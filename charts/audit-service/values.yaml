@@ -1,0 +1,21 @@
+replicaCount: 1
+
+service:
+  port: 80
+
+image:
+  repository: palisade/audit-service
+  tag: 044b626-SNAPSHOT
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 750m
+    memory: 2.5Gi
+  requests:
+    cpu: 250m
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

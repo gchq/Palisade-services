@@ -28,7 +28,7 @@
     <groupId>uk.gov.gchq.palisade</groupId>
     <artifactId>service</artifactId>
     <version>0.0.1-${revision}</version>
-    <name>palisade-service</name>
+    <name>palisade</name>
     <description>Service layer for palisade</description>
     <packaging>pom</packaging>
 
