@@ -63,4 +63,4 @@ ${Ansi.GREEN}dddysssyyddy/   +ddy+++++sddy`   :dds          -ddy      `.:/+shddo
 ${Ansi.GREEN}ddh////:-.`    /ddyssssssssdds   :dds          -ddy            `hdd- .hdhsssssssshdh.   ddh        `ydd:   ddd`
 ${Ansi.GREEN}ddh           -ddy`        +dd+  :ddy........` -ddy  `/:-..``.-oddh``hdd-        -ddy`  ddd-..`.-:oddh:    ddd-.........
 ${Ansi.GREEN}hhy          `yhh.          shh: -hhhhhhhhhhh/ -hhs  `syhhddddhys/` ohh/          /hh+  yhdddddhhys+-      hhhhhhhhhhhhh
-${AnsiColor.MAGENTA} :: ${application.title} ::${AnsiColor.CYAN}::${application.formatted-version} ::${Ansi.DEFAULT}
+${AnsiColor.MAGENTA} :: ${application.title} ::${AnsiColor.CYAN}::${application.formatted-version} ::${AnsiColor.RED}:: image.tag ::${Ansi.DEFAULT}
