@@ -1,0 +1,12 @@
+▶ terraform import aws_vpc.palisade-eks-vpc vpc-098d1eb9900dc38fa
+aws_vpc.palisade-eks-vpc: Importing from ID "vpc-098d1eb9900dc38fa"...
+aws_vpc.palisade-eks-vpc: Import prepared!
+  Prepared aws_vpc for import
+aws_vpc.palisade-eks-vpc: Refreshing state... [id=vpc-098d1eb9900dc38fa]
+
+Import successful!
+
+The resources that were imported are shown above. These resources are now in
+your Terraform state and will henceforth be managed by Terraform.
+
+
