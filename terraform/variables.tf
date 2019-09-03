@@ -8,13 +8,3 @@ variable "cluster-name" {
 }
 
 
-variable "bucket" {
-  default = "terraform-infra-palisade"
-  type = "string"
-}
-
-
-variable "key" {
-  default = "terraform/dev/terraform_dev.tfstate"
-  type = "string"
-}
