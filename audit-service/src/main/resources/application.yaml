@@ -15,6 +15,9 @@
 spring:
   application:
     name: audit-service
+  output:
+    ansi:
+      enabled: always
 
 server:
   port: 8086
