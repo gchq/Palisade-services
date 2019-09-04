@@ -69,6 +69,18 @@
         <module>user-service</module>
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Greenwich.SR2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <scm>
         <!-- <connection>scm:git:ssh://git@github.com:gchq/Palisade-services.git</connection> -->
         <developerConnection>scm:git:ssh://git@github.com:gchq/Palisade-services.git</developerConnection>
