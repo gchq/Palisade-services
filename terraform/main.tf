@@ -17,7 +17,7 @@ data "aws_availability_zones" "available" {}
 
 resource "aws_vpc" "palisade-eks-vpc" {
   //  # (resource arguments)
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.cidr_block
   tags = "${
       map(
        "Name", "terraform-eks-demo-node",
@@ -30,7 +30,7 @@ resource "aws_subnet" "palisade-eks-subnet" {
   count = 2
 
   availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
-  cidr_block = "10.0.${count.index}.0/24"
+  cidr_block = "${var.cidr-block-subnet}${count.index}.0/24"
   vpc_id = "${aws_vpc.palisade-eks-vpc.id}"
 
   tags = "${
@@ -118,27 +118,7 @@ resource "aws_security_group" "palisade-cluster-security-group" {
 #           list of those addresses that are allowed access.
 
 resource "aws_security_group_rule" "palisade-cluster-ingress-workstation-https" {
-  cidr_blocks = [
-    "165.225.76.0/23",
-    "165.225.80.0/22",
-    "185.125.224.0/22",
-    "195.92.40.49/32",
-    "212.137.36.228/32",
-    "34.240.141.198/32",
-    "34.253.77.184/32",
-    "35.176.136.170/32",
-    "35.177.97.88/32",
-    "35.178.132.230/32",
-    "51.140.114.144/32",
-    "51.140.78.31/32",
-    "51.141.26.231/32",
-    "51.141.34.27/32",
-    "52.19.126.58/32",
-    "62.25.106.209/32",
-    "62.25.109.195/32",
-    "62.25.109.202/32",
-    "65.225.209.240/29",
-    "62.254.157.222/32"]
+  cidr_blocks = var.cidr-access-group
   description = "Allow workstation to communicate with the cluster API Server"
   from_port = 443
   protocol = "tcp"

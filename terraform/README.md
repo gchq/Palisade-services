@@ -12,9 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-
-
 --->
 
 
@@ -23,7 +20,7 @@ limitations under the License.
 ### EKS terraform deployment
 The terraform here creates an EKS cluster and includes the following resources:
 1. EKS Cluster: AWS managed Kubernetes cluster of master servers.
-1. AutoScaling Group containing 2 m4.large instances based on the latest EKS Amazon Linux 2 AMI: Operator managed Kuberneted worker nodes for running Kubernetes service deployments
+1. AutoScaling Group containing 2 m4.large instances based on the latest EKS Amazon Linux 2 AMI: Operator managed Kubernetes worker nodes for running Kubernetes service deployments
 1. Associated VPC, Internet Gateway, Security Groups, and Subnets: Operator managed networking resources for the EKS Cluster and worker node instances
 1. Associated IAM Roles and Policies: Operator managed access resources for EKS and worker node instances
 
@@ -172,13 +169,24 @@ aws s3 ls
 }
 ```
 
+You will need to create a terraform.tfvars file with the following content:
+
+```json
+cidr-access-group = [
+  "X.X.X.X/XX",
+  "Y.Y.Y.Y/YY"]
+  
+cidr-block = "any /16 ip address"
+
+cluster-name = "any cluster name"  
+```
 
 Run the following commands in order to deploy the EKS cluster:
 
 ```json
-terraform init
-terraform plan
-terraform apply
+terraform init -var-file="terraform.tfvars"
+terraform plan -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars"
 ```
 
 After a few minutes the EKS cluster will be created - see diagram below:
