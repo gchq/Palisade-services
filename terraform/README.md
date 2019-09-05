@@ -179,6 +179,16 @@ cidr-access-group = [
 cidr-block = "any /16 ip address"
 
 cluster-name = "any cluster name"  
+
+
+terraform {
+  backend "s3" {
+    bucket = "bucket to use for terraform deployment"
+    key = "state location within the bucket"
+    region = "region to deploy to"
+  }
+}
+
 ```
 
 Run the following commands in order to deploy the EKS cluster:
