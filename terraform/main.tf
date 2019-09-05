@@ -17,7 +17,7 @@ data "aws_availability_zones" "available" {}
 
 resource "aws_vpc" "palisade-eks-vpc" {
   //  # (resource arguments)
-  cidr_block = var.cidr_block
+  cidr_block = var.cidr-block
   tags = "${
       map(
        "Name", "terraform-eks-demo-node",
