@@ -181,6 +181,11 @@ cidr-block = "any /16 ip address"
 cluster-name = "any cluster name"  
 
 
+
+```
+
+You will also need to create a backend.tf file with the following content:
+```json
 terraform {
   backend "s3" {
     bucket = "bucket to use for terraform deployment"
@@ -188,7 +193,6 @@ terraform {
     region = "region to deploy to"
   }
 }
-
 ```
 
 Run the following commands in order to deploy the EKS cluster:
