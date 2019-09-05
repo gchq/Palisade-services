@@ -170,6 +170,7 @@ aws s3 ls
 ```
 
 You will need to create a terraform.tfvars file with the following content:
+A helper script has been created that pulls out a named security group definition.
 
 ```json
 cidr-access-group = [
