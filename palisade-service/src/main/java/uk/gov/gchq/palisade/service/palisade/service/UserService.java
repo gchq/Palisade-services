@@ -23,7 +23,7 @@ public class UserService {
     @Autowired
     private UserClient userClient;
 
-    private final AuditService auditService;
+    private AuditService auditService;
 
     public UserService(final AuditService auditService) {
 

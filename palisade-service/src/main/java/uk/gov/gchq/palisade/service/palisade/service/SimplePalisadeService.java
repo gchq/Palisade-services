@@ -34,85 +34,85 @@ import java.util.concurrent.CompletableFuture;
  * should check the resources requested in getDataRequestConfig are the same or a subset of the resources passed in in
  * registerDataRequest. </p>
  */
-public class SimplePalisadeService implements PalisadeService, PalisadeMetricProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
-
-    /**
-     * Duration for how long the count of resources requested should live in the cache.
-     */
-    public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
-
-    @Override
-    public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
-        final RequestId originalRequestId = new RequestId().id(UUID.randomUUID().toString());
-        LOGGER.debug("Registering data request: {}", request, originalRequestId);
-        auditRequestReceived(request, originalRequestId);
-        final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
-        userRequest.setOriginalRequestId(originalRequestId);
-        LOGGER.debug("Getting user from userService: {}", userRequest);
-
-        final CompletableFuture<User> futureUser = userService.getUser(userRequest)
-                .thenApply(user -> {
-                    LOGGER.debug("Got user: {}", user);
-                    return user;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get user: {}", ex.getMessage());
-                    if (nonNull(ex)) {
-                        auditRequestReceivedException(request, originalRequestId, ex);
-                    }
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
-
-        final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
-        resourceRequest.setOriginalRequestId(originalRequestId);
-
-        LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResources = resourceService.getResourcesById(resourceRequest)
-                .thenApply(resources -> {
-                    LOGGER.debug("Got resources: {}", resources);
-                    return resources;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get resources: {}", ex.getMessage());
-                    if (nonNull(ex)) {
-                        auditRequestReceivedException(request, originalRequestId, ex);
-                    }
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
-
-        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-
-        final DataRequestConfig config = new DataRequestConfig();
-        config.setContext(request.getContext());
-        config.setOriginalRequestId(originalRequestId);
-
-        CompletableFuture<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
-
-        return CompletableFuture.allOf(futureUser, futureResources, futureMultiPolicy)
-                .thenApply(t -> {
-                    //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
-                    //resources they don't have permission to see
-                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.join(), futureMultiPolicy.join());
-
-                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.join(), filteredResources.keySet());
-                    auditProcessingStarted(request, futureUser.join(), futureMultiPolicy.join(), originalRequestId);
-                    cache(request, futureUser.join(), requestId, futureMultiPolicy.join(), filteredResources.size(), originalRequestId);
-
-                    final DataRequestResponse response = new DataRequestResponse().requestId(requestId).originalRequestId(originalRequestId).resources(filteredResources);
-                    response.setOriginalRequestId(originalRequestId);
-                    LOGGER.debug("Responding with: {}", response);
-                    return response;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Error handling: {}", ex.getMessage());
-                    if (nonNull(ex)) {
-                        auditRequestReceivedException(request, originalRequestId, ex);
-
-                    }
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
-    }
-
-}
+//public class SimplePalisadeService implements PalisadeService, PalisadeMetricProvider {
+//
+//    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
+//
+//    /**
+//     * Duration for how long the count of resources requested should live in the cache.
+//     */
+//    public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
+//
+//    @Override
+//    public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
+//        final RequestId originalRequestId = new RequestId().id(UUID.randomUUID().toString());
+//        LOGGER.debug("Registering data request: {}", request, originalRequestId);
+//        auditRequestReceived(request, originalRequestId);
+//        final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
+//        userRequest.setOriginalRequestId(originalRequestId);
+//        LOGGER.debug("Getting user from userService: {}", userRequest);
+//
+//        final CompletableFuture<User> futureUser = userService.getUser(userRequest)
+//                .thenApply(user -> {
+//                    LOGGER.debug("Got user: {}", user);
+//                    return user;
+//                })
+//                .exceptionally(ex -> {
+//                    LOGGER.error("Failed to get user: {}", ex.getMessage());
+//                    if (nonNull(ex)) {
+//                        auditRequestReceivedException(request, originalRequestId, ex);
+//                    }
+//                    throw new RuntimeException(ex); //rethrow the exception
+//                });
+//
+//        final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
+//        resourceRequest.setOriginalRequestId(originalRequestId);
+//
+//        LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
+//        final CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResources = resourceService.getResourcesById(resourceRequest)
+//                .thenApply(resources -> {
+//                    LOGGER.debug("Got resources: {}", resources);
+//                    return resources;
+//                })
+//                .exceptionally(ex -> {
+//                    LOGGER.error("Failed to get resources: {}", ex.getMessage());
+//                    if (nonNull(ex)) {
+//                        auditRequestReceivedException(request, originalRequestId, ex);
+//                    }
+//                    throw new RuntimeException(ex); //rethrow the exception
+//                });
+//
+//        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
+//
+//        final DataRequestConfig config = new DataRequestConfig();
+//        config.setContext(request.getContext());
+//        config.setOriginalRequestId(originalRequestId);
+//
+//        CompletableFuture<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
+//
+//        return CompletableFuture.allOf(futureUser, futureResources, futureMultiPolicy)
+//                .thenApply(t -> {
+//                    //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
+//                    //resources they don't have permission to see
+//                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.join(), futureMultiPolicy.join());
+//
+//                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.join(), filteredResources.keySet());
+//                    auditProcessingStarted(request, futureUser.join(), futureMultiPolicy.join(), originalRequestId);
+//                    cache(request, futureUser.join(), requestId, futureMultiPolicy.join(), filteredResources.size(), originalRequestId);
+//
+//                    final DataRequestResponse response = new DataRequestResponse().requestId(requestId).originalRequestId(originalRequestId).resources(filteredResources);
+//                    response.setOriginalRequestId(originalRequestId);
+//                    LOGGER.debug("Responding with: {}", response);
+//                    return response;
+//                })
+//                .exceptionally(ex -> {
+//                    LOGGER.error("Error handling: {}", ex.getMessage());
+//                    if (nonNull(ex)) {
+//                        auditRequestReceivedException(request, originalRequestId, ex);
+//
+//                    }
+//                    throw new RuntimeException(ex); //rethrow the exception
+//                });
+//    }
+//
+//}
