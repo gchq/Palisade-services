@@ -33,7 +33,7 @@ public class AuditRequestTest {
 
     @Test
     public void RegisterRequestCompleteAuditRequestTest() {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(null, new RequestId().id("456"))
+        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("456"))
                 .withUser(new User().userId("a user"))
                 .withLeafResources(Stream.of(new FileResource()).collect(toSet()))
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
@@ -43,7 +43,7 @@ public class AuditRequestTest {
 
     @Test
     public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(null, new RequestId().id("123"))
+        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
                 .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
@@ -56,7 +56,7 @@ public class AuditRequestTest {
 
     @Test
     public void RegisterRequestCompleteAuditRequestFromJsonTest() throws IOException {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(null, new RequestId().id("123"))
+        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
                 .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
