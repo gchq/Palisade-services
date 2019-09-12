@@ -15,5 +15,28 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-public class AuditService {
+import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
+import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+
+public class AuditService implements Service {
+
+    @Autowired
+    private AuditClient client;
+
+    private final Executor executor;
+
+    public AuditService(final Executor executor) {
+        this.executor = executor;
+    }
+
+    CompletionStage<Boolean> audit(final AuditRequest request) {
+        return CompletableFuture.supplyAsync(() -> this.client.audit(request), this.executor);
+    }
+
 }

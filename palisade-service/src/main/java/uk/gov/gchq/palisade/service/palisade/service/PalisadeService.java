@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
  * to have multiple Palisade services, the data that the data server will require, needs to be stored in a shared cache
  * (Cache service).
  */
-public interface PalisadeService extends Service {
+public interface PalisadeService {
 
     /**
      * This method is used by the client code to register that they want to read a resource or data set. This method
@@ -64,12 +64,11 @@ public interface PalisadeService extends Service {
      */
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request);
 
-    @Override
     default CompletableFuture<?> process(final Request request) {
         if (request instanceof RegisterDataRequest) {
             return registerDataRequest((RegisterDataRequest) request);
         }
-        return Service.super.process(request);
+        return CompletableFuture.completedFuture(null);
     }
 
     /**

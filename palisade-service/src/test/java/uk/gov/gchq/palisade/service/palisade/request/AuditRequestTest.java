@@ -11,6 +11,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -25,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
+import static uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
 
 @RunWith(JUnit4.class)
 public class AuditRequestTest {
@@ -65,7 +67,19 @@ public class AuditRequestTest {
 
         final RegisterRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, RegisterRequestCompleteAuditRequest.class);
 
-        assertThat("", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
+        assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
+    }
+
+    @Test
+    public void RegisterRequestExceptionAuditRequestTest() {
+        final RegisterRequestExceptionAuditRequest subject = RegisterRequestExceptionAuditRequest.create(new RequestId().id("304958"))
+                .withUserId(new User().userId("username").getUserId())
+                .withResourceId("resource")
+                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a reason for access", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
+                .withException(new SecurityException("not allowed"))
+                .withServiceClass(UserService.class);
+
+        assertThat("RegisterRequestExceptionAuditRequest not constructed", subject.resourceId, is(equalTo("resource")));
     }
 
 }

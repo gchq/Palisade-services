@@ -103,7 +103,7 @@ public class AuditRequest extends Request {
             this.context = requireNonNull(context);
         }
 
-        interface IUser {
+        public interface IUser {
             /**
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link RegisterRequestCompleteAuditRequest}
@@ -111,7 +111,7 @@ public class AuditRequest extends Request {
             ILeafResources withUser(final User user);
         }
 
-        interface ILeafResources {
+        public interface ILeafResources {
             /**
              * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
              * @return the {@link RegisterRequestCompleteAuditRequest}
@@ -119,7 +119,7 @@ public class AuditRequest extends Request {
             IContext withLeafResources(final Set<LeafResource> leafResources);
         }
 
-        interface IContext {
+        public interface IContext {
             /**
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestCompleteAuditRequest}
@@ -172,7 +172,7 @@ public class AuditRequest extends Request {
             this.serviceClass = requireNonNull(serviceClass);
         }
 
-        interface IUserId {
+        public interface IUserId {
             /**
              * @param userId {@link UserId} is the user id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
@@ -180,7 +180,7 @@ public class AuditRequest extends Request {
             IResourceId withUserId(final UserId userId);
         }
 
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * @param resourceId {@link String} is the resource id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
@@ -188,7 +188,7 @@ public class AuditRequest extends Request {
             IContext withResourceId(final String resourceId);
         }
 
-        interface IContext {
+        public interface IContext {
             /**
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestExceptionAuditRequest}
@@ -196,7 +196,7 @@ public class AuditRequest extends Request {
             IException withContext(final Context context);
         }
 
-        interface IException {
+        public interface IException {
             /**
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link RegisterRequestExceptionAuditRequest}
@@ -204,7 +204,7 @@ public class AuditRequest extends Request {
             IServiceClass withException(final Throwable exception);
         }
 
-        interface IServiceClass {
+        public interface IServiceClass {
             /**
              * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
@@ -259,7 +259,7 @@ public class AuditRequest extends Request {
             this.numberOfRecordsProcessed = numberOfRecordsProcessed;
         }
 
-        interface IUser {
+        public interface IUser {
             /**
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -267,7 +267,7 @@ public class AuditRequest extends Request {
             ILeafResource withUser(final User user);
         }
 
-        interface ILeafResource {
+        public interface ILeafResource {
             /**
              * @param leafResource the {@link LeafResource} which the data has just finished being read
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -275,7 +275,7 @@ public class AuditRequest extends Request {
             IContext withLeafResource(final LeafResource leafResource);
         }
 
-        interface IContext {
+        public interface IContext {
             /**
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -283,7 +283,7 @@ public class AuditRequest extends Request {
             IRulesApplied withContext(final Context context);
         }
 
-        interface IRulesApplied {
+        public interface IRulesApplied {
             /**
              * @param rules {@link Rules} is the rules that are being applied to this resource for this request
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -291,7 +291,7 @@ public class AuditRequest extends Request {
             INumberOfRecordsReturned withRulesApplied(final Rules rules);
         }
 
-        interface INumberOfRecordsReturned {
+        public interface INumberOfRecordsReturned {
             /**
              * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -299,7 +299,7 @@ public class AuditRequest extends Request {
             INumberOfRecordsProcessed withNumberOfRecordsReturned(final long numberOfRecordsReturned);
         }
 
-        interface INumberOfRecordsProcessed {
+        public interface INumberOfRecordsProcessed {
             /**
              * @param numberOfRecordsProcessed is the number of records that was processed from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
@@ -349,7 +349,7 @@ public class AuditRequest extends Request {
             this.exception = requireNonNull(exception);
         }
 
-        interface IToken {
+        public interface IToken {
             /**
              * @param token this is the token that is used to retrieve cached information from the palisade service
              * @return the {@link ReadRequestExceptionAuditRequest}
@@ -357,7 +357,7 @@ public class AuditRequest extends Request {
             ILeafResource withToken(final String token);
         }
 
-        interface ILeafResource {
+        public interface ILeafResource {
             /**
              * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
              * @return the {@link ReadRequestExceptionAuditRequest}
@@ -365,7 +365,7 @@ public class AuditRequest extends Request {
             IThrowable withLeafResource(final LeafResource leafResource);
         }
 
-        interface IThrowable {
+        public interface IThrowable {
             /**
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link ReadRequestExceptionAuditRequest}
