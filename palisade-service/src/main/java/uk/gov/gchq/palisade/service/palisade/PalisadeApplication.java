@@ -8,6 +8,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,9 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.service.AuditService;
+import uk.gov.gchq.palisade.service.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
+import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
 import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
@@ -35,11 +38,12 @@ public class PalisadeApplication {
     }
 
     @Configuration
+    @EnableCaching
     static class Config implements AsyncConfigurer {
 
         @Bean
         public PalisadeService palisadeService() {
-            return new SimplePalisadeService(auditService(), userService(), getAsyncExecutor());
+            return new SimplePalisadeService(auditService(), userService(), policyService(), resourceService(), getAsyncExecutor());
         }
 
         @Bean
@@ -55,6 +59,16 @@ public class PalisadeApplication {
         @Bean
         public ResourceService resourceService() {
             return new ResourceService(getAsyncExecutor());
+        }
+
+        @Bean
+        public PolicyService policyService() {
+            return new PolicyService(getAsyncExecutor());
+        }
+
+        @Bean
+        public CacheService cacheService() {
+            return new CacheService(getAsyncExecutor());
         }
 
         @Bean

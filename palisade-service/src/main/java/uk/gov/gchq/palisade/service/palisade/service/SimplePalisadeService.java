@@ -17,20 +17,17 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.palisade.metrics.PalisadeMetricProvider;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
+import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetMetricRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -41,9 +38,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 import uk.gov.gchq.palisade.service.request.Request;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -52,11 +47,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
-import static uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
 
 /**
  * <p> A simple implementation of a Palisade Service that just connects up the Audit, Cache, User, Policy and Resource
@@ -75,16 +67,19 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
 
     private final AuditService auditService;
-    private PolicyService policyService;
+    private final PolicyService policyService;
     private final UserService userService;
-    private ResourceService resourceService;
-    private CacheService cacheService;
+    private final ResourceService resourceService;
+    private final CacheService cacheService;
 
     private final Executor executor;
 
-    public SimplePalisadeService(final AuditService auditService, final UserService userService, final Executor executor) {
+    public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService, final CacheService cacheService, final Executor executor) {
         this.auditService = auditService;
         this.userService = userService;
+        this.policyService = policyService;
+        this.resourceService = resourceService;
+        this.cacheService = cacheService;
         this.executor = executor;
     }
 
@@ -123,19 +118,19 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
 
-        CompletableFuture<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
+        CompletionStage<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
 
-        return CompletableFuture.allOf(futureUser, futureResources, futureMultiPolicy)
+        return CompletableFuture.allOf(futureUser.toCompletableFuture(), futureResources.toCompletableFuture(), futureMultiPolicy.toCompletableFuture())
                 .thenApply(t -> {
                     //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
                     //resources they don't have permission to see
-                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.join(), futureMultiPolicy.join());
+                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
 
-                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.join(), filteredResources.keySet());
-                    auditRegisterRequestComplete(request, futureUser.join(), futureMultiPolicy.join());
-                    cache(request, futureUser.join(), requestId, futureMultiPolicy.join(), filteredResources.size(), originalRequestId);
+                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
+                    auditRegisterRequestComplete(request, futureUser.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
+                    cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId); // *********
 
-                    final DataRequestResponse response = new DataRequestResponse().token(requestId.getId()).resources(filteredResources);
+                    final DataRequestResponse response = new DataRequestResponse().requestId(requestId.id(request.getId())).resources(filteredResources);
                     response.setOriginalRequestId(originalRequestId);
                     LOGGER.debug("Responding with: {}", response);
                     return response;
@@ -171,7 +166,7 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
                 })
                 .thenApply(req -> {
                     LOGGER.debug("Getting policy from policyService: {}", req);
-                    return policyService.getPolicy(req).join();
+                    return policyService.getPolicy(req).toCompletableFuture().join();
                 }).thenApply(policy -> {
                     LOGGER.debug("Got policy: {}", policy);
                     return policy;
@@ -179,13 +174,12 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     }
 
     private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final MultiPolicy multiPolicy) {
-        AuditRequest.RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = new AuditRequest.RegisterRequestCompleteAuditRequest()
-                .leafResources(multiPolicy.getPolicies().keySet())
-                .user(user)
-                .context(request.getContext());
-        registerRequestCompleteAuditRequest.setOriginalRequestId(request.getId());
+        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getOriginalRequestId())
+                .withUser(user)
+                .withLeafResources(multiPolicy.getPolicies().keySet())
+                .withContext(request.getContext());
         LOGGER.debug("Auditing: {}", registerRequestCompleteAuditRequest);
-        auditService.audit(registerRequestCompleteAuditRequest).join();
+        auditService.audit(registerRequestCompleteAuditRequest).toCompletableFuture().join();
     }
 
     private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
@@ -256,11 +250,6 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     }
 
     @Override
-    public CompletableFuture<Map<String, String>> getMetrics(GetMetricRequest request) {
-        return null;
-    }
-
-    @Override
     public CompletableFuture<?> process(final Request request) {
         //first try one parent interface
         try {
@@ -275,49 +264,4 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
         return new RuntimeException(TOKEN_NOT_FOUND_MESSAGE + id);
     }
 
-    public AuditService getAuditService() {
-        requireNonNull(auditService, "The audit service has not been set.");
-        return auditService;
-    }
-
-    public void setAuditService(final AuditService auditService) {
-        auditService(auditService);
-    }
-
-    public PolicyService getPolicyService() {
-        requireNonNull(policyService, "The policy service has not been set.");
-        return policyService;
-    }
-
-    public void setPolicyService(final PolicyService policyService) {
-        policyService(policyService);
-    }
-
-    public UserService getUserService() {
-        requireNonNull(userService, "The user service has not been set.");
-        return userService;
-    }
-
-    public void setUserService(final UserService userService) {
-        userService(userService);
-    }
-
-    public ResourceService getResourceService() {
-        requireNonNull(resourceService, "The resource service has not been set.");
-        return resourceService;
-    }
-
-    public void setResourceService(final ResourceService resourceService) {
-        resourceService(resourceService);
-    }
-
-    public CacheService getCacheService() {
-        requireNonNull(cacheService, "The cache service has not been set.");
-        return cacheService;
-    }
-
-    public void setCacheService(final CacheService cacheService) {
-        cacheService(cacheService);
-    }
 }
-
