@@ -8,7 +8,6 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +15,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.service.AuditService;
 import uk.gov.gchq.palisade.service.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
@@ -38,12 +38,11 @@ public class PalisadeApplication {
     }
 
     @Configuration
-    @EnableCaching
     static class Config implements AsyncConfigurer {
 
         @Bean
         public PalisadeService palisadeService() {
-            return new SimplePalisadeService(auditService(), userService(), policyService(), resourceService(), getAsyncExecutor());
+            return new SimplePalisadeService(auditService(), userService(), policyService(), resourceService(), cacheService(), getAsyncExecutor());
         }
 
         @Bean
@@ -68,7 +67,7 @@ public class PalisadeApplication {
 
         @Bean
         public CacheService cacheService() {
-            return new CacheService(getAsyncExecutor());
+            return new SimpleCacheService();
         }
 
         @Bean
