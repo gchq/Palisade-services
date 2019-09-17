@@ -16,7 +16,7 @@
 podTemplate(containers: [
         containerTemplate(name: 'maven', 
                           image: '779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA', 
-                          ttyEnabled: true, alwaysPullImage: true, command: 'cat')
+                          ttyEnabled: true, alwaysPullImage: true, command: 'docker', args: 'run -v /var/run/docker.sock:/var/run/docker.sock --net=host -i -t')
 ]) {
 
     node(POD_LABEL) {
