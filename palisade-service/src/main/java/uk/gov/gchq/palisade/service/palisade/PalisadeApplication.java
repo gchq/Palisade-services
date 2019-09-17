@@ -5,8 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +18,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.K8sBackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.service.AuditService;
 import uk.gov.gchq.palisade.service.palisade.service.CacheService;
@@ -24,6 +31,8 @@ import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SpringBootApplication
@@ -39,6 +48,12 @@ public class PalisadeApplication {
 
     @Configuration
     static class Config implements AsyncConfigurer {
+
+        @Autowired
+        public Map<String, BackingStore> backingStores;
+
+        @Value("${cache.implementation.props:cache.props}")
+        public String propertyFile;
 
         @Bean
         public PalisadeService palisadeService() {
@@ -65,9 +80,31 @@ public class PalisadeApplication {
             return new PolicyService(getAsyncExecutor());
         }
 
+        @Bean(name = "hashmap")
+        @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
+        public HashMapBackingStore hashMapBackingStore() {
+            return new HashMapBackingStore();
+        }
+
+        @Bean(name = "k8s")
+        @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "k8s")
+        public K8sBackingStore k8sBackingStore() {
+            return new K8sBackingStore();
+        }
+
+        @Bean(name = "props")
+        @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "props")
+        public PropertiesBackingStore propertiesBackingStore() {
+            return new PropertiesBackingStore(Optional.ofNullable(this.propertyFile).orElse("cache.properties"));
+        }
+
         @Bean
         public CacheService cacheService() {
-            return new SimpleCacheService();
+            return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
+                LOGGER.info("Cache backing implementation = {}", this.backingStores.values().stream().findFirst().orElse(null).getClass().getSimpleName());
+                cache.backingStore(this.backingStores.values().stream().findFirst().orElse(null));
+                //return cache;
+            }).findFirst().orElse(null);
         }
 
         @Bean
@@ -79,10 +116,11 @@ public class PalisadeApplication {
         @Override
         @Bean("threadPoolTaskExecutor")
         public Executor getAsyncExecutor() {
-            ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
-            ex.setThreadNamePrefix("AppThreadPool-");
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-            return ex;
+            return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
+                ex.setThreadNamePrefix("AppThreadPool-");
+                ex.setCorePoolSize(5);
+                LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+            }).findFirst().orElse(null);
         }
 
         @Override
