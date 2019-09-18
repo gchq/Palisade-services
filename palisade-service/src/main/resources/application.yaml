@@ -41,7 +41,7 @@ feign:
     default-config: default
 
 cache:
-  implementation: props
+  implementation: hashmap
   props: "cache.properties"
   etcd:
     - http://localhost:9797

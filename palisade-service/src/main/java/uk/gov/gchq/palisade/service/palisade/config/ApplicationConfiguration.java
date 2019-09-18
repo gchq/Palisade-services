@@ -20,7 +20,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +41,10 @@ import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
 import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
+import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
+import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
+import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
+import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.net.URI;
 import java.util.Map;
@@ -60,37 +63,43 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Autowired
-    public Map<String, BackingStore> backingStores;
-
     @Bean
     public CacheConfiguration cacheConfiguration() {
         return new CacheConfiguration();
     }
 
     @Bean
-    public PalisadeService palisadeService() {
-        return new SimplePalisadeService(auditService(), userService(), policyService(), resourceService(), cacheService(), getAsyncExecutor());
+    public PalisadeService palisadeService(final Map<String, BackingStore> backingStores,
+                                           final AuditClient auditClient,
+                                           final UserClient userClient,
+                                           final PolicyClient policyClient,
+                                           final ResourceClient resourceClient) {
+        return new SimplePalisadeService(auditService(auditClient),
+                userService(userClient),
+                policyService(policyClient),
+                resourceService(resourceClient),
+                cacheService(backingStores),
+                getAsyncExecutor());
     }
 
     @Bean
-    public UserService userService() {
-        return new UserService(auditService(), getAsyncExecutor());
+    public UserService userService(final UserClient userClient) {
+        return new UserService(userClient, getAsyncExecutor());
     }
 
     @Bean
-    public AuditService auditService() {
-        return new AuditService(getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient) {
+        return new AuditService(auditClient, getAsyncExecutor());
     }
 
     @Bean
-    public ResourceService resourceService() {
-        return new ResourceService(getAsyncExecutor());
+    public ResourceService resourceService(final ResourceClient resourceClient) {
+        return new ResourceService(resourceClient, getAsyncExecutor());
     }
 
     @Bean
-    public PolicyService policyService() {
-        return new PolicyService(getAsyncExecutor());
+    public PolicyService policyService(final PolicyClient policyClient) {
+        return new PolicyService(policyClient, getAsyncExecutor());
     }
 
     @Bean(name = "hashmap")
@@ -118,10 +127,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public CacheService cacheService() {
+    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
         return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(this.backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(this.backingStores.values().stream().findFirst().orElse(null));
+            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
+            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
     }
 

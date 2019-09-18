@@ -27,12 +27,11 @@ import java.util.concurrent.Executor;
 
 public class PolicyService implements Service {
 
-    @Autowired
-    private PolicyClient client;
-
+    private final PolicyClient client;
     private final Executor executor;
 
-    public PolicyService(final Executor executor) {
+    public PolicyService(final PolicyClient policyClient, final Executor executor) {
+        this.client = policyClient;
         this.executor = executor;
     }
 

@@ -14,12 +14,11 @@ import java.util.concurrent.Executor;
 
 public class ResourceService implements Service {
 
-    @Autowired
-    private ResourceClient client;
-
+    private final ResourceClient client;
     private final Executor executor;
 
-    public ResourceService(final Executor executor) {
+    public ResourceService(final ResourceClient resourceClient, final Executor executor) {
+        this.client = resourceClient;
         this.executor = executor;
     }
 

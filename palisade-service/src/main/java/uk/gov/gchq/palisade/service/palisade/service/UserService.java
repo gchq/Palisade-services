@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
@@ -27,14 +26,11 @@ import java.util.concurrent.Executor;
 
 public class UserService implements Service {
 
-    @Autowired
-    private UserClient userClient;
-
-    private final AuditService auditService;
+    private final UserClient userClient;
     private final Executor executor;
 
-    public UserService(final AuditService auditService, final Executor executor) {
-        this.auditService = auditService;
+    public UserService(final UserClient userClient, final Executor executor) {
+        this.userClient = userClient;
         this.executor = executor;
     }
 
