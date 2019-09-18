@@ -94,7 +94,7 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -111,7 +111,7 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true" />
+                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -229,7 +229,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>palisade/${project.artifactId}</repository>
+                    <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
                     <tag>${image.tag}</tag>
