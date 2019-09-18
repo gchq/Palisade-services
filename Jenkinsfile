@@ -18,7 +18,7 @@ podTemplate(
         containers: [
                 containerTemplate(name: 'maven',
                         image: '779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA',
-                        ttyEnabled: true, alwaysPullImage: true, command: 'cat', envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])
+                        ttyEnabled: true, alwaysPullImage: false, command: 'cat', envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])
         ]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
