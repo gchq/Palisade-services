@@ -36,6 +36,9 @@ podTemplate(
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
                     sh 'export TILLER_NAMESPACE=tiller && export HELM_HOST=:44134 && helm list'
+                    sh 'echo $TILLER_NAMESPACE'
+                    sh 'echo $HELM_HOST'
+                    sh 'helm list'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
 
                 }
