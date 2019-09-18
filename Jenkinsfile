@@ -35,6 +35,10 @@ podTemplate(
                     sh 'aws s3 ls'
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
+                    sh 'echo $HELM_HOST'
+                    sh 'echo $TILLER_NAMESPACE'
+                    sh 'cat ~/tiller_logs/tiller-command.log'
+                    sh 'ps -ef'
                     sh 'helm list'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
 
