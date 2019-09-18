@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -129,8 +130,7 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
                     PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
                     auditRegisterRequestComplete(request, futureUser.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
                     cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId); // *********
-
-                    final DataRequestResponse response = new DataRequestResponse().requestId(requestId.id(request.getId())).resources(filteredResources);
+                    final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
                     response.setOriginalRequestId(originalRequestId);
                     LOGGER.debug("Responding with: {}", response);
                     return response;
@@ -185,11 +185,11 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
         final RegisterRequestExceptionAuditRequest auditRequestWithException =
                 RegisterRequestExceptionAuditRequest.create(request.getOriginalRequestId())
-                .withUserId(request.getUserId())
-                .withResourceId(request.getResourceId())
-                .withContext(request.getContext())
-                .withException(ex)
-                .withServiceClass(serviceClass);
+                        .withUserId(request.getUserId())
+                        .withResourceId(request.getResourceId())
+                        .withContext(request.getContext())
+                        .withException(ex)
+                        .withServiceClass(serviceClass);
         LOGGER.debug("Error handling: " + ex.getMessage());
         auditService.audit(auditRequestWithException).toCompletableFuture().join();
     }
@@ -228,13 +228,13 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
         requireNonNull(request.getId());
         // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
-        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getId()).service(this.getClass());
+        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getId().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
         return cacheService.get(cacheRequest)
                 .thenApply(cache -> {
-                    DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId()));
+                    DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId().getId()));
                     if (null == value.getUser()) {
-                        throw createCacheException(request.getId());
+                        throw createCacheException(request.getId().getId());
                     }
                     LOGGER.debug("Got cache: {}", value);
                     return value;
