@@ -19,7 +19,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 
-@FeignClient(name = "audit-service", url = "${feign.client.audit-service.url}")
+@FeignClient(name = "audit-service")
 public interface AuditClient {
 
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
