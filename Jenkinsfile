@@ -18,7 +18,7 @@ podTemplate(
         containers: [
                 containerTemplate(name: 'maven',
                         image: '779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA',
-                        ttyEnabled: true, alwaysPullImage: true, command: 'cat')
+                        ttyEnabled: true, alwaysPullImage: true, command: 'cat', envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])
         ]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
@@ -35,7 +35,7 @@ podTemplate(
                     sh 'aws s3 ls'
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
-                    sh 'export TILLER_NAMESPACE=tiller && export HELM_HOST=:44134 && helm list'
+//                    sh 'export TILLER_NAMESPACE=tiller && export HELM_HOST=:44134 && helm list'
                     sh 'echo $TILLER_NAMESPACE'
                     sh 'echo $HELM_HOST'
                     sh 'helm list'
