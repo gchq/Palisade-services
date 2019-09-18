@@ -32,6 +32,7 @@ podTemplate(
                     sh 'aws s3 ls'
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
+                    sh 'cat ~/.docker/config.json'
                 }
             }
         }
