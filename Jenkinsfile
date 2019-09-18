@@ -24,6 +24,9 @@ podTemplate(
         stage('Bootstrap') {
             sh "echo ${env.BRANCH_NAME}"
         }
+        stage('Install maven project') {
+
+        }
         stage('Build a Maven project') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
@@ -31,7 +34,7 @@ podTemplate(
                         [configFile(fileId: '450d38e2-db65-4601-8be0-8621455e93b5', variable: 'MAVEN_SETTINGS')]) {
                     sh 'aws s3 ls'
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
-                    sh '$(aws ecr get-login --no-include-email --region eu-west-1)'
+                    sh 'palisade-login'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
                 }
             }
