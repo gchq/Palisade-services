@@ -35,7 +35,9 @@ podTemplate(
                     sh 'aws s3 ls'
                     sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
+                    sh 'helm list'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
+
                 }
             }
         }
