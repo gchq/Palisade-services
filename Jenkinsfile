@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-podTemplate(containers: [
+podTemplate(label: 'maven', activeDeadlineSeconds: 300, volumes: '/var/run/docker.sock:/var/run/docker.sock',         
+        containers: [
         containerTemplate(name: 'maven', 
                           image: '779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA', 
                           ttyEnabled: true, alwaysPullImage: true, command: 'docker', args: 'run -v /var/run/docker.sock:/var/run/docker.sock --net=host -i -t')
