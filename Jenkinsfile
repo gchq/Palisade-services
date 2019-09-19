@@ -27,6 +27,8 @@ podTemplate(
         }
         stage('Install maven project') {
 
+            sh "echo ${env}"
+
         }
         stage('Install a Maven project') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
