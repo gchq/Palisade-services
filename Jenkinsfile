@@ -18,7 +18,7 @@ podTemplate(
         volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
         containers: [
                 containerTemplate(name: 'maven',
-                        image: '${env.INFRA_IMAGE}',
+                        image: '${INFRA_IMAGE}',
                         ttyEnabled: true, alwaysPullImage: false, command: 'cat', envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])
         ]) {
     node(POD_LABEL) {
