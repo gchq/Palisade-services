@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-stages {
+node(POD_LABEL) {
     stage('Bootstrap') {
         sh "echo ${env.BRANCH_NAME}"
     }
@@ -39,7 +38,6 @@ stages {
         }
     }
 }
-
 /*
 podTemplate(
         name: 'palisade',
