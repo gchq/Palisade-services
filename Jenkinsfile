@@ -24,6 +24,8 @@ podTemplate(
     node(POD_LABEL) {
         stage('Bootstrap') {
             sh "echo hello"
+            sh "echo ${env.INFRA_IMAGE}"
+            sh "echo ${env.CONFIG_FILE}"
             echo sh(script: 'env|sort', returnStdout: true)
             sh "echo ${env.BRANCH_NAME}"
             sh "echo ${env}"
