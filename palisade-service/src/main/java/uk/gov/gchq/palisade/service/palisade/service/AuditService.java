@@ -26,12 +26,11 @@ import java.util.concurrent.Executor;
 
 public class AuditService implements Service {
 
-    @Autowired
-    private AuditClient client;
-
+    private final AuditClient client;
     private final Executor executor;
 
-    public AuditService(final Executor executor) {
+    public AuditService(final AuditClient auditClient, final Executor executor) {
+        this.client = auditClient;
         this.executor = executor;
     }
 
