@@ -29,8 +29,6 @@ podTemplate(
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'aws s3 ls'
-                    sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
                     sh 'helm list'
                     sh 'mvn -s $MAVEN_SETTINGS install'
@@ -41,8 +39,6 @@ podTemplate(
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'aws s3 ls'
-                    sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
                     sh 'palisade-login'
                     sh 'helm list'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
