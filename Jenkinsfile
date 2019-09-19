@@ -28,7 +28,7 @@ podTemplate(
         stage('Install maven project') {
 
         }
-        stage('Build a Maven project') {
+        stage('Install a Maven project') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
@@ -40,7 +40,7 @@ podTemplate(
                 }
             }
         }
-        stage('Build a Maven project') {
+        stage('Deploy a Maven project') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
