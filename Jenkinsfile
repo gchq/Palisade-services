@@ -23,6 +23,8 @@ podTemplate(
         ]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
+            sh "echo hello"
+            echo sh(script: 'env|sort', returnStdout: true)
             sh "echo ${env.BRANCH_NAME}"
             sh "echo ${env}"
         }
