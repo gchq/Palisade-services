@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-pipeline {
-    stages {
-        stage('Bootstrap') {
-            sh "echo ${env.BRANCH_NAME}"
-        }
-        stage('Install maven project') {
+stages {
+    stage('Bootstrap') {
+        sh "echo ${env.BRANCH_NAME}"
+    }
+    stage('Install maven project') {
 
-        }
-        stage('Build a Maven project') {
-            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-            container('mavencontainer') {
-                configFileProvider(
-                        [configFile(fileId: '450d38e2-db65-4601-8be0-8621455e93b5', variable: 'MAVEN_SETTINGS')]) {
-                    sh 'aws s3 ls'
-                    sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
-                    sh 'palisade-login'
+    }
+    stage('Build a Maven project') {
+        git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+        container('mavencontainer') {
+            configFileProvider(
+                    [configFile(fileId: '450d38e2-db65-4601-8be0-8621455e93b5', variable: 'MAVEN_SETTINGS')]) {
+                sh 'aws s3 ls'
+                sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
+                sh 'palisade-login'
 //                    sh 'export TILLER_NAMESPACE=tiller && export HELM_HOST=:44134 && helm list'
-                    sh 'echo $TILLER_NAMESPACE'
-                    sh 'echo $HELM_HOST'
-                    sh 'helm list'
-                    sh 'mvn -s $MAVEN_SETTINGS deploy'
+                sh 'echo $TILLER_NAMESPACE'
+                sh 'echo $HELM_HOST'
+                sh 'helm list'
+                sh 'mvn -s $MAVEN_SETTINGS deploy'
 
-                }
             }
         }
     }
