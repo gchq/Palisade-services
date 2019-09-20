@@ -23,14 +23,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.metrics.PalisadeMetricProvider;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
-import uk.gov.gchq.palisade.service.palisade.request.GetMetricRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
@@ -57,7 +55,7 @@ import static java.util.Objects.requireNonNull;
  * should check the resources requested in getDataRequestConfig are the same or a subset of the resources passed in in
  * registerDataRequest. </p>
  */
-public class SimplePalisadeService implements PalisadeService, PalisadeMetricProvider {
+public class SimplePalisadeService implements PalisadeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
     //Cache keys
     public static final String RES_COUNT_KEY = "res_count_";
@@ -87,7 +85,7 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     @Override
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
         final RequestId originalRequestId = request.getOriginalRequestId();
-        LOGGER.debug("Registering data request: {}", request, originalRequestId);
+        LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
@@ -242,19 +240,13 @@ public class SimplePalisadeService implements PalisadeService, PalisadeMetricPro
     }
 
     @Override
-    public CompletableFuture<Map<String, String>> getMetrics(final GetMetricRequest request) {
-        requireNonNull(request, "request");
-        return null;
-    }
-
-    @Override
     public CompletableFuture<?> process(final Request request) {
         //first try one parent interface
         try {
             return PalisadeService.super.process(request);
         } catch (IllegalArgumentException e) {
-            //that failed try the other
-            return PalisadeMetricProvider.super.process(request);
+            LOGGER.error(e.getMessage());
+            return CompletableFuture.failedFuture(e);
         }
     }
 

@@ -44,4 +44,4 @@ cache:
   implementation: hashmap
   props: "cache.properties"
   etcd:
-    - http://localhost:9797
+    - http://localhost:2379
