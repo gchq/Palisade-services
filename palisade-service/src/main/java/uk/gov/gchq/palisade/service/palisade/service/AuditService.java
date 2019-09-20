@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
