@@ -19,9 +19,10 @@ podTemplate(
         containers: [
                 containerTemplate(name: 'maven',
                         image: "${env.INFRA_IMAGE}",
+                        privileged: true,
                         ttyEnabled: true, alwaysPullImage: false, command: 'cat',
                         envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')],
-                        ports: [portMapping(name: 'ryuk', containerPort: 32773, hostPort: 32773)])
+                        ports: [portMapping(name: 'ryuk', containerPort: 32774, hostPort: 32774)])
         ]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
