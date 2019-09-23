@@ -16,7 +16,7 @@
 
 podTemplate(
         name: 'palisade',
-        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
+//        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
         containers: [
                 containerTemplate(name: 'maven',
                         priviledged: true,
@@ -43,6 +43,7 @@ podTemplate(
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'palisade-login'
                     sh 'helm list'
+                    sh 'docker ps'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
                 }
             }
