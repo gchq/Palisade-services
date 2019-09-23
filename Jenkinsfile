@@ -22,7 +22,7 @@ podTemplate(
                         image: "${env.INFRA_IMAGE}",
                         ttyEnabled: true, alwaysPullImage: false, command: 'cat',
                         envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')],
-                        ports: [portMapping(name: 'ryuk', containerPort: 8080, hostPort: 32778)])
+                        ports: [portMapping(name: 'ryuk', containerPort: 32778, hostPort: 32778)])
         ]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
