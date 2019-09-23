@@ -22,7 +22,7 @@ podTemplate(
                         priviledged: true,
                         image: "${env.INFRA_IMAGE}",
                         ttyEnabled: true, alwaysPullImage: false, command: 'cat',
-                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])]) {
+                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134'), envVar(key: 'DOCKER_OPTS', value: '--tls=false, --net=host')])]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
