@@ -34,6 +34,8 @@ podTemplate(
                     sh 'palisade-login'
                     sh 'helm list'
                     sh 'docker ps'
+                    sh 'docker network ls'
+                    sh 'ip addr show'
                     sh 'mvn -s $MAVEN_SETTINGS install'
                 }
             }
@@ -45,6 +47,8 @@ podTemplate(
                     sh 'palisade-login'
                     sh 'helm list'
                     sh 'docker ps'
+                    sh 'docker network ls'
+                    sh 'ip addr show'
                     sh 'mvn -s $MAVEN_SETTINGS deploy'
                 }
             }
