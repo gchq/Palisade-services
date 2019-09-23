@@ -33,6 +33,7 @@ podTemplate(
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'palisade-login'
                     sh 'helm list'
+                    sh 'docker ps'
                     sh 'mvn -s $MAVEN_SETTINGS install'
                 }
             }
