@@ -42,7 +42,6 @@ public class EtcdBackingStoreTest extends AbstractBackingStoreTest {
     public static void startETCDCluster() {
         // tests require docker to be installed
         etcd = new EtcdClusterResource("test-etcd", 1);
-        etcd.cluster().start();
         clientEndpoints = etcd.cluster().getClientEndpoints();
     }
 
