@@ -21,7 +21,8 @@ kind: Pod
 spec:
   containers:
   - name: docker-cmds
-    image: user/jnlp-did:jdk11
+    image: jnlp-did:jdk11
+    imagePullPolicy: ifNotPresent
     command:
     - sleep
     args:
@@ -46,7 +47,8 @@ spec:
         value: ""
         
   - name: maven
-    image: user/jnlp-slave-palisade:jdk11
+    image: jnlp-slave-palisade:jdk11
+    imagePullPolicy: ifNotPresent
     command: ['cat']
     tty: true
     env:
