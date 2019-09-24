@@ -21,7 +21,7 @@ kind: Pod
 spec:
   containers:
   - name: docker-cmds
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:INFRA
+    image: user/jnlp-did:jdk11
     command:
     - sleep
     args:
@@ -46,7 +46,7 @@ spec:
         value: ""
         
   - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
+    image: user/jnlp-slave-palisade:jdk11
     command: ['cat']
     tty: true
     env:
