@@ -16,7 +16,7 @@
 
 
 podTemplate(
-        yamlFile: 'KubernetesPod.yaml'
+        yaml: ''''''
 ) {
     node(POD_LABEL) {
         stage('Bootstrap') {
