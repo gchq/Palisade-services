@@ -15,55 +15,9 @@
  */
 
 
-podTemplate(yaml: '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: docker-cmds
-    image: "\$(env.DOCKER_IMAGE)"
-    command:
-    - sleep
-    args:
-    - 99d
-    env:
-      - name: DOCKER_HOST
-        value: tcp://localhost:2375
-        
-  - name: docker-daemon
-    image: docker:19.03.1-dind
-    securityContext:
-      privileged: true
-    resources: 
-      requests: 
-        cpu: 20m 
-        memory: 512Mi 
-    volumeMounts: 
-      - name: docker-graph-storage 
-        mountPath: /var/lib/docker 
-    env:
-      - name: DOCKER_TLS_CERTDIR
-        value: ""
-        
-  - name: maven
-    image: "\$(env.INFRA_IMAGE)"
-    command: ['cat']
-    tty: true
-    env:
-    - name: TILLER_NAMESPACE
-      value: tiller
-    - name: HELM_HOST
-      value: :44134
-    volumeMounts:
-      - mountPath: /var/run
-        name: docker-sock
-  volumes:
-    - name: docker-graph-storage
-      emptyDir: {}
-    - name: docker-sock
-      hostPath:
-         path: /var/run
-''') {
+podTemplate(
+        yamlFile: 'KubernetesPod.yaml'
+) {
     node(POD_LABEL) {
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
