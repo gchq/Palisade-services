@@ -52,7 +52,8 @@ spec:
     - name: docker-graph-storage
       emptyDir: {}
     - name: docker-sock
-      hostPath: /var/run
+      hostPath:
+         path: /var/run
 ''') {
     node(POD_LABEL) {
         stage('Bootstrap') {
