@@ -19,10 +19,9 @@ podTemplate(
         volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
         containers: [
                 containerTemplate(name: 'maven',
-                        priviledged: true,
                         image: "${env.INFRA_IMAGE}",
                         ttyEnabled: true, alwaysPullImage: false, command: 'cat',
-                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134'), envVar(key: 'DOCKER_OPTS', value: '--tls=false, --net=host')])]) {
+                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])]) {
     node(POD_LABEL) {
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
