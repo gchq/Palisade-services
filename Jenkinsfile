@@ -22,22 +22,28 @@ pipeline {
     }
     stages {
         stage('Bootstrap') {
-            echo sh(script: 'env|sort', returnStdout: true)
+            steps {
+                echo sh(script: 'env|sort', returnStdout: true)
+            }
         }
         stage('Install a Maven project') {
-            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-            container('docker-cmds') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install'
+            steps {
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn -s $MAVEN_SETTINGS install'
+                    }
                 }
             }
         }
         stage('Deploy a Maven project') {
-            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-            container('maven') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'palisade-login'
-                    sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+            steps {
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+                container('maven') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'palisade-login'
+                        sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                    }
                 }
             }
         }
