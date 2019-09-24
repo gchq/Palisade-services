@@ -14,91 +14,122 @@
  * limitations under the License.
  */
 
-podTemplate(yaml: """
+
+podTemplate(yaml: '''
 apiVersion: v1
 kind: Pod
-metadata:
-  name: dind
 spec:
   containers:
-  - name: docker-cmds
-    image: docker:1.12.6
-    command: ['docker', 'run', '-p', '80:80', 'httpd:latest'] 
-    resources: 
-      requests: 
-        cpu: 10m 
-        memory: 256Mi 
-    env: 
-    - name: DOCKER_HOST 
-      value: tcp://localhost:2375
-  - name: dind-daemon 
-    image: docker:1.12.6-dind 
-    resources: 
-      requests: 
-        cpu: 20m 
-        memory: 512Mi 
-    securityContext: 
-      privileged: true 
-    volumeMounts: 
-     - name: docker-graph-storage 
-       mountPath: /var/lib/docker 
-  - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
-    command: ['cat']
-    tty: true
+  - name: docker
+    image: docker:19.03.1
+    command:
+    - sleep
+    args:
+    - 99d
     env:
-    - name: TILLER_NAMESPACE
-      value: tiller
-    - name: HELM_HOST
-      value: :44134
-  volumes: 
-    - name: docker-graph-storage 
-      emptyDir: {}
-"""
-)
-
-//podTemplate(
-//        name: 'palisade',
-//        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
-//        containers: [
-//                containerTemplate(name: 'maven',
-//                        image: "${env.INFRA_IMAGE}",
-//                        ttyEnabled: true, alwaysPullImage: false, command: 'cat',
-//                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])])
-        {
-            node(POD_LABEL) {
-                stage('Bootstrap') {
-                    echo sh(script: 'env|sort', returnStdout: true)
-                }
-                stage('Install a Maven project') {
-                    git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                    sh 'palisade-login'
-//                    sh 'helm list'
-//                    sh 'docker ps'
-//                    sh 'docker network ls'
-//                    sh 'ip addr show'
-                            sh 'mvn -s $MAVEN_SETTINGS install'
-                        }
-                    }
-                }
-                stage('Deploy a Maven project') {
-                    git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-                    container('maven') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh 'palisade-login'
-                            sh 'helm list'
-                            sh 'docker ps'
-                            sh 'docker network ls'
-                            sh 'ip addr show'
-                            sh 'mvn -s $MAVEN_SETTINGS deploy'
-                        }
-                    }
-                }
-            }
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+  - name: docker-daemon
+    image: docker:19.03.1-dind
+    securityContext:
+      privileged: true
+    env:
+      - name: DOCKER_TLS_CERTDIR
+        value: ""
+''') {
+    node(POD_LABEL) {
+        git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
+        container('docker') {
+            sh 'docker version && DOCKER_BUILDKIT=1 docker build --progress plain -t testing .'
         }
+    }
+}
 
-
-
-
+//podTemplate(yaml: """
+//apiVersion: v1
+//kind: Pod
+//metadata:
+//  name: dind
+//spec:
+//  containers:
+//  - name: docker-cmds
+//    image: docker:1.12.6
+//    command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
+//    resources:
+//      requests:
+//        cpu: 10m
+//        memory: 256Mi
+//    env:
+//    - name: DOCKER_HOST
+//      value: tcp://localhost:2375
+//  - name: dind-daemon
+//    image: docker:1.12.6-dind
+//    resources:
+//      requests:
+//        cpu: 20m
+//        memory: 512Mi
+//    securityContext:
+//      privileged: true
+//    volumeMounts:
+//     - name: docker-graph-storage
+//       mountPath: /var/lib/docker
+//  - name: maven
+//    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
+//    command: ['cat']
+//    tty: true
+//    env:
+//    - name: TILLER_NAMESPACE
+//      value: tiller
+//    - name: HELM_HOST
+//      value: :44134
+//  volumes:
+//    - name: docker-graph-storage
+//      emptyDir: {}
+//"""
+//)
+//
+////podTemplate(
+////        name: 'palisade',
+////        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
+////        containers: [
+////                containerTemplate(name: 'maven',
+////                        image: "${env.INFRA_IMAGE}",
+////                        ttyEnabled: true, alwaysPullImage: false, command: 'cat',
+////                        envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])])
+//        {
+//            node(POD_LABEL) {
+//                stage('Bootstrap') {
+//                    echo sh(script: 'env|sort', returnStdout: true)
+//                }
+//                stage('Install a Maven project') {
+//                    git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+//                    container('docker-cmds') {
+//                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+////                    sh 'palisade-login'
+////                    sh 'helm list'
+////                    sh 'docker ps'
+////                    sh 'docker network ls'
+////                    sh 'ip addr show'
+//                            sh 'mvn -s $MAVEN_SETTINGS install'
+//                        }
+//                    }
+//                }
+//                stage('Deploy a Maven project') {
+//                    git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+//                    container('maven') {
+//                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                            sh 'palisade-login'
+//                            sh 'helm list'
+//                            sh 'docker ps'
+//                            sh 'docker network ls'
+//                            sh 'ip addr show'
+//                            sh 'mvn -s $MAVEN_SETTINGS deploy'
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//
+//
