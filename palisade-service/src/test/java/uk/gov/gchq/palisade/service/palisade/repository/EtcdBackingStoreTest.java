@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 public class EtcdBackingStoreTest extends AbstractBackingStoreTest {
 
     @ClassRule
-    private static EtcdClusterResource etcd = new EtcdClusterResource("test-etcd", 1);
+    public static EtcdClusterResource etcd = new EtcdClusterResource("test-etcd", 1);
 
     private static List<URI> clientEndpoints;
     private EtcdBackingStore etcdBackingStore;
