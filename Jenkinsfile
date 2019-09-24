@@ -45,9 +45,14 @@ spec:
       value: tiller
     - name: HELM_HOST
       value: :44134
+    volumeMounts:
+      - mountPath: /var/run
+        name: docker-sock
   volumes:
     - name: docker-graph-storage
       emptyDir: {}
+    - name: docker-sock
+      hostPath: /var/run
 ''') {
     node(POD_LABEL) {
         stage('Bootstrap') {
