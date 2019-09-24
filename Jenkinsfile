@@ -20,7 +20,7 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: docker
+  - name: docker-cmds
     image: docker:19.03.1
     command:
     - sleep
@@ -36,11 +36,48 @@ spec:
     env:
       - name: DOCKER_TLS_CERTDIR
         value: ""
+  - name: maven
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
+    command: ['cat']
+    tty: true
+    env:
+    - name: TILLER_NAMESPACE
+      value: tiller
+    - name: HELM_HOST
+      value: :44134
+  volumes:
+    - name: docker-graph-storage
+      emptyDir: {}
 ''') {
     node(POD_LABEL) {
-        git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
-        container('docker') {
-            sh 'docker version && DOCKER_BUILDKIT=1 docker build --progress plain -t testing .'
+        stage('Bootstrap') {
+            echo sh(script: 'env|sort', returnStdout: true)
+        }
+        stage('Install a Maven project') {
+            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            container('docker-cmds') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                    sh 'palisade-login'
+//                    sh 'helm list'
+//                    sh 'docker ps'
+//                    sh 'docker network ls'
+//                    sh 'ip addr show'
+                    sh 'mvn -s $MAVEN_SETTINGS install'
+                }
+            }
+        }
+        stage('Deploy a Maven project') {
+            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            container('maven') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'palisade-login'
+                    sh 'helm list'
+                    sh 'docker ps'
+                    sh 'docker network ls'
+                    sh 'ip addr show'
+                    sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                }
+            }
         }
     }
 }
