@@ -21,7 +21,7 @@ kind: Pod
 spec:
   containers:
   - name: docker-cmds
-    image: '\$(env.DOCKER_IMAGE)'
+    image: '\\$(env.DOCKER_IMAGE)'
     command:
     - sleep
     args:
@@ -46,7 +46,7 @@ spec:
         value: ""
         
   - name: maven
-    image: '\$(env.INFRA_IMAGE)'
+    image: '\\$(env.INFRA_IMAGE)'
     command: ['cat']
     tty: true
     env:
