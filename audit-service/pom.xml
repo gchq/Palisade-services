@@ -192,10 +192,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>${pom.parent.name}/${project.artifactId}</repository>
+                    <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
                     <tag>${image.tag}</tag>
+                    <finalName>${project.artifactId}</finalName>
                     <buildArgs>
                         <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
                     </buildArgs>
