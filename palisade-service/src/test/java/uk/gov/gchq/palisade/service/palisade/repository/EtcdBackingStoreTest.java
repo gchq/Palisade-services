@@ -19,6 +19,7 @@ import io.etcd.jetcd.launcher.junit.EtcdClusterResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 
 import java.net.URI;
 import java.time.Duration;
@@ -32,14 +33,16 @@ import static org.junit.Assert.assertTrue;
 
 public class EtcdBackingStoreTest extends AbstractBackingStoreTest {
 
-    private static EtcdClusterResource etcd;
+    @ClassRule
+    private static EtcdClusterResource etcd = new EtcdClusterResource("test-etcd", 1);
+
     private static List<URI> clientEndpoints;
     private EtcdBackingStore etcdBackingStore;
 
     @BeforeClass
     public static void startETCDCluster() {
         // tests require docker to be installed
-        etcd = new EtcdClusterResource("test-etcd", 1);
+//        etcd = new EtcdClusterResource("test-etcd", 1);
         clientEndpoints = etcd.cluster().getClientEndpoints();
     }
 
