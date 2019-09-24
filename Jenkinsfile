@@ -21,7 +21,7 @@ kind: Pod
 spec:
   containers:
   - name: docker-cmds
-    image: docker:19.03.1
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:INFRA
     command:
     - sleep
     args:
