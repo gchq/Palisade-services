@@ -1,4 +1,3 @@
-package uk.gov.gchq.palisade.service.palisade.request;
 /*
  * Copyright 2019 Crown Copyright
  *
@@ -14,6 +13,8 @@ package uk.gov.gchq.palisade.service.palisade.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.palisade.request;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
