@@ -1,103 +1,75 @@
 package uk.gov.gchq.palisade.audit.service.request;
 
-import org.junit.Before;
-import org.junit.Rule;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 
 @RunWith(SpringRunner.class)
 public class ReadRequestCompleteAuditRequestTest {
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
-    private ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest;
+    public final ObjectMapper mapper = new ObjectMapper();
 
-    @Before
-    public void setUp() {
-        readRequestCompleteAuditRequest = new ReadRequestCompleteAuditRequest();
+
+    @Test
+    public void ReadRequestCompleteAuditRequestFromJsonTest() throws IOException {
+        final ReadRequestCompleteAuditRequest subject = ReadRequestCompleteAuditRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("user"))
+                .withLeafResource(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share"))))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
+                .withRulesApplied(new Rules().message("new Rule"))
+                .withNumberOfRecordsReturned(100L)
+                .withNumberOfRecordsProcessed(200L);
+
+        assertThat("ReadRequestCompleteAuditRequest could not be parsed from json string", subject.numberOfRecordsProcessed, is(equalTo(200L)));
+    }
+
+
+    @Test
+    public void ReadRequestCompleteAuditRequestToJsonTest() throws IOException {
+        final ReadRequestCompleteAuditRequest subject = ReadRequestCompleteAuditRequest.create(new RequestId().id("456"))
+               .withUser(new User().userId("user1"))
+                .withLeafResource(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share"))))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
+                .withRulesApplied(new Rules().message("newer Rule"))
+                .withNumberOfRecordsReturned(300L)
+                .withNumberOfRecordsProcessed(400L);
+
+        final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
+        final Iterable<String> iterable = asNode::fieldNames;
+
+        assertThat("ReadRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed, timestamp, serverIp, serverHostname")));
     }
 
     @Test
-    public void correctUser() {
-        User actual = new User().userId("john");
-        readRequestCompleteAuditRequest.setUser(actual);
-        User expected = readRequestCompleteAuditRequest.getUser();
-        assertThat(actual, is(equalTo(expected)));
-    }
+    public void ReadRequestCompleteAuditRequestTest() {
+        final ReadRequestCompleteAuditRequest subject = ReadRequestCompleteAuditRequest.create(new RequestId().id("789"))
+                .withUser(new User().userId("user2"))
+                .withLeafResource(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share"))))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
+                .withRulesApplied(new Rules().message("newest Rule"))
+                .withNumberOfRecordsReturned(500L)
+                .withNumberOfRecordsProcessed(600L);
 
-    @Test
-    public void incorrectUser() {
-        User actual = new User().userId("john");
-        User processedUser = new User().userId("testUser1");
-        readRequestCompleteAuditRequest.setUser(processedUser);
-        User expected = readRequestCompleteAuditRequest.getUser();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
-
-    @Test
-    public void nullUser() {
-        expectedEx.expect(NullPointerException.class);
-        expectedEx.expectMessage("The user type cannot be null");
-        readRequestCompleteAuditRequest.setUser(null);
-    }
-
-    @Test
-    public void validNumberOfRecordsReturned() {
-        long actual = 12345678910L;
-        readRequestCompleteAuditRequest.setNumberOfRecordsReturned(actual);
-        long expected = readRequestCompleteAuditRequest.getNumberOfRecordsReturned();
-        assertThat(actual, is(equalTo(expected)));
-    }
-
-    @Test
-    public void negativeNumberOfRecordsReturned() {
-        long actual = -1;
-        readRequestCompleteAuditRequest.setNumberOfRecordsReturned(actual);
-        long expected = readRequestCompleteAuditRequest.getNumberOfRecordsReturned();
-        assertThat(actual, is(equalTo(expected)));
-    }
-
-    @Test
-    public void invalidNumberOfRecordsReturned() {
-        long actual = 100;
-        long valueProcessed = 101;
-        readRequestCompleteAuditRequest.setNumberOfRecordsReturned(valueProcessed);
-        long expected = readRequestCompleteAuditRequest.getNumberOfRecordsReturned();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
-
-    @Test(expected = NumberFormatException.class)
-    public void nullNumberOfRecordsReturned() {
-        long actual = Integer.valueOf(null);
-        readRequestCompleteAuditRequest.setNumberOfRecordsReturned(actual);
-        long expected = readRequestCompleteAuditRequest.getNumberOfRecordsReturned();
-        assertThat(actual, is(equalTo(expected)));
-    }
-
-    @Test
-    public void equals() {
-        ReadRequestCompleteAuditRequest o = readRequestCompleteAuditRequest.numberOfRecordsProcessed(100L)
-                .numberOfRecordsReturned(200L)
-                .context(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
-                .rulesApplied(new Rules()).resource(new FileResource())
-                .resource(new FileResource())
-                .user(new User().userId("Person1"));
-        boolean actual = readRequestCompleteAuditRequest.equals(o);
-        assertThat(actual, is(true));
+        assertThat("ReadRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("user2")));
     }
 
 }

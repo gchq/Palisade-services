@@ -1,92 +1,67 @@
 package uk.gov.gchq.palisade.audit.service.request;
 
-import org.junit.Before;
-import org.junit.Rule;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 
+import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 
 @RunWith(SpringRunner.class)
 public class RegisterRequestCompleteAuditRequestTest {
+    public final ObjectMapper mapper = new ObjectMapper();
 
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
-    private RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest;
+    @Test
+    public void RegisterRequestCompleteAuditRequestTest() {
+        final RegisterRequestCompleteAuditRequest subject = RegisterRequestCompleteAuditRequest.create(new RequestId().id("456"))
+                .withUser(new User().userId("a user"))
+                .withLeafResources(Stream.of(new FileResource()).collect(toSet()))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))));
 
-    @Before
-    public void setUp() {
-        registerRequestCompleteAuditRequest = new RegisterRequestCompleteAuditRequest();
+        assertThat("RegisterRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("a user")));
     }
 
     @Test
-    public void correctUser() {
-        User actual = new User().userId("testUser1");
-        registerRequestCompleteAuditRequest.setUser(actual);
-        User expected = registerRequestCompleteAuditRequest.getUser();
-        assertThat(actual, is(equalTo(expected)));
+    public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
+        final RegisterRequestCompleteAuditRequest subject = RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("user"))
+                .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))));
+
+        final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
+        final Iterable<String> iterable = asNode::fieldNames;
+
+        assertThat("RegisterRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResources, context, timestamp, serverIp, serverHostname")));
     }
 
     @Test
-    public void incorrectUser() {
-        User actual = new User().userId("testUser1");
-        User processedUser = new User().userId("testUser2");
-        registerRequestCompleteAuditRequest.setUser(processedUser);
-        User expected = registerRequestCompleteAuditRequest.getUser();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
+    public void RegisterRequestCompleteAuditRequestFromJsonTest() throws IOException {
+        final RegisterRequestCompleteAuditRequest subject = RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("user"))
+                .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
+                .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))));
 
-    @Test
-    public void nullUser() {
-        expectedEx.expect(NullPointerException.class);
-        expectedEx.expectMessage("The user type cannot be null");
-        registerRequestCompleteAuditRequest.setUser(null);
-    }
+        final String jsonString = "{\"class\":\"RegisterRequestCompleteAuditRequest\",\"id\":{\"id\":\"5942c37d-43e3-419c-bf1c-bb7153d395c8\"},\"originalRequestId\":{\"id\":\"123\"},\"user\":{\"userId\":{\"id\":\"user\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"leafResources\":[{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/usr/share/resource/test_resource\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"resource\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"share\"}},\"serialisedFormat\":\"none\",\"type\":\"standard\"}],\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"a string\":\"java.lang.String\"}}}";
 
-    @Test
-    public void validContext() {
-        Context actual = new Context().purpose("SALARY");
-        registerRequestCompleteAuditRequest.setContext(actual);
-        Context expected = registerRequestCompleteAuditRequest.getContext();
-        assertThat(actual, is(equalTo(expected)));
-    }
+        final RegisterRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, RegisterRequestCompleteAuditRequest.class);
 
-    @Test
-    public void invalidContext() {
-        Context actual = new Context().purpose("SALARY");
-        Context processed = new Context().purpose("HR");
-        registerRequestCompleteAuditRequest.setContext(processed);
-        Context expected = registerRequestCompleteAuditRequest.getContext();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
-
-    @Test
-    public void nullContext() {
-        expectedEx.expect(NullPointerException.class);
-        expectedEx.expectMessage("The context cannot be set to null");
-        registerRequestCompleteAuditRequest.setContext(null);
-    }
-
-    @Test
-    public void equals() {
-        RegisterRequestCompleteAuditRequest o = registerRequestCompleteAuditRequest
-                .context(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
-                .user(new User().userId("Person1"))
-                .leafResources(Stream.of(new FileResource()).collect(toSet()));
-        boolean actual = registerRequestCompleteAuditRequest.equals(o);
-        assertThat(actual, is(true));
+        assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
     }
 }

@@ -15,14 +15,15 @@
  */
 package uk.gov.gchq.palisade.audit.service.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Set;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,105 +35,60 @@ import static java.util.Objects.requireNonNull;
  */
 public class RegisterRequestCompleteAuditRequest extends AuditRequest {
 
-    private User user;
-    private Set<LeafResource> leafResources;
-    private Context context;
+    public final User user;
+    public final Set<LeafResource> leafResources;
+    public final Context context;
 
-    // no-arg constructor required
-    public RegisterRequestCompleteAuditRequest() {
+    @JsonCreator
+    private RegisterRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user,
+                                                @JsonProperty("leafResources") final Set<LeafResource> leafResources, @JsonProperty("context") final Context context) {
+        super(originalRequestId);
+        this.user = requireNonNull(user);
+        this.leafResources = requireNonNull(leafResources);
+        this.context = requireNonNull(context);
+    }
+
+    public interface IUser {
+        /**
+         * @param user {@link User} is the user that made the initial registration request to access data
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        ILeafResources withUser(final User user);
+    }
+
+    public interface ILeafResources {
+        /**
+         * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        IContext withLeafResources(final Set<LeafResource> leafResources);
+    }
+
+    public interface IContext {
+        /**
+         * @param context the context that was passed by the client to the palisade service
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        RegisterRequestCompleteAuditRequest withContext(final Context context);
     }
 
     /**
-     * @param user {@link User} is the user that made the initial registration request to access data
+     * Static factory method.
+     *
+     * @param original the originating request Id
      * @return the {@link RegisterRequestCompleteAuditRequest}
      */
-    public RegisterRequestCompleteAuditRequest user(final User user) {
-        requireNonNull(user, "The user type cannot be null");
-        this.user = user;
-        return this;
-    }
-
-    /**
-     * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
-     * @return the {@link RegisterRequestCompleteAuditRequest}
-     */
-    public RegisterRequestCompleteAuditRequest leafResources(final Set<LeafResource> leafResources) {
-        requireNonNull(leafResources, "The leaf resources cannot be null");
-        this.leafResources = leafResources;
-        return this;
-    }
-
-    /**
-     * @param context the context that was passed by the client to the palisade service
-     * @return the {@link RegisterRequestCompleteAuditRequest}
-     */
-    public RegisterRequestCompleteAuditRequest context(final Context context) {
-        requireNonNull(context, "The context cannot be set to null");
-        this.context = context;
-        return this;
-    }
-
-    public Context getContext() {
-        requireNonNull(this.context, "The context has not been set");
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        context(context);
-    }
-
-    public User getUser() {
-        requireNonNull(user, "The user has not been set.");
-        return user;
-    }
-
-    public void setUser(final User user) {
-        user(user);
-    }
-
-    public Set<LeafResource> getLeafResources() {
-        requireNonNull(leafResources, "The leafResources has not been set.");
-        return leafResources;
-    }
-
-    public void setLeafResources(final Set<LeafResource> leafResources) {
-        leafResources(leafResources);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(leafResources, that.leafResources)
-                .append(context, that.context)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(23, 41)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(leafResources)
-                .append(context)
-                .toHashCode();
+    public static IUser create(final RequestId original) {
+        return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("user", user)
-                .append("leafResources", leafResources)
-                .append("context", context)
+        return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
+                .add(super.toString())
+                .add("user=" + user)
+                .add("leafResources=" + leafResources)
+                .add("context=" + context)
                 .toString();
     }
 }

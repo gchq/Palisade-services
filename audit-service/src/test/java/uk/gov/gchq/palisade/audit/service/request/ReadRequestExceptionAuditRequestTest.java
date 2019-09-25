@@ -1,90 +1,59 @@
 package uk.gov.gchq.palisade.audit.service.request;
 
-import org.junit.Before;
-import org.junit.Rule;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 
-import java.util.AbstractMap;
-import java.util.stream.Stream;
+import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 
 @RunWith(SpringRunner.class)
 public class ReadRequestExceptionAuditRequestTest {
+    public final ObjectMapper mapper = new ObjectMapper();
 
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
-    private ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest;
 
-    @Before
-    public void setUp() {
-        readRequestExceptionAuditRequest = new ReadRequestExceptionAuditRequest();
+    @Test
+    public void ReadRequestExceptionAuditRequestFromJsonTest() throws IOException {
+        final ReadRequestExceptionAuditRequest subject = ReadRequestExceptionAuditRequest.create(new RequestId().id("123"))
+                .withToken("789")
+                .withLeafResource(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share"))))
+                .withException(new SecurityException("not allowed"));
+
+        assertThat("ReadRequestExceptionAuditRequest could not be parsed from json string", subject.exception.getLocalizedMessage(), is(equalTo("not allowed")));
+    }
+
+
+    @Test
+    public void ReadRequestExceptionAuditRequestToJsonTest() throws IOException {
+        final ReadRequestExceptionAuditRequest subject = ReadRequestExceptionAuditRequest.create(new RequestId().id("123"))
+                .withToken("token")
+                .withLeafResource((new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))))
+                .withException(new SecurityException("not allowed"));
+
+        final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
+        final Iterable<String> iterable = asNode::fieldNames;
+
+        assertThat("ReadRequestExceptionAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, token, leafResource, exception, timestamp, serverIp, serverHostname")));
     }
 
     @Test
-    public void validToken() {
-        String actual = "String1";
-        readRequestExceptionAuditRequest.setToken(actual);
-        String expected = readRequestExceptionAuditRequest.getToken();
-        assertThat(actual, is(equalTo(expected)));
-    }
+    public void ReadRequestExceptionAuditRequestTest() {
+        final ReadRequestExceptionAuditRequest subject = ReadRequestExceptionAuditRequest.create(new RequestId().id("456"))
+                .withToken("token")
+                .withLeafResource(new FileResource())
+                .withException(new SecurityException("not allowed"));
 
-    @Test
-    public void invalidToken() {
-        String actual = "String1";
-        readRequestExceptionAuditRequest.setToken("String2");
-        String expected = readRequestExceptionAuditRequest.getToken();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
-
-    @Test
-    public void nullToken() {
-        expectedEx.expect(NullPointerException.class);
-        expectedEx.expectMessage("The token cannot be null");
-        readRequestExceptionAuditRequest.setToken(null);
-    }
-
-    @Test
-    public void validException() {
-        Throwable actual = new Throwable("Error");
-        readRequestExceptionAuditRequest.setException(actual);
-        Throwable expected = readRequestExceptionAuditRequest.getException();
-        assertThat(actual, is(equalTo(expected)));
-    }
-
-    @Test
-    public void invalidException() {
-        Throwable actual = new Throwable("Error");
-        Throwable processed = new Throwable("Error2");
-        readRequestExceptionAuditRequest.setException(processed);
-        Throwable expected = readRequestExceptionAuditRequest.getException();
-        assertThat(actual, is(not(equalTo(expected))));
-    }
-
-    @Test
-    public void nullException() {
-        expectedEx.expect(NullPointerException.class);
-        expectedEx.expectMessage("The exception cannot be null");
-        readRequestExceptionAuditRequest.setException(null);
-    }
-
-    @Test
-    public void equals() {
-        ReadRequestExceptionAuditRequest o = readRequestExceptionAuditRequest.exception(new Throwable("Error"))
-                .token("String1")
-                .resource(new FileResource());
-        boolean actual = readRequestExceptionAuditRequest.equals(o);
-        assertThat(actual, is(true));
+        assertThat("ReadRequestExceptionAuditRequest not constructed", subject.token, is(equalTo("token")));
     }
 }
