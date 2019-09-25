@@ -30,7 +30,6 @@ import java.util.Optional;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
 public class EtcdBackingStoreTest extends AbstractBackingStoreTest {
 
     @ClassRule
@@ -41,8 +40,6 @@ public class EtcdBackingStoreTest extends AbstractBackingStoreTest {
 
     @BeforeClass
     public static void startETCDCluster() {
-        // tests require docker to be installed
-//        etcd = new EtcdClusterResource("test-etcd", 1);
         clientEndpoints = etcd.cluster().getClientEndpoints();
     }
 
