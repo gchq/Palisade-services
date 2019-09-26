@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
 })
 public class AuditRequest extends Request {
 
-    public final Date timestamp;
+    public final ZoneDateTime timestamp;
     public final String serverIp;
     public final String serverHostname;
 
