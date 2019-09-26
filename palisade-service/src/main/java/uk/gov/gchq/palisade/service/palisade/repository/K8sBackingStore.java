@@ -63,11 +63,17 @@ public class K8sBackingStore implements BackingStore {
         client.close();
     }
 
-    public String convertKeyToCompatible(final String key) throws
+    /**
+     * Remove characters that are not permitted in Kubernetes config map keys
+     * @param key to the item that is to be persisted
+     * @return the new value of the key
+     * @throws IllegalArgumentException if the key is empty or whitespace
+     */
+    public static String convertKeyToCompatible(final String key) throws
             IllegalArgumentException {
         //only allow lower case alphanumberic character or -
         if (key.trim().length() == 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("key empty or contains only whitespace");
         }
         return key.toLowerCase().replaceAll("[^a-z0-9\\-]", "");
     }
@@ -143,7 +149,7 @@ public class K8sBackingStore implements BackingStore {
     @Override
     public SimpleCacheObject get(final String key) {
         if (key == null) {
-            throw new IllegalArgumentException("key");
+            throw new NullPointerException("key value is null");
         }
 
 
@@ -186,9 +192,7 @@ public class K8sBackingStore implements BackingStore {
      */
     @Override
     public boolean remove(final String key) {
-        if (key == null) {
-            throw new IllegalArgumentException("key");
-        }
+        requireNonNull(key);
 
         String dns1123Compatible = convertKeyToCompatible(key);
         try {
