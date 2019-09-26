@@ -12,21 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-spring:
-  application:
-    name: audit-service
-  output:
-    ansi:
-      enabled: always
+FROM openjdk:11
+VOLUME /tmp
 
-server:
-  port: 8086
+ARG JAR_FILE
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - health
-          - info
-          - metrics
+ADD $JAR_FILE /usr/share/palisade-service/palisade-service.jar
+
+LABEL service="palisade", project="palisade"
+
+ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/palisade-service.jar"]

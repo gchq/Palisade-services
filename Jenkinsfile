@@ -13,33 +13,77 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-podTemplate(
-        volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
-        containers: [
-                containerTemplate(name: 'maven',
-                        image: '779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA',
-                        ttyEnabled: true, alwaysPullImage: false, command: 'cat', envVars: [envVar(key: 'TILLER_NAMESPACE', value: 'tiller'), envVar(key: 'HELM_HOST', value: ':44134')])
-        ]) {
+
+
+podTemplate(yaml: '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker-cmds
+    image: jnlp-did:jdk11
+    imagePullPolicy: Never
+    command:
+    - sleep
+    args:
+    - 99d
+    env:
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+        
+  - name: docker-daemon
+    image: docker:19.03.1-dind
+    securityContext:
+      privileged: true
+    resources: 
+      requests: 
+        cpu: 20m 
+        memory: 512Mi 
+    volumeMounts: 
+      - name: docker-graph-storage 
+        mountPath: /var/lib/docker 
+    env:
+      - name: DOCKER_TLS_CERTDIR
+        value: ""
+        
+  - name: maven
+    image: jnlp-slave-palisade:jdk11
+    imagePullPolicy: Never
+    command: ['cat']
+    tty: true
+    env:
+    - name: TILLER_NAMESPACE
+      value: tiller
+    - name: HELM_HOST
+      value: :44134
+    volumeMounts:
+      - mountPath: /var/run
+        name: docker-sock
+  volumes:
+    - name: docker-graph-storage
+      emptyDir: {}
+    - name: docker-sock
+      hostPath:
+         path: /var/run
+''') {
     node(POD_LABEL) {
         stage('Bootstrap') {
-            sh "echo ${env.BRANCH_NAME}"
+            echo sh(script: 'env|sort', returnStdout: true)
         }
-        stage('Install maven project') {
-
+        stage('Install a Maven project') {
+            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            container('docker-cmds') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -s $MAVEN_SETTINGS install'
+                }
+            }
         }
-        stage('Build a Maven project') {
+        stage('Deploy a Maven project') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
-                configFileProvider(
-                        [configFile(fileId: '450d38e2-db65-4601-8be0-8621455e93b5', variable: 'MAVEN_SETTINGS')]) {
-                    sh 'aws s3 ls'
-                    sh 'aws ecr list-images --repository-name palisade --region=eu-west-1'
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'palisade-login'
-                    sh 'echo $TILLER_NAMESPACE'
-                    sh 'echo $HELM_HOST'
-                    sh 'helm list'
-                    sh 'mvn -s $MAVEN_SETTINGS deploy'
-
+                    sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                 }
             }
         }
