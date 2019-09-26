@@ -106,6 +106,7 @@ public class K8sBackingStore implements BackingStore {
         }
         requireNonNull(valueClass, "valueClass");
         requireNonNull(value, "value");
+        requireNonNull(timeToLive);
         if (value.length == 0) {
             throw new IllegalArgumentException("value is empty");
         }
