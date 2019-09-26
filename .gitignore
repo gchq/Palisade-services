@@ -28,6 +28,7 @@ node_modules/
 .extract/
 .settings/
 .terraform/
+backend.tf
 terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
