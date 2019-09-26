@@ -29,6 +29,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class K8sBackingStoreTest extends AbstractBackingStoreTest {
 
@@ -70,6 +71,26 @@ public class K8sBackingStoreTest extends AbstractBackingStoreTest {
         delay(2500);
         SimpleCacheObject empty = impl.get("new_test4");
         assertFalse(empty.getValue().isPresent());
+    }
+
+    @Override
+    @Test(expected = NullPointerException.class)
+    public void throwOnNullKeyRemove() {
+        //Given - nothing
+        //When
+        impl.remove(null);
+        //Then
+        fail("exception expected");
+    }
+
+    @Override
+    @Test(expected = NullPointerException.class)
+    public void throwOnNullKeyRetrieve() {
+        //Given - nothing
+        //When
+        impl.get(null);
+        //Then
+        fail("exception expected");
     }
 
     @Override
