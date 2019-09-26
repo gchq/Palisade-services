@@ -210,13 +210,6 @@ public class SimplePalisadeService implements PalisadeService {
         if (null == success || !success) {
             throw new CompletionException(new RuntimeException("Failed to cache request: " + request));
         }
-        //set a quick count of how many resources are needed for this request
-        final AddCacheRequest<byte[]> resourceCountRequest = new AddCacheRequest<>()
-                .key(RES_COUNT_KEY + requestId.getId() + "_" + resCount)
-                .value(new byte[1])
-                .timeToLive(Optional.of(COUNT_PERSIST_DURATION))
-                .service(this.getClass());
-        cacheService.add(resourceCountRequest).join();
     }
 
     @Override
