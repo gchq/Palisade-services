@@ -46,7 +46,7 @@ public class AuditRequest extends Request {
     protected AuditRequest(final RequestId originalRequestId) {
         super.setOriginalRequestId(requireNonNull(originalRequestId));
 
-        this.timestamp = new Date();
+       this.timestamp = ZonedDateTime.now();
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getLocalHost();
