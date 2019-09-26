@@ -60,7 +60,7 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true" />
+                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -187,7 +187,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>${pom.parent.name}/${project.artifactId}</repository>
+                    <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
                     <tag>${image.tag}</tag>

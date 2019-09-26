@@ -13,20 +13,6 @@
 # limitations under the License.
 #
 spring:
-  application:
-    name: audit-service
-  output:
-    ansi:
-      enabled: always
-
-server:
-  port: 8086
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - health
-          - info
-          - metrics
+  cloud:
+    config:
+      enabled: false

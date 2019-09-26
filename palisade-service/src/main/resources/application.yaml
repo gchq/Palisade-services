@@ -14,13 +14,13 @@
 #
 spring:
   application:
-    name: audit-service
+    name: palisade-service
   output:
     ansi:
       enabled: always
 
 server:
-  port: 8086
+  port: 8080
 
 management:
   endpoints:
@@ -30,3 +30,18 @@ management:
           - health
           - info
           - metrics
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+    default-config: default
+
+cache:
+  implementation: hashmap
+  props: "cache.properties"
+  etcd:
+    - http://localhost:2379

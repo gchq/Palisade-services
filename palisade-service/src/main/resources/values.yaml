@@ -12,21 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-spring:
-  application:
-    name: audit-service
-  output:
-    ansi:
-      enabled: always
+replicaCount: 1
 
-server:
-  port: 8086
+service:
+  port: 80
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - health
-          - info
-          - metrics
+image:
+  repository: palisade/@artifactId@
+  tag: @git.commit.id.abbrev@-@revision@
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 750m
+    memory: 2.5Gi
+  requests:
+    cpu: 250m
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
