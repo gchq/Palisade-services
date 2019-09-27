@@ -7,6 +7,7 @@ import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
@@ -31,9 +32,9 @@ import static java.util.Objects.requireNonNull;
         @JsonSubTypes.Type(value = ReadRequestCompleteAuditRequest.class),
         @JsonSubTypes.Type(value = ReadRequestExceptionAuditRequest.class)
 })
-public class AuditRequest extends Request {
+public class AuditRequest<ZoneDateTime> extends Request {
 
-    public final ZoneDateTime timestamp;
+    public final ZonedDateTime timestamp;
     public final String serverIp;
     public final String serverHostname;
 
