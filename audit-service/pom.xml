@@ -82,7 +82,8 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
+                                        <copy file="${project.build.outputDirectory}/values.yaml"
+                                              toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -130,7 +131,8 @@
                 <configuration>
                     <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false
+                    </generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
