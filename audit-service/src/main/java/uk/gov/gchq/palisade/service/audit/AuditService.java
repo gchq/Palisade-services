@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.audit.service;
+package uk.gov.gchq.palisade.service.audit;
 
-import uk.gov.gchq.palisade.audit.service.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Request;
 

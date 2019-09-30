@@ -1,11 +1,10 @@
-package uk.gov.gchq.palisade.audit.service.request;
+package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;

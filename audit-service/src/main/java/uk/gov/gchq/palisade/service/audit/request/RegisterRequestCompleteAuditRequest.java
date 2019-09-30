@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.audit.service.request;
+package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.audit.AuditService;
 
 import java.util.Set;
 import java.util.StringJoiner;
@@ -28,7 +29,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This is one of the objects that is passed to the {@link uk.gov.gchq.palisade.audit.service.AuditService}
+ * This is one of the objects that is passed to the {@link AuditService}
  * to be able to store an audit record. This class extends {@link AuditRequest} This class
  * is used for the indication to the Audit logs that a RegisterDataRequest has been successfully processed and these are
  * the resources that this user is approved to read for this data access request.

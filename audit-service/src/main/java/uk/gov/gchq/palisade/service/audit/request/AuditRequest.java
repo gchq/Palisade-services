@@ -1,4 +1,4 @@
-package uk.gov.gchq.palisade.audit.service.request;
+package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -8,7 +8,6 @@ import uk.gov.gchq.palisade.service.request.Request;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
 

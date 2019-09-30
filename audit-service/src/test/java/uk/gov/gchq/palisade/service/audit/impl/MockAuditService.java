@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.audit.service.impl;
+package uk.gov.gchq.palisade.service.audit.impl;
 
 
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.audit.service.AuditService;
-import uk.gov.gchq.palisade.audit.service.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.AuditService;
+import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import java.util.concurrent.CompletableFuture;
 
