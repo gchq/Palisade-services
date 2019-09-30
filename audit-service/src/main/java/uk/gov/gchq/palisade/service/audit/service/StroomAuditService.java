@@ -40,6 +40,7 @@ import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditReques
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
+import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.sql.Date;
 import java.util.HashMap;
