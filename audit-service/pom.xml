@@ -66,7 +66,6 @@
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>palisade-service</artifactId>
             <version>0.4.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
