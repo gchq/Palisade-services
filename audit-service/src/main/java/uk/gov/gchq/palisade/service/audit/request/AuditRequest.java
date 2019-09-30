@@ -49,7 +49,7 @@ public class AuditRequest<ZoneDateTime> extends Request {
     protected AuditRequest(final RequestId originalRequestId) {
         super.setOriginalRequestId(requireNonNull(originalRequestId));
 
-       this.timestamp = ZonedDateTime.now();
+        this.timestamp = ZonedDateTime.now();
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getLocalHost();
@@ -59,6 +59,7 @@ public class AuditRequest<ZoneDateTime> extends Request {
         serverHostname = inetAddress.getHostName();
         serverIp = inetAddress.getHostAddress();
     }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
