@@ -2,7 +2,10 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
@@ -55,5 +58,42 @@ public class AuditRequest<ZoneDateTime> extends Request {
         }
         serverHostname = inetAddress.getHostName();
         serverIp = inetAddress.getHostAddress();
+    }
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final AuditRequest that = (AuditRequest) o;
+        return new EqualsBuilder()
+                //TODO should appendSuper be here, if so it needs adding on other objects where it is missing
+                .appendSuper(super.equals(o))
+                .append(timestamp, that.timestamp)
+                .append(serverIp, that.serverIp)
+                .append(serverHostname, that.serverHostname)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(19, 37)
+                .appendSuper(super.hashCode())
+                .append(timestamp)
+                .append(serverIp)
+                .append(serverHostname)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("timestamp", timestamp)
+                .append("serverIp", serverIp)
+                .append("serverHostname", serverHostname)
+                .toString();
     }
 }

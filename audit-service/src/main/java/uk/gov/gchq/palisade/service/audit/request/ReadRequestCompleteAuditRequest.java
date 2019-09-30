@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -108,6 +110,39 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
      */
     public static IUser create(final RequestId original) {
         return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(user, that.user)
+                .append(context, that.context)
+                .append(leafResource, that.leafResource)
+                .append(rulesApplied, that.rulesApplied)
+                .append(numberOfRecordsReturned, that.numberOfRecordsReturned)
+                .append(numberOfRecordsProcessed, that.numberOfRecordsProcessed)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(29, 37)
+                .appendSuper(super.hashCode())
+                .append(user)
+                .append(context)
+                .append(leafResource)
+                .append(rulesApplied)
+                .append(numberOfRecordsReturned)
+                .append(numberOfRecordsProcessed)
+                .toHashCode();
     }
 
     @Override

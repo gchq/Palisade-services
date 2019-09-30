@@ -2,6 +2,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -84,6 +86,37 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
      */
     public static IUserId create(final RequestId original) {
         return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(userId, that.userId)
+                .append(resourceId, that.resourceId)
+                .append(context, that.context)
+                .append(exception, that.exception)
+                .append(serviceClass, that.serviceClass)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(27, 41)
+                .appendSuper(super.hashCode())
+                .append(userId)
+                .append(resourceId)
+                .append(context)
+                .append(exception)
+                .append(serviceClass)
+                .toHashCode();
     }
 
     @Override

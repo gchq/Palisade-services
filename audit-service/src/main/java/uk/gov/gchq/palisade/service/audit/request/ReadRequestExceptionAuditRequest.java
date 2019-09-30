@@ -2,6 +2,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
@@ -60,6 +62,33 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
      */
     public static IToken create(final RequestId original) {
         return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(token, that.token)
+                .append(leafResource, that.leafResource)
+                .append(exception, that.exception)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(19, 39)
+                .appendSuper(super.hashCode())
+                .append(token)
+                .append(leafResource)
+                .append(exception)
+                .toHashCode();
     }
 
     @Override
