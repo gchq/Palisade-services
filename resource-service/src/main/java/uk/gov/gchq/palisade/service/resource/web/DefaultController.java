@@ -23,7 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.request.*;
+import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.resource.service.ResourceService;
 
 import java.util.Map;
