@@ -18,8 +18,8 @@ service:
   port: 80
 
 image:
-  repository: palisade/palisade-service
-  tag: 45cdb76-SNAPSHOT
+  repository: palisade/resource-service
+  tag: 9131bna-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
