@@ -85,13 +85,13 @@
             <artifactId>common</artifactId>
             <version>${parent.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>common</artifactId>
             <version>${parent.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>palisade-service</artifactId>
