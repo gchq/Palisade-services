@@ -19,11 +19,11 @@ package uk.gov.gchq.palisade.service.resource.service;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.request.AddResourceRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Map;
