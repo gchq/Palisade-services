@@ -83,9 +83,9 @@ public class DefaultController implements ResourceClient {
         try {
             return service.getResourcesById(request).get();
         } catch (InterruptedException e) {
-            LOGGER.debug("Interrupted Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
         } catch (ExecutionException e) {
-            LOGGER.debug("Execution Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
         }
         return null;
     }
@@ -105,9 +105,9 @@ public class DefaultController implements ResourceClient {
         try {
             return service.getResourcesByType(request).get();
         } catch (InterruptedException e) {
-            LOGGER.debug("Interrupted Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
         } catch (ExecutionException e) {
-            LOGGER.debug("Execution Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
         }
         return null;
     }
@@ -116,9 +116,9 @@ public class DefaultController implements ResourceClient {
         try {
             return service.getResourcesBySerialisedFormat(request).get();
         } catch (InterruptedException e) {
-            LOGGER.debug("Interrupted Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
         } catch (ExecutionException e) {
-            LOGGER.debug("Execution Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
         }
         return null;
     }
@@ -127,9 +127,9 @@ public class DefaultController implements ResourceClient {
         try {
             return service.addResource(request).get();
         } catch (InterruptedException e) {
-            LOGGER.debug("Interrupted Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
         } catch (ExecutionException e) {
-            LOGGER.debug("Execution Exception Encountered: {}", e.getMessage());
+            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
         }
         return null;
     }
