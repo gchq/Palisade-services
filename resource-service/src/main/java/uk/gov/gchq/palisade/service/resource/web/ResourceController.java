@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.service.resource.service.ResourceService;
+import uk.gov.gchq.palisade.service.resource.service.IResourceService;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -40,9 +40,9 @@ public class ResourceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-    private final ResourceService service;
+    private final IResourceService service;
 
-    public ResourceController(final ResourceService service) {
+    public ResourceController(final IResourceService service) {
         this.service = service;
     }
 
