@@ -17,7 +17,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
@@ -27,10 +26,10 @@ import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRe
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
-import java.util.stream.Stream;
+import java.util.HashSet;
 
-import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -49,10 +48,6 @@ public class StroomAuditServiceTest {
     private static final long TEST_NUMBER_OF_RECORDS_RETURNED = 5;
     private static final String TEST_TOKEN = "token in the form of a UUID";
     private static final String TEST_RULES_APPLIED = "human readable description of the rules/policies been applied to the data";
-    @Mock
-    AppenderSkeleton appender;
-    @Captor
-    ArgumentCaptor<LoggingEvent> logCaptor;
 
     private static StroomAuditService createStroomAuditService() {
         return new StroomAuditService()
@@ -108,6 +103,12 @@ public class StroomAuditServiceTest {
         return mockRules;
     }
 
+
+    @Mock
+    AppenderSkeleton appender;
+    @Captor
+    ArgumentCaptor<LoggingEvent> logCaptor;
+
     @Test
     public void auditRegisterRequestWithNoResources() {
         // Given
@@ -122,7 +123,7 @@ public class StroomAuditServiceTest {
 
         final AuditRequest auditRequest = RegisterRequestCompleteAuditRequest.create(mockOriginalRequestId)
                 .withUser(mockUser)
-                .withLeafResources(Stream.of(new FileResource()).collect(toSet()))
+                .withLeafResources(new HashSet<>(0))
                 .withContext(mockContext);
 
         // When
@@ -200,7 +201,8 @@ public class StroomAuditServiceTest {
                 .withResourceId(TEST_RESOURCE_ID)
                 .withContext(mockContext)
                 .withException(mockException)
-                .withServiceClass(AuditService.class);
+                .withServiceClass(UserService.class);
+        auditRequest.setOriginalRequestId(mockOriginalRequestId);
 
         // When
         STROOM_AUDIT_SERVICE.audit(auditRequest);
@@ -320,9 +322,8 @@ public class StroomAuditServiceTest {
                 .withLeafResource(mockResource)
                 .withContext(mockContext)
                 .withRulesApplied(mockRules)
-                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_PROCESSED)
-                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_RETURNED);
-
+                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
+                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
 
         // When
         STROOM_AUDIT_SERVICE.audit(auditRequest);
