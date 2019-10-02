@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/palisade-service/resource-service.jar
+ADD $JAR_FILE /usr/share/resource-service/resource-service.jar
 
 LABEL service="resource", project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/resource-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/share/resource-service/resource-service.jar"]

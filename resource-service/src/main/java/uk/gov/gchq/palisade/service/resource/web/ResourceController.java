@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.resource.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -35,18 +36,18 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path = "/")
-public class DefaultController {
+public class ResourceController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
     private final ResourceService service;
 
-    public DefaultController (final ResourceService service) {
+    public ResourceController(final ResourceService service) {
         this.service = service;
     }
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesById(GetResourcesByIdRequest request) {
+    public Map<LeafResource, ConnectionDetail> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.debug("Invoking getResourceById: {}", request);
         GetResourcesByIdRequest getResourcesByIdRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         getResourcesByIdRequest.setOriginalRequestId(request.getOriginalRequestId());
@@ -54,25 +55,25 @@ public class DefaultController {
     }
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesByResource(GetResourcesByResourceRequest request) {
+    public Map<LeafResource, ConnectionDetail> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
         LOGGER.debug("Invoking GetResourcesByResource: {}", request);
         return getResourceByResourceRequest(request);
     }
 
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesByType(GetResourcesByTypeRequest request) {
+    public Map<LeafResource, ConnectionDetail> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.debug("Invoking getResourceByType: {}", request);
         return getResourceByTypeRequest(request);
     }
 
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(GetResourcesBySerialisedFormatRequest request) {
+    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.debug("Invoking getResourcesBySerialisedFormatRequest: {}", request);
         return getResourceBySerialisedFormat(request);
     }
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
-    public Boolean addResource(AddResourceRequest request) {
+    public Boolean addResource(@RequestBody final AddResourceRequest request) {
         LOGGER.debug("Invoking addResource: {}", request);
         return addResourceRequest(request);
     }
