@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -27,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.EtcdBackingStore;
@@ -137,7 +137,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return JSONSerialiser.createDefaultMapper();
     }
 
     @Override
