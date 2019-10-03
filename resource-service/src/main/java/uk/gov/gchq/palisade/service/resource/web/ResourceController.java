@@ -49,14 +49,12 @@ public class ResourceController {
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.debug("Invoking getResourceById: {}", request);
-        GetResourcesByIdRequest getResourcesByIdRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
-        getResourcesByIdRequest.setOriginalRequestId(request.getOriginalRequestId());
-        return getResourcesByIdRequest(getResourcesByIdRequest);
+        return getResourcesByIdRequest(request);
     }
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
-        LOGGER.debug("Invoking GetResourcesByResource: {}", request);
+        LOGGER.debug("Invoking getResourcesByResource: {}", request);
         return getResourceByResourceRequest(request);
     }
 
