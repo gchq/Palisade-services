@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.resource.web;
+package uk.gov.gchq.palisade.service.resource.service;
 
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
-
-@RunWith(SpringRunner.class)
-public class ResourceControllerTest {
-
+public class ResourceServiceTest {
 }
