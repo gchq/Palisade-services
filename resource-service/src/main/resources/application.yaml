@@ -30,3 +30,16 @@ management:
           - health
           - info
           - metrics
+
+web:
+  client:
+    audit-service: audit-service
+    palisade-service: palisade-service
+    policy-service: policy-service
+    user-service: user-service
+
+cache:
+  implementation: hashmap
+  props: "cache.properties"
+  etcd:
+    - http://localhost:2379
