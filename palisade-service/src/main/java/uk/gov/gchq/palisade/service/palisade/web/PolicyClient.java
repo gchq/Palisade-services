@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
-@FeignClient(name = "policy-service")
+@FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicy", consumes = "application/json", produces = "application/json")

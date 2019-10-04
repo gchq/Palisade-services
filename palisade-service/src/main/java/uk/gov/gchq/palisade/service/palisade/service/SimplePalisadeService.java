@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -40,7 +39,6 @@ import uk.gov.gchq.palisade.service.request.Request;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -84,7 +82,7 @@ public class SimplePalisadeService implements PalisadeService {
 
     @Override
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
-        final RequestId originalRequestId = request.getOriginalRequestId();
+        final RequestId originalRequestId = request.getId();
         LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
@@ -127,7 +125,7 @@ public class SimplePalisadeService implements PalisadeService {
 
                     PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
                     auditRegisterRequestComplete(request, futureUser.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
-                    cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId); // *********
+                    cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId);
                     final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
                     response.setOriginalRequestId(originalRequestId);
                     LOGGER.debug("Responding with: {}", response);
@@ -172,7 +170,7 @@ public class SimplePalisadeService implements PalisadeService {
     }
 
     private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final MultiPolicy multiPolicy) {
-        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getOriginalRequestId())
+        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
                 .withUser(user)
                 .withLeafResources(multiPolicy.getPolicies().keySet())
                 .withContext(request.getContext());
@@ -182,7 +180,7 @@ public class SimplePalisadeService implements PalisadeService {
 
     private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
         final RegisterRequestExceptionAuditRequest auditRequestWithException =
-                RegisterRequestExceptionAuditRequest.create(request.getOriginalRequestId())
+                RegisterRequestExceptionAuditRequest.create(request.getId())
                         .withUserId(request.getUserId())
                         .withResourceId(request.getResourceId())
                         .withContext(request.getContext())
