@@ -15,15 +15,15 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Util;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
@@ -122,22 +122,25 @@ public class HashMapBackingStore implements BackingStore {
             if (this == o) return true;
             if (!(o instanceof CachedPair)) return false;
             CachedPair that = (CachedPair) o;
-            return Arrays.equals(value, that.value) &&
-                    clazz.equals(that.clazz);
+            return new EqualsBuilder()
+                    .append(value, that.value)
+                    .append(clazz, that.clazz)
+                    .isEquals();
         }
 
         @Override
         public int hashCode() {
-            int result = Objects.hash(clazz);
-            result = 31 * result + Arrays.hashCode(value);
-            return result;
+            return new HashCodeBuilder(17, 37)
+                    .append(value)
+                    .append(clazz)
+                    .toHashCode();
         }
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", CachedPair.class.getSimpleName() + "[", "]")
-                    .add("value=" + Arrays.toString(value))
-                    .add("clazz=" + clazz)
+            return new ToStringBuilder(this)
+                    .append("value", "\"" + new String(value) + "\"")
+                    .append("clazz", clazz)
                     .toString();
         }
     }
@@ -205,22 +208,28 @@ public class HashMapBackingStore implements BackingStore {
         if (this == o) return true;
         if (!(o instanceof HashMapBackingStore)) return false;
         HashMapBackingStore that = (HashMapBackingStore) o;
-        return getUseStatic() == that.getUseStatic() &&
-                cache.equals(that.cache) &&
-                removals.equals(that.removals);
+        return new EqualsBuilder()
+                .append(cache, that.cache)
+                .append(useStatic, that.useStatic)
+                .append(removals, that.removals)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cache, removals, getUseStatic());
+        return new HashCodeBuilder(17, 37)
+                .append(cache)
+                .append(useStatic)
+                .append(removals)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", HashMapBackingStore.class.getSimpleName() + "[", "]")
-                .add("cache=" + cache)
-                .add("removals=" + removals)
-                .add("useStatic=" + useStatic)
+        return new ToStringBuilder(this)
+                .append("cache", cache)
+                .append("removals", removals)
+                .append("useStatic", useStatic)
                 .toString();
     }
 }

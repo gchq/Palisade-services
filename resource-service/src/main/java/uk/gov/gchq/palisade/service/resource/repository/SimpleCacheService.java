@@ -15,8 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.ServiceState;
@@ -31,7 +35,11 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -117,6 +125,44 @@ public class SimpleCacheService implements CacheService {
         String serialisedCache = new String(JSONSerialiser.serialise(store), StandardCharsets.UTF_8);
         config.put(STORE_IMPL_KEY, serialisedCache);
         config.put(MAX_LOCAL_TTL_KEY, maxLocalTTL.toString());
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("codecs", codecs)
+                .append("store", store)
+                .append("maxLocalTTL", maxLocalTTL)
+                .toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        SimpleCacheService that = (SimpleCacheService) o;
+
+        return new EqualsBuilder()
+                .append(getCodecs(), that.getCodecs())
+                .append(store, that.store)
+                .append(maxLocalTTL, that.maxLocalTTL)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(getCodecs())
+                .append(store)
+                .append(maxLocalTTL)
+                .toHashCode();
     }
 
     /**
