@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
-@FeignClient(value = "user-service")
+@FeignClient(value = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
