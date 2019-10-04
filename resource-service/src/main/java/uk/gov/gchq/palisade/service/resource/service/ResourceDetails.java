@@ -24,7 +24,7 @@ public class ResourceDetails {
 
     private static final String TYPE_DEL = "_";
     private static final String FORMAT_DEL = ".";
-    private static final String FILE_NAME_FORMAT = "%s" + TYPE_DEL + "%s" + FORMAT_DEL + "%s";
+    public static final String FILE_NAME_FORMAT = "%s" + TYPE_DEL + "%s" + FORMAT_DEL + "%s";
     private String fileName, type, format;
 
     public ResourceDetails (final String fileName, final String type, final String format) {

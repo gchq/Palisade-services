@@ -34,12 +34,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.palisade.service.CacheService;
-import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -54,10 +49,18 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A implementation of the ResourceService.
+ * <p>
+ * This service is for the retrieval of Resources only. Resources cannot be added via this service, they should be added
+ * through the actual real filing system.
+ *
+ * @see ResourceService
+ */
+
 public class ResourceService implements IResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
-    private static final String ERROR_ADD_RESOURCE = "AddResource is not supported by HadoopResourceService resources should be added/created via regular file system behaviour.";
     private static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
     private static final String ERROR_RESOLVING_PARENTS = "Error occurred while resolving resourceParents";
     private static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
@@ -67,6 +70,8 @@ public class ResourceService implements IResourceService {
     private static final String DATASERVICE_LIST = "hadoop.data.svc.list";
 
     private static final Pattern FILE_PAT = Pattern.compile("(?i)(?<=^file:)/(?=([^/]|$))");
+
+    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by HadoopResourceService resources should be added/created via regular file system behaviour.";
 
     private Configuration conf;
     private CacheService cacheService;
@@ -214,6 +219,12 @@ public class ResourceService implements IResourceService {
     protected FileSystem getFileSystem() {
         requireNonNull(fileSystem, "configuration must be set");
         return fileSystem;
+    }
+
+    public ResourceService addDataService(final ConnectionDetail detail) {
+        requireNonNull(detail, "detail");
+        dataServices.add(detail);
+        return this;
     }
 
     protected static Collection<String> getPaths(final RemoteIterator<LocatedFileStatus> remoteIterator) throws IOException {
