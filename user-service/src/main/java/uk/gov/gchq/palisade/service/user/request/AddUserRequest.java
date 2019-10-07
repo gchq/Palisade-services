@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.user.UserService;
@@ -32,10 +33,11 @@ import static java.util.Objects.requireNonNull;
  * to add a {@link User}.
  */
 public class AddUserRequest extends Request {
-    private final User user;
+    public final User user;
 
     @JsonCreator
-    private AddUserRequest(@JsonProperty("user") final User user) {
+    private AddUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user) {
+        setOriginalRequestId(originalRequestId);
         this.user = requireNonNull(user);
     }
 
@@ -44,8 +46,8 @@ public class AddUserRequest extends Request {
      *
      * @return {@link AddUserRequest}
      */
-    public static IUser create() {
-        return user -> new AddUserRequest(user);
+    public static IUser create(final RequestId original) {
+        return user -> new AddUserRequest(null, original, user);
     }
 
     @Override
