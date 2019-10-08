@@ -16,13 +16,20 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
+import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.request.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -40,12 +47,12 @@ public class SimpleResourceService implements ResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
-    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by HadoopResourceService resources should be added/created via regular file system behaviour.";
+    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
 
     private final ResourceService service;
     private final Executor executor;
 
-    //private List<ConnectionDetail> dataServices = new ArrayList<>();
+    private List<ConnectionDetail> dataServices = new ArrayList<>();
     private String filename;
 
     public SimpleResourceService(final ResourceService service, final Executor executor) {
@@ -55,37 +62,34 @@ public class SimpleResourceService implements ResourceService {
 
     @Override
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(GetResourcesByResourceRequest request) {
-        final RequestId originalRequestId = request.getId();
-        LOGGER.debug("Invoking getResourcesByResource request: {}, with RequestId: {}", request, originalRequestId);
+        final RequestId originalRequestId = request.getOriginalRequestId();
+        LOGGER.debug("Invoking getResourcesByResource request: {}", request);
         return null;
     }
 
     @Override
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(GetResourcesByIdRequest request) {
         final RequestId originalRequestId = request.getOriginalRequestId();
-        LOGGER.debug("Invoking getResourcesById request: {}, with RequestId: {}", request, originalRequestId);
-        final String resourceId = request.getResourceId();
+        LOGGER.debug("Invoking getResourcesById request: {}", request);
         return null;
     }
 
     @Override
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(GetResourcesByTypeRequest request) {
-        final RequestId originalRequestId = request.getId();
-        LOGGER.debug("Invoking getResourcesByType request: {}, with RequestId: {}", request, originalRequestId);
+        final RequestId originalRequestId = request.getOriginalRequestId();
+        LOGGER.debug("Invoking getResourcesByType request: {}", request);
         return null;
     }
 
     @Override
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(GetResourcesBySerialisedFormatRequest request) {
-        final RequestId originalRequestId = request.getId();
-        LOGGER.debug("Invoking getResourcesBySerialisedFormat request: {}, with RequestId: {}", request, originalRequestId);
+        final RequestId originalRequestId = request.getOriginalRequestId();
+        LOGGER.debug("Invoking getResourcesBySerialisedFormat request: {}", request);
         return null;
     }
 
     @Override
     public CompletableFuture<Boolean> addResource(AddResourceRequest request) {
-        return null;
+        throw new UnsupportedOperationException(ERROR_ADD_RESOURCE);
     }
-
-
 }
