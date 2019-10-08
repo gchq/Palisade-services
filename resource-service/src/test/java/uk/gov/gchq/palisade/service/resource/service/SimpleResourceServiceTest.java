@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -30,11 +31,13 @@ import static org.junit.Assert.fail;
 public class SimpleResourceServiceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceServiceTest.class);
+    private ApplicationConfiguration config = new ApplicationConfiguration();
+    private ResourceService service;
     private SimpleResourceService resourceService;
 
     @Before
     public void setup() throws Exception {
-
+        resourceService = new SimpleResourceService(service, config.getAsyncExecutor());
     }
 
     @Test
