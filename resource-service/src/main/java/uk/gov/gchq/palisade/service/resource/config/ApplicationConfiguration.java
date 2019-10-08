@@ -54,7 +54,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleResourceService resourceService(final ResourceService service) {
+    public ResourceService resourceService(final ResourceService service) {
         return new SimpleResourceService(service, getAsyncExecutor());
     }
 
