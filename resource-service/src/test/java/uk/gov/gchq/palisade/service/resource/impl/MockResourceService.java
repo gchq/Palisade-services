@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.web;
+package uk.gov.gchq.palisade.service.resource.impl;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import uk.gov.gchq.palisade.service.resource.request.AuditRequest;
+import org.mockito.Mockito;
+import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
-@FeignClient(name = "audit-service")
-public interface AuditClient {
+public class MockResourceService {
 
-    @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
-    Boolean audit(final AuditRequest request);
+    private static SimpleResourceService mock = Mockito.mock(SimpleResourceService.class);
 
+    public static SimpleResourceService getMock() {
+        return mock;
+    }
+
+    public static void setMock(final SimpleResourceService mock) {
+        if (mock == null) {
+            MockResourceService.mock = Mockito.mock(SimpleResourceService.class);
+        }
+        MockResourceService.mock = mock;
+    }
 }

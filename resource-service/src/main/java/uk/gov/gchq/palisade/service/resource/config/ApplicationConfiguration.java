@@ -27,13 +27,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.palisade.repository.*;
-import uk.gov.gchq.palisade.service.palisade.service.*;
-import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
-import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
-import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
-import uk.gov.gchq.palisade.service.palisade.web.UserClient;
+import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.resource.repository.*;
+import uk.gov.gchq.palisade.service.resource.service.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -58,37 +54,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeService palisadeService(final Map<String, BackingStore> backingStores,
-                                           final AuditClient auditClient,
-                                           final UserClient userClient,
-                                           final PolicyClient policyClient,
-                                           final ResourceClient resourceClient) {
-        return new SimplePalisadeService(auditService(auditClient),
-                userService(userClient),
-                policyService(policyClient),
-                resourceService(resourceClient),
-                cacheService(backingStores),
-                getAsyncExecutor());
-    }
-
-    @Bean
-    public UserService userService(final UserClient userClient) {
-        return new UserService(userClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient) {
-        return new ResourceService(resourceClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public PolicyService policyService(final PolicyClient policyClient) {
-        return new PolicyService(policyClient, getAsyncExecutor());
+    public SimpleResourceService resourceService(final ResourceService service) {
+        return new SimpleResourceService(service, getAsyncExecutor());
     }
 
     @Bean(name = "hashmap")

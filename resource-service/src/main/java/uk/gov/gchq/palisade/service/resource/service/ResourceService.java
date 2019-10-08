@@ -16,302 +16,119 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.resource.request.*;
+import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.request.Request;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
 
 /**
- * A implementation of the ResourceService.
  * <p>
- * This service is for the retrieval of Resources only. Resources cannot be added via this service, they should be added
- * through the actual real filing system.
- *
- * @see ResourceService
+ * The core API for the resource service.
+ * </p>
+ * <p>
+ * The resource service is the Palisade component that determines what resources are available that meet a specific
+ * (type of) request and how they should be accessed. This interface details several methods for obtaining a list of
+ * resources, e.g. by type or by data format. The methods of this service all return {@link CompletableFuture}s of
+ * {@link Map}s which link a valid {@link LeafResource} with a {@link ConnectionDetail} object. The ${@code
+ * ConnectionDetail} objects contain information on how to set up a connection to retrieve a particular resource.
+ * Implementations of this service do not deal with the filtering or application of security policy to the resources.
+ * Therefore, a result returned from a method call on this interface doesn't guarantee that the user will be allowed to
+ * access it by policy. Other components of the Palisade system will enforce the necessary policy controls to prevent
+ * access to resources by users without the necessary access rights.
+ * </p>
+ * <p>
+ * Implementation note: None of the ${@code getResourcesByXXX} methods in this class will return in error if there
+ * don't happen to be any resources that do not match a request, instead they will simply return empty ${@link Map}
+ * instances.
+ * </p>
  */
 
-public class ResourceService implements IResourceService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
-    private static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
-    private static final String ERROR_RESOLVING_PARENTS = "Error occurred while resolving resourceParents";
-    private static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
-
-    private static final String HADOOP_CONF_STRING = "hadoop.init.conf";
-    private static final String CACHE_IMPL_KEY = "hadoop.cache.svc";
-    private static final String DATASERVICE_LIST = "hadoop.data.svc.list";
-
-    private static final Pattern FILE_PAT = Pattern.compile("(?i)(?<=^file:)/(?=([^/]|$))");
-
-    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by HadoopResourceService resources should be added/created via regular file system behaviour.";
-
-    private Configuration conf;
-    private CacheService cacheService;
-    private FileSystem fileSystem;
-
-    private List<ConnectionDetail> dataServices = new ArrayList<>();
-
-    private String filename;
-
-    public ResourceService() {
-    }
-
-    public ResourceService(final Configuration conf, final CacheService cacheService) throws IOException {
-        requireNonNull(conf, "conf");
-        requireNonNull(cacheService, "cache");
-        this.conf = conf;
-        this.fileSystem = FileSystem.get(conf);
-        this.cacheService = cacheService;
-    }
-
-    @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(GetResourcesByResourceRequest request) {
-        LOGGER.debug("Invoking getResourcesByResource: {}", request);
-        GetResourcesByIdRequest getResourcesByIdRequest = new GetResourcesByIdRequest().resourceId(request.getResource().getId());
-        getResourcesByIdRequest.setOriginalRequestId(request.getOriginalRequestId());
-        return getResourcesById(getResourcesByIdRequest);
-    }
-
-    @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(GetResourcesByIdRequest request) {
-        LOGGER.debug("Invoking getResourcesById: {}", request);
-        String resourceId = request.getResourceId();
-        final String path = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
-        if (!resourceId.startsWith(path)) {
-            throw new UnsupportedOperationException(java.lang.String.format(ERROR_OUT_SCOPE, resourceId, path));
-        }
-        return getMapCompletableFuture(resourceId, ignore -> true);
-    }
-
-    @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(GetResourcesByTypeRequest request) {
-        LOGGER.debug("Invoking getResourcesByType: {}", request);
-        final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
-        final Predicate<ResourceDetails> predicate = detail -> request.getType().equals(detail.getType());
-        return getMapCompletableFuture(pathString, predicate);
-    }
-
-    @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(GetResourcesBySerialisedFormatRequest request) {
-        LOGGER.debug("Invoking getResourcesBySerialisedFormat: {}", request);
-        final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
-        final Predicate<ResourceDetails> predicate = detail -> request.getSerialisedFormat().equals(detail.getFormat());
-        return getMapCompletableFuture(pathString, predicate);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> addResource(AddResourceRequest request) {
-        LOGGER.debug("Invoking addResource: {}", request);
-        throw new UnsupportedOperationException(ERROR_ADD_RESOURCE);
-    }
-
-    private CompletableFuture<Map<LeafResource, ConnectionDetail>> getMapCompletableFuture(
-            final String pathString, final Predicate<ResourceDetails> predicate) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                //pull latest connection details
-                final RemoteIterator<LocatedFileStatus> remoteIterator = this.getFileSystem().listFiles(new Path(pathString), true);
-                return getPaths(remoteIterator)
-                        .stream()
-                        .map(ResourceDetails::getResourceDetailsFromFileName)
-                        .filter(predicate)
-                        .collect(Collectors.toMap(
-                                resourceDetails -> {
-                                    final String fileName = resourceDetails.getFileName();
-                                    final FileResource fileFileResource = new FileResource().id(fileName).type(resourceDetails.getType()).serialisedFormat(resourceDetails.getFormat());
-                                    resolveParents(fileFileResource, getInternalConf());
-                                    return fileFileResource;
-                                },
-                                resourceDetails -> {
-                                    if (this.dataServices.size() < 1) {
-                                        throw new IllegalStateException(ERROR_NO_DATA_SERVICES);
-                                    }
-                                    int service = ThreadLocalRandom.current().nextInt(this.dataServices.size());
-                                    return this.dataServices.get(service);
-                                }
-                                )
-                        );
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    public static void resolveParents(final ChildResource resource, final Configuration configuration) {
-        try {
-            final String connectionDetail = resource.getId();
-            final Path path = new Path(connectionDetail);
-            final int fileDepth = path.depth();
-            final int fsDepth = new Path(configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)).depth();
-
-            if (fileDepth > fsDepth + 1) {
-                DirectoryResource parent = new DirectoryResource().id(fixURIScheme(path.getParent().toString()));
-                resource.setParent(parent);
-                resolveParents(parent, configuration);
-            } else {
-                resource.setParent(new SystemResource().id(fixURIScheme(path.getParent().toString())));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(ERROR_RESOLVING_PARENTS, e);
-        }
-    }
+public interface ResourceService extends Service {
 
     /**
-     * Fixes URI schemes that use the file: scheme with no authority component. Any URI that starts file:/ will be changed to file:///
+     * Get a list of resources based on a specific resource. This allows for the retrieval of the appropriate {@link
+     * ConnectionDetail}s for a given resource. It may also be used to retrieve the details all the resources that are
+     * notionally children of another resource. For example, in a standard hierarchical filing system the files in a
+     * directory could be considered child resources and calling this method on the directory resource would fetch the
+     * details on the contained files.
      *
-     * @param uri URI to check
-     * @return the file URI with authority separator inserted
-     * @throws NullPointerException if {@code uri} is {@code null}
+     * @param request the details of the resource to request
+     * @return a {@link CompletableFuture} that upon completion will contain a map of how to retrieve the available
+     * resources
      */
-    private static String fixURIScheme(final String uri) {
-        requireNonNull(uri, "uri");
-        Matcher match = FILE_PAT.matcher(uri);
-        if (match.find()) {
-            return match.replaceFirst("///");
-        } else {
-            return uri;
-        }
-    }
+    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request);
 
-    private Map<String, String> getPlainJobConfWithoutResolvingValues() {
-        Map<String, String> plainMapWithoutResolvingValues = new HashMap<>();
-        for (Map.Entry<String, String> entry : new Configuration()) {
-            plainMapWithoutResolvingValues.put(entry.getKey(), entry.getValue());
-        }
-        return plainMapWithoutResolvingValues;
-    }
+    /**
+     * Retrieve resource and connection details by resource ID. The request object allows the client to specify the
+     * resource ID and obtain the connection details once the returned future has completed.
+     *
+     * @param request the details of which ID to request
+     * @return a {@link CompletableFuture} that upon completion will contain details on how to retrieve the requested
+     * resource.
+     */
+    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request);
 
-    protected Configuration getInternalConf() {
-        requireNonNull(conf, "configuration must be set");
-        return conf;
-    }
+    /**
+     * Obtain a list of resources that match a specific resource type. This method allows a client to obtain potentially
+     * large collections of resources by requesting all the resources of one particular type. For example, a client may
+     * request all "employee contact card" records. Please note the warning in the class documentation above, that just
+     * because a resource is available does not guarantee that the requesting client has the right to access it.
+     *
+     * @param request request object detailing the type of resource to retrieve.
+     * @return {@link CompletableFuture} that upon completion will contain the connection details for all resources
+     * matching a type
+     */
+    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request);
 
-    protected FileSystem getFileSystem() {
-        requireNonNull(fileSystem, "configuration must be set");
-        return fileSystem;
-    }
+    /**
+     * Find all resources that match a particular data format. Resources of a particular data format may not share a
+     * type, e.g. not all CSV format records will contain employee contact details. This method allows clients to
+     * retrieve all the resources Palisade knows about that conform to one particular format. Note that this method can
+     * potentially return large ${@code Map}s with many mappings.
+     *
+     * @param request the request detailing the specific format for retrieval
+     * @return a {@link CompletableFuture} that upon completion will contain the details on how to retrieve the
+     * resources
+     */
+    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request);
 
-    public ResourceService addDataService(final ConnectionDetail detail) {
-        requireNonNull(detail, "detail");
-        dataServices.add(detail);
-        return this;
-    }
-
-    protected static Collection<String> getPaths(final RemoteIterator<LocatedFileStatus> remoteIterator) throws IOException {
-        final ArrayList<String> paths = Lists.newArrayList();
-        while (remoteIterator.hasNext()) {
-            final LocatedFileStatus next = remoteIterator.next();
-            final String pathWithoutFSName = next.getPath().toUri().toString();
-            paths.add(pathWithoutFSName);
-        }
-        return paths;
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "class")
-    public Map<String, String> getConf() {
-        Map<String, String> rtn = Maps.newHashMap();
-        Map<String, String> plainJobConfWithoutResolvingValues = getPlainJobConfWithoutResolvingValues();
-
-        for (Map.Entry<String, String> entry : getInternalConf()) {
-            final String plainValue = plainJobConfWithoutResolvingValues.get(entry.getKey());
-            final String thisValue = entry.getValue();
-            if (isNull(plainValue) || !plainValue.equals(thisValue)) {
-                rtn.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return rtn;
-    }
+    /**
+     * Informs Palisade about a specific resource that it may return to users. This lets Palisade clients request access
+     * to that resource and allows Palisade to provide policy controlled access to it via the other methods in this
+     * interface.
+     *
+     * @param request details of the resource that Palisade can manage access to
+     * @return a {@link CompletableFuture} that will complete as true once the resource has been added to this {@link
+     * ResourceService}
+     */
+    CompletableFuture<Boolean> addResource(final AddResourceRequest request);
 
     @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(ResourceService.class.getTypeName(), getClass().getTypeName());
-        Map<String, String> confMap = getConf();
-        String serialisedConf = new String(JSONSerialiser.serialise(confMap), StandardCharsets.UTF_8);
-        config.put(HADOOP_CONF_STRING, serialisedConf);
-        String serialisedCache = new String(JSONSerialiser.serialise(cacheService), StandardCharsets.UTF_8);
-        config.put(CACHE_IMPL_KEY, serialisedCache);
-        String serialisedDataServices = new String(JSONSerialiser.serialise(dataServices), StandardCharsets.UTF_8);
-        config.put(DATASERVICE_LIST, serialisedDataServices);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
+    default CompletableFuture<?> process(final Request request) {
+        if (request instanceof GetResourcesByResourceRequest) {
+            return getResourcesByResource(((GetResourcesByResourceRequest) request));
         }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+        if (request instanceof GetResourcesByIdRequest) {
+            return getResourcesById((GetResourcesByIdRequest) request);
         }
-
-        final ResourceService that = (ResourceService) o;
-
-        final EqualsBuilder builder = new EqualsBuilder()
-                .append(this.getFileSystem(), that.getFileSystem())
-                .append(this.cacheService, that.cacheService);
-
-        if (builder.isEquals()) {
-            builder.append(this.getInternalConf().size(), that.getInternalConf().size());
-            for (Map.Entry<String, String> entry : this.getInternalConf()) {
-                final String lhs = this.getInternalConf().get(entry.getKey());
-                final String rhs = that.getInternalConf().get(entry.getKey());
-                builder.append(lhs, rhs);
-                if (!builder.isEquals()) {
-                    break;
-                }
-            }
+        if (request instanceof GetResourcesByTypeRequest) {
+            return getResourcesByType((GetResourcesByTypeRequest) request);
         }
-
-        return builder.isEquals();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("conf", conf)
-                .append("fileSystem", fileSystem)
-                .append("cacheService", cacheService)
-                .toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(conf)
-                .append(fileSystem)
-                .append(cacheService)
-                .toHashCode();
+        if (request instanceof GetResourcesBySerialisedFormatRequest) {
+            return getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request);
+        }
+        if (request instanceof AddResourceRequest) {
+            addResource((AddResourceRequest) request);
+            return CompletableFuture.completedFuture(null);
+        }
+        return Service.super.process(request);
     }
 }

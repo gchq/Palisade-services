@@ -31,13 +31,6 @@ management:
           - info
           - metrics
 
-web:
-  client:
-    audit-service: audit-service
-    palisade-service: palisade-service
-    policy-service: policy-service
-    user-service: user-service
-
 feign:
   client:
     config:

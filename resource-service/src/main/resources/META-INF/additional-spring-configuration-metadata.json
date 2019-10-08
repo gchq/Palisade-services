@@ -16,23 +16,8 @@
       "description": "list of etcd instance uri addresses, only applicable to etcd backing store."
     },
     {
-      "name": "web.client.audit-service",
+      "name": "web.client.resource-service",
       "type": "java.lang.String",
-      "description": "url for the audit service."
-    },
-    {
-      "name": "web.client.palisade-service",
-      "type": "java.lang.String",
-      "description": "url for the palisade service."
-    },
-    {
-      "name": "web.client.policy-service",
-      "type": "java.lang.String",
-      "description": "url for the policy service."
-    },
-    {
-      "name": "web.client.user-service",
-      "type": "java.lang.String",
-      "description": "url for the user service."
+      "description": "url for the resource service."
     }
   ] }
