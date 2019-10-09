@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
@@ -66,7 +67,7 @@ public class SimpleResourceService implements ResourceService {
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(GetResourcesByIdRequest request) {
         final RequestId originalRequestId = request.getOriginalRequestId();
         LOGGER.debug("Invoking getResourcesById request: {}", request);
-        return null;
+        return getFutureMappings(request.getResourceId());
     }
 
     @Override
@@ -86,5 +87,9 @@ public class SimpleResourceService implements ResourceService {
     @Override
     public CompletableFuture<Boolean> addResource(AddResourceRequest request) {
         throw new UnsupportedOperationException(ERROR_ADD_RESOURCE);
+    }
+
+    private CompletableFuture<Map<LeafResource, ConnectionDetail>> getFutureMappings(final String str) {
+        return null;
     }
 }
