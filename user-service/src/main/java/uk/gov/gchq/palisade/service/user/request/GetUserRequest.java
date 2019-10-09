@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -34,13 +35,14 @@ import static java.util.Objects.requireNonNull;
  */
 public class GetUserRequest extends Request {
 
-    private final UserId userId;
+    public final UserId userId;
 
     /**
      * @param userId the id of the {@link uk.gov.gchq.palisade.User} you want
      */
     @JsonCreator
-    private GetUserRequest(@JsonProperty("userId") final UserId userId) {
+    private GetUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId) {
+        setOriginalRequestId(originalRequestId);
         this.userId = requireNonNull(userId);
     }
 
@@ -49,8 +51,8 @@ public class GetUserRequest extends Request {
      *
      * @return {@link GetUserRequest}
      */
-    public static GetUserRequest.IUserId create() {
-        return userId -> new GetUserRequest(userId);
+    public static GetUserRequest.IUserId create(final RequestId original) {
+        return userId -> new GetUserRequest(null, original, userId);
     }
 
     @Override

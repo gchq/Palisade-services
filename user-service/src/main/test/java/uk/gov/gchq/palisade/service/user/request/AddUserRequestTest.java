@@ -35,7 +35,7 @@ public class AddUserRequestTest {
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;
 
-        assertThat("AddUserRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("originalRequestId, user, id")));
+        assertThat("AddUserRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("id, originalRequestId, user")));
     }
 
     @Test
