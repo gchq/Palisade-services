@@ -16,19 +16,19 @@
 package uk.gov.gchq.palisade.service.resource.impl;
 
 import org.mockito.Mockito;
-import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
+import uk.gov.gchq.palisade.service.resource.service.ResourceService;
 
 public class MockResourceService {
 
-    private static SimpleResourceService mock = Mockito.mock(SimpleResourceService.class);
+    private static ResourceService mock = Mockito.mock(ResourceService.class);
 
-    public static SimpleResourceService getMock() {
+    public static ResourceService getMock() {
         return mock;
     }
 
-    public static void setMock(final SimpleResourceService mock) {
+    public static void setMock(final ResourceService mock) {
         if (mock == null) {
-            MockResourceService.mock = Mockito.mock(SimpleResourceService.class);
+            MockResourceService.mock = Mockito.mock(ResourceService.class);
         }
         MockResourceService.mock = mock;
     }
