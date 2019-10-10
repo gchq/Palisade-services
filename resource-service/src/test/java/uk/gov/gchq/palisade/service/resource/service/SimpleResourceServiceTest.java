@@ -19,8 +19,8 @@ package uk.gov.gchq.palisade.service.resource.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
@@ -34,8 +34,9 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceServiceTest.class);
@@ -82,17 +83,17 @@ public class SimpleResourceServiceTest {
     }
 
     private LeafResource mockResource() {
-        final LeafResource mockResource = Mockito.mock(LeafResource.class);
-        Mockito.doReturn(TEST_RESOURCE_ID).when(mockResource).getId();
-        Mockito.doReturn(TEST_DATA_TYPE).when(mockResource).getType();
-        Mockito.doReturn(TEST_SERIALISED_FORMAT).when(mockResource).getSerialisedFormat();
-        return mockResource;
+        final LeafResource leafResource = Mockito.mock(LeafResource.class);
+        when(leafResource.getId()).thenReturn(TEST_RESOURCE_ID);
+        when(leafResource.getType()).thenReturn(TEST_DATA_TYPE);
+        when(leafResource.getSerialisedFormat()).thenReturn(TEST_SERIALISED_FORMAT);
+        return leafResource;
     }
 
     private ConnectionDetail mockConnection() {
-        final ConnectionDetail mockConnection = Mockito.mock(ConnectionDetail.class);
-        Mockito.doReturn(TEST_CONNECTION_CLASS).when(mockConnection)._getClass();
-        return mockConnection;
+        final ConnectionDetail connectionDetail = Mockito.mock(ConnectionDetail.class);
+        when(connectionDetail._getClass()).thenReturn(TEST_CONNECTION_CLASS);
+        return connectionDetail;
     }
 
     private CompletableFuture<Map<LeafResource, ConnectionDetail>> mockCompletableFuture() {
