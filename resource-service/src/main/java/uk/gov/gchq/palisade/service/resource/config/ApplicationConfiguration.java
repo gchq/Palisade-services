@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -28,9 +27,17 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.resource.repository.*;
-import uk.gov.gchq.palisade.service.resource.service.*;
+import uk.gov.gchq.palisade.service.resource.repository.BackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.EtcdBackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.K8sBackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
+import uk.gov.gchq.palisade.service.resource.service.CacheService;
+import uk.gov.gchq.palisade.service.resource.service.ResourceService;
+import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
 import java.net.URI;
 import java.util.Map;
@@ -94,7 +101,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
-        return new ObjectMapper().registerModule(new JavaTimeModule());
+        return JSONSerialiser.createDefaultMapper();
     }
 
     @Override

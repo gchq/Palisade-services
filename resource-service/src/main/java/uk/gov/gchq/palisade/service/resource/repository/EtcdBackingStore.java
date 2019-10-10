@@ -16,10 +16,14 @@
 package uk.gov.gchq.palisade.service.resource.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.etcd.jetcd.*;
+import io.etcd.jetcd.ByteSequence;
+import io.etcd.jetcd.Client;
+import io.etcd.jetcd.KV;
+import io.etcd.jetcd.KeyValue;
+import io.etcd.jetcd.Lease;
 import io.etcd.jetcd.kv.DeleteResponse;
-import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.kv.PutResponse;
+import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
 import org.slf4j.Logger;
