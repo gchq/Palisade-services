@@ -55,7 +55,7 @@ public class SimpleResourceServiceTest {
     }
 
     @Test
-    public void getResourcesByIdTest() throws Exception {
+    public void getResourcesByIdTest() {
 
         //Given
         CompletableFuture<Map<LeafResource, ConnectionDetail>> expected = mockCompletableFuture();
@@ -72,7 +72,7 @@ public class SimpleResourceServiceTest {
     }
 
     @Test
-    public void addResourceTest() throws Exception {
+    public void addResourceTest() {
         try {
             resourceService.addResource(null);
             fail("exception expected");

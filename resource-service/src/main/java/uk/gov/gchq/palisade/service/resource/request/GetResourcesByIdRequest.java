@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class GetResourcesByIdRequest extends Request {
+public class    GetResourcesByIdRequest extends Request {
 
     private String resourceId;
 

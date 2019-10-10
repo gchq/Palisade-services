@@ -71,4 +71,12 @@ public class ResourceDetails {
                 .append("format", format)
                 .build();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ResourceDetails)) return false;
+        ResourceDetails that = (ResourceDetails) o;
+        return getFileName().equals(that.getFileName());
+    }
 }
