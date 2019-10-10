@@ -16,14 +16,13 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class ResourceDetailsTest {
 
     private static final String FILENAME = "/home/user/Docs/other_file.json";

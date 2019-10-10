@@ -19,12 +19,12 @@ package uk.gov.gchq.palisade.service.resource.request;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 import uk.gov.gchq.palisade.RequestId;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class GetResourcesByIdTest {
 
     private final GetResourcesByIdRequest expected = new GetResourcesByIdRequest();
