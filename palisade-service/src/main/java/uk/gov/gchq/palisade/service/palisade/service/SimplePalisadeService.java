@@ -69,6 +69,7 @@ public class SimplePalisadeService implements PalisadeService {
     private final UserService userService;
     private final ResourceService resourceService;
     private final CacheService cacheService;
+    private ResultAggregationService aggregationService = new ResultAggregationService();
 
     private final Executor executor;
 
@@ -85,48 +86,30 @@ public class SimplePalisadeService implements PalisadeService {
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
         final RequestId originalRequestId = request.getId();
         LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
+
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
-
-        final CompletionStage<User> futureUser = userService.getUser(userRequest)
-                .thenApply(user -> {
-                    LOGGER.debug("Got user: {}", user);
-                    return user;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get user: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, UserService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
+        final CompletionStage<User> user = userService.getUser(userRequest);
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-
-        final CompletionStage<Map<LeafResource, ConnectionDetail>> futureResources = resourceService.getResourcesById(resourceRequest)
-                .thenApply(resources -> {
-                    LOGGER.debug("Got resources: {}", resources);
-                    return resources;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get resources: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, ResourceService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
+        final CompletionStage<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
 
-        CompletionStage<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
+        CompletionStage<MultiPolicy> futureMultiPolicy = getPolicy(request, user, resources, originalRequestId);
 
-        return CompletableFuture.allOf(futureUser.toCompletableFuture(), futureResources.toCompletableFuture(), futureMultiPolicy.toCompletableFuture())
+        return (CompletableFuture<DataRequestResponse>) aggregationService.aggregateDataRequestResults((User) user, (Map<LeafResource, ConnectionDetail>) resources, (MultiPolicy) futureMultiPolicy);
+        /*CompletableFuture.allOf(user.toCompletableFuture(), resources.toCompletableFuture(), futureMultiPolicy.toCompletableFuture())
                 .thenApply(t -> {
                     //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
                     //resources they don't have permission to see
-                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
+                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resources.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
 
                     PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
-                    auditRegisterRequestComplete(request, futureUser.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
-                    cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId);
+                    auditRegisterRequestComplete(request, (User) user, futureMultiPolicy.toCompletableFuture().join());
+                    cache(request, (User) user, requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId);
                     final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
                     response.setOriginalRequestId(originalRequestId);
                     LOGGER.debug("Responding with: {}", response);
@@ -136,7 +119,7 @@ public class SimplePalisadeService implements PalisadeService {
                     LOGGER.error("Error handling: {}", ex.getMessage());
                     auditRequestReceivedException(request, ex, PolicyService.class);
                     throw new RuntimeException(ex); //rethrow the exception
-                });
+                });*/
     }
 
     /**

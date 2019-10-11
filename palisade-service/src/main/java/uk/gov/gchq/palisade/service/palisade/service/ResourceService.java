@@ -15,12 +15,16 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -28,6 +32,7 @@ import java.util.concurrent.Executor;
 
 public class ResourceService implements Service {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
     private final ResourceClient client;
     private final Executor executor;
 
@@ -37,6 +42,15 @@ public class ResourceService implements Service {
     }
 
     public CompletionStage<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest resource) {
-        return CompletableFuture.supplyAsync(() -> this.client.getResourcesById(resource), this.executor);
+
+        Map<LeafResource, ConnectionDetail> resources;
+        try {
+            resources = this.client.getResourcesById(resource);
+            LOGGER.debug("Got resources: {}", resources);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to get resources: {}", ex.getMessage());
+            throw new RuntimeException(ex); //rethrow the exception
+        }
+        return (CompletionStage<Map<LeafResource, ConnectionDetail>>) resources;
     }
 }
