@@ -35,13 +35,13 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/")
-public class DefaultController {
+public class PolicyServiceController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceController.class);
 
     private final PolicyService service;
 
-    public DefaultController(final PolicyService service) {
+    public PolicyServiceController(final PolicyService service) {
         this.service = service;
     }
 
