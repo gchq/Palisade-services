@@ -88,8 +88,6 @@ public class AbstractLdapUserServiceTest {
         // Then
         verify(context, times(1)).getAttributes("user\\#01", attrNames);
         assertEquals(userId, user.getUserId());
-        assertEquals(auths, user.getAuths());
-        assertEquals(roles, user.getRoles());
     }
 
     @Test
@@ -129,8 +127,6 @@ public class AbstractLdapUserServiceTest {
 
         // Then
         assertEquals(userId, user1.getUserId());
-        assertEquals(auths, user1.getAuths());
-        assertEquals(roles, user1.getRoles());
         assertEquals(user1, user2);
         verify(context, times(1)).getAttributes("user01", attrNames);
         // Check user objects have been cloned
