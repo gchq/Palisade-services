@@ -158,7 +158,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
         // mock user
         final User mockUser = mockUser();
@@ -202,7 +202,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
         // mock userId
         final UserId mockUserId = mockUserID();
@@ -247,7 +247,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
         // mock userId
         final UserId mockUserId = mockUserID();
@@ -291,7 +291,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
 
         // mock userId
@@ -337,7 +337,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
 
         // mock user
@@ -388,7 +388,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
 
         // mock original request id
@@ -429,7 +429,7 @@ public class StroomAuditServiceTest {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
         } else {
-            fail("Expected Logback Error");
+            fail("Expected Logback logger");
         }
 
         // mock original request id
