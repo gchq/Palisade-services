@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.util.HashSet;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -116,6 +117,8 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
 
         // mock user
@@ -154,6 +157,8 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
         // mock user
         final User mockUser = mockUser();
@@ -196,6 +201,8 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
         // mock userId
         final UserId mockUserId = mockUserID();
@@ -239,6 +246,8 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
         // mock userId
         final UserId mockUserId = mockUserID();
@@ -281,7 +290,11 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
-        }        // mock userId
+        } else {
+            fail("Expected Logback Error");
+        }
+
+        // mock userId
         final UserId mockUserId = mockUserID();
         // mock context
         final Context mockContext = mockContext();
@@ -323,7 +336,10 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
+
         // mock user
         final User mockUser = mockUser();
         // mock context
@@ -371,7 +387,10 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
+
         // mock original request id
         final RequestId mockOriginalRequestId = mockOriginalRequestId();
         // mock resource
@@ -409,7 +428,10 @@ public class StroomAuditServiceTest {
         if (logger instanceof ch.qos.logback.classic.Logger) {
             ch.qos.logback.classic.Logger log = logger;
             log.addAppender(appender);
+        } else {
+            fail("Expected Logback Error");
         }
+
         // mock original request id
         final RequestId mockOriginalRequestId = mockOriginalRequestId();
         // mock resource
