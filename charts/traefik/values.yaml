@@ -1,0 +1,10 @@
+container:
+  args:
+    - --api.insecure
+    - --accesslog
+    - --entrypoints.web.Address=:80
+    - --providers.kubernetesingress=true
+    - --ping=true
+
+admin:
+  port:  8080

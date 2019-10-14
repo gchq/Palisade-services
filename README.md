@@ -17,3 +17,11 @@ limitations under the License.
 # <img src="logos/logo.svg" width="180">
 
 ### Scalable Data Access Policy Management and Enforcement
+
+#### Helm installation
+
+Idempotent release from the project root: 
+
+````helm upgrade --install <release name> --values <values file> .````
+
+
