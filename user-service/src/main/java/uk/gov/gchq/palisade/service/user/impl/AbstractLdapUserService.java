@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2019 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.UserService;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
+import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
