@@ -16,14 +16,13 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -36,9 +35,9 @@ import uk.gov.gchq.palisade.service.resource.repository.K8sBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.resource.service.CacheService;
-import uk.gov.gchq.palisade.service.resource.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +49,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Bean configuration and dependency injection graph
  */
-@Configuration
+@org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
@@ -62,8 +61,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResourceService resourceService(@Lazy final ResourceService service) {
-        return new SimpleResourceService(service, getAsyncExecutor());
+    public SimpleResourceService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
+        return new SimpleResourceService(config, cacheService(backingStore));
     }
 
     @Bean(name = "hashmap")

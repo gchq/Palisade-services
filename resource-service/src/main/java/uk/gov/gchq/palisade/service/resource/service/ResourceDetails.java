@@ -18,16 +18,22 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
 
+import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.Objects.requireNonNull;
 
 public class ResourceDetails {
 
-    private static final String TYPE_DEL = "_";
-    private static final String FORMAT_DEL = ".";
-    public static final String FILE_NAME_FORMAT = "%s" + TYPE_DEL + "%s" + FORMAT_DEL + "%s";
+    public static final Pattern FILENAME_PATTERN = Pattern.compile("(?<type>.+)_(?<name>.+)\\.(?<format>.+)");
+    public static final String FORMAT = "TYPE_FILENAME.FORMAT";
     private String fileName, type, format;
 
     public ResourceDetails (final String fileName, final String type, final String format) {
+        requireNonNull(fileName, "fileName");
+        requireNonNull(type, "type");
+        requireNonNull(format, "format");
         this.fileName = fileName;
         this.type = type;
         this.format = format;
@@ -46,21 +52,25 @@ public class ResourceDetails {
     }
 
     protected static ResourceDetails getResourceDetailsFromFileName(final String fileName) {
-        //The mirror of the FILE_NAME_FORMAT
+        //get filename component
         final String[] split = fileName.split(Pattern.quote("/"));
         final String fileString = split[split.length - 1];
-        final String[] typeSplit = fileString.split(TYPE_DEL);
-        if (typeSplit.length == 2) {
-            final String type = typeSplit[0];
-            final String[] idSplit = typeSplit[1].split(Pattern.quote(FORMAT_DEL));
-            if (idSplit.length == 2) {
-                final String name = idSplit[0];
-                final String format = idSplit[1];
-
-                return new ResourceDetails(fileName, type, format);
-            }
+        //check match
+        Matcher match = validateNameRegex(fileString);
+        if (!match.matches()) {
+            throw new IllegalArgumentException("Filename doesn't comply with " + FORMAT + ": " + fileName);
         }
-        throw new IllegalArgumentException("Incorrect format expected:" + FILE_NAME_FORMAT + " found: " + fileString);
+
+        return new ResourceDetails(fileName, match.group("type"), match.group("format"));
+    }
+
+    public static boolean isValidResourceName(final String fileName) {
+        requireNonNull(fileName);
+        return validateNameRegex(fileName).matches();
+    }
+
+    private static Matcher validateNameRegex(final String fileName) {
+        return FILENAME_PATTERN.matcher(fileName);
     }
 
     @Override
@@ -77,6 +87,14 @@ public class ResourceDetails {
         if (this == o) return true;
         if (!(o instanceof ResourceDetails)) return false;
         ResourceDetails that = (ResourceDetails) o;
-        return getFileName().equals(that.getFileName());
+        boolean fileName = getFileName().equals(that.getFileName());
+        boolean type = getType().equals(that.getType());
+        boolean format = getFormat().equals(that.getFormat());
+        return fileName && type && format;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFileName(), getFormat(),  getType());
     }
 }

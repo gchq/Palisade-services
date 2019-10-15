@@ -30,19 +30,20 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.resource.service.ResourceService;
+import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path = "/")
-public class DefaultController {
+public class ResourceController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-    private final ResourceService service;
+    private ResourceService service;
 
-    public DefaultController(final ResourceService service) {
+    public ResourceController(final ResourceService service) {
         this.service = service;
     }
 
