@@ -88,6 +88,8 @@ public class AbstractLdapUserServiceTest {
         // Then
         verify(context, times(1)).getAttributes("user\\#01", attrNames);
         assertEquals(userId, user.getUserId());
+        assertEquals(auths, user.getAuths());
+        assertEquals(roles, user.getRoles());
     }
 
     @Test

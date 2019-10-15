@@ -185,7 +185,7 @@ public abstract class AbstractLdapUserService implements UserService {
             }
 
             final User user = new User().userId(userId).auths(auths).roles(roles);
-            userCache.put(userId.clone(), user.clone());
+            userCache.put(userId.clone(), user);
             return user;
         });
     }
