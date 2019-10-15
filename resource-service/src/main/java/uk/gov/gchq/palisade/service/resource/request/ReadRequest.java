@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.data.service.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
 
 import org.apache.commons.lang3.builder.EqualsBuilder;

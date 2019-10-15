@@ -20,28 +20,102 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class ResourceDetailsTest {
 
-    private static final String FILENAME = "/home/user/Docs/other_file.json";
-    private static final String TYPE = "other";
-    private static final String FORMAT = "json";
+    public static final String PATH = "path/to/nowhere/";
+    public static final String VALID1 = "employee_file0.avro";
+    public static final String VALID2 = "emplo   yee_file0.avro";
+    public static final String VALID3 = "employee_fi   le0.av   ro";
 
-    private ResourceDetails expected = new ResourceDetails(FILENAME, TYPE, FORMAT);
-
-    /*@Before
-    public void setup() {
-
-    }*/
+    public static final String INVALID1 = "file0.avro";
+    public static final String INVALID2 = "employee_file0";
+    public static final String INVALID3 = "_.";
+    public static final String INVALID4 = "";
+    public static final String INVALID5 = ".avro";
 
     @Test
-    public void getReourceDetailsTest() {
+    public void shouldExtractFileName() {
+        //Given
+        String fileName = PATH + VALID1;
+
         //When
-        ResourceDetails details = ResourceDetails.getResourceDetailsFromFileName("/home/user/Docs/other_file.json");
+        ResourceDetails details = ResourceDetails.getResourceDetailsFromFileName(fileName);
 
         //Then
-        assertEquals(expected, details);
+        assertThat("employee", is(equalTo(details.getType())));
+        assertThat(fileName, is(equalTo(details.getFileName())));
+        assertThat("avro", is(equalTo(details.getFormat())));
+    }
+
+    @Test
+    public void shouldCreateValidDetails() {
+        //Given valid names above
+        //When tested
+        ResourceDetails valid1ob = ResourceDetails.getResourceDetailsFromFileName(VALID1);
+        ResourceDetails valid2ob = ResourceDetails.getResourceDetailsFromFileName(VALID2);
+        ResourceDetails valid3ob = ResourceDetails.getResourceDetailsFromFileName(VALID3);
+
+        //Then - check components match
+        assertThat("employee", is(equalTo(valid1ob.getType())));
+        assertThat(VALID1, is(equalTo(valid1ob.getFileName())));
+        assertThat("avro", is(equalTo(valid1ob.getFormat())));
+
+        assertThat("emplo   yee", is(equalTo(valid2ob.getType())));
+        assertThat(VALID2, is(equalTo(valid2ob.getFileName())));
+        assertThat("avro", is(equalTo(valid2ob.getFormat())));
+
+        assertThat("employee", is(equalTo(valid3ob.getType())));
+        assertThat(VALID3, is(equalTo(valid3ob.getFileName())));
+        assertThat("av   ro", is(equalTo(valid3ob.getFormat())));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwOnInvalidName1() {
+        ResourceDetails.getResourceDetailsFromFileName(INVALID1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwOnInvalidName2() {
+        ResourceDetails.getResourceDetailsFromFileName(INVALID2);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwOnInvalidName3() {
+        ResourceDetails.getResourceDetailsFromFileName(INVALID3);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwOnInvalidName4() {
+        ResourceDetails.getResourceDetailsFromFileName(INVALID4);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwOnInvalidName5() {
+        ResourceDetails.getResourceDetailsFromFileName(INVALID5);
+    }
+
+    @Test
+    public void shouldPassValidNames() {
+        //All of these are valid so should return true
+        assertTrue(ResourceDetails.isValidResourceName(VALID1));
+        assertTrue(ResourceDetails.isValidResourceName(VALID2));
+        assertTrue(ResourceDetails.isValidResourceName(VALID3));
+    }
+
+    @Test
+    public void shouldFailInvalidNames() {
+        //all of these should fail
+        assertFalse(ResourceDetails.isValidResourceName(INVALID1));
+        assertFalse(ResourceDetails.isValidResourceName(INVALID2));
+        assertFalse(ResourceDetails.isValidResourceName(INVALID3));
+        assertFalse(ResourceDetails.isValidResourceName(INVALID4));
+        assertFalse(ResourceDetails.isValidResourceName(INVALID5));
     }
 }

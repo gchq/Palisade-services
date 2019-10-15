@@ -381,8 +381,7 @@ public class SimpleResourceService implements ResourceService {
         SimpleResourceService that = (SimpleResourceService) o;
         boolean conf = getConf().equals(that.getConf());
         boolean fileSystem = getFileSystem().equals(that.getFileSystem());
-        boolean cache = getCacheService().equals(that.getCacheService());
-        return conf && fileSystem && cache;
+        return conf && fileSystem;
     }
 
     @Override

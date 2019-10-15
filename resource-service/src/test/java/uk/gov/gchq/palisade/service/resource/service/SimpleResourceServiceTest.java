@@ -16,25 +16,54 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import com.google.common.collect.Maps;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.test.PathUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.resource.ChildResource;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.ParentResource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.ConnectionDetail;
+import uk.gov.gchq.palisade.service.ServiceState;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.impl.MockDataService;
+import uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -46,42 +75,344 @@ public class SimpleResourceServiceTest {
     private static final String TEST_SERIALISED_FORMAT = "json";
     private static final String TEST_DATA_TYPE = "thing";
     private static final String TEST_CONNECTION_CLASS = "class of the connection";
+    private static final String FORMAT_VALUE = "txt";
+    private static final String TYPE_VALUE = "bob";
+    private static final String FILE_NAME_VALUE_00001 = "00001";
+    private static final String FILE_NAME_VALUE_00002 = "00002";
+    private static final String FILE = System.getProperty("os.name").toLowerCase().startsWith("win") ? "file:///" : "file://";
+    private static final String HDFS = "hdfs:///";
+    private static File TMP_DIRECTORY;
 
-    private ApplicationConfiguration config = new ApplicationConfiguration();
-    private ResourceService service;
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder(TMP_DIRECTORY);
+
+    private SimpleConnectionDetail simpleConnection;
+    private String inputPathString;
+    private FileSystem fs;
+    private HashMap<uk.gov.gchq.palisade.resource.Resource, ConnectionDetail> expected;
+    private SimpleCacheService simpleCache;
+    private Configuration config = new Configuration();
     private SimpleResourceService resourceService;
     private GetResourcesByIdRequest idRequest = new GetResourcesByIdRequest();
 
+    static {
+        TMP_DIRECTORY = PathUtils.getTestDir(SimpleResourceServiceTest.class);
+    }
+
     @Before
-    public void setup() throws Exception {
-        resourceService = new SimpleResourceService(service, config.getAsyncExecutor());
+    public void setup() throws IOException {
+        System.setProperty("hadoop.home.dir", Paths.get(".").toAbsolutePath().normalize().toString() + "/src/test/resources/hadoop-3.0.0");
+        config = createConf();
+        inputPathString = testFolder.getRoot().getAbsolutePath() + "/inputDir";
+        fs = FileSystem.get(config);
+        fs.mkdirs(new Path(inputPathString));
+        expected = Maps.newHashMap();
+        simpleConnection = new SimpleConnectionDetail().service(new MockDataService());
+
+        simpleCache = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
+
+        resourceService = new SimpleResourceService(config, simpleCache);
+        resourceService.addDataService(simpleConnection);
     }
 
     @Test
-    public void getResourcesByIdTest() {
+    public void getResourcesByIdTest() throws Exception{
 
-        //Given
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> expected = mockCompletableFuture();
+        //given
+        final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        expected.put(new FileResource().id(FILE + id).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
 
-        RequestId originalId = new RequestId().id("original");
-        idRequest.setResourceId("data");
-        idRequest.setOriginalRequestId(originalId);
+        //when
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
 
-        //When
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(idRequest);
-
-        //Then
-        assertNull(actual);
+        //then
+        assertEquals(expected, resourcesById.get());
     }
 
     @Test
-    public void addResourceTest() {
+    public void shouldGetResourcesOutsideOfScope() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
+
+        //when
+        final String found = HDFS + "/unknownDir/" + id;
+        try {
+            resourceService.getResourcesById(new GetResourcesByIdRequest().resourceId(found));
+            fail("exception expected");
+        } catch (Exception e) {
+            //then
+            assertEquals(String.format(SimpleResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)), e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldGetResourcesByIdOfAFolder() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/");
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00002, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+
+        //when
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void shouldFilterOutIllegalFileName() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/");
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString + "/I AM AN ILLEGAL FILENAME");
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00002, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+
+        //when
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void shouldGetResourcesByType() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/");
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, "00003", FORMAT_VALUE, TYPE_VALUE + 2);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00002, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+
+        //when
+        GetResourcesByTypeRequest getResourcesByTypeRequest = new GetResourcesByTypeRequest().type(TYPE_VALUE);
+        getResourcesByTypeRequest.setOriginalRequestId(new RequestId().id("test shouldGetResourcesByType"));
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesByType(getResourcesByTypeRequest);
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void shouldGetResourcesByFormat() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/");
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, "00003", FORMAT_VALUE + 2, TYPE_VALUE);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00002, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+
+        //when
+        GetResourcesBySerialisedFormatRequest getResourcesBySerialisedFormatRequest = new GetResourcesBySerialisedFormatRequest().serialisedFormat(FORMAT_VALUE);
+        getResourcesBySerialisedFormatRequest.setOriginalRequestId(new RequestId().id("test shouldGetResourcesByFormat"));
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesBySerialisedFormat(getResourcesBySerialisedFormatRequest);
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void shouldGetResourcesByResource() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/");
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        expected.put(new FileResource().id(FILE + id + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00002, TYPE_VALUE, FORMAT_VALUE)).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+        //when
+        GetResourcesByResourceRequest getResourcesByResourceRequest = new GetResourcesByResourceRequest().resource(new DirectoryResource().id(FILE + id));
+        getResourcesByResourceRequest.setOriginalRequestId(new RequestId().id("test shouldGetResourcesByResource"));
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesByResource(getResourcesByResourceRequest);
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void addResourceTest() throws Exception{
         try {
             resourceService.addResource(null);
             fail("exception expected");
         } catch (UnsupportedOperationException e) {
             assertEquals(SimpleResourceService.ERROR_ADD_RESOURCE, e.getMessage());
         }
+    }
+
+    @Test
+    public void shouldBeEqualAfterConfigure() {
+        //given
+        ServiceState is = new ServiceState();
+        resourceService.recordCurrentConfigTo(is);
+
+        //when
+        SimpleResourceService actual = new SimpleResourceService();
+        actual.applyConfigFrom(is);
+
+        //then
+        assertEquals(resourceService, actual);
+    }
+
+    @Test
+    public void shouldJSONSerialiser() throws Exception {
+        //use local copy for this test
+        final SimpleResourceService service = new SimpleResourceService(config, simpleCache);
+
+        final byte[] serialise = JSONSerialiser.serialise(service, true);
+        final String expected = String.format("{%n" +
+                "  \"@id\" : 1,%n" +
+                "  \"class\" : \"uk.gov.gchq.palisade.service.resource.service.SimpleResourceService\",%n" +
+                "  \"cacheService\" : {%n" +
+                "    \"@id\" : 2,%n" +
+                "    \"class\" : \"uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService\",%n" +
+                "    \"backingStore\" : {%n" +
+                "      \"class\" : \"uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore\",%n" +
+                "      \"useStatic\" : true%n" +
+                "    },%n" +
+                "    \"codecs\" : { },%n" +
+                "    \"maximumLocalCacheDuration\" : 300.000000000%n" +
+                "  },%n" +
+                "  \"conf\" : {%n" +
+                "  }%n" +
+                "}%n");
+
+        final String stringOfSerialised = new String(serialise);
+        final String[] split = stringOfSerialised.split(System.lineSeparator());
+        final StringBuilder modified = new StringBuilder();
+        for (String s : split) {
+            if (!s.startsWith("    \"fs.defaultFS")) {
+                modified.append(s).append(System.lineSeparator());
+            }
+        }
+
+        final String modifiedActual = modified.toString();
+        assertEquals(stringOfSerialised, expected, modifiedActual);
+        assertEquals(service, JSONSerialiser.deserialise(serialise, SimpleResourceService.class));
+    }
+
+    @Test
+    public void shouldErrorWithNoConnectionDetails() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        expected.put(new FileResource().id(id).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE), simpleConnection);
+
+        //when
+        try {
+            //this test needs a local HDFS resource service
+            final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = new SimpleResourceService(config, simpleCache)
+                    .getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
+            resourcesById.get();
+            fail("exception expected");
+        } catch (ExecutionException e) {
+            //then
+            assertEquals(SimpleResourceService.ERROR_NO_DATA_SERVICES, e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    public void shouldGetFormatConnectionWhenNoTypeConnection() throws Exception {
+        //given
+        final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00001, FORMAT_VALUE, TYPE_VALUE);
+        writeFile(fs, inputPathString, FILE_NAME_VALUE_00002, FORMAT_VALUE, TYPE_VALUE);
+        expected.put(new FileResource().id(FILE + id).type(TYPE_VALUE).serialisedFormat(FORMAT_VALUE).parent(
+                new DirectoryResource().id(FILE + inputPathString.replace("\\", "/")).parent(
+                        new SystemResource().id(FILE + testFolder.getRoot().getAbsolutePath())
+                )
+        ), simpleConnection);
+
+        //when
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = resourceService.getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
+
+        //then
+        assertEquals(expected, resourcesById.join());
+    }
+
+    @Test
+    public void shouldResolveParents() throws Exception {
+        final String parent = testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1" + "/" + "folder2/";
+        final String id = parent + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
+        final FileResource fileResource = new FileResource().id(id);
+        SimpleResourceService.resolveParents(fileResource, config);
+
+        final ParentResource parent1 = fileResource.getParent();
+        assertEquals(parent, parent1.getId());
+
+        assertTrue(parent1 instanceof ChildResource);
+        assertTrue(parent1 instanceof DirectoryResource);
+        final ChildResource child = (ChildResource) parent1;
+        SimpleResourceService.resolveParents(child, config);
+        final ParentResource parent2 = child.getParent();
+        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1/", parent2.getId());
+
+        assertTrue(parent2 instanceof ChildResource);
+        assertTrue(parent2 instanceof DirectoryResource);
+        final ChildResource child2 = (ChildResource) parent2;
+        SimpleResourceService.resolveParents(child2, config);
+        final ParentResource parent3 = child2.getParent();
+        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir/", parent3.getId());
+
+        assertTrue(parent3 instanceof ChildResource);
+        assertTrue(parent3 instanceof DirectoryResource);
+        final ChildResource child3 = (ChildResource) parent3;
+        SimpleResourceService.resolveParents(child3, config);
+        final ParentResource parent4 = child3.getParent();
+        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/", parent4.getId());
+
+        assertTrue(parent4 instanceof SystemResource);
+        assertFalse(parent4 instanceof DirectoryResource);
     }
 
     private LeafResource mockResource() {
@@ -105,5 +436,29 @@ public class SimpleResourceServiceTest {
         map.put(mockResource(), mockConnection());
         future.complete(map);
         return future;
+    }
+
+    private Configuration createConf() {
+        // Set up local conf
+        final Configuration conf = new Configuration();
+        conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, FILE + testFolder.getRoot().getAbsolutePath().replace("\\", "/"));
+        return conf;
+    }
+
+    private void writeFile(final FileSystem fs, final String parentPath, final String name, final String format, final String type) throws IOException {
+        writeFile(fs, parentPath + "/" + getFileNameFromResourceDetails(name, type, format));
+    }
+
+    private void writeFile(final FileSystem fs, final String filePathString) throws IOException {
+        //Write Some file
+        final Path filePath = new Path(filePathString);
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
+            writer.write("myContents");
+        }
+    }
+
+    private static String getFileNameFromResourceDetails(final String name, final String type, final String format) {
+        //Type, Id, Format
+        return type + "_" + name + "." + format;
     }
 }
