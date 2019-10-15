@@ -65,6 +65,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleResourceService(config, cacheService(backingStore));
     }
 
+    @Bean
+    public Configuration hadoopConfiguration() {
+        return new Configuration();
+    }
+
     @Bean(name = "hashmap")
     @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
     public HashMapBackingStore hashMapBackingStore() {

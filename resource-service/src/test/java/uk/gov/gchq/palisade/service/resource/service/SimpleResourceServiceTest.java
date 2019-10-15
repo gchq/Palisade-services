@@ -93,7 +93,6 @@ public class SimpleResourceServiceTest {
     private SimpleCacheService simpleCache;
     private Configuration config = new Configuration();
     private SimpleResourceService resourceService;
-    private GetResourcesByIdRequest idRequest = new GetResourcesByIdRequest();
 
     static {
         TMP_DIRECTORY = PathUtils.getTestDir(SimpleResourceServiceTest.class);

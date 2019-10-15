@@ -83,6 +83,7 @@ public class SimpleResourceService implements ResourceService {
      */
     private static final Pattern FILE_PAT = Pattern.compile("(?i)(?<=^file:)/(?=([^/]|$))");
 
+    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
     static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
     static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
     private static final String ERROR_RESOLVING_PARENTS = "Error occurred while resolving resourceParents";
@@ -90,14 +91,11 @@ public class SimpleResourceService implements ResourceService {
     private static final String CACHE_IMPL_KEY = "hadoop.cache.svc";
     private static final String DATASERVICE_LIST = "hadoop.data.svc.list";
 
-    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
-
     private Configuration config;
     private CacheService cacheService;
     private FileSystem fileSystem;
 
     private List<ConnectionDetail> dataServices = new ArrayList<>();
-    private String filename;
 
     public SimpleResourceService(final Configuration config, final CacheService cacheService) throws IOException {
         requireNonNull(config, "service");
