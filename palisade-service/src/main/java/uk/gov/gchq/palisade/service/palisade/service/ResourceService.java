@@ -24,10 +24,7 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 public class ResourceService implements Service {
@@ -41,7 +38,7 @@ public class ResourceService implements Service {
         this.executor = executor;
     }
 
-    public CompletionStage<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest resource) {
+    public Map<LeafResource, ConnectionDetail> getResourcesById(final GetResourcesByIdRequest resource) {
 
         Map<LeafResource, ConnectionDetail> resources;
         try {
@@ -51,6 +48,6 @@ public class ResourceService implements Service {
             LOGGER.error("Failed to get resources: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception
         }
-        return (CompletionStage<Map<LeafResource, ConnectionDetail>>) resources;
+        return resources;
     }
 }

@@ -23,9 +23,6 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 public class UserService implements Service {
@@ -39,7 +36,7 @@ public class UserService implements Service {
         this.executor = executor;
     }
 
-    public CompletionStage<User> getUser(final GetUserRequest request) {
+    public User getUser(final GetUserRequest request) {
 
         User user;
         try {
@@ -49,7 +46,7 @@ public class UserService implements Service {
             LOGGER.error("Failed to get user: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception
         }
-        return (CompletionStage<User>) user;
+        return user;
     }
 
 }

@@ -90,108 +90,21 @@ public class SimplePalisadeService implements PalisadeService {
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
-        final CompletionStage<User> user = userService.getUser(userRequest);
+        final User user = userService.getUser(userRequest);
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final CompletionStage<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
+        final Map<LeafResource, ConnectionDetail> resources = resourceService.getResourcesById(resourceRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
 
-        CompletionStage<MultiPolicy> futureMultiPolicy = getPolicy(request, user, resources, originalRequestId);
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user).context(request.getContext()).resources(new HashSet<>(resources.keySet()));
+        policyRequest.setOriginalRequestId(originalRequestId);
+        LOGGER.debug("Getting policy from policyService: {}", request);
+        MultiPolicy multiPolicy = policyService.getPolicy(policyRequest);
 
-        return (CompletableFuture<DataRequestResponse>) aggregationService.aggregateDataRequestResults((User) user, (Map<LeafResource, ConnectionDetail>) resources, (MultiPolicy) futureMultiPolicy);
-        /*CompletableFuture.allOf(user.toCompletableFuture(), resources.toCompletableFuture(), futureMultiPolicy.toCompletableFuture())
-                .thenApply(t -> {
-                    //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
-                    //resources they don't have permission to see
-                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resources.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
-
-                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
-                    auditRegisterRequestComplete(request, (User) user, futureMultiPolicy.toCompletableFuture().join());
-                    cache(request, (User) user, requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId);
-                    final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
-                    response.setOriginalRequestId(originalRequestId);
-                    LOGGER.debug("Responding with: {}", response);
-                    return response;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Error handling: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, PolicyService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });*/
-    }
-
-    /**
-     * Removes all resource mappings in the {@code resources} that do not have a defined policy in {@code policy}.
-     *
-     * @param resources the resources to modify
-     * @param policy    the policy for all resources
-     * @return the {@code resources} map after filtering
-     */
-    private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final MultiPolicy policy) {
-        resources.keySet().retainAll(policy.getPolicies().keySet());
-        return resources;
-    }
-
-    private CompletableFuture<MultiPolicy> getPolicy(final RegisterDataRequest request, final CompletionStage<User> futureUser, final CompletionStage<Map<LeafResource, ConnectionDetail>> futureResources, final RequestId originalRequestId) {
-        return CompletableFuture.allOf(futureUser.toCompletableFuture(), futureResources.toCompletableFuture())
-                .thenApply(t -> {
-                    final GetPolicyRequest policyRequest = new GetPolicyRequest()
-                            .user(futureUser.toCompletableFuture().join())
-                            .context(request.getContext())
-                            .resources(new HashSet<>(futureResources.toCompletableFuture().join().keySet()));
-                    policyRequest.setOriginalRequestId(originalRequestId);
-                    return policyRequest;
-                })
-                .thenApply(req -> {
-                    LOGGER.debug("Getting policy from policyService: {}", req);
-                    return policyService.getPolicy(req).toCompletableFuture().join();
-                }).thenApply(policy -> {
-                    LOGGER.debug("Got policy: {}", policy);
-                    return policy;
-                });
-    }
-
-    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final MultiPolicy multiPolicy) {
-        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
-                .withUser(user)
-                .withLeafResources(multiPolicy.getPolicies().keySet())
-                .withContext(request.getContext());
-        LOGGER.debug("Auditing: {}", registerRequestCompleteAuditRequest);
-        auditService.audit(registerRequestCompleteAuditRequest).toCompletableFuture().join();
-    }
-
-    private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
-        final RegisterRequestExceptionAuditRequest auditRequestWithException =
-                RegisterRequestExceptionAuditRequest.create(request.getId())
-                        .withUserId(request.getUserId())
-                        .withResourceId(request.getResourceId())
-                        .withContext(request.getContext())
-                        .withException(ex)
-                        .withServiceClass(serviceClass);
-        LOGGER.debug("Error handling: " + ex.getMessage());
-        auditService.audit(auditRequestWithException).toCompletableFuture().join();
-    }
-
-    private void cache(final RegisterDataRequest request, final User user,
-                       final RequestId requestId, final MultiPolicy multiPolicy,
-                       final int resCount,
-                       final RequestId originalRequestId) {
-        DataRequestConfig dataRequestConfig = new DataRequestConfig()
-                .user(user)
-                .context(request.getContext())
-                .rules(multiPolicy.getRuleMap());
-        dataRequestConfig.setOriginalRequestId(originalRequestId);
-        final AddCacheRequest<DataRequestConfig> cacheRequest = new AddCacheRequest<>()
-                .key(requestId.getId())
-                .value(dataRequestConfig)
-                .service(this.getClass());
-        LOGGER.debug("Caching: {}", cacheRequest);
-        final Boolean success = cacheService.add(cacheRequest).join();
-        if (null == success || !success) {
-            throw new CompletionException(new RuntimeException("Failed to cache request: " + request));
-        }
+        return (CompletableFuture<DataRequestResponse>) aggregationService.aggregateDataRequestResults(
+                cacheService, auditService, request, user, resources, multiPolicy, requestId, originalRequestId);
     }
 
     @Override
