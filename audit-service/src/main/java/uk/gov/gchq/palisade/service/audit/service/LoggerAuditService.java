@@ -15,8 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.audit.AuditService;
@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditR
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -42,52 +42,65 @@ import static java.util.Objects.requireNonNull;
  * </pre>
  */
 public class LoggerAuditService implements AuditService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
-    private static final Map<Class, Consumer<Object>> DISPATCH = new HashMap<Class, Consumer<Object>>();
+    public static final String CONFIG_KEY = "logger";
 
-    //translate class object to handler
+    private final Logger logger;
+    private static final Map<Class, BiConsumer<Logger, AuditRequest>> DISPATCHER = new HashMap<>();
+
+    static final String REGISTER_REQUEST_COMPLETE = "RegisterRequestCompleteAuditRequest" ;
+    static final String REGISTER_REQUEST_EXCEPTION = "RegisterRequestExceptionAuditRequest";
+    static final String READ_REQUEST_COMPLETE = "ReadRequestCompleteAuditRequest";
+    static final String READ_REQUEST_EXCEPTION = "ReadRequestExceptionAuditRequest";
+
     static {
-        //handler for RegisterRequestCompleteAuditRequest
-        DISPATCH.put(RegisterRequestCompleteAuditRequest.class, (o) -> {
-            requireNonNull(o, "RegisterRequestCompleteAuditRequest cannot be null");
-            RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (RegisterRequestCompleteAuditRequest) o;
-            final String msg = "'RegisterRequestCompleteAuditRequest': " + registerRequestCompleteAuditRequest;
-            LOGGER.info(msg);
-        });
-        //handler for RegisterRequestExceptionAuditRequest
-        DISPATCH.put(RegisterRequestExceptionAuditRequest.class, (o) -> {
-            requireNonNull(o, "RegisterRequestExceptionAuditRequest cannot be null");
-            RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest = (RegisterRequestExceptionAuditRequest) o;
-            final String msg = "'RegisterRequestExceptionAuditRequest': " + registerRequestExceptionAuditRequest;
-            LOGGER.error(msg);
-        });
-        //handler for ReadRequestCompleteAuditRequest
-        DISPATCH.put(ReadRequestCompleteAuditRequest.class, (o) -> {
-            requireNonNull(o, "ReadRequestCompleteAuditRequest cannot be null");
-            ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest = (ReadRequestCompleteAuditRequest) o;
-            final String msg = "'readRequestException': " + readRequestCompleteAuditRequest;
-            LOGGER.info(msg);
-        });
-        //handler for ReadRequestExceptionAuditRequest
-        DISPATCH.put(ReadRequestExceptionAuditRequest.class, (o) -> {
-            requireNonNull(o, "ReadRequestExceptionAuditRequest cannot be null");
-            ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = (ReadRequestExceptionAuditRequest) o;
-            final String msg = "'readRequestExceptionAuditRequest': " + readRequestExceptionAuditRequest;
-            LOGGER.error(msg);
-        });
+        DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, LoggerAuditService::onRegisterRequestComplete);
+        DISPATCHER.put(RegisterRequestExceptionAuditRequest.class, LoggerAuditService::onRegisterRequestException);
+        DISPATCHER.put(ReadRequestCompleteAuditRequest.class, LoggerAuditService::onReadRequestComplete);
+        DISPATCHER.put(ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
+    }
+
+    public LoggerAuditService(final Logger loggingService) {
+        logger = loggingService;
+    }
+
+    private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
+        requireNonNull(logger, "Logger cannot be null");
+        requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
+        final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, (RegisterRequestCompleteAuditRequest) request);
+        logger.info(msg);
+    }
+
+    private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
+        requireNonNull(logger, "Logger cannot be null");
+        requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
+        final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, (RegisterRequestExceptionAuditRequest) request);
+        logger.error(msg);
+    }
+
+    private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
+        requireNonNull(logger, "Logger cannot be null");
+        requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
+        final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, (ReadRequestCompleteAuditRequest) request);
+        logger.info(msg);
+    }
+
+    private static void onReadRequestException(final Logger logger, final AuditRequest request) {
+        requireNonNull(logger, "Logger cannot be null");
+        requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
+        final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, (ReadRequestExceptionAuditRequest) request);
+        logger.error(msg);
     }
 
     @Override
     public CompletableFuture<Boolean> audit(final AuditRequest request) {
         requireNonNull(request, "The audit request can not be null.");
-        Consumer<Object> handler = DISPATCH.get((request.getClass()));
+        BiConsumer<Logger, AuditRequest> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
-            handler.accept(request);
+            handler.accept(logger, request);
         } else {
-            //received an AuditRequest derived class that is not defined as a Handler above.
-            //need to add handler for this class.
-            LOGGER.error("handler == null for " + request.getClass().getName());
-
+            // received an AuditRequest derived class that is not defined as a Handler above.
+            // need to add handler for this class.
+            logger.error("handler == null for " + request.getClass().getName());
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
@@ -96,12 +109,12 @@ public class LoggerAuditService implements AuditService {
     public void recordCurrentConfigTo(final ServiceState config) {
         requireNonNull(config, "config");
         config.put(AuditService.class.getTypeName(), getClass().getTypeName());
-        LOGGER.debug("Wrote configuration data: no-op");
+        logger.debug("Wrote configuration data: no-op");
     }
 
     @Override
     public void applyConfigFrom(final ServiceState config) throws NoConfigException {
         requireNonNull(config, "config");
-        LOGGER.debug("Read configuration data: no-op");
+        logger.debug("Read configuration data: no-op");
     }
 }
