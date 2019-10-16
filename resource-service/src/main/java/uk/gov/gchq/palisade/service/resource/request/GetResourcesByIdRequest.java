@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class GetResourcesByIdRequest extends Request {
+public class    GetResourcesByIdRequest extends Request {
 
     private String resourceId;
 
