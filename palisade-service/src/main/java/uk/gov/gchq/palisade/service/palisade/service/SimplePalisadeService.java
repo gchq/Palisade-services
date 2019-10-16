@@ -69,7 +69,7 @@ public class SimplePalisadeService implements PalisadeService {
     private final UserService userService;
     private final ResourceService resourceService;
     private final CacheService cacheService;
-    private ResultAggregationService aggregationService = new ResultAggregationService();
+    private ResultAggregationService aggregationService;
 
     private final Executor executor;
 
@@ -80,6 +80,7 @@ public class SimplePalisadeService implements PalisadeService {
         this.resourceService = resourceService;
         this.cacheService = cacheService;
         this.executor = executor;
+        this.aggregationService = new ResultAggregationService(auditService, cacheService);
     }
 
     @Override
@@ -103,8 +104,8 @@ public class SimplePalisadeService implements PalisadeService {
         LOGGER.debug("Getting policy from policyService: {}", request);
         MultiPolicy multiPolicy = policyService.getPolicy(policyRequest);
 
-        return (CompletableFuture<DataRequestResponse>) aggregationService.aggregateDataRequestResults(
-                cacheService, auditService, request, user, resources, multiPolicy, requestId, originalRequestId);
+        return (CompletableFuture<DataRequestResponse>) aggregationService
+                .aggregateDataRequestResults(request, user, resources, multiPolicy, requestId, originalRequestId);
     }
 
     @Override

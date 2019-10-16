@@ -38,13 +38,15 @@ import java.util.concurrent.CompletionStage;
 public class ResultAggregationService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
+    private AuditService auditService;
+    private CacheService cacheService;
 
-    public ResultAggregationService() {
+    public ResultAggregationService(final AuditService auditService, final CacheService cacheService) {
+        this.auditService = auditService;
+        this.cacheService = cacheService;
     }
 
-    public CompletionStage<DataRequestResponse> aggregateDataRequestResults(final CacheService cacheService,
-                                                                            final AuditService auditService,
-                                                                            final RegisterDataRequest request,
+    public CompletionStage<DataRequestResponse> aggregateDataRequestResults(final RegisterDataRequest request,
                                                                             final User user,
                                                                             final Map<LeafResource, ConnectionDetail> resource,
                                                                             final MultiPolicy policy,
@@ -57,8 +59,10 @@ public class ResultAggregationService implements Service {
             Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, policy);
 
             PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
-            auditRegisterRequestComplete(request, (User) user, policy, auditService);
+            auditRegisterRequestComplete(request, user, policy, auditService);
+
             cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
+
             final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
             response.setOriginalRequestId(originalRequestId);
             LOGGER.debug("Responding with: {}", response);
@@ -66,6 +70,7 @@ public class ResultAggregationService implements Service {
             return (CompletionStage<DataRequestResponse>) response;
         } catch (Exception ex) {
             LOGGER.error("Error handling: {}", ex.getMessage());
+
             auditRequestReceivedException(request, ex, PolicyService.class, auditService);
             throw new RuntimeException(ex); //rethrow the exception
         }
