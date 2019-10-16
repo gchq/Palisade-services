@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.impl;
+package uk.gov.gchq.palisade.service.user.service;
 
 
 import org.slf4j.Logger;
@@ -23,12 +23,10 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.service.CacheService;
-import uk.gov.gchq.palisade.service.user.UserService;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
+import uk.gov.gchq.palisade.service.user.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
 import java.nio.charset.StandardCharsets;

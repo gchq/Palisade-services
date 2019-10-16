@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.user.exception;
 
-import uk.gov.gchq.palisade.service.user.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserService;
 
 /**
  * A {@code NoSuchUserIdException} is a {@link RuntimeException} thrown by a

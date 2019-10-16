@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.impl;
+package uk.gov.gchq.palisade.service.user.service;
 
 
 import org.mockito.Mockito;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.UserService;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
 import java.util.concurrent.CompletionStage;

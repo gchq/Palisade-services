@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user;
+package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
@@ -32,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
  * of 'Palisade' users.</strong> The actual authentication of users should be provided by an external service outside of
  * Palisade. For example, this could be via a centralised PKI service or by a SASL/Kerberos implementation. </p>
  */
-
 public interface UserService extends Service {
 
     /**

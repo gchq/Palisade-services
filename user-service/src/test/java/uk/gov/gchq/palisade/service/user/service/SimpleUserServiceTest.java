@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.impl;
+package uk.gov.gchq.palisade.service.user.service;
 
 import org.junit.Test;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 

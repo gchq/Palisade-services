@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.request.Request;
-import uk.gov.gchq.palisade.service.user.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import static java.util.Objects.requireNonNull;
 
