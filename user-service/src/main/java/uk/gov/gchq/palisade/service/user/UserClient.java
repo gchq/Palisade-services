@@ -26,4 +26,7 @@ public interface UserClient {
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
     User getUser(final GetUserRequest request);
 
+    @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")
+    Boolean addUser(final GetUserRequest request);
+
 }

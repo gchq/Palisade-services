@@ -29,7 +29,6 @@ public class NoSuchUserIdException extends RuntimeException {
      * Initialises this exception with no message or cause.
      */
     public NoSuchUserIdException() {
-        super();
     }
 
     /**
