@@ -32,15 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
@@ -48,7 +45,6 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,9 +70,9 @@ import static java.util.Objects.requireNonNull;
  * through the actual real filing system.
  */
 
-public class SimpleResourceService implements ResourceService {
+public class HadoopResourceService implements ResourceService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HadoopResourceService.class);
 
     /**
      * A regular expression that matches URIs that have the file:/ scheme with a single slash but not any more slashes.
@@ -97,7 +93,7 @@ public class SimpleResourceService implements ResourceService {
 
     private List<ConnectionDetail> dataServices = new ArrayList<>();
 
-    public SimpleResourceService(final Configuration config, final CacheService cacheService) throws IOException {
+    public HadoopResourceService(final Configuration config, final CacheService cacheService) throws IOException {
         requireNonNull(config, "service");
         requireNonNull(cacheService, "executor");
         this.config = config;
@@ -105,11 +101,11 @@ public class SimpleResourceService implements ResourceService {
         this.fileSystem = FileSystem.get(config);
     }
 
-    public SimpleResourceService(@JsonProperty("conf") final Map<String, String> conf, @JsonProperty("cacheService") final CacheService cacheService) throws IOException {
+    public HadoopResourceService(@JsonProperty("conf") final Map<String, String> conf, @JsonProperty("cacheService") final CacheService cacheService) throws IOException {
         this(createConfig(conf), cacheService);
     }
 
-    public SimpleResourceService() {
+    public HadoopResourceService() {
 
     }
 
@@ -191,13 +187,13 @@ public class SimpleResourceService implements ResourceService {
         });
     }
 
-    public SimpleResourceService cacheService(final CacheService cacheService) {
+    public HadoopResourceService cacheService(final CacheService cacheService) {
         requireNonNull(cacheService, "Cache service cannot be set to null.");
         this.cacheService = cacheService;
         return this;
     }
 
-    public SimpleResourceService conf(final Configuration conf) throws IOException {
+    public HadoopResourceService conf(final Configuration conf) throws IOException {
         requireNonNull(conf, "conf");
         this.config = conf;
         this.fileSystem = FileSystem.get(conf);
@@ -213,42 +209,10 @@ public class SimpleResourceService implements ResourceService {
         return cacheService;
     }
 
-    public SimpleResourceService addDataService(final ConnectionDetail detail) {
+    public HadoopResourceService addDataService(final ConnectionDetail detail) {
         requireNonNull(detail, "detail");
         dataServices.add(detail);
         return this;
-    }
-
-    @Override
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        //get the configuration string
-        String serialisedConfig = config.getOrDefault(HADOOP_CONF_STRING, null);
-        //make this into a map
-        Map<String, String> confMap = null;
-        if (nonNull(serialisedConfig)) {
-            confMap = JSONSerialiser.deserialise(serialisedConfig.getBytes(StandardCharsets.UTF_8), Map.class);
-        }
-        //make this into a config, confMap may be null at this point
-        try {
-            setConf(confMap);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        //extract cache
-        String serialisedCache = config.getOrDefault(CACHE_IMPL_KEY, null);
-        if (nonNull(serialisedCache)) {
-            setCacheService(JSONSerialiser.deserialise(serialisedCache.getBytes(StandardCharsets.UTF_8), CacheService.class));
-        } else {
-            throw new NoConfigException("no cache service specified in configuration");
-        }
-        //extract data services
-        String serialisedDataServices = config.getOrDefault(DATASERVICE_LIST, null);
-        if (nonNull(serialisedDataServices)) {
-            this.dataServices = JSONSerialiser.deserialise(serialisedDataServices.getBytes(StandardCharsets.UTF_8), new ConnectionDetailType());
-        } else {
-            throw new NoConfigException("no data services specified in configuration");
-        }
     }
 
     /**
@@ -284,19 +248,6 @@ public class SimpleResourceService implements ResourceService {
         } else {
             return uri;
         }
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(ResourceService.class.getTypeName(), getClass().getTypeName());
-        Map<String, String> confMap = getConf();
-        String serialisedConf = new String(JSONSerialiser.serialise(confMap), StandardCharsets.UTF_8);
-        config.put(HADOOP_CONF_STRING, serialisedConf);
-        String serialisedCache = new String(JSONSerialiser.serialise(cacheService), StandardCharsets.UTF_8);
-        config.put(CACHE_IMPL_KEY, serialisedCache);
-        String serialisedDataServices = new String(JSONSerialiser.serialise(dataServices), StandardCharsets.UTF_8);
-        config.put(DATASERVICE_LIST, serialisedDataServices);
     }
 
     protected Configuration getInternalConf() {
@@ -375,8 +326,8 @@ public class SimpleResourceService implements ResourceService {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SimpleResourceService)) return false;
-        SimpleResourceService that = (SimpleResourceService) o;
+        if (!(o instanceof HadoopResourceService)) return false;
+        HadoopResourceService that = (HadoopResourceService) o;
         boolean conf = getConf().equals(that.getConf());
         boolean fileSystem = getFileSystem().equals(that.getFileSystem());
         return conf && fileSystem;

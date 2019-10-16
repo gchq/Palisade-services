@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.resource.service.ResourceService;
-import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

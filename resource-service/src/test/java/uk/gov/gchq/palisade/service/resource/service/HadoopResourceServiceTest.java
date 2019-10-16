@@ -68,9 +68,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 @RunWith(JUnit4.class)
-public class SimpleResourceServiceTest {
+public class HadoopResourceServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceServiceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HadoopResourceServiceTest.class);
     private static final String TEST_RESOURCE_ID = "/home/user/other/thing_file.json";
     private static final String TEST_SERIALISED_FORMAT = "json";
     private static final String TEST_DATA_TYPE = "thing";
@@ -92,10 +92,10 @@ public class SimpleResourceServiceTest {
     private HashMap<uk.gov.gchq.palisade.resource.Resource, ConnectionDetail> expected;
     private SimpleCacheService simpleCache;
     private Configuration config = new Configuration();
-    private SimpleResourceService resourceService;
+    private HadoopResourceService resourceService;
 
     static {
-        TMP_DIRECTORY = PathUtils.getTestDir(SimpleResourceServiceTest.class);
+        TMP_DIRECTORY = PathUtils.getTestDir(HadoopResourceServiceTest.class);
     }
 
     @Before
@@ -110,7 +110,7 @@ public class SimpleResourceServiceTest {
 
         simpleCache = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
 
-        resourceService = new SimpleResourceService(config, simpleCache);
+        resourceService = new HadoopResourceService(config, simpleCache);
         resourceService.addDataService(simpleConnection);
     }
 
@@ -146,7 +146,7 @@ public class SimpleResourceServiceTest {
             fail("exception expected");
         } catch (Exception e) {
             //then
-            assertEquals(String.format(SimpleResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)), e.getMessage());
+            assertEquals(String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)), e.getMessage());
         }
     }
 
@@ -284,33 +284,19 @@ public class SimpleResourceServiceTest {
             resourceService.addResource(null);
             fail("exception expected");
         } catch (UnsupportedOperationException e) {
-            assertEquals(SimpleResourceService.ERROR_ADD_RESOURCE, e.getMessage());
+            assertEquals(HadoopResourceService.ERROR_ADD_RESOURCE, e.getMessage());
         }
-    }
-
-    @Test
-    public void shouldBeEqualAfterConfigure() {
-        //given
-        ServiceState is = new ServiceState();
-        resourceService.recordCurrentConfigTo(is);
-
-        //when
-        SimpleResourceService actual = new SimpleResourceService();
-        actual.applyConfigFrom(is);
-
-        //then
-        assertEquals(resourceService, actual);
     }
 
     @Test
     public void shouldJSONSerialiser() throws Exception {
         //use local copy for this test
-        final SimpleResourceService service = new SimpleResourceService(config, simpleCache);
+        final HadoopResourceService service = new HadoopResourceService(config, simpleCache);
 
         final byte[] serialise = JSONSerialiser.serialise(service, true);
         final String expected = String.format("{%n" +
                 "  \"@id\" : 1,%n" +
-                "  \"class\" : \"uk.gov.gchq.palisade.service.resource.service.SimpleResourceService\",%n" +
+                "  \"class\" : \"uk.gov.gchq.palisade.service.resource.service.HadoopResourceService\",%n" +
                 "  \"cacheService\" : {%n" +
                 "    \"@id\" : 2,%n" +
                 "    \"class\" : \"uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService\",%n" +
@@ -336,7 +322,7 @@ public class SimpleResourceServiceTest {
 
         final String modifiedActual = modified.toString();
         assertEquals(stringOfSerialised, expected, modifiedActual);
-        assertEquals(service, JSONSerialiser.deserialise(serialise, SimpleResourceService.class));
+        assertEquals(service, JSONSerialiser.deserialise(serialise, HadoopResourceService.class));
     }
 
     @Test
@@ -350,13 +336,13 @@ public class SimpleResourceServiceTest {
         //when
         try {
             //this test needs a local HDFS resource service
-            final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = new SimpleResourceService(config, simpleCache)
+            final CompletableFuture<Map<LeafResource, ConnectionDetail>> resourcesById = new HadoopResourceService(config, simpleCache)
                     .getResourcesById(new GetResourcesByIdRequest().resourceId(FILE + id));
             resourcesById.get();
             fail("exception expected");
         } catch (ExecutionException e) {
             //then
-            assertEquals(SimpleResourceService.ERROR_NO_DATA_SERVICES, e.getCause().getMessage());
+            assertEquals(HadoopResourceService.ERROR_NO_DATA_SERVICES, e.getCause().getMessage());
         }
     }
 
@@ -384,7 +370,7 @@ public class SimpleResourceServiceTest {
         final String parent = testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1" + "/" + "folder2/";
         final String id = parent + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
         final FileResource fileResource = new FileResource().id(id);
-        SimpleResourceService.resolveParents(fileResource, config);
+        HadoopResourceService.resolveParents(fileResource, config);
 
         final ParentResource parent1 = fileResource.getParent();
         assertEquals(parent, parent1.getId());
@@ -392,21 +378,21 @@ public class SimpleResourceServiceTest {
         assertTrue(parent1 instanceof ChildResource);
         assertTrue(parent1 instanceof DirectoryResource);
         final ChildResource child = (ChildResource) parent1;
-        SimpleResourceService.resolveParents(child, config);
+        HadoopResourceService.resolveParents(child, config);
         final ParentResource parent2 = child.getParent();
         assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1/", parent2.getId());
 
         assertTrue(parent2 instanceof ChildResource);
         assertTrue(parent2 instanceof DirectoryResource);
         final ChildResource child2 = (ChildResource) parent2;
-        SimpleResourceService.resolveParents(child2, config);
+        HadoopResourceService.resolveParents(child2, config);
         final ParentResource parent3 = child2.getParent();
         assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir/", parent3.getId());
 
         assertTrue(parent3 instanceof ChildResource);
         assertTrue(parent3 instanceof DirectoryResource);
         final ChildResource child3 = (ChildResource) parent3;
-        SimpleResourceService.resolveParents(child3, config);
+        HadoopResourceService.resolveParents(child3, config);
         final ParentResource parent4 = child3.getParent();
         assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/", parent4.getId());
 
