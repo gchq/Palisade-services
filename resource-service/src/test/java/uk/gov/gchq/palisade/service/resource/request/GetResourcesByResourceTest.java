@@ -20,40 +20,47 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.resource.Resource;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(JUnit4.class)
-public class GetResourcesByIdTest {
+@RunWith(MockitoJUnitRunner.class)
+public class GetResourcesByResourceTest {
 
-    private final GetResourcesByIdRequest expected = new GetResourcesByIdRequest();
+    @Mock
+    private Resource mockResource;
+
+    private final GetResourcesByResourceRequest expected = new GetResourcesByResourceRequest();
     private final RequestId originalId = new RequestId().id("Original");
 
     @Before
     public void setup() {
-        expected.setResourceId("Test");
+        expected.setResource(mockResource);
         expected.setOriginalRequestId(originalId);
     }
 
     @Test
     public void returnRequestObjectTest() {
-        //Given
-        GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
+        // Given
+        GetResourcesByResourceRequest actual = new GetResourcesByResourceRequest();
 
-        //When
-        actual.resourceId("Test");
+        // When
+        actual.resource(mockResource);
 
-        //Then
-        assertEquals(expected.getResourceId(), actual.getResourceId());
+        // Then
+        assertEquals(expected.getResource(), actual.getResource());
     }
 
-    @Test (expected = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void returnErrorWithNoResourceIdTest() {
         //Given
-        GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
+        GetResourcesByResourceRequest actual = new GetResourcesByResourceRequest();
 
         //When
-        actual.setResourceId(null);
+        actual.setResource(null);
     }
 }
