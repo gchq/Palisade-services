@@ -16,8 +16,8 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
 
@@ -100,25 +100,24 @@ public abstract class ReadResponse {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-
         final ReadResponse that = (ReadResponse) o;
-
         return new EqualsBuilder()
+                .appendSuper(super.equals(o))
                 .append(message, that.message)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 61)
+        return new HashCodeBuilder(11,7)
+                .appendSuper(super.hashCode())
                 .append(message)
                 .toHashCode();
     }
@@ -126,6 +125,7 @@ public abstract class ReadResponse {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .appendSuper(super.toString())
                 .append("message", message)
                 .toString();
     }

@@ -16,7 +16,11 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
@@ -89,24 +93,35 @@ public class AddResourceRequest extends Request {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddResourceRequest)) return false;
-        if (!super.equals(o)) return false;
-        AddResourceRequest that = (AddResourceRequest) o;
-        return getResource().equals(that.getResource()) &&
-                getConnectionDetail().equals(that.getConnectionDetail());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final AddResourceRequest that = (AddResourceRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(resource, that.resource)
+                .append(connectionDetail, that.connectionDetail)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getResource(), getConnectionDetail());
+        return new HashCodeBuilder(9,13)
+                .appendSuper(super.hashCode())
+                .append(resource)
+                .append(connectionDetail)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AddResourceRequest.class.getSimpleName() + "[", "]")
-                .add("resource=" + resource)
-                .add("connectionDetail=" + connectionDetail)
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resource", resource)
+                .append("connectionDetail", connectionDetail)
                 .toString();
     }
 }

@@ -15,6 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -51,21 +55,32 @@ public class    GetResourcesByIdRequest extends Request {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesByIdRequest)) return false;
-        GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
-        return getResourceId().equals(that.getResourceId());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(resourceId, that.resourceId)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getResourceId());
+        return new HashCodeBuilder(37,29)
+                .appendSuper(super.hashCode())
+                .append(resourceId)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByIdRequest.class.getSimpleName() + "[", "]")
-                .add("resourceId='" + resourceId + "'")
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceId", resourceId)
                 .toString();
     }
 }

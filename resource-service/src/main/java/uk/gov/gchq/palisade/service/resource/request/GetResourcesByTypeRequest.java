@@ -15,6 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -55,22 +59,32 @@ public class GetResourcesByTypeRequest extends Request {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesByTypeRequest)) return false;
-        if (!super.equals(o)) return false;
-        GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
-        return getType().equals(that.getType());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(type, that.type)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getType());
+        return new HashCodeBuilder(37,33)
+                .appendSuper(super.hashCode())
+                .append(type)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByTypeRequest.class.getSimpleName() + "[", "]")
-                .add("type='" + type + "'")
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("type", type)
                 .toString();
     }
 }

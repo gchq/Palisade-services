@@ -15,6 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -56,22 +60,32 @@ public class GetResourcesBySerialisedFormatRequest extends Request {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesBySerialisedFormatRequest)) return false;
-        if (!super.equals(o)) return false;
-        GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
-        return getSerialisedFormat().equals(that.getSerialisedFormat());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(serialisedFormat, that.serialisedFormat)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getSerialisedFormat());
+        return new HashCodeBuilder(37,35)
+                .appendSuper(super.hashCode())
+                .append(serialisedFormat)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetResourcesBySerialisedFormatRequest.class.getSimpleName() + "[", "]")
-                .add("serialisedFormat='" + serialisedFormat + "'")
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("serialisedFormat", serialisedFormat)
                 .toString();
     }
 }

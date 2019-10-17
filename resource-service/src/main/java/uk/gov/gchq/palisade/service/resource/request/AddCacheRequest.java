@@ -16,7 +16,11 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.resource.request.CacheRequest;
@@ -279,27 +283,40 @@ public class AddCacheRequest<V> extends CacheRequest {
         this.timeToLive = Optional.empty();
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddCacheRequest)) return false;
-        if (!super.equals(o)) return false;
-        AddCacheRequest<?> that = (AddCacheRequest<?>) o;
-        return getLocallyCacheable() == that.getLocallyCacheable() &&
-                getTimeToLive().equals(that.getTimeToLive()) &&
-                getValue().equals(that.getValue());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final AddCacheRequest<?> that = (AddCacheRequest<?>) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(timeToLive, that.timeToLive)
+                .append(value, that.value)
+                .append(locallyCacheable, that.locallyCacheable)
+                .isEquals();
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getTimeToLive(), getValue(), getLocallyCacheable());
+        return new HashCodeBuilder(3,5)
+                .appendSuper(super.hashCode())
+                .append(timeToLive)
+                .append(value)
+                .append(locallyCacheable)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AddCacheRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("timeToLive=" + timeToLive)
-                .add("value=" + value)
-                .add("locallyCacheable=" + locallyCacheable)
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("timeToLive", timeToLive)
+                .append("value", value)
+                .append("locallyCacheable", locallyCacheable)
                 .toString();
     }
 }
