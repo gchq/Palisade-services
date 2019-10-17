@@ -122,7 +122,7 @@ public class HashMapBackingStore implements BackingStore {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (!(o instanceof CachedPair)) return false;
             CachedPair that = (CachedPair) o;
@@ -205,7 +205,7 @@ public class HashMapBackingStore implements BackingStore {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof HashMapBackingStore)) return false;
         HashMapBackingStore that = (HashMapBackingStore) o;

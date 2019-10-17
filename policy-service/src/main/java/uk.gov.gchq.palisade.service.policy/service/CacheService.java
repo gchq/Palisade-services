@@ -45,7 +45,7 @@ public interface CacheService extends Service {
      * @param <V>     the value type being added to the cache
      * @return a {@link CompletableFuture} which would be true once the information has been cached.
      */
-    <V> CompletableFuture<Boolean> add(final AddCacheRequest<V> request);
+    <V> CompletableFuture<Boolean> add(AddCacheRequest<V> request);
 
     /**
      * Retrieve an item from the cache. The {@code request} should be parameterized according to the expected type
@@ -56,7 +56,7 @@ public interface CacheService extends Service {
      * @param <V>     the value type being retrieved
      * @return a {@link CompletableFuture} that contains an {@link Optional} for the cached key
      */
-    <V> CompletableFuture<Optional<V>> get(final GetCacheRequest<V> request);
+    <V> CompletableFuture<Optional<V>> get(GetCacheRequest<V> request);
 
     /**
      * Returns a list of all cache entries available that match the given prefix. The cache will look in the namespace
@@ -65,7 +65,7 @@ public interface CacheService extends Service {
      * @param request the request configured with a prefix
      * @return a list of strings that are cache keys
      */
-    CompletableFuture<Stream<String>> list(final ListCacheRequest request);
+    CompletableFuture<Stream<String>> list(ListCacheRequest request);
 
     /**
      * Remove an item from the cache. The {@code request} contains the key name to remove. If an item with the matching key is in the cache,
@@ -74,7 +74,7 @@ public interface CacheService extends Service {
      * @param request the request to remove a cache entry
      * @return a future that will contain true if the key was sucessfully removed, false otherwise
      */
-    CompletableFuture<Boolean> remove(final RemoveCacheRequest request);
+    CompletableFuture<Boolean> remove(RemoveCacheRequest request);
 
     @Override
     default CompletableFuture<?> process(final Request request) {

@@ -324,7 +324,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof HadoopResourceService)) return false;
         HadoopResourceService that = (HadoopResourceService) o;

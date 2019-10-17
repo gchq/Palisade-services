@@ -102,9 +102,13 @@ public class MultiPolicy {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MultiPolicy)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof MultiPolicy)) {
+            return false;
+        }
         MultiPolicy that = (MultiPolicy) o;
         return getPolicies().equals(that.getPolicies());
     }

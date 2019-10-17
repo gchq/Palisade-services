@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Configuration properties for cache selection and configuration
+ * Configuration properties for cache selection and configuration.
  */
 @ConfigurationProperties(prefix = "cache")
 public class CacheConfiguration {
@@ -32,13 +33,13 @@ public class CacheConfiguration {
 
     /**
      * The backing store implementation type
-     * @return
+     * @return implementation
      */
     public String getImplementation() {
         return implementation;
     }
 
-    public void setImplementation(String implementation) {
+    public void setImplementation(final String implementation) {
         this.implementation = implementation;
     }
 
@@ -46,7 +47,7 @@ public class CacheConfiguration {
         return props;
     }
 
-    public void setProps(String props) {
+    public void setProps(final String props) {
         this.props = props;
     }
 
@@ -54,7 +55,7 @@ public class CacheConfiguration {
         return etcd;
     }
 
-    public void setEtcd(List<String> etcd) {
+    public void setEtcd(final List<String> etcd) {
         this.etcd = etcd;
     }
 }

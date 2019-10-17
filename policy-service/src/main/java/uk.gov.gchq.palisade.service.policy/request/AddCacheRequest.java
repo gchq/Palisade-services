@@ -279,7 +279,7 @@ public class AddCacheRequest<V> extends CacheRequest {
         this.timeToLive = Optional.empty();
     }
 
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof AddCacheRequest)) return false;
         if (!super.equals(o)) return false;
