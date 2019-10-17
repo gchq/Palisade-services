@@ -16,11 +16,11 @@
 package uk.gov.gchq.palisade.service.resource.service;
 
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.resource.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.ListCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.RemoveCacheRequest;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

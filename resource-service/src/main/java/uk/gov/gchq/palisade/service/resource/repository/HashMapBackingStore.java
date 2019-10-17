@@ -123,8 +123,12 @@ public class HashMapBackingStore implements BackingStore {
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (!(o instanceof CachedPair)) return false;
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CachedPair)) {
+                return false;
+            }
             CachedPair that = (CachedPair) o;
             return Arrays.equals(value, that.value) &&
                     clazz.equals(that.clazz);
@@ -206,8 +210,12 @@ public class HashMapBackingStore implements BackingStore {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HashMapBackingStore)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HashMapBackingStore)) {
+            return false;
+        }
         HashMapBackingStore that = (HashMapBackingStore) o;
         return getUseStatic() == that.getUseStatic() &&
                 cache.equals(that.cache) &&

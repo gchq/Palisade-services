@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.resource.request.CacheRequest;
 
 /**
  * This class is used to request the cache service return a list of known cache entries. The <code>key</code> methods

@@ -19,13 +19,16 @@ package uk.gov.gchq.palisade.service.resource;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-public class ResourceApplication {
+public final class ResourceApplication {
+
+    private ResourceApplication() {
+    }
 
     /**
      * Application entry point
+     *
      * @param args from the command line
      */
     public static void main(final String[] args) {

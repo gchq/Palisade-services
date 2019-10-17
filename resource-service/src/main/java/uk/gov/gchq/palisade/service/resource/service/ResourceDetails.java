@@ -28,9 +28,11 @@ public class ResourceDetails {
 
     public static final Pattern FILENAME_PATTERN = Pattern.compile("(?<type>.+)_(?<name>.+)\\.(?<format>.+)");
     public static final String FORMAT = "TYPE_FILENAME.FORMAT";
-    private String fileName, type, format;
+    private String fileName;
+    private String type;
+    private String format;
 
-    public ResourceDetails (final String fileName, final String type, final String format) {
+    public ResourceDetails(final String fileName, final String type, final String format) {
         requireNonNull(fileName, "fileName");
         requireNonNull(type, "type");
         requireNonNull(format, "format");
@@ -84,8 +86,12 @@ public class ResourceDetails {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResourceDetails)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResourceDetails)) {
+            return false;
+        }
         ResourceDetails that = (ResourceDetails) o;
         boolean fileName = getFileName().equals(that.getFileName());
         boolean type = getType().equals(that.getType());
@@ -95,6 +101,6 @@ public class ResourceDetails {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFileName(), getFormat(),  getType());
+        return Objects.hash(getFileName(), getFormat(), getType());
     }
 }

@@ -130,9 +130,15 @@ public abstract class CacheRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CacheRequest)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CacheRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         CacheRequest that = (CacheRequest) o;
         return getKey().equals(that.getKey()) &&
                 getService().equals(that.getService());

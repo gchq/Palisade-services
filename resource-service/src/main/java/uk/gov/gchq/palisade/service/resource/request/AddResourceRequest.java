@@ -89,9 +89,15 @@ public class AddResourceRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddResourceRequest)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AddResourceRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AddResourceRequest that = (AddResourceRequest) o;
         return getResource().equals(that.getResource()) &&
                 getConnectionDetail().equals(that.getConnectionDetail());

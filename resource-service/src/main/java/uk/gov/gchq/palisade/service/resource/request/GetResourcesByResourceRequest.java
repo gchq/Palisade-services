@@ -57,9 +57,15 @@ public class GetResourcesByResourceRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesByResourceRequest)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetResourcesByResourceRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
         return getResource().equals(that.getResource());
     }
