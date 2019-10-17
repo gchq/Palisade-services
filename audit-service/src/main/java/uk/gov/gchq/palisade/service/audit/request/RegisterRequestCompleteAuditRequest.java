@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.audit.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.Set;
 import java.util.StringJoiner;

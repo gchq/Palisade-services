@@ -3,6 +3,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import event.logging.impl.DefaultEventLoggingService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,15 +20,11 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
-import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.util.HashSet;
 
@@ -50,9 +47,11 @@ public class StroomAuditServiceTest {
     private static final long TEST_NUMBER_OF_RECORDS_RETURNED = 5;
     private static final String TEST_TOKEN = "token in the form of a UUID";
     private static final String TEST_RULES_APPLIED = "human readable description of the rules/policies been applied to the data";
+    private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
+
 
     private static StroomAuditService createStroomAuditService() {
-        return new StroomAuditService()
+        return new StroomAuditService(new DefaultEventLoggingService())
                 .organisation("Test Org")
                 .systemClassification("Some system classification")
                 .systemDescription("some system description")
@@ -194,94 +193,6 @@ public class StroomAuditServiceTest {
         Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_DESCRIPTION));
     }
 
-    @Test
-    public void auditRegisterRequestUserException() {
-        // Given
-        Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (logger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger log = logger;
-            log.addAppender(appender);
-        } else {
-            fail("Expected Logback logger");
-        }
-        // mock userId
-        final UserId mockUserId = mockUserID();
-        // mock context
-        final Context mockContext = mockContext();
-        // mock original request id
-        final RequestId mockOriginalRequestId = mockOriginalRequestId();
-        // mock exception
-        final Exception mockException = mockException();
-
-        final AuditRequest auditRequest = RegisterRequestExceptionAuditRequest.create(mockOriginalRequestId)
-                .withUserId(mockUserId)
-                .withResourceId(TEST_RESOURCE_ID)
-                .withContext(mockContext)
-                .withException(mockException)
-                .withServiceClass(UserService.class);
-        auditRequest.setOriginalRequestId(mockOriginalRequestId);
-
-        // When
-        STROOM_AUDIT_SERVICE.audit(auditRequest);
-
-        //Then
-        verify(appender, atLeastOnce()).doAppend(logCaptor.capture());
-        final String log = logCaptor.getValue().getFormattedMessage();
-        verify(mockOriginalRequestId, Mockito.atLeastOnce()).getId();
-        verify(mockUserId, Mockito.atLeastOnce()).getId();
-        verify(mockContext, Mockito.atLeastOnce()).getPurpose();
-        Assert.assertTrue(log.contains(TEST_USER_ID));
-        Assert.assertTrue(log.contains(TEST_PURPOSE));
-        Assert.assertTrue(log.contains(TEST_ORIGINAL_REQUEST_ID));
-        Assert.assertTrue(log.contains(TEST_RESOURCE_ID));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION));
-    }
-
-    @Test
-    public void auditRegisterRequestResourceException() {
-        // Given
-        Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        if (logger instanceof ch.qos.logback.classic.Logger) {
-            ch.qos.logback.classic.Logger log = logger;
-            log.addAppender(appender);
-        } else {
-            fail("Expected Logback logger");
-        }
-        // mock userId
-        final UserId mockUserId = mockUserID();
-        // mock context
-        final Context mockContext = mockContext();
-        // mock original request id
-        final RequestId mockOriginalRequestId = mockOriginalRequestId();
-        // mock exception
-        final Exception mockException = mockException();
-
-        final AuditRequest auditRequest = RegisterRequestExceptionAuditRequest.create(mockOriginalRequestId)
-                .withUserId(mockUserId)
-                .withResourceId(TEST_RESOURCE_ID)
-                .withContext(mockContext)
-                .withException(mockException)
-                .withServiceClass(ResourceService.class);
-
-        // When
-        STROOM_AUDIT_SERVICE.audit(auditRequest);
-
-        //Then
-        verify(appender, atLeastOnce()).doAppend(logCaptor.capture());
-        final String log = logCaptor.getValue().getFormattedMessage();
-        verify(mockOriginalRequestId, Mockito.atLeastOnce()).getId();
-        verify(mockUserId, Mockito.atLeastOnce()).getId();
-        verify(mockContext, Mockito.atLeastOnce()).getPurpose();
-        Assert.assertTrue(log.contains(TEST_USER_ID));
-        Assert.assertTrue(log.contains(TEST_PURPOSE));
-        Assert.assertTrue(log.contains(TEST_ORIGINAL_REQUEST_ID));
-        Assert.assertTrue(log.contains(TEST_RESOURCE_ID));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION));
-        Assert.assertTrue(log.contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION));
-    }
 
     @Test
     public void auditRegisterRequestOtherException() {
@@ -397,7 +308,7 @@ public class StroomAuditServiceTest {
         final LeafResource mockResource = mockResource();
         // mock exception
         final Exception mockException = Mockito.mock(Exception.class);
-        Mockito.doReturn(PalisadeService.TOKEN_NOT_FOUND_MESSAGE).when(mockException).getMessage();
+        Mockito.doReturn(TOKEN_NOT_FOUND_MESSAGE).when(mockException).getMessage();
 
         final AuditRequest auditRequest = ReadRequestExceptionAuditRequest.create(mockOriginalRequestId)
                 .withToken(TEST_TOKEN)

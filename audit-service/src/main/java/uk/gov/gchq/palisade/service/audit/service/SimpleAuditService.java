@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2019 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.audit.impl;
+package uk.gov.gchq.palisade.service.audit.service;
 
-
-import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.concurrent.CompletableFuture;
 
-public class MockAuditService implements AuditService {
-    private static AuditService mock = Mockito.mock(AuditService.class);
-
-    public static AuditService getMock() {
-        return mock;
-    }
-
-    public static void setMock(final AuditService mock) {
-        if (null == mock) {
-            MockAuditService.mock = Mockito.mock(AuditService.class);
-        }
-        MockAuditService.mock = mock;
-    }
+/**
+ * A SimpleAuditService is a simple implementation of a {@link AuditService} that keeps user data in the cache service
+ */
+public class SimpleAuditService implements AuditService {
+    public static final String CACHE_IMPL_KEY = "user.svc.hashmap.cache.svc";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditRequest request) {
-        return mock.audit(request);
+    public CompletableFuture<Boolean> audit(AuditRequest request) {
+        return null;
     }
 }
+

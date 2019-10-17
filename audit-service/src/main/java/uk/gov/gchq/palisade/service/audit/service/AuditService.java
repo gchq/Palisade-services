@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.audit;
+package uk.gov.gchq.palisade.service.audit.service;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.concurrent.CompletableFuture;
