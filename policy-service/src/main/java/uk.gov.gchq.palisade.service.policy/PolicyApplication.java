@@ -22,7 +22,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class PolicyApplication {
+public final class PolicyApplication {
+
+    private PolicyApplication() {
+    }
 
     /**
      * Application entry point

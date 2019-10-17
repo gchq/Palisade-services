@@ -33,6 +33,7 @@ public class CacheConfiguration {
 
     /**
      * The backing store implementation type
+     *
      * @return implementation
      */
     public String getImplementation() {

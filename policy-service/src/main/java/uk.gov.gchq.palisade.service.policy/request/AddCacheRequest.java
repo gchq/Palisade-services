@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
@@ -280,9 +279,15 @@ public class AddCacheRequest<V> extends CacheRequest {
     }
 
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddCacheRequest)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AddCacheRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AddCacheRequest<?> that = (AddCacheRequest<?>) o;
         return getLocallyCacheable() == that.getLocallyCacheable() &&
                 getTimeToLive().equals(that.getTimeToLive()) &&

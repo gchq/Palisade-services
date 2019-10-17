@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
