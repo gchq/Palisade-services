@@ -324,9 +324,8 @@ public class HadoopResourceService implements ResourceService {
         }
         final HadoopResourceService that = (HadoopResourceService) o;
         return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(config, that.config)
-                .append(cacheService, that.cacheService)
+                //.append(config, that.config)
+                .append(cacheService.getClass(), that.cacheService.getClass())
                 .append(fileSystem, that.fileSystem)
                 .isEquals();
     }
@@ -334,9 +333,8 @@ public class HadoopResourceService implements ResourceService {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(37,31)
-                .appendSuper(super.hashCode())
-                .append(config)
-                .append(cacheService)
+                //.append(config)
+                .append(cacheService.getClass())
                 .append(fileSystem)
                 .toHashCode();
     }
@@ -344,7 +342,6 @@ public class HadoopResourceService implements ResourceService {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .appendSuper(super.toString())
                 .append("config", config)
                 .append("cacheService", cacheService)
                 .append("fileSystem", fileSystem)
