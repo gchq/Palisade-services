@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
@@ -312,29 +314,40 @@ public class HadoopResourceService implements ResourceService {
         return plainMapWithoutResolvingValues;
     }
 
-
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("conf", config)
-                .append("fileSystem", fileSystem)
-                .append("cacheService", cacheService)
-                .build();
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HadoopResourceService)) return false;
-        HadoopResourceService that = (HadoopResourceService) o;
-        boolean conf = getConf().equals(that.getConf());
-        boolean fileSystem = getFileSystem().equals(that.getFileSystem());
-        return conf && fileSystem;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final HadoopResourceService that = (HadoopResourceService) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(config, that.config)
+                .append(cacheService, that.cacheService)
+                .append(fileSystem, that.fileSystem)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getConf(), getFileSystem(),  getCacheService());
+        return new HashCodeBuilder(37,31)
+                .appendSuper(super.hashCode())
+                .append(config)
+                .append(cacheService)
+                .append(fileSystem)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("config", config)
+                .append("cacheService", cacheService)
+                .append("fileSystem", fileSystem)
+                .toString();
     }
 }

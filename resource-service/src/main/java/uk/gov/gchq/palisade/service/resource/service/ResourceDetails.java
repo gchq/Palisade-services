@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.ToStringBuilder;
 
 import java.util.Objects;
@@ -74,27 +77,39 @@ public class ResourceDetails {
     }
 
     @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("type", type)
-                .append("fileName", fileName)
-                .append("format", format)
-                .build();
-    }
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResourceDetails)) return false;
-        ResourceDetails that = (ResourceDetails) o;
-        boolean fileName = getFileName().equals(that.getFileName());
-        boolean type = getType().equals(that.getType());
-        boolean format = getFormat().equals(that.getFormat());
-        return fileName && type && format;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final ResourceDetails that = (ResourceDetails) o;
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(fileName, that.fileName)
+                .append(type, that.type)
+                .append(format, that.format)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFileName(), getFormat(),  getType());
+        return new HashCodeBuilder(37,31)
+                .appendSuper(super.hashCode())
+                .append(fileName)
+                .append(type)
+                .append(format)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("fileName", fileName)
+                .append("type", type)
+                .append("format", format)
+                .toString();
     }
 }
