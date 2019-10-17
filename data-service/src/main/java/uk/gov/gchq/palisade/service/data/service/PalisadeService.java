@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.service;
+package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
-import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
+import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
+import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
+import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
-public class AuditService implements Service {
+public class PalisadeService implements Service {
 
-    private final AuditClient client;
+    private final PalisadeClient client;
     private final Executor executor;
 
-    public AuditService(final AuditClient auditClient, final Executor executor) {
-        this.client = auditClient;
+    public PalisadeService(final PalisadeClient palisadeClient, final Executor executor) {
+        this.client = palisadeClient;
         this.executor = executor;
     }
 
 
-    CompletionStage<Boolean> audit(final AuditRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.client.audit(request), this.executor);
+    CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
+        return CompletableFuture.supplyAsync(() -> this.client.getDataRequestConfig(request), this.executor);
     }
-
 }

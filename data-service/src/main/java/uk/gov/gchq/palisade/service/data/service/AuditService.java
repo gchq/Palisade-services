@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.service;
+package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
-import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
+import uk.gov.gchq.palisade.service.data.request.AuditRequest;
+import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -33,8 +33,7 @@ public class AuditService implements Service {
         this.executor = executor;
     }
 
-
-    CompletionStage<Boolean> audit(final AuditRequest request) {
+    public CompletionStage<Boolean> audit(final AuditRequest request) {
         return CompletableFuture.supplyAsync(() -> this.client.audit(request), this.executor);
     }
 
