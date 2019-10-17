@@ -108,7 +108,6 @@ public class HadoopResourceService implements ResourceService {
     }
 
     public HadoopResourceService() {
-
     }
 
     @Override
