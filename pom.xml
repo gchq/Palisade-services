@@ -117,7 +117,7 @@
                     <configLocation>code-style/checkstyle.xml</configLocation>
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>false</failsOnError>
+                    <failsOnError>true</failsOnError>
                     <headerLocation>code-style/licenseHeader.txt
                     </headerLocation>
                 </configuration>
@@ -130,7 +130,7 @@
                             </configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
-                            <failsOnError>false</failsOnError>
+                            <failsOnError>true</failsOnError>
                             <headerLocation>code-style/licenseHeader.txt
                             </headerLocation>
                         </configuration>

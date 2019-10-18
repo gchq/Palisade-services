@@ -110,6 +110,8 @@
         <module name="VisibilityModifier">
             <property name="allowPublicImmutableFields" value="true"/>
             <property name="allowPublicFinalFields" value="true"/>
+            <property name="packageAllowed" value="true"/>
+            <property name="protectedAllowed" value="true"/>
         </module>
         <module name="AvoidNestedBlocks"/>
         <module name="LeftCurly"/>
@@ -137,7 +139,4 @@
     </module>
 
     <module name="UniqueProperties"/>
-    <module name="SuppressionFilter">
-        <property name="file" value="code-style/jetcd-suppression.xml"/>
-    </module>
 </module>
