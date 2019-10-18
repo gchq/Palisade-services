@@ -16,10 +16,8 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
 import org.apache.log4j.Logger;
-
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;

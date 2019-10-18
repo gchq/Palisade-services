@@ -15,12 +15,14 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
+import uk.gov.gchq.palisade.service.request.Request;
+
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class GetResourcesByIdRequest {
+public class GetResourcesByIdRequest extends Request {
 
     private String resourceId;
 

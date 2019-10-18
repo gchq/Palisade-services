@@ -31,17 +31,14 @@ import event.logging.util.DeviceUtil;
 import event.logging.util.EventLoggingUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ServiceState;
-import uk.gov.gchq.palisade.service.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.sql.Date;
 import java.util.HashMap;
@@ -86,6 +83,7 @@ public class StroomAuditService implements AuditService {
     static final String READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION = "The provided token is invalid.";
     static final String READ_REQUEST_EXCEPTION_OTHER_TYPE_ID = "READ_REQUEST_EXCEPTION_OTHER";
     static final String READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION = "Audits the fact that an exception was thrown when trying to provide the data to the user.";
+    static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
         errorLogger = LogManager.getLogger(StroomAuditService.class);
@@ -373,7 +371,7 @@ public class StroomAuditService implements AuditService {
         viewEventDetail.setView(view);
         Outcome outcome = createOutcome(false);
         view.setOutcome(outcome);
-        if (readRequestExceptionAuditRequest.exception.getMessage().startsWith(PalisadeService.TOKEN_NOT_FOUND_MESSAGE)) {
+        if (readRequestExceptionAuditRequest.exception.getMessage().startsWith(TOKEN_NOT_FOUND_MESSAGE)) {
             viewEventDetail.setTypeId(READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID);
             viewEventDetail.setDescription(READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION);
             outcome.setDescription(READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION);

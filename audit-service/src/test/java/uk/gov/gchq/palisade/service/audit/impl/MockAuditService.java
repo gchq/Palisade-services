@@ -18,9 +18,8 @@ package uk.gov.gchq.palisade.service.audit.impl;
 
 
 import org.mockito.Mockito;
-
-import uk.gov.gchq.palisade.service.audit.AuditService;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.concurrent.CompletableFuture;
 

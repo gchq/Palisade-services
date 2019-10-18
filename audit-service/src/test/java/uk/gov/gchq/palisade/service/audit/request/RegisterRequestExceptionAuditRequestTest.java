@@ -8,7 +8,7 @@ import org.junit.runners.JUnit4;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.audit.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.io.IOException;
 import java.util.AbstractMap;

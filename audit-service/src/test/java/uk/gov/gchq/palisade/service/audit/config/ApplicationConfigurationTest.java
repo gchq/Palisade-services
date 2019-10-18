@@ -8,8 +8,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.gov.gchq.palisade.service.audit.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
+import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class ApplicationConfigurationTest {
     static {
         expectedAudits.add(LoggerAuditService.class);
         expectedAudits.add(StroomAuditService.class);
+        expectedAudits.add(SimpleAuditService.class);
     }
 
     @Autowired
