@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -52,54 +53,6 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
         this.rulesApplied = requireNonNull(rulesApplied);
         this.numberOfRecordsReturned = numberOfRecordsReturned;
         this.numberOfRecordsProcessed = numberOfRecordsProcessed;
-    }
-
-    public interface IUser {
-        /**
-         * @param user {@link User} is the user that made the initial registration request to access data
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        ILeafResource withUser(final User user);
-    }
-
-    public interface ILeafResource {
-        /**
-         * @param leafResource the {@link LeafResource} which the data has just finished being read
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        IContext withLeafResource(final LeafResource leafResource);
-    }
-
-    public interface IContext {
-        /**
-         * @param context the context that was passed by the client to the palisade service
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        IRulesApplied withContext(final Context context);
-    }
-
-    public interface IRulesApplied {
-        /**
-         * @param rules {@link Rules} is the rules that are being applied to this resource for this request
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        INumberOfRecordsReturned withRulesApplied(final Rules rules);
-    }
-
-    public interface INumberOfRecordsReturned {
-        /**
-         * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        INumberOfRecordsProcessed withNumberOfRecordsReturned(final long numberOfRecordsReturned);
-    }
-
-    public interface INumberOfRecordsProcessed {
-        /**
-         * @param numberOfRecordsProcessed is the number of records that was processed from this resource
-         * @return the {@link ReadRequestCompleteAuditRequest}
-         */
-        ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(final long numberOfRecordsProcessed);
     }
 
     /**
@@ -156,5 +109,53 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
                 .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
                 .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
                 .toString();
+    }
+
+    public interface IUser {
+        /**
+         * @param user {@link User} is the user that made the initial registration request to access data
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        ILeafResource withUser(final User user);
+    }
+
+    public interface ILeafResource {
+        /**
+         * @param leafResource the {@link LeafResource} which the data has just finished being read
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        IContext withLeafResource(final LeafResource leafResource);
+    }
+
+    public interface IContext {
+        /**
+         * @param context the context that was passed by the client to the palisade service
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        IRulesApplied withContext(final Context context);
+    }
+
+    public interface IRulesApplied {
+        /**
+         * @param rules {@link Rules} is the rules that are being applied to this resource for this request
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        INumberOfRecordsReturned withRulesApplied(final Rules rules);
+    }
+
+    public interface INumberOfRecordsReturned {
+        /**
+         * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        INumberOfRecordsProcessed withNumberOfRecordsReturned(final long numberOfRecordsReturned);
+    }
+
+    public interface INumberOfRecordsProcessed {
+        /**
+         * @param numberOfRecordsProcessed is the number of records that was processed from this resource
+         * @return the {@link ReadRequestCompleteAuditRequest}
+         */
+        ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(final long numberOfRecordsProcessed);
     }
 }

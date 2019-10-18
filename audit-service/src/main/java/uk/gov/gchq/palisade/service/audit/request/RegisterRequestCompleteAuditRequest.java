@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -49,30 +50,6 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
         this.user = requireNonNull(user);
         this.leafResources = requireNonNull(leafResources);
         this.context = requireNonNull(context);
-    }
-
-    public interface IUser {
-        /**
-         * @param user {@link User} is the user that made the initial registration request to access data
-         * @return the {@link RegisterRequestCompleteAuditRequest}
-         */
-        ILeafResources withUser(final User user);
-    }
-
-    public interface ILeafResources {
-        /**
-         * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
-         * @return the {@link RegisterRequestCompleteAuditRequest}
-         */
-        IContext withLeafResources(final Set<LeafResource> leafResources);
-    }
-
-    public interface IContext {
-        /**
-         * @param context the context that was passed by the client to the palisade service
-         * @return the {@link RegisterRequestCompleteAuditRequest}
-         */
-        RegisterRequestCompleteAuditRequest withContext(final Context context);
     }
 
     /**
@@ -120,5 +97,29 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
                 .add("leafResources=" + leafResources)
                 .add("context=" + context)
                 .toString();
+    }
+
+    public interface IUser {
+        /**
+         * @param user {@link User} is the user that made the initial registration request to access data
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        ILeafResources withUser(final User user);
+    }
+
+    public interface ILeafResources {
+        /**
+         * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        IContext withLeafResources(final Set<LeafResource> leafResources);
+    }
+
+    public interface IContext {
+        /**
+         * @param context the context that was passed by the client to the palisade service
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        RegisterRequestCompleteAuditRequest withContext(final Context context);
     }
 }

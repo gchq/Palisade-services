@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -36,46 +37,6 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
         this.context = requireNonNull(context);
         this.exception = requireNonNull(exception);
         this.serviceClass = requireNonNull(serviceClass);
-    }
-
-    public interface IUserId {
-        /**
-         * @param userId {@link UserId} is the user id provided in the register request
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        IResourceId withUserId(final UserId userId);
-    }
-
-    public interface IResourceId {
-        /**
-         * @param resourceId {@link String} is the resource id provided in the register request
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        IContext withResourceId(final String resourceId);
-    }
-
-    public interface IContext {
-        /**
-         * @param context the context that was passed by the client to the palisade service
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        IException withContext(final Context context);
-    }
-
-    public interface IException {
-        /**
-         * @param exception {@link Throwable} is the type of the exception while processing
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        IServiceClass withException(final Throwable exception);
-    }
-
-    public interface IServiceClass {
-        /**
-         * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        RegisterRequestExceptionAuditRequest withServiceClass(final Class<? extends Service> serviceClass);
     }
 
     /**
@@ -129,5 +90,45 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
                 .add("exception=" + exception)
                 .add("serviceClass=" + serviceClass)
                 .toString();
+    }
+
+    public interface IUserId {
+        /**
+         * @param userId {@link UserId} is the user id provided in the register request
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        IResourceId withUserId(final UserId userId);
+    }
+
+    public interface IResourceId {
+        /**
+         * @param resourceId {@link String} is the resource id provided in the register request
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        IContext withResourceId(final String resourceId);
+    }
+
+    public interface IContext {
+        /**
+         * @param context the context that was passed by the client to the palisade service
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        IException withContext(final Context context);
+    }
+
+    public interface IException {
+        /**
+         * @param exception {@link Throwable} is the type of the exception while processing
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        IServiceClass withException(final Throwable exception);
+    }
+
+    public interface IServiceClass {
+        /**
+         * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        RegisterRequestExceptionAuditRequest withServiceClass(final Class<? extends Service> serviceClass);
     }
 }

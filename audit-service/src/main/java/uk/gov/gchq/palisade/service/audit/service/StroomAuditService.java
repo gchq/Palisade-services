@@ -31,6 +31,7 @@ import event.logging.util.DeviceUtil;
 import event.logging.util.EventLoggingUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ServiceState;
@@ -55,14 +56,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class StroomAuditService implements AuditService {
     public static final String CONFIG_KEY = "stroom";
-
-    private final DefaultEventLoggingService eventLogger;
-    private final Logger errorLogger;
-
-    private static final Map<Class, BiConsumer<DefaultEventLoggingService, AuditRequest>> DISPATCHER = new HashMap<>();
-    private static final System SYSTEM = new System();
-    private static final String EVENT_GENERATOR = "Palisade";
-
     static final String REGISTER_REQUEST_NO_RESOURCES_TYPE_ID = "REGISTER_REQUEST_NO_RESOURCES";
     static final String REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION = "Audits the fact that the user requested access to some resources however they do not have permission to access any of those resources.";
     static final String REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION = "The user does not have permission to access any of those resources.";
@@ -84,120 +77,23 @@ public class StroomAuditService implements AuditService {
     static final String READ_REQUEST_EXCEPTION_OTHER_TYPE_ID = "READ_REQUEST_EXCEPTION_OTHER";
     static final String READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION = "Audits the fact that an exception was thrown when trying to provide the data to the user.";
     static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
+    private static final Map<Class, BiConsumer<DefaultEventLoggingService, AuditRequest>> DISPATCHER = new HashMap<>();
+    private static final System SYSTEM = new System();
+    private static final String EVENT_GENERATOR = "Palisade";
+
+    static {
+        DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, StroomAuditService::onRegisterRequestComplete);
+        DISPATCHER.put(RegisterRequestExceptionAuditRequest.class, StroomAuditService::onRegisterRequestException);
+        DISPATCHER.put(ReadRequestCompleteAuditRequest.class, StroomAuditService::onReadRequestComplete);
+        DISPATCHER.put(ReadRequestExceptionAuditRequest.class, StroomAuditService::onReadRequestException);
+    }
+
+    private final DefaultEventLoggingService eventLogger;
+    private final Logger errorLogger;
 
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
         errorLogger = LogManager.getLogger(StroomAuditService.class);
         eventLogger = eventLoggingService;
-    }
-
-    /**
-     * @param systemName the name of the system from which the audit service is receiving audit logs from
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService systemName(final String systemName) {
-        requireNonNull(systemName, "The system name cannot be null.");
-        SYSTEM.setName(systemName);
-        return this;
-    }
-
-    public void setSystemName(final String systemName) {
-        systemName(systemName);
-    }
-
-    public String getSystemName() {
-        return SYSTEM.getName();
-    }
-
-    /**
-     * @param organisation the organisation that the system belongs too
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService organisation(final String organisation) {
-        requireNonNull(organisation, "The organisation cannot be null.");
-        SYSTEM.setOrganisation(organisation);
-        return this;
-    }
-
-    public void setOrganisation(final String organisation) {
-        organisation(organisation);
-    }
-
-    public String getOrganisation() {
-        return SYSTEM.getOrganisation();
-    }
-
-    /**
-     * @param env the system environment of this deployment, e.g prod, ref, test
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService systemEnv(final String env) {
-        requireNonNull(env, "The env cannot be null.");
-        SYSTEM.setEnvironment(env);
-        return this;
-    }
-
-    public void setSystemEnv(final String systemEnv) {
-        systemEnv(systemEnv);
-    }
-
-    public String getSystemEnv() {
-        return SYSTEM.getEnvironment();
-    }
-
-    /**
-     * @param description the description of the system from which the audit service is receiving audit logs from
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService systemDescription(final String description) {
-        requireNonNull(description, "The description cannot be null.");
-        SYSTEM.setDescription(description);
-        return this;
-    }
-
-    public void setSystemDescription(final String description) {
-        systemDescription(description);
-    }
-
-    public String getSystemDescription() {
-        return SYSTEM.getDescription();
-    }
-
-    /**
-     * @param systemVersion the system version of this deployment, v1, v1.0.2, v2, etc
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService systemVersion(final String systemVersion) {
-        requireNonNull(systemVersion, "The systemVersion cannot be null.");
-        SYSTEM.setVersion(systemVersion);
-        return this;
-    }
-
-    public void setSystemVersion(final String systemVersion) {
-        systemVersion(systemVersion);
-    }
-
-    public String getSystemVersion() {
-        return SYSTEM.getVersion();
-    }
-
-    /**
-     * @param systemClassification the classification of the system from which the audit service is receiving audit logs from
-     * @return {@link StroomAuditService}
-     */
-    public StroomAuditService systemClassification(final String systemClassification) {
-        requireNonNull(systemClassification, "The systemClassification cannot be null.");
-        Classification classification = new Classification();
-        classification.setText(systemClassification);
-        SYSTEM.setClassification(classification);
-        return this;
-    }
-
-    public void setSystemClassification(final String systemClassification) {
-        systemClassification(systemClassification);
-    }
-
-    public String getSystemClassification() {
-        return SYSTEM.getClassification().getText();
     }
 
     private static Event generateNewGenericEvent(DefaultEventLoggingService loggingService, final AuditRequest request) {
@@ -240,13 +136,6 @@ public class StroomAuditService implements AuditService {
         Outcome outcome = new Outcome();
         outcome.setSuccess(success);
         return outcome;
-    }
-
-    static {
-        DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, StroomAuditService::onRegisterRequestComplete);
-        DISPATCHER.put(RegisterRequestExceptionAuditRequest.class, StroomAuditService::onRegisterRequestException);
-        DISPATCHER.put(ReadRequestCompleteAuditRequest.class, StroomAuditService::onReadRequestComplete);
-        DISPATCHER.put(ReadRequestExceptionAuditRequest.class, StroomAuditService::onReadRequestException);
     }
 
     private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, AuditRequest request) {
@@ -391,6 +280,116 @@ public class StroomAuditService implements AuditService {
         token.setValue(readRequestExceptionAuditRequest.token);
         view.getData().add(token);
         loggingService.log(viewEvent);
+    }
+
+    /**
+     * @param systemName the name of the system from which the audit service is receiving audit logs from
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService systemName(final String systemName) {
+        requireNonNull(systemName, "The system name cannot be null.");
+        SYSTEM.setName(systemName);
+        return this;
+    }
+
+    public String getSystemName() {
+        return SYSTEM.getName();
+    }
+
+    public void setSystemName(final String systemName) {
+        systemName(systemName);
+    }
+
+    /**
+     * @param organisation the organisation that the system belongs too
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService organisation(final String organisation) {
+        requireNonNull(organisation, "The organisation cannot be null.");
+        SYSTEM.setOrganisation(organisation);
+        return this;
+    }
+
+    public String getOrganisation() {
+        return SYSTEM.getOrganisation();
+    }
+
+    public void setOrganisation(final String organisation) {
+        organisation(organisation);
+    }
+
+    /**
+     * @param env the system environment of this deployment, e.g prod, ref, test
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService systemEnv(final String env) {
+        requireNonNull(env, "The env cannot be null.");
+        SYSTEM.setEnvironment(env);
+        return this;
+    }
+
+    public String getSystemEnv() {
+        return SYSTEM.getEnvironment();
+    }
+
+    public void setSystemEnv(final String systemEnv) {
+        systemEnv(systemEnv);
+    }
+
+    /**
+     * @param description the description of the system from which the audit service is receiving audit logs from
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService systemDescription(final String description) {
+        requireNonNull(description, "The description cannot be null.");
+        SYSTEM.setDescription(description);
+        return this;
+    }
+
+    public String getSystemDescription() {
+        return SYSTEM.getDescription();
+    }
+
+    public void setSystemDescription(final String description) {
+        systemDescription(description);
+    }
+
+    /**
+     * @param systemVersion the system version of this deployment, v1, v1.0.2, v2, etc
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService systemVersion(final String systemVersion) {
+        requireNonNull(systemVersion, "The systemVersion cannot be null.");
+        SYSTEM.setVersion(systemVersion);
+        return this;
+    }
+
+    public String getSystemVersion() {
+        return SYSTEM.getVersion();
+    }
+
+    public void setSystemVersion(final String systemVersion) {
+        systemVersion(systemVersion);
+    }
+
+    /**
+     * @param systemClassification the classification of the system from which the audit service is receiving audit logs from
+     * @return {@link StroomAuditService}
+     */
+    public StroomAuditService systemClassification(final String systemClassification) {
+        requireNonNull(systemClassification, "The systemClassification cannot be null.");
+        Classification classification = new Classification();
+        classification.setText(systemClassification);
+        SYSTEM.setClassification(classification);
+        return this;
+    }
+
+    public String getSystemClassification() {
+        return SYSTEM.getClassification().getText();
+    }
+
+    public void setSystemClassification(final String systemClassification) {
+        systemClassification(systemClassification);
     }
 
     @Override

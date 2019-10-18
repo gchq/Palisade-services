@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
@@ -28,30 +29,6 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
         this.token = requireNonNull(token);
         this.leafResource = requireNonNull(leafResource);
         this.exception = requireNonNull(exception);
-    }
-
-    public interface IToken {
-        /**
-         * @param token this is the token that is used to retrieve cached information from the palisade service
-         * @return the {@link ReadRequestExceptionAuditRequest}
-         */
-        ILeafResource withToken(final String token);
-    }
-
-    public interface ILeafResource {
-        /**
-         * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
-         * @return the {@link ReadRequestExceptionAuditRequest}
-         */
-        IThrowable withLeafResource(final LeafResource leafResource);
-    }
-
-    public interface IThrowable {
-        /**
-         * @param exception {@link Throwable} is the type of the exception while processing
-         * @return the {@link ReadRequestExceptionAuditRequest}
-         */
-        ReadRequestExceptionAuditRequest withException(final Throwable exception);
     }
 
     /**
@@ -99,5 +76,29 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
                 .add("leafResource=" + leafResource)
                 .add("exception=" + exception)
                 .toString();
+    }
+
+    public interface IToken {
+        /**
+         * @param token this is the token that is used to retrieve cached information from the palisade service
+         * @return the {@link ReadRequestExceptionAuditRequest}
+         */
+        ILeafResource withToken(final String token);
+    }
+
+    public interface ILeafResource {
+        /**
+         * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
+         * @return the {@link ReadRequestExceptionAuditRequest}
+         */
+        IThrowable withLeafResource(final LeafResource leafResource);
+    }
+
+    public interface IThrowable {
+        /**
+         * @param exception {@link Throwable} is the type of the exception while processing
+         * @return the {@link ReadRequestExceptionAuditRequest}
+         */
+        ReadRequestExceptionAuditRequest withException(final Throwable exception);
     }
 }
