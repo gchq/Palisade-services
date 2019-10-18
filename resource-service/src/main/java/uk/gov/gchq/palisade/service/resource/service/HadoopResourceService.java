@@ -47,6 +47,7 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -230,6 +231,10 @@ public class HadoopResourceService implements ResourceService {
             final int fsDepth = new Path(configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)).depth();
 
             if (fileDepth > fsDepth + 1) {
+                Path par = path.getParent();
+                URI uri = par.toUri();
+                String string = uri.toString();
+                String id = fixURIScheme(string);
                 DirectoryResource parent = new DirectoryResource().id(fixURIScheme(path.getParent().toUri().toString()));
                 resource.setParent(parent);
                 resolveParents(parent, configuration);

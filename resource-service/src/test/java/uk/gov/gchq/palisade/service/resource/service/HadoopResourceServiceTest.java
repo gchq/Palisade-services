@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.resource.service;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
@@ -37,6 +38,7 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -55,6 +57,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,6 +100,10 @@ public class HadoopResourceServiceTest {
 
     static {
         TMP_DIRECTORY = PathUtils.getTestDir(HadoopResourceServiceTest.class);
+    }
+
+    static String asUri(String path) throws URISyntaxException {
+        return new Path(path.replace("\\", "/")).toUri().toString();
     }
 
     @Before
@@ -367,37 +375,29 @@ public class HadoopResourceServiceTest {
 
     @Test
     public void shouldResolveParents() throws Exception {
-        final String parent = testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1" + "/" + "folder2/";
-        final String id = parent + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
-        final FileResource fileResource = new FileResource().id(id);
-        HadoopResourceService.resolveParents(fileResource, config);
+        String[] walk = new String[] {
+                testFolder.getRoot().getAbsolutePath(),
+                "inputDir",
+                "folder1",
+                "folder2",
+                getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE)};
 
-        final ParentResource parent1 = fileResource.getParent();
-        assertEquals(parent, parent1.getId());
+        ChildResource childResource = new FileResource().id(asUri(String.join("/", walk)));
+        HadoopResourceService.resolveParents(childResource, config);
+        ParentResource parentResource = childResource.getParent();
 
-        assertTrue(parent1 instanceof ChildResource);
-        assertTrue(parent1 instanceof DirectoryResource);
-        final ChildResource child = (ChildResource) parent1;
-        HadoopResourceService.resolveParents(child, config);
-        final ParentResource parent2 = child.getParent();
-        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir" + "/" + "folder1/", parent2.getId());
+        for (int depth = walk.length; depth > 1; depth--) {
+            String parent = String.join("/", ArrayUtils.subarray(walk, 0, depth - 1));
+            String child = parent + "/" + walk[depth - 1];
 
-        assertTrue(parent2 instanceof ChildResource);
-        assertTrue(parent2 instanceof DirectoryResource);
-        final ChildResource child2 = (ChildResource) parent2;
-        HadoopResourceService.resolveParents(child2, config);
-        final ParentResource parent3 = child2.getParent();
-        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/inputDir/", parent3.getId());
+            assertEquals(asUri(parent), asUri(parentResource.getId()));
+            assertEquals(asUri(child), asUri(childResource.getId()));
 
-        assertTrue(parent3 instanceof ChildResource);
-        assertTrue(parent3 instanceof DirectoryResource);
-        final ChildResource child3 = (ChildResource) parent3;
-        HadoopResourceService.resolveParents(child3, config);
-        final ParentResource parent4 = child3.getParent();
-        assertEquals(testFolder.getRoot().getAbsolutePath().replace("\\", "/") + "/", parent4.getId());
-
-        assertTrue(parent4 instanceof SystemResource);
-        assertFalse(parent4 instanceof DirectoryResource);
+            if (depth > 2) {
+                childResource = (ChildResource) parentResource;
+                parentResource = childResource.getParent();
+            }
+        }
     }
 
     private LeafResource mockResource() {
