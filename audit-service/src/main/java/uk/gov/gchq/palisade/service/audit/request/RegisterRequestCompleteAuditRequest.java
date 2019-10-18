@@ -26,6 +26,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -64,29 +65,18 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(leafResources, that.leafResources)
-                .append(context, that.context)
-                .isEquals();
+        return user.equals(that.user) &&
+                leafResources.equals(that.leafResources) &&
+                context.equals(that.context);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(23, 41)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(leafResources)
-                .append(context)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), user, leafResources, context);
     }
 
     @Override

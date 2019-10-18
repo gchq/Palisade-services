@@ -2,12 +2,11 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -43,29 +42,18 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(token, that.token)
-                .append(leafResource, that.leafResource)
-                .append(exception, that.exception)
-                .isEquals();
+        return token.equals(that.token) &&
+                leafResource.equals(that.leafResource) &&
+                exception.equals(that.exception);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(19, 39)
-                .appendSuper(super.hashCode())
-                .append(token)
-                .append(leafResource)
-                .append(exception)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), token, leafResource, exception);
     }
 
     @Override

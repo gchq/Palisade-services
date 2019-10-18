@@ -12,6 +12,7 @@ import uk.gov.gchq.palisade.service.request.Request;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -63,30 +64,18 @@ public class AuditRequest<ZoneDateTime> extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AuditRequest that = (AuditRequest) o;
-        return new EqualsBuilder()
-                //TODO should appendSuper be here, if so it needs adding on other objects where it is missing
-                .appendSuper(super.equals(o))
-                .append(timestamp, that.timestamp)
-                .append(serverIp, that.serverIp)
-                .append(serverHostname, that.serverHostname)
-                .isEquals();
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        final AuditRequest<?> that = (AuditRequest<?>) o;
+        return Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(serverIp, that.serverIp) &&
+                Objects.equals(serverHostname, that.serverHostname);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(19, 37)
-                .appendSuper(super.hashCode())
-                .append(timestamp)
-                .append(serverIp)
-                .append(serverHostname)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), timestamp, serverIp, serverHostname);
     }
 
     @Override

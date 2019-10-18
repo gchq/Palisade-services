@@ -10,6 +10,7 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -51,33 +52,20 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(userId, that.userId)
-                .append(resourceId, that.resourceId)
-                .append(context, that.context)
-                .append(exception, that.exception)
-                .append(serviceClass, that.serviceClass)
-                .isEquals();
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                exception.equals(that.exception) &&
+                serviceClass.equals(that.serviceClass);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(27, 41)
-                .appendSuper(super.hashCode())
-                .append(userId)
-                .append(resourceId)
-                .append(context)
-                .append(exception)
-                .append(serviceClass)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
     }
 
     @Override

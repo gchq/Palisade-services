@@ -26,6 +26,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -67,35 +68,21 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(context, that.context)
-                .append(leafResource, that.leafResource)
-                .append(rulesApplied, that.rulesApplied)
-                .append(numberOfRecordsReturned, that.numberOfRecordsReturned)
-                .append(numberOfRecordsProcessed, that.numberOfRecordsProcessed)
-                .isEquals();
+        return numberOfRecordsReturned == that.numberOfRecordsReturned &&
+                numberOfRecordsProcessed == that.numberOfRecordsProcessed &&
+                user.equals(that.user) &&
+                leafResource.equals(that.leafResource) &&
+                context.equals(that.context) &&
+                rulesApplied.equals(that.rulesApplied);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(29, 37)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(context)
-                .append(leafResource)
-                .append(rulesApplied)
-                .append(numberOfRecordsReturned)
-                .append(numberOfRecordsProcessed)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
     }
 
     @Override
