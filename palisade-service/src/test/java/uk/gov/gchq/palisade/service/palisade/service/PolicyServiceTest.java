@@ -72,4 +72,15 @@ public class PolicyServiceTest {
         assertEquals(multiPolicy, actual);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void getUserReturnsError() {
+
+        //Given
+        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenThrow(new RuntimeException());
+
+        //When
+        GetPolicyRequest request = new GetPolicyRequest().user(testUser);
+        MultiPolicy actual = policyService.getPolicy(request);
+    }
+
 }

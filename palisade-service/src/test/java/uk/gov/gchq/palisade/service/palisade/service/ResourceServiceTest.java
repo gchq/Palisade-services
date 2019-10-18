@@ -67,4 +67,15 @@ public class ResourceServiceTest {
         assertEquals(resources, actual);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void getUserReturnsError() {
+
+        //Given
+        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenThrow(new RuntimeException());
+
+        //When
+        GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
+        Map<LeafResource, ConnectionDetail> actual = resourceService.getResourcesById(request);
+    }
+
 }

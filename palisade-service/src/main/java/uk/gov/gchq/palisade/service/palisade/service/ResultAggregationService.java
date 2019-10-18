@@ -32,6 +32,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
@@ -67,7 +68,7 @@ public class ResultAggregationService implements Service {
             response.setOriginalRequestId(originalRequestId);
             LOGGER.debug("Responding with: {}", response);
 
-            return (CompletionStage<DataRequestResponse>) response;
+            return CompletableFuture.completedStage(response);
         } catch (Exception ex) {
             LOGGER.error("Error handling: {}", ex.getMessage());
 
@@ -94,7 +95,7 @@ public class ResultAggregationService implements Service {
                 .withLeafResources(multiPolicy.getPolicies().keySet())
                 .withContext(request.getContext());
         LOGGER.debug("Auditing: {}", registerRequestCompleteAuditRequest);
-        auditService.audit(registerRequestCompleteAuditRequest).toCompletableFuture().join();
+        auditService.audit(registerRequestCompleteAuditRequest);
     }
 
     private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass, final AuditService auditService) {
@@ -106,7 +107,7 @@ public class ResultAggregationService implements Service {
                         .withException(ex)
                         .withServiceClass(serviceClass);
         LOGGER.debug("Error handling: " + ex.getMessage());
-        auditService.audit(auditRequestWithException).toCompletableFuture().join();
+        auditService.audit(auditRequestWithException);
     }
 
     private void cache(final CacheService cacheService,

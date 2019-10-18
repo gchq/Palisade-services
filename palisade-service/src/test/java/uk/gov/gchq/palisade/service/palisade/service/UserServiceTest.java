@@ -60,4 +60,15 @@ public class UserServiceTest {
         //Then
         assertEquals(testUser, actual);
     }
+
+    @Test(expected = RuntimeException.class)
+    public void getUserReturnsError() {
+
+        //Given
+        when(userClient.getUser(any(GetUserRequest.class))).thenThrow(new RuntimeException());
+
+        //When
+        GetUserRequest request = new GetUserRequest().userId(userId);
+        User actual = userService.getUser(request);
+    }
 }
