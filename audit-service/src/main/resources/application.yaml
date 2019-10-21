@@ -18,6 +18,8 @@ spring:
   output:
     ansi:
       enabled: always
+  main:
+    allow-bean-definition-overriding: true
 
 server:
   port: 8086
@@ -27,6 +29,6 @@ management:
     web:
       exposure:
         include:
-          - health
-          - info
-          - metrics
+        - health
+        - info
+        - metrics
