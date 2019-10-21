@@ -35,7 +35,6 @@ public class GetResourcesBySerialisedFormatRequest extends Request {
     }
 
     /**
-     *
      * @param serialisedFormat the serialisedFormat of the {@link uk.gov.gchq.palisade.resource.Resource}'s that you want to know about
      * @return the {@link GetResourcesBySerialisedFormatRequest}
      */
@@ -55,10 +54,16 @@ public class GetResourcesBySerialisedFormatRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesBySerialisedFormatRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetResourcesBySerialisedFormatRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
         return getSerialisedFormat().equals(that.getSerialisedFormat());
     }
