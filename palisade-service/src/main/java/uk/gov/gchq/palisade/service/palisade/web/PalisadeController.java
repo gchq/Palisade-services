@@ -31,13 +31,13 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/")
-public class DefaultController {
+public class PalisadeController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeController.class);
 
     private final PalisadeService service;
 
-    public DefaultController(final PalisadeService service) {
+    public PalisadeController(final PalisadeService service) {
         this.service = service;
     }
 
