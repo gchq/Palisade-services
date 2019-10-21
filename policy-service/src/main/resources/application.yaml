@@ -22,7 +22,7 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-port: 8085
+  port: 8085
 
 eureka:
   instance:
@@ -40,8 +40,6 @@ management:
         - health
         - info
         - metrics
-
-
 
 cache:
   implementation: hashmap
