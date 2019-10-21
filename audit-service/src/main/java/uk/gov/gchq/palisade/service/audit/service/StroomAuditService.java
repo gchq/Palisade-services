@@ -224,7 +224,7 @@ public class StroomAuditService implements AuditService {
         return outcome;
     }
 
-    private static Event generateNewGenericEvent(DefaultEventLoggingService loggingService, final AuditRequest request) {
+    private static Event generateNewGenericEvent(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         Event event = loggingService.createEvent();
         // set the event time
         Event.EventTime eventTime = EventLoggingUtil.createEventTime(Date.from(request.timestamp.toInstant()));
@@ -247,7 +247,7 @@ public class StroomAuditService implements AuditService {
         return event;
     }
 
-    private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, AuditRequest request) {
+    private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
         RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (RegisterRequestCompleteAuditRequest) request;
         Event authorisationEvent = generateNewGenericEvent(loggingService, registerRequestCompleteAuditRequest);

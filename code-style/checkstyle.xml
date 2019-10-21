@@ -72,7 +72,7 @@
         <module name="IllegalToken"/>
 
         <module name="ImportOrder">
-            <property name="groups" value="*,/^javax\./,java"/>
+            <property name="groups" value="*,/^javax\./,/^java\./"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="bottom"/>
@@ -127,7 +127,6 @@
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
         <module name="ConstantName"/>
-        <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
 

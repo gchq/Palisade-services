@@ -29,7 +29,10 @@ import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
 import javax.annotation.PostConstruct;
+
 import java.util.Map;
+
+
 
 /**
  * Bean configuration and dependency injection graph
@@ -40,7 +43,7 @@ public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Autowired
-    public Map<String, AuditService> auditServiceMap;
+    private Map<String, AuditService> auditServiceMap;
 
     @Bean(name = "SimpleAuditService")
     public SimpleAuditService auditService() {
