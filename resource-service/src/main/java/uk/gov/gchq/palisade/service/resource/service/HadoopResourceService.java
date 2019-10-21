@@ -323,13 +323,13 @@ public class HadoopResourceService implements ResourceService {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final HadoopResourceService that = (HadoopResourceService) o;
-        return cacheService.equals(that.cacheService) &&
+        return cacheService.getClass().equals(that.cacheService.getClass()) &&
                 Objects.equals(fileSystem, that.fileSystem);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cacheService, fileSystem);
+        return Objects.hash(cacheService.getClass(), fileSystem);
     }
 
     @Override
