@@ -59,26 +59,17 @@ public class GetResourcesBySerialisedFormatRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(serialisedFormat, that.serialisedFormat)
-                .isEquals();
+        return Objects.equals(serialisedFormat, that.serialisedFormat);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(37,35)
-                .appendSuper(super.hashCode())
-                .append(serialisedFormat)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), serialisedFormat);
     }
 
     @Override

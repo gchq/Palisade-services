@@ -77,30 +77,18 @@ public class ResourceDetails {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         final ResourceDetails that = (ResourceDetails) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(fileName, that.fileName)
-                .append(type, that.type)
-                .append(format, that.format)
-                .isEquals();
+        return fileName.equals(that.fileName) &&
+                type.equals(that.type) &&
+                format.equals(that.format);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(37,31)
-                .appendSuper(super.hashCode())
-                .append(fileName)
-                .append(type)
-                .append(format)
-                .toHashCode();
+        return Objects.hash(fileName, type, format);
     }
 
     @Override

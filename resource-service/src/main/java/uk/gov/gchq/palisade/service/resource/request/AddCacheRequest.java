@@ -284,30 +284,19 @@ public class AddCacheRequest<V> extends CacheRequest {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final AddCacheRequest<?> that = (AddCacheRequest<?>) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(timeToLive, that.timeToLive)
-                .append(value, that.value)
-                .append(locallyCacheable, that.locallyCacheable)
-                .isEquals();
+        return locallyCacheable == that.locallyCacheable &&
+                timeToLive.equals(that.timeToLive) &&
+                Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(3,5)
-                .appendSuper(super.hashCode())
-                .append(timeToLive)
-                .append(value)
-                .append(locallyCacheable)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), timeToLive, value, locallyCacheable);
     }
 
     @Override

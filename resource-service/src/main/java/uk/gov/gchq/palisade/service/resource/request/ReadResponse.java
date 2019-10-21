@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.ToStringBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
@@ -100,26 +101,17 @@ public abstract class ReadResponse {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReadResponse)) return false;
         final ReadResponse that = (ReadResponse) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(message, that.message)
-                .isEquals();
+        return Objects.equals(message, that.message) &&
+                isUsed.equals(that.isUsed);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(11,7)
-                .appendSuper(super.hashCode())
-                .append(message)
-                .toHashCode();
+        return Objects.hash(message, isUsed);
     }
 
     @Override

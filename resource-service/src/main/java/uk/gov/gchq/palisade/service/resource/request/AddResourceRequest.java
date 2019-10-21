@@ -92,28 +92,18 @@ public class AddResourceRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final AddResourceRequest that = (AddResourceRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(resource, that.resource)
-                .append(connectionDetail, that.connectionDetail)
-                .isEquals();
+        return resource.equals(that.resource) &&
+                Objects.equals(connectionDetail, that.connectionDetail);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(9,13)
-                .appendSuper(super.hashCode())
-                .append(resource)
-                .append(connectionDetail)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), resource, connectionDetail);
     }
 
     @Override

@@ -54,26 +54,17 @@ public class    GetResourcesByIdRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(resourceId, that.resourceId)
-                .isEquals();
+        return Objects.equals(resourceId, that.resourceId);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(37,29)
-                .appendSuper(super.hashCode())
-                .append(resourceId)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), resourceId);
     }
 
     @Override

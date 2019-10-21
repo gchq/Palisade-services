@@ -58,26 +58,17 @@ public class GetResourcesByTypeRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(type, that.type)
-                .isEquals();
+        return Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(37,33)
-                .appendSuper(super.hashCode())
-                .append(type)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), type);
     }
 
     @Override

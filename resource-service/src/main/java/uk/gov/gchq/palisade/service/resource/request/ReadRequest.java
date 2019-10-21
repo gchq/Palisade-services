@@ -24,6 +24,8 @@ import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
 
+import java.util.Objects;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -67,28 +69,17 @@ public class ReadRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         final ReadRequest that = (ReadRequest) o;
-
-        return new EqualsBuilder()
-                .append(token, that.token)
-                .append(resource, that.resource)
-                .isEquals();
+        return Objects.equals(token, that.token) &&
+                Objects.equals(resource, that.resource);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(47, 37)
-                .append(token)
-                .append(resource)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), token, resource);
     }
 
     @Override

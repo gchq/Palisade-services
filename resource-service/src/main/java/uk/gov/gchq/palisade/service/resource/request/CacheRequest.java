@@ -133,28 +133,18 @@ public abstract class CacheRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CacheRequest)) return false;
+        if (!super.equals(o)) return false;
         final CacheRequest that = (CacheRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(key, that.key)
-                .append(service, that.service)
-                .isEquals();
+        return Objects.equals(key, that.key) &&
+                Objects.equals(service, that.service);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(5,7)
-                .appendSuper(super.hashCode())
-                .append(key)
-                .append(service)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), key, service);
     }
 
     @Override

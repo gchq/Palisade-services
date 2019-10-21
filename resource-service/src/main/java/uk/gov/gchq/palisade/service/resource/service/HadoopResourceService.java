@@ -319,28 +319,17 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         final HadoopResourceService that = (HadoopResourceService) o;
-        return new EqualsBuilder()
-                //.append(config, that.config)
-                .append(cacheService.getClass(), that.cacheService.getClass())
-                .append(fileSystem, that.fileSystem)
-                .isEquals();
+        return cacheService.equals(that.cacheService) &&
+                Objects.equals(fileSystem, that.fileSystem);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(37,31)
-                //.append(config)
-                .append(cacheService.getClass())
-                .append(fileSystem)
-                .toHashCode();
+        return Objects.hash(cacheService, fileSystem);
     }
 
     @Override
