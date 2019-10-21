@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy;
+
+package uk.gov.gchq.palisade.service.audit;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,15 +23,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 @EnableEurekaClient
 @SpringBootApplication
-public class PolicyApplication {
+public class UserApplication {
 
-    /**
-     * Application entry point
-     *
-     * @param args from the command line
-     */
     public static void main(final String[] args) {
-        new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)
+        new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 
