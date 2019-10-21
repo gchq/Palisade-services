@@ -16,11 +16,21 @@
 
 package uk.gov.gchq.palisade.service.resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
+@EnableEurekaClient
 @SpringBootApplication
 public class ResourceApplication {
 
@@ -31,5 +41,18 @@ public class ResourceApplication {
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ResourceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
+    }
+}
+
+@RestController
+class ServiceInstanceRestController {
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
+    @RequestMapping("/service-instances/{applicationName}")
+    public List<ServiceInstance> serviceInstancesByApplicationName(
+            @PathVariable String applicationName) {
+        return this.discoveryClient.getInstances(applicationName);
     }
 }
