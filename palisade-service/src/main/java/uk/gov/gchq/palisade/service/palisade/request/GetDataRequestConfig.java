@@ -59,10 +59,16 @@ public class GetDataRequestConfig extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetDataRequestConfig)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetDataRequestConfig)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetDataRequestConfig that = (GetDataRequestConfig) o;
         return getRequestId().equals(that.getRequestId()) &&
                 getResource().equals(that.getResource());
