@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.resource.request.CacheRequest;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -279,10 +278,16 @@ public class AddCacheRequest<V> extends CacheRequest {
         this.timeToLive = Optional.empty();
     }
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddCacheRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AddCacheRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AddCacheRequest<?> that = (AddCacheRequest<?>) o;
         return getLocallyCacheable() == that.getLocallyCacheable() &&
                 getTimeToLive().equals(that.getTimeToLive()) &&

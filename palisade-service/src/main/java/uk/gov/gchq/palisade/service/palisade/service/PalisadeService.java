@@ -53,7 +53,7 @@ public interface PalisadeService {
      * @return details of all the resources linked to the initial request (if they asked for a data set) and how to
      * connect to the relevant data service to get that data.
      */
-    CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request);
+    CompletableFuture<DataRequestResponse> registerDataRequest(RegisterDataRequest request);
 
     /**
      * This method is used by the data service's to request the trusted details that it requires to apply the necessary
@@ -63,7 +63,7 @@ public interface PalisadeService {
      * @return a {@link DataRequestConfig} containing the information that the data service requires to apply the
      * necessary filtering/transformations to the data.
      */
-    CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request);
+    CompletableFuture<DataRequestConfig> getDataRequestConfig(GetDataRequestConfig request);
 
     default CompletableFuture<?> process(final Request request) {
         if (request instanceof RegisterDataRequest) {
