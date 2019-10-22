@@ -54,10 +54,16 @@ public class GetResourcesByTypeRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesByTypeRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetResourcesByTypeRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
         return getType().equals(that.getType());
     }

@@ -96,7 +96,26 @@ public class StroomAuditService implements AuditService {
         eventLogger = eventLoggingService;
     }
 
-    private static Event generateNewGenericEvent(DefaultEventLoggingService loggingService, final AuditRequest request) {
+    private static void addUserToEvent(final Event event, final uk.gov.gchq.palisade.UserId user) {
+        Event.EventSource eventSource = event.getEventSource();
+        User stroomUser = EventLoggingUtil.createUser(user.getId());
+        eventSource.setUser(stroomUser);
+    }
+
+    private static void addPurposeToEvent(final Event event, final uk.gov.gchq.palisade.Context context) {
+        Event.EventDetail eventDetail = event.getEventDetail();
+        Purpose purpose = new Purpose();
+        purpose.setJustification(context.getPurpose());
+        eventDetail.setPurpose(purpose);
+    }
+
+    private static Outcome createOutcome(final boolean success) {
+        Outcome outcome = new Outcome();
+        outcome.setSuccess(success);
+        return outcome;
+    }
+
+    private static Event generateNewGenericEvent(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         Event event = loggingService.createEvent();
         // set the event time
         Event.EventTime eventTime = EventLoggingUtil.createEventTime(Date.from(request.timestamp.toInstant()));
@@ -119,26 +138,7 @@ public class StroomAuditService implements AuditService {
         return event;
     }
 
-    private static void addUserToEvent(final Event event, final uk.gov.gchq.palisade.UserId user) {
-        Event.EventSource eventSource = event.getEventSource();
-        User stroomUser = EventLoggingUtil.createUser(user.getId());
-        eventSource.setUser(stroomUser);
-    }
-
-    private static void addPurposeToEvent(final Event event, final uk.gov.gchq.palisade.Context context) {
-        Event.EventDetail eventDetail = event.getEventDetail();
-        Purpose purpose = new Purpose();
-        purpose.setJustification(context.getPurpose());
-        eventDetail.setPurpose(purpose);
-    }
-
-    private static Outcome createOutcome(final boolean success) {
-        Outcome outcome = new Outcome();
-        outcome.setSuccess(success);
-        return outcome;
-    }
-
-    private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, AuditRequest request) {
+    private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
         RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (RegisterRequestCompleteAuditRequest) request;
         Event authorisationEvent = generateNewGenericEvent(loggingService, registerRequestCompleteAuditRequest);
