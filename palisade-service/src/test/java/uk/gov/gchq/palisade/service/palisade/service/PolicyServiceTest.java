@@ -73,7 +73,7 @@ public class PolicyServiceTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void getUserReturnsError() {
+    public void getPolicyReturnsError() {
 
         //Given
         when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenThrow(new RuntimeException());

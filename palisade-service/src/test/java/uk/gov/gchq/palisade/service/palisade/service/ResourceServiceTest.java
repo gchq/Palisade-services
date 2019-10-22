@@ -68,7 +68,7 @@ public class ResourceServiceTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void getUserReturnsError() {
+    public void getResourceByIdReturnsError() {
 
         //Given
         when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenThrow(new RuntimeException());
