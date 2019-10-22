@@ -38,12 +38,10 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.impl.MockDataService;
 import uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore;
@@ -57,7 +55,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -66,8 +63,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -87,9 +82,12 @@ public class HadoopResourceServiceTest {
     private static final String HDFS = "hdfs:///";
     private static File TMP_DIRECTORY;
 
+    static {
+        TMP_DIRECTORY = PathUtils.getTestDir(HadoopResourceServiceTest.class);
+    }
+
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder(TMP_DIRECTORY);
-
     private SimpleConnectionDetail simpleConnection;
     private String inputPathString;
     private FileSystem fs;
@@ -98,12 +96,13 @@ public class HadoopResourceServiceTest {
     private Configuration config = new Configuration();
     private HadoopResourceService resourceService;
 
-    static {
-        TMP_DIRECTORY = PathUtils.getTestDir(HadoopResourceServiceTest.class);
-    }
-
     static String asUri(String path) throws URISyntaxException {
         return new Path(path.replace("\\", "/")).toUri().toString();
+    }
+
+    private static String getFileNameFromResourceDetails(final String name, final String type, final String format) {
+        //Type, Id, Format
+        return type + "_" + name + "." + format;
     }
 
     @Before
@@ -123,7 +122,7 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void getResourcesByIdTest() throws Exception{
+    public void getResourcesByIdTest() throws Exception {
 
         //given
         final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
@@ -287,7 +286,7 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void addResourceTest() throws Exception{
+    public void addResourceTest() throws Exception {
         try {
             resourceService.addResource(null);
             fail("exception expected");
@@ -375,7 +374,7 @@ public class HadoopResourceServiceTest {
 
     @Test
     public void shouldResolveParents() throws Exception {
-        String[] walk = new String[] {
+        String[] walk = new String[]{
                 testFolder.getRoot().getAbsolutePath(),
                 "inputDir",
                 "folder1",
@@ -440,10 +439,5 @@ public class HadoopResourceServiceTest {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
             writer.write("myContents");
         }
-    }
-
-    private static String getFileNameFromResourceDetails(final String name, final String type, final String format) {
-        //Type, Id, Format
-        return type + "_" + name + "." + format;
     }
 }

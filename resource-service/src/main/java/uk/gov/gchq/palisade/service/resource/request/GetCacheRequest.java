@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;

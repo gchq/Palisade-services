@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 import uk.gov.gchq.palisade.RequestId;
 
 @RunWith(JUnit4.class)
@@ -34,7 +35,7 @@ public class GetResourcesBySerialisedFormatTest {
         expected.setOriginalRequestId(originalId);
     }
 
-    @Test (expected = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void returnErrorWithNoSerialisedFormatTest() {
         GetResourcesBySerialisedFormatRequest actual = new GetResourcesBySerialisedFormatRequest();
 

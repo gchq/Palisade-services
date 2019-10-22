@@ -42,6 +42,11 @@ public class ResourceDetailsTest {
 
     @DataPoints
     public static final List<Pair<String, Pair<String, String>>> filenameDataPoints = new ArrayList<>();
+    @DataPoints
+    public static final List<ResourceDetails> resourceDataPoints = new ArrayList<>();
+
+    ;
+
     static {
         // Valid file names
         filenameDataPoints.add(new Pair<>("employee_file0.avro", new Pair<>("employee", "avro")));
@@ -53,10 +58,8 @@ public class ResourceDetailsTest {
         filenameDataPoints.add(new Pair<>("_.", null));
         filenameDataPoints.add(new Pair<>("", null));
         filenameDataPoints.add(new Pair<>(".avro", null));
-    };
+    }
 
-    @DataPoints
-    public static final List<ResourceDetails> resourceDataPoints = new ArrayList<>();
     static {
         for (Pair<String, ?> filename : filenameDataPoints) {
             if (filename.getValue() != null) {

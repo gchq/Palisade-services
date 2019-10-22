@@ -27,7 +27,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used to send a request to the
- * {@link uk.gov.gchq.palisade.data.service.DataService} to read a resource.
+ * DataService to read a resource.
  */
 
 public class ReadRequest extends Request {
@@ -66,9 +66,15 @@ public class ReadRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         final ReadRequest that = (ReadRequest) o;
         return Objects.equals(token, that.token) &&
                 Objects.equals(resource, that.resource);

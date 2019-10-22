@@ -99,8 +99,12 @@ public abstract class ReadResponse {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ReadResponse)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReadResponse)) {
+            return false;
+        }
         final ReadResponse that = (ReadResponse) o;
         return Objects.equals(message, that.message) &&
                 isUsed.equals(that.isUsed);

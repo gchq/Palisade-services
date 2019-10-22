@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Util;
 
 import java.io.IOException;
@@ -365,7 +364,7 @@ public class PropertiesBackingStore implements BackingStore {
         WatchFile(final PropertiesBackingStore action, final Path watchPath) {
             requireNonNull(action, "action");
             requireNonNull(watchPath, "watchPath");
-            this.action = new WeakReference<PropertiesBackingStore>(action);
+            this.action = new WeakReference<>(action);
             this.watchPath = watchPath;
         }
 

@@ -51,9 +51,15 @@ public class GetResourcesByIdRequest extends Request {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         final GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
         return Objects.equals(resourceId, that.resourceId);
     }

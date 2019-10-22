@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 import uk.gov.gchq.palisade.RequestId;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +49,7 @@ public class GetResourcesByIdTest {
         assertEquals(expected.getResourceId(), actual.getResourceId());
     }
 
-    @Test (expected = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void returnErrorWithNoResourceIdTest() {
         //Given
         GetResourcesByIdRequest actual = new GetResourcesByIdRequest();

@@ -19,7 +19,6 @@ package uk.gov.gchq.palisade.service.resource.request;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -31,11 +30,10 @@ import static org.junit.Assert.assertEquals;
 @RunWith(MockitoJUnitRunner.class)
 public class GetResourcesByResourceTest {
 
-    @Mock
-    private Resource mockResource;
-
     private final GetResourcesByResourceRequest expected = new GetResourcesByResourceRequest();
     private final RequestId originalId = new RequestId().id("Original");
+    @Mock
+    private Resource mockResource;
 
     @Before
     public void setup() {

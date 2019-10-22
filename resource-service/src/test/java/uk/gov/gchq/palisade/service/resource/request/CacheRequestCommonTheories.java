@@ -21,14 +21,8 @@ import static org.junit.Assume.assumeThat;
 @RunWith(Theories.class)
 public class CacheRequestCommonTheories {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Mock
-    private RequestId requestId;
-
     @DataPoints
-    public static final CacheRequest[] cacheRequests = new CacheRequest[] {
+    public static final CacheRequest[] cacheRequests = new CacheRequest[]{
             new AddCacheRequest<String>(),
             new GetCacheRequest<String>(),
             new ListCacheRequest(),
@@ -48,6 +42,11 @@ public class CacheRequestCommonTheories {
             }
         }
     }
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private RequestId requestId;
 
     @Theory
     public void setOriginalRequestIdThrows(CacheRequest cacheRequest) {
