@@ -17,12 +17,10 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class AuditService implements Service {
