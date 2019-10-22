@@ -35,6 +35,8 @@ import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,14 +64,16 @@ public class PolicyServiceTest {
     @Test
     public void getPolicyReturnsPolicy() {
         //Given
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
+        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
+        futurePolicy.complete(multiPolicy);
+        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
 
         //When
         GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
-        MultiPolicy actual = policyService.getPolicy(request);
+        CompletableFuture<MultiPolicy> actual = policyService.getPolicy(request);
 
         //Then
-        assertEquals(multiPolicy, actual);
+        assertEquals(multiPolicy, actual.join());
     }
 
     @Test(expected = RuntimeException.class)
@@ -80,7 +84,7 @@ public class PolicyServiceTest {
 
         //When
         GetPolicyRequest request = new GetPolicyRequest().user(testUser);
-        MultiPolicy actual = policyService.getPolicy(request);
+        CompletableFuture<MultiPolicy> actual = policyService.getPolicy(request);
     }
 
 }

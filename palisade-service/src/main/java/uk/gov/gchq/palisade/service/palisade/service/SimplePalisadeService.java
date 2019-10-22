@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -62,11 +61,17 @@ public class SimplePalisadeService implements PalisadeService {
     private final UserService userService;
     private final ResourceService resourceService;
     private final CacheService cacheService;
-    private ResultAggregationService aggregationService;
+    private final ResultAggregationService aggregationService;
 
     private final Executor executor;
 
     public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService, final CacheService cacheService, final Executor executor) {
+        requireNonNull(auditService, "auditService");
+        requireNonNull(userService, "userService");
+        requireNonNull(policyService, "policyService");
+        requireNonNull(resourceService, "resourceService");
+        requireNonNull(cacheService, "cacheService");
+        requireNonNull(executor, "executor");
         this.auditService = auditService;
         this.userService = userService;
         this.policyService = policyService;
@@ -78,27 +83,28 @@ public class SimplePalisadeService implements PalisadeService {
 
     @Override
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
+        requireNonNull(request, "request");
         final RequestId originalRequestId = request.getId();
         LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
 
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
-        final User user = userService.getUser(userRequest);
+        final CompletableFuture<User> user = userService.getUser(userRequest);
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final Map<LeafResource, ConnectionDetail> resources = resourceService.getResourcesById(resourceRequest);
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
 
-        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user).context(request.getContext()).resources(new HashSet<>(resources.keySet()));
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
         policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting policy from policyService: {}", request);
-        MultiPolicy multiPolicy = policyService.getPolicy(policyRequest);
+        CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
         return (CompletableFuture<DataRequestResponse>) aggregationService
-                .aggregateDataRequestResults(request, user, resources, multiPolicy, requestId, originalRequestId);
+                .aggregateDataRequestResults(request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
     }
 
     @Override

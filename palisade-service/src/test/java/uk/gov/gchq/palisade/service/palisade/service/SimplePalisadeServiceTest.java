@@ -121,13 +121,20 @@ public class SimplePalisadeServiceTest {
     public void registerDataRequestTest() {
 
         //Given
+        CompletableFuture<User> futureUser = new CompletableFuture<>();
+        futureUser.complete(user);
+        CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResource = new CompletableFuture<>();
+        futureResource.complete(resources);
+        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
+        futurePolicy.complete(multiPolicy);
+
         when(cacheService.getBackingStore().add(anyString(), any(), any(), any())).thenReturn(true);
         when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
         when(aggregationService.aggregateDataRequestResults(dataRequest, user, resources, multiPolicy, requestId, originalRequestId))
                 .thenReturn(CompletableFuture.completedFuture(expectedResponse));
-        when(userService.getUser(any(GetUserRequest.class))).thenReturn(user);
-        when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(resources);
-        when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
+        when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
+        when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
+        when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
 
         RegisterDataRequest request = new RegisterDataRequest()
                 .userId(new UserId().id("Bob"))

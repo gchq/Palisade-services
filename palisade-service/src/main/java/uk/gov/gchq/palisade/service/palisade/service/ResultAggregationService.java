@@ -35,6 +35,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.Objects.requireNonNull;
+
 public class ResultAggregationService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
@@ -42,6 +44,8 @@ public class ResultAggregationService implements Service {
     private CacheService cacheService;
 
     public ResultAggregationService(final AuditService auditService, final CacheService cacheService) {
+        requireNonNull(auditService, "Audit Service");
+        requireNonNull(cacheService, "Cache Service");
         this.auditService = auditService;
         this.cacheService = cacheService;
     }
@@ -52,6 +56,12 @@ public class ResultAggregationService implements Service {
                                                                             final MultiPolicy policy,
                                                                             final RequestId requestId,
                                                                             final RequestId originalRequestId) {
+        requireNonNull(request, "request");
+        requireNonNull(user, "user");
+        requireNonNull(resource, "resource");
+        requireNonNull(policy, "policy");
+        requireNonNull(requestId, "request ID");
+        requireNonNull(originalRequestId, "original request ID");
 
         try {
             //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about

@@ -22,6 +22,8 @@ import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 public class PolicyService implements Service {
@@ -35,9 +37,9 @@ public class PolicyService implements Service {
         this.executor = executor;
     }
 
-    public MultiPolicy getPolicy(final GetPolicyRequest policyRequest) {
+    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest policyRequest) {
 
-        MultiPolicy policy;
+        CompletionStage<MultiPolicy> policy;
 
         try {
             policy = this.client.getPolicy(policyRequest);
@@ -47,6 +49,6 @@ public class PolicyService implements Service {
             throw new RuntimeException(ex);
         }
 
-        return policy;
+        return policy.toCompletableFuture();
     }
 }

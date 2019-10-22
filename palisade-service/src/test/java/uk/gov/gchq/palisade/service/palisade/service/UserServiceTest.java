@@ -28,6 +28,8 @@ import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -51,14 +53,16 @@ public class UserServiceTest {
     public void getUserReturnsUser() {
 
         //Given
-        when(userClient.getUser(any(GetUserRequest.class))).thenReturn(testUser);
+        CompletableFuture<User> futureUser = new CompletableFuture<>();
+        futureUser.complete(testUser);
+        when(userClient.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
 
         //When
         GetUserRequest request = new GetUserRequest().userId(userId);
-        User actual = userService.getUser(request);
+        CompletableFuture<User> actual = userService.getUser(request);
 
         //Then
-        assertEquals(testUser, actual);
+        assertEquals(testUser, actual.join());
     }
 
     @Test(expected = RuntimeException.class)
@@ -69,6 +73,6 @@ public class UserServiceTest {
 
         //When
         GetUserRequest request = new GetUserRequest().userId(userId);
-        User actual = userService.getUser(request);
+        CompletableFuture<User> actual = userService.getUser(request);
     }
 }

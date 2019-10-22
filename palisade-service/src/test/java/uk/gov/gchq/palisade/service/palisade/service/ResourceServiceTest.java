@@ -33,6 +33,7 @@ import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,14 +58,16 @@ public class ResourceServiceTest {
     @Test
     public void getResourceByIdReturnsMappedResources() {
         //Given
-        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(resources);
+        CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResource = new CompletableFuture<>();
+        futureResource.complete(resources);
+        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
 
         //When
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
-        Map<LeafResource, ConnectionDetail> actual = resourceService.getResourcesById(request);
+        CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(request);
 
         //Then
-        assertEquals(resources, actual);
+        assertEquals(resources, actual.join());
     }
 
     @Test(expected = RuntimeException.class)
@@ -75,7 +78,7 @@ public class ResourceServiceTest {
 
         //When
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
-        Map<LeafResource, ConnectionDetail> actual = resourceService.getResourcesById(request);
+        CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(request);
     }
 
 }
