@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -46,7 +47,7 @@ public class ReadRequestCompleteAuditRequestTest {
     @Test
     public void ReadRequestCompleteAuditRequestToJsonTest() throws IOException {
         final ReadRequestCompleteAuditRequest subject = ReadRequestCompleteAuditRequest.create(new RequestId().id("456"))
-               .withUser(new User().userId("user1"))
+                .withUser(new User().userId("user1"))
                 .withLeafResource(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share"))))
                 .withContext(new Context(Stream.of(new AbstractMap.SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue))))
                 .withRulesApplied(new Rules().message("newer Rule"))
