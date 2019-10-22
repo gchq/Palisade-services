@@ -27,12 +27,12 @@ management:
     web:
       exposure:
         include:
-          - health
-          - info
-          - metrics
+        - health
+        - info
+        - metrics
 
 cache:
   implementation: hashmap
   props: "cache.properties"
   etcd:
-    - http://localhost:2379
+  - http://localhost:2379

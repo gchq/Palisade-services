@@ -16,13 +16,12 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
