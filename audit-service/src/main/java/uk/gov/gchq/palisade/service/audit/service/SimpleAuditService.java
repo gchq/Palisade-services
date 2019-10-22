@@ -33,7 +33,7 @@ public class SimpleAuditService implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override
-    public CompletableFuture<Boolean> audit(AuditRequest request) {
+    public CompletableFuture<Boolean> audit(final AuditRequest request) {
         return null;
     }
 }

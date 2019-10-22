@@ -88,10 +88,16 @@ public class GetPolicyRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetPolicyRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetPolicyRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetPolicyRequest that = (GetPolicyRequest) o;
         return getUser().equals(that.getUser()) &&
                 getContext().equals(that.getContext()) &&

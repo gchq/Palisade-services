@@ -193,9 +193,13 @@ public class Policy<RULE_DATA_TYPE> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Policy)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Policy)) {
+            return false;
+        }
         Policy<?> policy = (Policy<?>) o;
         return getRecordRules().equals(policy.getRecordRules()) &&
                 getResourceRules().equals(policy.getResourceRules()) &&

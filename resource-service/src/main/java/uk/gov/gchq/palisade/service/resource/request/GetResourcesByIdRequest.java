@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class    GetResourcesByIdRequest extends Request {
+public class GetResourcesByIdRequest extends Request {
 
     private String resourceId;
 
@@ -50,9 +50,13 @@ public class    GetResourcesByIdRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetResourcesByIdRequest)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetResourcesByIdRequest)) {
+            return false;
+        }
         GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
         return getResourceId().equals(that.getResourceId());
     }
