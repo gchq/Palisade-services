@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
