@@ -28,15 +28,16 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.reader.HadoopDataReader;
+import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
-import uk.gov.gchq.palisade.service.data.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.EtcdBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.K8sBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
+import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.CacheService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
@@ -70,10 +71,18 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public SimpleDataService SimpleDataService(final Map<String, BackingStore> backingStores,
                                                final AuditClient auditClient,
                                                final PalisadeClient palisadeClient) {
+        AuditService audService = auditService(auditClient);
         return new SimpleDataService(cacheService(backingStores),
-                auditService(auditClient),
+                audService,
                 palisadeService(palisadeClient),
-                dataReader());
+                dataReader(),
+                auditRequestReceiver(audService)
+        );
+    }
+
+    @Bean
+    public AuditRequestReceiver auditRequestReceiver(final AuditService auditService) {
+        return new AuditRequestReceiver(auditService);
     }
 
     @Bean

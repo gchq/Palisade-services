@@ -19,10 +19,11 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
+import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.DataReaderRequest;
-import uk.gov.gchq.palisade.service.data.request.DataReaderResponse;
+import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
@@ -53,12 +54,14 @@ public class SimpleDataService implements DataService {
     private DataReader dataReader;
     private CacheService cacheService;
     private AuditService auditService;
+    private AuditRequestReceiver auditRequestReceiver;
 
-    public SimpleDataService(CacheService cacheService, AuditService auditService, PalisadeService palisadeService, DataReader dataReader) {
+    public SimpleDataService(CacheService cacheService, AuditService auditService, PalisadeService palisadeService, DataReader dataReader, AuditRequestReceiver auditRequestReceiver) {
         this.cacheService = cacheService;
         this.auditService = auditService;
         this.palisadeService = palisadeService;
         this.dataReader = dataReader;
+        this.auditRequestReceiver = auditRequestReceiver;
     }
 
     public SimpleDataService auditService(final AuditService auditService) {
@@ -118,7 +121,9 @@ public class SimpleDataService implements DataService {
             readerRequest.setOriginalRequestId(request.getOriginalRequestId());
 
             LOGGER.debug("Calling dataReader with: {}", readerRequest);
-            final DataReaderResponse readerResult = getDataReader().read(readerRequest);
+            final DataReaderResponse readerResult = getDataReader().read(readerRequest,
+                    this.getClass(),
+                    auditRequestReceiver);
             LOGGER.debug("Reader returned: {}", readerResult);
 
             final ReadResponse response = new NoInputReadResponse(readerResult);

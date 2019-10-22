@@ -91,8 +91,13 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>shade-hadoop-client</artifactId>
-            <version>0.3.1-SNAPSHOT</version>
+            <artifactId>readers-common</artifactId>
+            <version>0.4.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>hadoop-readers</artifactId>
+            <version>0.4.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

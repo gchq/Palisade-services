@@ -20,8 +20,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import uk.gov.gchq.palisade.service.data.reader.DataReader;
-import uk.gov.gchq.palisade.service.data.reader.ResponseWriter;
+import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.common.ResponseWriter;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
