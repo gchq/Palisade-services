@@ -24,7 +24,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

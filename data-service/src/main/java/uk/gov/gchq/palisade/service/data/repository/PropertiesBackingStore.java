@@ -153,7 +153,7 @@ public class PropertiesBackingStore implements BackingStore {
         @Override
         public Object call() throws Exception {
             WatchKey watched = null;
-            try (final WatchService watcher = watchPath.getFileSystem().newWatchService()) {
+            try (WatchService watcher = watchPath.getFileSystem().newWatchService()) {
                 //register this
                 watched = watchPath.getParent().register(watcher,
                         StandardWatchEventKinds.ENTRY_MODIFY,

@@ -24,6 +24,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class DataApplication {
 
+    private DataApplication() {
+    }
+
     /**
      * Application entry point
      *
@@ -33,5 +36,4 @@ public class DataApplication {
         new SpringApplicationBuilder(DataApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
-
 }

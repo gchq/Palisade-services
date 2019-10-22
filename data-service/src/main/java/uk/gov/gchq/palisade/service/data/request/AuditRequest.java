@@ -42,7 +42,6 @@ import static java.util.Objects.requireNonNull;
  * This is the abstract class that is passed to the audit-service
  * to be able to store an audit record. The default information is
  * when was the audit record created and by what server.
- *
  * The four immutable data subclasses below can be instantiated by static
  * {@code create(RequestId orig)} factory methods which chain construction by fluid interface definitions.
  */
@@ -96,8 +95,8 @@ public class AuditRequest extends Request {
         public final Context context;
 
         @JsonCreator
-        private RegisterRequestCompleteAuditRequest (@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user,
-                                                     @JsonProperty("leafResources") final Set<LeafResource> leafResources, @JsonProperty("context") final Context context) {
+        private RegisterRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user,
+                                                    @JsonProperty("leafResources") final Set<LeafResource> leafResources, @JsonProperty("context") final Context context) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResources = requireNonNull(leafResources);
@@ -130,6 +129,7 @@ public class AuditRequest extends Request {
 
         /**
          * Static factory method.
+         *
          * @param original the originating request Id
          * @return the {@link RegisterRequestCompleteAuditRequest}
          */
@@ -215,6 +215,7 @@ public class AuditRequest extends Request {
 
         /**
          * Static factory method.
+         *
          * @param original the original request id
          * @return the {@link RegisterRequestExceptionAuditRequest}
          */
@@ -249,8 +250,8 @@ public class AuditRequest extends Request {
         public final long numberOfRecordsProcessed;
 
         @JsonCreator
-        private ReadRequestCompleteAuditRequest (@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
-                                                 @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
+        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
+                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResource = requireNonNull(leafResource);
@@ -310,6 +311,7 @@ public class AuditRequest extends Request {
 
         /**
          * Static factory method.
+         *
          * @param original the original request id
          * @return {@link ReadRequestCompleteAuditRequest}
          */
@@ -376,6 +378,7 @@ public class AuditRequest extends Request {
 
         /**
          * Static factory method.
+         *
          * @param original request id.
          * @return the {@link ReadRequestExceptionAuditRequest}
          */
@@ -395,10 +398,16 @@ public class AuditRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AuditRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AuditRequest that = (AuditRequest) o;
         return timestamp.equals(that.timestamp) &&
                 serverIp.equals(that.serverIp) &&

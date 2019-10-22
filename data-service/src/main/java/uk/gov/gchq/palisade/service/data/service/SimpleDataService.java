@@ -56,7 +56,7 @@ public class SimpleDataService implements DataService {
     private AuditService auditService;
     private AuditRequestReceiver auditRequestReceiver;
 
-    public SimpleDataService(CacheService cacheService, AuditService auditService, PalisadeService palisadeService, DataReader dataReader, AuditRequestReceiver auditRequestReceiver) {
+    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader, final AuditRequestReceiver auditRequestReceiver) {
         this.cacheService = cacheService;
         this.auditService = auditService;
         this.palisadeService = palisadeService;

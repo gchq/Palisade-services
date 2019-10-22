@@ -117,9 +117,13 @@ public class CacheMetadata {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CacheMetadata)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CacheMetadata)) {
+            return false;
+        }
         CacheMetadata that = (CacheMetadata) o;
         return wasRetrievedLocally == that.wasRetrievedLocally &&
                 canRetrieveLocally == that.canRetrieveLocally;
