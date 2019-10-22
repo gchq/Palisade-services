@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 
 import java.util.Objects;
@@ -31,27 +28,17 @@ public class ResourceDetails {
 
     public static final Pattern FILENAME_PATTERN = Pattern.compile("(?<type>.+)_(?<name>.+)\\.(?<format>.+)");
     public static final String FORMAT = "TYPE_FILENAME.FORMAT";
-    private String fileName, type, format;
+    private String fileName;
+    private String type;
+    private String format;
 
-    public ResourceDetails (final String fileName, final String type, final String format) {
+    public ResourceDetails(final String fileName, final String type, final String format) {
         requireNonNull(fileName, "fileName");
         requireNonNull(type, "type");
         requireNonNull(format, "format");
         this.fileName = fileName;
         this.type = type;
         this.format = format;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getFormat() {
-        return format;
     }
 
     protected static ResourceDetails getResourceDetailsFromFileName(final String fileName) {
@@ -74,6 +61,18 @@ public class ResourceDetails {
 
     private static Matcher validateNameRegex(final String fileName) {
         return FILENAME_PATTERN.matcher(fileName);
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     @Override

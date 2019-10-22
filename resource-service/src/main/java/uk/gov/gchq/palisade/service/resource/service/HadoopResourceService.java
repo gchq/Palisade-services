@@ -22,8 +22,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
@@ -47,7 +45,6 @@ import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -75,16 +72,14 @@ import static java.util.Objects.requireNonNull;
 
 public class HadoopResourceService implements ResourceService {
 
+    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
+    static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
+    static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
     private static final Logger LOGGER = LoggerFactory.getLogger(HadoopResourceService.class);
-
     /**
      * A regular expression that matches URIs that have the file:/ scheme with a single slash but not any more slashes.
      */
     private static final Pattern FILE_PAT = Pattern.compile("(?i)(?<=^file:)/(?=([^/]|$))");
-
-    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
-    static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
-    static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
     private static final String ERROR_RESOLVING_PARENTS = "Error occurred while resolving resourceParents";
     private static final String HADOOP_CONF_STRING = "hadoop.init.conf";
     private static final String CACHE_IMPL_KEY = "hadoop.cache.svc";
@@ -111,8 +106,57 @@ public class HadoopResourceService implements ResourceService {
     public HadoopResourceService() {
     }
 
+    public static void resolveParents(final ChildResource resource, final Configuration configuration) {
+        try {
+            final String connectionDetail = resource.getId();
+            final Path path = new Path(connectionDetail);
+            final int fileDepth = path.depth();
+            final int fsDepth = new Path(configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)).depth();
+
+            if (fileDepth > fsDepth + 1) {
+                DirectoryResource parent = new DirectoryResource().id(fixURIScheme(path.getParent().toUri().toString()));
+                resource.setParent(parent);
+                resolveParents(parent, configuration);
+            } else {
+                resource.setParent(new SystemResource().id(fixURIScheme(path.getParent().toUri().toString())));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(ERROR_RESOLVING_PARENTS, e);
+        }
+    }
+
+    private static String fixURIScheme(final String uri) {
+        requireNonNull(uri, "uri");
+        Matcher match = FILE_PAT.matcher(uri);
+        if (match.find()) {
+            return match.replaceFirst("///");
+        } else {
+            return uri;
+        }
+    }
+
+    protected static Collection<String> getPaths(final RemoteIterator<LocatedFileStatus> remoteIterator) throws IOException {
+        final ArrayList<String> paths = Lists.newArrayList();
+        while (remoteIterator.hasNext()) {
+            final LocatedFileStatus next = remoteIterator.next();
+            final String pathWithoutFSName = next.getPath().toUri().toString();
+            paths.add(pathWithoutFSName);
+        }
+        return paths;
+    }
+
+    private static Configuration createConfig(final Map<String, String> conf) {
+        final Configuration config = new Configuration();
+        if (nonNull(conf)) {
+            for (final Entry<String, String> entry : conf.entrySet()) {
+                config.set(entry.getKey(), entry.getValue());
+            }
+        }
+        return config;
+    }
+
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(GetResourcesByResourceRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesByResource request: {}", request);
         GetResourcesByIdRequest getResourcesByIdRequest = new GetResourcesByIdRequest().resourceId(request.getResource().getId());
@@ -121,7 +165,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(GetResourcesByIdRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesById request: {}", request);
         final String resourceId = request.getResourceId();
@@ -133,7 +177,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(GetResourcesByTypeRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesByType request: {}", request);
         final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
@@ -142,7 +186,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(GetResourcesBySerialisedFormatRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesBySerialisedFormat request: {}", request);
         final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
@@ -151,7 +195,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Boolean> addResource(AddResourceRequest request) {
+    public CompletableFuture<Boolean> addResource(final AddResourceRequest request) {
         throw new UnsupportedOperationException(ERROR_ADD_RESOURCE);
     }
 
@@ -202,58 +246,19 @@ public class HadoopResourceService implements ResourceService {
         return this;
     }
 
-    public void setCacheService(final CacheService cacheService) {
-        cacheService(cacheService);
-    }
-
     public CacheService getCacheService() {
         requireNonNull(cacheService, "The cache service has not been set.");
         return cacheService;
+    }
+
+    public void setCacheService(final CacheService cacheService) {
+        cacheService(cacheService);
     }
 
     public HadoopResourceService addDataService(final ConnectionDetail detail) {
         requireNonNull(detail, "detail");
         dataServices.add(detail);
         return this;
-    }
-
-    /**
-     * Make Jackson interpret the deserialised list correctly.
-     */
-    private static class ConnectionDetailType extends TypeReference<List<ConnectionDetail>> {
-    }
-
-    public static void resolveParents(final ChildResource resource, final Configuration configuration) {
-        try {
-            final String connectionDetail = resource.getId();
-            final Path path = new Path(connectionDetail);
-            final int fileDepth = path.depth();
-            final int fsDepth = new Path(configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)).depth();
-
-            if (fileDepth > fsDepth + 1) {
-                Path par = path.getParent();
-                URI uri = par.toUri();
-                String string = uri.toString();
-                String id = fixURIScheme(string);
-                DirectoryResource parent = new DirectoryResource().id(fixURIScheme(path.getParent().toUri().toString()));
-                resource.setParent(parent);
-                resolveParents(parent, configuration);
-            } else {
-                resource.setParent(new SystemResource().id(fixURIScheme(path.getParent().toUri().toString())));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(ERROR_RESOLVING_PARENTS, e);
-        }
-    }
-
-    private static String fixURIScheme(final String uri) {
-        requireNonNull(uri, "uri");
-        Matcher match = FILE_PAT.matcher(uri);
-        if (match.find()) {
-            return match.replaceFirst("///");
-        } else {
-            return uri;
-        }
     }
 
     protected Configuration getInternalConf() {
@@ -264,26 +269,6 @@ public class HadoopResourceService implements ResourceService {
     protected FileSystem getFileSystem() {
         requireNonNull(fileSystem, "configuration must be set");
         return fileSystem;
-    }
-
-    protected static Collection<String> getPaths(final RemoteIterator<LocatedFileStatus> remoteIterator) throws IOException {
-        final ArrayList<String> paths = Lists.newArrayList();
-        while (remoteIterator.hasNext()) {
-            final LocatedFileStatus next = remoteIterator.next();
-            final String pathWithoutFSName = next.getPath().toUri().toString();
-            paths.add(pathWithoutFSName);
-        }
-        return paths;
-    }
-
-    private static Configuration createConfig(final Map<String, String> conf) {
-        final Configuration config = new Configuration();
-        if (nonNull(conf)) {
-            for (final Entry<String, String> entry : conf.entrySet()) {
-                config.set(entry.getKey(), entry.getValue());
-            }
-        }
-        return config;
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "class")
@@ -339,5 +324,11 @@ public class HadoopResourceService implements ResourceService {
                 .append("cacheService", cacheService)
                 .append("fileSystem", fileSystem)
                 .toString();
+    }
+
+    /**
+     * Make Jackson interpret the deserialised list correctly.
+     */
+    private static class ConnectionDetailType extends TypeReference<List<ConnectionDetail>> {
     }
 }

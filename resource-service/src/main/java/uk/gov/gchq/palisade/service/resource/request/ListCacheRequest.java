@@ -16,10 +16,10 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.resource.request.CacheRequest;
 
 /**
  * This class is used to request the cache service return a list of known cache entries. The <code>key</code> methods
@@ -83,13 +83,13 @@ public class ListCacheRequest extends CacheRequest {
     }
 
     @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call ListCacheRequest.setOriginalRequestId()");
+    public RequestId getOriginalRequestId() {
+        throw new ForbiddenException("Should not call ListCacheRequest.getOriginalRequestId()");
     }
 
     @Override
-    public RequestId getOriginalRequestId() {
-        throw new ForbiddenException("Should not call ListCacheRequest.getOriginalRequestId()");
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call ListCacheRequest.setOriginalRequestId()");
     }
 }
 

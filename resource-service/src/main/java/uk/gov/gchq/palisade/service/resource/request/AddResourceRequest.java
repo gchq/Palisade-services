@@ -16,8 +16,6 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
@@ -27,7 +25,6 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -73,13 +70,13 @@ public class AddResourceRequest extends Request {
     }
 
     @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call AddResourceRequest.setOriginalRequestId()");
+    public RequestId getOriginalRequestId() {
+        throw new ForbiddenException("Should not call AddResourceRequest.getOriginalRequestId()");
     }
 
     @Override
-    public RequestId getOriginalRequestId() {
-        throw new ForbiddenException("Should not call AddResourceRequest.getOriginalRequestId()");
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call AddResourceRequest.setOriginalRequestId()");
     }
 
     public ConnectionDetail getConnectionDetail() {

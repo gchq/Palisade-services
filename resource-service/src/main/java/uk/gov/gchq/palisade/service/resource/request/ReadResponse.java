@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 
 import java.io.IOException;

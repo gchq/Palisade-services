@@ -30,14 +30,13 @@ import static java.util.Objects.requireNonNull;
 public class CacheMetadata {
 
     /**
-     * If true, then this cache entry has been retrieved from a local cache.
-     */
-    private boolean wasRetrievedLocally;
-
-    /**
      * If true, then this cache entry can be stored in a local cache.
      */
     private final boolean canRetrieveLocally;
+    /**
+     * If true, then this cache entry has been retrieved from a local cache.
+     */
+    private boolean wasRetrievedLocally;
 
     /**
      * Create a new metadata object.
@@ -116,9 +115,13 @@ public class CacheMetadata {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CacheMetadata)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CacheMetadata)) {
+            return false;
+        }
         CacheMetadata that = (CacheMetadata) o;
         return wasRetrievedLocally == that.wasRetrievedLocally &&
                 canRetrieveLocally == that.canRetrieveLocally;

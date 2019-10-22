@@ -15,15 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * This is the basic cache request object. Each cache request is associated with a {@link Service} which is used to
@@ -34,19 +30,17 @@ import java.util.StringJoiner;
 public abstract class CacheRequest extends Request {
 
     /**
+     * Separator string used internally to the cache.
+     */
+    public static final String SEPARATOR = ":";
+    /**
      * The key to use when interacting with the cache.
      */
     private String key;
-
     /**
      * The service class that is interacting with the cache.
      */
     private Class<? extends Service> service;
-
-    /**
-     * Separator string used internally to the cache.
-     */
-    public static final String SEPARATOR = ":";
 
     public CacheRequest() {
     }
@@ -95,15 +89,6 @@ public abstract class CacheRequest extends Request {
     }
 
     /**
-     * Set the key for cache interaction. This key should not be <code>null</code> or empty.
-     *
-     * @param key the cache key
-     */
-    public void setKey(final String key) {
-        key(key);
-    }
-
-    /**
      * Get the cache key.
      *
      * @return the key
@@ -111,6 +96,15 @@ public abstract class CacheRequest extends Request {
     public String getKey() {
         Objects.requireNonNull(key, "key cannot be null");
         return key;
+    }
+
+    /**
+     * Set the key for cache interaction. This key should not be <code>null</code> or empty.
+     *
+     * @param key the cache key
+     */
+    public void setKey(final String key) {
+        key(key);
     }
 
     /**
