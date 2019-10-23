@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import java.util.concurrent.CompletableFuture;
