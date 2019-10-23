@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "palisade.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- default .Chart.Name .Values.nameOverride | lower | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -38,7 +38,17 @@ Modify the namespace if required
 {{- if eq .Values.uniqueNamespace false -}}
 {{- printf "%s" .Values.namespace -}}
 {{- else -}}
-{{- .Values.namespace .Release.Name -}}
-{{- printf "%s-%s" .Release.Name .Values.namespace | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "palisade.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "palisade.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
