@@ -31,6 +31,7 @@ import event.logging.util.DeviceUtil;
 import event.logging.util.EventLoggingUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ServiceState;

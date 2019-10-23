@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 

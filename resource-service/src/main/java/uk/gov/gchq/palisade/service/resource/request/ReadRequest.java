@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
