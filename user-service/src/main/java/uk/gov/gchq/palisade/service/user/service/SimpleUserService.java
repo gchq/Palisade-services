@@ -21,22 +21,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 
 /**
  * A SimpleUserService is a simple implementation of a {@link UserService} that keeps user data in the cache service.
@@ -47,45 +40,10 @@ public class SimpleUserService implements UserService {
     /**
      * Cache service that user service can use.
      */
-    private CacheService cacheService;
+    private final CacheService cacheService;
 
-    public SimpleUserService() {
-    }
-
-    @Override
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        //extract cache
-        String serialisedCache = config.getOrDefault(CACHE_IMPL_KEY, null);
-        if (nonNull(serialisedCache)) {
-            setCacheService(JSONSerialiser.deserialise(serialisedCache.getBytes(StandardCharsets.UTF_8), CacheService.class));
-        } else {
-            throw new NoConfigException("no cache service specified in configuration");
-        }
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(UserService.class.getTypeName(), getClass().getTypeName());
-        String serialisedCache = new String(JSONSerialiser.serialise(cacheService), StandardCharsets.UTF_8);
-        config.put(CACHE_IMPL_KEY, serialisedCache);
-    }
-
-    public SimpleUserService cacheService(final CacheService cacheService) {
-        requireNonNull(cacheService, "Cache service cannot be set to null.");
+    public SimpleUserService(final CacheService cacheService) {
         this.cacheService = cacheService;
-        LOGGER.debug("Configured to use cache {}", cacheService);
-        return this;
-    }
-
-    public CacheService getCacheService() {
-        requireNonNull(cacheService, "The cache service has not been set.");
-        return cacheService;
-    }
-
-    public void setCacheService(final CacheService cacheService) {
-        cacheService(cacheService);
     }
 
     @Override
@@ -97,7 +55,7 @@ public class SimpleUserService implements UserService {
                 .service(this.getClass())
                 .key(request.userId.getId());
 
-        Optional<User> cachedUser = getCacheService().get(temp).join();
+        Optional<User> cachedUser = cacheService.get(temp).join();
 
         if (cachedUser.isPresent()) {
             user = cachedUser.get();
@@ -121,7 +79,7 @@ public class SimpleUserService implements UserService {
                 .service(this.getClass())
                 .key(request.user.getUserId().getId())
                 .value(request.user);
-        getCacheService().add(addCacheRequest).join();
+        cacheService.add(addCacheRequest).join();
         return CompletableFuture.completedFuture(true);
     }
 }

@@ -54,14 +54,15 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public SimpleUserService userService() {
-        return new SimpleUserService();
-    }
-
-    @Bean
     public CacheConfiguration cacheConfiguration() {
         return new CacheConfiguration();
     }
+
+    @Bean
+    public SimpleUserService userService(final Map<String, BackingStore> backingStores) {
+        return new SimpleUserService(cacheService(backingStores));
+    }
+
 
     @Bean(name = "hashmap")
     @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
@@ -110,6 +111,4 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
-
-
 }

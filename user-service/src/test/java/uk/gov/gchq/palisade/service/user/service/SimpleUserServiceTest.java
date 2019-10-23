@@ -41,15 +41,15 @@ public class SimpleUserServiceTest {
         //Given
         User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
         User user2 = new User().userId("uid2").auths("other_test").roles("role");
-        SimpleUserService hms = new SimpleUserService();
-        hms.cacheService(new SimpleCacheService().backingStore(new HashMapBackingStore(true)));
+        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
+        SimpleUserService hms = new SimpleUserService(cacheService);
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
         ServiceState con = new ServiceState();
         hms.recordCurrentConfigTo(con);
 
         //When
-        SimpleUserService test = new SimpleUserService();
+        SimpleUserService test = new SimpleUserService(cacheService);
         test.applyConfigFrom(con);
         //add a user to the first service
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user2)).join();
@@ -68,15 +68,15 @@ public class SimpleUserServiceTest {
     public void shouldSaveToCache() {
         //Given
         User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
-        SimpleUserService hms = new SimpleUserService();
-        hms.cacheService(new SimpleCacheService().backingStore(new HashMapBackingStore(true)));
+        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
+        SimpleUserService hms = new SimpleUserService(cacheService);
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
         ServiceState con = new ServiceState();
         hms.recordCurrentConfigTo(con);
 
         //When
-        SimpleUserService test = new SimpleUserService();
+        SimpleUserService test = new SimpleUserService(cacheService);
         test.applyConfigFrom(con);
         GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
         User actual1 = test.getUser(getUserRequest).join();
@@ -88,14 +88,14 @@ public class SimpleUserServiceTest {
     @Test(expected = NoSuchUserIdException.class)
     public void throwOnNonExistantUser() throws Throwable {
         //Given
-        SimpleUserService hms = new SimpleUserService();
-        hms.cacheService(new SimpleCacheService().backingStore(new HashMapBackingStore(false)));
+        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(false));
+        SimpleUserService hms = new SimpleUserService(cacheService);
 
         ServiceState con = new ServiceState();
         hms.recordCurrentConfigTo(con);
 
         //When
-        SimpleUserService test = new SimpleUserService();
+        SimpleUserService test = new SimpleUserService(cacheService);
         test.applyConfigFrom(con);
         try {
             GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
