@@ -65,20 +65,22 @@ public class SimplePalisadeService implements PalisadeService {
 
     private final Executor executor;
 
-    public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService, final CacheService cacheService, final Executor executor) {
+    public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService,
+                                 final CacheService cacheService, final Executor executor, final ResultAggregationService resultAggregationService) {
         requireNonNull(auditService, "auditService");
         requireNonNull(userService, "userService");
         requireNonNull(policyService, "policyService");
         requireNonNull(resourceService, "resourceService");
         requireNonNull(cacheService, "cacheService");
         requireNonNull(executor, "executor");
+        requireNonNull(resultAggregationService, "resultAggregationService");
         this.auditService = auditService;
         this.userService = userService;
         this.policyService = policyService;
         this.resourceService = resourceService;
         this.cacheService = cacheService;
         this.executor = executor;
-        this.aggregationService = new ResultAggregationService(auditService, cacheService);
+        this.aggregationService = resultAggregationService;
     }
 
     @Override
@@ -103,8 +105,11 @@ public class SimplePalisadeService implements PalisadeService {
         LOGGER.debug("Getting policy from policyService: {}", request);
         CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
-        return (CompletableFuture<DataRequestResponse>) aggregationService
-                .aggregateDataRequestResults(request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
+        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
+        CompletableFuture<DataRequestResponse> aggregatedResponse = aggregationService.aggregateDataRequestResults(
+                request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
+
+        return aggregatedResponse;
     }
 
     @Override

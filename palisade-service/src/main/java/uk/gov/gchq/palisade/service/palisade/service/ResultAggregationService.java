@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -66,11 +67,14 @@ public class ResultAggregationService implements Service {
         try {
             //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
             //resources they don't have permission to see
+            LOGGER.debug("Removing resources the user should not know about");
             Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, policy);
 
             PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
+            LOGGER.debug("Auditing the request");
             auditRegisterRequestComplete(request, user, policy, auditService);
 
+            LOGGER.debug("Caching the request");
             cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
 
             final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);

@@ -58,9 +58,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -78,6 +80,7 @@ public class SimplePalisadeServiceTest {
     private UserService userService;
     private SimplePalisadeService service;
     private ServiceState serviceState = new ServiceState();
+    private CompletableFuture<DataRequestResponse> futureResponse = new CompletableFuture<>();
     private DataRequestResponse expectedResponse = new DataRequestResponse();
     private RegisterDataRequest dataRequest = new RegisterDataRequest();
     private DataRequestConfig dataRequestConfig = new DataRequestConfig();
@@ -93,7 +96,7 @@ public class SimplePalisadeServiceTest {
     public void setup() {
         setupCacheService();
         mockOtherServices();
-        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, applicationConfig.getAsyncExecutor());
+        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, applicationConfig.getAsyncExecutor(), aggregationService);
         LOGGER.info("Simple Palisade Service created: {}", service);
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
@@ -115,6 +118,8 @@ public class SimplePalisadeServiceTest {
         dataRequestConfig.user(user).context(dataRequest.getContext()).rules(multiPolicy.getRuleMap());
         dataRequestConfig.setOriginalRequestId(originalRequestId);
         expectedResponse.resources(resources);
+        expectedResponse.originalRequestId(originalRequestId);
+        futureResponse.complete(expectedResponse);
     }
 
     @Test
@@ -128,21 +133,22 @@ public class SimplePalisadeServiceTest {
         CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
         futurePolicy.complete(multiPolicy);
 
-        when(cacheService.getBackingStore().add(anyString(), any(), any(), any())).thenReturn(true);
-        when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
-        when(aggregationService.aggregateDataRequestResults(dataRequest, user, resources, multiPolicy, requestId, originalRequestId))
-                .thenReturn(CompletableFuture.completedFuture(expectedResponse));
-        when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
-        when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
-        when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
-
         RegisterDataRequest request = new RegisterDataRequest()
                 .userId(new UserId().id("Bob"))
                 .context(new Context().purpose("Testing"))
                 .resourceId("/path/to/new/bob_file.txt");
 
+        when(cacheService.getBackingStore().add(anyString(), any(), any(), any())).thenReturn(true);
+        when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
+        when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
+        when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
+        when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
+        when(aggregationService.aggregateDataRequestResults(any(RegisterDataRequest.class), any(User.class), anyMap(), any(MultiPolicy.class), any(RequestId.class), any(RequestId.class)))
+                .thenReturn(futureResponse);
+
         //When
-        DataRequestResponse actualResponse = service.registerDataRequest(request).toCompletableFuture().join();
+        CompletableFuture<DataRequestResponse> response = service.registerDataRequest(request);
+        DataRequestResponse actualResponse = response.join();
         actualResponse.originalRequestId(request.getId());
 
         //Then
