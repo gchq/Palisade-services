@@ -28,14 +28,14 @@ import java.util.List;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-class ServiceInstanceRestController {
+public class ServiceInstanceRestController {
 
     @Autowired
     private DiscoveryClient discoveryClient;
 
     @RequestMapping(value = "/service-instances/{applicationName}", method = GET)
     public List<ServiceInstance> serviceInstancesByApplicationName(
-            @PathVariable String applicationName) {
+            @PathVariable final String applicationName) {
         return this.discoveryClient.getInstances(applicationName);
     }
 

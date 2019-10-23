@@ -23,9 +23,9 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 @EnableEurekaClient
 @SpringBootApplication
-public final class AuditApplication {
+public class AuditApplication {
 
-    private AuditApplication() {
+    public AuditApplication() {
     }
 
     public static void main(final String[] args) {

@@ -19,17 +19,16 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public class PolicyApplication {
 
-    /**
-     * Application entry point
-     *
-     * @param args from the command line
-     */
+    private PolicyApplication() {
+    }
+
     public static void main(final String[] args) {
         new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);

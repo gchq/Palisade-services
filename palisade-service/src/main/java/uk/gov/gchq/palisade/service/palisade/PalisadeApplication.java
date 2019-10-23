@@ -15,30 +15,21 @@
  */
 package uk.gov.gchq.palisade.service.palisade;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public class PalisadeApplication {
 
-    /**
-     * Application entry point
-     *
-     * @param args from the command line
-     */
+
+    private PalisadeApplication() {
+    }
+
     public static void main(final String[] args) {
         new SpringApplicationBuilder(PalisadeApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
