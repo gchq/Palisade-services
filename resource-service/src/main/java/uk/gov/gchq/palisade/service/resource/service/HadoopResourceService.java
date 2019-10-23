@@ -110,7 +110,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(GetResourcesByResourceRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesByResource request: {}", request);
         GetResourcesByIdRequest getResourcesByIdRequest = new GetResourcesByIdRequest().resourceId(request.getResource().getId());
@@ -119,7 +119,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(GetResourcesByIdRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesById request: {}", request);
         final String resourceId = request.getResourceId();
@@ -131,7 +131,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(GetResourcesByTypeRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesByType request: {}", request);
         final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
@@ -140,7 +140,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(GetResourcesBySerialisedFormatRequest request) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         requireNonNull(request, "request");
         LOGGER.debug("Invoking getResourcesBySerialisedFormat request: {}", request);
         final String pathString = getInternalConf().get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
@@ -149,7 +149,7 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public CompletableFuture<Boolean> addResource(AddResourceRequest request) {
+    public CompletableFuture<Boolean> addResource(final AddResourceRequest request) {
         throw new UnsupportedOperationException(ERROR_ADD_RESOURCE);
     }
 
@@ -313,7 +313,6 @@ public class HadoopResourceService implements ResourceService {
     }
 
 
-
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -324,9 +323,13 @@ public class HadoopResourceService implements ResourceService {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HadoopResourceService)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HadoopResourceService)) {
+            return false;
+        }
         HadoopResourceService that = (HadoopResourceService) o;
         boolean conf = getConf().equals(that.getConf());
         boolean fileSystem = getFileSystem().equals(that.getFileSystem());
@@ -335,6 +338,6 @@ public class HadoopResourceService implements ResourceService {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getConf(), getFileSystem(),  getCacheService());
+        return Objects.hash(getConf(), getFileSystem(), getCacheService());
     }
 }

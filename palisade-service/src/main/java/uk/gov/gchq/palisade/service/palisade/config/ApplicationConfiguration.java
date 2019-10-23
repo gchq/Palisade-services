@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
@@ -55,7 +57,7 @@ import java.util.concurrent.Executor;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
 @EnableConfigurationProperties(CacheConfiguration.class)

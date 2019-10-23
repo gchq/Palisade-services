@@ -41,7 +41,6 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.impl.MockDataService;
 import uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore;
@@ -100,7 +99,7 @@ public class HadoopResourceServiceTest {
 
     @Before
     public void setup() throws IOException {
-        System.setProperty("hadoop.home.dir", Paths.get(".").toAbsolutePath().normalize().toString() + "/src/test/resources/hadoop-3.0.0");
+        System.setProperty("hadoop.home.dir", Paths.get(".").toAbsolutePath().normalize().toString() + "/src/test/resources/hadoop-3.0.0.bin");
         config = createConf();
         inputPathString = testFolder.getRoot().getAbsolutePath() + "/inputDir";
         fs = FileSystem.get(config);
@@ -115,7 +114,7 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void getResourcesByIdTest() throws Exception{
+    public void getResourcesByIdTest() throws Exception {
 
         //given
         final String id = inputPathString.replace("\\", "/") + "/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE);
@@ -279,7 +278,7 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void addResourceTest() throws Exception{
+    public void addResourceTest() throws Exception {
         try {
             resourceService.addResource(null);
             fail("exception expected");

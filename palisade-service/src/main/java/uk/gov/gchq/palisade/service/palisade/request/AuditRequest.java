@@ -19,14 +19,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,7 +42,7 @@ import static java.util.Objects.requireNonNull;
  * This is the abstract class that is passed to the audit-service
  * to be able to store an audit record. The default information is
  * when was the audit record created and by what server.
- *
+ * <p>
  * The four immutable data subclasses below can be instantiated by static
  * {@code create(RequestId orig)} factory methods which chain construction by fluid interface definitions.
  */
@@ -88,15 +89,15 @@ public class AuditRequest extends Request {
      * {@link AuditRequest}. This class is used to indicate to the Audit logs that a RegisterDataRequest has been successfully
      * processed and these are the resources that this user is approved to read for this data access request.
      */
-    public static class RegisterRequestCompleteAuditRequest extends AuditRequest {
+    public static final class RegisterRequestCompleteAuditRequest extends AuditRequest {
 
         public final User user;
         public final Set<LeafResource> leafResources;
         public final Context context;
 
         @JsonCreator
-        private RegisterRequestCompleteAuditRequest (@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user,
-                                                     @JsonProperty("leafResources") final Set<LeafResource> leafResources, @JsonProperty("context") final Context context) {
+        private RegisterRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user,
+                                                    @JsonProperty("leafResources") final Set<LeafResource> leafResources, @JsonProperty("context") final Context context) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResources = requireNonNull(leafResources);
@@ -108,7 +109,7 @@ public class AuditRequest extends Request {
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
-            ILeafResources withUser(final User user);
+            ILeafResources withUser(User user);
         }
 
         public interface ILeafResources {
@@ -116,7 +117,7 @@ public class AuditRequest extends Request {
              * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
-            IContext withLeafResources(final Set<LeafResource> leafResources);
+            IContext withLeafResources(Set<LeafResource> leafResources);
         }
 
         public interface IContext {
@@ -124,11 +125,12 @@ public class AuditRequest extends Request {
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
-            RegisterRequestCompleteAuditRequest withContext(final Context context);
+            RegisterRequestCompleteAuditRequest withContext(Context context);
         }
 
         /**
          * Static factory method.
+         *
          * @param original the originating request Id
          * @return the {@link RegisterRequestCompleteAuditRequest}
          */
@@ -153,7 +155,7 @@ public class AuditRequest extends Request {
      * is used for the indication to the Audit logs that an exception has been received while processing the RegisterDataRequest
      * and which service it was that triggered the exception.
      */
-    public static class RegisterRequestExceptionAuditRequest extends AuditRequest {
+    public static final class RegisterRequestExceptionAuditRequest extends AuditRequest {
 
         public final UserId userId;
         public final String resourceId;
@@ -177,7 +179,7 @@ public class AuditRequest extends Request {
              * @param userId {@link UserId} is the user id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            IResourceId withUserId(final UserId userId);
+            IResourceId withUserId(UserId userId);
         }
 
         public interface IResourceId {
@@ -185,7 +187,7 @@ public class AuditRequest extends Request {
              * @param resourceId {@link String} is the resource id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            IContext withResourceId(final String resourceId);
+            IContext withResourceId(String resourceId);
         }
 
         public interface IContext {
@@ -193,7 +195,7 @@ public class AuditRequest extends Request {
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            IException withContext(final Context context);
+            IException withContext(Context context);
         }
 
         public interface IException {
@@ -201,7 +203,7 @@ public class AuditRequest extends Request {
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            IServiceClass withException(final Throwable exception);
+            IServiceClass withException(Throwable exception);
         }
 
         public interface IServiceClass {
@@ -209,11 +211,12 @@ public class AuditRequest extends Request {
              * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            RegisterRequestExceptionAuditRequest withServiceClass(final Class<? extends Service> serviceClass);
+            RegisterRequestExceptionAuditRequest withServiceClass(Class<? extends Service> serviceClass);
         }
 
         /**
          * Static factory method.
+         *
          * @param original the original request id
          * @return the {@link RegisterRequestExceptionAuditRequest}
          */
@@ -238,7 +241,7 @@ public class AuditRequest extends Request {
      * This is one of the objects that is passed to the audit-service to be able to store an audit record. This class extends
      * {@link AuditRequest} This class is used for the indication to the Audit logs that processing has been completed.
      */
-    public static class ReadRequestCompleteAuditRequest extends AuditRequest {
+    public static final class ReadRequestCompleteAuditRequest extends AuditRequest {
 
         public final User user;
         public final LeafResource leafResource;
@@ -248,8 +251,8 @@ public class AuditRequest extends Request {
         public final long numberOfRecordsProcessed;
 
         @JsonCreator
-        private ReadRequestCompleteAuditRequest (@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
-                                                 @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
+        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
+                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResource = requireNonNull(leafResource);
@@ -264,7 +267,7 @@ public class AuditRequest extends Request {
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            ILeafResource withUser(final User user);
+            ILeafResource withUser(User user);
         }
 
         public interface ILeafResource {
@@ -272,7 +275,7 @@ public class AuditRequest extends Request {
              * @param leafResource the {@link LeafResource} which the data has just finished being read
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            IContext withLeafResource(final LeafResource leafResource);
+            IContext withLeafResource(LeafResource leafResource);
         }
 
         public interface IContext {
@@ -280,7 +283,7 @@ public class AuditRequest extends Request {
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            IRulesApplied withContext(final Context context);
+            IRulesApplied withContext(Context context);
         }
 
         public interface IRulesApplied {
@@ -288,7 +291,7 @@ public class AuditRequest extends Request {
              * @param rules {@link Rules} is the rules that are being applied to this resource for this request
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            INumberOfRecordsReturned withRulesApplied(final Rules rules);
+            INumberOfRecordsReturned withRulesApplied(Rules rules);
         }
 
         public interface INumberOfRecordsReturned {
@@ -296,7 +299,7 @@ public class AuditRequest extends Request {
              * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            INumberOfRecordsProcessed withNumberOfRecordsReturned(final long numberOfRecordsReturned);
+            INumberOfRecordsProcessed withNumberOfRecordsReturned(long numberOfRecordsReturned);
         }
 
         public interface INumberOfRecordsProcessed {
@@ -304,11 +307,12 @@ public class AuditRequest extends Request {
              * @param numberOfRecordsProcessed is the number of records that was processed from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
-            ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(final long numberOfRecordsProcessed);
+            ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(long numberOfRecordsProcessed);
         }
 
         /**
          * Static factory method.
+         *
          * @param original the original request id
          * @return {@link ReadRequestCompleteAuditRequest}
          */
@@ -335,7 +339,7 @@ public class AuditRequest extends Request {
      * to be able to store an audit record. This class extends {@link Request} This class
      * is used for the indication to the Audit logs that an exception has been received.
      */
-    public static class ReadRequestExceptionAuditRequest extends AuditRequest {
+    public static final class ReadRequestExceptionAuditRequest extends AuditRequest {
 
         public final String token;
         public final LeafResource leafResource;
@@ -354,7 +358,7 @@ public class AuditRequest extends Request {
              * @param token this is the token that is used to retrieve cached information from the palisade service
              * @return the {@link ReadRequestExceptionAuditRequest}
              */
-            ILeafResource withToken(final String token);
+            ILeafResource withToken(String token);
         }
 
         public interface ILeafResource {
@@ -362,7 +366,7 @@ public class AuditRequest extends Request {
              * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
              * @return the {@link ReadRequestExceptionAuditRequest}
              */
-            IThrowable withLeafResource(final LeafResource leafResource);
+            IThrowable withLeafResource(LeafResource leafResource);
         }
 
         public interface IThrowable {
@@ -370,11 +374,12 @@ public class AuditRequest extends Request {
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link ReadRequestExceptionAuditRequest}
              */
-            ReadRequestExceptionAuditRequest withException(final Throwable exception);
+            ReadRequestExceptionAuditRequest withException(Throwable exception);
         }
 
         /**
          * Static factory method.
+         *
          * @param original request id.
          * @return the {@link ReadRequestExceptionAuditRequest}
          */
@@ -394,10 +399,16 @@ public class AuditRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AuditRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AuditRequest that = (AuditRequest) o;
         return timestamp.equals(that.timestamp) &&
                 serverIp.equals(that.serverIp) &&

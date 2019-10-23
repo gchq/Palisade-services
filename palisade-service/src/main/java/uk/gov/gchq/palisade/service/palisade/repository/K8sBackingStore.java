@@ -65,6 +65,7 @@ public class K8sBackingStore implements BackingStore {
 
     /**
      * Remove characters that are not permitted in Kubernetes config map keys
+     *
      * @param key to the item that is to be persisted
      * @return the new value of the key
      * @throws IllegalArgumentException if the key is empty or whitespace

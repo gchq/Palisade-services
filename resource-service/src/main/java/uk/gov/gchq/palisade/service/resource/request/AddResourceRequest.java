@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -88,10 +89,16 @@ public class AddResourceRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddResourceRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AddResourceRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         AddResourceRequest that = (AddResourceRequest) o;
         return getResource().equals(that.getResource()) &&
                 getConnectionDetail().equals(that.getConnectionDetail());

@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.resource.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Util;
 
 import java.time.Duration;
@@ -122,9 +123,13 @@ public class HashMapBackingStore implements BackingStore {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof CachedPair)) return false;
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CachedPair)) {
+                return false;
+            }
             CachedPair that = (CachedPair) o;
             return Arrays.equals(value, that.value) &&
                     clazz.equals(that.clazz);
@@ -205,9 +210,13 @@ public class HashMapBackingStore implements BackingStore {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HashMapBackingStore)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HashMapBackingStore)) {
+            return false;
+        }
         HashMapBackingStore that = (HashMapBackingStore) o;
         return getUseStatic() == that.getUseStatic() &&
                 cache.equals(that.cache) &&

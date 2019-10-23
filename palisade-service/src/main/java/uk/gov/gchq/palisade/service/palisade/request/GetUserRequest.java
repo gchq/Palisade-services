@@ -59,10 +59,16 @@ public class GetUserRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetUserRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetUserRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         GetUserRequest that = (GetUserRequest) o;
         return getUserId().equals(that.getUserId());
     }

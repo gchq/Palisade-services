@@ -21,11 +21,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
-public class AuditApplication {
+public final class AuditApplication {
+
+    private AuditApplication() {
+    }
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
-
 }
