@@ -33,6 +33,8 @@ terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
 dependency-reduced-pom.xml
+velocity.log.*
+velocity.log
 
 ##VSCODE default files that dont need to be tracked
 eclipse-formatter.xml

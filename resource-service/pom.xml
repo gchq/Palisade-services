@@ -54,9 +54,8 @@
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
-            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>

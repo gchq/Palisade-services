@@ -22,13 +22,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.resource.service.ResourceService;
 
 import java.util.Map;
@@ -87,7 +88,7 @@ public class ResourceController {
         return null;
     }
 
-    private Map<LeafResource, ConnectionDetail> getResourceByResourceRequest (final GetResourcesByResourceRequest request) {
+    private Map<LeafResource, ConnectionDetail> getResourceByResourceRequest(final GetResourcesByResourceRequest request) {
         try {
             return service.getResourcesByResource(request).get();
         } catch (InterruptedException e) {
@@ -98,7 +99,7 @@ public class ResourceController {
         return null;
     }
 
-    private Map<LeafResource, ConnectionDetail> getResourceByTypeRequest (final GetResourcesByTypeRequest request) {
+    private Map<LeafResource, ConnectionDetail> getResourceByTypeRequest(final GetResourcesByTypeRequest request) {
         try {
             return service.getResourcesByType(request).get();
         } catch (InterruptedException e) {
@@ -109,7 +110,7 @@ public class ResourceController {
         return null;
     }
 
-    private Map<LeafResource, ConnectionDetail> getResourceBySerialisedFormat (final GetResourcesBySerialisedFormatRequest request) {
+    private Map<LeafResource, ConnectionDetail> getResourceBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         try {
             return service.getResourcesBySerialisedFormat(request).get();
         } catch (InterruptedException e) {
@@ -120,7 +121,7 @@ public class ResourceController {
         return null;
     }
 
-    private Boolean addResourceRequest (final AddResourceRequest request) {
+    private Boolean addResourceRequest(final AddResourceRequest request) {
         try {
             return service.addResource(request).get();
         } catch (InterruptedException e) {

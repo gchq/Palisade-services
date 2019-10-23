@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.resource.impl;
 
 import org.mockito.Mockito;
+
 import uk.gov.gchq.palisade.service.resource.service.ResourceService;
 
 public class MockResourceService {

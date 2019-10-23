@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -25,6 +25,13 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <repositories>
+        <repository>
+            <id>event-logging</id>
+            <name>stroom event-logging repo</name>
+            <url>https://dl.bintray.com/stroom/event-logging</url>
+        </repository>
+    </repositories>
     <artifactId>audit-service</artifactId>
 
     <dependencies>
@@ -44,6 +51,36 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>event-logging</groupId>
+            <artifactId>event-logging</artifactId>
+            <version>v4.0.5_schema-v3.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>javax.activation-api</artifactId>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -78,7 +115,8 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
+                                        <copy file="${project.build.outputDirectory}/values.yaml"
+                                              toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -126,7 +164,8 @@
                 <configuration>
                     <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false
+                    </generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
@@ -209,6 +248,7 @@
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
                     <tag>${image.tag}</tag>
+                    <finalName>${project.artifactId}</finalName>
                     <buildArgs>
                         <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
                     </buildArgs>

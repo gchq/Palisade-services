@@ -36,6 +36,7 @@ public class PalisadeApplication {
 
     /**
      * Application entry point
+     *
      * @param args from the command line
      */
     public static void main(final String[] args) {

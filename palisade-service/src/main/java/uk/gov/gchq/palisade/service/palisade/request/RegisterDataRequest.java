@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -107,15 +108,25 @@ public class RegisterDataRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RegisterDataRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RegisterDataRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
         RegisterDataRequest that = (RegisterDataRequest) o;
 
-        if (!getUserId().equals(that.getUserId())) return false;
-        if (!getContext().equals(that.getContext())) return false;
+        if (!getUserId().equals(that.getUserId())) {
+            return false;
+        }
+        if (!getContext().equals(that.getContext())) {
+            return false;
+        }
         return getResourceId().equals(that.getResourceId());
     }
 

@@ -16,10 +16,10 @@
 package uk.gov.gchq.palisade.service.resource.request;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.resource.request.CacheRequest;
 
 /**
  * This class is the type of request for removing things from the cache. The service and key specify which entry to remove.

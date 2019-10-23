@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 
 import java.util.HashMap;
@@ -23,8 +24,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Maintains a registry of encoder and decoder function pairs (codecs) for various object types in to byte arrays. This

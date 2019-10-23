@@ -34,8 +34,12 @@ import java.util.List;
 @SpringBootApplication
 public class ResourceApplication {
 
+    private ResourceApplication() {
+    }
+
     /**
      * Application entry point
+     *
      * @param args from the command line
      */
     public static void main(final String[] args) {
