@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 import uk.gov.gchq.palisade.RequestId;
 
 import static org.junit.Assert.assertEquals;
@@ -38,17 +39,17 @@ public class GetResourcesByIdTest {
 
     @Test
     public void returnRequestObjectTest() {
-            //Given
-            GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
+        //Given
+        GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
 
-            //When
-            actual.resourceId("Test");
+        //When
+        actual.resourceId("Test");
 
-            //Then
-            assertEquals(expected.getResourceId(), actual.getResourceId());
+        //Then
+        assertEquals(expected.getResourceId(), actual.getResourceId());
     }
 
-    @Test (expected = NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void returnErrorWithNoResourceIdTest() {
         //Given
         GetResourcesByIdRequest actual = new GetResourcesByIdRequest();

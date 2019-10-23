@@ -22,8 +22,7 @@ HADOOP_SHELL_EXECNAME="${MYNAME##*/}"
 ## @audience     public
 ## @stability    stable
 ## @replaceable  no
-function hadoop_usage
-{
+function hadoop_usage() {
   hadoop_add_option "--buildpaths" "attempt to add class files from build tree"
   hadoop_add_option "--daemon (start|status|stop)" "operate on a daemon"
   hadoop_add_option "--hostnames list[,of,host,names]" "hosts to use in worker mode"
@@ -72,142 +71,141 @@ function hadoop_usage
 ## @stability    stable
 ## @replaceable  no
 ## @param        CLI arguments
-function hdfscmd_case
-{
+function hdfscmd_case() {
   subcmd=$1
   shift
 
   case ${subcmd} in
-    balancer)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.server.balancer.Balancer
+  balancer)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.server.balancer.Balancer
     ;;
-    cacheadmin)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.CacheAdmin
+  cacheadmin)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.CacheAdmin
     ;;
-    classpath)
-      hadoop_do_classpath_subcommand HADOOP_CLASSNAME "$@"
+  classpath)
+    hadoop_do_classpath_subcommand HADOOP_CLASSNAME "$@"
     ;;
-    crypto)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.CryptoAdmin
+  crypto)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.CryptoAdmin
     ;;
-    datanode)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_SECURE_CLASSNAME="org.apache.hadoop.hdfs.server.datanode.SecureDataNodeStarter"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.datanode.DataNode'
-      hadoop_deprecate_envvar HADOOP_SECURE_DN_PID_DIR HADOOP_SECURE_PID_DIR
-      hadoop_deprecate_envvar HADOOP_SECURE_DN_LOG_DIR HADOOP_SECURE_LOG_DIR
+  datanode)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_SECURE_CLASSNAME="org.apache.hadoop.hdfs.server.datanode.SecureDataNodeStarter"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.datanode.DataNode'
+    hadoop_deprecate_envvar HADOOP_SECURE_DN_PID_DIR HADOOP_SECURE_PID_DIR
+    hadoop_deprecate_envvar HADOOP_SECURE_DN_LOG_DIR HADOOP_SECURE_LOG_DIR
     ;;
-    debug)
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.DebugAdmin'
+  debug)
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.DebugAdmin'
     ;;
-    dfs)
-      HADOOP_CLASSNAME=org.apache.hadoop.fs.FsShell
+  dfs)
+    HADOOP_CLASSNAME=org.apache.hadoop.fs.FsShell
     ;;
-    dfsadmin)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSAdmin
+  dfsadmin)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSAdmin
     ;;
-    dfsrouter)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.federation.router.DFSRouter'
+  dfsrouter)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.federation.router.DFSRouter'
     ;;
-    dfsrouteradmin)
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.federation.RouterAdmin'
+  dfsrouteradmin)
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.federation.RouterAdmin'
     ;;
-    diskbalancer)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DiskBalancerCLI
+  diskbalancer)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DiskBalancerCLI
     ;;
-    envvars)
-      echo "JAVA_HOME='${JAVA_HOME}'"
-      echo "HADOOP_HDFS_HOME='${HADOOP_HDFS_HOME}'"
-      echo "HDFS_DIR='${HDFS_DIR}'"
-      echo "HDFS_LIB_JARS_DIR='${HDFS_LIB_JARS_DIR}'"
-      echo "HADOOP_CONF_DIR='${HADOOP_CONF_DIR}'"
-      echo "HADOOP_TOOLS_HOME='${HADOOP_TOOLS_HOME}'"
-      echo "HADOOP_TOOLS_DIR='${HADOOP_TOOLS_DIR}'"
-      echo "HADOOP_TOOLS_LIB_JARS_DIR='${HADOOP_TOOLS_LIB_JARS_DIR}'"
-      exit 0
+  envvars)
+    echo "JAVA_HOME='${JAVA_HOME}'"
+    echo "HADOOP_HDFS_HOME='${HADOOP_HDFS_HOME}'"
+    echo "HDFS_DIR='${HDFS_DIR}'"
+    echo "HDFS_LIB_JARS_DIR='${HDFS_LIB_JARS_DIR}'"
+    echo "HADOOP_CONF_DIR='${HADOOP_CONF_DIR}'"
+    echo "HADOOP_TOOLS_HOME='${HADOOP_TOOLS_HOME}'"
+    echo "HADOOP_TOOLS_DIR='${HADOOP_TOOLS_DIR}'"
+    echo "HADOOP_TOOLS_LIB_JARS_DIR='${HADOOP_TOOLS_LIB_JARS_DIR}'"
+    exit 0
     ;;
-    ec)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.ECAdmin
+  ec)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.ECAdmin
     ;;
-    fetchdt)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DelegationTokenFetcher
+  fetchdt)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DelegationTokenFetcher
     ;;
-    fsck)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSck
+  fsck)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSck
     ;;
-    getconf)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.GetConf
+  getconf)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.GetConf
     ;;
-    groups)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.GetGroups
+  groups)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.GetGroups
     ;;
-    haadmin)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSHAAdmin
+  haadmin)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.DFSHAAdmin
     ;;
-    journalnode)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.qjournal.server.JournalNode'
+  journalnode)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.qjournal.server.JournalNode'
     ;;
-    jmxget)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.JMXGet
+  jmxget)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.JMXGet
     ;;
-    lsSnapshottableDir)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.snapshot.LsSnapshottableDir
+  lsSnapshottableDir)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.snapshot.LsSnapshottableDir
     ;;
-    mover)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.server.mover.Mover
+  mover)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.server.mover.Mover
     ;;
-    namenode)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.namenode.NameNode'
-      hadoop_add_param HADOOP_OPTS hdfs.audit.logger "-Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER}"
+  namenode)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.namenode.NameNode'
+    hadoop_add_param HADOOP_OPTS hdfs.audit.logger "-Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER}"
     ;;
-    nfs3)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_SECURE_CLASSNAME=org.apache.hadoop.hdfs.nfs.nfs3.PrivilegedNfsGatewayStarter
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.nfs.nfs3.Nfs3
-      hadoop_deprecate_envvar HADOOP_SECURE_NFS3_LOG_DIR HADOOP_SECURE_LOG_DIR
-      hadoop_deprecate_envvar HADOOP_SECURE_NFS3_PID_DIR HADOOP_SECURE_PID_DIR
+  nfs3)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_SECURE_CLASSNAME=org.apache.hadoop.hdfs.nfs.nfs3.PrivilegedNfsGatewayStarter
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.nfs.nfs3.Nfs3
+    hadoop_deprecate_envvar HADOOP_SECURE_NFS3_LOG_DIR HADOOP_SECURE_LOG_DIR
+    hadoop_deprecate_envvar HADOOP_SECURE_NFS3_PID_DIR HADOOP_SECURE_PID_DIR
     ;;
-    oev)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineEditsViewer.OfflineEditsViewer
+  oev)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineEditsViewer.OfflineEditsViewer
     ;;
-    oiv)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineImageViewer.OfflineImageViewerPB
+  oiv)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineImageViewer.OfflineImageViewerPB
     ;;
-    oiv_legacy)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineImageViewer.OfflineImageViewer
+  oiv_legacy)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.offlineImageViewer.OfflineImageViewer
     ;;
-    portmap)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME=org.apache.hadoop.portmap.Portmap
+  portmap)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME=org.apache.hadoop.portmap.Portmap
     ;;
-    secondarynamenode)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.namenode.SecondaryNameNode'
-      hadoop_add_param HADOOP_OPTS hdfs.audit.logger "-Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER}"
+  secondarynamenode)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.server.namenode.SecondaryNameNode'
+    hadoop_add_param HADOOP_OPTS hdfs.audit.logger "-Dhdfs.audit.logger=${HDFS_AUDIT_LOGGER}"
     ;;
-    snapshotDiff)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.snapshot.SnapshotDiff
+  snapshotDiff)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.snapshot.SnapshotDiff
     ;;
-    storagepolicies)
-      HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.StoragePolicyAdmin
+  storagepolicies)
+    HADOOP_CLASSNAME=org.apache.hadoop.hdfs.tools.StoragePolicyAdmin
     ;;
-    version)
-      HADOOP_CLASSNAME=org.apache.hadoop.util.VersionInfo
+  version)
+    HADOOP_CLASSNAME=org.apache.hadoop.util.VersionInfo
     ;;
-    zkfc)
-      HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
-      HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.DFSZKFailoverController'
+  zkfc)
+    HADOOP_SUBCMD_SUPPORTDAEMONIZATION="true"
+    HADOOP_CLASSNAME='org.apache.hadoop.hdfs.tools.DFSZKFailoverController'
     ;;
-    *)
-      HADOOP_CLASSNAME="${subcmd}"
-      if ! hadoop_validate_classname "${HADOOP_CLASSNAME}"; then
-        hadoop_exit_with_usage 1
-      fi
+  *)
+    HADOOP_CLASSNAME="${subcmd}"
+    if ! hadoop_validate_classname "${HADOOP_CLASSNAME}"; then
+      hadoop_exit_with_usage 1
+    fi
     ;;
   esac
 }
@@ -233,7 +231,7 @@ fi
 # now that we have support code, let's abs MYNAME so we can use it later
 MYNAME=$(hadoop_abs "${MYNAME}")
 
-if [[ $# = 0 ]]; then
+if [[ $# == 0 ]]; then
   hadoop_exit_with_usage 1
 fi
 
@@ -261,7 +259,7 @@ fi
 
 hadoop_add_client_opts
 
-if [[ ${HADOOP_WORKER_MODE} = true ]]; then
+if [[ ${HADOOP_WORKER_MODE} == true ]]; then
   hadoop_common_worker_mode_execute "${HADOOP_HDFS_HOME}/bin/hdfs" "${HADOOP_USER_PARAMS[@]}"
   exit $?
 fi
