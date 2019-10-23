@@ -21,9 +21,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
-public final class ResourceApplication {
+public class ResourceApplication {
 
-    private ResourceApplication() {
+    public ResourceApplication() {
     }
 
     /**
