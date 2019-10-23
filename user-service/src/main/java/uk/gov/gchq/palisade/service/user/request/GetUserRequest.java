@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
@@ -38,7 +39,9 @@ public class GetUserRequest extends Request {
     public final UserId userId;
 
     /**
-     * @param userId the id of the {@link uk.gov.gchq.palisade.User} you want
+     * @param id                id
+     * @param originalRequestId originalRequestId
+     * @param userId            the id of the {@link uk.gov.gchq.palisade.User} you want
      */
     @JsonCreator
     private GetUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId) {
@@ -49,6 +52,7 @@ public class GetUserRequest extends Request {
     /**
      * Static factory method.
      *
+     * @param original requestId
      * @return {@link GetUserRequest}
      */
     public static GetUserRequest.IUserId create(final RequestId original) {
@@ -56,10 +60,16 @@ public class GetUserRequest extends Request {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetUserRequest)) return false;
-        if (!super.equals(o)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GetUserRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
 
         GetUserRequest that = (GetUserRequest) o;
         return new EqualsBuilder()
@@ -85,7 +95,7 @@ public class GetUserRequest extends Request {
 
     public interface IUserId {
         /**
-         * @param userId
+         * @param userId userId
          * @return the {@link GetUserRequest}
          */
         GetUserRequest withUserId(final UserId userId);

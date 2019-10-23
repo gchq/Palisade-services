@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.user.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 
 import java.util.HashMap;

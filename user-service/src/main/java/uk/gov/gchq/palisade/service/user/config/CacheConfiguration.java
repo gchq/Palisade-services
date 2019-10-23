@@ -33,13 +33,13 @@ public class CacheConfiguration {
     /**
      * The backing store implementation type
      *
-     * @return
+     * @return implementation
      */
     public String getImplementation() {
         return implementation;
     }
 
-    public void setImplementation(String implementation) {
+    public void setImplementation(final String implementation) {
         this.implementation = implementation;
     }
 
@@ -47,7 +47,7 @@ public class CacheConfiguration {
         return props;
     }
 
-    public void setProps(String props) {
+    public void setProps(final String props) {
         this.props = props;
     }
 
@@ -55,7 +55,7 @@ public class CacheConfiguration {
         return etcd;
     }
 
-    public void setEtcd(List<String> etcd) {
+    public void setEtcd(final List<String> etcd) {
         this.etcd = etcd;
     }
 }

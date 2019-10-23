@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -31,6 +32,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;

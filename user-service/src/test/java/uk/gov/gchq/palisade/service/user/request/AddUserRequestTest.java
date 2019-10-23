@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 

@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import org.junit.Test;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;

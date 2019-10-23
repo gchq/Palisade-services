@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.user.service;
 
 
 import org.mockito.Mockito;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 

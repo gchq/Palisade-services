@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.request.Request;
@@ -44,6 +45,7 @@ public class AddUserRequest extends Request {
     /**
      * Static factory method.
      *
+     * @param original RequestId
      * @return {@link AddUserRequest}
      */
     public static IUser create(final RequestId original) {
