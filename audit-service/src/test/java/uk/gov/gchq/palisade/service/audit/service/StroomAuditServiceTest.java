@@ -4,7 +4,6 @@ import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
 import event.logging.impl.DefaultEventSerializer;
 import event.logging.impl.EventSerializer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
