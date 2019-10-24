@@ -67,9 +67,9 @@ import static org.junit.Assert.assertTrue;
 
 
 @RunWith(JUnit4.class)
-public class HierachicalPolicyServiceTest {
+public class HierarchicalPolicyServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HierachicalPolicyServiceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HierarchicalPolicyServiceTest.class);
 
     private HierarchicalPolicyService policyService;
     private static final SimpleCacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore());
