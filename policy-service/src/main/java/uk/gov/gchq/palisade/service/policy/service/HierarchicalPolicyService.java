@@ -22,13 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.Util;
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.policy.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
@@ -39,7 +36,6 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
@@ -48,7 +44,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -74,6 +69,10 @@ public class HierarchicalPolicyService implements PolicyService {
         this.cacheService = cacheService;
     }
 
+    public HierarchicalPolicyService() {
+
+    }
+
     @Autowired
     public HierarchicalPolicyService cacheService(final CacheService cacheService) {
         requireNonNull(cacheService, "Cache service cannot be set to null.");
@@ -88,24 +87,6 @@ public class HierarchicalPolicyService implements PolicyService {
     public CacheService getCacheService() {
         requireNonNull(cacheService, "The cache service has not been set.");
         return cacheService;
-    }
-
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        //extract cache
-        String serialisedCache = config.getOrDefault(CACHE_IMPL_KEY, null);
-        if (nonNull(serialisedCache)) {
-            setCacheService(JSONSerialiser.deserialise(serialisedCache.getBytes(StandardCharsets.UTF_8), CacheService.class));
-        } else {
-            throw new NoConfigException("no cache service specified in configuration");
-        }
-    }
-
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(PolicyService.class.getTypeName(), getClass().getTypeName());
-        String serialisedCache = new String(JSONSerialiser.serialise(cacheService), StandardCharsets.UTF_8);
-        config.put(CACHE_IMPL_KEY, serialisedCache);
     }
 
     @Override
@@ -227,7 +208,7 @@ public class HierarchicalPolicyService implements PolicyService {
             if (optionalRecordRules.isPresent()) {
                 map.put(resource, new Policy<>().recordRules(optionalRecordRules.get()));
             } else {
-                LOGGER.warn("Couldn't find any record level rules for {}. This shouldn't be the case, since we found resource level rules for it!");
+                LOGGER.warn("Couldn't find any record level rules for {}. This shouldn't be the case, since we found resource level rules for it!", user.getUserId().getId());
             }
         });
         return CompletableFuture.completedFuture(new MultiPolicy().policies(map));
