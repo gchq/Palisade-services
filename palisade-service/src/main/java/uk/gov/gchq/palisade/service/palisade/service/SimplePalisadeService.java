@@ -55,15 +55,13 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
     //Cache keys
     public static final String RES_COUNT_KEY = "res_count_";
-
     /**
      * Duration for how long the count of resources requested should live in the cache.
      */
     public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
     private final AuditService auditService;
     private final PolicyService policyService;
     private final UserService userService;
