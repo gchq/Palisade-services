@@ -21,9 +21,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
-public final class AuditApplication {
+public class AuditApplication {
 
-    private AuditApplication() {
+    public AuditApplication() {
     }
 
     public static void main(final String[] args) {
