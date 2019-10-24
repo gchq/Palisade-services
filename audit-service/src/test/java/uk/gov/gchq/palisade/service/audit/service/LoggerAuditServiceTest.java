@@ -17,12 +17,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -93,7 +93,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(UserService.class);
+                .withServiceClass(Service.class);
 
         // When
         auditService.audit(auditRequest);

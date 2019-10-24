@@ -20,14 +20,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
-import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.util.HashSet;
 
@@ -39,6 +37,7 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class StroomAuditServiceTest extends AuditServiceTestCommon {
+    private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     @Spy
     DefaultEventLoggingService eventLogger = new DefaultEventLoggingService();
@@ -198,7 +197,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(AuditService.class);
+                .withServiceClass(Service.class);
 
         // When
         auditService.audit(auditRequest);
@@ -255,7 +254,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditReadRequestTokenException() {
         // Given
-        Mockito.doReturn(PalisadeService.TOKEN_NOT_FOUND_MESSAGE).when(exception).getMessage();
+        Mockito.doReturn(TOKEN_NOT_FOUND_MESSAGE).when(exception).getMessage();
         final AuditRequest auditRequest = ReadRequestExceptionAuditRequest.create(requestId)
                 .withToken(TEST_TOKEN)
                 .withLeafResource(resource)

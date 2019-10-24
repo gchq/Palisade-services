@@ -8,6 +8,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.Service;
 
 class AuditServiceTestCommon {
 
@@ -21,6 +22,7 @@ class AuditServiceTestCommon {
     private static final String TEST_ORIGINAL_REQUEST_ID = "originalRequestId linking all logs from the same data access request together";
     private static final String TEST_DATA_TYPE = "data type of the resource, e.g. Employee";
     private static final String TEST_EXCEPTION_MESSAGE = "exception message";
+    private static final String TEST_SERVICE_CLASS_MESSAGE = "mocked service class, e.g. UserService";
 
     private static final String TEST_RULES_APPLIED = "human readable description of the rules/policies been applied to the data";
 
@@ -73,5 +75,11 @@ class AuditServiceTestCommon {
         Mockito.doReturn(TEST_RULES_APPLIED).when(mockRules).getMessage();
         Mockito.doReturn(TEST_RULES_APPLIED).when(mockRules).toString();
         return mockRules;
+    }
+
+    public class UserService implements Service {
+    }
+
+    public class ResourceService implements Service {
     }
 }
