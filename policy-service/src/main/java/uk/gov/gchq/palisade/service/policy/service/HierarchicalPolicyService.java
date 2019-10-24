@@ -69,10 +69,6 @@ public class HierarchicalPolicyService implements PolicyService {
         this.cacheService = cacheService;
     }
 
-    public HierarchicalPolicyService() {
-
-    }
-
     @Autowired
     public HierarchicalPolicyService cacheService(final CacheService cacheService) {
         requireNonNull(cacheService, "Cache service cannot be set to null.");
