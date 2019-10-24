@@ -18,3 +18,48 @@ spring:
   output:
     ansi:
       enabled: always
+
+launcher:
+  services:
+    audit:
+      name: audit-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    data:
+      name: data-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    discovery:
+      name: discovery-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    palisade:
+      name: palisade-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    policy:
+      name: policy-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    resource:
+      name: resource-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log
+    user:
+      name: user-service
+      enabled: false
+      path: path/../to/../jar
+      config: path/../to/../config
+      log: path/../to/../log

@@ -18,15 +18,33 @@ package uk.gov.gchq.palisade.service.launcher.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+import uk.gov.gchq.palisade.service.audit.AuditApplication;
+import uk.gov.gchq.palisade.service.launcher.config.AuditConfiguration;
+
 @Component
-public class ServicesRunner implements ApplicationRunner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
+public class AuditRunner implements ApplicationRunner {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditRunner.class);
+
+    @Autowired
+    AuditConfiguration configuration;
+
+    private static ConfigurableApplicationContext context;
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
+        if (args.getOptionNames().contains(configuration.getName()) || configuration.isEnabled()) {
+            Thread thread = new Thread(() -> {
+                context.close();
+                context = SpringApplication.run(AuditApplication.class, args.getSourceArgs());
+            });
+            thread.start();
+        }
     }
 }

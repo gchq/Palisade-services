@@ -17,14 +17,24 @@ package uk.gov.gchq.palisade.service.launcher.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
 /**
  * Bean configuration and dependency injection graph
  */
-@Configuration
+@ConfigurationProperties(prefix = "launcher.services")
+@EnableConfigurationProperties(AuditConfiguration.class)
 public class ApplicationConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    @Bean
+    public AuditConfiguration auditConfiguration() {
+        return new AuditConfiguration();
+    }
+
 }
