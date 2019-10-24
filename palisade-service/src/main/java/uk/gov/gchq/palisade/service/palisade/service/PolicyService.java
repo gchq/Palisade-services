@@ -15,6 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -26,6 +31,7 @@ import java.util.concurrent.Executor;
 
 public class PolicyService implements Service {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
     private final PolicyClient client;
     private final Executor executor;
 
@@ -34,7 +40,18 @@ public class PolicyService implements Service {
         this.executor = executor;
     }
 
-    public CompletionStage<MultiPolicy> getPolicy(final GetPolicyRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.client.getPolicy(request), this.executor);
+    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest policyRequest) {
+
+        CompletionStage<MultiPolicy> policy;
+
+        try {
+            policy = this.client.getPolicy(policyRequest);
+            LOGGER.debug("Got policy: {}", policy);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to get policy: {}", ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+
+        return policy.toCompletableFuture();
     }
 }
