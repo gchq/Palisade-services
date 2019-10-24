@@ -22,13 +22,14 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public final class PalisadeApplication {
+public class PalisadeApplication {
 
-    private PalisadeApplication() {
+    public PalisadeApplication() {
     }
 
     /**
      * Application entry point
+     *
      * @param args from the command line
      */
     public static void main(final String[] args) {
