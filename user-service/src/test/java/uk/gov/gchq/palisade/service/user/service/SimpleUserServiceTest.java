@@ -21,7 +21,6 @@ import org.junit.Test;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
@@ -45,12 +44,8 @@ public class SimpleUserServiceTest {
         SimpleUserService hms = new SimpleUserService(cacheService);
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
-        ServiceState con = new ServiceState();
-        hms.recordCurrentConfigTo(con);
-
         //When
         SimpleUserService test = new SimpleUserService(cacheService);
-        test.applyConfigFrom(con);
         //add a user to the first service
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user2)).join();
         //both should be in the second service
@@ -72,12 +67,8 @@ public class SimpleUserServiceTest {
         SimpleUserService hms = new SimpleUserService(cacheService);
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
-        ServiceState con = new ServiceState();
-        hms.recordCurrentConfigTo(con);
-
         //When
         SimpleUserService test = new SimpleUserService(cacheService);
-        test.applyConfigFrom(con);
         GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
         User actual1 = test.getUser(getUserRequest).join();
 
@@ -91,12 +82,8 @@ public class SimpleUserServiceTest {
         CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(false));
         SimpleUserService hms = new SimpleUserService(cacheService);
 
-        ServiceState con = new ServiceState();
-        hms.recordCurrentConfigTo(con);
-
         //When
         SimpleUserService test = new SimpleUserService(cacheService);
-        test.applyConfigFrom(con);
         try {
             GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
             User actual1 = test.getUser(getUserRequest).join();
