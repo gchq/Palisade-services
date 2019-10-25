@@ -38,7 +38,6 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.policy.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
