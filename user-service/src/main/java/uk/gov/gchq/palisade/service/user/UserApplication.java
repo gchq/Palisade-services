@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.web;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+package uk.gov.gchq.palisade.service.user;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import java.util.concurrent.CompletableFuture;
+@EnableFeignClients
+@SpringBootApplication
+public final class UserApplication {
 
-@FeignClient(value = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
+    private UserApplication() {
 
-    @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    CompletableFuture<User> getUser(final GetUserRequest request);
+    }
+
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
+                .run(args);
+    }
 
 }

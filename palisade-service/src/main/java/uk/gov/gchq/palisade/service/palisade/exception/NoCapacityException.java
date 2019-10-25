@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.web;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+package uk.gov.gchq.palisade.service.palisade.exception;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+import uk.gov.gchq.palisade.exception.RequestFailedException;
 
-import java.util.concurrent.CompletableFuture;
+public class NoCapacityException extends RequestFailedException {
 
-@FeignClient(value = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
+    public NoCapacityException(final String e) {
+        super(e);
+    }
 
-    @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    CompletableFuture<User> getUser(final GetUserRequest request);
+    public NoCapacityException(final Throwable cause) {
+        super(cause);
+    }
 
+    public NoCapacityException(final String e, final Throwable cause) {
+        super(e, cause);
+    }
 }
