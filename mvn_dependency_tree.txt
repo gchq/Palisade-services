@@ -1,4 +1,4 @@
-25/10/2019 10:11:42
+26/10/2019 08:44:56
 uk.gov.gchq.palisade:service:pom:0.4.0-SNAPSHOT
 uk.gov.gchq.palisade:audit-service:jar:0.4.0-SNAPSHOT
 +- org.springframework.boot:spring-boot-starter:jar:2.1.8.RELEASE:compile
