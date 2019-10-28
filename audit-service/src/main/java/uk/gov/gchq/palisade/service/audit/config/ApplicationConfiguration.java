@@ -67,7 +67,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "registerWithEureka")
+    @ConditionalOnProperty(prefix = "eureka.client.registerWithEureka", value = "true")
     public ServiceInstanceRestController eurekaClient() {
         return new ServiceInstanceRestController();
     }

@@ -34,11 +34,6 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
 
-audit:
-  implementations:
-    logger:
-    stroom:
-
 management:
   endpoints:
     web:
