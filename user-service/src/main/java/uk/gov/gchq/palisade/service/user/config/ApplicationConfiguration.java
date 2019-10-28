@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.palisade.config;
+package uk.gov.gchq.palisade.service.user.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,25 +27,14 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.EtcdBackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.K8sBackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.PropertiesBackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.palisade.service.AuditService;
-import uk.gov.gchq.palisade.service.palisade.service.CacheService;
-import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
-import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
-import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
-import uk.gov.gchq.palisade.service.palisade.service.ResultAggregationService;
-import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
-import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
-import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
-import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
-import uk.gov.gchq.palisade.service.palisade.web.UserClient;
+import uk.gov.gchq.palisade.service.user.repository.BackingStore;
+import uk.gov.gchq.palisade.service.user.repository.EtcdBackingStore;
+import uk.gov.gchq.palisade.service.user.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.user.repository.K8sBackingStore;
+import uk.gov.gchq.palisade.service.user.repository.PropertiesBackingStore;
+import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
+import uk.gov.gchq.palisade.service.user.service.CacheService;
+import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 
 import java.net.URI;
 import java.util.Map;
@@ -58,7 +45,7 @@ import java.util.concurrent.Executor;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Bean configuration and dependency injection graph.
+ * Bean configuration and dependency injection graph
  */
 @Configuration
 @EnableConfigurationProperties(CacheConfiguration.class)
@@ -72,46 +59,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeService palisadeService(final Map<String, BackingStore> backingStores,
-                                           final AuditClient auditClient,
-                                           final UserClient userClient,
-                                           final PolicyClient policyClient,
-                                           final ResourceClient resourceClient) {
-        return new SimplePalisadeService(auditService(auditClient),
-                userService(userClient),
-                policyService(policyClient),
-                resourceService(resourceClient),
-                cacheService(backingStores),
-                getAsyncExecutor(),
-                resultAggregationService(auditClient));
+    public SimpleUserService userService(final Map<String, BackingStore> backingStores) {
+        return new SimpleUserService(cacheService(backingStores));
     }
 
-    @Bean
-    public UserService userService(final UserClient userClient) {
-        return new UserService(userClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient) {
-        return new ResourceService(resourceClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public PolicyService policyService(final PolicyClient policyClient) {
-        return new PolicyService(policyClient, getAsyncExecutor());
-    }
-
-    @Bean
-    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
-        CacheService cacheService = new SimpleCacheService();
-        AuditService auditService = auditService(auditClient);
-        return new ResultAggregationService(auditService, cacheService);
-    }
 
     @Bean(name = "hashmap")
     @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
@@ -160,10 +111,4 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
-    }
-
 }

@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.user.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.codehaus.jackson.annotate.JsonCreator;
+
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
-import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -31,31 +36,27 @@ import static java.util.Objects.requireNonNull;
  */
 public class GetUserRequest extends Request {
 
-    private UserId userId;
+    public final UserId userId;
 
     /**
-     * Constructs a {@link GetUserRequest} without a {@link UserId}.
+     * @param id                id
+     * @param originalRequestId originalRequestId
+     * @param userId            the id of the {@link uk.gov.gchq.palisade.User} you want
      */
-    public GetUserRequest() {
+    @JsonCreator
+    private GetUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId) {
+        setOriginalRequestId(originalRequestId);
+        this.userId = requireNonNull(userId);
     }
 
     /**
-     * @param userId the id of the {@link uk.gov.gchq.palisade.User} you want
-     * @return the {@link GetUserRequest}
+     * Static factory method.
+     *
+     * @param original requestId
+     * @return {@link GetUserRequest}
      */
-    public GetUserRequest userId(final UserId userId) {
-        requireNonNull(userId, "The user id cannot be set to null.");
-        this.userId = userId;
-        return this;
-    }
-
-    public UserId getUserId() {
-        requireNonNull(userId, "The user id has not been set.");
-        return userId;
-    }
-
-    public void setUserId(final UserId userId) {
-        userId(userId);
+    public static GetUserRequest.IUserId create(final RequestId original) {
+        return userId -> new GetUserRequest(null, original, userId);
     }
 
     @Override
@@ -69,13 +70,20 @@ public class GetUserRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
+
         GetUserRequest that = (GetUserRequest) o;
-        return getUserId().equals(that.getUserId());
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(userId, that.userId)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getUserId());
+        return new HashCodeBuilder(17, 61)
+                .appendSuper(super.hashCode())
+                .append(userId)
+                .toHashCode();
     }
 
     @Override
@@ -83,5 +91,13 @@ public class GetUserRequest extends Request {
         return new StringJoiner(", ", GetUserRequest.class.getSimpleName() + "[", "]")
                 .add("userId=" + userId)
                 .toString();
+    }
+
+    public interface IUserId {
+        /**
+         * @param userId userId
+         * @return the {@link GetUserRequest}
+         */
+        GetUserRequest withUserId(final UserId userId);
     }
 }
