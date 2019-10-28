@@ -30,13 +30,11 @@ import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
