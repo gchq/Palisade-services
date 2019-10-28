@@ -22,6 +22,7 @@
         <groupId>uk.gov.gchq.palisade</groupId>
         <artifactId>service</artifactId>
         <version>0.4.0-${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>user-service</artifactId>
