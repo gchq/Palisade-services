@@ -16,13 +16,10 @@
 
 package uk.gov.gchq.palisade.service.launcher.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-@ConfigurationProperties(prefix = "audit")
-public class AuditConfiguration {
+public class ServiceConfiguration {
     private String name;
-    private boolean enabled;
-    private String path;
+    private String service;
+    private String target;
     private String config;
     private String log;
 
@@ -34,20 +31,20 @@ public class AuditConfiguration {
         this.name = name;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public String getService() {
+        return service;
     }
 
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
+    public void setService(final String service) {
+        this.service = service;
     }
 
-    public String getPath() {
-        return path;
+    public String getTarget() {
+        return target;
     }
 
-    public void setPath(final String path) {
-        this.path = path;
+    public void setTarget(final String target) {
+        this.target = target;
     }
 
     public String getConfig() {
@@ -65,5 +62,4 @@ public class AuditConfiguration {
     public void setLog(final String log) {
         this.log = log;
     }
-
 }

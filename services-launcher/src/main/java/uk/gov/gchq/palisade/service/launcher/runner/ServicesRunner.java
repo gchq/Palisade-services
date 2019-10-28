@@ -18,15 +18,55 @@ package uk.gov.gchq.palisade.service.launcher.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class ServicesRunner implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
+    @Autowired
+    List<ProcessBuilder> processBuilders;
+
+    //@Autowired
+    //DefaultsConfiguration defaultsConfiguration;
+
+    //@Autowired
+    //ServicesConfiguration servicesConfiguration;
+
     @Override
     public void run(final ApplicationArguments args) throws Exception {
+        for (String serviceName : args.getOptionNames()) {
+        }
+        List<Process> processes = processBuilders.stream().parallel()
+                .map((pb) -> {
+                    try {
+                        Process process = pb.start();
+                        LOGGER.info(String.format("Started process %s", process.toString()));
+                        return process;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        List<Integer> retCodes = processes.stream().parallel()
+                .map((p) -> {
+                    try {
+                        return p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        LOGGER.info(retCodes.toString());
     }
 }

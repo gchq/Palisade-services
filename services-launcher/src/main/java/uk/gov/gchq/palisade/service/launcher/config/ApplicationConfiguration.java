@@ -15,26 +15,51 @@
  */
 package uk.gov.gchq.palisade.service.launcher.config;
 
+import org.apache.tools.ant.util.JavaEnvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean config and dependency injection graph
  */
-@ConfigurationProperties(prefix = "launcher.services")
-@EnableConfigurationProperties(AuditConfiguration.class)
+@Configuration
+@EnableConfigurationProperties({DefaultsConfiguration.class, ServicesConfiguration.class})
 public class ApplicationConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    @Autowired
+    DefaultsConfiguration defaultsConfiguration;
+
+    @Autowired
+    ServicesConfiguration servicesConfiguration;
+
     @Bean
-    public AuditConfiguration auditConfiguration() {
-        return new AuditConfiguration();
+    List<ProcessBuilder> serviceProcesses() {
+        return servicesConfiguration.getServices().stream()
+                .map(this::constructServiceProcess).collect(Collectors.toList());
     }
 
+    private ProcessBuilder constructServiceProcess(final OverriddenConfiguration config) {
+        config.defaults(defaultsConfiguration);
+        String[] command = new String[] {
+                JavaEnvUtils.getJreExecutable("java"),
+                "-jar", config.getTarget(),
+                String.format("--spring-config-location=%s", config.getConfig())
+        };
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder.redirectOutput(new File(config.getLog()));
+        builder.redirectError(new File(config.getLog()));
+        LOGGER.info(String.format("Constructed ProcessBuilder %s [%s]", Arrays.toString(command), builder.redirectOutput().toString()));
+        return builder;
+    }
 }
