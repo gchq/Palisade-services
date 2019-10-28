@@ -17,8 +17,6 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -26,6 +24,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -52,6 +51,48 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
         this.context = requireNonNull(context);
     }
 
+    /**
+     * Static factory method.
+     *
+     * @param original the originating request Id
+     * @return the {@link RegisterRequestCompleteAuditRequest}
+     */
+    public static IUser create(final RequestId original) {
+        return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
+        return user.equals(that.user) &&
+                leafResources.equals(that.leafResources) &&
+                context.equals(that.context);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), user, leafResources, context);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
+                .add(super.toString())
+                .add("user=" + user)
+                .add("leafResources=" + leafResources)
+                .add("context=" + context)
+                .toString();
+    }
+
     public interface IUser {
         /**
          * @param user {@link User} is the user that made the initial registration request to access data
@@ -74,52 +115,5 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
          * @return the {@link RegisterRequestCompleteAuditRequest}
          */
         RegisterRequestCompleteAuditRequest withContext(final Context context);
-    }
-
-    /**
-     * Static factory method.
-     *
-     * @param original the originating request Id
-     * @return the {@link RegisterRequestCompleteAuditRequest}
-     */
-    public static IUser create(final RequestId original) {
-        return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(leafResources, that.leafResources)
-                .append(context, that.context)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(23, 41)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(leafResources)
-                .append(context)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("user=" + user)
-                .add("leafResources=" + leafResources)
-                .add("context=" + context)
-                .toString();
     }
 }
