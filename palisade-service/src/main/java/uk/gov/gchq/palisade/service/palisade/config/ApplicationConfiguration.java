@@ -41,6 +41,7 @@ import uk.gov.gchq.palisade.service.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
 import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.palisade.service.ResultAggregationService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
@@ -81,7 +82,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 policyService(policyClient),
                 resourceService(resourceClient),
                 cacheService(backingStores),
-                getAsyncExecutor());
+                getAsyncExecutor(),
+                resultAggregationService(auditClient));
     }
 
     @Bean
@@ -102,6 +104,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public PolicyService policyService(final PolicyClient policyClient) {
         return new PolicyService(policyClient, getAsyncExecutor());
+    }
+
+    @Bean
+    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
+        CacheService cacheService = new SimpleCacheService();
+        AuditService auditService = auditService(auditClient);
+        return new ResultAggregationService(auditService, cacheService);
     }
 
     @Bean(name = "hashmap")

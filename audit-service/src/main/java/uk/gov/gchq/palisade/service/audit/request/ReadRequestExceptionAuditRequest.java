@@ -17,12 +17,11 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -44,6 +43,48 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
         this.token = requireNonNull(token);
         this.leafResource = requireNonNull(leafResource);
         this.exception = requireNonNull(exception);
+    }
+
+    /**
+     * Static factory method.
+     *
+     * @param original request id.
+     * @return the {@link ReadRequestExceptionAuditRequest}
+     */
+    public static IToken create(final RequestId original) {
+        return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
+        return token.equals(that.token) &&
+                leafResource.equals(that.leafResource) &&
+                exception.equals(that.exception);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), token, leafResource, exception);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
+                .add(super.toString())
+                .add("token='" + token + "'")
+                .add("leafResource=" + leafResource)
+                .add("exception=" + exception)
+                .toString();
     }
 
     public interface IToken {
@@ -68,52 +109,5 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
          * @return the {@link ReadRequestExceptionAuditRequest}
          */
         ReadRequestExceptionAuditRequest withException(final Throwable exception);
-    }
-
-    /**
-     * Static factory method.
-     *
-     * @param original request id.
-     * @return the {@link ReadRequestExceptionAuditRequest}
-     */
-    public static IToken create(final RequestId original) {
-        return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(token, that.token)
-                .append(leafResource, that.leafResource)
-                .append(exception, that.exception)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(19, 39)
-                .appendSuper(super.hashCode())
-                .append(token)
-                .append(leafResource)
-                .append(exception)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("token='" + token + "'")
-                .add("leafResource=" + leafResource)
-                .add("exception=" + exception)
-                .toString();
     }
 }

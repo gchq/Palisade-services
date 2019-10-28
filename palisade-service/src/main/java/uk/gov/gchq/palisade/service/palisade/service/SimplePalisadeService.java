@@ -22,11 +22,7 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -38,12 +34,9 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import static java.util.Objects.requireNonNull;
@@ -55,160 +48,67 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
     //Cache keys
     public static final String RES_COUNT_KEY = "res_count_";
-
     /**
      * Duration for how long the count of resources requested should live in the cache.
      */
     public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
     private final AuditService auditService;
     private final PolicyService policyService;
     private final UserService userService;
     private final ResourceService resourceService;
     private final CacheService cacheService;
+    private final ResultAggregationService aggregationService;
 
     private final Executor executor;
 
-    public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService, final CacheService cacheService, final Executor executor) {
+    public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService,
+                                 final CacheService cacheService, final Executor executor, final ResultAggregationService resultAggregationService) {
+        requireNonNull(auditService, "auditService");
+        requireNonNull(userService, "userService");
+        requireNonNull(policyService, "policyService");
+        requireNonNull(resourceService, "resourceService");
+        requireNonNull(cacheService, "cacheService");
+        requireNonNull(executor, "executor");
+        requireNonNull(resultAggregationService, "resultAggregationService");
         this.auditService = auditService;
         this.userService = userService;
         this.policyService = policyService;
         this.resourceService = resourceService;
         this.cacheService = cacheService;
         this.executor = executor;
+        this.aggregationService = resultAggregationService;
     }
 
     @Override
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
+        requireNonNull(request, "request");
         final RequestId originalRequestId = request.getId();
         LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
+
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
-
-        final CompletionStage<User> futureUser = userService.getUser(userRequest)
-                .thenApply(user -> {
-                    LOGGER.debug("Got user: {}", user);
-                    return user;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get user: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, UserService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
+        final CompletableFuture<User> user = userService.getUser(userRequest);
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-
-        final CompletionStage<Map<LeafResource, ConnectionDetail>> futureResources = resourceService.getResourcesById(resourceRequest)
-                .thenApply(resources -> {
-                    LOGGER.debug("Got resources: {}", resources);
-                    return resources;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Failed to get resources: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, ResourceService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
+        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
 
-        CompletionStage<MultiPolicy> futureMultiPolicy = getPolicy(request, futureUser, futureResources, originalRequestId);
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
+        policyRequest.setOriginalRequestId(originalRequestId);
+        LOGGER.debug("Getting policy from policyService: {}", request);
+        CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
-        return CompletableFuture.allOf(futureUser.toCompletableFuture(), futureResources.toCompletableFuture(), futureMultiPolicy.toCompletableFuture())
-                .thenApply(t -> {
-                    //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
-                    //resources they don't have permission to see
-                    Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(futureResources.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
+        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
+        CompletableFuture<DataRequestResponse> aggregatedResponse = aggregationService.aggregateDataRequestResults(
+                request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
 
-                    PalisadeService.ensureRecordRulesAvailableFor(futureMultiPolicy.toCompletableFuture().join(), filteredResources.keySet());
-                    auditRegisterRequestComplete(request, futureUser.toCompletableFuture().join(), futureMultiPolicy.toCompletableFuture().join());
-                    cache(request, futureUser.toCompletableFuture().join(), requestId, futureMultiPolicy.toCompletableFuture().join(), filteredResources.size(), originalRequestId);
-                    final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
-                    response.setOriginalRequestId(originalRequestId);
-                    LOGGER.debug("Responding with: {}", response);
-                    return response;
-                })
-                .exceptionally(ex -> {
-                    LOGGER.error("Error handling: {}", ex.getMessage());
-                    auditRequestReceivedException(request, ex, PolicyService.class);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
-    }
-
-    /**
-     * Removes all resource mappings in the {@code resources} that do not have a defined policy in {@code policy}.
-     *
-     * @param resources the resources to modify
-     * @param policy    the policy for all resources
-     * @return the {@code resources} map after filtering
-     */
-    private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final MultiPolicy policy) {
-        resources.keySet().retainAll(policy.getPolicies().keySet());
-        return resources;
-    }
-
-    private CompletableFuture<MultiPolicy> getPolicy(final RegisterDataRequest request, final CompletionStage<User> futureUser, final CompletionStage<Map<LeafResource, ConnectionDetail>> futureResources, final RequestId originalRequestId) {
-        return CompletableFuture.allOf(futureUser.toCompletableFuture(), futureResources.toCompletableFuture())
-                .thenApply(t -> {
-                    final GetPolicyRequest policyRequest = new GetPolicyRequest()
-                            .user(futureUser.toCompletableFuture().join())
-                            .context(request.getContext())
-                            .resources(new HashSet<>(futureResources.toCompletableFuture().join().keySet()));
-                    policyRequest.setOriginalRequestId(originalRequestId);
-                    return policyRequest;
-                })
-                .thenApply(req -> {
-                    LOGGER.debug("Getting policy from policyService: {}", req);
-                    return policyService.getPolicy(req).toCompletableFuture().join();
-                }).thenApply(policy -> {
-                    LOGGER.debug("Got policy: {}", policy);
-                    return policy;
-                });
-    }
-
-    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final MultiPolicy multiPolicy) {
-        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
-                .withUser(user)
-                .withLeafResources(multiPolicy.getPolicies().keySet())
-                .withContext(request.getContext());
-        LOGGER.debug("Auditing: {}", registerRequestCompleteAuditRequest);
-        auditService.audit(registerRequestCompleteAuditRequest).toCompletableFuture().join();
-    }
-
-    private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
-        final RegisterRequestExceptionAuditRequest auditRequestWithException =
-                RegisterRequestExceptionAuditRequest.create(request.getId())
-                        .withUserId(request.getUserId())
-                        .withResourceId(request.getResourceId())
-                        .withContext(request.getContext())
-                        .withException(ex)
-                        .withServiceClass(serviceClass);
-        LOGGER.debug("Error handling: " + ex.getMessage());
-        auditService.audit(auditRequestWithException).toCompletableFuture().join();
-    }
-
-    private void cache(final RegisterDataRequest request, final User user,
-                       final RequestId requestId, final MultiPolicy multiPolicy,
-                       final int resCount,
-                       final RequestId originalRequestId) {
-        DataRequestConfig dataRequestConfig = new DataRequestConfig()
-                .user(user)
-                .context(request.getContext())
-                .rules(multiPolicy.getRuleMap());
-        dataRequestConfig.setOriginalRequestId(originalRequestId);
-        final AddCacheRequest<DataRequestConfig> cacheRequest = new AddCacheRequest<>()
-                .key(requestId.getId())
-                .value(dataRequestConfig)
-                .service(this.getClass());
-        LOGGER.debug("Caching: {}", cacheRequest);
-        final Boolean success = cacheService.add(cacheRequest).join();
-        if (null == success || !success) {
-            throw new CompletionException(new RuntimeException("Failed to cache request: " + request));
-        }
+        return aggregatedResponse;
     }
 
     @Override

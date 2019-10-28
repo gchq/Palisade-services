@@ -27,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
  * A SimpleAuditService is a simple implementation of a {@link AuditService} that keeps user data in the cache service
  */
 public class SimpleAuditService implements AuditService {
+    public static final String CONFIG_KEY = "simple";
+
     public static final String CACHE_IMPL_KEY = "user.svc.hashmap.cache.svc";
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 

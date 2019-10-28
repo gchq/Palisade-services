@@ -17,8 +17,6 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -26,6 +24,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -53,6 +52,54 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
         this.rulesApplied = requireNonNull(rulesApplied);
         this.numberOfRecordsReturned = numberOfRecordsReturned;
         this.numberOfRecordsProcessed = numberOfRecordsProcessed;
+    }
+
+    /**
+     * Static factory method.
+     *
+     * @param original the original request id
+     * @return {@link ReadRequestCompleteAuditRequest}
+     */
+    public static IUser create(final RequestId original) {
+        return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
+        return numberOfRecordsReturned == that.numberOfRecordsReturned &&
+                numberOfRecordsProcessed == that.numberOfRecordsProcessed &&
+                user.equals(that.user) &&
+                leafResource.equals(that.leafResource) &&
+                context.equals(that.context) &&
+                rulesApplied.equals(that.rulesApplied);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
+                .add(super.toString())
+                .add("user=" + user)
+                .add("leafResource=" + leafResource)
+                .add("context=" + context)
+                .add("rulesApplied=" + rulesApplied)
+                .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
+                .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
+                .toString();
     }
 
     public interface IUser {
@@ -101,61 +148,5 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
          * @return the {@link ReadRequestCompleteAuditRequest}
          */
         ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(final long numberOfRecordsProcessed);
-    }
-
-    /**
-     * Static factory method.
-     *
-     * @param original the original request id
-     * @return {@link ReadRequestCompleteAuditRequest}
-     */
-    public static IUser create(final RequestId original) {
-        return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(context, that.context)
-                .append(leafResource, that.leafResource)
-                .append(rulesApplied, that.rulesApplied)
-                .append(numberOfRecordsReturned, that.numberOfRecordsReturned)
-                .append(numberOfRecordsProcessed, that.numberOfRecordsProcessed)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(29, 37)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(context)
-                .append(leafResource)
-                .append(rulesApplied)
-                .append(numberOfRecordsReturned)
-                .append(numberOfRecordsProcessed)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("user=" + user)
-                .add("leafResource=" + leafResource)
-                .add("context=" + context)
-                .add("rulesApplied=" + rulesApplied)
-                .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
-                .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
-                .toString();
     }
 }

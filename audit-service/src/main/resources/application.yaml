@@ -47,3 +47,9 @@ management:
         - health
         - info
         - metrics
+
+audit:
+  implementations:
+    stroom:
+    logger:
+    simple:
