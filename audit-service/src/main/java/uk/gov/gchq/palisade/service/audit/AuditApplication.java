@@ -19,12 +19,11 @@ package uk.gov.gchq.palisade.service.audit;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
+@EnableEurekaClient
 @SpringBootApplication
 public class AuditApplication {
-
-    public AuditApplication() {
-    }
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)

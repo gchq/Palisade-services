@@ -23,11 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
+import uk.gov.gchq.palisade.service.audit.web.ServiceInstanceRestController;
 
 import javax.annotation.PostConstruct;
 
@@ -45,6 +47,7 @@ public class ApplicationConfiguration {
     @Autowired
     private Map<String, AuditService> auditServiceMap;
 
+    @Primary
     @Bean(name = "simple")
     @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
@@ -61,6 +64,12 @@ public class ApplicationConfiguration {
     @ConditionalOnProperty(prefix = "audit.implementations", name = LoggerAuditService.CONFIG_KEY)
     public LoggerAuditService loggerAuditService() {
         return new LoggerAuditService(LogManager.getLogger(LoggerAuditService.class));
+    }
+
+    @Bean(name = "eureka-client")
+    @ConditionalOnProperty(prefix = "eureka.client", name = "registerWithEureka")
+    public ServiceInstanceRestController eurekaClient() {
+        return new ServiceInstanceRestController();
     }
 
     @PostConstruct
