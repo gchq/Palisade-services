@@ -14,7 +14,7 @@
 #
 spring:
   application:
-    name: audit-service
+    name: user-service
   output:
     ansi:
       enabled: always
@@ -22,7 +22,7 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8081
+  port: 8087
 
 eureka:
   instance:

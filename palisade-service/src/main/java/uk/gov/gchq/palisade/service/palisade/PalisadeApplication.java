@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade;
 
 import org.springframework.boot.WebApplicationType;
@@ -25,10 +26,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 @SpringBootApplication
 public class PalisadeApplication {
-
-
-    private PalisadeApplication() {
-    }
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(PalisadeApplication.class).web(WebApplicationType.SERVLET)

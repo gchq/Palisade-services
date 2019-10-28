@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.policy;
 
 import org.springframework.boot.WebApplicationType;
@@ -25,9 +26,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 @SpringBootApplication
 public class PolicyApplication {
-
-    private PolicyApplication() {
-    }
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
@@ -46,7 +47,9 @@ public class ApplicationConfiguration {
     @Autowired
     private Map<String, AuditService> auditServiceMap;
 
-    @Bean(name = "SimpleAuditService")
+    @Primary
+    @Bean(name = "simple")
+    @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
         return new SimpleAuditService();
     }
