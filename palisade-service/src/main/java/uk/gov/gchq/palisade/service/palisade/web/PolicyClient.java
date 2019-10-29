@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
-import java.util.concurrent.CompletableFuture;
-
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
 

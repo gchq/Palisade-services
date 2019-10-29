@@ -27,7 +27,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @FeignClient(value = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
