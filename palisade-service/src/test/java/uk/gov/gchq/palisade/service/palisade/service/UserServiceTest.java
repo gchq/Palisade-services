@@ -53,9 +53,7 @@ public class UserServiceTest {
     public void getUserReturnsUser() {
 
         //Given
-        CompletableFuture<User> futureUser = new CompletableFuture<>();
-        futureUser.complete(testUser);
-        when(userClient.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
+        when(userClient.getUser(any(GetUserRequest.class))).thenReturn(testUser);
 
         //When
         GetUserRequest request = new GetUserRequest().userId(userId);
@@ -65,14 +63,4 @@ public class UserServiceTest {
         assertEquals(testUser, actual.join());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void getUserReturnsError() {
-
-        //Given
-        when(userClient.getUser(any(GetUserRequest.class))).thenThrow(new RuntimeException());
-
-        //When
-        GetUserRequest request = new GetUserRequest().userId(userId);
-        CompletableFuture<User> actual = userService.getUser(request);
-    }
 }
