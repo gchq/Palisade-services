@@ -69,14 +69,15 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public SimpleDataService SimpleDataService(final Map<String, BackingStore> backingStores,
-                                               final AuditClient auditClient,
-                                               final PalisadeClient palisadeClient) {
-        AuditService audService = auditService(auditClient);
+                                               final AuditService auditService,
+                                               final PalisadeService palisadeService,
+                                               final DataReader dataReader,
+                                               final AuditRequestReceiver auditRequestReceiver) {
         return new SimpleDataService(cacheService(backingStores),
-                audService,
-                palisadeService(palisadeClient),
-                dataReader(),
-                auditRequestReceiver(audService)
+                auditService,
+                palisadeService,
+                dataReader,
+                auditRequestReceiver
         );
     }
 

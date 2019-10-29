@@ -51,7 +51,7 @@ public class DataServiceController {
     }
 
     // Taken from the following example: https://dzone.com/articles/streaming-data-with-spring-boot-restful-web-service
-    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
 
         StreamingResponseBody streamingResponseBody = outputStream -> {

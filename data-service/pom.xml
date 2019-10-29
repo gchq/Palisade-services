@@ -28,11 +28,12 @@
 
     <artifactId>data-service</artifactId>
 
+    <properties>
+        <spring-cloud-starter-ribbon-version>1.4.7.RELEASE</spring-cloud-starter-ribbon-version>
+        <revision>SNAPSHOT</revision>
+    </properties>
+
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -56,7 +57,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-ribbon</artifactId>
-            <version>1.4.7.RELEASE</version>
+            <version>${spring-cloud-starter-ribbon-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,23 +88,17 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>readers-common</artifactId>
-            <version>0.4.1-SNAPSHOT</version>
+            <artifactId>hadoop-reader</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>hadoop-readers</artifactId>
-            <version>0.4.1-SNAPSHOT</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
