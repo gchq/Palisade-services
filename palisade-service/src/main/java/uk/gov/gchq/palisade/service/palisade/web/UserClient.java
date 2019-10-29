@@ -27,6 +27,6 @@ import java.util.concurrent.CompletableFuture;
 public interface UserClient {
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    CompletableFuture<User> getUser(final GetUserRequest request);
+    User getUser(final GetUserRequest request);
 
 }

@@ -27,6 +27,6 @@ import java.util.concurrent.CompletableFuture;
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicy", consumes = "application/json", produces = "application/json")
-    CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request);
+    MultiPolicy getPolicy(final GetPolicyRequest request);
 
 }
