@@ -17,14 +17,13 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -52,6 +51,52 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
         this.context = requireNonNull(context);
         this.exception = requireNonNull(exception);
         this.serviceClass = requireNonNull(serviceClass);
+    }
+
+    /**
+     * Static factory method.
+     *
+     * @param original the original request id
+     * @return the {@link RegisterRequestExceptionAuditRequest}
+     */
+    public static IUserId create(final RequestId original) {
+        return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                exception.equals(that.exception) &&
+                serviceClass.equals(that.serviceClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RegisterRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
+                .add(super.toString())
+                .add("userId=" + userId)
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("exception=" + exception)
+                .add("serviceClass=" + serviceClass)
+                .toString();
     }
 
     public interface IUserId {
@@ -92,58 +137,5 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
          * @return the {@link RegisterRequestExceptionAuditRequest}
          */
         RegisterRequestExceptionAuditRequest withServiceClass(final Class<? extends Service> serviceClass);
-    }
-
-    /**
-     * Static factory method.
-     *
-     * @param original the original request id
-     * @return the {@link RegisterRequestExceptionAuditRequest}
-     */
-    public static IUserId create(final RequestId original) {
-        return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(userId, that.userId)
-                .append(resourceId, that.resourceId)
-                .append(context, that.context)
-                .append(exception, that.exception)
-                .append(serviceClass, that.serviceClass)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(27, 41)
-                .appendSuper(super.hashCode())
-                .append(userId)
-                .append(resourceId)
-                .append(context)
-                .append(exception)
-                .append(serviceClass)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", RegisterRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("userId=" + userId)
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("exception=" + exception)
-                .add("serviceClass=" + serviceClass)
-                .toString();
     }
 }
