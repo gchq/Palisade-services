@@ -23,15 +23,16 @@ import static java.util.Objects.requireNonNull;
 @ConfigurationProperties(prefix = "launcher.defaults")
 public class DefaultsConfiguration extends ServiceConfiguration {
 
+    public DefaultsConfiguration() {
+    }
+
+    public DefaultsConfiguration(final ServiceConfiguration copy) {
+        super(copy);
+    }
+
     public DefaultsConfiguration name(final String name) {
         setName(name);
         return this;
-    }
-
-    @Override
-    public String getService() {
-        requireNonNull(getName());
-        return super.getService().replace("SERVICE", getName());
     }
 
     @Override

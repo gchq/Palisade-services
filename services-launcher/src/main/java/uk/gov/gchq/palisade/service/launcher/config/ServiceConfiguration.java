@@ -16,12 +16,25 @@
 
 package uk.gov.gchq.palisade.service.launcher.config;
 
+import java.util.Objects;
+
 public class ServiceConfiguration {
     private String name;
-    private String service;
     private String target;
     private String config;
     private String log;
+
+    // Default constructor
+    public ServiceConfiguration() {
+    }
+
+    // Copy constructor
+    public ServiceConfiguration(ServiceConfiguration copy) {
+        this.name = copy.name;
+        this.target = copy.target;
+        this.config = copy.config;
+        this.log = copy.log;
+    }
 
     public String getName() {
         return name;
@@ -29,14 +42,6 @@ public class ServiceConfiguration {
 
     public void setName(final String name) {
         this.name = name;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(final String service) {
-        this.service = service;
     }
 
     public String getTarget() {
@@ -61,5 +66,23 @@ public class ServiceConfiguration {
 
     public void setLog(final String log) {
         this.log = log;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ServiceConfiguration)) {
+            return false;
+        }
+        final ServiceConfiguration that = (ServiceConfiguration) o;
+        return Objects.equals(getName(), that.getName()) &&
+                Objects.equals(getTarget(), that.getTarget());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getTarget());
     }
 }

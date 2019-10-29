@@ -25,13 +25,12 @@ spring:
 # These are built from launcher.defaults with SERVICE substituted for the service.name
 # and any other overrides specified will replace the default
 launcher:
-  defaults:
+  root: ../..
+  default-service:
     name: default
-    root: ../..
-    service: ${launcher.defaults.root}/SERVICE
-    target: ${launcher.defaults.service}/target/SERVICE-0.4.0-SNAPSHOT.jar
-    config: ${launcher.defaults.service}/classes/application.yaml
-    log: ${launcher.defaults.root}/SERVICE.log
+    target: ${launcher.root}/SERVICE/target/SERVICE-0.4.0-SNAPSHOT.jar
+    config: ${launcher.root}/SERVICE/classes/application.yaml
+    log: ${launcher.root}/SERVICE.log
   services:
     -
       name: audit-service
