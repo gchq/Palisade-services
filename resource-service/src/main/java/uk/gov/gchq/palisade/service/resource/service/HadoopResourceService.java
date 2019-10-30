@@ -72,9 +72,9 @@ import static java.util.Objects.requireNonNull;
 
 public class HadoopResourceService implements ResourceService {
 
-    static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
-    static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
-    static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
+    public static final String ERROR_ADD_RESOURCE = "AddResource is not supported by the Resource Service, resources should be added/created via regular file system behaviour.";
+    public static final String ERROR_OUT_SCOPE = "resource ID is out of scope of the this resource Service. Found: %s expected: %s";
+    public static final String ERROR_NO_DATA_SERVICES = "No Hadoop data services known about in Hadoop resource service";
     private static final Logger LOGGER = LoggerFactory.getLogger(HadoopResourceService.class);
     /**
      * A regular expression that matches URIs that have the file:/ scheme with a single slash but not any more slashes.
