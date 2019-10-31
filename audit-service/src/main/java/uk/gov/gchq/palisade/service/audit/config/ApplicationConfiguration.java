@@ -45,7 +45,8 @@ public class ApplicationConfiguration {
     @Autowired
     private Map<String, AuditService> auditServiceMap;
 
-    @Bean(name = "SimpleAuditService")
+    @Bean(name = "simple")
+    @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
         return new SimpleAuditService();
     }
