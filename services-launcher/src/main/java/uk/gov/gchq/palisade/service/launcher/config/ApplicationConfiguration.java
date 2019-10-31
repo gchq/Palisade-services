@@ -31,7 +31,7 @@ public class ApplicationConfiguration {
     ServicesConfiguration servicesConfiguration;
 
     @Bean
-    List<OverriddenConfiguration> overriddenConfigurations() {
+    List<OverridableConfiguration> overriddenConfigurations() {
         return servicesConfiguration.getServices();
     }
 

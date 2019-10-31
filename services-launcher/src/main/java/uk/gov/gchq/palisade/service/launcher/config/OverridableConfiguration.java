@@ -16,41 +16,37 @@
 
 package uk.gov.gchq.palisade.service.launcher.config;
 
-import static java.util.Objects.requireNonNull;
-
-public class OverriddenConfiguration extends ServiceConfiguration {
+public class OverridableConfiguration extends ServiceConfiguration {
     private DefaultsConfiguration defaultConfig;
 
     // Default constructor
-    public OverriddenConfiguration() {
+    public OverridableConfiguration() {
     }
 
     // Copy constructor
-    public OverriddenConfiguration(OverriddenConfiguration copy) {
+    public OverridableConfiguration(OverridableConfiguration copy) {
         super(copy);
         this.defaultConfig = copy.defaultConfig;
     }
 
-    public OverriddenConfiguration defaults(final DefaultsConfiguration defaultsConfiguration) {
+    public OverridableConfiguration defaults(final DefaultsConfiguration defaultsConfiguration) {
         this.defaultConfig = defaultsConfiguration;
         return this;
     }
 
     @Override
     public String getTarget() {
-        requireNonNull(defaultConfig);
-        return super.getTarget() != null ? super.getTarget() : defaultConfig.name(getName()).getTarget();
+        return super.getTarget() != null || defaultConfig == null ? super.getTarget() : defaultConfig.name(getName()).getTarget();
     }
 
     @Override
     public String getConfig() {
-        requireNonNull(defaultConfig);
-        return super.getConfig() != null ? super.getConfig() : defaultConfig.name(getName()).getConfig();
+        return super.getConfig() != null || defaultConfig == null ? super.getConfig() : defaultConfig.name(getName()).getConfig();
     }
 
     @Override
     public String getLog() {
-        requireNonNull(defaultConfig);
-        return super.getLog() != null ? super.getLog() : defaultConfig.name(getName()).getLog();
+        return super.getLog() != null || defaultConfig == null ? super.getLog() : defaultConfig.name(getName()).getLog();
     }
+
 }

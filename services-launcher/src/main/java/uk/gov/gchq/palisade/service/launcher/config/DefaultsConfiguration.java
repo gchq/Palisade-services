@@ -18,9 +18,7 @@ package uk.gov.gchq.palisade.service.launcher.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import static java.util.Objects.requireNonNull;
-
-@ConfigurationProperties(prefix = "launcher.defaults")
+@ConfigurationProperties(prefix = "launcher.default-service")
 public class DefaultsConfiguration extends ServiceConfiguration {
 
     public DefaultsConfiguration() {
@@ -37,19 +35,17 @@ public class DefaultsConfiguration extends ServiceConfiguration {
 
     @Override
     public String getTarget() {
-        requireNonNull(getName());
-        return super.getTarget().replace("SERVICE", getName());
+        return getName() == null || super.getTarget() == null ? super.getTarget() : super.getTarget().replace("SERVICE", getName());
     }
 
     @Override
     public String getConfig() {
-        requireNonNull(getName());
-        return super.getConfig().replace("SERVICE", getName());
+        return getName() == null || super.getConfig() == null ? super.getConfig() : super.getConfig().replace("SERVICE", getName());
     }
 
     @Override
     public String getLog() {
-        requireNonNull(getName());
-        return super.getLog().replace("SERVICE", getName());
+        return  getName() == null || super.getLog() == null ? super.getLog() : super.getLog().replace("SERVICE", getName());
     }
+
 }

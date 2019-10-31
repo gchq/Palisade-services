@@ -28,21 +28,9 @@ launcher:
   root: ../..
   default-service:
     name: default
-    target: ${launcher.root}/SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
-    config: ${launcher.root}/SERVICE/classes/application.yaml
-    log: ${launcher.root}/SERVICE.log
+    target: target
+    config: SERVICE-config
+    log: log
   services:
     -
-      name: audit-service
-    -
-      name: data-service
-    -
-      name: discovery-service
-    -
-      name: palisade-service
-    -
-      name: policy-service
-    -
-      name: resource-service
-    -
-      name: user-service
+      name: services-launcher
