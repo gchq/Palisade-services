@@ -21,10 +21,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
+import java.util.concurrent.CompletableFuture;
+
 @FeignClient(value = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final GetUserRequest request);
+    CompletableFuture<User> getUser(final GetUserRequest request);
 
 }
