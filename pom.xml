@@ -61,6 +61,7 @@
         <protobuf.version>3.5.1</protobuf.version>
         <checkstyle.plugin.version>3.1.0</checkstyle.plugin.version>
         <checkstyle.phase>verify</checkstyle.phase>
+        <depends.phase>validate</depends.phase>
     </properties>
 
     <modules>
@@ -109,6 +110,25 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.servicemix.tooling</groupId>
+                <artifactId>depends-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <outputFile>mvn_dependency_tree.txt</outputFile>
+                            <includeScope>false</includeScope>
+                            <includeType>false</includeType>
+                        </configuration>
+                        <id>depends</id>
+                        <phase>${depends.phase}</phase>
+                        <goals>
+                            <goal>generate-depends-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
