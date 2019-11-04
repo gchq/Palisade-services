@@ -30,13 +30,11 @@ import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,9 +62,7 @@ public class PolicyServiceTest {
     @Test
     public void getPolicyReturnsPolicy() {
         //Given
-        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
-        futurePolicy.complete(multiPolicy);
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
+        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
 
         //When
         GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
@@ -74,17 +70,6 @@ public class PolicyServiceTest {
 
         //Then
         assertEquals(multiPolicy, actual.join());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void getPolicyReturnsError() {
-
-        //Given
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenThrow(new RuntimeException());
-
-        //When
-        GetPolicyRequest request = new GetPolicyRequest().user(testUser);
-        CompletableFuture<MultiPolicy> actual = policyService.getPolicy(request);
     }
 
 }

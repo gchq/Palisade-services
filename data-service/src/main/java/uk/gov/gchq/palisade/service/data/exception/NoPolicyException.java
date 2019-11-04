@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.web;
+package uk.gov.gchq.palisade.service.data.exception;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+public class NoPolicyException extends PalisadeRuntimeException {
 
-@FeignClient(value = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
+    public NoPolicyException(final String e) {
+        super(e);
+    }
 
-    @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final GetUserRequest request);
+    public NoPolicyException(final Throwable cause) {
+        super(cause);
+    }
 
+    public NoPolicyException(final String e, final Throwable cause) {
+        super(e, cause);
+    }
 }
