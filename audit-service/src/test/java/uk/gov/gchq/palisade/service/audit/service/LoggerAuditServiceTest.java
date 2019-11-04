@@ -1,7 +1,5 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +8,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
     @Mock
-    Logger logger = LogManager.getRootLogger();
+    Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     @Captor
     ArgumentCaptor<Object> logCaptor;
 
@@ -72,7 +72,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
+        verify(logger, atLeastOnce()).info(logCaptor.capture().toString());
         final String log = logCaptor.getValue().toString();
 
         assertThat(log, allOf(
@@ -99,7 +99,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
+        verify(logger, atLeastOnce()).error(logCaptor.capture().toString());
         final String log = logCaptor.getValue().toString();
 
         assertThat(log, allOf(
@@ -129,7 +129,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
+        verify(logger, atLeastOnce()).info(logCaptor.capture().toString());
         final String log = logCaptor.getValue().toString();
 
         assertThat(log, allOf(
@@ -158,7 +158,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
+        verify(logger, atLeastOnce()).error(logCaptor.capture().toString());
         final String log = logCaptor.getValue().toString();
 
         assertThat(log, allOf(
