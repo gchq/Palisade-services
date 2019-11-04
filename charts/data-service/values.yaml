@@ -12,13 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11
-VOLUME /tmp
+replicaCount: 1
 
-ARG JAR_FILE
+service:
+  port: 80
 
-ADD $JAR_FILE /usr/share/audit-service/audit-service.jar
+image:
+  repository: palisade/data-service
+  tag: 78f4e4f-SNAPSHOT
+  pullPolicy: IfNotPresent
 
-LABEL service="audit", project="palisade"
+resources:
+  limits:
+    cpu: 750m
+    memory: 2.5Gi
+  requests:
+    cpu: 250m
+    memory: 1Gi
 
-ENTRYPOINT ["java", "-jar", "/usr/share/audit-service/audit-service.jar"]
+nodeSelector: {}
+tolerations: []
+affinity: {}
