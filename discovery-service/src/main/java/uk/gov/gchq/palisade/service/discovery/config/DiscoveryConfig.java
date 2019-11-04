@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.discovery.config;
 
 import com.netflix.appinfo.AmazonInfo;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +39,6 @@ public class DiscoveryConfig {
     }
 
     @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
         return new ServiceInstanceRestController();
     }

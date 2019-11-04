@@ -27,22 +27,21 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @FeignClient(value = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request);
+    Map<LeafResource, ConnectionDetail> getResourcesById(final GetResourcesByIdRequest request);
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request);
+    Map<LeafResource, ConnectionDetail> getResourcesByResource(final GetResourcesByResourceRequest request);
 
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request);
+    Map<LeafResource, ConnectionDetail> getResourcesByType(final GetResourcesByTypeRequest request);
 
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request);
+    Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request);
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(final AddResourceRequest request);
