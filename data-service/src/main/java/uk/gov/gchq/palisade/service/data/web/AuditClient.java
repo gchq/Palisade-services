@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.web;
+package uk.gov.gchq.palisade.service.data.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 
-@FeignClient(value = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
 
-    @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final GetUserRequest request);
+@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
+public interface AuditClient {
+
+    @PostMapping(path = "/palisade", consumes = "application/json", produces = "application/json")
+    Boolean audit(final AuditRequest request);
 
 }

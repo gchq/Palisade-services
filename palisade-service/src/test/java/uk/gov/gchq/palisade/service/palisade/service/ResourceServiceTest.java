@@ -58,9 +58,7 @@ public class ResourceServiceTest {
     @Test
     public void getResourceByIdReturnsMappedResources() {
         //Given
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResource = new CompletableFuture<>();
-        futureResource.complete(resources);
-        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
+        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(resources);
 
         //When
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
@@ -68,17 +66,6 @@ public class ResourceServiceTest {
 
         //Then
         assertEquals(resources, actual.join());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void getResourceByIdReturnsError() {
-
-        //Given
-        when(resourceClient.getResourcesById(any(GetResourcesByIdRequest.class))).thenThrow(new RuntimeException());
-
-        //When
-        GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(request);
     }
 
 }
