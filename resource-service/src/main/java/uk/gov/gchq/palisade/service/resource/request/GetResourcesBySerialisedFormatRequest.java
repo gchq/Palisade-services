@@ -15,10 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -58,25 +58,26 @@ public class GetResourcesBySerialisedFormatRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetResourcesBySerialisedFormatRequest)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
-        return getSerialisedFormat().equals(that.getSerialisedFormat());
+        final GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
+        return Objects.equals(serialisedFormat, that.serialisedFormat);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getSerialisedFormat());
+        return Objects.hash(super.hashCode(), serialisedFormat);
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetResourcesBySerialisedFormatRequest.class.getSimpleName() + "[", "]")
-                .add("serialisedFormat='" + serialisedFormat + "'")
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("serialisedFormat", serialisedFormat)
                 .toString();
     }
 }

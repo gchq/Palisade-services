@@ -16,14 +16,12 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
@@ -104,28 +102,23 @@ public abstract class ReadResponse {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReadResponse)) {
             return false;
         }
-
         final ReadResponse that = (ReadResponse) o;
-
-        return new EqualsBuilder()
-                .append(message, that.message)
-                .isEquals();
+        return Objects.equals(message, that.message) &&
+                isUsed.equals(that.isUsed);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 61)
-                .append(message)
-                .toHashCode();
+        return Objects.hash(message, isUsed);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .appendSuper(super.toString())
                 .append("message", message)
                 .toString();
     }
