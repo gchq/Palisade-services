@@ -12,13 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11
-VOLUME /tmp
+spring:
+  application:
+    name: palisade-service
+  output:
+    ansi:
+      enabled: always
 
-ARG JAR_FILE
+server:
+  port: 8080
 
-ADD $JAR_FILE /usr/share/audit-service/audit-service.jar
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - health
+        - info
+        - metrics
 
-LABEL service="audit", project="palisade"
+web:
+  client:
+    audit-service: audit-service
+    palisade-service: palisade-service
 
-ENTRYPOINT ["java", "-jar", "/usr/share/audit-service/audit-service.jar"]
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+    default-config: default
+
+cache:
+  implementation: hashmap
+  props: "cache.properties"
+  etcd:
+  - http://localhost:2379
