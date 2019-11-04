@@ -20,6 +20,7 @@ import org.apache.tools.ant.util.JavaEnvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -46,6 +47,17 @@ import java.util.stream.Stream;
 public class ServicesRunner implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
+    @Value("${launcher.root}")
+    private static String rootDir;
+
+    public static File getServicesRoot() {
+        File parent = new File(".");
+        while (parent != null && !rootDir.equals(parent.getName())) {
+            parent = parent.getParentFile();
+        }
+        return parent;
+    }
+
     @Autowired
     private static List<OverridableConfiguration> serviceConfigurations;
 
@@ -58,14 +70,16 @@ public class ServicesRunner implements ApplicationRunner {
                 "-jar", config.getTarget(),
                 String.format("--spring-config-location=%s,%s", defaultsConfiguration.getConfig(), config.getConfig())
         };
-        ProcessBuilder builder = new ProcessBuilder(command);
-        builder.redirectOutput(new File(config.getLog()));
-        builder.redirectError(new File(config.getLog()));
+        ProcessBuilder builder = new ProcessBuilder()
+                .command(command)
+                .directory(getServicesRoot())
+                .redirectOutput(new File(config.getLog()))
+                .redirectError(new File(config.getLog()));
         LOGGER.info(String.format("Constructed ProcessBuilder %s [%s]", Arrays.toString(command), builder.redirectOutput().toString()));
         return builder;
     }
 
-    static Stream<ProcessBuilder> loadConfigurations(ApplicationArguments args) {
+    static Stream<ProcessBuilder> loadConfigurations(final ApplicationArguments args) {
         Set<OverridableConfiguration> configurations = new HashSet<>(serviceConfigurations);
 
         // --enable=<service-name>
@@ -85,7 +99,7 @@ public class ServicesRunner implements ApplicationRunner {
         return configurations.parallelStream().map(ServicesRunner::constructServiceProcess);
     }
 
-    static Stream<Process> launchApplicationsFromProcessBuilders(Stream<ProcessBuilder> configurations) {
+    static Stream<Process> launchApplicationsFromProcessBuilders(final Stream<ProcessBuilder> configurations) {
         Stream<Process> processes = configurations.map((pb) -> {
                     try {
                         Process process = pb.start();
@@ -101,7 +115,7 @@ public class ServicesRunner implements ApplicationRunner {
         return processes;
     }
 
-    static Map<Process, Integer> joinProcesses(Stream<Process> processes) {
+    static Map<Process, Integer> joinProcesses(final Stream<Process> processes) {
         Map<Process, Integer> retCodes = processes.map((p) -> {
                     try {
                         return new SimpleEntry<>(p, p.waitFor());
