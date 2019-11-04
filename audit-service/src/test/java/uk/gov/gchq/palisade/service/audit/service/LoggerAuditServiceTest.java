@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
     @Mock
-    Logger logger; //= LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    Logger logger;
     @Captor
     ArgumentCaptor<String> logCaptor;
 
