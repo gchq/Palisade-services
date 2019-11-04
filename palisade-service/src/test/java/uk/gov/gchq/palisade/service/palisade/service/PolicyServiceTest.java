@@ -62,9 +62,7 @@ public class PolicyServiceTest {
     @Test
     public void getPolicyReturnsPolicy() {
         //Given
-        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
-        futurePolicy.complete(multiPolicy);
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
+        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
 
         //When
         GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
@@ -72,17 +70,6 @@ public class PolicyServiceTest {
 
         //Then
         assertEquals(multiPolicy, actual.join());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void getPolicyReturnsError() {
-
-        //Given
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenThrow(new RuntimeException());
-
-        //When
-        GetPolicyRequest request = new GetPolicyRequest().user(testUser);
-        CompletableFuture<MultiPolicy> actual = policyService.getPolicy(request);
     }
 
 }

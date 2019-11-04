@@ -43,7 +43,7 @@ public class PolicyService implements Service {
         CompletionStage<MultiPolicy> policy;
 
         try {
-            policy = this.client.getPolicy(policyRequest);
+            policy = CompletableFuture.supplyAsync(() -> client.getPolicy(policyRequest));
             LOGGER.debug("Got policy: {}", policy);
         } catch (Exception ex) {
             LOGGER.error("Failed to get policy: {}", ex.getMessage());
