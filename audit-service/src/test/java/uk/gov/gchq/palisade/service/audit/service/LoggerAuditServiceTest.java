@@ -34,9 +34,9 @@ import static org.mockito.Mockito.verify;
 public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
     @Mock
-    Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    Logger logger; //= LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     @Captor
-    ArgumentCaptor<Object> logCaptor;
+    ArgumentCaptor<String> logCaptor;
 
     private static LoggerAuditService auditService;
     private UserId userId;
@@ -72,8 +72,8 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture().toString());
-        final String log = logCaptor.getValue().toString();
+        verify(logger, atLeastOnce()).info(logCaptor.capture());
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(user.toString()),
@@ -99,8 +99,8 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture().toString());
-        final String log = logCaptor.getValue().toString();
+        verify(logger, atLeastOnce()).error(logCaptor.capture());
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(userId.toString()),
@@ -129,8 +129,8 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture().toString());
-        final String log = logCaptor.getValue().toString();
+        verify(logger, atLeastOnce()).info(logCaptor.capture());
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(user.toString()),
@@ -158,8 +158,8 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         auditService.audit(auditRequest);
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture().toString());
-        final String log = logCaptor.getValue().toString();
+        verify(logger, atLeastOnce()).error(logCaptor.capture());
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(requestId.toString()),
