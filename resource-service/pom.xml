@@ -49,10 +49,10 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
+            <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>palisade-service</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
