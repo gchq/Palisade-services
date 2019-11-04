@@ -97,12 +97,6 @@
             <artifactId>guava</artifactId>
             <version>28.1-jre</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.google.guava</groupId>-->
-            <!--<artifactId>guava</artifactId>-->
-            <!--<version>27.1-jre</version>-->
-            <!--<scope>compile</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-server-mock</artifactId>
