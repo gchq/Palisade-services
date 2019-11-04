@@ -28,11 +28,6 @@
 
     <artifactId>data-service</artifactId>
 
-    <properties>
-        <spring-cloud-starter-ribbon-version>1.4.7.RELEASE</spring-cloud-starter-ribbon-version>
-        <revision>SNAPSHOT</revision>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -57,7 +52,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-ribbon</artifactId>
-            <version>${spring-cloud-starter-ribbon-version}</version>
+            <version>${spring-cloud-starter-ribbon.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -96,43 +91,16 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-            <type>test-jar</type>
-        </dependency>
-        <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-server-mock</artifactId>
-            <version>4.3.0</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>kubernetes-model</artifactId>
-                    <groupId>io.fabric8</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>kubernetes-client</artifactId>
-                    <groupId>io.fabric8</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>4.3.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.fabric8</groupId>
-                    <artifactId>kubernetes-model</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
