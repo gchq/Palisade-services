@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
@@ -39,6 +41,7 @@ import uk.gov.gchq.palisade.service.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
 import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.palisade.service.ResultAggregationService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
@@ -55,7 +58,7 @@ import java.util.concurrent.Executor;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Bean configuration and dependency injection graph
+ * Bean configuration and dependency injection graph.
  */
 @Configuration
 @EnableConfigurationProperties(CacheConfiguration.class)
@@ -79,7 +82,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 policyService(policyClient),
                 resourceService(resourceClient),
                 cacheService(backingStores),
-                getAsyncExecutor());
+                getAsyncExecutor(),
+                resultAggregationService(auditClient));
     }
 
     @Bean
@@ -100,6 +104,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public PolicyService policyService(final PolicyClient policyClient) {
         return new PolicyService(policyClient, getAsyncExecutor());
+    }
+
+    @Bean
+    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
+        CacheService cacheService = new SimpleCacheService();
+        AuditService auditService = auditService(auditClient);
+        return new ResultAggregationService(auditService, cacheService);
     }
 
     @Bean(name = "hashmap")

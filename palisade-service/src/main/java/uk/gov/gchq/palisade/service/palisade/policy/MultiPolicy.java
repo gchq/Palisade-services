@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.policy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
@@ -102,9 +103,13 @@ public class MultiPolicy {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MultiPolicy)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof MultiPolicy)) {
+            return false;
+        }
         MultiPolicy that = (MultiPolicy) o;
         return getPolicies().equals(that.getPolicies());
     }

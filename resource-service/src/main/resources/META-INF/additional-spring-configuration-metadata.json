@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "cache.implementation",
+      "type": "java.lang.String",
+      "description": "The backing store implementation for the cache."
+    },
+    {
+      "name": "cache.props",
+      "type": "java.lang.String",
+      "description": "property file to store cache data, only applicable to property backing store."
+    },
+    {
+      "name": "cache.etcd",
+      "type": "java.lang.String",
+      "description": "list of etcd instance uri addresses, only applicable to etcd backing store."
+    },
+    {
+      "name": "web.client.resource-service",
+      "type": "java.lang.String",
+      "description": "url for the resource service."
+    }
+  ]
+}

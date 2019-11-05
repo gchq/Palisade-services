@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
@@ -26,6 +29,7 @@ import java.util.concurrent.Executor;
 
 public class UserService implements Service {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserClient userClient;
     private final Executor executor;
 
@@ -34,8 +38,17 @@ public class UserService implements Service {
         this.executor = executor;
     }
 
-    public CompletionStage<User> getUser(final GetUserRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.userClient.getUser(request), executor);
+    public CompletableFuture<User> getUser(final GetUserRequest request) {
+
+        CompletionStage<User> user;
+        try {
+            user = CompletableFuture.supplyAsync(() -> userClient.getUser(request));
+            LOGGER.debug("Got user: {}", user);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to get user: {}", ex.getMessage());
+            throw new RuntimeException(ex); //rethrow the exception
+        }
+        return user.toCompletableFuture();
     }
 
 }

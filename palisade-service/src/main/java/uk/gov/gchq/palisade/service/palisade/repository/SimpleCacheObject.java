@@ -125,9 +125,13 @@ public class SimpleCacheObject {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SimpleCacheObject)) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SimpleCacheObject)) {
+            return false;
+        }
         SimpleCacheObject that = (SimpleCacheObject) o;
         return getValueClass().equals(that.getValueClass()) &&
                 getValue().equals(that.getValue()) &&
