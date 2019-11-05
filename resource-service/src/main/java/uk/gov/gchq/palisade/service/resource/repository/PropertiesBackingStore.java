@@ -119,6 +119,36 @@ public class PropertiesBackingStore implements BackingStore {
     }
 
     /**
+     * Create the unique key for storing the class of a key.
+     *
+     * @param key the original key
+     * @return a string for the properties file
+     */
+    private static String makeClassKey(final String key) {
+        return key + CLASS_SUFFIX;
+    }
+
+    /**
+     * Create the unique key for storing the expiry time of a key.
+     *
+     * @param key the original key
+     * @return a string for the properties file
+     */
+    private static String makeDateKey(final String key) {
+        return key + EXPIRY_SUFFIX;
+    }
+
+    /**
+     * Derive the base key from an expiry time key.
+     *
+     * @param key the expiry time key
+     * @return the base key
+     */
+    private static String deriveBaseFromDateKey(final String key) {
+        return key.substring(0, key.length() - EXPIRY_SUFFIX.length());
+    }
+
+    /**
      * Load the properties to the backing file.
      *
      * @throws IOException if anything failed during the load
@@ -132,83 +162,6 @@ public class PropertiesBackingStore implements BackingStore {
         props.clear();
         props.load(Files.newInputStream(configPath));
         LOGGER.debug("Loaded from {}", location);
-    }
-
-    /**
-     * Static class that performs a watch on a file and then performs some action when that file changes. We use a
-     * {@link WeakReference} to maintain a link to prevent the outer object being garbage collected. That way, if the
-     * caller no longer exists, we can clean up quickly.
-     */
-    private static class WatchFile implements Callable<Object> {
-        private final WeakReference<PropertiesBackingStore> action;
-        private final Path watchPath;
-
-        WatchFile(final PropertiesBackingStore action, final Path watchPath) {
-            requireNonNull(action, "action");
-            requireNonNull(watchPath, "watchPath");
-            this.action = new WeakReference<PropertiesBackingStore>(action);
-            this.watchPath = watchPath;
-        }
-
-        @Override
-        public Object call() throws Exception {
-            WatchKey watched = null;
-            try (WatchService watcher = watchPath.getFileSystem().newWatchService()) {
-                //register this
-                watched = watchPath.getParent().register(watcher,
-                        StandardWatchEventKinds.ENTRY_MODIFY,
-                        StandardWatchEventKinds.ENTRY_CREATE);
-                LOGGER.debug("Watching for changes on {}", watchPath);
-
-                while (true) {
-                    //check exit condition
-                    if (action.get() == null) {
-                        //reference is collected, exit loop
-                        break;
-                    }
-                    WatchKey key = watcher.poll(10, TimeUnit.SECONDS);
-                    //did anything get returned
-                    if (key == null) {
-                        continue;
-                    }
-                    if (!(key.watchable() instanceof Path)) {
-                        continue;
-                    }
-                    Path eventPath = (Path) key.watchable();
-                    // process events
-                    for (WatchEvent<?> event : key.pollEvents()) {
-                        final Path changed = (Path) event.context();
-                        //recompute complete path
-                        final Path completePath = eventPath.resolve(changed);
-                        //see if the file we care about changed
-                        if (completePath.equals(watchPath)) {
-                            LOGGER.info("Properties backing file changed {}", watchPath);
-                            //trigger the action, might have been gc'd since the first check
-                            PropertiesBackingStore store = action.get();
-                            if (store != null) {
-                                store.load();
-                            }
-                            break;
-                        }
-                    }
-
-                    //notify event handled
-                    if (!key.reset()) {
-                        break;
-                    }
-                }
-            } catch (NoSuchFileException e) {
-                LOGGER.warn("Error while watching, no such file {}", watchPath);
-            } catch (ClosedWatchServiceException | IOException | InterruptedException e) {
-                LOGGER.error("Error while watching {}", watchPath, e);
-            } finally {
-                if (watched != null) {
-                    watched.cancel();
-                }
-            }
-            LOGGER.debug("No longer watching {}", watchPath);
-            return null;
-        }
     }
 
     /**
@@ -401,33 +354,80 @@ public class PropertiesBackingStore implements BackingStore {
     }
 
     /**
-     * Create the unique key for storing the class of a key.
-     *
-     * @param key the original key
-     * @return a string for the properties file
+     * Static class that performs a watch on a file and then performs some action when that file changes. We use a
+     * {@link WeakReference} to maintain a link to prevent the outer object being garbage collected. That way, if the
+     * caller no longer exists, we can clean up quickly.
      */
-    private static String makeClassKey(final String key) {
-        return key + CLASS_SUFFIX;
-    }
+    private static class WatchFile implements Callable<Object> {
+        private final WeakReference<PropertiesBackingStore> action;
+        private final Path watchPath;
 
-    /**
-     * Create the unique key for storing the expiry time of a key.
-     *
-     * @param key the original key
-     * @return a string for the properties file
-     */
-    private static String makeDateKey(final String key) {
-        return key + EXPIRY_SUFFIX;
-    }
+        WatchFile(final PropertiesBackingStore action, final Path watchPath) {
+            requireNonNull(action, "action");
+            requireNonNull(watchPath, "watchPath");
+            this.action = new WeakReference<>(action);
+            this.watchPath = watchPath;
+        }
 
-    /**
-     * Derive the base key from an expiry time key.
-     *
-     * @param key the expiry time key
-     * @return the base key
-     */
-    private static String deriveBaseFromDateKey(final String key) {
-        return key.substring(0, key.length() - EXPIRY_SUFFIX.length());
+        @Override
+        public Object call() throws Exception {
+            WatchKey watched = null;
+            try (WatchService watcher = watchPath.getFileSystem().newWatchService()) {
+                //register this
+                watched = watchPath.getParent().register(watcher,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.ENTRY_CREATE);
+                LOGGER.debug("Watching for changes on {}", watchPath);
+
+                while (true) {
+                    //check exit condition
+                    if (action.get() == null) {
+                        //reference is collected, exit loop
+                        break;
+                    }
+                    WatchKey key = watcher.poll(10, TimeUnit.SECONDS);
+                    //did anything get returned
+                    if (key == null) {
+                        continue;
+                    }
+                    if (!(key.watchable() instanceof Path)) {
+                        continue;
+                    }
+                    Path eventPath = (Path) key.watchable();
+                    // process events
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        final Path changed = (Path) event.context();
+                        //recompute complete path
+                        final Path completePath = eventPath.resolve(changed);
+                        //see if the file we care about changed
+                        if (completePath.equals(watchPath)) {
+                            LOGGER.info("Properties backing file changed {}", watchPath);
+                            //trigger the action, might have been gc'd since the first check
+                            PropertiesBackingStore store = action.get();
+                            if (store != null) {
+                                store.load();
+                            }
+                            break;
+                        }
+                    }
+
+                    //notify event handled
+                    if (!key.reset()) {
+                        break;
+                    }
+                }
+            } catch (NoSuchFileException e) {
+                LOGGER.warn("Error while watching, no such file {}", watchPath);
+            } catch (ClosedWatchServiceException | IOException | InterruptedException e) {
+                LOGGER.error("Error while watching {}", watchPath, e);
+            } finally {
+                if (watched != null) {
+                    watched.cancel();
+                }
+            }
+            LOGGER.debug("No longer watching {}", watchPath);
+            return null;
+        }
     }
 }
 

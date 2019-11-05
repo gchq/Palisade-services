@@ -18,13 +18,13 @@ package uk.gov.gchq.palisade.service.resource.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -70,13 +70,13 @@ public class AddResourceRequest extends Request {
     }
 
     @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call AddResourceRequest.setOriginalRequestId()");
+    public RequestId getOriginalRequestId() {
+        throw new ForbiddenException("Should not call AddResourceRequest.getOriginalRequestId()");
     }
 
     @Override
-    public RequestId getOriginalRequestId() {
-        throw new ForbiddenException("Should not call AddResourceRequest.getOriginalRequestId()");
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call AddResourceRequest.setOriginalRequestId()");
     }
 
     public ConnectionDetail getConnectionDetail() {
@@ -93,27 +93,28 @@ public class AddResourceRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AddResourceRequest)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        AddResourceRequest that = (AddResourceRequest) o;
-        return getResource().equals(that.getResource()) &&
-                getConnectionDetail().equals(that.getConnectionDetail());
+        final AddResourceRequest that = (AddResourceRequest) o;
+        return resource.equals(that.resource) &&
+                Objects.equals(connectionDetail, that.connectionDetail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getResource(), getConnectionDetail());
+        return Objects.hash(super.hashCode(), resource, connectionDetail);
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AddResourceRequest.class.getSimpleName() + "[", "]")
-                .add("resource=" + resource)
-                .add("connectionDetail=" + connectionDetail)
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resource", resource)
+                .append("connectionDetail", connectionDetail)
                 .toString();
     }
 }

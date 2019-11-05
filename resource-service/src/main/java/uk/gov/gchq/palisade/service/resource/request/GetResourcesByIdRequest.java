@@ -15,10 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.resource.request;
 
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -54,22 +54,26 @@ public class GetResourcesByIdRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetResourcesByIdRequest)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
-        return getResourceId().equals(that.getResourceId());
+        if (!super.equals(o)) {
+            return false;
+        }
+        final GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
+        return Objects.equals(resourceId, that.resourceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getResourceId());
+        return Objects.hash(super.hashCode(), resourceId);
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByIdRequest.class.getSimpleName() + "[", "]")
-                .add("resourceId='" + resourceId + "'")
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("resourceId", resourceId)
                 .toString();
     }
 }
