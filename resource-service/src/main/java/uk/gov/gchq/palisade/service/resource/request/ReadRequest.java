@@ -16,19 +16,17 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used to send a request to the
- * {@link uk.gov.gchq.palisade.data.service.DataService} to read a resource.
+ * DataService to read a resource.
  */
 
 public class ReadRequest extends Request {
@@ -70,25 +68,20 @@ public class ReadRequest extends Request {
         if (this == o) {
             return true;
         }
-
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final ReadRequest that = (ReadRequest) o;
-
-        return new EqualsBuilder()
-                .append(token, that.token)
-                .append(resource, that.resource)
-                .isEquals();
+        return Objects.equals(token, that.token) &&
+                Objects.equals(resource, that.resource);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(47, 37)
-                .append(token)
-                .append(resource)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), token, resource);
     }
 
     @Override

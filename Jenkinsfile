@@ -82,8 +82,13 @@ spec:
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'palisade-login'
-                    sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                    if (("${env.BRANCH_NAME}" == "develop") ||
+                            ("${env.BRANCH_NAME}" == "master")) {
+                        sh 'palisade-login'
+                        sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                    } else {
+                        sh "echo - no deploy"
+                    }
                 }
             }
         }

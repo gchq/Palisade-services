@@ -41,18 +41,6 @@ public class ResourceDetails {
         this.format = format;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
     protected static ResourceDetails getResourceDetailsFromFileName(final String fileName) {
         //get filename component
         final String[] split = fileName.split(Pattern.quote("/"));
@@ -75,13 +63,16 @@ public class ResourceDetails {
         return FILENAME_PATTERN.matcher(fileName);
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("type", type)
-                .append("fileName", fileName)
-                .append("format", format)
-                .build();
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     @Override
@@ -89,18 +80,27 @@ public class ResourceDetails {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ResourceDetails)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ResourceDetails that = (ResourceDetails) o;
-        boolean fileName = getFileName().equals(that.getFileName());
-        boolean type = getType().equals(that.getType());
-        boolean format = getFormat().equals(that.getFormat());
-        return fileName && type && format;
+        final ResourceDetails that = (ResourceDetails) o;
+        return fileName.equals(that.fileName) &&
+                type.equals(that.type) &&
+                format.equals(that.format);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFileName(), getFormat(), getType());
+        return Objects.hash(fileName, type, format);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("fileName", fileName)
+                .append("type", type)
+                .append("format", format)
+                .toString();
     }
 }
