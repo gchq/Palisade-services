@@ -49,8 +49,7 @@
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
         <dependency>
-            <!-- required with JDK11 for Eureka -->
-            <groupId>org.glassfish.jaxb</groupId>
+            <groupId>org.glassfish.jaxb</groupId> <!-- required with JDK11 for Eureka -->
             <artifactId>jaxb-runtime</artifactId>
         </dependency>
         <dependency>
@@ -71,6 +70,18 @@
                         <goals>
                             <goal>build-info</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
