@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "launcher.default-service")
 public class DefaultsConfiguration extends ServiceConfiguration {
+    private String root;
 
     public DefaultsConfiguration() {
     }
@@ -31,6 +32,14 @@ public class DefaultsConfiguration extends ServiceConfiguration {
     public DefaultsConfiguration name(final String name) {
         setName(name);
         return this;
+    }
+
+    public String getRoot() {
+        return root;
+    }
+
+    public void setRoot(final String root) {
+        this.root = root;
     }
 
     @Override

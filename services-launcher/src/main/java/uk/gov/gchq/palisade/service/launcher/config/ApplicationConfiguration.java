@@ -16,25 +16,24 @@
 
 package uk.gov.gchq.palisade.service.launcher.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import uk.gov.gchq.palisade.service.launcher.runner.ServicesRunner;
 
 import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties({ServicesConfiguration.class, DefaultsConfiguration.class})
 public class ApplicationConfiguration {
-
-    @Autowired
-    ServicesConfiguration servicesConfiguration;
-
     @Bean
-    List<OverridableConfiguration> overriddenConfigurations() {
+    List<OverridableConfiguration> overriddenConfigurations(final ServicesConfiguration servicesConfiguration) {
         return servicesConfiguration.getServices();
     }
 
-    @Autowired
-    DefaultsConfiguration defaultsConfiguration;
+    @Bean
+    ServicesRunner servicesRunner(final ServicesConfiguration servicesConfiguration, final DefaultsConfiguration defaultsConfiguration) {
+        return new ServicesRunner(overriddenConfigurations(servicesConfiguration), defaultsConfiguration);
+    }
 }

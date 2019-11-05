@@ -19,12 +19,8 @@ package uk.gov.gchq.palisade.service.launcher.runner;
 import org.apache.tools.ant.util.JavaEnvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.launcher.config.DefaultsConfiguration;
 import uk.gov.gchq.palisade.service.launcher.config.OverridableConfiguration;
@@ -42,29 +38,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component
-@Profile("!test")
 public class ServicesRunner implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
-    @Value("${launcher.root}")
-    private static String rootDir;
+    private List<OverridableConfiguration> serviceConfigurations;
+    private DefaultsConfiguration defaultsConfiguration;
 
-    public static File getServicesRoot() {
-        File parent = new File(".");
-        while (parent != null && !rootDir.equals(parent.getName())) {
+    public ServicesRunner(final List<OverridableConfiguration> serviceConfigurations, final DefaultsConfiguration defaultsConfiguration) {
+        this.serviceConfigurations = serviceConfigurations;
+        this.defaultsConfiguration = defaultsConfiguration;
+    }
+
+    File getServicesRoot() {
+        File parent = new File(".").getAbsoluteFile();
+        while (parent != null && !defaultsConfiguration.getRoot().equals(parent.getName())) {
+            LOGGER.info(parent.getName(), parent.getParent());
             parent = parent.getParentFile();
         }
         return parent;
     }
 
-    @Autowired
-    private static List<OverridableConfiguration> serviceConfigurations;
-
-    @Autowired
-    private static DefaultsConfiguration defaultsConfiguration;
-
-    static ProcessBuilder constructServiceProcess(final OverridableConfiguration config) {
+    ProcessBuilder constructServiceProcess(final OverridableConfiguration config) {
         String[] command = new String[] {
                 JavaEnvUtils.getJreExecutable("java"),
                 "-jar", config.getTarget(),
@@ -79,27 +73,31 @@ public class ServicesRunner implements ApplicationRunner {
         return builder;
     }
 
-    static Stream<ProcessBuilder> loadConfigurations(final ApplicationArguments args) {
-        Set<OverridableConfiguration> configurations = new HashSet<>(serviceConfigurations);
-
-        // --enable=<service-name>
-        for (String serviceName : args.getOptionValues("enable")) {
-            OverridableConfiguration config = new OverridableConfiguration();
-            config.setName(serviceName);
-            config.defaults(new DefaultsConfiguration(defaultsConfiguration));
-            configurations.add(config);
+    Stream<OverridableConfiguration> loadConfigurations(final Set<OverridableConfiguration> configurations, final ApplicationArguments args) {
+        if (args.getSourceArgs().length > 0) {
+            // --enable=<service-name>
+            for (String serviceName : args.getOptionValues("enable")) {
+                OverridableConfiguration config = new OverridableConfiguration();
+                config.setName(serviceName);
+                configurations.add(config);
+            }
+            // --disable=<service-name>
+            for (String serviceName : args.getOptionValues("disable")) {
+                OverridableConfiguration config = new OverridableConfiguration();
+                config.setName(serviceName);
+                configurations.remove(config);
+            }
         }
-        // --disable=<service-name>
-        for (String serviceName : args.getOptionValues("disable")) {
-            OverridableConfiguration config = new OverridableConfiguration();
-            config.setName(serviceName);
-            configurations.remove(config);
-        }
 
-        return configurations.parallelStream().map(ServicesRunner::constructServiceProcess);
+        return loadConfigurations(configurations);
     }
 
-    static Stream<Process> launchApplicationsFromProcessBuilders(final Stream<ProcessBuilder> configurations) {
+    Stream<OverridableConfiguration> loadConfigurations(final Set<OverridableConfiguration> configurations) {
+        return configurations.parallelStream()
+                .map((x) -> x.defaults(defaultsConfiguration));
+    }
+
+    Stream<Process> launchApplicationsFromProcessBuilders(final Stream<ProcessBuilder> configurations) {
         Stream<Process> processes = configurations.map((pb) -> {
                     try {
                         Process process = pb.start();
@@ -115,7 +113,7 @@ public class ServicesRunner implements ApplicationRunner {
         return processes;
     }
 
-    static Map<Process, Integer> joinProcesses(final Stream<Process> processes) {
+    Map<Process, Integer> joinProcesses(final Stream<Process> processes) {
         Map<Process, Integer> retCodes = processes.map((p) -> {
                     try {
                         return new SimpleEntry<>(p, p.waitFor());
@@ -132,8 +130,10 @@ public class ServicesRunner implements ApplicationRunner {
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
+        Set<OverridableConfiguration> configurations = new HashSet<>(serviceConfigurations);
+
         // Build a set of configurations for processes from config and commandline args
-        Stream<ProcessBuilder> processBuilders = loadConfigurations(args);
+        Stream<ProcessBuilder> processBuilders = loadConfigurations(configurations, args).map(this::constructServiceProcess);
 
         // Start processes for each service configuration
         Stream<Process> processes = launchApplicationsFromProcessBuilders(processBuilders);

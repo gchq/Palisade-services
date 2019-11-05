@@ -25,12 +25,12 @@ spring:
 # These are built from launcher.defaults with SERVICE substituted for the service.name
 # and any other overrides specified will replace the default
 launcher:
-  root: palisade-services
   default-service:
+    root: palisade-services
     name: default
     target: target
     config: SERVICE-config
     log: log
   services:
     -
-      name: services-launcher
+      name: dummy-service

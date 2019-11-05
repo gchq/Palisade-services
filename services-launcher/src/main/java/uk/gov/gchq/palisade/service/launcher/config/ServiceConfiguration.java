@@ -29,7 +29,7 @@ public class ServiceConfiguration {
     }
 
     // Copy constructor
-    public ServiceConfiguration(ServiceConfiguration copy) {
+    public ServiceConfiguration(final ServiceConfiguration copy) {
         this.name = copy.name;
         this.target = copy.target;
         this.config = copy.config;

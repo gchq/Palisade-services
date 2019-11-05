@@ -24,7 +24,7 @@ public class OverridableConfiguration extends ServiceConfiguration {
     }
 
     // Copy constructor
-    public OverridableConfiguration(OverridableConfiguration copy) {
+    public OverridableConfiguration(final OverridableConfiguration copy) {
         super(copy);
         this.defaultConfig = copy.defaultConfig;
     }

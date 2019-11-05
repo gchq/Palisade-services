@@ -25,8 +25,8 @@ spring:
 # These are built from launcher.defaults with SERVICE substituted for the service.name
 # and any other overrides specified will replace the default
 launcher:
-  root: palisade-services
   default-service:
+    root: palisade-services
     name: default
     target: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
     config: SERVICE/classes/application.yaml
