@@ -34,7 +34,8 @@ The launcher is designed to be used by defining a collection of SpringBoot confi
  The launcher configuration further defines two types of configurations:
  * A list of configurations for each service to be run - required fields are:
     * target (SpringBoot-enabled JAR to run)
-    * config (directory to pass to `--spring-config-location=<dir>`)
+    * config (directory to pass to `-Dspring.config.location=<...>`)
+    * profiles (profiles to pass to `-Dspring.profiles.active=<...>`, `default` for JAR default profile)
     * log (can be `/dev/null` for no logging)
  * One default configuration - for any required field not defined in the services, its value is deduced from the defaults:
     * The `root` directory is the first directory matching the field value after traversing up the directory tree from the working directory
