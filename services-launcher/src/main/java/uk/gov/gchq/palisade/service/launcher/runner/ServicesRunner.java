@@ -28,7 +28,8 @@ import uk.gov.gchq.palisade.service.launcher.config.OverridableConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,80 +42,84 @@ import java.util.stream.Stream;
 public class ServicesRunner implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
-    private List<OverridableConfiguration> serviceConfigurations;
+    private List<OverridableConfiguration> configsFromFile;
     private DefaultsConfiguration defaultsConfiguration;
 
     public ServicesRunner(final List<OverridableConfiguration> serviceConfigurations, final DefaultsConfiguration defaultsConfiguration) {
-        this.serviceConfigurations = serviceConfigurations;
+        this.configsFromFile = serviceConfigurations;
         this.defaultsConfiguration = defaultsConfiguration;
     }
 
     File getServicesRoot() {
         File parent = new File(".").getAbsoluteFile();
         while (parent != null && !defaultsConfiguration.getRoot().equals(parent.getName())) {
-            LOGGER.info(parent.getName(), parent.getParent());
             parent = parent.getParentFile();
         }
         return parent;
     }
 
-    ProcessBuilder constructServiceProcess(final OverridableConfiguration config) {
-        String[] command = new String[] {
-                JavaEnvUtils.getJreExecutable("java"),
-                "-jar", config.getTarget(),
-                String.format("--spring-config-location=%s,%s", defaultsConfiguration.getConfig(), config.getConfig())
-        };
-        ProcessBuilder builder = new ProcessBuilder()
-                .command(command)
-                .directory(getServicesRoot())
-                .redirectOutput(new File(config.getLog()))
-                .redirectError(new File(config.getLog()));
-        LOGGER.info(String.format("Constructed ProcessBuilder %s [%s]", Arrays.toString(command), builder.redirectOutput().toString()));
-        return builder;
+    List<ProcessBuilder> constructProcessRunners(final List<OverridableConfiguration> configs) {
+        return configs.stream()
+                .map((config) -> {
+                    String[] command = new String[]{
+                            JavaEnvUtils.getJreExecutable("java"),
+                            "-jar", config.getTarget(),
+                            String.format("--spring-config-location=%s,%s", defaultsConfiguration.getConfig(), config.getConfig())
+                    };
+                    final ProcessBuilder processBuilder = new ProcessBuilder()
+                            .command(command)
+                            .directory(getServicesRoot())
+                            .redirectOutput(new File(config.getLog()))
+                            .redirectError(new File(config.getLog()));
+                    return processBuilder;
+                })
+                .collect(Collectors.toList());
     }
 
-    Stream<OverridableConfiguration> loadConfigurations(final Set<OverridableConfiguration> configurations, final ApplicationArguments args) {
+    List<OverridableConfiguration> loadConfigurations(final List<OverridableConfiguration> configurations, final ApplicationArguments args) {
+        List<OverridableConfiguration> addedConfigs = new ArrayList<>();
+        Set<OverridableConfiguration> removedConfigs = new HashSet<>();
+
         if (args.getSourceArgs().length > 0) {
             // --enable=<service-name>
             for (String serviceName : args.getOptionValues("enable")) {
                 OverridableConfiguration config = new OverridableConfiguration();
                 config.setName(serviceName);
-                configurations.add(config);
+                addedConfigs.add(config);
             }
             // --disable=<service-name>
             for (String serviceName : args.getOptionValues("disable")) {
                 OverridableConfiguration config = new OverridableConfiguration();
                 config.setName(serviceName);
-                configurations.remove(config);
+                removedConfigs.add(config);
             }
         }
 
-        return loadConfigurations(configurations);
+        return Stream.of(configurations, addedConfigs)
+                .flatMap(Collection::stream)
+                .filter((x) -> !removedConfigs.contains(x))
+                .map((x) -> x.defaults(defaultsConfiguration))
+                .collect(Collectors.toList());
     }
 
-    Stream<OverridableConfiguration> loadConfigurations(final Set<OverridableConfiguration> configurations) {
-        return configurations.parallelStream()
-                .map((x) -> x.defaults(defaultsConfiguration));
-    }
-
-    Stream<Process> launchApplicationsFromProcessBuilders(final Stream<ProcessBuilder> configurations) {
-        Stream<Process> processes = configurations.map((pb) -> {
+    List<Process> launchApplicationsFromProcessBuilders(final List<ProcessBuilder> configurations) {
+        return configurations.stream()
+                .map((pb) -> {
                     try {
                         Process process = pb.start();
-                        LOGGER.info(String.format("Started process %s", process.toString()));
                         return process;
                     } catch (IOException e) {
                         e.printStackTrace();
                         return null;
                     }
                 })
-                .filter(Objects::nonNull);
-
-        return processes;
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
-    Map<Process, Integer> joinProcesses(final Stream<Process> processes) {
-        Map<Process, Integer> retCodes = processes.map((p) -> {
+    Map<Process, Integer> joinProcesses(final List<Process> processes) {
+        return processes.stream()
+                .map((p) -> {
                     try {
                         return new SimpleEntry<>(p, p.waitFor());
                     } catch (InterruptedException e) {
@@ -124,23 +129,25 @@ public class ServicesRunner implements ApplicationRunner {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-        return retCodes;
     }
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
-        Set<OverridableConfiguration> configurations = new HashSet<>(serviceConfigurations);
+        LOGGER.info(String.format("Loaded %s service configurations from file", configsFromFile.size()));
 
         // Build a set of configurations for processes from config and commandline args
-        Stream<ProcessBuilder> processBuilders = loadConfigurations(configurations, args).map(this::constructServiceProcess);
+        List<OverridableConfiguration> serviceConfigurations = loadConfigurations(configsFromFile, args);
+        LOGGER.info(String.format("Loaded %s configurations total", serviceConfigurations.size()));
+
+        List<ProcessBuilder> processBuilders = constructProcessRunners(serviceConfigurations);
+        LOGGER.info(String.format("Prepared %s processes to run", processBuilders.size()));
 
         // Start processes for each service configuration
-        Stream<Process> processes = launchApplicationsFromProcessBuilders(processBuilders);
+        List<Process> processes = launchApplicationsFromProcessBuilders(processBuilders);
+        LOGGER.info(String.format("Launched %s processes, waiting to join", processes.size()));
 
         // Wait for retcodes
         Map<Process, Integer> retCodes = joinProcesses(processes);
-
-        LOGGER.info(retCodes.toString());
+        LOGGER.info(String.format("Joined with retcodes: %s", retCodes.toString()));
     }
 }

@@ -32,14 +32,10 @@ import uk.gov.gchq.palisade.service.launcher.config.OverridableConfiguration;
 import uk.gov.gchq.palisade.service.launcher.config.ServicesConfiguration;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -66,6 +62,12 @@ public class ServicesRunnerTest {
 
     private ServicesRunner servicesRunner;
     private List<OverridableConfiguration> serviceConfigurations;
+
+    private static <T> ArrayList<T> singleton(T element) {
+        ArrayList<T> singletonList = new ArrayList<>();
+        singletonList.add(element);
+        return singletonList;
+    }
 
     @Before
     public void setUp() {
@@ -97,21 +99,18 @@ public class ServicesRunnerTest {
 
     @Test
     public void commandLineExtendsConfigurations() {
-        // Given - ./services-launcher.jar --enable=mock-service
-        Set<OverridableConfiguration> configs = new HashSet<>();
-        configs.add(getTestConfig());
-        when(arguments.getOptionValues(eq("enable"))).thenReturn(Collections.singletonList("mock-service"));
-        when(arguments.getSourceArgs()).thenReturn(new String[] {"--enable=mock-service"});
+        // Given - ./services-launcher.jar --enable=another-mock-service
+        List<OverridableConfiguration> configs = singleton(getTestConfig());
+        when(arguments.getOptionValues(eq("enable"))).thenReturn(singleton("another-mock-service"));
+        when(arguments.getSourceArgs()).thenReturn(new String[] {"--enable=another-mock-service"});
 
         // When
-        Set<OverridableConfiguration> commandLineExtensions = servicesRunner.loadConfigurations(configs, arguments)
-                .collect(Collectors.toSet());
+        List<OverridableConfiguration> commandLineExtensions = servicesRunner.loadConfigurations(configs, arguments);
 
         // Then
-        Set<OverridableConfiguration> expected = servicesRunner.loadConfigurations(configs)
-                .collect(Collectors.toSet());
+        List<OverridableConfiguration> expected = configs.stream().map(x -> x.defaults(defaultsConfiguration)).collect(Collectors.toList());
         OverridableConfiguration expectedExtension = new OverridableConfiguration().defaults(defaultsConfiguration);
-        expectedExtension.setName("mock-service");
+        expectedExtension.setName("another-mock-service");
         expected.add(expectedExtension);
         assertThat(commandLineExtensions, equalTo(expected));
     }
@@ -122,7 +121,7 @@ public class ServicesRunnerTest {
         OverridableConfiguration config = getTestConfig();
 
         // When
-        ProcessBuilder processBuilder = servicesRunner.constructServiceProcess(config);
+        ProcessBuilder processBuilder = servicesRunner.constructProcessRunners(singleton(config)).get(0);
 
         // Then
         assertThat(processBuilder.command(), hasItem(config.getTarget()));
@@ -132,25 +131,25 @@ public class ServicesRunnerTest {
     @Test
     public void processesLaunchedFromBuilders() throws IOException {
         // Given
-        ProcessBuilder[] processBuilders = new ProcessBuilder[] {processBuilder};
+        List<ProcessBuilder> processBuilders = singleton(processBuilder);
         when(processBuilder.start()).thenReturn(process);
 
         // When
-        Stream<Process> processes = servicesRunner.launchApplicationsFromProcessBuilders(Arrays.stream(processBuilders));
+        List<Process> processes = servicesRunner.launchApplicationsFromProcessBuilders(processBuilders);
 
         // Then
-        assertThat(processes.collect(Collectors.toList()), hasItem(process));
+        assertThat(processes, hasItem(process));
     }
 
     @Test
     public void processesJoined() throws InterruptedException {
         // Given
         Integer retCode = 0;
-        Process[] processes = new Process[] {process};
+        List<Process> processes = singleton(process);
         when(process.waitFor()).thenReturn(retCode);
 
         // When
-        Map<Process, Integer> retCodes = servicesRunner.joinProcesses(Arrays.stream(processes));
+        Map<Process, Integer> retCodes = servicesRunner.joinProcesses(processes);
 
         // Then
         assertThat(retCodes.get(process), equalTo(retCode));
