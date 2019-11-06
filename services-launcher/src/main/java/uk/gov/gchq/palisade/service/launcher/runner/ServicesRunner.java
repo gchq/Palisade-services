@@ -63,8 +63,10 @@ public class ServicesRunner implements ApplicationRunner {
                 .map((config) -> {
                     String[] command = new String[]{
                             JavaEnvUtils.getJreExecutable("java"),
-                            "-jar", config.getTarget(),
-                            String.format("--spring-config-location=%s,%s", defaultsConfiguration.getConfig(), config.getConfig())
+                            "-jar",
+                            String.format("-Dspring.config.location=%s", config.getConfig()),
+                            String.format("-Dspring.profiles.active=%s", config.getProfiles()),
+                            config.getTarget()
                     };
                     final ProcessBuilder processBuilder = new ProcessBuilder()
                             .command(command)

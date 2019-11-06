@@ -45,6 +45,11 @@ public class OverridableConfiguration extends ServiceConfiguration {
     }
 
     @Override
+    public String getProfiles() {
+        return super.getProfiles() != null || defaultConfig == null ? super.getProfiles() : defaultConfig.name(getName()).getProfiles();
+    }
+
+    @Override
     public String getLog() {
         return super.getLog() != null || defaultConfig == null ? super.getLog() : defaultConfig.name(getName()).getLog();
     }

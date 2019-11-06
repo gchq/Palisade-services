@@ -22,6 +22,7 @@ public class ServiceConfiguration {
     private String name;
     private String target;
     private String config;
+    private String profiles;
     private String log;
 
     // Default constructor
@@ -58,6 +59,14 @@ public class ServiceConfiguration {
 
     public void setConfig(final String config) {
         this.config = config;
+    }
+
+    public String getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(final String profiles) {
+        this.profiles = profiles;
     }
 
     public String getLog() {

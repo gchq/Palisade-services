@@ -53,6 +53,11 @@ public class DefaultsConfiguration extends ServiceConfiguration {
     }
 
     @Override
+    public String getProfiles() {
+        return getName() == null || super.getProfiles() == null ? super.getProfiles() : super.getProfiles().replace("SERVICE", getName());
+    }
+
+    @Override
     public String getLog() {
         return  getName() == null || super.getLog() == null ? super.getLog() : super.getLog().replace("SERVICE", getName());
     }
