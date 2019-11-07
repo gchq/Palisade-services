@@ -29,8 +29,8 @@ import event.logging.User;
 import event.logging.impl.DefaultEventLoggingService;
 import event.logging.util.DeviceUtil;
 import event.logging.util.EventLoggingUtil;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -92,7 +92,7 @@ public class StroomAuditService implements AuditService {
     private final Logger errorLogger;
 
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
-        errorLogger = LogManager.getLogger(StroomAuditService.class);
+        errorLogger = LoggerFactory.getLogger(StroomAuditService.class);
         eventLogger = eventLoggingService;
     }
 

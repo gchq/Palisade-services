@@ -199,7 +199,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <dateFormat>yyyyMMdd-HHmmss</dateFormat>
+                    <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
             <plugin>
@@ -237,6 +240,8 @@
                     <replacements>
                         <replacement>
                             <token>image.tag</token>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>${image.tag}</value>
                         </replacement>
                     </replacements>
                 </configuration>

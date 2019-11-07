@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.service.ServiceState;
@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A LoggerAuditService is a simple implementation of an {@link AuditService} that simply constructs a message and logs
- * it using log4j {@link Logger}. <ul> <li>Messages are logged at INFO logging level.</li> <li>Error messages are logged
+ * it using slf4j {@link Logger}. <ul> <li>Messages are logged at INFO logging level.</li> <li>Error messages are logged
  * at ERROR logging level.</li> </ul> <p> An example message is: </p>
  * <pre>
  * 'Alice' accessed 'file1' for 'Payroll' and it was processed using 'Age off and visibility filtering'

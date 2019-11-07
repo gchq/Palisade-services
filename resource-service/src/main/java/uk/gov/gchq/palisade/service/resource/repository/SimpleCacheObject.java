@@ -68,21 +68,21 @@ public class SimpleCacheObject {
     }
 
     /**
-     * Set the metadata for this cache object.
-     *
-     * @param metadata the new metadata
-     */
-    public void setMetadata(final Optional<CacheMetadata> metadata) {
-        metadata(metadata);
-    }
-
-    /**
      * Get the metadata about this cache entry.
      *
      * @return the metadata
      */
     public Optional<CacheMetadata> getMetadata() {
         return metadata;
+    }
+
+    /**
+     * Set the metadata for this cache object.
+     *
+     * @param metadata the new metadata
+     */
+    public void setMetadata(final Optional<CacheMetadata> metadata) {
+        metadata(metadata);
     }
 
     /**
@@ -98,21 +98,21 @@ public class SimpleCacheObject {
     }
 
     /**
-     * Set the cache entry.
-     *
-     * @param value the new cache entry
-     */
-    public void setValue(final Optional<byte[]> value) {
-        value(value);
-    }
-
-    /**
      * Get the cached value.
      *
      * @return cached value or an empty {@link Optional}
      */
     public Optional<byte[]> getValue() {
         return value;
+    }
+
+    /**
+     * Set the cache entry.
+     *
+     * @param value the new cache entry
+     */
+    public void setValue(final Optional<byte[]> value) {
+        value(value);
     }
 
     /**

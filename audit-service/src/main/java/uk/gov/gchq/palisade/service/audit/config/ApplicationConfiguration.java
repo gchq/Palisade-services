@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.audit.config;
 
 import event.logging.impl.DefaultEventLoggingService;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -53,7 +52,7 @@ public class ApplicationConfiguration {
     @Bean(name = "logger")
     @ConditionalOnProperty(prefix = "audit.implementations", name = LoggerAuditService.CONFIG_KEY)
     public LoggerAuditService loggerAuditService() {
-        return new LoggerAuditService(LogManager.getLogger(LoggerAuditService.class));
+        return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
     @Bean(name = "eureka-client")

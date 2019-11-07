@@ -38,11 +38,9 @@ import static java.util.Objects.requireNonNull;
 public class K8sBackingStore implements BackingStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(K8sBackingStore.class);
-
+    private static final String NAMESPACE = "default";
     private final Config config = new ConfigBuilder().build();
     private final KubernetesClient client = new DefaultKubernetesClient(config);
-
-    private static final String NAMESPACE = "default";
     private final String namespace = Optional.ofNullable(client.getNamespace()).orElse(NAMESPACE);
 
     public K8sBackingStore() {
@@ -53,14 +51,6 @@ public class K8sBackingStore implements BackingStore {
         } catch (KubernetesClientException e) {
             LOGGER.info("Not running in kubernetes or RBAC not entitled");
         }
-    }
-
-    /**
-     * Clean up the resource
-     */
-
-    public void close() {
-        client.close();
     }
 
     /**
@@ -79,6 +69,21 @@ public class K8sBackingStore implements BackingStore {
         return key.toLowerCase().replaceAll("[^a-z0-9\\-]", "");
     }
 
+    private static void log(final String action, final Object obj) {
+        LOGGER.info("{}: {}", action, obj);
+    }
+
+    private static void log(final String action) {
+        LOGGER.info(action);
+    }
+
+    /**
+     * Clean up the resource
+     */
+
+    public void close() {
+        client.close();
+    }
 
     /**
      * Store the given data in the backing store. The byte array <code>value</code> is assumed to encode an object of
@@ -136,7 +141,6 @@ public class K8sBackingStore implements BackingStore {
         return true;
     }
 
-
     /**
      * Attempt to get the given key from the backing store. Looks up the given key and attempts to get it. If the
      * requested key couldn't be found then the value of the returned {@link SimpleCacheObject} will be empty. A new
@@ -182,7 +186,6 @@ public class K8sBackingStore implements BackingStore {
             }
         }
     }
-
 
     /**
      * Remove the given key from the backing store. If the key is present it will be removed, otherwise nothing will happen.
@@ -232,15 +235,6 @@ public class K8sBackingStore implements BackingStore {
                         (!Instant.now().isAfter(Instant.ofEpochMilli(Long.parseLong(configMap.getData().get("expiryTimestamp"))))))
                 .map(configMap -> configMap.getMetadata().getName())
                 .distinct();
-    }
-
-
-    private static void log(final String action, final Object obj) {
-        LOGGER.info("{}: {}", action, obj);
-    }
-
-    private static void log(final String action) {
-        LOGGER.info(action);
     }
 }
 

@@ -45,6 +45,58 @@ import static java.util.Objects.requireNonNull;
 public interface BackingStore {
 
     /**
+     * Check the provided key is not empty.
+     *
+     * @param key the backing store key
+     * @return the key
+     * @throws IllegalArgumentException if the given key is <code>null</code> once whitespace is trimmed
+     */
+    static String keyCheck(final String key) {
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException("key cannot be empty");
+        }
+        return key;
+    }
+
+    /**
+     * Check the provided duration. If the <code>duration</code> is  <code>null</code> or negative an exception is
+     * thrown.
+     *
+     * @param duration duration to check
+     * @throws NullPointerException     if <code>duration</code> is <code>null</code>
+     * @throws IllegalArgumentException if the duration is negative
+     */
+    static void durationCheck(final Optional<Duration> duration) {
+        requireNonNull(duration, "timeToLive");
+        duration.ifPresent(x -> {
+            if (x.isNegative()) {
+                throw new IllegalArgumentException("time to live cannot be negative");
+            }
+        });
+    }
+
+    /**
+     * Convenience method to validate the parameters to an <code>add</code> call.
+     *
+     * @param key        the key to add
+     * @param valueClass the type of the value
+     * @param value      the encoded value
+     * @param timeToLive optional time to live
+     * @return the key
+     * @throws NullPointerException     if anything is <code>null</code>
+     * @throws IllegalArgumentException if the duration is negative, or the trimmed key is empty
+     * @see BackingStore#durationCheck(Optional)
+     * @see BackingStore#keyCheck(String)
+     */
+    static String validateAddParameters(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
+        String cacheKey = BackingStore.keyCheck(key);
+        requireNonNull(valueClass, "valueClass");
+        requireNonNull(value, "value");
+        BackingStore.durationCheck(timeToLive);
+        return cacheKey;
+    }
+
+    /**
      * Store the given data in the backing store. The byte array <code>value</code> is assumed to encode an object of
      * the type represented by the class <code>valueClass</code>. The <code>key</code> must not be empty or
      * <code>null</code>. If a time to live duration is required on this entry, then the optional specified should not
@@ -115,58 +167,6 @@ public interface BackingStore {
      * Closes the backing store. This method must be idempotent.
      */
     default void close() {
-    }
-
-    /**
-     * Check the provided key is not empty.
-     *
-     * @param key the backing store key
-     * @return the key
-     * @throws IllegalArgumentException if the given key is <code>null</code> once whitespace is trimmed
-     */
-    static String keyCheck(final String key) {
-        if (key == null || key.trim().isEmpty()) {
-            throw new IllegalArgumentException("key cannot be empty");
-        }
-        return key;
-    }
-
-    /**
-     * Check the provided duration. If the <code>duration</code> is  <code>null</code> or negative an exception is
-     * thrown.
-     *
-     * @param duration duration to check
-     * @throws NullPointerException     if <code>duration</code> is <code>null</code>
-     * @throws IllegalArgumentException if the duration is negative
-     */
-    static void durationCheck(final Optional<Duration> duration) {
-        requireNonNull(duration, "timeToLive");
-        duration.ifPresent(x -> {
-            if (x.isNegative()) {
-                throw new IllegalArgumentException("time to live cannot be negative");
-            }
-        });
-    }
-
-    /**
-     * Convenience method to validate the parameters to an <code>add</code> call.
-     *
-     * @param key        the key to add
-     * @param valueClass the type of the value
-     * @param value      the encoded value
-     * @param timeToLive optional time to live
-     * @return the key
-     * @throws NullPointerException     if anything is <code>null</code>
-     * @throws IllegalArgumentException if the duration is negative, or the trimmed key is empty
-     * @see BackingStore#durationCheck(Optional)
-     * @see BackingStore#keyCheck(String)
-     */
-    static String validateAddParameters(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
-        String cacheKey = BackingStore.keyCheck(key);
-        requireNonNull(valueClass, "valueClass");
-        requireNonNull(value, "value");
-        BackingStore.durationCheck(timeToLive);
-        return cacheKey;
     }
 
     @JsonGetter("class")

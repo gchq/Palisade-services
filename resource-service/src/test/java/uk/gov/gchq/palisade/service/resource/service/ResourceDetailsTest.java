@@ -16,106 +16,144 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import org.junit.Test;
+import org.apache.commons.math3.util.Pair;
+import org.junit.Rule;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class ResourceDetailsTest {
 
     public static final String PATH = "path/to/nowhere/";
-    public static final String VALID1 = "employee_file0.avro";
-    public static final String VALID2 = "emplo   yee_file0.avro";
-    public static final String VALID3 = "employee_fi   le0.av   ro";
 
-    public static final String INVALID1 = "file0.avro";
-    public static final String INVALID2 = "employee_file0";
-    public static final String INVALID3 = "_.";
-    public static final String INVALID4 = "";
-    public static final String INVALID5 = ".avro";
+    @DataPoints
+    public static final List<Pair<String, Pair<String, String>>> filenameDataPoints = new ArrayList<>();
+    @DataPoints
+    public static final List<ResourceDetails> resourceDataPoints = new ArrayList<>();
 
-    @Test
-    public void shouldExtractFileName() {
-        //Given
-        String fileName = PATH + VALID1;
+    ;
+
+    static {
+        // Valid file names
+        filenameDataPoints.add(new Pair<>("employee_file0.avro", new Pair<>("employee", "avro")));
+        filenameDataPoints.add(new Pair<>("emplo   yee_file0.avro", new Pair<>("emplo   yee", "avro")));
+        filenameDataPoints.add(new Pair<>("employee_fi   le0.av   ro", new Pair<>("employee", "av   ro")));
+        // Invalid file names
+        filenameDataPoints.add(new Pair<>("file0.avro", null));
+        filenameDataPoints.add(new Pair<>("employee_file0", null));
+        filenameDataPoints.add(new Pair<>("_.", null));
+        filenameDataPoints.add(new Pair<>("", null));
+        filenameDataPoints.add(new Pair<>(".avro", null));
+    }
+
+    static {
+        for (Pair<String, ?> filename : filenameDataPoints) {
+            if (filename.getValue() != null) {
+                resourceDataPoints.add(ResourceDetails.getResourceDetailsFromFileName(filename.getKey()));
+            }
+        }
+    }
+
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Theory
+    public void throwIfInvalidFileName(Pair<String, Pair<String, String>> dataPoint) {
+        // Given - invalid filename
+        String fileName = dataPoint.getKey();
+        Pair<String, String> expected = dataPoint.getValue();
+        assumeThat(expected, nullValue());
+
+        // Then (expected)
+        thrown.expect(IllegalArgumentException.class);
+
+        // When
+        ResourceDetails.getResourceDetailsFromFileName(fileName);
+    }
+
+    @Theory
+    public void shouldExtractFileName(Pair<String, Pair<String, String>> dataPoint) {
+        // Given - valid filename
+        String fileName = dataPoint.getKey();
+        Pair<String, String> expected = dataPoint.getValue();
+        assumeThat(expected, notNullValue());
+
+        String type = expected.getKey();
+        String format = expected.getValue();
 
         //When
         ResourceDetails details = ResourceDetails.getResourceDetailsFromFileName(fileName);
 
         //Then
-        assertThat("employee", is(equalTo(details.getType())));
+        assertThat(type, is(equalTo(details.getType())));
         assertThat(fileName, is(equalTo(details.getFileName())));
-        assertThat("avro", is(equalTo(details.getFormat())));
+        assertThat(format, is(equalTo(details.getFormat())));
     }
 
-    @Test
-    public void shouldCreateValidDetails() {
-        //Given valid names above
-        //When tested
-        ResourceDetails valid1ob = ResourceDetails.getResourceDetailsFromFileName(VALID1);
-        ResourceDetails valid2ob = ResourceDetails.getResourceDetailsFromFileName(VALID2);
-        ResourceDetails valid3ob = ResourceDetails.getResourceDetailsFromFileName(VALID3);
+    @Theory
+    public void shouldPassValidNames(Pair<String, Pair<String, String>> dataPoint) {
+        // Given
+        String fileName = dataPoint.getKey();
+        Pair<String, String> expected = dataPoint.getValue();
 
-        //Then - check components match
-        assertThat("employee", is(equalTo(valid1ob.getType())));
-        assertThat(VALID1, is(equalTo(valid1ob.getFileName())));
-        assertThat("avro", is(equalTo(valid1ob.getFormat())));
-
-        assertThat("emplo   yee", is(equalTo(valid2ob.getType())));
-        assertThat(VALID2, is(equalTo(valid2ob.getFileName())));
-        assertThat("avro", is(equalTo(valid2ob.getFormat())));
-
-        assertThat("employee", is(equalTo(valid3ob.getType())));
-        assertThat(VALID3, is(equalTo(valid3ob.getFileName())));
-        assertThat("av   ro", is(equalTo(valid3ob.getFormat())));
+        assertThat(ResourceDetails.isValidResourceName(fileName), is(expected != null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidName1() {
-        ResourceDetails.getResourceDetailsFromFileName(INVALID1);
+    @Theory
+    public void reflexiveEquals(ResourceDetails x) {
+        // Then
+        assertThat(x, equalTo(x));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidName2() {
-        ResourceDetails.getResourceDetailsFromFileName(INVALID2);
+    @Theory
+    public void nullNotEquals(ResourceDetails x) {
+        // Then
+        assertThat(x, not(equalTo(nullValue())));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidName3() {
-        ResourceDetails.getResourceDetailsFromFileName(INVALID3);
+    @Theory
+    public void symmetricEquals(ResourceDetails x, ResourceDetails y) {
+        // Given
+        assumeThat(x, equalTo(y));
+        // Then
+        assertThat(y, equalTo(x));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidName4() {
-        ResourceDetails.getResourceDetailsFromFileName(INVALID4);
+    @Theory
+    public void transitiveEquals(ResourceDetails x, ResourceDetails y, ResourceDetails z) {
+        // Given
+        assumeThat(x, equalTo(y));
+        assumeThat(y, equalTo(z));
+        // Then
+        assertThat(x, equalTo(z));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throwOnInvalidName5() {
-        ResourceDetails.getResourceDetailsFromFileName(INVALID5);
+    @Theory
+    public void consistentHashCode(ResourceDetails x) {
+        // Then
+        assertThat(x.hashCode(), equalTo(x.hashCode()));
     }
 
-    @Test
-    public void shouldPassValidNames() {
-        //All of these are valid so should return true
-        assertTrue(ResourceDetails.isValidResourceName(VALID1));
-        assertTrue(ResourceDetails.isValidResourceName(VALID2));
-        assertTrue(ResourceDetails.isValidResourceName(VALID3));
-    }
-
-    @Test
-    public void shouldFailInvalidNames() {
-        //all of these should fail
-        assertFalse(ResourceDetails.isValidResourceName(INVALID1));
-        assertFalse(ResourceDetails.isValidResourceName(INVALID2));
-        assertFalse(ResourceDetails.isValidResourceName(INVALID3));
-        assertFalse(ResourceDetails.isValidResourceName(INVALID4));
-        assertFalse(ResourceDetails.isValidResourceName(INVALID5));
+    @Theory
+    public void equalHashCodeWhenEqual(ResourceDetails x, ResourceDetails y) {
+        // Given
+        assumeThat(x, equalTo(y));
+        // Then
+        assertThat(x.hashCode(), equalTo(y.hashCode()));
     }
 }

@@ -83,13 +83,13 @@ public class ListCacheRequest extends CacheRequest {
     }
 
     @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call ListCacheRequest.setOriginalRequestId()");
+    public RequestId getOriginalRequestId() {
+        throw new ForbiddenException("Should not call ListCacheRequest.getOriginalRequestId()");
     }
 
     @Override
-    public RequestId getOriginalRequestId() {
-        throw new ForbiddenException("Should not call ListCacheRequest.getOriginalRequestId()");
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call ListCacheRequest.setOriginalRequestId()");
     }
 }
 
