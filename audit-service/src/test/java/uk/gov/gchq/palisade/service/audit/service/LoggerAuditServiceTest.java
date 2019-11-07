@@ -1,7 +1,5 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +8,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -34,9 +34,9 @@ import static org.mockito.Mockito.verify;
 public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
     @Mock
-    Logger logger = LogManager.getRootLogger();
+    Logger logger;
     @Captor
-    ArgumentCaptor<Object> logCaptor;
+    ArgumentCaptor<String> logCaptor;
 
     private static LoggerAuditService auditService;
     private UserId userId;
@@ -73,7 +73,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).info(logCaptor.capture());
-        final String log = logCaptor.getValue().toString();
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(user.toString()),
@@ -100,7 +100,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).error(logCaptor.capture());
-        final String log = logCaptor.getValue().toString();
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(userId.toString()),
@@ -130,7 +130,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).info(logCaptor.capture());
-        final String log = logCaptor.getValue().toString();
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(user.toString()),
@@ -159,7 +159,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).error(logCaptor.capture());
-        final String log = logCaptor.getValue().toString();
+        final String log = logCaptor.getValue();
 
         assertThat(log, allOf(
                 containsString(requestId.toString()),
