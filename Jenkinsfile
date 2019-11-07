@@ -70,7 +70,7 @@ spec:
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
         }
-        stage('Install, Unit-test and Checkstyle branch') {
+        stage('Unit Test, Checkstyle and Install') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
@@ -78,15 +78,13 @@ spec:
                 }
             }
         }
-        stage('Integration-test branch') {
+        stage('Integration Tests') {
             git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
             container('docker-cmds') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install'
-                }
+                sh 'mvn -s $MAVEN_SETTINGS install'
             }
         }
-        stage('Maven deploy branch') {
+        stage('Maven deploy') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
