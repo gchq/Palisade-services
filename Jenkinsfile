@@ -81,7 +81,9 @@ spec:
         stage('Integration Tests') {
             git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
             container('docker-cmds') {
-                sh 'mvn -s $MAVEN_SETTINGS install'
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -s $MAVEN_SETTINGS install'
+                }
             }
         }
         stage('Maven deploy') {
