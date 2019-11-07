@@ -242,6 +242,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
