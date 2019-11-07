@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import uk.gov.gchq.palisade.service.discovery.web.ServiceInstanceRestController;
+
 @Configuration
 public class DiscoveryConfig {
 
@@ -34,6 +36,11 @@ public class DiscoveryConfig {
         bean.setDataCenterInfo(info);
 
         return bean;
+    }
+
+    @Bean(name = "eureka-client")
+    public ServiceInstanceRestController eurekaClient() {
+        return new ServiceInstanceRestController();
     }
 
 }

@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 spring:
+  application:
+    name: policy-service
   cloud:
     config:
       enabled: false

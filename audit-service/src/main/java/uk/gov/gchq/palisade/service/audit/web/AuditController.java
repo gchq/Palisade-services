@@ -29,13 +29,13 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/")
-public class AuditServiceController {
+public class AuditController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
 
     private final AuditService service;
 
-    public AuditServiceController(final AuditService service) {
+    public AuditController(final AuditService service) {
         this.service = service;
     }
 

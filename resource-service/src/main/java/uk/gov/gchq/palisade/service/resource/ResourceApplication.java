@@ -19,20 +19,15 @@ package uk.gov.gchq.palisade.service.resource;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
+@EnableEurekaClient
 @SpringBootApplication
 public class ResourceApplication {
 
-    public ResourceApplication() {
-    }
-
-    /**
-     * Application entry point
-     *
-     * @param args from the command line
-     */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ResourceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 }
+

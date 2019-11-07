@@ -18,20 +18,15 @@ package uk.gov.gchq.palisade.service.audit.config;
 import event.logging.impl.DefaultEventLoggingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
-
-import javax.annotation.PostConstruct;
-
-import java.util.Map;
-
+import uk.gov.gchq.palisade.service.audit.web.ServiceInstanceRestController;
 
 /**
  * Bean configuration and dependency injection graph
@@ -41,9 +36,7 @@ public class ApplicationConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Autowired
-    private Map<String, AuditService> auditServiceMap;
-
+    @Primary
     @Bean(name = "simple")
     @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
@@ -62,8 +55,10 @@ public class ApplicationConfiguration {
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
-    @PostConstruct
-    public void init() {
-        LOGGER.info(auditServiceMap.toString());
+    @Bean(name = "eureka-client")
+    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
+    public ServiceInstanceRestController eurekaClient() {
+        return new ServiceInstanceRestController();
     }
+
 }
