@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "audit-service.fullname" . }}
+  name: {{ include "audit-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
     helm.sh/chart: {{ include "audit-service.chart" . }}

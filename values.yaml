@@ -25,13 +25,12 @@ namespaces:
   uat: uat
   prod: prod
 
-namespace: default
-
 hosted:
   local: true
   metal: false
   cloud: false
 
-nodes: 1
-
-uniqueNamespace: false
+global:
+  nodes: 1
+  namespace: default
+  uniqueNamespace: false

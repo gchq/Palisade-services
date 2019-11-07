@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "audit-service.fullname" . }}
+  name: {{ include "audit-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
 {{ include "audit-service.labels" . | indent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
