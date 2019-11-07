@@ -30,6 +30,7 @@
 
     <properties>
         <hadoop.version>3.2.0</hadoop.version>
+        <fabric8.version>4.3.0</fabric8.version>
     </properties>
 
     <dependencies>
@@ -46,12 +47,12 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>4.3.0</version>
+            <version>${fabric8.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
-            <version>4.2.0</version>
+            <version>${fabric8.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
