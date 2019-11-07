@@ -18,9 +18,20 @@ spring:
   output:
     ansi:
       enabled: always
+  main:
+    allow-bean-definition-overriding: true
 
 server:
-  port: 0
+  port: 8087
+
+eureka:
+  instance:
+    hostname: localhost
+    port: 8083
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+    enabled: false
 
 management:
   endpoints:

@@ -19,8 +19,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>uk.gov.gchq.palisade</groupId>
         <artifactId>service</artifactId>
+        <groupId>uk.gov.gchq.palisade</groupId>
         <version>0.4.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -34,14 +34,43 @@
     </repositories>
     <artifactId>audit-service</artifactId>
 
+    <properties>
+        <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
+        <jaxb.version>2.3.0</jaxb.version>
+    </properties>
+
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <groupId>com.netflix.eureka</groupId>
+            <artifactId>eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>event-logging</groupId>
+            <artifactId>event-logging</artifactId>
+            <version>${event-logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>javax.activation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -49,38 +78,25 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>event-logging</groupId>
-            <artifactId>event-logging</artifactId>
-            <version>v4.0.5_schema-v3.2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>javax.activation-api</artifactId>
-            <version>1.2.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -95,15 +111,14 @@
                         <executions>
                             <execution>
                                 <phase>process-resources</phase>
-                                <configuration>
-                                    <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml"
-                                              toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
-                                    </tasks>
-                                </configuration>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
+                                <configuration>
+                                    <tasks>
+                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
+                                    </tasks>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -115,15 +130,15 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <directory>src/main/resources</directory>
                 <includes>
                     <include>**/values.yaml</include>
                 </includes>
             </resource>
             <resource>
-                <directory>src/main/resources</directory>
                 <filtering>false</filtering>
+                <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>**/values.yaml</exclude>
                 </excludes>
@@ -143,10 +158,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
-                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
-                    <useNativeGit>true</useNativeGit>
+                    <dateFormat>yyyyMMdd-HHmmss</dateFormat>
                 </configuration>
             </plugin>
             <plugin>
@@ -184,8 +196,6 @@
                     <replacements>
                         <replacement>
                             <token>image.tag</token>
-                            <!--suppress UnresolvedMavenProperty -->
-                            <value>${image.tag}</value>
                         </replacement>
                     </replacements>
                 </configuration>

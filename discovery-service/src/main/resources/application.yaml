@@ -15,19 +15,22 @@
 spring:
   application:
     name: discovery-service
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
 
 server:
-  port: 8761
+  port: 8083
 
-# Turn off Eureka peer discovery for standalone server
 eureka:
   instance:
     hostname: localhost
+    port: 8083
   client:
-    registerWithEureka: false
-    fetchRegistry: false
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
 
 management:
   endpoints:

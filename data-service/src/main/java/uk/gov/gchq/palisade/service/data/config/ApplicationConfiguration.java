@@ -44,6 +44,7 @@ import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
+import uk.gov.gchq.palisade.service.data.web.ServiceInstanceRestController;
 
 import java.net.URI;
 import java.util.Map;
@@ -134,6 +135,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         }).findFirst().orElse(null);
     }
 
+    @Bean(name = "eureka-client")
+    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
+    public ServiceInstanceRestController eurekaClient() {
+        return new ServiceInstanceRestController();
+    }
 
     @Primary
     public ObjectMapper objectMapper() {

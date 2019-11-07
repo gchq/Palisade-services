@@ -19,15 +19,13 @@ package uk.gov.gchq.palisade.service.user;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+@EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public final class UserApplication {
-
-    private UserApplication() {
-
-    }
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)

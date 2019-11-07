@@ -17,9 +17,10 @@ package uk.gov.gchq.palisade.service.data.repository;
 
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -32,9 +33,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-//more work needed here - K8sBackingStoreTest fails in DataService with an exception on the Kubernetes
-//client namespace list - this does not happen in the PalisadeService
-@Ignore
+@RunWith(JUnit4.class)
 public class K8sBackingStoreTest extends AbstractBackingStoreTest {
 
     private K8sBackingStore k8sBackingStore;
