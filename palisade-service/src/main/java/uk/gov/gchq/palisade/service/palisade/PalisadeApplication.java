@@ -13,28 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+@EnableEurekaClient
 @EnableFeignClients
+@SpringBootApplication
 public class PalisadeApplication {
 
-    public PalisadeApplication() {
-    }
-
-    /**
-     * Application entry point
-     *
-     * @param args from the command line
-     */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(PalisadeApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 
 }
+
