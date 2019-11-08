@@ -14,36 +14,23 @@
 #
 spring:
   application:
-    name: audit-service
+    name: services-launcher
   output:
     ansi:
       enabled: always
   main:
     allow-bean-definition-overriding: true
 
-server:
-  port: 8081
-
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-        - health
-        - info
-        - metrics
-
-audit:
-  implementations:
-    stroom:
-    logger:
-    simple:
+# The launcher creates a command to execute for each service in launcher.services
+# These are built from launcher.defaults with SERVICE substituted for the service.name
+# and any other overrides specified will replace the default
+launcher:
+  default-service:
+    root: palisade-services
+    name: default
+    target: target
+    config: SERVICE-config
+    log: log
+  services:
+    -
+      name: dummy-service
