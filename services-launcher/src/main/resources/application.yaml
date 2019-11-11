@@ -1,0 +1,49 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+spring:
+  application:
+    name: services-launcher
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+
+# The launcher creates a command to execute for each service in launcher.services
+# These are built from launcher.defaults with SERVICE substituted for the service.name
+# and any other overrides specified will replace the default
+launcher:
+  default-service:
+    root: palisade-services
+    name: default
+    target: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
+    config: SERVICE/classes
+    profiles: default
+    log: SERVICE.log
+  services:
+    -
+      name: audit-service
+    -
+      name: data-service
+    -
+      name: discovery-service
+    -
+      name: palisade-service
+    -
+      name: policy-service
+    -
+      name: resource-service
+    -
+      name: user-service

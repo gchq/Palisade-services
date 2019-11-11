@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user;
+package uk.gov.gchq.palisade.service.launcher;
 
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableEurekaClient
-@EnableFeignClients
 @SpringBootApplication
-public class UserApplication {
+public class LauncherApplication {
 
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
-                .run(args);
+    public LauncherApplication() {
     }
 
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(LauncherApplication.class).run(args);
+    }
 }
