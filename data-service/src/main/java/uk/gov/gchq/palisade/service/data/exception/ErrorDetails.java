@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.service.request.Request;
-
 import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
@@ -26,13 +24,13 @@ public class ErrorDetails {
 
     private Date date;
     private String message;
-    private Request details;
+    private String details;
 
     public ErrorDetails() {
 
     }
 
-    public ErrorDetails(final Date date, final String message, final Request details) {
+    public ErrorDetails(final Date date, final String message, final String details) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
         requireNonNull(details, "Details cannot be null");

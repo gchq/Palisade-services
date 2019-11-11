@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used to send a request to the
- * {@link uk.gov.gchq.palisade.data.service.DataService} to read a resource.
+ * {@link uk.gov.gchq.palisade.service.data.service.DataService} to read a resource.
  */
 
 public class ReadRequest extends Request {
