@@ -30,6 +30,11 @@ public class ErrorDetails {
 
     }
 
+    public ErrorDetails(final Date date) {
+        requireNonNull(date, "Date cannot be null");
+        this.date = date;
+    }
+
     public ErrorDetails(final Date date, final String message, final String details) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
@@ -37,5 +42,35 @@ public class ErrorDetails {
         this.date = date;
         this.message = message;
         this.details = details;
+    }
+
+    public void setDate(final Date date) {
+        requireNonNull(date, "Date cannot be null");
+        this.date = date;
+    }
+
+    public void setDetails(final String details) {
+        requireNonNull(details, "Details cannot be null");
+        this.details = details;
+    }
+
+    public void setMessage(final String message) {
+        requireNonNull(message, "Message cannot be null");
+        this.message = message;
+    }
+
+    public Date getDate() {
+        requireNonNull(date, "Date cannot be null");
+        return date;
+    }
+
+    public String getDetails() {
+        requireNonNull(details, "Details cannot be null");
+        return details;
+    }
+
+    public String getMessage() {
+        requireNonNull(message, "Message cannot be null");
+        return message;
     }
 }

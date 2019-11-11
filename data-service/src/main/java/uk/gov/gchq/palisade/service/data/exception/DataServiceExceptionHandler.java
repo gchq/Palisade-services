@@ -26,21 +26,25 @@ import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import java.util.Date;
 
 @ControllerAdvice
-public class ControllerExceptionHandler {
+public class DataServiceExceptionHandler {
 
-    @ExceptionHandler(NoPolicyException.class)
-    public ResponseEntity<?> noPolicyExceptionHandler(final Exception ex, final ReadRequest request) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> runtimeExceptionHandler(final RuntimeException ex, final ReadRequest request) {
 
-        String message = "The request could not be processed as no policy was found.";
+        ErrorDetails details = new ErrorDetails(new Date());
+        details.setMessage("");
+        details.setDetails(ex.getMessage());
 
-        ErrorDetails details = new ErrorDetails(new Date(), message, ex.getMessage());
-        return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> globalExceptionHandler(final Exception ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "message", ex.getMessage());
+        ErrorDetails details = new ErrorDetails(new Date());
+        details.setMessage("An error occurred when processing the request.");
+        details.setDetails(ex.getMessage());
+
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
