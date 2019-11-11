@@ -25,7 +25,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
-public final class UserApplication {
+public class UserApplication {
 
     public static void main(final String[] args) {
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
