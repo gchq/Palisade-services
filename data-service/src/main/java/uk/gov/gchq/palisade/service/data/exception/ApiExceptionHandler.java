@@ -29,7 +29,7 @@ import java.util.Date;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> globalExceptionHandler(Exception ex, ReadRequest request) {
+    public ResponseEntity<?> globalExceptionHandler(final Exception ex, final ReadRequest request) {
 
         ErrorDetails details = new ErrorDetails(new Date(), ex.getMessage(), request);
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);

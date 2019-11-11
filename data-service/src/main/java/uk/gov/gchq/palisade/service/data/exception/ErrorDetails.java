@@ -32,7 +32,7 @@ public class ErrorDetails {
 
     }
 
-    public ErrorDetails(Date date, String message, Request details) {
+    public ErrorDetails(final Date date, final String message, final Request details) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
         requireNonNull(details, "Details cannot be null");
