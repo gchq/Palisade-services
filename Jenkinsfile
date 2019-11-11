@@ -70,7 +70,7 @@ spec:
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
         }
-        stage('Unit Test, Checkstyle and Install') {
+        stage('Unit Tests, Checkstyle and Install') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
@@ -80,11 +80,7 @@ spec:
         }
         stage('Integration Tests') {
             git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            container('docker-cmds') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install'
-                }
-            }
+            build job: "gchq/Palisade-integration-tests/PAL-234-move-tests-to-integration"
         }
         stage('Maven deploy') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
