@@ -80,7 +80,7 @@ spec:
         }
         stage('Integration Tests') {
             git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            build job: "gchq/Palisade-integration-tests/PAL-234-move-tests-to-integration"
+            build job: "Palisade-integration-tests/PAL-234-move-tests-to-integration"
         }
         stage('Maven deploy') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
