@@ -16,7 +16,10 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -25,23 +28,21 @@ public class ErrorDetails {
     private Date date;
     private String message;
     private String details;
+    private List<StackTraceElement> stackTrace = new ArrayList<>();
 
     public ErrorDetails() {
 
     }
 
-    public ErrorDetails(final Date date) {
-        requireNonNull(date, "Date cannot be null");
-        this.date = date;
-    }
-
-    public ErrorDetails(final Date date, final String message, final String details) {
+    public ErrorDetails(final Date date, final String message, final String details, final StackTraceElement[]  trace) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
         requireNonNull(details, "Details cannot be null");
+        requireNonNull(trace, "Trace cannot be null");
         this.date = date;
         this.message = message;
         this.details = details;
+        this.stackTrace = Arrays.asList(trace);
     }
 
     public void setDate(final Date date) {
@@ -49,14 +50,18 @@ public class ErrorDetails {
         this.date = date;
     }
 
+    public void setMessage(final String message) {
+        requireNonNull(message, "Message cannot be null");
+        this.message = message;
+    }
+
     public void setDetails(final String details) {
         requireNonNull(details, "Details cannot be null");
         this.details = details;
     }
 
-    public void setMessage(final String message) {
-        requireNonNull(message, "Message cannot be null");
-        this.message = message;
+    public void setStackTrace(final List<StackTraceElement> stackTrace) {
+        this.stackTrace = stackTrace;
     }
 
     public Date getDate() {
@@ -64,13 +69,17 @@ public class ErrorDetails {
         return date;
     }
 
+    public String getMessage() {
+        requireNonNull(message, "Message cannot be null");
+        return message;
+    }
+
     public String getDetails() {
         requireNonNull(details, "Details cannot be null");
         return details;
     }
 
-    public String getMessage() {
-        requireNonNull(message, "Message cannot be null");
-        return message;
+    public List<StackTraceElement> getStackTrace() {
+        return stackTrace;
     }
 }
