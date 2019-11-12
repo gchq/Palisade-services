@@ -34,7 +34,7 @@ public class DataServiceExceptionHandler {
 
         ErrorDetails details = new ErrorDetails(new Date(), "a no policy error message", ex.getMessage(), ex.getStackTrace());
 
-        return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(NullPointerException.class)

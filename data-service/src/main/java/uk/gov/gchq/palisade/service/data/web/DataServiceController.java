@@ -63,7 +63,6 @@ public class DataServiceController {
         return new ResponseEntity(streamingResponseBody, HttpStatus.OK);
     }
 
-
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
         return service.read(request);
     }
