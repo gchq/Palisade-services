@@ -197,10 +197,6 @@ public class SimplePalisadeServiceTest {
 
     private void setupCacheService() {
         final BackingStore store = Mockito.mock(BackingStore.class);
-        serviceState.put("cache.svc.store", null);
-        serviceState.put("cache.svc.max.ttl", Duration.of(5, ChronoUnit.MINUTES).toString());
-        cacheService = new SimpleCacheService();
-        cacheService.recordCurrentConfigTo(serviceState);
-        cacheService.backingStore(store);
+        cacheService = new SimpleCacheService().backingStore(store);
     }
 }
