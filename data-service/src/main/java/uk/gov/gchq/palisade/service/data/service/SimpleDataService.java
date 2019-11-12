@@ -89,6 +89,10 @@ public class SimpleDataService implements DataService {
         return this;
     }
 
+    private void fred() {
+
+    }
+
     private void auditRequestReceivedException(final ReadRequest request, final Throwable ex) {
         LOGGER.debug("Error handling: " + ex.getMessage());
         auditService.audit(ReadRequestExceptionAuditRequest.create(request.getOriginalRequestId())
