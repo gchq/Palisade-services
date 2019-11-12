@@ -61,6 +61,7 @@ public class ErrorDetails {
     }
 
     public void setStackTrace(final List<StackTraceElement> stackTrace) {
+        requireNonNull(stackTrace, "Stack Trace cannot be null");
         this.stackTrace = stackTrace;
     }
 
@@ -80,6 +81,7 @@ public class ErrorDetails {
     }
 
     public List<StackTraceElement> getStackTrace() {
+        requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
     }
 }
