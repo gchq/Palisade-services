@@ -68,6 +68,7 @@
         <module>palisade-service</module>
         <module>policy-service</module>
         <module>resource-service</module>
+        <module>services-launcher</module>
         <module>user-service</module>
     </modules>
 
