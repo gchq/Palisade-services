@@ -17,8 +17,6 @@ package uk.gov.gchq.palisade.service.audit.service;
 
 import org.slf4j.Logger;
 
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
@@ -101,13 +99,6 @@ public class LoggerAuditService implements AuditService {
             logger.error("handler == null for " + request.getClass().getName());
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(AuditService.class.getTypeName(), getClass().getTypeName());
-        logger.debug("Wrote configuration data: no-op");
     }
 
 }

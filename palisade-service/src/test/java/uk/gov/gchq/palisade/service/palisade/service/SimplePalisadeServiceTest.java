@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.impl.MockDataService;
@@ -78,7 +77,6 @@ public class SimplePalisadeServiceTest {
     private ResourceService resourceService;
     private UserService userService;
     private SimplePalisadeService service;
-    private ServiceState serviceState = new ServiceState();
     private CompletableFuture<DataRequestResponse> futureResponse = new CompletableFuture<>();
     private DataRequestResponse expectedResponse = new DataRequestResponse();
     private RegisterDataRequest dataRequest = new RegisterDataRequest();

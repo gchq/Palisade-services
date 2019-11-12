@@ -21,16 +21,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.exception.NoConfigException;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.resource.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.ListCacheRequest;
 import uk.gov.gchq.palisade.service.resource.request.RemoveCacheRequest;
 import uk.gov.gchq.palisade.service.resource.service.CacheService;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -45,7 +41,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**

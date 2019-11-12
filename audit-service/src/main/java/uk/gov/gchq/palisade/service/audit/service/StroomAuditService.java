@@ -32,9 +32,7 @@ import event.logging.util.EventLoggingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
@@ -405,13 +403,6 @@ public class StroomAuditService implements AuditService {
 
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(AuditService.class.getTypeName(), getClass().getTypeName());
-        errorLogger.debug("Wrote configuration data: no-op");
     }
 
 }

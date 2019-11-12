@@ -18,9 +18,7 @@ package uk.gov.gchq.palisade.service.user.repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.exception.NoConfigException;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.user.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.ListCacheRequest;
@@ -42,7 +40,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -91,15 +88,6 @@ public class SimpleCacheService implements CacheService {
      * instance of this class without first initialising a backing store will result in exceptions being thrown.
      */
     public SimpleCacheService() {
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(CacheService.class.getTypeName(), getClass().getTypeName());
-        String serialisedCache = new String(JSONSerialiser.serialise(store), StandardCharsets.UTF_8);
-        config.put(STORE_IMPL_KEY, serialisedCache);
-        config.put(MAX_LOCAL_TTL_KEY, maxLocalTTL.toString());
     }
 
     /**
