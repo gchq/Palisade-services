@@ -15,10 +15,6 @@
 
 fullnameOverride: palisade-services
 
-traefik:
-  ingress:
-    hostname: localhost
-
 namespaces:
   default: default
   dev: dev
@@ -31,6 +27,10 @@ hosted:
   cloud: false
 
 global:
+  hostname: localhost
   nodes: 1
   namespace: default
   uniqueNamespace: false
+
+traefik:
+  install: false

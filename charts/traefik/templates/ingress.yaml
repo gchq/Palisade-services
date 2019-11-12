@@ -19,7 +19,7 @@ metadata:
     namespace: kube-system
 spec:
     rules:
-        - host: {{ .Values.ingress.hostname }}
+        - host: {{ .Values.global.hostname }}
           http:
               paths:
                   - path: /dashboard

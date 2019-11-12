@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+    name: audit-service
+    namespace: {{ include "palisade.namespace" . }}
+spec:
+    entryPoints:
+        - web
+    routes:
+        - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`/audit`)
+          kind: Rule
+          services:
+              - name: audit-service
+                port: 80

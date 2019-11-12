@@ -25,25 +25,25 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 8080
+            - name: web
+              containerPort: 8086
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: http
-            initialDelaySeconds: 250
+              port: 8086
+            initialDelaySeconds: 10
             failureThreshold: 5
-            periodSeconds: 200
-            timeoutSeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 250
+              port: 8086
+            initialDelaySeconds: 10
             failureThreshold: 5
-            periodSeconds: 200
-            timeoutSeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

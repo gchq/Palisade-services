@@ -34,5 +34,5 @@ management:
 audit:
   implementations:
     stroom:
-    logger: logger
+    logger:
     simple:

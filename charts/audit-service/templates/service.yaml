@@ -9,9 +9,9 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 8080
+      targetPort: 8086
       protocol: TCP
-      name: http
+      name: web
   selector:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -4,6 +4,7 @@ container:
     - --accesslog
     - --entrypoints.web.Address=:80
     - --providers.kubernetesingress=true
+    - --providers.kubernetescrd.namespaces=kube-system,default,dev,uat
     - --ping=true
 
 admin:
