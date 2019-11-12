@@ -414,9 +414,4 @@ public class StroomAuditService implements AuditService {
         errorLogger.debug("Wrote configuration data: no-op");
     }
 
-    @Override
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        errorLogger.debug("Read configuration data: no-op");
-    }
 }

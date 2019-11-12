@@ -110,9 +110,4 @@ public class LoggerAuditService implements AuditService {
         logger.debug("Wrote configuration data: no-op");
     }
 
-    @Override
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        logger.debug("Read configuration data: no-op");
-    }
 }

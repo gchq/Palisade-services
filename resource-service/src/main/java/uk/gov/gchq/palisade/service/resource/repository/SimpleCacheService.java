@@ -97,30 +97,6 @@ public class SimpleCacheService implements CacheService {
     }
 
     @Override
-    public void applyConfigFrom(final ServiceState config) throws NoConfigException {
-        requireNonNull(config, "config");
-        //extract cache
-        String serialised = config.getOrDefault(STORE_IMPL_KEY, null);
-        if (nonNull(serialised)) {
-            setBackingStore(JSONSerialiser.deserialise(serialised.getBytes(StandardCharsets.UTF_8), BackingStore.class));
-        } else {
-            throw new NoConfigException("no backing store specified in configuration");
-        }
-        //extract max local TTL
-        String serialisedDuration = config.getOrDefault(MAX_LOCAL_TTL_KEY, MAX_LOCAL_TTL.toString());
-        maxLocalTTL = Duration.parse(serialisedDuration);
-    }
-
-    @Override
-    public void recordCurrentConfigTo(final ServiceState config) {
-        requireNonNull(config, "config");
-        config.put(CacheService.class.getTypeName(), getClass().getTypeName());
-        String serialisedCache = new String(JSONSerialiser.serialise(store), StandardCharsets.UTF_8);
-        config.put(STORE_IMPL_KEY, serialisedCache);
-        config.put(MAX_LOCAL_TTL_KEY, maxLocalTTL.toString());
-    }
-
-    @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
