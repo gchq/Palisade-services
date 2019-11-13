@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import com.google.inject.internal.cglib.core.$AbstractClassGenerator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -51,7 +50,6 @@ public class ErrorDetailsTest {
         Iterable<String> iterable = node::fieldNames;
 
         // Then
-        LOGGER.debug("Json String: {}", node.toString());
         assertThat("ErrorDetails could not be parsed to json",
                 StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")),
                 is(equalTo("date, message, details, stackTrace")));
