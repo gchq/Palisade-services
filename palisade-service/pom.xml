@@ -34,6 +34,7 @@
         <jetcd.version>0.3.0</jetcd.version>
         <protobuf.version>3.5.1</protobuf.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
+        <apache.commons.version>1.18</apache.commons.version>
     </properties>
 
     <dependencies>
@@ -65,6 +66,11 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-model</artifactId>
             <version>${fabric8.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${apache.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
