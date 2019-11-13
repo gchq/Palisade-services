@@ -30,22 +30,22 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
-        
+
   - name: docker-daemon
     image: docker:19.03.1-dind
     securityContext:
       privileged: true
-    resources: 
-      requests: 
-        cpu: 20m 
-        memory: 512Mi 
-    volumeMounts: 
-      - name: docker-graph-storage 
-        mountPath: /var/lib/docker 
+    resources:
+      requests:
+        cpu: 20m
+        memory: 512Mi
+    volumeMounts:
+      - name: docker-graph-storage
+        mountPath: /var/lib/docker
     env:
       - name: DOCKER_TLS_CERTDIR
         value: ""
-        
+
   - name: maven
     image: jnlp-slave-palisade:jdk11
     imagePullPolicy: Never
@@ -70,7 +70,7 @@ spec:
         stage('Bootstrap') {
             echo sh(script: 'env|sort', returnStdout: true)
         }
-        stage('Install a Maven project') {
+        stage('Unit Tests, Checkstyle and Install') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
@@ -78,7 +78,11 @@ spec:
                 }
             }
         }
-        stage('Deploy a Maven project') {
+        stage('Integration Tests') {
+            git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
+            build job: "Palisade-integration-tests/develop"
+        }
+        stage('Maven deploy') {
             git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
