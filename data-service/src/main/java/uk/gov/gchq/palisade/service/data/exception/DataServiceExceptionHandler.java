@@ -31,10 +31,12 @@ import java.util.Date;
 @ControllerAdvice
 public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolver {
 
+    private static final String MESSAGE = "The application encountered an issue while processing the request. \nDetails of this can be seen below.";
+
     @ExceptionHandler(NoPolicyException.class)
     public ResponseEntity<?> noPolicyExceptionHandler(final NoPolicyException ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "a no policy error message", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
@@ -42,7 +44,7 @@ public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolv
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> nullPointerExceptionHandler(final NullPointerException ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "a null pointer error message", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
@@ -50,7 +52,7 @@ public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolv
     @ExceptionHandler(FileNotFoundException.class)
     public ResponseEntity<?> fileNotFoundExceptionHandler(final FileNotFoundException ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "The requested file could not be found", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
@@ -58,7 +60,7 @@ public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolv
     @ExceptionHandler(IOException.class)
     public ResponseEntity<?> ioExceptionHandler(final IOException ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "an IO error message", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -66,7 +68,7 @@ public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolv
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> runtimeExceptionHandler(final RuntimeException ex, final ReadRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "a runtime error message", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
