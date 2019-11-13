@@ -43,3 +43,15 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{/*
+Determine ingress root url
+*/}}
+{{- define "audit-service.root" -}}
+{{- $ns := include "palisade.namespace" . -}}
+{{- if eq "default" $ns -}}
+{{- printf "" -}}
+{{- else -}}
+{{- printf "/%s" $ns -}}
+{{- end -}}
+{{- end -}}

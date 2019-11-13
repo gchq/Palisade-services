@@ -22,7 +22,7 @@ spec:
         - host: {{ .Values.global.hostname }}
           http:
               paths:
-                  - path: /audit
+                  - path: {{ include "audit-service.root" . }}/audit
                     backend:
                         serviceName: audit-service
                         servicePort: 80
