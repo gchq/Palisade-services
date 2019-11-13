@@ -20,14 +20,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 
 @ControllerAdvice
-public class DataServiceExceptionHandler {
+public class DataServiceExceptionHandler extends ExceptionHandlerExceptionResolver {
 
     @ExceptionHandler(NoPolicyException.class)
     public ResponseEntity<?> noPolicyExceptionHandler(final NoPolicyException ex, final ReadRequest request) {
@@ -42,7 +44,15 @@ public class DataServiceExceptionHandler {
 
         ErrorDetails details = new ErrorDetails(new Date(), "a null pointer error message", ex.getMessage(), ex.getStackTrace());
 
-        return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<?> fileNotFoundExceptionHandler(final FileNotFoundException ex, final ReadRequest request) {
+
+        ErrorDetails details = new ErrorDetails(new Date(), "The requested file could not be found", ex.getMessage(), ex.getStackTrace());
+
+        return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IOException.class)

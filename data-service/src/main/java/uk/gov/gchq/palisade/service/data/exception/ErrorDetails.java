@@ -16,6 +16,8 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
+import uk.gov.gchq.palisade.ToStringBuilder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -83,5 +85,15 @@ public class ErrorDetails {
     public List<StackTraceElement> getStackTrace() {
         requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("date", date)
+                .append("message", message)
+                .append("details", details)
+                .append("stackTrace", stackTrace)
+                .toString();
     }
 }
