@@ -25,8 +25,12 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -78,20 +82,24 @@ public class ErrorDetailsTest {
     }
 
     @Test
-    public void toStringTest() {
+    public void toStringTest() throws ParseException {
         // Given
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
         final ErrorDetails details = new ErrorDetails();
-        details.setDate(new Date(1546300800000L));
+        details.setDate(format.parse("2019-01-01T00:00:00"));
         details.setMessage("Test Message");
         details.setDetails("Test Details");
         details.setStackTrace(Arrays.asList(stackTrace));
 
-        String expected = "ErrorDetails[date=Tue Jan 01 00:00:00 GMT 2019,message=Test Message,details=Test Details,stackTrace=[]]";
+        String expected = "ErrorDetails[date=Tue Jan 01 00:00:00 UTC 2019,message=Test Message,details=Test Details,stackTrace=[]]";
 
         // When
         String actual = details.toString();
 
         // Then
+        LOGGER.debug("Expected:\t{}",expected);
+        LOGGER.debug("Actual:\t{}", actual);
         assertEquals(actual, expected);
     }
 }

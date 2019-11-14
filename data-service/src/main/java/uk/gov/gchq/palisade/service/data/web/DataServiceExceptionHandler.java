@@ -35,12 +35,13 @@ import java.util.Date;
 @RequestMapping(produces = "application/json")
 public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final String MESSAGE = "The application encountered an issue while processing the request. \nDetails of this can be seen below.";
+    private static final String MESSAGE = "The application encountered an issue while processing the request.";
 
     /**
      * Provides handling for errors encountered by the data-service.
      * @param ex the target exception
      * @param request the current request
+     * @return a {@code ResponseEntity} instance
      */
     @ExceptionHandler({
             NoPolicyException.class,
@@ -54,20 +55,15 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
 
         if (ex instanceof NoPolicyException) {
             return noPolicyExceptionHandler((NoPolicyException) ex, request);
-        }
-        else if (ex instanceof NullPointerException) {
+        } else if (ex instanceof NullPointerException) {
             return nullPointerExceptionHandler((NullPointerException) ex, request);
-        }
-        else if (ex instanceof FileNotFoundException) {
+        } else if (ex instanceof FileNotFoundException) {
             return fileNotFoundExceptionHandler((FileNotFoundException) ex, request);
-        }
-        else if (ex instanceof IOException) {
+        } else if (ex instanceof IOException) {
             return ioExceptionHandler((IOException) ex, request);
-        }
-        else if (ex instanceof RuntimeException) {
+        } else if (ex instanceof RuntimeException) {
             return runtimeExceptionHandler((RuntimeException) ex, request);
-        }
-        else {
+        } else {
             return globalExceptionHandler(ex, request);
         }
     }
