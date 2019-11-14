@@ -1,0 +1,9 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: pathparam-regex
+  namespace: {{ include "palisade.namespace" . }}
+spec:
+  replacePathRegex:
+    regex: ^{{ include "audit-service.root" . }}/audit-service/(.*)
+    replacement: /$1

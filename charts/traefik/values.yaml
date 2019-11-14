@@ -3,8 +3,7 @@ container:
     - --api.insecure
     - --accesslog
     - --entrypoints.web.Address=:80
-    - --providers.kubernetesingress=true
-    - --providers.kubernetescrd.namespaces=
+    - --providers.kubernetescrd
     - --ping=true
 
 admin:
