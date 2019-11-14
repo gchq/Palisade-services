@@ -36,7 +36,6 @@ import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.ServiceState;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
@@ -49,8 +48,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -70,7 +67,6 @@ public class SimpleDataServiceTest {
     private PalisadeService palisadeService;
     private SimpleDataService simpleDataService;
     private DataReader dataReader;
-    private ServiceState serviceState = new ServiceState();
     String token = "token";
     @Mock
     ReadRequest readRequest;
@@ -279,10 +275,7 @@ public class SimpleDataServiceTest {
 
     private void setupCacheService() {
         final BackingStore store = Mockito.mock(BackingStore.class);
-        serviceState.put("cache.svc.store", null);
-        serviceState.put("cache.svc.max.ttl", Duration.of(5, ChronoUnit.MINUTES).toString());
         cacheService = new SimpleCacheService();
-        cacheService.recordCurrentConfigTo(serviceState);
         cacheService.backingStore(store);
     }
 
