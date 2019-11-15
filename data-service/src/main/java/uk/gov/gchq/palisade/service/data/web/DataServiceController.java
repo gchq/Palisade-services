@@ -46,6 +46,7 @@ public class DataServiceController {
 
     @PostMapping(value = "/read", consumes = "application/json", produces = "application/json")
     public ReadResponse readSync(@RequestBody final ReadRequest request) {
+        LOGGER.info("Request received: {}", request.getOriginalRequestId().getId());
         LOGGER.debug("Invoking read: {}", request);
         return read(request).join();
     }
@@ -54,6 +55,7 @@ public class DataServiceController {
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
 
+        LOGGER.info("Request received: {}", request.getOriginalRequestId().getId());
         StreamingResponseBody streamingResponseBody = outputStream -> {
             ReadResponse response = read(request).join();
             response.writeTo(outputStream);
@@ -64,6 +66,7 @@ public class DataServiceController {
     }
 
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
+        LOGGER.info("Request will now be read: {}", request.getOriginalRequestId().getId());
         return service.read(request);
     }
 }
