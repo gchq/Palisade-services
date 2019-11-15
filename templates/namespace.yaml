@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-container:
-  args:
-    - --api.insecure
-    - --accesslog
-    - --entrypoints.web.Address=:80
-    - --providers.kubernetescrd
-    - --ping=true
 
-admin:
-  port:  8080
+{{/*
+Should a new namespace be created
+*/}}
+{{- if .Values.global.uniqueNamespace -}}
+{{- if .Release.IsInstall -}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "palisade.namespace" . }}
+{{- end -}}
+{{- end -}}

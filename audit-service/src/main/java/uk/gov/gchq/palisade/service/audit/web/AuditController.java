@@ -33,13 +33,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/")
-public class AuditServiceController {
+public class AuditController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
 
     private final Map<String, AuditService> services;
 
-    public AuditServiceController(final Map<String, AuditService> services) {
+    public AuditController(final Map<String, AuditService> services) {
         this.services = services;
     }
 
