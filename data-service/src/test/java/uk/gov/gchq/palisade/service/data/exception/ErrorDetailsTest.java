@@ -25,12 +25,12 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -49,7 +49,8 @@ public class ErrorDetailsTest {
     @Test
     public void ErrorDetailsToJsonTest() throws IOException {
         // Given
-        final ErrorDetails details = new ErrorDetails(new Date(1546300800), "Test Message", "Test Details", stackTrace);
+        final ZonedDateTime dateTime = ZonedDateTime.now();
+        final ErrorDetails details = new ErrorDetails(dateTime, "Test Message", "Test Details", stackTrace);
 
         // When
         JsonNode node = this.mapper.readTree(this.mapper.writeValueAsString(details));
@@ -64,7 +65,7 @@ public class ErrorDetailsTest {
     @Test
     public void ErrorDetailsFromJsonTest() throws IOException {
         // Given
-        final String jsonString = "{\"date\":1546300800000,\"message\":\"Test Message\",\"details\":\"Test Details\",\"stackTrace\":[]}";
+        final String jsonString = "{\"date\":\"2019-01-01T00:00:00.000001Z\",\"message\":\"Test Message\",\"details\":\"Test Details\",\"stackTrace\":[]}";
 
         // When
         ErrorDetails result = this.mapper.readValue(jsonString, ErrorDetails.class);
@@ -72,7 +73,7 @@ public class ErrorDetailsTest {
         // Then
         assertThat("ErrorDetails could not be parsed from json",
                 result.getDate(),
-                equalTo(new Date(1546300800000L)));
+                equalTo(ZonedDateTime.parse("2019-01-01T00:00:00.000001Z")));
         assertThat("ErrorDetails could not be parsed from json",
                 result.getMessage(),
                 equalTo("Test Message"));
@@ -84,22 +85,15 @@ public class ErrorDetailsTest {
     @Test
     public void toStringTest() throws ParseException {
         // Given
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        final ErrorDetails details = new ErrorDetails();
-        details.setDate(format.parse("2019-01-01T00:00:00"));
-        details.setMessage("Test Message");
-        details.setDetails("Test Details");
-        details.setStackTrace(Arrays.asList(stackTrace));
+        final ZonedDateTime date = ZonedDateTime.of(LocalDateTime.ofEpochSecond(1546300800L, 1000, ZoneOffset.UTC), ZoneId.of("UTC"));
+        final ErrorDetails details = new ErrorDetails(date, "Test Message", "Test Details", stackTrace);
 
-        String expected = "ErrorDetails[date=Tue Jan 01 00:00:00 UTC 2019,message=Test Message,details=Test Details,stackTrace=[]]";
+        String expected = "ErrorDetails[date=2019-01-01T00:00:00.000001Z[UTC],message=Test Message,details=Test Details,stackTrace=[]]";
 
         // When
         String actual = details.toString();
 
         // Then
-        LOGGER.debug("Expected:\t{}",expected);
-        LOGGER.debug("Actual:\t{}", actual);
         assertEquals(actual, expected);
     }
 }

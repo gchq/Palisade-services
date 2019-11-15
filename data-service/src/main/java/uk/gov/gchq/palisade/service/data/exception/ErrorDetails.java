@@ -18,25 +18,23 @@ package uk.gov.gchq.palisade.service.data.exception;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
 
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
 public class ErrorDetails {
 
-    private Date date;
+    private ZonedDateTime date;
     private String message;
     private String details;
-    private List<StackTraceElement> stackTrace = new ArrayList<>();
+    private List<StackTraceElement> stackTrace;
 
-    public ErrorDetails() {
+    private ErrorDetails() { }
 
-    }
-
-    public ErrorDetails(final Date date, final String message, final String details, final StackTraceElement[]  trace) {
+    public ErrorDetails(final ZonedDateTime date, final String message, final String details, final StackTraceElement[]  trace) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
         requireNonNull(details, "Details cannot be null");
@@ -47,9 +45,14 @@ public class ErrorDetails {
         this.stackTrace = Arrays.asList(trace);
     }
 
-    public void setDate(final Date date) {
+    public void setLocalDate(final ZonedDateTime date) {
         requireNonNull(date, "Date cannot be null");
         this.date = date;
+    }
+
+    public void setDate(final String dateString) {
+        requireNonNull(dateString, "String value cannot be null");
+        this.date = ZonedDateTime.parse(dateString);
     }
 
     public void setMessage(final String message) {
@@ -67,7 +70,7 @@ public class ErrorDetails {
         this.stackTrace = stackTrace;
     }
 
-    public Date getDate() {
+    public ZonedDateTime getDate() {
         requireNonNull(date, "Date cannot be null");
         return date;
     }
@@ -95,5 +98,27 @@ public class ErrorDetails {
                 .append("details", details)
                 .append("stackTrace", stackTrace)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final ErrorDetails details1 = (ErrorDetails) o;
+        return Objects.equals(date, details1.date) &&
+                Objects.equals(message, details1.message) &&
+                Objects.equals(details, details1.details) &&
+                Objects.equals(stackTrace, details1.stackTrace);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, message, details, stackTrace);
     }
 }

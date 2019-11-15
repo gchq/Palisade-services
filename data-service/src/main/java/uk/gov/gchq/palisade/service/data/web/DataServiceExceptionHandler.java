@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.service.data.exception.NoPolicyException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @ControllerAdvice(assignableTypes = DataServiceController.class)
 @RequestMapping(produces = "application/json")
@@ -76,7 +76,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> noPolicyExceptionHandler(final NoPolicyException ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
@@ -89,7 +89,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> nullPointerExceptionHandler(final NullPointerException ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
@@ -102,7 +102,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> fileNotFoundExceptionHandler(final FileNotFoundException ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
@@ -115,7 +115,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> ioExceptionHandler(final IOException ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -128,7 +128,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> runtimeExceptionHandler(final RuntimeException ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), MESSAGE, ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -141,7 +141,7 @@ public class DataServiceExceptionHandler extends ResponseEntityExceptionHandler 
      */
     private ResponseEntity<Object> globalExceptionHandler(final Exception ex, final WebRequest request) {
 
-        ErrorDetails details = new ErrorDetails(new Date(), "an exception error message", ex.getMessage(), ex.getStackTrace());
+        ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
