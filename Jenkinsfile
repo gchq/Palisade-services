@@ -71,7 +71,16 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Unit Tests, Checkstyle and Install') {
-            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            x = env.BRANCH_NAME
+
+            if (x.substring(0, 2) == "PR") {
+                y = x.substring(3)
+                git url: 'https://github.com/gchq/Palisade-services.git'
+                sh "git fetch origin pull/${y}/head:${x}"
+                sh "git checkout ${x}"
+            } else { //just a normal branch
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            }
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install'
@@ -83,7 +92,16 @@ spec:
             build job: "Palisade-integration-tests/develop"
         }
         stage('Maven deploy') {
-            git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            x = env.BRANCH_NAME
+
+            if (x.substring(0, 2) == "PR") {
+                y = x.substring(3)
+                git url: 'https://github.com/gchq/Palisade-services.git'
+                sh "git fetch origin pull/${y}/head:${x}"
+                sh "git checkout ${x}"
+            } else { //just a normal branch
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
+            }
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     if (("${env.BRANCH_NAME}" == "develop") ||
