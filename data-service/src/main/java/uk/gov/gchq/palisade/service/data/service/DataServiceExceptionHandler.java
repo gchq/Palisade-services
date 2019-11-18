@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.web;
+package uk.gov.gchq.palisade.service.data.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import uk.gov.gchq.palisade.service.data.exception.ErrorDetails;
 import uk.gov.gchq.palisade.service.data.exception.NoPolicyException;
+import uk.gov.gchq.palisade.service.data.web.DataServiceController;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
