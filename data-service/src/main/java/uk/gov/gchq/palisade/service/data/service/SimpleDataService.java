@@ -100,7 +100,6 @@ public class SimpleDataService implements DataService {
     @Override
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
         requireNonNull(request, "The request cannot be null.");
-        //check that we have an active heartbeat before serving request
 
         LOGGER.debug("Creating async read: {}", request);
         return CompletableFuture.supplyAsync(() -> {
