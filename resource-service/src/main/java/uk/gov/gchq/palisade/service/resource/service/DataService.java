@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.resource.service;
 
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.resource.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.resource.request.ReadRequest;
 import uk.gov.gchq.palisade.service.resource.request.ReadResponse;
@@ -28,11 +27,4 @@ public interface DataService extends Service {
 
     CompletableFuture<ReadResponse> read(final ReadRequest request) throws NoCapacityException;
 
-    @Override
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof ReadRequest) {
-            return read((ReadRequest) request);
-        }
-        return Service.super.process(request);
-    }
 }

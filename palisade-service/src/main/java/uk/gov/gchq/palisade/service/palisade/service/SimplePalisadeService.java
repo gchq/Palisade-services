@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.time.Duration;
 import java.util.Map;
@@ -129,17 +128,6 @@ public class SimplePalisadeService implements PalisadeService {
                     LOGGER.debug("Got cache: {}", value);
                     return value;
                 });
-    }
-
-    @Override
-    public CompletableFuture<?> process(final Request request) {
-        //first try one parent interface
-        try {
-            return PalisadeService.super.process(request);
-        } catch (IllegalArgumentException e) {
-            LOGGER.error(e.getMessage());
-            return CompletableFuture.failedFuture(e);
-        }
     }
 
     private RuntimeException createCacheException(final String id) {

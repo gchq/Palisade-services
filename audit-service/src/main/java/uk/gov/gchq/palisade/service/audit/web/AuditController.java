@@ -25,7 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/")
@@ -33,20 +37,27 @@ public class AuditController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
 
-    private final AuditService service;
+    private final Map<String, AuditService> services;
 
-    public AuditController(final AuditService service) {
-        this.service = service;
+    public AuditController(final Map<String, AuditService> services) {
+        this.services = services;
     }
 
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
-    public Boolean AuditRequest(@RequestBody final AuditRequest request) {
+    public Boolean AuditRequest(@RequestBody final AuditRequest request) throws ExecutionException, InterruptedException {
         LOGGER.debug("Invoking GetUserRequest: {}", request);
-        return this.audit(request).join();
+        final List<CompletableFuture<Boolean>> audits = this.audit(request);
+        final CompletableFuture<Void> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]));
+
+        return results.thenApply(res ->
+            audits.stream().map(CompletableFuture::join).collect(Collectors.toList())
+        ).get().stream().allMatch(res -> res);
     }
 
-    public CompletableFuture<Boolean> audit(final AuditRequest request) {
-        return service.audit(request);
+    public List<CompletableFuture<Boolean>> audit(final AuditRequest request) {
+        return services.values().stream().map(
+                auditService -> auditService.audit(request)
+        ).collect(Collectors.toList());
     }
 
 }
