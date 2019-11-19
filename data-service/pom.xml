@@ -264,28 +264,30 @@
                 <version>1.4.10</version>
                 <executions>
                     <execution>
-                        <id>ar</id>
+                        <phase>install</phase>
+                        <id>cache</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <phase>deploy</phase>
+                        <id>ar</id>
                         <goals>
                             <goal>build</goal>
                             <goal>push</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>cache</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
                 </executions>
                 <configuration>
-                    <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
-                    </buildArgs>
-                    <dockerfile>Dockerfile</dockerfile>
-                    <finalName>${project.artifactId}</finalName>
                     <repository>${image.repository}${project.artifactId}</repository>
+                    <dockerfile>Dockerfile</dockerfile>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <tag>${image.tag}</tag>
+                    <finalName>${project.artifactId}</finalName>
+                    <buildArgs>
+                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
                 </configuration>
             </plugin>
             <plugin>
