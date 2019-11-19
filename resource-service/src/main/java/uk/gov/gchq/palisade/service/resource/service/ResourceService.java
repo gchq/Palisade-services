@@ -19,7 +19,6 @@ package uk.gov.gchq.palisade.service.resource.service;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
@@ -111,24 +110,4 @@ public interface ResourceService extends Service {
      */
     CompletableFuture<Boolean> addResource(final AddResourceRequest request);
 
-    @Override
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof GetResourcesByResourceRequest) {
-            return getResourcesByResource(((GetResourcesByResourceRequest) request));
-        }
-        if (request instanceof GetResourcesByIdRequest) {
-            return getResourcesById((GetResourcesByIdRequest) request);
-        }
-        if (request instanceof GetResourcesByTypeRequest) {
-            return getResourcesByType((GetResourcesByTypeRequest) request);
-        }
-        if (request instanceof GetResourcesBySerialisedFormatRequest) {
-            return getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request);
-        }
-        if (request instanceof AddResourceRequest) {
-            addResource((AddResourceRequest) request);
-            return CompletableFuture.completedFuture(null);
-        }
-        return Service.super.process(request);
-    }
 }

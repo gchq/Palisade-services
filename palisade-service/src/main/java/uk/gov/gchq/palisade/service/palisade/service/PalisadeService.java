@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
 import java.util.Map;
@@ -64,13 +63,6 @@ public interface PalisadeService {
      * necessary filtering/transformations to the data.
      */
     CompletableFuture<DataRequestConfig> getDataRequestConfig(GetDataRequestConfig request);
-
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof RegisterDataRequest) {
-            return registerDataRequest((RegisterDataRequest) request);
-        }
-        return CompletableFuture.completedFuture(null);
-    }
 
     /**
      * Checks that each {@link LeafResource} in a request has record level policy associated with it in the {@link

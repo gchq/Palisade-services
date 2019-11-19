@@ -17,8 +17,8 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "audit-service.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "palisade.name" -}}
+{{- default .Chart.Name .Values.nameOverride | lower | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -26,7 +26,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "audit-service.fullname" -}}
+{{- define "palisade.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -42,31 +42,32 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "audit-service.chart" -}}
+{{- define "palisade.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Common labels
-*/}}
-{{- define "audit-service.labels" -}}
-app.kubernetes.io/name: {{ include "audit-service.name" . }}
-helm.sh/chart: {{ include "audit-service.chart" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+Modify the namespace if required
+ */}}
+{{- define "palisade.namespace" -}}
+{{- if .Values.global.uniqueNamespace -}}
+{{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- if .Release.Namespace -}}
+{{- printf "%s" .Release.Namespace -}}
+{{- else -}}
+{{- printf "%s" .Values.global.namespace | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
-Determine ingress root url
+Create the name of the service account to use
 */}}
-{{- define "audit-service.root" -}}
-{{- $ns := include "palisade.namespace" . -}}
-{{- if eq "default" $ns -}}
-{{- printf "" -}}
+{{- define "palisade.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{- default (include "palisade.fullname" .) .Values.serviceAccount.name -}}
 {{- else -}}
-{{- printf "/%s" $ns -}}
+    {{- default "default" .Values.serviceAccount.name -}}
 {{- end -}}
 {{- end -}}

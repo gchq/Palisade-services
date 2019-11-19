@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
@@ -53,18 +52,5 @@ public interface UserService extends Service {
      * @return a {@link CompletableFuture} which will complete as ${@code true} once the user has been added
      */
     CompletableFuture<Boolean> addUser(final AddUserRequest request);
-
-    @Override
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof GetUserRequest) {
-            return getUser((GetUserRequest) request);
-        }
-
-        if (request instanceof AddUserRequest) {
-            return addUser((AddUserRequest) request);
-        }
-
-        return Service.super.process(request);
-    }
 
 }
