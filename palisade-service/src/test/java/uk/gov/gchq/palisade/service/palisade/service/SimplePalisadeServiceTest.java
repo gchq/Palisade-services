@@ -197,7 +197,6 @@ public class SimplePalisadeServiceTest {
 
     private void setupCacheService() {
         final BackingStore store = Mockito.mock(BackingStore.class);
-        cacheService = new SimpleCacheService();
-        cacheService.backingStore(store);
+        cacheService = new SimpleCacheService().backingStore(store);
     }
 }
