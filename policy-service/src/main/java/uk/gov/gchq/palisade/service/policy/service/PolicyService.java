@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.service.policy.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -84,20 +83,4 @@ public interface PolicyService extends Service {
      */
     CompletableFuture<Boolean> setTypePolicy(final SetTypePolicyRequest request);
 
-
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof CanAccessRequest) {
-            return canAccess((CanAccessRequest) request);
-        }
-        if (request instanceof GetPolicyRequest) {
-            return getPolicy((GetPolicyRequest) request);
-        }
-        if (request instanceof SetResourcePolicyRequest) {
-            return setResourcePolicy((SetResourcePolicyRequest) request);
-        }
-        if (request instanceof SetTypePolicyRequest) {
-            return setTypePolicy((SetTypePolicyRequest) request);
-        }
-        return Service.super.process(request);
-    }
 }

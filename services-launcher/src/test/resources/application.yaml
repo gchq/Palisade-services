@@ -30,7 +30,7 @@ launcher:
     name: default
     target: target
     config: SERVICE-config
-    log: log
+    log: .log
   services:
     -
       name: dummy-service

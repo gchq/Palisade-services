@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.audit.service;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -43,11 +42,4 @@ public interface AuditService extends Service {
      */
     CompletableFuture<Boolean> audit(final AuditRequest request);
 
-    @Override
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof AuditRequest) {
-            return audit((AuditRequest) request);
-        }
-        return Service.super.process(request);
-    }
 }

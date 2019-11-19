@@ -26,6 +26,8 @@
 .idea/
 *.tmproj
 .vscode/
+/logos/
+/code-style/
 # Add the directory for every service module here
 /discovery-service/
 /audit-service/
@@ -33,4 +35,5 @@
 /palisade-service/
 /policy-service/
 /resource-service/
+/services-launcher/
 /user-service/

@@ -12,25 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
-
-service:
-  port: 80
-  type: ClusterIP
-
-image:
-  repository: palisade/audit-service
-  tag: 784b4a9-SNAPSHOT
-  pullPolicy: IfNotPresent
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
+dependencies:
+  - name: traefik
+    version: 0.4.0
+    repository: file://.
+    condition: traefik.install

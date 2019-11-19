@@ -12,25 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
 
-service:
-  port: 80
-  type: ClusterIP
+fullnameOverride: palisade-services
 
-image:
-  repository: palisade/audit-service
-  tag: 784b4a9-SNAPSHOT
-  pullPolicy: IfNotPresent
+namespaces:
+  default: default
+  dev: dev
+  uat: uat
+  prod: prod
 
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
+hosted:
+  local: true
+  metal: false
+  cloud: false
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+global:
+  hostname: localhost
+  nodes: 1
+  namespace: default
+  uniqueNamespace: false
+
+traefik:
+  install: false
