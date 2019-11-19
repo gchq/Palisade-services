@@ -12,25 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
-
-service:
-  port: 80
-  type: ClusterIP
-
-image:
-  repository: palisade/audit-service
-  tag: 784b4a9-SNAPSHOT
-  pullPolicy: IfNotPresent
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
+apiVersion: v1
+kind: Service
+metadata:
+    name: traefik
+    namespace: kube-system
+spec:
+    externalTrafficPolicy: Local
+    type: LoadBalancer
+    ports:
+        - protocol: TCP
+          name: web
+          port: 80
+        - protocol: TCP
+          name: admin
+          port: {{ .Values.admin.port }}
+    selector:
+        app.kubernetes.io/name: traefik
+        app.kubernetes.io/part-of: traefik

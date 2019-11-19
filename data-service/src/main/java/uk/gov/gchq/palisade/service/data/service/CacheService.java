@@ -20,7 +20,6 @@ import uk.gov.gchq.palisade.service.data.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.data.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.data.request.ListCacheRequest;
 import uk.gov.gchq.palisade.service.data.request.RemoveCacheRequest;
-import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -76,20 +75,4 @@ public interface CacheService extends Service {
      */
     CompletableFuture<Boolean> remove(final RemoveCacheRequest request);
 
-    @Override
-    default CompletableFuture<?> process(final Request request) {
-        if (request instanceof AddCacheRequest) {
-            return add((AddCacheRequest) request);
-        }
-        if (request instanceof GetCacheRequest) {
-            return get((GetCacheRequest) request);
-        }
-        if (request instanceof ListCacheRequest) {
-            return list((ListCacheRequest) request);
-        }
-        if (request instanceof RemoveCacheRequest) {
-            return remove((RemoveCacheRequest) request);
-        }
-        return Service.super.process(request);
-    }
 }
