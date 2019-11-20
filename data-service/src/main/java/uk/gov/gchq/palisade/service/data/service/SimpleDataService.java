@@ -100,18 +100,22 @@ public class SimpleDataService implements DataService {
     @Override
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
         requireNonNull(request, "The request cannot be null.");
-        //check that we have an active heartbeat before serving request
 
         LOGGER.debug("Creating async read: {}", request);
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.debug("Starting to read: {}", request);
+            LOGGER.info("Reading request: original id: {}", request.getOriginalRequestId().getId());
+
             final GetDataRequestConfig getConfig = new GetDataRequestConfig()
                     .token(request.getToken())
                     .resource(request.getResource());
             getConfig.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.debug("Calling palisade service with: {}", getConfig);
+            LOGGER.info("Calling the palisade service, id: {}", getConfig.getOriginalRequestId().getId());
+
             final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
             LOGGER.debug("Palisade service returned: {}", config);
+            LOGGER.info("Response received from the palisade service, id: {}", config.getOriginalRequestId().getId());
 
             final DataReaderRequest readerRequest = new DataReaderRequest()
                     .resource(request.getResource())
@@ -119,12 +123,14 @@ public class SimpleDataService implements DataService {
                     .context(config.getContext())
                     .rules(config.getRules().get(request.getResource()));
             readerRequest.setOriginalRequestId(request.getOriginalRequestId());
-
             LOGGER.debug("Calling dataReader with: {}", readerRequest);
+            LOGGER.info("Calling the data reader with request: {}", readerRequest.getOriginalRequestId().getId());
+
             final DataReaderResponse readerResult = getDataReader().read(readerRequest,
                     this.getClass(),
                     auditRequestReceiver);
             LOGGER.debug("Reader returned: {}", readerResult);
+            LOGGER.info("Response received from the data reader");
 
             final ReadResponse response = new NoInputReadResponse(readerResult);
             LOGGER.debug("Returning from read: {}", response);

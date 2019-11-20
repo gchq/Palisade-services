@@ -194,16 +194,24 @@ public class SimpleDataServiceTest {
         when(readRequest.getResource()).thenReturn(leafResource);
         DataReaderResponse dataReaderResponse = Mockito.mock(DataReaderResponse.class);
         when(dataReader.read(any(DataReaderRequest.class), any(), any(AuditRequestCompleteReceiver.class))).thenReturn(dataReaderResponse);
+
         DataRequestConfig dataRequestConfig = Mockito.mock(DataRequestConfig.class);
+
+        when(dataRequestConfig.getOriginalRequestId()).thenReturn(requestId);
+
         User user = Mockito.mock(User.class);
         when(dataRequestConfig.getUser()).thenReturn(user);
+
         Context context = Mockito.mock(Context.class);
         when(dataRequestConfig.getContext()).thenReturn(context);
+
         Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
         Rules rules = Mockito.mock(Rules.class);
         leafResourceToRules.put(leafResource, rules);
         when(dataRequestConfig.getRules()).thenReturn(leafResourceToRules);
+
         CompletableFuture<DataRequestConfig> dataRequestConfigCompletableFuture = CompletableFuture.supplyAsync(() -> dataRequestConfig);
+
         when(palisadeService.getDataRequestConfig(any(GetDataRequestConfig.class))).thenReturn(dataRequestConfigCompletableFuture);
 
         //when
