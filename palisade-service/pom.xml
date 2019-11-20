@@ -230,6 +230,8 @@
                     <replacements>
                         <replacement>
                             <token>image.tag</token>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>${image.tag}</value>
                         </replacement>
                     </replacements>
                 </configuration>
@@ -292,7 +294,7 @@
                     <tag>${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                        <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
             </plugin>

@@ -196,6 +196,8 @@
                     <replacements>
                         <replacement>
                             <token>image.tag</token>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>${image.tag}</value>
                         </replacement>
                     </replacements>
                 </configuration>
