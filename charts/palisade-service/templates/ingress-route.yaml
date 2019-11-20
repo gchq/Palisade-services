@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+    name: palisade-service
+    namespace: {{ include "palisade.namespace" . }}
+spec:
+    entryPoints:
+        - web
+    routes:
+        - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "palisade-service.root" . }}/palisade`)
+          kind: Rule
+          services:
+              - name: palisade-service
+                port: 80
+          middlewares:
+              - name: palisade-pathparam-regex
