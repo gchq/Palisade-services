@@ -57,6 +57,8 @@ public class ResultAggregationService implements Service {
                                                                             final MultiPolicy policy,
                                                                             final RequestId requestId,
                                                                             final RequestId originalRequestId) {
+        LOGGER.debug("aggregateDataRequestResults({}, {}, {}, {}, {}, {})",
+                request, user, resource, policy, request, originalRequestId);
         requireNonNull(request, "request");
         requireNonNull(user, "user");
         requireNonNull(resource, "resource");
@@ -67,19 +69,15 @@ public class ResultAggregationService implements Service {
         try {
             //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
             //resources they don't have permission to see
-            LOGGER.debug("Removing resources the user should not know about");
             Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, policy);
 
             PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
-            LOGGER.debug("Auditing the request");
             auditRegisterRequestComplete(request, user, policy, auditService);
-
-            LOGGER.debug("Caching the request");
             cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
 
             final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
             response.setOriginalRequestId(originalRequestId);
-            LOGGER.debug("Responding with: {}", response);
+            LOGGER.debug("Aggregated request with response: {}", response);
 
             return CompletableFuture.completedStage(response);
         } catch (Exception ex) {
@@ -98,7 +96,11 @@ public class ResultAggregationService implements Service {
      * @return the {@code resources} map after filtering
      */
     private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final MultiPolicy policy) {
+        LOGGER.debug("removeDisallowedResources({}, {})", resources, policy);
+
         resources.keySet().retainAll(policy.getPolicies().keySet());
+
+        LOGGER.debug("Allowed resources: {}", resources);
         return resources;
     }
 
@@ -107,7 +109,7 @@ public class ResultAggregationService implements Service {
                 .withUser(user)
                 .withLeafResources(multiPolicy.getPolicies().keySet())
                 .withContext(request.getContext());
-        LOGGER.debug("Auditing: {}", registerRequestCompleteAuditRequest);
+        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, multiPolicy);
         auditService.audit(registerRequestCompleteAuditRequest);
     }
 
@@ -119,7 +121,7 @@ public class ResultAggregationService implements Service {
                         .withContext(request.getContext())
                         .withException(ex)
                         .withServiceClass(serviceClass);
-        LOGGER.debug("Error handling: " + ex.getMessage());
+        LOGGER.debug("Auditing request exception: \n\t{}\n\t{}", request, ex);
         auditService.audit(auditRequestWithException);
     }
 
@@ -142,5 +144,6 @@ public class ResultAggregationService implements Service {
         if (null == success || !success) {
             throw new CompletionException(new RuntimeException("Failed to cache request: " + request));
         }
+        LOGGER.debug("Cache request successful");
     }
 }

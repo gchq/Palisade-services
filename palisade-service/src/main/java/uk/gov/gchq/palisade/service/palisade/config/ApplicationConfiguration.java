@@ -140,10 +140,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
+        CacheService service = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
+            LOGGER.debug("Cache backing implementation: {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
             cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
+        if (service != null) {
+            LOGGER.debug("Instantiated cacheService: {}", service.getClass());
+        } else {
+            LOGGER.error("Failed to instantiate cacheService, returned null");
+        }
+        return service;
     }
 
     @Bean
@@ -155,6 +161,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
+        LOGGER.debug("Instantiated eurekaClient");
         return new ServiceInstanceRestController();
     }
 
@@ -164,7 +171,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");
             ex.setCorePoolSize(6);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+            LOGGER.debug("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
 

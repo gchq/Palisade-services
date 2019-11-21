@@ -41,11 +41,12 @@ public class ResourceService implements Service {
     }
 
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest resource) {
+        LOGGER.debug("Getting resources from resource service: {}", resource);
 
         CompletionStage<Map<LeafResource, ConnectionDetail>> resources;
         try {
             resources = CompletableFuture.supplyAsync(() -> client.getResourcesById(resource));
-            LOGGER.debug("Got resources: {}", resources);
+            LOGGER.info("Got resources: {}", resources);
         } catch (Exception ex) {
             LOGGER.error("Failed to get resources: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception

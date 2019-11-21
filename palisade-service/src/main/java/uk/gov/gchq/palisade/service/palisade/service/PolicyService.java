@@ -39,12 +39,12 @@ public class PolicyService implements Service {
     }
 
     public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest policyRequest) {
+        LOGGER.debug("Getting policy from policy service: {}", policyRequest);
 
         CompletionStage<MultiPolicy> policy;
-
         try {
             policy = CompletableFuture.supplyAsync(() -> client.getPolicy(policyRequest));
-            LOGGER.debug("Got policy: {}", policy);
+            LOGGER.info("Got policy: {}", policy);
         } catch (Exception ex) {
             LOGGER.error("Failed to get policy: {}", ex.getMessage());
             throw new RuntimeException(ex);
