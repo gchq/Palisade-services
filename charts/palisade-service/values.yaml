@@ -20,7 +20,7 @@ service:
 
 image:
   repository: palisade/palisade-service
-  tag: 53682ed-SNAPSHOT
+  tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
