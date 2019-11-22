@@ -66,3 +66,10 @@ This will deploy an additional instance of Palisade called test which may be acc
 
 Helm will only deploy artifacts to the cluster on upgrade that are new or changed. Pods that require re-deployment must advance the
 image tag using the "push image" profile during the build, as shown above.
+
+#### Helm delete
+
+Custom resource definition (CRD) files required by the traefik configurations are pre-loaded by helm and as such must be removed manually if
+the ingress controller sub-chart is removed or subsequent installations will fail. To achieve this run:
+
+```kubectl delete -f charts/traefik/templates/custom-resource.yaml```
