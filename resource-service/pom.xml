@@ -36,14 +36,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.netflix.eureka</groupId>
-            <artifactId>eureka-client</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
             <version>0.3.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -64,6 +65,12 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,6 +95,11 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>hadoop-resource</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
