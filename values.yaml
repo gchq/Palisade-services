@@ -21,16 +21,19 @@ namespaces:
   uat: uat
   prod: prod
 
-hosted:
-  local: true
-  metal: false
-  cloud: false
+# hosting: local, metal or cloud and defines configuration parameter choices for some child charts according to deployment environment
+hosting: local
 
+# hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
+# nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
+# namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
+# uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
 global:
   hostname: localhost
   nodes: 1
   namespace: default
   uniqueNamespace: false
 
+# install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
   install: false
