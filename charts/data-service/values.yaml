@@ -19,7 +19,7 @@ service:
 
 image:
   repository: palisade/data-service
-  tag: 78f4e4f-SNAPSHOT
+  tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
