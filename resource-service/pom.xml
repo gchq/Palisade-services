@@ -32,13 +32,14 @@
         <hadoop.version>3.2.0</hadoop.version>
         <fabric8.version>4.3.0</fabric8.version>
         <protobuf.version>3.5.1</protobuf.version>
+        <jetcd.core>0.3.0</jetcd.core>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
-            <version>0.3.0</version>
+            <version>${jetcd.core}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
