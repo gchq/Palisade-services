@@ -19,7 +19,7 @@ service:
 
 image:
   repository: palisade/policy-service
-  tag: 2af687b-SNAPSHOT
+  tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:

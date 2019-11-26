@@ -145,9 +145,9 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
+                                    <target>
                                         <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
-                                    </tasks>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
@@ -189,6 +189,9 @@
                 </executions>
                 <configuration>
                     <dateFormat>yyyyMMdd-HHmmss</dateFormat>
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
             <plugin>
@@ -226,6 +229,8 @@
                     <replacements>
                         <replacement>
                             <token>image.tag</token>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>${image.tag}</value>
                         </replacement>
                     </replacements>
                 </configuration>
@@ -288,7 +293,7 @@
                     <tag>${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                        <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
             </plugin>
