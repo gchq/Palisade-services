@@ -64,7 +64,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public HadoopResourceService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
-        return new HadoopResourceService(config, cacheService(backingStore));
+        return new HadoopResourceService(config);
     }
 
     @Bean

@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 
 import java.util.concurrent.CompletableFuture;
 
-
 /**
  * The core API for the data service.
  * The responsibility of the data service is to take the read request from the
