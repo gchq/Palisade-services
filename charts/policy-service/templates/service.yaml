@@ -12,24 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
 
-service:
-  port: 80
-
-image:
-  repository: palisade/policy-service
-  tag: 4775745-SNAPSHOT
-  pullPolicy: IfNotPresent
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 2.5Gi
-  requests:
-    cpu: 250m
-    memory: 1Gi
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ include "audit-service.name" . }}
+    namespace: {{ include "palisade.namespace" . }}
+    labels:
+        {{ include "audit-service.labels" . | indent 4 }}
+spec:
+    type: {{ .Values.service.type }}
+    ports:
+    -   port: {{ .Values.service.port }}
+        targetPort: 8085
+        protocol: TCP
+        name: web
+    selector:
+        app.kubernetes.io/name: {{ include "audit-service.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
