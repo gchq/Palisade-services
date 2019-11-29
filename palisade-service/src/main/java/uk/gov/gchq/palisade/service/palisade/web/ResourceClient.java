@@ -19,12 +19,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.request.AddResourceRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 import java.util.Map;
 
