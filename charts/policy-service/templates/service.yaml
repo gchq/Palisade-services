@@ -16,10 +16,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: {{ include "audit-service.name" . }}
+    name: {{ include "policy-service.name" . }}
     namespace: {{ include "palisade.namespace" . }}
     labels:
-        {{ include "audit-service.labels" . | indent 4 }}
+            {{ include "policy-service.labels" . | indent 4 }}
 spec:
     type: {{ .Values.service.type }}
     ports:
@@ -28,5 +28,5 @@ spec:
         protocol: TCP
         name: web
     selector:
-        app.kubernetes.io/name: {{ include "audit-service.name" . }}
+        app.kubernetes.io/name: {{ include "policy-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
