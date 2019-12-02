@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.policy.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -36,6 +35,7 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
@@ -69,7 +69,6 @@ public class HierarchicalPolicyService implements PolicyService {
         this.cacheService = cacheService;
     }
 
-    @Autowired
     public HierarchicalPolicyService cacheService(final CacheService cacheService) {
         requireNonNull(cacheService, "Cache service cannot be set to null.");
         this.cacheService = cacheService;
@@ -87,6 +86,7 @@ public class HierarchicalPolicyService implements PolicyService {
 
     @Override
     public CompletableFuture<CanAccessResponse> canAccess(final CanAccessRequest request) {
+        LOGGER.debug("Determining access: {}", request);
         Context context = request.getContext();
         User user = request.getUser();
         Collection<LeafResource> resources = request.getResources();
@@ -95,11 +95,13 @@ public class HierarchicalPolicyService implements PolicyService {
     }
 
     private Collection<LeafResource> canAccess(final Context context, final User user, final Collection<LeafResource> resources) {
+        LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, Arrays.toString(resources.toArray()));
         return resources.stream()
                 .map(resource -> {
                     CompletableFuture<Optional<Rules<LeafResource>>> futureRules = getApplicableRules(resource, true, resource.getType());
                     Optional<Rules<LeafResource>> rules = futureRules.join();
                     if (rules.isPresent()) {
+                        LOGGER.debug("resource {}, has the following policy {}", resource, rules);
                         return Util.applyRulesToItem(resource, user, context, rules.get(), new AtomicLong(0), new AtomicLong(0));
                     } else {
                         LOGGER.debug("No policy for {}, removing resource from list...", resource);
@@ -125,11 +127,14 @@ public class HierarchicalPolicyService implements PolicyService {
      * that need to be applied to the resource.
      */
     protected <T> CompletableFuture<Optional<Rules<T>>> getApplicableRules(final Resource resource, final boolean canAccessRequest, final String originalDataType) {
+        LOGGER.debug("Getting the applicable rules: {} {} {}", resource, canAccessRequest, originalDataType);
         CompletableFuture<Optional<Rules<T>>> inheritedRules;
         if (resource instanceof ChildResource) {
+            LOGGER.debug("resource is an instance of ChildResource");
             inheritedRules = getApplicableRules(((ChildResource) resource).getParent(), canAccessRequest, originalDataType);
         } else {
             //we are at top of hierarchy
+            LOGGER.debug("resource is NOT an instance of ChildResource (top of hierachy)");
             CompletableFuture<Optional<Policy>> inheritedPolicy = (CompletableFuture<Optional<Policy>>) getCacheService().get(
                     new GetCacheRequest<Policy>()
                             .service(this.getClass())
@@ -151,44 +156,48 @@ public class HierarchicalPolicyService implements PolicyService {
 
     private <T> Optional<Rules<T>> extractRules(final boolean canAccessRequest, final Optional<Policy> policy) {
         if (canAccessRequest) {
-            return policy.map(p -> p.getResourceRules());
+            Optional<Rules<T>> policyMap = policy.map(p -> p.getResourceRules());
+            LOGGER.debug("getting RESOURCE rules: {}", policyMap);
+            return policyMap;
         } else {
-            return policy.map(p -> p.getRecordRules());
+            Optional<Rules<T>> policyMap = policy.map(p -> p.getRecordRules());
+            LOGGER.debug("getting RECORD rules: {}", policyMap);
+            return policyMap;
         }
     }
 
     private <T> Optional<Rules<T>> mergeRules(final Optional<Rules<T>> inheritedRules, final Optional<Rules<T>> newRules) {
-        if (inheritedRules.isPresent()) {
-            if (newRules.isPresent()) {
-                //both present --> merge
-                String inheritedMessage = inheritedRules.get().getMessage();
-                String newMessage = newRules.get().getMessage();
-                if (!inheritedMessage.equals(Rules.NO_RULES_SET) && !newMessage.equals(Rules.NO_RULES_SET)) {
-                    inheritedRules.get().message(inheritedMessage + ", " + newMessage);
-                } else if (!newMessage.equals(Rules.NO_RULES_SET)) {
-                    inheritedRules.get().message(newMessage);
-                }
-                //don't test for inheritedRules != Rules.NO_RULES_SET as that is the default case, there is nothing to do
-                inheritedRules.get().addRules(newRules.get().getRules());
-                return inheritedRules;
-            } else {
-                //only inherited present
-                return inheritedRules;
-            }
-        } else {
-            if (newRules.isPresent()) {
-                //new rules but no inherited ones
-                return newRules;
-            } else {
-                //neither
-                return Optional.empty();
-            }
-        }
 
+        if (inheritedRules.isPresent() && newRules.isPresent()) {
+            LOGGER.debug("inheritedRules and newRules both present {} {}", inheritedRules.get(), newRules.get());
+            //both present --> merge
+            String inheritedMessage = inheritedRules.get().getMessage();
+            String newMessage = newRules.get().getMessage();
+            if (!inheritedMessage.equals(Rules.NO_RULES_SET) && !newMessage.equals(Rules.NO_RULES_SET)) {
+                inheritedRules.get().message(inheritedMessage + ", " + newMessage);
+            } else if (!newMessage.equals(Rules.NO_RULES_SET)) {
+                inheritedRules.get().message(newMessage);
+            }
+            //don't test for inheritedRules != Rules.NO_RULES_SET as that is the default case, there is nothing to do
+            inheritedRules.get().addRules(newRules.get().getRules());
+            LOGGER.debug("mergeRules - inheritedRules now set to {}", inheritedRules.get());
+            return inheritedRules;
+        } else if (inheritedRules.isPresent() && !newRules.isPresent()) {
+            //only inherited present
+            LOGGER.debug("inheritedRules NOT modified {}", inheritedRules.get());
+            return inheritedRules;
+        } else if (!inheritedRules.isPresent() && newRules.isPresent()) {
+            LOGGER.debug("only newRules present {}", newRules.get());
+            return newRules;
+        } else {
+            LOGGER.debug("no rules present");
+            return Optional.empty();
+        }
     }
 
     @Override
     public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request) {
+        LOGGER.debug("getPolicy - {}", request);
         Context context = request.getContext();
         User user = request.getUser();
         Collection<LeafResource> resources = request.getResources();
@@ -202,7 +211,9 @@ public class HierarchicalPolicyService implements PolicyService {
             CompletableFuture<Optional<Rules<Object>>> rules = getApplicableRules(resource, false, resource.getType());
             Optional<Rules<Object>> optionalRecordRules = rules.join();
             if (optionalRecordRules.isPresent()) {
-                map.put(resource, new Policy<>().recordRules(optionalRecordRules.get()));
+                Policy<Object> policy = new Policy<>().recordRules(optionalRecordRules.get());
+                LOGGER.debug("adding resource: {} with the following policy: {}", resource, policy);
+                map.put(resource, policy);
             } else {
                 LOGGER.warn("Couldn't find any record level rules for {}. This shouldn't be the case, since we found resource level rules for it!", user.getUserId().getId());
             }
@@ -215,7 +226,7 @@ public class HierarchicalPolicyService implements PolicyService {
         requireNonNull(request);
         Resource resource = request.getResource();
         Policy policy = request.getPolicy();
-        LOGGER.debug("Set {} to resource {}", policy, resource);
+        LOGGER.debug("Setting resource policy {} to resource {}", policy, resource);
         return getCacheService().add(
                 new AddCacheRequest<Policy>()
                         .service(this.getClass())
@@ -228,7 +239,7 @@ public class HierarchicalPolicyService implements PolicyService {
         requireNonNull(request);
         final String type = request.getType();
         final Policy policy = request.getPolicy();
-        LOGGER.debug("Set {} to data type {}", policy, type);
+        LOGGER.debug("Setting Type policy {} to data type {}", policy, type);
         return getCacheService().add(
                 new AddCacheRequest<Policy>()
                         .service(this.getClass())
