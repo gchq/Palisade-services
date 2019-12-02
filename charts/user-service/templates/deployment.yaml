@@ -19,7 +19,10 @@ metadata:
     name: {{ include "user-service.name" . }}
     namespace: {{ include "palisade.namespace" . }}
     labels:
-            {{ include "user-service.labels" . | indent 4 }}
+        app.kubernetes.io/name: {{ include "palisade-service.name" . }}
+        helm.sh/chart: {{ include "palisade-service.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
     replicas: {{ .Values.replicaCount }}
     selector:
@@ -58,11 +61,11 @@ spec:
                     timeoutSeconds: 5
                 resources:
                         {{- toYaml .Values.resources | nindent 12 }}
-                    {{- with .Values.nodeSelector }}
+                                {{- with .Values.nodeSelector }}
             nodeSelector:
                     {{- toYaml . | nindent 8 }}
                             {{- end }}
-                {{- with .Values.affinity }}
+                            {{- with .Values.affinity }}
         affinity:
                 {{- toYaml . | nindent 8 }}
                         {{- end }}
