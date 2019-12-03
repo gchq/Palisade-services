@@ -21,12 +21,12 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
@@ -90,14 +90,20 @@ public class SimplePalisadeService implements PalisadeService {
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
 
+        LOGGER.debug("Getting user from userService: {}", userRequest);
         final CompletableFuture<User> user = userService.getUser(userRequest);
+
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
+        LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
         final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
+
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
         final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
         policyRequest.setOriginalRequestId(originalRequestId);
+        LOGGER.debug("Getting policy from policyService: {}", request);
         CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
+        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
         CompletableFuture<DataRequestResponse> aggregatedResponse = aggregationService.aggregateDataRequestResults(
                 request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
 
