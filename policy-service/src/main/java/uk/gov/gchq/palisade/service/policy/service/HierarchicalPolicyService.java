@@ -156,12 +156,20 @@ public class HierarchicalPolicyService implements PolicyService {
 
     private <T> Optional<Rules<T>> extractRules(final boolean canAccessRequest, final Optional<Policy> policy) {
         if (canAccessRequest) {
-            Optional<Rules<T>> policyMap = policy.map(p -> p.getResourceRules());
-            LOGGER.debug("getting RESOURCE rules: {}", policyMap);
+            Optional<Rules<T>> policyMap = policy.map(p -> {
+                        Rules rules = p.getResourceRules();
+                        LOGGER.debug("getting RESOURCE rules for Policy: {}", p.getMessage());
+                        return rules;
+                    }
+            );
             return policyMap;
         } else {
-            Optional<Rules<T>> policyMap = policy.map(p -> p.getRecordRules());
-            LOGGER.debug("getting RECORD rules: {}", policyMap);
+            Optional<Rules<T>> policyMap = policy.map(p -> {
+                        Rules rules = p.getRecordRules();
+                        LOGGER.debug("getting RECORD rules for Policy: {}", p.getMessage());
+                        return rules;
+                    }
+            );
             return policyMap;
         }
     }
@@ -169,7 +177,8 @@ public class HierarchicalPolicyService implements PolicyService {
     private <T> Optional<Rules<T>> mergeRules(final Optional<Rules<T>> inheritedRules, final Optional<Rules<T>> newRules) {
 
         if (inheritedRules.isPresent() && newRules.isPresent()) {
-            LOGGER.debug("inheritedRules and newRules both present {} {}", inheritedRules.get(), newRules.get());
+            LOGGER.debug("inheritedRules and newRules both present MessageInherited:{} MessageNew:{} RulesInherited:{} RulesNew:{}", inheritedRules.get().getMessage(), newRules.get().getMessage(),
+                    inheritedRules.get().getRules(), newRules.get().getRules());
             //both present --> merge
             String inheritedMessage = inheritedRules.get().getMessage();
             String newMessage = newRules.get().getMessage();
@@ -180,14 +189,14 @@ public class HierarchicalPolicyService implements PolicyService {
             }
             //don't test for inheritedRules != Rules.NO_RULES_SET as that is the default case, there is nothing to do
             inheritedRules.get().addRules(newRules.get().getRules());
-            LOGGER.debug("mergeRules - inheritedRules now set to {}", inheritedRules.get());
+            LOGGER.debug("mergeRules -  Message:{} Rules:{}", inheritedRules.get().getMessage(), inheritedRules.get().getRules());
             return inheritedRules;
         } else if (inheritedRules.isPresent() && !newRules.isPresent()) {
             //only inherited present
-            LOGGER.debug("inheritedRules NOT modified {}", inheritedRules.get());
+            LOGGER.debug("inherited only Message:{} Rules:{}", inheritedRules.get().getMessage(), inheritedRules.get().getRules());
             return inheritedRules;
         } else if (!inheritedRules.isPresent() && newRules.isPresent()) {
-            LOGGER.debug("only newRules present {}", newRules.get());
+            LOGGER.debug("new only Message:{} Rules:{}", newRules.get().getMessage(), newRules.get().getRules());
             return newRules;
         } else {
             LOGGER.debug("no rules present");
