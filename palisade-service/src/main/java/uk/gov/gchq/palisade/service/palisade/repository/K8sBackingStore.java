@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -165,7 +166,7 @@ public class K8sBackingStore implements BackingStore {
                 String className = Class.forName(configMap.getData().get("valueClass")).toString();
                 byte[] data = configMap.getData().get("value").getBytes(StandardCharsets.UTF_8);
 
-                LOGGER.debug("Completed get for key {}, classname {} with data {}", key , className, data.toString());
+                LOGGER.debug("Completed get for key {}, classname {} with data {}", key, className, Arrays.toString(data));
 
                 return new SimpleCacheObject(Class.forName(configMap.getData().get("valueClass")), Optional.of(configMap.getData().get("value").getBytes(StandardCharsets.UTF_8)));
             } catch (ClassNotFoundException e) {
