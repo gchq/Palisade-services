@@ -46,19 +46,19 @@ public class K8sBackingStore implements BackingStore {
     private final String namespace = Optional.ofNullable(client.getNamespace()).orElse(NAMESPACE);
 
     public K8sBackingStore() {
-        LOGGER.info("Current namespace is: {}", this.namespace);
+        LOGGER.debug("Current namespace is: {}", this.namespace);
 
         try {
-            this.client.namespaces().list().getItems().forEach(ns -> LOGGER.info("Found namespace {} with status: {}", ns.getMetadata().getName(), ns.getStatus()));
+            this.client.namespaces().list().getItems().forEach(ns -> LOGGER.debug("Found namespace {} with status: {}", ns.getMetadata().getName(), ns.getStatus()));
         } catch (KubernetesClientException e) {
-            LOGGER.info("Not running in kubernetes or RBAC not entitled");
+            LOGGER.error("Not running in kubernetes or RBAC not entitled");
+            throw e;
         }
     }
 
     /**
      * Clean up the resource
      */
-
     public void close() {
         client.close();
     }
@@ -70,8 +70,7 @@ public class K8sBackingStore implements BackingStore {
      * @return the new value of the key
      * @throws IllegalArgumentException if the key is empty or whitespace
      */
-    public static String convertKeyToCompatible(final String key) throws
-            IllegalArgumentException {
+    public static String convertKeyToCompatible(final String key) throws IllegalArgumentException {
         //only allow lower case alphanumberic character or -
         if (key.trim().length() == 0) {
             throw new IllegalArgumentException("key empty or contains only whitespace");
@@ -99,40 +98,35 @@ public class K8sBackingStore implements BackingStore {
      * @throws IllegalArgumentException if <code>key</code> is empty (once whitespace is trimmed)
      */
     @Override
-    public boolean add(final String key, final Class<?> valueClass,
-                       final byte[] value, final Optional<Duration> timeToLive) {
-
-        if (key == null) {
-            throw new IllegalArgumentException("key");
-        }
+    public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
+        requireNonNull(key);
         requireNonNull(valueClass, "valueClass");
         requireNonNull(value, "value");
         requireNonNull(timeToLive);
         if (value.length == 0) {
             throw new IllegalArgumentException("value is empty");
         }
-
+        LOGGER.debug("Adding cache key {} ignoring class {}", key, valueClass);
         String dns1123Compatible = convertKeyToCompatible(key);
         Resource<ConfigMap, DoneableConfigMap> configMapResource = client.configMaps().inNamespace(namespace).withName(dns1123Compatible);
+        ConfigMap configMap;
 
         if (timeToLive.isPresent()) {
             final long epochMilli = Instant.now().plusSeconds(timeToLive.get().getSeconds()).plusNanos(timeToLive.get().getNano()).toEpochMilli();
-            ConfigMap configMap = configMapResource.createOrReplace(new ConfigMapBuilder()
+            configMap = configMapResource.createOrReplace(new ConfigMapBuilder()
                     .withNewMetadata().withName(dns1123Compatible).endMetadata()
                     .addToData("valueClass", valueClass.getName())
                     .addToData("value", new String(value))
                     .addToData("expiryTimestamp", String.valueOf(epochMilli))
                     .build());
-            log("Upserted ConfigMap at " + configMap.getMetadata().getSelfLink() + " data " + configMap.getData());
-
         } else {
-            ConfigMap configMap = configMapResource.createOrReplace(new ConfigMapBuilder()
+            configMap = configMapResource.createOrReplace(new ConfigMapBuilder()
                     .withNewMetadata().withName(dns1123Compatible).endMetadata()
                     .addToData("valueClass", valueClass.getName())
                     .addToData("value", new String(value))
                     .build());
-            log("Upserted ConfigMap at " + configMap.getMetadata().getSelfLink() + " data " + configMap.getData());
         }
+        LOGGER.debug("Upserted ConfigMap {} with data {}", configMap.getMetadata().getSelfLink(), configMap.getData());
         return true;
     }
 
@@ -150,11 +144,8 @@ public class K8sBackingStore implements BackingStore {
      */
     @Override
     public SimpleCacheObject get(final String key) {
-        if (key == null) {
-            throw new NullPointerException("key value is null");
-        }
-
-
+        requireNonNull(key);
+        LOGGER.debug("Getting from cache: {}", key);
         String dns1123Compatible = convertKeyToCompatible(key);
         Resource<ConfigMap, DoneableConfigMap> configMapResource = client.configMaps().inNamespace(namespace).withName(dns1123Compatible);
         ConfigMap configMap = configMapResource.get();
@@ -166,7 +157,7 @@ public class K8sBackingStore implements BackingStore {
                 if (configMap.getData().containsKey("expiryTimestamp")) {
                     if (Instant.now().isAfter(Instant.ofEpochMilli(Long.parseLong(configMap.getData().get("expiryTimestamp"))))) {
                         remove(key);
-                        log("Timedout on key " + key);
+                        LOGGER.debug("Timeout getting for key: {}", key);
 
                         return new SimpleCacheObject(Object.class, Optional.empty());
                     }
@@ -174,15 +165,16 @@ public class K8sBackingStore implements BackingStore {
                 String className = Class.forName(configMap.getData().get("valueClass")).toString();
                 byte[] data = configMap.getData().get("value").getBytes(StandardCharsets.UTF_8);
 
-                log("get for key " + key + " with className " + className + " data " + new String(data));
+                LOGGER.debug("Completed get for key {}, classname {} with data {}", key , className, data.toString());
 
                 return new SimpleCacheObject(Class.forName(configMap.getData().get("valueClass")), Optional.of(configMap.getData().get("value").getBytes(StandardCharsets.UTF_8)));
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Get request failed due to the class of the value not being found.", e);
+                RuntimeException ex = new RuntimeException("Get request failed due to the class of the value not being found.", e);
+                LOGGER.error("Error while getting cache key {}: {}", key, ex.getMessage());
+                throw ex;
             }
         }
     }
-
 
     /**
      * Remove the given key from the backing store. If the key is present it will be removed, otherwise nothing will happen.
@@ -200,14 +192,18 @@ public class K8sBackingStore implements BackingStore {
         try {
             Resource<ConfigMap, DoneableConfigMap> configMapResource = client.configMaps().inNamespace(namespace).withName(dns1123Compatible);
             ConfigMap configMap = configMapResource.get();
-
+            boolean ret;
             if (configMap == null || configMap.getData().isEmpty()) {
-                return false;
+                ret = false;
+            } else {
+                ret = client.configMaps().inNamespace(namespace).withName(dns1123Compatible).delete();
             }
-            log("remove " + key);
-            return client.configMaps().inNamespace(namespace).withName(dns1123Compatible).delete();
+            LOGGER.debug("Remove cache key {}: result {}", key, ret);
+            return ret;
         } catch (KubernetesClientException e) {
-            throw new RuntimeException("Get request failed due to the class of the value not being found.", e);
+            RuntimeException ex = new RuntimeException("Get request failed due to the class of the value not being found.", e);
+            LOGGER.error("Error while removing cache key {}: {}", key, ex.getMessage());
+            throw ex;
         }
     }
 
@@ -220,9 +216,8 @@ public class K8sBackingStore implements BackingStore {
      */
     @Override
     public Stream<String> list(final String prefix) {
-        if (prefix == null) {
-            throw new NullPointerException();
-        }
+        requireNonNull(prefix);
+        LOGGER.debug("Listing from cache: {}", prefix);
         String dns1123Compatible = convertKeyToCompatible(prefix);
 
         return client.configMaps().inNamespace(namespace).list().getItems()
@@ -232,15 +227,6 @@ public class K8sBackingStore implements BackingStore {
                         (!Instant.now().isAfter(Instant.ofEpochMilli(Long.parseLong(configMap.getData().get("expiryTimestamp"))))))
                 .map(configMap -> configMap.getMetadata().getName())
                 .distinct();
-    }
-
-
-    private static void log(final String action, final Object obj) {
-        LOGGER.info("{}: {}", action, obj);
-    }
-
-    private static void log(final String action) {
-        LOGGER.info(action);
     }
 }
 

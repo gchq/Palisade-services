@@ -51,12 +51,14 @@ public class ResultAggregationService implements Service {
         this.cacheService = cacheService;
     }
 
-    public CompletionStage<DataRequestResponse> aggregateDataRequestResults(final RegisterDataRequest request,
-                                                                            final User user,
-                                                                            final Map<LeafResource, ConnectionDetail> resource,
-                                                                            final MultiPolicy policy,
-                                                                            final RequestId requestId,
-                                                                            final RequestId originalRequestId) {
+    public CompletionStage<DataRequestResponse> aggregateDataRequestResults(
+            final RegisterDataRequest request,
+            final User user,
+            final Map<LeafResource, ConnectionDetail> resource,
+            final MultiPolicy policy,
+            final RequestId requestId,
+            final RequestId originalRequestId) {
+
         LOGGER.debug("aggregateDataRequestResults({}, {}, {}, {}, {}, {})",
                 request, user, resource, policy, request, originalRequestId);
         requireNonNull(request, "request");
