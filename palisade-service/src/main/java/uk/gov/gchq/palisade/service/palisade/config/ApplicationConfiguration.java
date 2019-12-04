@@ -47,7 +47,6 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
-import uk.gov.gchq.palisade.service.palisade.web.ServiceInstanceRestController;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.net.URI;
@@ -150,12 +149,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
     }
 
     @Override

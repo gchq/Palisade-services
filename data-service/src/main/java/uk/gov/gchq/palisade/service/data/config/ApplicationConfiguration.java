@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
-import uk.gov.gchq.palisade.service.data.web.ServiceInstanceRestController;
 
 import java.net.URI;
 import java.util.Map;
@@ -133,12 +132,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
             cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
     }
 
     @Primary

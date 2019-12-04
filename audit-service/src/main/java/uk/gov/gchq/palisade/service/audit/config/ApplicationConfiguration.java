@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Primary;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
-import uk.gov.gchq.palisade.service.audit.web.ServiceInstanceRestController;
 
 /**
  * Bean configuration and dependency injection graph
@@ -53,12 +52,6 @@ public class ApplicationConfiguration {
     @ConditionalOnProperty(prefix = "audit.implementations", name = LoggerAuditService.CONFIG_KEY)
     public LoggerAuditService loggerAuditService() {
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
     }
 
 }
