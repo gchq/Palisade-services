@@ -18,11 +18,11 @@ package uk.gov.gchq.palisade.service.policy.repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.policy.request.AddCacheRequest;
-import uk.gov.gchq.palisade.service.policy.request.GetCacheRequest;
-import uk.gov.gchq.palisade.service.policy.request.ListCacheRequest;
-import uk.gov.gchq.palisade.service.policy.request.RemoveCacheRequest;
-import uk.gov.gchq.palisade.service.policy.service.CacheService;
+import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.request.ListCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.request.RemoveCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.service.CacheService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -198,9 +198,9 @@ public class SimpleCacheService implements CacheService {
         byte[] metadataWrapped = CacheMetadata.addMetaData(encodedValue, request);
         //send to add
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store add {}", baseKey);
+            LOGGER.debug("Backing store add {}", baseKey);
             boolean result = getBackingStore().add(baseKey, valueClass, metadataWrapped, timeToLive);
-            LOGGER.debug("-> Backing store stored {} with result {}", baseKey, result);
+            LOGGER.debug("Backing store stored {} with result {}", baseKey, result);
             return result;
         });
     }
@@ -211,9 +211,11 @@ public class SimpleCacheService implements CacheService {
         requireNonNull(request, "request");
         //make final key name
         String baseKey = request.makeBaseName();
+        LOGGER.debug("Get item with key {}", baseKey);
 
         Supplier<Optional<V>> getFunction = () -> {
             SimpleCacheObject result = doCacheRetrieve(baseKey, maxLocalTTL);
+            LOGGER.debug("Retrieved {} from cache with result {}", baseKey, result);
 
             //assign so Javac can infer the generic type
             BiFunction<byte[], Class<V>, V> decode = codecs.getValueDecoder((Class<V>) result.getValueClass());
@@ -273,11 +275,11 @@ public class SimpleCacheService implements CacheService {
 
         //get from cache
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store list {}", baseKey);
+            LOGGER.debug("Backing store list {}", baseKey);
 
             //remove the service name from the list of keys
             Stream<String> ret = getBackingStore().list(baseKey).map(x -> x.substring(len + 1));
-            LOGGER.debug("-> Backing store list returned for {}", baseKey);
+            LOGGER.debug("Backing store list returned for {}", baseKey);
 
             return ret;
         });
@@ -293,11 +295,11 @@ public class SimpleCacheService implements CacheService {
 
         //create remove request for backing store
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store remove {}", baseKey);
+            LOGGER.debug("Backing store remove {}", baseKey);
 
             //remove the key
             boolean removed = getBackingStore().remove(baseKey);
-            LOGGER.debug("-> Backing store removed {} with result {}", baseKey, removed);
+            LOGGER.debug("Backing store removed {} with result {}", baseKey, removed);
             return removed;
         });
     }

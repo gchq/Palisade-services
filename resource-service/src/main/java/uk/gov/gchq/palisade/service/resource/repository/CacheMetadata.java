@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
-import uk.gov.gchq.palisade.service.resource.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -30,13 +30,14 @@ import static java.util.Objects.requireNonNull;
 public class CacheMetadata {
 
     /**
-     * If true, then this cache entry can be stored in a local cache.
-     */
-    private final boolean canRetrieveLocally;
-    /**
      * If true, then this cache entry has been retrieved from a local cache.
      */
     private boolean wasRetrievedLocally;
+
+    /**
+     * If true, then this cache entry can be stored in a local cache.
+     */
+    private final boolean canRetrieveLocally;
 
     /**
      * Create a new metadata object.
