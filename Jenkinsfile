@@ -87,6 +87,18 @@ spec:
                 }
             }
         }
+        stage('SonarQube analysis') {
+            container('docker-cmds') {
+                withCredentials([string(credentialsId: 'b01b7c11-ccdf-4ac5-b022-28c9b861379a', variable: 'KEYSTORE_PASS'),
+                                 file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        withSonarQubeEnv(installationName: 'sonar') {
+                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                        }
+                    }
+                }
+            }
+        }
         stage('Integration Tests') {
             git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
             build job: "Palisade-integration-tests/develop"
