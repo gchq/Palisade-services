@@ -35,7 +35,6 @@
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <swagger.version>1.5.21</swagger.version>
         <testcontainers.version>1.10.5</testcontainers.version>
-        <slf4j-test>1.1.0</slf4j-test>
     </properties>
 
     <dependencies>
@@ -136,12 +135,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.org.lidalia</groupId>
-            <artifactId>slf4j-test</artifactId>
-            <version>${slf4j-test}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
