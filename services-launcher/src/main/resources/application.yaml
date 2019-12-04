@@ -29,7 +29,7 @@ launcher:
     root: palisade-services
     name: default
     target: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
-    config: SERVICE/classes
+    config: SERVICE/target/classes/
     profiles: default
     log: SERVICE.log
   services:
