@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -34,10 +36,13 @@ import static java.util.Objects.requireNonNull;
  * to add a {@link User}.
  */
 public class AddUserRequest extends Request {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddUserRequest.class);
+
     public final User user;
 
     @JsonCreator
     private AddUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user) {
+        LOGGER.debug("AddUserRequest with requestId: {}, originalRequestId {} and User {}", id, originalRequestId, user);
         setOriginalRequestId(originalRequestId);
         this.user = requireNonNull(user);
     }
@@ -49,6 +54,7 @@ public class AddUserRequest extends Request {
      * @return {@link AddUserRequest}
      */
     public static IUser create(final RequestId original) {
+        LOGGER.debug("AddUserRequest.create with requestId: {}", original);
         return user -> new AddUserRequest(null, original, user);
     }
 
