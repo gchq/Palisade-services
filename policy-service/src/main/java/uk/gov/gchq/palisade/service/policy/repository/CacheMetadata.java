@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.policy.repository;
 
-import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.policy.request.AddCacheRequest;
 
 import java.util.Arrays;
 import java.util.Objects;

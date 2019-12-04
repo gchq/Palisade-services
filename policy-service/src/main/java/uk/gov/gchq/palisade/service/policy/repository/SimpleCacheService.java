@@ -18,11 +18,11 @@ package uk.gov.gchq.palisade.service.policy.repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.request.ListCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.request.RemoveCacheRequest;
-import uk.gov.gchq.palisade.service.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.policy.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.policy.request.GetCacheRequest;
+import uk.gov.gchq.palisade.service.policy.request.ListCacheRequest;
+import uk.gov.gchq.palisade.service.policy.request.RemoveCacheRequest;
+import uk.gov.gchq.palisade.service.policy.service.CacheService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
