@@ -123,7 +123,7 @@ public class ResultAggregationService implements Service {
                         .withContext(request.getContext())
                         .withException(ex)
                         .withServiceClass(serviceClass);
-        LOGGER.debug("Auditing request exception: \n\t{}\n\t{}", request, ex);
+        LOGGER.error("Auditing request exception: \n\t{}\n\t{}", request, ex);
         auditService.audit(auditRequestWithException);
     }
 
