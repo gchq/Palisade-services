@@ -63,7 +63,7 @@ public class K8sBackingStore implements BackingStore {
      * @throws IllegalArgumentException if the key is empty or whitespace
      */
     public static String convertKeyToCompatible(final String key) throws IllegalArgumentException {
-        //only allow lower case alphanumberic character or -
+        //only allow lower case alphanumeric character or -
         if (key.trim().length() == 0) {
             throw new IllegalArgumentException("key empty or contains only whitespace");
         }
@@ -189,13 +189,9 @@ public class K8sBackingStore implements BackingStore {
         String dns1123Compatible = convertKeyToCompatible(key);
         try {
             Resource<ConfigMap, DoneableConfigMap> configMapResource = client.configMaps().inNamespace(namespace).withName(dns1123Compatible);
-            ConfigMap configMap = configMapResource.get();
-            boolean ret;
-            if (configMap == null || configMap.getData().isEmpty()) {
-                ret = false;
-            } else {
-                ret = client.configMaps().inNamespace(namespace).withName(dns1123Compatible).delete();
-            }
+            Optional<ConfigMap> configMap = Optional.ofNullable(configMapResource.get());
+            boolean ret = configMap.isPresent() && configMapResource.delete();
+
             LOGGER.debug("Remove cache key {}: result {}", key, ret);
             return ret;
         } catch (KubernetesClientException e) {

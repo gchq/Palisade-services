@@ -38,9 +38,8 @@ import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 import uk.gov.gchq.palisade.service.user.web.ServiceInstanceRestController;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static java.util.stream.Collectors.toList;
@@ -60,9 +59,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleUserService userService(final Map<String, BackingStore> backingStores) {
-        SimpleUserService simpleUserService = new SimpleUserService(cacheService(backingStores));
-        LOGGER.debug("Instantiated SimpleUserService");
+    public SimpleUserService userService(final CacheService cacheService) {
+        SimpleUserService simpleUserService = new SimpleUserService(cacheService);
+        LOGGER.info("Instantiated SimpleUserService");
         return simpleUserService;
     }
 
@@ -91,17 +90,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        CacheService cacheService = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.debug("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
-        }).findFirst().orElse(null);
-        if (cacheService != null) {
-            LOGGER.debug("Instantiated cacheService: {}", cacheService.getClass());
-        } else {
-            LOGGER.error("Failed to instantiate cacheService, returned null");
-        }
-        return cacheService;
+    public CacheService cacheService(final Set<BackingStore> backingStores) {
+        return backingStores.stream()
+                .map(x -> new SimpleCacheService().backingStore(x))
+                .peek(x -> LOGGER.info("Created candidate cache service {}", x))
+                .findAny().orElseThrow(() -> {
+                    LOGGER.error("No backing store provided and no default found");
+                    return new NullPointerException();
+                });
     }
 
     @Bean
@@ -114,7 +110,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
         ServiceInstanceRestController serviceInstanceRestController = new ServiceInstanceRestController();
-        LOGGER.debug("Instantiated eurekaClient");
+        LOGGER.info("Instantiated eurekaClient");
         return serviceInstanceRestController;
     }
 
@@ -124,7 +120,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");
             ex.setCorePoolSize(6);
-            LOGGER.debug("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
 }

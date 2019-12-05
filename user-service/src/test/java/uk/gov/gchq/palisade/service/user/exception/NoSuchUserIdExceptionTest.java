@@ -54,7 +54,7 @@ public class NoSuchUserIdExceptionTest {
     public void NoSuchUserIdExceptionTest() {
         final NoSuchUserIdException noSuchUserIdException = new NoSuchUserIdException("NoSuchUser");
         assertThat(noSuchUserIdException.getMessage(), is(equalTo("NoSuchUser")));
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.ERROR);
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
         assertNotEquals(0, debugMessages.size());
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("NoSuchUserIdException thrown with")
