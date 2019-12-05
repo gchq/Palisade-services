@@ -98,8 +98,8 @@ public class HashMapBackingStore implements BackingStore {
 
     @Override
     public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
-        String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
         LOGGER.debug("Adding to cache key {} of class {}", key, valueClass);
+        String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
         cache.put(cacheKey, new CachedPair(value, valueClass));
         /*Here we set up a simple timer to deal with the removal of the item from the cache if a duration is present
          *This uses a single timer to remove elements, this is fine for this example, but in production we would want
@@ -125,8 +125,8 @@ public class HashMapBackingStore implements BackingStore {
 
     @Override
     public SimpleCacheObject get(final String key) {
+        LOGGER.debug("Getting from cache: {}", key);
         String cacheKey = BackingStore.keyCheck(key);
-        LOGGER.debug("Getting from cache: {}", cacheKey);
         final CachedPair result = cache.getOrDefault(cacheKey, new CachedPair(null, Object.class));
         return new SimpleCacheObject(result.clazz, Optional.ofNullable(result.value));
     }
@@ -134,6 +134,7 @@ public class HashMapBackingStore implements BackingStore {
     @Override
     public Stream<String> list(final String prefix) {
         requireNonNull(prefix, "prefix");
+        LOGGER.debug("Listing from cache: {}", prefix);
         return cache.keySet()
                 .stream()
                 .filter(x -> x.startsWith(
@@ -146,7 +147,7 @@ public class HashMapBackingStore implements BackingStore {
         String cacheKey = BackingStore.keyCheck(key);
         CachedPair result = cache.remove(cacheKey);
         boolean ret = (result != null);
-        LOGGER.debug("Remove cache key {} result {}", cacheKey, ret);
+        LOGGER.debug("Remove cache key {}: result {}", key, ret);
         return ret;
     }
 
