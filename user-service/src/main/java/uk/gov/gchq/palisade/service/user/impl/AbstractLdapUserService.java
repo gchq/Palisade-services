@@ -183,6 +183,7 @@ public abstract class AbstractLdapUserService implements UserService {
                 auths = getAuths(userId, userAttrs, context);
                 roles = getRoles(userId, userAttrs, context);
             } catch (final NamingException e) {
+                LOGGER.error("Unable to get user from LDAP: {}", e);
                 throw new RuntimeException("Unable to get user from LDAP", e);
             }
 
@@ -194,6 +195,7 @@ public abstract class AbstractLdapUserService implements UserService {
 
     @Override
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
+        LOGGER.error("Adding users is not supported in this user service: " + getClass().getSimpleName());
         throw new UnsupportedOperationException("Adding users is not supported in this user service: " + getClass().getSimpleName());
     }
 
@@ -292,6 +294,7 @@ public abstract class AbstractLdapUserService implements UserService {
     protected Set<Object> basicSearch(final UserId userId,
                                       final String name, final String attrIdForUserId,
                                       final String... attrs) throws NamingException {
+        LOGGER.debug("Performing basic search using {}, {}, {}, {}", userId, name, attrIdForUserId, attrs);
         final NamingEnumeration<SearchResult> attrResults = context.search(
                 name,
                 new BasicAttributes(attrIdForUserId, formatInput(userId.getId())),
@@ -327,10 +330,12 @@ public abstract class AbstractLdapUserService implements UserService {
      * @return the formatted string
      */
     protected String formatInput(final String input) {
+        LOGGER.debug("Formatting input with {} as the variable", input);
         String result = input;
         for (final String escapedChar : ESCAPED_CHARS) {
             result = result.replace(escapedChar, "\\" + escapedChar);
         }
+        LOGGER.debug("Returning formatted input as {}", result);
         return result;
     }
 
