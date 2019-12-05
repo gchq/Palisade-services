@@ -40,7 +40,9 @@ public class ApplicationConfiguration {
     @Bean(name = "simple")
     @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
-        return new SimpleAuditService();
+        SimpleAuditService simpleUserService = new SimpleAuditService();
+        LOGGER.debug("Instantiated SimpleAuditService");
+        return simpleUserService;
     }
 
     @Bean(name = "stroom")
@@ -58,7 +60,9 @@ public class ApplicationConfiguration {
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
+        ServiceInstanceRestController serviceInstanceRestController = new ServiceInstanceRestController();
+        LOGGER.debug("Instantiated eurekaClient");
+        return serviceInstanceRestController;
     }
 
 }

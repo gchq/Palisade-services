@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
@@ -51,11 +53,14 @@ import static java.util.Objects.requireNonNull;
 })
 public class AuditRequest<ZoneDateTime> extends Request {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditRequest.class);
+
     public final ZonedDateTime timestamp;
     public final String serverIp;
     public final String serverHostname;
 
     protected AuditRequest() {
+        LOGGER.debug("AuditRequest called");
         this.timestamp = null;
         this.serverIp = null;
         this.serverHostname = null;
@@ -63,16 +68,18 @@ public class AuditRequest<ZoneDateTime> extends Request {
 
     protected AuditRequest(final RequestId originalRequestId) {
         super.setOriginalRequestId(requireNonNull(originalRequestId));
-
+        LOGGER.debug("AuditRequest called passing in {}", originalRequestId);
         this.timestamp = ZonedDateTime.now();
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
+            LOGGER.error("AuditRequest UnknownHostException: {}", e);
             throw new RuntimeException(e);
         }
         serverHostname = inetAddress.getHostName();
         serverIp = inetAddress.getHostAddress();
+        LOGGER.debug("AuditRequest instantiated and serverHostname is: {}, and serverIP is {}", serverHostname, serverIp);
     }
 
     @Override

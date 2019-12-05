@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -35,6 +37,7 @@ import static java.util.Objects.requireNonNull;
  * and which service it was that triggered the exception.
  */
 public class RegisterRequestExceptionAuditRequest extends AuditRequest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterRequestExceptionAuditRequest.class);
 
     public final UserId userId;
     public final String resourceId;
@@ -51,6 +54,8 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
         this.context = requireNonNull(context);
         this.exception = requireNonNull(exception);
         this.serviceClass = requireNonNull(serviceClass);
+        LOGGER.debug("RegisterRequestExceptionAuditRequest called with originalRequestId: {}, userId: {}, resourceId: {}, context: {}, exception: {}, serviceClass: {}", originalRequestId, userId, resourceId, context, exception, serviceClass);
+
     }
 
     /**
@@ -60,6 +65,7 @@ public class RegisterRequestExceptionAuditRequest extends AuditRequest {
      * @return the {@link RegisterRequestExceptionAuditRequest}
      */
     public static IUserId create(final RequestId original) {
+        LOGGER.debug("RegisterRequestExceptionAuditRequest.create called with originalRequestId: {}", original);
         return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
     }
 
