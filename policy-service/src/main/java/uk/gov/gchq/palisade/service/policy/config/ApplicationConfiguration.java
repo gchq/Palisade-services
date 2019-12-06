@@ -63,7 +63,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public HierarchicalPolicyService hierarchicalPolicyService(final Map<String, BackingStore> backingStores) {
-        return new HierarchicalPolicyService(cacheService(backingStores));
+        HierarchicalPolicyService hierarchicalPolicyService = new HierarchicalPolicyService(cacheService(backingStores));
+        LOGGER.debug("Instantiated HierarchicalPolicyService");
+        return hierarchicalPolicyService;
     }
 
     @Bean(name = "hashmap")
@@ -92,10 +94,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
+        CacheService service = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
+            LOGGER.debug("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
             cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
+        if (service != null) {
+            LOGGER.debug("Instantiated cacheService: {}", service.getClass());
+        } else {
+            LOGGER.error("Failed to instantiate cacheService, returned null");
+        }
+        return service;
     }
 
     @Bean
@@ -107,7 +115,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
+        ServiceInstanceRestController restController = new ServiceInstanceRestController();
+        LOGGER.debug("Instantiated eurekaClient");
+        return restController;
     }
 
     @Override
