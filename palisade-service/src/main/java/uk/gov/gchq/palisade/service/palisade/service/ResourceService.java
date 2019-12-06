@@ -40,16 +40,19 @@ public class ResourceService implements Service {
         this.executor = executor;
     }
 
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest resource) {
+    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
+        LOGGER.debug("Getting resources from resource service: {}", request);
 
         CompletionStage<Map<LeafResource, ConnectionDetail>> resources;
         try {
-            resources = CompletableFuture.supplyAsync(() -> client.getResourcesById(resource));
-            LOGGER.debug("Got resources: {}", resources);
+            LOGGER.info("Resource request: {}", request);
+            resources = CompletableFuture.supplyAsync(() -> client.getResourcesById(request));
+            LOGGER.info("Got resources: {}", resources);
         } catch (Exception ex) {
             LOGGER.error("Failed to get resources: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception
         }
+
         return resources.toCompletableFuture();
     }
 }

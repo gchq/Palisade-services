@@ -16,11 +16,19 @@
 
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -33,16 +41,20 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PolicyServiceTest {
-
+    private Logger logger;
+    private ListAppender<ILoggingEvent> appender;
     private PolicyClient policyClient = Mockito.mock(PolicyClient.class);
     private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private PolicyService policyService;
@@ -51,12 +63,51 @@ public class PolicyServiceTest {
     private Map<LeafResource, Policy> policies = new HashMap<>();
 
     @Before
-    public void setup() {
+    public void setUp() {
+        logger = (Logger) LoggerFactory.getLogger(PolicyService.class);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+
         policyService = new PolicyService(policyClient, applicationConfig.getAsyncExecutor());
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         Policy policy = new Policy().owner(testUser);
         policies.put(resource, policy);
         multiPolicy = new MultiPolicy().policies(policies);
+    }
+
+    @After
+    public void tearDown() {
+        logger.detachAppender(appender);
+        appender.stop();
+    }
+
+    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
+
+    @Test
+    public void infoOnGetPolicyRequest() {
+        // Given
+        GetPolicyRequest request = Mockito.mock(GetPolicyRequest.class);
+        MultiPolicy response = Mockito.mock(MultiPolicy.class);
+        Mockito.when(policyClient.getPolicy(request)).thenReturn(response);
+
+        // When
+        policyService.getPolicy(request);
+
+        // Then
+        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
+
+        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
+                Matchers.containsString(request.toString()),
+                Matchers.anyOf(
+                        Matchers.containsString(response.toString()),
+                        Matchers.containsString("Not completed"))
+        ));
     }
 
     @Test
