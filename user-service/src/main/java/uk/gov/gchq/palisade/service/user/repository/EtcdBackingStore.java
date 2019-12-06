@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class EtcdBackingStore implements BackingStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EtcdBackingStore.class);
     /**
      * Flag to indicate boolean false.
      */
@@ -54,7 +55,7 @@ public class EtcdBackingStore implements BackingStore {
      * Default charset
      */
     public static final Charset UTF8 = StandardCharsets.UTF_8;
-    private static final Logger LOGGER = LoggerFactory.getLogger(EtcdBackingStore.class);
+
     private Collection<URI> connectionDetails;
     private Client etcdClient;
     private KV keyValueClient;
@@ -111,14 +112,14 @@ public class EtcdBackingStore implements BackingStore {
     }
 
     @JsonIgnore
-    public Client getEtcdClient() {
-        requireNonNull(etcdClient, "No connection is open to the etcd cluster.");
-        return etcdClient;
+    public void setEtcdClient(final Collection<URI> connectionDetails) {
+        connectionDetails(connectionDetails);
     }
 
     @JsonIgnore
-    public void setEtcdClient(final Collection<URI> connectionDetails) {
-        connectionDetails(connectionDetails);
+    public Client getEtcdClient() {
+        requireNonNull(etcdClient, "No connection is open to the etcd cluster.");
+        return etcdClient;
     }
 
     @JsonIgnore
@@ -136,6 +137,7 @@ public class EtcdBackingStore implements BackingStore {
     @Override
     public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
         String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
+        LOGGER.debug("Adding cache key {} of class {}", key, valueClass);
         long leaseID = 0;
         if (timeToLive.isPresent()) {
             long ttl = timeToLive.get().getSeconds();
@@ -161,6 +163,7 @@ public class EtcdBackingStore implements BackingStore {
     @Override
     public SimpleCacheObject get(final String key) {
         String cacheKey = BackingStore.keyCheck(key);
+        LOGGER.debug("Getting from cache: {}", cacheKey);
         CompletableFuture<GetResponse> futureValueClass = getKeyValueClient().get(ByteSequence.from(cacheKey + ".class", UTF8));
         CompletableFuture<GetResponse> futureValue = getKeyValueClient().get(ByteSequence.from(cacheKey + ".value", UTF8));
         List<KeyValue> valueClassKV = futureValueClass.join().getKvs();
@@ -177,6 +180,7 @@ public class EtcdBackingStore implements BackingStore {
     @Override
     public Stream<String> list(final String prefix) {
         requireNonNull(prefix, "prefix");
+        LOGGER.debug("Listing from cache: {}", prefix);
         return getKeyValueClient().get(ByteSequence.from(prefix, UTF8), GetOption.newBuilder().withRange(ByteSequence.from(prefix + "~", UTF8)).withKeysOnly(true).build())
                 .join()
                 .getKvs()
@@ -192,6 +196,8 @@ public class EtcdBackingStore implements BackingStore {
         CompletableFuture<DeleteResponse> removedValue = getKeyValueClient().delete(ByteSequence.from(cacheKey + ".value", UTF8));
         CompletableFuture<DeleteResponse> removedClass = getKeyValueClient().delete(ByteSequence.from(cacheKey + ".class", UTF8));
         CompletableFuture.allOf(removedClass).join();
-        return (removedValue.join().getDeleted() != 0);
+        boolean ret = removedValue.join().getDeleted() != 0;
+        LOGGER.debug("Remove cache key {}: result {}", cacheKey, ret);
+        return ret;
     }
 }

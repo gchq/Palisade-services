@@ -38,13 +38,14 @@ public class PolicyService implements Service {
         this.executor = executor;
     }
 
-    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest policyRequest) {
+    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request) {
+        LOGGER.debug("Getting policy from policy service: {}", request);
 
         CompletionStage<MultiPolicy> policy;
-
         try {
-            policy = CompletableFuture.supplyAsync(() -> client.getPolicy(policyRequest));
-            LOGGER.debug("Got policy: {}", policy);
+            LOGGER.info("Policy request: {}", request);
+            policy = CompletableFuture.supplyAsync(() -> client.getPolicy(request));
+            LOGGER.info("Got policy: {}", policy);
         } catch (Exception ex) {
             LOGGER.error("Failed to get policy: {}", ex.getMessage());
             throw new RuntimeException(ex);
