@@ -19,8 +19,8 @@ metadata:
     name: {{ include "policy-service.name" . }}
     namespace: {{ include "palisade.namespace" . }}
     labels:
-        app.kubernetes.io/name: {{ include "palisade-service.name" . }}
-        helm.sh/chart: {{ include "palisade-service.chart" . }}
+        app.kubernetes.io/name: {{ include "policy-service.name" . }}
+        helm.sh/chart: {{ include "policy-service.chart" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
