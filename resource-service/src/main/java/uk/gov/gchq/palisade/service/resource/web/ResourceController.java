@@ -49,32 +49,42 @@ public class ResourceController {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
-        LOGGER.debug("Invoking getResourceById: {}", request);
-        return getResourcesByIdRequest(request);
+        LOGGER.info("Invoking getResourceById: {}", request);
+        Map<LeafResource, ConnectionDetail> response = getResourcesByIdRequest(request);
+        LOGGER.info("Returning reponse {}", response);
+        return response;
     }
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
-        LOGGER.debug("Invoking getResourcesByResource: {}", request);
-        return getResourceByResourceRequest(request);
+        LOGGER.info("Invoking getResourcesByResource: {}", request);
+        Map<LeafResource, ConnectionDetail> response = getResourceByResourceRequest(request);
+        LOGGER.info("Returning reponse {}", response);
+        return response;
     }
 
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
-        LOGGER.debug("Invoking getResourceByType: {}", request);
-        return getResourceByTypeRequest(request);
+        LOGGER.info("Invoking getResourceByType: {}", request);
+        Map<LeafResource, ConnectionDetail> response = getResourceByTypeRequest(request);
+        LOGGER.info("Returning reponse {}", response);
+        return response;
     }
 
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
-        LOGGER.debug("Invoking getResourcesBySerialisedFormatRequest: {}", request);
-        return getResourceBySerialisedFormat(request);
+        LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
+        Map<LeafResource, ConnectionDetail> response = getResourceBySerialisedFormat(request);
+        LOGGER.info("Returning reponse {}", response);
+        return response;
     }
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     public Boolean addResource(@RequestBody final AddResourceRequest request) {
-        LOGGER.debug("Invoking addResource: {}", request);
-        return addResourceRequest(request);
+        LOGGER.info("Invoking addResource: {}", request);
+        Boolean response = addResourceRequest(request);
+        LOGGER.info("Returning reponse {}", response);
+        return response;
     }
 
     private Map<LeafResource, ConnectionDetail> getResourcesByIdRequest(final GetResourcesByIdRequest request) {
