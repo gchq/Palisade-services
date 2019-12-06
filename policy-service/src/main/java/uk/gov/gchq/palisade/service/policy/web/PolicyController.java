@@ -46,49 +46,53 @@ public class PolicyController {
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
     public CanAccessResponse registerDataRequestSync(@RequestBody final CanAccessRequest request) {
-        LOGGER.debug("Invoking registerDataRequest: {}", request);
+        LOGGER.info("Invoking registerDataRequest: {}", request);
         return this.canAccess(request).join();
-    }
-
-    public CompletableFuture<CanAccessResponse> canAccess(final CanAccessRequest request) {
-        return service.canAccess(request);
     }
 
     @PostMapping(value = "/getPolicySync", consumes = "application/json", produces = "application/json")
     public MultiPolicy getPolicySync(@RequestBody final GetPolicyRequest request) {
-        LOGGER.debug("Invoking getPolicy: {}", request);
+        LOGGER.info("Invoking getPolicySync: {}", request);
         return getPolicy(request).join();
-    }
-
-    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request) {
-        return service.getPolicy(request);
     }
 
 
     @PutMapping(value = "/setResourcePolicySync", consumes = "application/json", produces = "application/json")
     public void setResourcePolicySync(@RequestBody final SetResourcePolicyRequest request) {
+        LOGGER.info("Invoking setResourcePolicySync: {}", request);
         setResourcePolicy(request).join();
     }
 
     @PutMapping(value = "/setResourcePolicyAsync", consumes = "application/json", produces = "application/json")
     public void setResourcePolicyAsync(final SetResourcePolicyRequest request) {
+        LOGGER.info("Invoking setResourcePolicyAsync: {}", request);
         setResourcePolicy(request);
     }
 
+    @PutMapping(value = "/setTypePolicyAsync", consumes = "application/json", produces = "application/json")
+    public void setTypePolicyAsync(final SetTypePolicyRequest request) {
+        LOGGER.info("Invoking setTypePolicyAsync: {}", request);
+        setTypePolicy(request);
+    }
 
     public CompletableFuture<Boolean> setResourcePolicy(final SetResourcePolicyRequest request) {
         LOGGER.debug("Invoking setResourcePolicy: {}", request);
         return service.setResourcePolicy(request);
     }
 
-
-    @PutMapping(value = "/setTypePolicyAsync", consumes = "application/json", produces = "application/json")
-    public void setTypePolicyAsync(final SetTypePolicyRequest request) {
-        setTypePolicy(request);
-    }
-
     public CompletableFuture<Boolean> setTypePolicy(final SetTypePolicyRequest request) {
         LOGGER.debug("Invoking setTypePolicy: {}", request);
         return service.setTypePolicy(request);
     }
+
+    public CompletableFuture<CanAccessResponse> canAccess(final CanAccessRequest request) {
+        LOGGER.debug("Invoking canAccess: {}", request);
+        return service.canAccess(request);
+    }
+
+    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request) {
+        LOGGER.debug("Invoking getPolicy: {}", request);
+        return service.getPolicy(request);
+    }
+
 }
