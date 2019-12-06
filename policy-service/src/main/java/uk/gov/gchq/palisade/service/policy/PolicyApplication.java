@@ -16,18 +16,24 @@
 
 package uk.gov.gchq.palisade.service.policy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+import java.util.Arrays;
+
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public class PolicyApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyApplication.class);
 
     public static void main(final String[] args) {
+        LOGGER.debug("PolicyApplication started with: {}", PolicyApplication.class.toString(), "main", Arrays.toString(args));
         new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
