@@ -182,7 +182,7 @@ public class PropertiesBackingStore implements BackingStore {
                         final Path completePath = eventPath.resolve(changed);
                         //see if the file we care about changed
                         if (completePath.equals(watchPath)) {
-                            LOGGER.info("Properties backing file changed {}", watchPath);
+                            LOGGER.debug("Properties backing file changed {}", watchPath);
                             //trigger the action, might have been gc'd since the first check
                             PropertiesBackingStore store = action.get();
                             if (store != null) {
@@ -336,12 +336,12 @@ public class PropertiesBackingStore implements BackingStore {
      */
     @Override
     public SimpleCacheObject get(final String key) {
+        LOGGER.debug("Getting from cache: {}", key);
         String cacheKey = BackingStore.keyCheck(key);
         //enforce and any expiries and persist
         update(false);
         synchronized (this) {
             String b64Value = props.getProperty(cacheKey);
-            LOGGER.debug("Looking up key {} from cache", cacheKey);
             if (b64Value != null) {
                 //key found
                 try {
@@ -350,11 +350,12 @@ public class PropertiesBackingStore implements BackingStore {
 
                     return new SimpleCacheObject(valueClass, Optional.of(value));
                 } catch (Exception e) {
-                    LOGGER.warn("Couldn't retrieve key {}", key, e);
+                    LOGGER.error("Couldn't retrieve key {}: exception while creating class {}", key, e);
                     return new SimpleCacheObject(Object.class, Optional.empty());
                 }
             } else {
                 //key not found
+                LOGGER.warn("Couldn't retrieve key {}", key);
                 return new SimpleCacheObject(Object.class, Optional.empty());
             }
         }
@@ -371,7 +372,7 @@ public class PropertiesBackingStore implements BackingStore {
                 removeKey(cacheKey);
                 update(true);
             }
-            LOGGER.debug("Cache key remove of {} possible {}", cacheKey, present);
+            LOGGER.debug("Remove cache key {}: result {}", key, present);
             return present;
         }
     }
@@ -382,22 +383,20 @@ public class PropertiesBackingStore implements BackingStore {
     @Override
     public Stream<String> list(final String prefix) {
         requireNonNull(prefix, "prefix");
+        LOGGER.debug("Listing from cache: {}", prefix);
         update(false);
         Set<?> clonedSet;
         synchronized (this) {
             clonedSet = new HashSet<>(props.keySet());
         }
-        return clonedSet
-                .stream()
+        return clonedSet.stream()
                 //filter any non string properties
                 .filter(String.class::isInstance)
                 //perform cast now we know it's safe
                 .map(String.class::cast)
                 .filter(x -> !x.endsWith(EXPIRY_SUFFIX))
                 .filter(x -> !x.endsWith(CLASS_SUFFIX))
-                .filter(x -> x.startsWith(
-                        prefix)
-                );
+                .filter(x -> x.startsWith(prefix));
     }
 
     /**
