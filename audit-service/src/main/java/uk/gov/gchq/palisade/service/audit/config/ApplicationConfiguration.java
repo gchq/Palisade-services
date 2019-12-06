@@ -41,28 +41,29 @@ public class ApplicationConfiguration {
     @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
     public SimpleAuditService auditService() {
         SimpleAuditService simpleUserService = new SimpleAuditService();
-        LOGGER.debug("Instantiated SimpleAuditService");
+        LOGGER.info("Instantiated SimpleAuditService");
         return simpleUserService;
     }
 
     @Bean(name = "stroom")
     @ConditionalOnProperty(prefix = "audit.implementations", name = StroomAuditService.CONFIG_KEY)
     public StroomAuditService stroomAuditService() {
+        LOGGER.info("Instantiated StroomAuditService");
         return new StroomAuditService(new DefaultEventLoggingService());
     }
 
     @Bean(name = "logger")
     @ConditionalOnProperty(prefix = "audit.implementations", name = LoggerAuditService.CONFIG_KEY)
     public LoggerAuditService loggerAuditService() {
+        LOGGER.info("Instantiated LoggerAuditService");
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
-        ServiceInstanceRestController serviceInstanceRestController = new ServiceInstanceRestController();
-        LOGGER.debug("Instantiated eurekaClient");
-        return serviceInstanceRestController;
+        LOGGER.info("Instantiated eurekaClient");
+        return new ServiceInstanceRestController();
     }
 
 }
