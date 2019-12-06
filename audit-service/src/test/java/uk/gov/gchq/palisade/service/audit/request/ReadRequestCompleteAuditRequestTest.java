@@ -31,11 +31,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotEquals;
+import static org.hamcrest.core.IsNot.not;
 
 @RunWith(JUnit4.class)
 public class ReadRequestCompleteAuditRequestTest {
@@ -79,7 +80,7 @@ public class ReadRequestCompleteAuditRequestTest {
         assertThat("ReadRequestCompleteAuditRequest could not be parsed from json string", subject.numberOfRecordsProcessed, is(equalTo(200L)));
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages, is(not(emptyList())));
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("ReadRequestCompleteAuditRequest.create called with RequestId"),
                 Matchers.anyOf(
@@ -103,7 +104,7 @@ public class ReadRequestCompleteAuditRequestTest {
 
         assertThat("ReadRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed, timestamp, serverIp, serverHostname")));
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages, is(not(emptyList())));
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("ReadRequestCompleteAuditRequest.create called with RequestId"),
                 Matchers.anyOf(
@@ -123,7 +124,7 @@ public class ReadRequestCompleteAuditRequestTest {
 
         assertThat("ReadRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("user2")));
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages, is(not(emptyList())));
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("ReadRequestCompleteAuditRequest.create called with RequestId"),
                 Matchers.anyOf(

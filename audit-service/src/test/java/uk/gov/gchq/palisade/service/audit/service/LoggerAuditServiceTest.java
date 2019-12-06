@@ -59,6 +59,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
         rules = mockRules();
     }
 
+
     @Test
     public void auditRegisterRequestSuccessful() {
         // Given
