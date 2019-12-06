@@ -68,7 +68,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
         logger.info(msg);
-        LOGGER.debug("onRegisterRequestComplete called and log message is: {}", msg);
+        LOGGER.info("onRegisterRequestComplete called and log message is: {}", msg);
     }
 
     private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
@@ -86,7 +86,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
         logger.info(msg);
-        LOGGER.debug("onReadRequestComplete called and log message is: {}", msg);
+        LOGGER.info("onReadRequestComplete called and log message is: {}", msg);
 
     }
 
@@ -96,7 +96,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
         logger.error(msg);
-        LOGGER.debug("onReadRequestException called and log message is: {}", msg);
+        LOGGER.error("onReadRequestException called and log message is: {}", msg);
     }
 
     @Override
