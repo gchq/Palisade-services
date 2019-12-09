@@ -19,7 +19,7 @@ metadata:
   name: {{ include "audit-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    app.kubernetes.io/name: {{ include "audit-service.name" . }}
+    kubernetes.io/name: {{ include "audit-service.name" . }}
     helm.sh/chart: {{ include "audit-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
