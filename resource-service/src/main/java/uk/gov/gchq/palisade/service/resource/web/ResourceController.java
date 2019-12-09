@@ -92,8 +92,8 @@ public class ResourceController {
             return service.getResourcesById(request).get();
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
+            return null;
         }
-        return null;
     }
 
     private Map<LeafResource, ConnectionDetail> getResourceByResourceRequest(final GetResourcesByResourceRequest request) {
