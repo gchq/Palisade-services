@@ -24,11 +24,10 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -37,22 +36,24 @@ import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.request.Request;
+import uk.gov.gchq.palisade.service.resource.impl.MockResourceService;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Theories.class)
 public class ResourceControllerTest {
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private ResourceController controller;
-
-    @Mock
-    ResourceService resourceService;
+    private MockResourceService resourceService;
 
     @Before
     public void setUp() {
@@ -60,6 +61,7 @@ public class ResourceControllerTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
+        resourceService = new MockResourceService();
         controller = new ResourceController(resourceService);
     }
 
@@ -76,15 +78,34 @@ public class ResourceControllerTest {
                 .collect(Collectors.toList());
     }
 
-    @Test
-    public void infoOnGetByIdRequest() {
+    @DataPoints
+    public static List<Request> requests = Arrays.asList(
+            new GetResourcesByIdRequest(),
+            new GetResourcesByResourceRequest(),
+            new GetResourcesBySerialisedFormatRequest(),
+            new GetResourcesByTypeRequest());
+
+    @DataPoints
+    public static List<Exception> exceptions = Arrays.asList(
+            new InterruptedException("InterruptedException"),
+            new ExecutionException("ExecutionException", null));
+
+    private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
+    {
+        requestMethods.put(GetResourcesByIdRequest.class, request -> controller.getResourcesById((GetResourcesByIdRequest) request));
+        requestMethods.put(GetResourcesByResourceRequest.class, request -> controller.getResourcesByResource((GetResourcesByResourceRequest) request));
+        requestMethods.put(GetResourcesBySerialisedFormatRequest.class, request -> controller.getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request));
+        requestMethods.put(GetResourcesByTypeRequest.class, request -> controller.getResourcesByType((GetResourcesByTypeRequest) request));
+    }
+
+    @Theory
+    public void infoOnGetResourceRequest(Request request) {
         // Given
-        GetResourcesByIdRequest request = Mockito.mock(GetResourcesByIdRequest.class);
-        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceService.getResourcesById(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
+        Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
 
         // When
-        controller.getResourcesById(request);
+        Map<LeafResource, ConnectionDetail> response = method.apply(request);
 
         // Then
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
@@ -95,60 +116,23 @@ public class ResourceControllerTest {
         ));
     }
 
-    @Test
-    public void infoOnGetByResourceRequest() {
+    @Theory
+    public void errorOnRequestException(Request request, Exception exception) {
         // Given
-        GetResourcesByResourceRequest request = Mockito.mock(GetResourcesByResourceRequest.class);
-        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceService.getResourcesByResource(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
+        Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
+        resourceService.willThrow(exception);
 
         // When
-        controller.getResourcesByResource(request);
+        Map<LeafResource, ConnectionDetail> response = method.apply(request);
 
         // Then
-        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
+        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
 
-        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
+        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
                 Matchers.containsString(request.toString()),
-                Matchers.containsString(response.toString())
+                Matchers.containsString(exception.getMessage())
         ));
     }
 
-    @Test
-    public void infoOnGetByTypeRequest() {
-        // Given
-        GetResourcesByTypeRequest request = Mockito.mock(GetResourcesByTypeRequest.class);
-        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceService.getResourcesByType(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
-
-        // When
-        controller.getResourcesByType(request);
-
-        // Then
-        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
-
-        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(response.toString())
-        ));
-    }
-
-    @Test
-    public void infoOnGetBySerialisedFormatRequest() {
-        // Given
-        GetResourcesBySerialisedFormatRequest request = Mockito.mock(GetResourcesBySerialisedFormatRequest.class);
-        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceService.getResourcesBySerialisedFormat(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
-
-        // When
-        controller.getResourcesBySerialisedFormat(request);
-
-        // Then
-        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
-
-        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(response.toString())
-        ));
-    }
 }

@@ -90,10 +90,8 @@ public class ResourceController {
     private Map<LeafResource, ConnectionDetail> getResourcesByIdRequest(final GetResourcesByIdRequest request) {
         try {
             return service.getResourcesById(request).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
-        } catch (ExecutionException e) {
-            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
         }
         return null;
     }
@@ -101,44 +99,36 @@ public class ResourceController {
     private Map<LeafResource, ConnectionDetail> getResourceByResourceRequest(final GetResourcesByResourceRequest request) {
         try {
             return service.getResourcesByResource(request).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
-        } catch (ExecutionException e) {
-            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
+            return null;
         }
-        return null;
     }
 
     private Map<LeafResource, ConnectionDetail> getResourceByTypeRequest(final GetResourcesByTypeRequest request) {
         try {
             return service.getResourcesByType(request).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
-        } catch (ExecutionException e) {
-            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
+            return null;
         }
-        return null;
     }
 
     private Map<LeafResource, ConnectionDetail> getResourceBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         try {
             return service.getResourcesBySerialisedFormat(request).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
-        } catch (ExecutionException e) {
-            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
+            return null;
         }
-        return null;
     }
 
     private Boolean addResourceRequest(final AddResourceRequest request) {
         try {
             return service.addResource(request).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted Exception Encountered: {}", e.getMessage());
-        } catch (ExecutionException e) {
-            LOGGER.error("Execution Exception Encountered: {}", e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
+            return null;
         }
-        return null;
     }
 }
