@@ -60,7 +60,6 @@ public class AuditRequest<ZoneDateTime> extends Request {
     public final String serverHostname;
 
     protected AuditRequest() {
-        LOGGER.debug("AuditRequest called");
         this.timestamp = null;
         this.serverIp = null;
         this.serverHostname = null;

@@ -318,12 +318,10 @@ public class StroomAuditService implements AuditService {
     }
 
     public String getSystemName() {
-        LOGGER.debug("systemName is {}", SYSTEM.getName());
         return SYSTEM.getName();
     }
 
     public void setSystemName(final String systemName) {
-        LOGGER.debug("systemName is {}", systemName);
         systemName(systemName);
     }
 
@@ -360,12 +358,10 @@ public class StroomAuditService implements AuditService {
     }
 
     public String getSystemEnv() {
-        LOGGER.debug("systemEnv is {}", SYSTEM.getEnvironment());
         return SYSTEM.getEnvironment();
     }
 
     public void setSystemEnv(final String systemEnv) {
-        LOGGER.debug("systemEnv is {}", systemEnv);
         systemEnv(systemEnv);
     }
 
@@ -381,12 +377,10 @@ public class StroomAuditService implements AuditService {
     }
 
     public String getSystemDescription() {
-        LOGGER.debug("systemDescription is {}", SYSTEM.getDescription());
         return SYSTEM.getDescription();
     }
 
     public void setSystemDescription(final String description) {
-        LOGGER.debug("systemDescription is {}", description);
         systemDescription(description);
     }
 
@@ -396,18 +390,15 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService systemVersion(final String systemVersion) {
         requireNonNull(systemVersion, "The systemVersion cannot be null.");
-        LOGGER.debug("systemVersion is {}", systemVersion);
         SYSTEM.setVersion(systemVersion);
         return this;
     }
 
     public String getSystemVersion() {
-        LOGGER.debug("systemVersion is {}", SYSTEM.getVersion());
         return SYSTEM.getVersion();
     }
 
     public void setSystemVersion(final String systemVersion) {
-        LOGGER.debug("systemVersion is {}", systemVersion);
         systemVersion(systemVersion);
     }
 
