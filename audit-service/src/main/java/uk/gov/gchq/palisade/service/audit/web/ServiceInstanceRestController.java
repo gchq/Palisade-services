@@ -16,6 +16,8 @@
 
 package uk.gov.gchq.palisade.service.audit.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -29,6 +31,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class ServiceInstanceRestController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInstanceRestController.class);
+
 
     @Autowired
     private DiscoveryClient discoveryClient;
@@ -36,6 +40,7 @@ public class ServiceInstanceRestController {
     @RequestMapping(value = "/service-instances/{applicationName}", method = GET)
     public List<ServiceInstance> serviceInstancesByApplicationName(
             @PathVariable final String applicationName) {
+        LOGGER.info("Queried for service instance: {}", applicationName);
         return this.discoveryClient.getInstances(applicationName);
     }
 
