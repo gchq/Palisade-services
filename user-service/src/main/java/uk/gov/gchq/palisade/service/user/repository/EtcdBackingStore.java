@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class EtcdBackingStore implements BackingStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EtcdBackingStore.class);
     /**
      * Flag to indicate boolean false.
      */
@@ -54,7 +55,7 @@ public class EtcdBackingStore implements BackingStore {
      * Default charset
      */
     public static final Charset UTF8 = StandardCharsets.UTF_8;
-    private static final Logger LOGGER = LoggerFactory.getLogger(EtcdBackingStore.class);
+
     private Collection<URI> connectionDetails;
     private Client etcdClient;
     private KV keyValueClient;
@@ -111,14 +112,14 @@ public class EtcdBackingStore implements BackingStore {
     }
 
     @JsonIgnore
-    public Client getEtcdClient() {
-        requireNonNull(etcdClient, "No connection is open to the etcd cluster.");
-        return etcdClient;
+    public void setEtcdClient(final Collection<URI> connectionDetails) {
+        connectionDetails(connectionDetails);
     }
 
     @JsonIgnore
-    public void setEtcdClient(final Collection<URI> connectionDetails) {
-        connectionDetails(connectionDetails);
+    public Client getEtcdClient() {
+        requireNonNull(etcdClient, "No connection is open to the etcd cluster.");
+        return etcdClient;
     }
 
     @JsonIgnore

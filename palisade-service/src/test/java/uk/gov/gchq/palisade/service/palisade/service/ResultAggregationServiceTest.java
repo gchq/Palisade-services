@@ -78,11 +78,12 @@ public class ResultAggregationServiceTest {
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource().id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt")
-                .parent(new DirectoryResource().id("/path/to/new/")
-                        .parent(new DirectoryResource().id("/path/to/")
-                                .parent(new DirectoryResource().id("/path/")
-                                        .parent(new SystemResource().id("/")))));
+        FileResource resource = new FileResource();
+        resource.id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt");
+        resource.parent(new DirectoryResource().id("/path/to/new/")
+                .parent(new DirectoryResource().id("/path/to/")
+                        .parent(new DirectoryResource().id("/path/")
+                                .parent(new SystemResource().id("/")))));
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
         resources.put(resource, connectionDetail);
 

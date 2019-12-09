@@ -39,9 +39,11 @@ import static java.util.Objects.requireNonNull;
 public class K8sBackingStore implements BackingStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(K8sBackingStore.class);
-    private static final String NAMESPACE = "default";
+
     private final Config config = new ConfigBuilder().build();
     private final KubernetesClient client = new DefaultKubernetesClient(config);
+
+    private static final String NAMESPACE = "default";
     private final String namespace = Optional.ofNullable(client.getNamespace()).orElse(NAMESPACE);
 
     public K8sBackingStore() {
@@ -53,6 +55,13 @@ public class K8sBackingStore implements BackingStore {
             LOGGER.error("Not running in kubernetes or RBAC not entitled");
             throw e;
         }
+    }
+
+    /**
+     * Clean up the resource
+     */
+    public void close() {
+        client.close();
     }
 
     /**
@@ -70,13 +79,6 @@ public class K8sBackingStore implements BackingStore {
         return key.toLowerCase().replaceAll("[^a-z0-9\\-]", "");
     }
 
-    /**
-     * Clean up the resource
-     */
-
-    public void close() {
-        client.close();
-    }
 
     /**
      * Store the given data in the backing store. The byte array <code>value</code> is assumed to encode an object of
@@ -118,7 +120,6 @@ public class K8sBackingStore implements BackingStore {
                     .addToData("value", new String(value))
                     .addToData("expiryTimestamp", String.valueOf(epochMilli))
                     .build());
-
         } else {
             configMap = configMapResource.createOrReplace(new ConfigMapBuilder()
                     .withNewMetadata().withName(dns1123Compatible).endMetadata()
@@ -129,6 +130,7 @@ public class K8sBackingStore implements BackingStore {
         LOGGER.debug("Upserted ConfigMap {} with data {}", configMap.getMetadata().getSelfLink(), configMap.getData());
         return true;
     }
+
 
     /**
      * Attempt to get the given key from the backing store. Looks up the given key and attempts to get it. If the
@@ -163,6 +165,7 @@ public class K8sBackingStore implements BackingStore {
                 }
                 String className = Class.forName(configMap.getData().get("valueClass")).toString();
                 byte[] data = configMap.getData().get("value").getBytes(StandardCharsets.UTF_8);
+
                 LOGGER.debug("Completed get for key {}, classname {} with data {}", key, className, Arrays.toString(data));
 
                 return new SimpleCacheObject(Class.forName(configMap.getData().get("valueClass")), Optional.of(configMap.getData().get("value").getBytes(StandardCharsets.UTF_8)));

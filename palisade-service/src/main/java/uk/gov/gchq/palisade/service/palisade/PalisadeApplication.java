@@ -16,18 +16,25 @@
 
 package uk.gov.gchq.palisade.service.palisade;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+import java.util.Arrays;
+
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public class PalisadeApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeApplication.class);
 
     public static void main(final String[] args) {
+        LOGGER.debug("PalisadeApplication started with: {}", PalisadeApplication.class.toString(), "main", Arrays.toString(args));
+
         new SpringApplicationBuilder(PalisadeApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }

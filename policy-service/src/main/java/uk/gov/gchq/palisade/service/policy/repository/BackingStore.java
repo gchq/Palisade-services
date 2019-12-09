@@ -62,7 +62,7 @@ public interface BackingStore {
      * @throws IllegalArgumentException if the duration is negative
      * @throws IllegalArgumentException if <code>key</code> is empty (once whitespace is trimmed)
      */
-    boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive);
+    boolean add(String key, Class<?> valueClass, byte[] value, Optional<Duration> timeToLive);
 
     /**
      * Store the given data with infinite time to live. This a convenience method that simply calls {@link
@@ -90,7 +90,7 @@ public interface BackingStore {
      * @return a new cache object
      * @throws IllegalArgumentException if <code>key</code> is empty (once whitespace is trimmed)
      */
-    SimpleCacheObject get(final String key);
+    SimpleCacheObject get(String key);
 
     /**
      * Remove the given key from the backing store. If the key is present it will be removed, otherwise nothing will happen.
@@ -100,7 +100,7 @@ public interface BackingStore {
      * @param key the key to remove
      * @return true if the key and value pair was removed, false otherwise
      */
-    boolean remove(final String key);
+    boolean remove(String key);
 
     /**
      * Get a stream of all keys with a given prefix. This method acts as a way to query the backing store to find which
@@ -109,7 +109,7 @@ public interface BackingStore {
      * @param prefix the prefix to look for
      * @return a stream of valid keys
      */
-    Stream<String> list(final String prefix);
+    Stream<String> list(String prefix);
 
     /**
      * Closes the backing store. This method must be idempotent.

@@ -52,22 +52,26 @@ public class HashMapBackingStore implements BackingStore {
      * The static map that contains the removal handles.
      */
     private static final ConcurrentHashMap<String, ScheduledFuture<?>> REMOVAL_HANDLES = new ConcurrentHashMap<>();
-    /**
-     * Timer thread to remove cache entries after expiry.
-     */
-    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor(Util.createDaemonThreadFactory());
+
     /**
      * The actual backing store for all cached data.
      */
     private final ConcurrentHashMap<String, CachedPair> cache;
+
     /**
      * The map of removal handles for time to live entries.
      */
     private final ConcurrentHashMap<String, ScheduledFuture<?>> removals;
+
     /**
      * Is the shared instance in use?
      */
     private final boolean useStatic;
+
+    /**
+     * Timer thread to remove cache entries after expiry.
+     */
+    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor(Util.createDaemonThreadFactory());
 
     /**
      * Create a {@link HashMapBackingStore} which uses the JVM wide shared object cache.
@@ -92,13 +96,68 @@ public class HashMapBackingStore implements BackingStore {
         this.useStatic = useStatic;
     }
 
+    /**
+     * Simple POJO for pairing together the object's class with the encoded form of the object.
+     */
+    private static class CachedPair {
+
+        /**
+         * Encoded form.
+         */
+        public final byte[] value;
+
+        /**
+         * Class of the value field.
+         */
+        public final Class<?> clazz;
+
+        /**
+         * Create a cache entry pair.
+         *
+         * @param value encoded object
+         * @param clazz Java class object
+         */
+        CachedPair(final byte[] value, final Class<?> clazz) {
+            this.value = value;
+            this.clazz = clazz;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CachedPair)) {
+                return false;
+            }
+            CachedPair that = (CachedPair) o;
+            return Arrays.equals(value, that.value) &&
+                    clazz.equals(that.clazz);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(clazz);
+            result = 31 * result + Arrays.hashCode(value);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", CachedPair.class.getSimpleName() + "[", "]")
+                    .add("value=" + Arrays.toString(value))
+                    .add("clazz=" + clazz)
+                    .toString();
+        }
+    }
+
     public boolean getUseStatic() {
         return useStatic;
     }
 
     @Override
     public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
-        LOGGER.debug("Adding to cache key {} of class {}", key, valueClass);
+        LOGGER.debug("Adding cache key {} of class {}", key, valueClass);
         String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
         cache.put(cacheKey, new CachedPair(value, valueClass));
         /*Here we set up a simple timer to deal with the removal of the item from the cache if a duration is present
@@ -177,61 +236,6 @@ public class HashMapBackingStore implements BackingStore {
                 .add("removals=" + removals)
                 .add("useStatic=" + useStatic)
                 .toString();
-    }
-
-    /**
-     * Simple POJO for pairing together the object's class with the encoded form of the object.
-     */
-    private static class CachedPair {
-
-        /**
-         * Encoded form.
-         */
-        public final byte[] value;
-
-        /**
-         * Class of the value field.
-         */
-        public final Class<?> clazz;
-
-        /**
-         * Create a cache entry pair.
-         *
-         * @param value encoded object
-         * @param clazz Java class object
-         */
-        CachedPair(final byte[] value, final Class<?> clazz) {
-            this.value = value;
-            this.clazz = clazz;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof CachedPair)) {
-                return false;
-            }
-            CachedPair that = (CachedPair) o;
-            return Arrays.equals(value, that.value) &&
-                    clazz.equals(that.clazz);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = Objects.hash(clazz);
-            result = 31 * result + Arrays.hashCode(value);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", CachedPair.class.getSimpleName() + "[", "]")
-                    .add("value=" + Arrays.toString(value))
-                    .add("clazz=" + clazz)
-                    .toString();
-        }
     }
 }
 
