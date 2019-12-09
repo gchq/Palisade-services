@@ -42,6 +42,7 @@ public class UserService implements Service {
 
         CompletionStage<User> user;
         try {
+            LOGGER.info("Getting user for id {}", request.getUserId().getId());
             user = CompletableFuture.supplyAsync(() -> userClient.getUser(request));
             LOGGER.debug("Got user: {}", user);
         } catch (Exception ex) {

@@ -137,27 +137,9 @@ public class ServicesRunner implements ApplicationRunner {
     public void run(final ApplicationArguments args) throws Exception {
         LOGGER.info(String.format("Loaded %s service configurations from file", configsFromFile.size()));
 
-        for (OverridableConfiguration overridableConfiguration : configsFromFile) {
-            LOGGER.info("Configs Loaded from file: {} - {} - {} - {}",
-                    overridableConfiguration.getName(),
-                    overridableConfiguration.getProfiles(),
-                    overridableConfiguration.getTarget(),
-                    overridableConfiguration.getConfig());
-        }
-
         // Build a set of configurations for processes from config and commandline args
-        LOGGER.info("Building a set of configurations from config and command line arguments");
         List<OverridableConfiguration> serviceConfigurations = loadConfigurations(configsFromFile, args);
         LOGGER.info(String.format("Loaded %s configurations total", serviceConfigurations.size()));
-
-        for (OverridableConfiguration overridableConfiguration : serviceConfigurations) {
-            LOGGER.info("{} Config:\t - Profile: {},\t - Config: {},\t - Target: {},\t - Log: {}",
-                    overridableConfiguration.getName(),
-                    overridableConfiguration.getProfiles(),
-                    overridableConfiguration.getConfig(),
-                    overridableConfiguration.getTarget(),
-                    overridableConfiguration.getLog());
-        }
 
         List<ProcessBuilder> processBuilders = constructProcessRunners(serviceConfigurations);
         LOGGER.info(String.format("Prepared %s processes to run", processBuilders.size()));
