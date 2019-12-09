@@ -47,6 +47,7 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
+import uk.gov.gchq.palisade.service.palisade.web.ServiceInstanceRestController;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.net.URI;
@@ -139,16 +140,29 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
+        CacheService service = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
+            LOGGER.debug("Cache backing implementation: {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
             cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
+        if (service != null) {
+            LOGGER.info("Instantiated cacheService: {}", service.getClass());
+        } else {
+            LOGGER.error("Failed to instantiate cacheService, returned null");
+        }
+        return service;
     }
 
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
+    }
+
+    @Bean(name = "eureka-client")
+    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
+    public ServiceInstanceRestController eurekaClient() {
+        LOGGER.info("Instantiated eurekaClient");
+        return new ServiceInstanceRestController();
     }
 
     @Override

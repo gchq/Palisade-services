@@ -44,8 +44,10 @@ public class PalisadeController {
 
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")
     public DataRequestResponse registerDataRequestSync(@RequestBody final RegisterDataRequest request) {
-        LOGGER.debug("Invoking registerDataRequest: {}", request);
-        return this.registerDataRequest(request).join();
+        LOGGER.info("Invoking registerDataRequest: {}", request);
+        DataRequestResponse response = this.registerDataRequest(request).join();
+        LOGGER.info("Returning response: {}", response);
+        return response;
     }
 
     public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
@@ -54,8 +56,10 @@ public class PalisadeController {
 
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
     public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) {
-        LOGGER.debug("Invoking getDataRequestConfig: {}", request);
-        return getDataRequestConfig(request).join();
+        LOGGER.info("Invoking getDataRequestConfig: {}", request);
+        DataRequestConfig response = getDataRequestConfig(request).join();
+        LOGGER.info("Returning response: {}", response);
+        return response;
     }
 
     public CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {

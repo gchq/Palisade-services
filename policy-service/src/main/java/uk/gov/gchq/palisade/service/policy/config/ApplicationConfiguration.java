@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.policy.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.policy.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.policy.service.CacheService;
 import uk.gov.gchq.palisade.service.policy.service.HierarchicalPolicyService;
+import uk.gov.gchq.palisade.service.policy.web.ServiceInstanceRestController;
 
 import java.net.URI;
 import java.util.Map;
@@ -62,7 +63,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public HierarchicalPolicyService hierarchicalPolicyService(final Map<String, BackingStore> backingStores) {
-        return new HierarchicalPolicyService(cacheService(backingStores));
+        HierarchicalPolicyService hierarchicalPolicyService = new HierarchicalPolicyService(cacheService(backingStores));
+        LOGGER.debug("Instantiated HierarchicalPolicyService");
+        return hierarchicalPolicyService;
     }
 
     @Bean(name = "hashmap")
@@ -91,16 +94,30 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
+        CacheService service = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
+            LOGGER.debug("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
             cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
         }).findFirst().orElse(null);
+        if (service != null) {
+            LOGGER.debug("Instantiated cacheService: {}", service.getClass());
+        } else {
+            LOGGER.error("Failed to instantiate cacheService, returned null");
+        }
+        return service;
     }
 
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
+    }
+
+    @Bean(name = "eureka-client")
+    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
+    public ServiceInstanceRestController eurekaClient() {
+        ServiceInstanceRestController restController = new ServiceInstanceRestController();
+        LOGGER.debug("Instantiated eurekaClient");
+        return restController;
     }
 
     @Override

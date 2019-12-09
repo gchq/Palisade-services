@@ -39,16 +39,18 @@ public class UserService implements Service {
     }
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
+        LOGGER.debug("Getting user from user service: {}", request);
 
         CompletionStage<User> user;
         try {
-            LOGGER.info("Getting user for id {}", request.getUserId().getId());
+            LOGGER.info("User request: {}", request);
             user = CompletableFuture.supplyAsync(() -> userClient.getUser(request));
-            LOGGER.debug("Got user: {}", user);
+            LOGGER.info("Got user: {}", user);
         } catch (Exception ex) {
             LOGGER.error("Failed to get user: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception
         }
+
         return user.toCompletableFuture();
     }
 

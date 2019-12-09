@@ -36,12 +36,13 @@ public class AuditService implements Service {
     }
 
     public Boolean audit(final AuditRequest request) {
+        LOGGER.debug("Submitting audit to audit service: {}", request);
 
         Boolean response;
-
         try {
+            LOGGER.info("Audit request: {}", request);
             response = this.client.audit(request);
-            LOGGER.debug("Audit request response: {}", response);
+            LOGGER.info("Audit response: {}", response);
         } catch (Exception ex) {
             LOGGER.error("Failed to log audit request: {}", ex.getMessage());
             throw new RuntimeException(ex);

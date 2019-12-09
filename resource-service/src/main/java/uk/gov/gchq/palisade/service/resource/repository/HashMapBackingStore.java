@@ -52,22 +52,26 @@ public class HashMapBackingStore implements BackingStore {
      * The static map that contains the removal handles.
      */
     private static final ConcurrentHashMap<String, ScheduledFuture<?>> REMOVAL_HANDLES = new ConcurrentHashMap<>();
-    /**
-     * Timer thread to remove cache entries after expiry.
-     */
-    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor(Util.createDaemonThreadFactory());
+
     /**
      * The actual backing store for all cached data.
      */
     private final ConcurrentHashMap<String, CachedPair> cache;
+
     /**
      * The map of removal handles for time to live entries.
      */
     private final ConcurrentHashMap<String, ScheduledFuture<?>> removals;
+
     /**
      * Is the shared instance in use?
      */
     private final boolean useStatic;
+
+    /**
+     * Timer thread to remove cache entries after expiry.
+     */
+    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor(Util.createDaemonThreadFactory());
 
     /**
      * Create a {@link HashMapBackingStore} which uses the JVM wide shared object cache.
@@ -90,92 +94,6 @@ public class HashMapBackingStore implements BackingStore {
             removals = new ConcurrentHashMap<>();
         }
         this.useStatic = useStatic;
-    }
-
-    public boolean getUseStatic() {
-        return useStatic;
-    }
-
-    @Override
-    public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
-        String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
-        LOGGER.debug("Adding to cache key {} of class {}", key, valueClass);
-        cache.put(cacheKey, new CachedPair(value, valueClass));
-        /*Here we set up a simple timer to deal with the removal of the item from the cache if a duration is present
-         *This uses a single timer to remove elements, this is fine for this example, but in production we would want
-         *something more performant.
-         */
-        //remove the old TTL handle if is there
-        ScheduledFuture<?> oldHandle = removals.remove(cacheKey);
-        //cancel the task
-        if (nonNull(oldHandle)) {
-            oldHandle.cancel(true);
-        }
-
-        timeToLive.ifPresent(duration -> {
-            ScheduledFuture<?> removalHandle = REMOVAL_TIMER.schedule(() -> {
-                cache.remove(cacheKey);
-                removals.remove(cacheKey);
-            }, duration.toMillis(), TimeUnit.MILLISECONDS);
-            //store new handle
-            removals.put(cacheKey, removalHandle);
-        });
-        return true;
-    }
-
-    @Override
-    public SimpleCacheObject get(final String key) {
-        String cacheKey = BackingStore.keyCheck(key);
-        LOGGER.debug("Getting from cache: {}", cacheKey);
-        final CachedPair result = cache.getOrDefault(cacheKey, new CachedPair(null, Object.class));
-        return new SimpleCacheObject(result.clazz, Optional.ofNullable(result.value));
-    }
-
-    @Override
-    public Stream<String> list(final String prefix) {
-        requireNonNull(prefix, "prefix");
-        return cache.keySet()
-                .stream()
-                .filter(x -> x.startsWith(
-                        prefix)
-                );
-    }
-
-    @Override
-    public boolean remove(final String key) {
-        String cacheKey = BackingStore.keyCheck(key);
-        CachedPair result = cache.remove(cacheKey);
-        boolean ret = (result != null);
-        LOGGER.debug("Remove cache key {} result {}", cacheKey, ret);
-        return ret;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof HashMapBackingStore)) {
-            return false;
-        }
-        HashMapBackingStore that = (HashMapBackingStore) o;
-        return getUseStatic() == that.getUseStatic() &&
-                cache.equals(that.cache) &&
-                removals.equals(that.removals);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(cache, removals, getUseStatic());
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", HashMapBackingStore.class.getSimpleName() + "[", "]")
-                .add("cache=" + cache)
-                .add("removals=" + removals)
-                .add("useStatic=" + useStatic)
-                .toString();
     }
 
     /**
@@ -231,6 +149,93 @@ public class HashMapBackingStore implements BackingStore {
                     .add("clazz=" + clazz)
                     .toString();
         }
+    }
+
+    public boolean getUseStatic() {
+        return useStatic;
+    }
+
+    @Override
+    public boolean add(final String key, final Class<?> valueClass, final byte[] value, final Optional<Duration> timeToLive) {
+        LOGGER.debug("Adding cache key {} of class {}", key, valueClass);
+        String cacheKey = BackingStore.validateAddParameters(key, valueClass, value, timeToLive);
+        cache.put(cacheKey, new CachedPair(value, valueClass));
+        /*Here we set up a simple timer to deal with the removal of the item from the cache if a duration is present
+         *This uses a single timer to remove elements, this is fine for this example, but in production we would want
+         *something more performant.
+         */
+        //remove the old TTL handle if is there
+        ScheduledFuture<?> oldHandle = removals.remove(cacheKey);
+        //cancel the task
+        if (nonNull(oldHandle)) {
+            oldHandle.cancel(true);
+        }
+
+        timeToLive.ifPresent(duration -> {
+            ScheduledFuture<?> removalHandle = REMOVAL_TIMER.schedule(() -> {
+                cache.remove(cacheKey);
+                removals.remove(cacheKey);
+            }, duration.toMillis(), TimeUnit.MILLISECONDS);
+            //store new handle
+            removals.put(cacheKey, removalHandle);
+        });
+        return true;
+    }
+
+    @Override
+    public SimpleCacheObject get(final String key) {
+        LOGGER.debug("Getting from cache: {}", key);
+        String cacheKey = BackingStore.keyCheck(key);
+        final CachedPair result = cache.getOrDefault(cacheKey, new CachedPair(null, Object.class));
+        return new SimpleCacheObject(result.clazz, Optional.ofNullable(result.value));
+    }
+
+    @Override
+    public Stream<String> list(final String prefix) {
+        requireNonNull(prefix, "prefix");
+        LOGGER.debug("Listing from cache: {}", prefix);
+        return cache.keySet()
+                .stream()
+                .filter(x -> x.startsWith(
+                        prefix)
+                );
+    }
+
+    @Override
+    public boolean remove(final String key) {
+        String cacheKey = BackingStore.keyCheck(key);
+        CachedPair result = cache.remove(cacheKey);
+        boolean ret = (result != null);
+        LOGGER.debug("Remove cache key {}: result {}", key, ret);
+        return ret;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HashMapBackingStore)) {
+            return false;
+        }
+        HashMapBackingStore that = (HashMapBackingStore) o;
+        return getUseStatic() == that.getUseStatic() &&
+                cache.equals(that.cache) &&
+                removals.equals(that.removals);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cache, removals, getUseStatic());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", HashMapBackingStore.class.getSimpleName() + "[", "]")
+                .add("cache=" + cache)
+                .add("removals=" + removals)
+                .add("useStatic=" + useStatic)
+                .toString();
     }
 }
 
