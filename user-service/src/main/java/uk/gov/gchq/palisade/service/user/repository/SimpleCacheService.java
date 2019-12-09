@@ -53,33 +53,40 @@ import static java.util.Objects.requireNonNull;
  */
 public class SimpleCacheService implements CacheService {
 
+    private static final String STORE_IMPL_KEY = "cache.svc.store";
+    private static final String MAX_LOCAL_TTL_KEY = "cache.svc.max.ttl";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCacheService.class);
+
     /**
      * The default maximum allowed time to live for entries that are marked as locally cacheable.
      */
     public static final Duration MAX_LOCAL_TTL = Duration.of(5, ChronoUnit.MINUTES);
-    private static final String STORE_IMPL_KEY = "cache.svc.store";
-    private static final String MAX_LOCAL_TTL_KEY = "cache.svc.max.ttl";
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCacheService.class);
-    /**
-     * Timer thread to remove local cache entries after expiry.
-     */
-    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor();
+
     /**
      * The codec registry that knows how to encode objects.
      */
     private final CacheCodecRegistry codecs = new CacheCodecRegistry();
-    /**
-     * The local store for retrieved objects.
-     */
-    private final Map<String, SimpleCacheObject> localObjects = new ConcurrentHashMap<>();
+
     /**
      * The store for our data.
      */
     private BackingStore store;
+
     /**
      * The maximum length of time for entries that are marked as locally cacheable.
      */
     private Duration maxLocalTTL = MAX_LOCAL_TTL;
+
+    /**
+     * The local store for retrieved objects.
+     */
+    private final Map<String, SimpleCacheObject> localObjects = new ConcurrentHashMap<>();
+
+    /**
+     * Timer thread to remove local cache entries after expiry.
+     */
+    private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Create and empty backing store. Note that this is for use by serialisation mechanisms and any attempt to use an
@@ -101,6 +108,15 @@ public class SimpleCacheService implements CacheService {
     }
 
     /**
+     * Set the backing store for this instance.
+     *
+     * @param store the backing store instance
+     */
+    public void setBackingStore(final BackingStore store) {
+        backingStore(store);
+    }
+
+    /**
      * Get the backing store for this instance.
      *
      * @return the backing store
@@ -108,15 +124,6 @@ public class SimpleCacheService implements CacheService {
     public BackingStore getBackingStore() {
         requireNonNull(store, "store must be initialised");
         return store;
-    }
-
-    /**
-     * Set the backing store for this instance.
-     *
-     * @param store the backing store instance
-     */
-    public void setBackingStore(final BackingStore store) {
-        backingStore(store);
     }
 
     /**
@@ -136,15 +143,6 @@ public class SimpleCacheService implements CacheService {
     }
 
     /**
-     * The maximum length of time to live for an entry that is can be put into the local cache.
-     *
-     * @return the max cache duration for local entries
-     */
-    public Duration getMaximumLocalCacheDuration() {
-        return maxLocalTTL;
-    }
-
-    /**
      * Sets the maximum amount of time to live allowed for cache entries that are cached locally.
      *
      * @param maxLocalCacheTime maxmimum time for local cache entries
@@ -152,6 +150,15 @@ public class SimpleCacheService implements CacheService {
      */
     public void setMaximumLocalCacheDuration(final Duration maxLocalCacheTime) {
         maximumLocalCacheDuration(maxLocalCacheTime);
+    }
+
+    /**
+     * The maximum length of time to live for an entry that is can be put into the local cache.
+     *
+     * @return the max cache duration for local entries
+     */
+    public Duration getMaximumLocalCacheDuration() {
+        return maxLocalTTL;
     }
 
     /**
@@ -191,9 +198,9 @@ public class SimpleCacheService implements CacheService {
         byte[] metadataWrapped = CacheMetadata.addMetaData(encodedValue, request);
         //send to add
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store add {}", baseKey);
+            LOGGER.debug("Backing store add {}", baseKey);
             boolean result = getBackingStore().add(baseKey, valueClass, metadataWrapped, timeToLive);
-            LOGGER.debug("-> Backing store stored {} with result {}", baseKey, result);
+            LOGGER.debug("Backing store stored {} with result {}", baseKey, result);
             return result;
         });
     }
@@ -204,9 +211,11 @@ public class SimpleCacheService implements CacheService {
         requireNonNull(request, "request");
         //make final key name
         String baseKey = request.makeBaseName();
+        LOGGER.debug("Get item with key {}", baseKey);
 
         Supplier<Optional<V>> getFunction = () -> {
             SimpleCacheObject result = doCacheRetrieve(baseKey, maxLocalTTL);
+            LOGGER.debug("Retrieved {} from cache with result {}", baseKey, result);
 
             //assign so Javac can infer the generic type
             BiFunction<byte[], Class<V>, V> decode = codecs.getValueDecoder((Class<V>) result.getValueClass());
@@ -266,11 +275,11 @@ public class SimpleCacheService implements CacheService {
 
         //get from cache
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store list {}", baseKey);
+            LOGGER.debug("Backing store list {}", baseKey);
 
             //remove the service name from the list of keys
             Stream<String> ret = getBackingStore().list(baseKey).map(x -> x.substring(len + 1));
-            LOGGER.debug("-> Backing store list returned for {}", baseKey);
+            LOGGER.debug("Backing store list returned for {}", baseKey);
 
             return ret;
         });
@@ -286,11 +295,11 @@ public class SimpleCacheService implements CacheService {
 
         //create remove request for backing store
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("-> Backing store remove {}", baseKey);
+            LOGGER.debug("Backing store remove {}", baseKey);
 
             //remove the key
             boolean removed = getBackingStore().remove(baseKey);
-            LOGGER.debug("-> Backing store removed {} with result {}", baseKey, removed);
+            LOGGER.debug("Backing store removed {} with result {}", baseKey, removed);
             return removed;
         });
     }

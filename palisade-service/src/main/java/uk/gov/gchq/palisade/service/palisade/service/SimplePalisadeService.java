@@ -89,6 +89,7 @@ public class SimplePalisadeService implements PalisadeService {
 
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
+
         LOGGER.debug("Getting user from userService: {}", userRequest);
         final CompletableFuture<User> user = userService.getUser(userRequest);
 
@@ -97,7 +98,6 @@ public class SimplePalisadeService implements PalisadeService {
         final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-
         final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
         policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting policy from policyService: {}", request);
@@ -113,6 +113,7 @@ public class SimplePalisadeService implements PalisadeService {
     @Override
     public CompletableFuture<DataRequestConfig> getDataRequestConfig(
             final GetDataRequestConfig request) {
+        LOGGER.debug("getDataRequestConfig({})", request);
         requireNonNull(request);
         requireNonNull(request.getId());
         // TODO: need to validate that the user is actually requesting the correct info.

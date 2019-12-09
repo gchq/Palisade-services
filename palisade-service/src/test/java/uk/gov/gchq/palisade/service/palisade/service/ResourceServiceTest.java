@@ -16,11 +16,19 @@
 
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -32,27 +40,71 @@ import uk.gov.gchq.palisade.service.palisade.impl.MockDataService;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ResourceServiceTest {
-
+    private Logger logger;
+    private ListAppender<ILoggingEvent> appender;
     private ResourceClient resourceClient = Mockito.mock(ResourceClient.class);
     private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResourceService resourceService;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
 
     @Before
-    public void setup() {
+    public void setUp() {
+        logger = (Logger) LoggerFactory.getLogger(ResourceService.class);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+
         resourceService = new ResourceService(resourceClient, applicationConfig.getAsyncExecutor());
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
         resources.put(resource, connectionDetail);
+    }
+
+    @After
+    public void tearDown() {
+        logger.detachAppender(appender);
+        appender.stop();
+    }
+
+    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
+
+    @Test
+    public void infoOnGetResourcesRequest() {
+        // Given
+        GetResourcesByIdRequest request = Mockito.mock(GetResourcesByIdRequest.class);
+        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
+        Mockito.when(resourceClient.getResourcesById(request)).thenReturn(response);
+
+        // When
+        resourceService.getResourcesById(request);
+
+        // Then
+        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
+
+        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
+                Matchers.containsString(request.toString()),
+                Matchers.anyOf(
+                        Matchers.containsString(response.toString()),
+                        Matchers.containsString("Not completed"))
+        ));
+
     }
 
     @Test
