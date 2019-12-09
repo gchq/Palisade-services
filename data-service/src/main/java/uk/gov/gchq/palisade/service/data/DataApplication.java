@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.data;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+import java.util.Arrays;
+
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
 public class DataApplication {
-
-    public DataApplication() {
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataApplication.class);
 
     /**
      * Application entry point
@@ -35,6 +38,8 @@ public class DataApplication {
      * @param args from the command line
      */
     public static void main(final String[] args) {
+        LOGGER.debug("ResourceApplication started with: {}", Arrays.toString(args));
+
         new SpringApplicationBuilder(DataApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
