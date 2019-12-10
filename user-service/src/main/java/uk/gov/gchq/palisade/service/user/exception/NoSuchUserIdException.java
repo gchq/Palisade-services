@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.user.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 /**
@@ -24,6 +27,8 @@ import uk.gov.gchq.palisade.service.user.service.UserService;
  * or is not known to that {@code Service} instance.
  */
 public class NoSuchUserIdException extends RuntimeException {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoSuchUserIdException.class);
+
 
     /**
      * Initialises this exception with no message or cause.
@@ -38,6 +43,7 @@ public class NoSuchUserIdException extends RuntimeException {
      */
     public NoSuchUserIdException(final String message) {
         super(message);
+        LOGGER.info("NoSuchUserIdException thrown with {} message", message);
     }
 
     /**
@@ -48,5 +54,6 @@ public class NoSuchUserIdException extends RuntimeException {
      */
     public NoSuchUserIdException(final String message, final Throwable throwable) {
         super(message, throwable);
+        LOGGER.error("NoSuchUserIdException thrown with {} message", message);
     }
 }
