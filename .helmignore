@@ -21,12 +21,18 @@
 .gitignore
 *.tmp
 *~
+Jenkinsfile
+mvn_dependency_tree.txt
+pom.xml
+README.md
+velocity*
 # Various IDEs
 .project
 .idea/
 *.tmproj
 .vscode/
 /logos/
+/target/
 /code-style/
 # Add the directory for every service module here
 /discovery-service/

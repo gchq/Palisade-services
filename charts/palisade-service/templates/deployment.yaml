@@ -34,39 +34,39 @@ spec:
         app.kubernetes.io/name: {{ include "palisade-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-        containers:
-          - name: {{ .Chart.Name }}
-            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-            imagePullPolicy: {{ .Values.image.pullPolicy }}
-            ports:
-              - name: web
-                containerPort: 8084
-                protocol: TCP
-            livenessProbe:
-              httpGet:
-                path: /actuator/health
-                port: 8084
-              initialDelaySeconds: 10
-              failureThreshold: 5
-              periodSeconds: 20
-              timeoutSeconds: 5
-            readinessProbe:
-              httpGet:
-                path: /actuator/health
-                port: 8084
-              initialDelaySeconds: 10
-              failureThreshold: 5
-              periodSeconds: 20
-              timeoutSeconds: 5
-            resources:
-              {{- toYaml .Values.resources | nindent 12 }}
-        {{- with .Values.nodeSelector }}
-        nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: web
+              containerPort: 8084
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 10
+            failureThreshold: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8084
+            initialDelaySeconds: 10
+            failureThreshold: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- with .Values.affinity }}
-        affinity:
-          {{- toYaml . | nindent 8 }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.tolerations }}
       tolerations:
