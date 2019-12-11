@@ -12,17 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }}.
 
-{{/*
-Should a new namespace be created
-*/}}
-{{- if .Values.global.uniqueNamespace -}}
-{{- if .Release.IsInstall -}}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ include "palisade.namespace" . }}
-  annotations:
-    "helm.sh/hook": pre-install
-{{- end -}}
-{{- end -}}
+The ingress is located on path {{ include "palisade-service.root" . }}/palisade and the ingress controller dashboard at :{{ .Values.traefik.admin.port }}/dashboard/#/
