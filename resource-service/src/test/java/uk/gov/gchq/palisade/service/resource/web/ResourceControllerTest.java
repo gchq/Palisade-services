@@ -24,13 +24,16 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
@@ -78,12 +81,15 @@ public class ResourceControllerTest {
                 .collect(Collectors.toList());
     }
 
-    @DataPoints
+    @DataPoints("GetRequests")
     public static List<Request> requests = Arrays.asList(
             new GetResourcesByIdRequest(),
             new GetResourcesByResourceRequest(),
             new GetResourcesBySerialisedFormatRequest(),
             new GetResourcesByTypeRequest());
+
+    @DataPoint("AddRequests")
+    public static AddResourceRequest addRequest = new AddResourceRequest();
 
     @DataPoints
     public static List<Exception> exceptions = Arrays.asList(
@@ -99,7 +105,7 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void infoOnGetResourceRequest(Request request) {
+    public void infoOnGetResourceRequest(@FromDataPoints("GetRequests") Request request) {
         // Given
         Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
         Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
@@ -114,17 +120,18 @@ public class ResourceControllerTest {
                 Matchers.containsString(request.toString()),
                 Matchers.containsString(response.toString())
         ));
+
+        MatcherAssert.assertThat(response, Matchers.equalTo(expectedResponse));
     }
 
     @Theory
-    public void errorOnRequestException(Request request, Exception exception) {
+    public void errorOnRequestException(@FromDataPoints("GetRequests") Request request, Exception exception) {
         // Given
         Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
-        Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
         resourceService.willThrow(exception);
 
         // When
-        Map<LeafResource, ConnectionDetail> response = method.apply(request);
+        method.apply(request);
 
         // Then
         List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
@@ -135,4 +142,38 @@ public class ResourceControllerTest {
         ));
     }
 
+    @Theory
+    public void infoOnAddResourceRequest(@FromDataPoints("AddRequests") AddResourceRequest request) {
+        // Given
+        Boolean expectedResponse = true;
+
+        // When
+        Boolean response = controller.addResource(request);
+
+        // Then
+        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
+
+        MatcherAssert.assertThat(infoMessages, Matchers.hasItem(
+                Matchers.containsString(request.toString())
+        ));
+
+        MatcherAssert.assertThat(response, Matchers.equalTo(expectedResponse));
+    }
+
+    @Theory
+    public void errorOnAddException(@FromDataPoints("AddRequests") AddResourceRequest request, Exception exception) {
+        // Given
+        resourceService.willThrow(exception);
+
+        // When
+        controller.addResource(request);
+
+        // Then
+        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
+
+        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
+                Matchers.containsString(request.toString()),
+                Matchers.containsString(exception.getMessage())
+        ));
+    }
 }
