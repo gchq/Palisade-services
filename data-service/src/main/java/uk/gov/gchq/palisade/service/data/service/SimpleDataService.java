@@ -132,7 +132,7 @@ public class SimpleDataService implements DataService {
             LOGGER.debug("Returning from read: {}", response);
             return response;
         }).exceptionally(ex -> {
-            LOGGER.debug("Error handling: " + ex.getMessage());
+            LOGGER.warn("Error handling: " + ex.getMessage());
             auditRequestReceivedException(request, ex);
             throw new RuntimeException(ex); //rethrow the exception
         });
