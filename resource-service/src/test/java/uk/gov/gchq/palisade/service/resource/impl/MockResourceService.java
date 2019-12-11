@@ -75,6 +75,13 @@ public class MockResourceService implements ResourceService {
         }
         return future;
     }
+    private CompletableFuture<Boolean> handleRequest(AddResourceRequest request) {
+        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> true);
+        if (serviceThrows != null) {
+            future.obtrudeException(serviceThrows);
+        }
+        return future;
+    }
 
     @Override
     public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request) {
@@ -98,6 +105,6 @@ public class MockResourceService implements ResourceService {
 
     @Override
     public CompletableFuture<Boolean> addResource(final AddResourceRequest request) {
-        return CompletableFuture.supplyAsync(() -> true);
+        return handleRequest(request);
     }
 }
