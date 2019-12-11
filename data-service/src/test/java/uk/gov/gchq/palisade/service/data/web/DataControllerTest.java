@@ -91,6 +91,9 @@ public class DataControllerTest {
                 Matchers.containsString(request.toString()),
                 Matchers.containsString(response.toString())
         ));
+
+        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.WARN || event.getLevel() == Level.ERROR);
+        MatcherAssert.assertThat(errorMessages, Matchers.empty());
     }
 
     @Test
@@ -113,6 +116,9 @@ public class DataControllerTest {
                 Matchers.containsString(request.toString()),
                 Matchers.containsString(response.toString())
         ));
+
+        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.WARN || event.getLevel() == Level.ERROR);
+        MatcherAssert.assertThat(errorMessages, Matchers.empty());
     }
 
 }
