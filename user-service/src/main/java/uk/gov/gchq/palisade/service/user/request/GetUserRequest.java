@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -35,7 +37,7 @@ import static java.util.Objects.requireNonNull;
  * the {@link uk.gov.gchq.palisade.User} you want.
  */
 public class GetUserRequest extends Request {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetUserRequest.class);
     public final UserId userId;
 
     /**
@@ -45,6 +47,7 @@ public class GetUserRequest extends Request {
      */
     @JsonCreator
     private GetUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId) {
+        LOGGER.debug("GetUserRequest with requestId: {}, originalRequestId {} and UserId {}", id, originalRequestId, userId);
         setOriginalRequestId(originalRequestId);
         this.userId = requireNonNull(userId);
     }
@@ -56,6 +59,7 @@ public class GetUserRequest extends Request {
      * @return {@link GetUserRequest}
      */
     public static GetUserRequest.IUserId create(final RequestId original) {
+        LOGGER.debug("GetUserRequest.create with requestId: {}", original);
         return userId -> new GetUserRequest(null, original, userId);
     }
 

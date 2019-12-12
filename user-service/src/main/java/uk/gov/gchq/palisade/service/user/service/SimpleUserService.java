@@ -27,9 +27,10 @@ import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A SimpleUserService is a simple implementation of a {@link UserService} that keeps user data in the cache service.
@@ -43,12 +44,14 @@ public class SimpleUserService implements UserService {
     private final CacheService cacheService;
 
     public SimpleUserService(final CacheService cacheService) {
+        requireNonNull(cacheService, "Cache Service cannot be set to null");
         this.cacheService = cacheService;
     }
 
     @Override
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        Objects.requireNonNull(request);
+        LOGGER.debug("Getting User: {}", request);
+        requireNonNull(request);
         User user = null;
 
         GetCacheRequest<User> temp = new GetCacheRequest<User>()
@@ -59,10 +62,12 @@ public class SimpleUserService implements UserService {
 
         if (cachedUser.isPresent()) {
             user = cachedUser.get();
+            LOGGER.debug("User {} found cached", user);
         }
         CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
 
         if (user == null) {
+            LOGGER.error("User {} not found", request);
             userCompletion.obtrudeException(new NoSuchUserIdException(request.userId.getId()));
         }
         return userCompletion;
@@ -70,16 +75,18 @@ public class SimpleUserService implements UserService {
 
     @Override
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
-        Objects.requireNonNull(request);
-        Objects.requireNonNull(request.user);
-        Objects.requireNonNull(request.user.getUserId());
-        Objects.requireNonNull(request.user.getUserId().getId());
+        LOGGER.debug("Adding User : {}", request);
+        requireNonNull(request);
+        requireNonNull(request.user);
+        requireNonNull(request.user.getUserId());
+        requireNonNull(request.user.getUserId().getId());
         //save to the cache service
         AddCacheRequest<User> addCacheRequest = new AddCacheRequest<User>()
                 .service(this.getClass())
                 .key(request.user.getUserId().getId())
                 .value(request.user);
         cacheService.add(addCacheRequest).join();
+        LOGGER.debug("User Added : {}", addCacheRequest);
         return CompletableFuture.completedFuture(true);
     }
 }

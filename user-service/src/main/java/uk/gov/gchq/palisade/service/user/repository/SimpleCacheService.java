@@ -243,10 +243,10 @@ public class SimpleCacheService implements CacheService {
             localRetrieve.getMetadata().ifPresent(metadata -> metadata.setWasRetrievedLocally(true));
             return localRetrieve;
         } else {
-            LOGGER.debug("-> Backing store get {}", baseKey);
+            LOGGER.debug("Backing store get {}", baseKey);
             SimpleCacheObject remoteRetrieve = getBackingStore().get(baseKey);
             if (remoteRetrieve.getValue().isPresent()) {
-                LOGGER.debug("-> Backing store retrieved {}", baseKey);
+                LOGGER.debug("Backing store retrieved {}", baseKey);
 
                 CacheMetadata.populateMetaData(remoteRetrieve);
 
@@ -257,7 +257,7 @@ public class SimpleCacheService implements CacheService {
                     REMOVAL_TIMER.schedule(() -> localObjects.remove(baseKey), localCacheTTL.toMillis(), TimeUnit.MILLISECONDS);
                 }
             } else {
-                LOGGER.debug("-> Backing store failed to get {}", baseKey);
+                LOGGER.debug("Backing store failed to get {}", baseKey);
             }
             return remoteRetrieve;
         }

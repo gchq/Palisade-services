@@ -38,9 +38,8 @@ import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 import uk.gov.gchq.palisade.service.user.web.ServiceInstanceRestController;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static java.util.stream.Collectors.toList;
@@ -60,8 +59,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleUserService userService(final Map<String, BackingStore> backingStores) {
-        return new SimpleUserService(cacheService(backingStores));
+    public SimpleUserService userService(final CacheService cacheService) {
+        SimpleUserService simpleUserService = new SimpleUserService(cacheService);
+        LOGGER.info("Instantiated SimpleUserService");
+        return simpleUserService;
     }
 
     @Bean(name = "hashmap")
@@ -89,11 +90,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
-        }).findFirst().orElse(null);
+    public CacheService cacheService(final Set<BackingStore> backingStores) {
+        return backingStores.stream()
+                .map(x -> new SimpleCacheService().backingStore(x))
+                .peek(x -> LOGGER.info("Created candidate cache service {}", x))
+                .findAny().orElseThrow(() -> {
+                    LOGGER.error("No backing store provided and no default found");
+                    return new NullPointerException();
+                });
     }
 
     @Bean
@@ -105,7 +109,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
+        ServiceInstanceRestController serviceInstanceRestController = new ServiceInstanceRestController();
+        LOGGER.info("Instantiated eurekaClient");
+        return serviceInstanceRestController;
     }
 
     @Override

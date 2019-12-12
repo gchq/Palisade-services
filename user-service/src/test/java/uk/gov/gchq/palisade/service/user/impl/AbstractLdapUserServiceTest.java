@@ -16,10 +16,18 @@
 
 package uk.gov.gchq.palisade.service.user.impl;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Sets;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -37,12 +45,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -51,9 +62,29 @@ import static org.mockito.Mockito.verify;
 
 public class AbstractLdapUserServiceTest {
 
+    private Logger logger;
+    private ListAppender<ILoggingEvent> appender;
+
     @Before
-    public void before() {
+    public void setup() {
+        logger = (Logger) LoggerFactory.getLogger(AbstractLdapUserService.class);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
         AbstractLdapUserService.clearCache();
+    }
+
+    @After
+    public void tearDown() {
+        logger.detachAppender(appender);
+        appender.stop();
+    }
+
+    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
     }
 
     @Test
@@ -92,6 +123,12 @@ public class AbstractLdapUserServiceTest {
         assertEquals(userId, user.getUserId());
         assertEquals(auths, user.getAuths());
         assertEquals(roles, user.getRoles());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertNotEquals(0, debugMessages.size());
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("was not in the cache. Fetching details from LDAP")
+        ));
     }
 
     @Test
@@ -135,6 +172,12 @@ public class AbstractLdapUserServiceTest {
         verify(context, times(1)).getAttributes("user01", attrNames);
         // Check user objects have been cloned
         assertNotSame(user1, user2);
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertNotEquals(0, debugMessages.size());
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("was not in the cache. Fetching details from LDAP"),
+                Matchers.containsString("was in the cache")
+        ));
     }
 
     @Test
@@ -206,6 +249,12 @@ public class AbstractLdapUserServiceTest {
                 requestAttrs);
         final Set<Object> expectedResults = Sets.newHashSet(attr1_1, attr1_2, attr2_1, attr2_2);
         assertEquals(expectedResults, results);
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertNotEquals(0, debugMessages.size());
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Performing basic search using")
+        ));
     }
 
     @Test
@@ -228,6 +277,12 @@ public class AbstractLdapUserServiceTest {
                 .map(t -> "\\" + t)
                 .collect(Collectors.joining());
         assertEquals(expectedResult, result);
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertNotEquals(0, debugMessages.size());
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Formatting input with"),
+                Matchers.containsString("Returning formatted input as")
+        ));
     }
 
     public static final class MockLdapUserService extends AbstractLdapUserService {
