@@ -16,6 +16,7 @@ replicaCount: 1
 
 service:
   port: 80
+  type: ClusterIP
 
 image:
   repository: palisade/data-service

@@ -19,7 +19,7 @@ metadata:
   name: {{ include "audit-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    {{- include "audit-service.labels" . | nindent 4 }}
+    {{ include "audit-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
