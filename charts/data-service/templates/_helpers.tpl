@@ -69,4 +69,4 @@ Determine ingress root url
 {{- else -}}
 {{- printf "/%s" $ns -}}
 {{- end -}}
-{
+{{- end -}}

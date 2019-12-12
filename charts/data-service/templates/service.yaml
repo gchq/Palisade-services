@@ -19,7 +19,7 @@ metadata:
   name: {{ include "data-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
-  {{ include "data-service.labels" . | indent 4 }}
+    {{ include "data-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
