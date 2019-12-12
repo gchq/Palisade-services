@@ -35,7 +35,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -205,23 +204,33 @@ public class SimpleCacheService implements CacheService {
         });
     }
 
+
     @Override
     @SuppressWarnings("unchecked")
     public <V> CompletableFuture<Optional<V>> get(final GetCacheRequest<V> request) {
         requireNonNull(request, "request");
         //make final key name
+        LOGGER.info("SimpleCacheService get");
         String baseKey = request.makeBaseName();
-        LOGGER.debug("Get item with key {}", baseKey);
+        LOGGER.info("Get item with key {}", baseKey);
 
-        Supplier<Optional<V>> getFunction = () -> {
+//        Supplier<Optional<V>> getFunction = () -> {
+//            SimpleCacheObject result = doCacheRetrieve(baseKey, maxLocalTTL);
+//            LOGGER.debug("Retrieved {} from cache with result {}", baseKey, result);
+//
+//            //assign so Javac can infer the generic type
+//            BiFunction<byte[], Class<V>, V> decode = codecs.getValueDecoder((Class<V>) result.getValueClass());
+//            return result.getValue().map(x -> decode.apply(x, (Class<V>) result.getValueClass()));
+//        };
+        return CompletableFuture.supplyAsync(() -> {
+            LOGGER.info("supply async function");
             SimpleCacheObject result = doCacheRetrieve(baseKey, maxLocalTTL);
-            LOGGER.debug("Retrieved {} from cache with result {}", baseKey, result);
+            LOGGER.info("Retrieved {} from cache with result {}", baseKey, result);
 
             //assign so Javac can infer the generic type
             BiFunction<byte[], Class<V>, V> decode = codecs.getValueDecoder((Class<V>) result.getValueClass());
             return result.getValue().map(x -> decode.apply(x, (Class<V>) result.getValueClass()));
-        };
-        return CompletableFuture.supplyAsync(getFunction);
+        });
     }
 
     /**

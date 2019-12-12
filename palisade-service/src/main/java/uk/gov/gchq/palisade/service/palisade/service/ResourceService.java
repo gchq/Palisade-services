@@ -46,7 +46,7 @@ public class ResourceService implements Service {
         CompletionStage<Map<LeafResource, ConnectionDetail>> resources;
         try {
             LOGGER.info("Resource request: {}", request);
-            resources = CompletableFuture.supplyAsync(() -> client.getResourcesById(request));
+            resources = CompletableFuture.supplyAsync(() -> client.getResourcesById(request), this.executor);
             LOGGER.info("Got resources: {}", resources);
         } catch (Exception ex) {
             LOGGER.error("Failed to get resources: {}", ex.getMessage());
