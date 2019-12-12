@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -32,7 +34,7 @@ import static java.util.Objects.requireNonNull;
  * is used for the indication to the Audit logs that an exception has been received.
  */
 public class ReadRequestExceptionAuditRequest extends AuditRequest {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadRequestExceptionAuditRequest.class);
     public final String token;
     public final LeafResource leafResource;
     public final Throwable exception;
@@ -43,6 +45,8 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
         this.token = requireNonNull(token);
         this.leafResource = requireNonNull(leafResource);
         this.exception = requireNonNull(exception);
+        LOGGER.debug("ReadRequestExceptionAuditRequest called with originalRequestId: {}, token: {}, leafResource: {}, exception: {}", originalRequestId, token, leafResource, exception);
+
     }
 
     /**
@@ -52,6 +56,7 @@ public class ReadRequestExceptionAuditRequest extends AuditRequest {
      * @return the {@link ReadRequestExceptionAuditRequest}
      */
     public static IToken create(final RequestId original) {
+        LOGGER.debug("ReadRequestExceptionAuditRequest.create called with RequestId: {}", original);
         return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
     }
 

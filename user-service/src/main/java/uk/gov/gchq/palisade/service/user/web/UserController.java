@@ -42,21 +42,23 @@ public class UserController {
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
     public User GetUserRequest(@RequestBody final GetUserRequest request) {
-        LOGGER.debug("Invoking GetUserRequest: {}", request);
+        LOGGER.info("Invoking GetUserRequest: {}", request);
         return this.getUser(request).join();
     }
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
+        LOGGER.debug("Getting User: {}", request);
         return service.getUser(request);
     }
 
     @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")
     public Boolean AddUserRequest(@RequestBody final AddUserRequest request) {
-        LOGGER.debug("Invoking AddUserRequest: {}", request);
+        LOGGER.info("Invoking AddUserRequest: {}", request);
         return this.addUser(request).join();
     }
 
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
+        LOGGER.info("Adding User: {}", request);
         return service.addUser(request);
     }
 

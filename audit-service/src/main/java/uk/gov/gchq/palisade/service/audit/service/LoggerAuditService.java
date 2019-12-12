@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
@@ -45,6 +46,8 @@ public class LoggerAuditService implements AuditService {
     static final String READ_REQUEST_COMPLETE = "ReadRequestCompleteAuditRequest";
     static final String READ_REQUEST_EXCEPTION = "ReadRequestExceptionAuditRequest";
     private static final Map<Class, BiConsumer<Logger, AuditRequest>> DISPATCHER = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
+
 
     static {
         DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, LoggerAuditService::onRegisterRequestComplete);
@@ -62,29 +65,38 @@ public class LoggerAuditService implements AuditService {
     private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
+        LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
         logger.info(msg);
+        LOGGER.info("onRegisterRequestComplete called and log message is: {}", msg);
     }
 
     private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
+        LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, request);
         logger.error(msg);
+        LOGGER.error("onRegisterRequestComplete called and log message is: {}", msg);
     }
 
     private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
+        LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
         logger.info(msg);
+        LOGGER.info("onReadRequestComplete called and log message is: {}", msg);
+
     }
 
     private static void onReadRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
+        LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
         logger.error(msg);
+        LOGGER.error("onReadRequestException called and log message is: {}", msg);
     }
 
     @Override

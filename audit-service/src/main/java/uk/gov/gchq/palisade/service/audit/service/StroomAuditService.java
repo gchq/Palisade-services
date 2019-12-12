@@ -88,16 +88,21 @@ public class StroomAuditService implements AuditService {
 
     private final DefaultEventLoggingService eventLogger;
     private final Logger errorLogger;
+    private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
+
 
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
         errorLogger = LoggerFactory.getLogger(StroomAuditService.class);
         eventLogger = eventLoggingService;
+        LOGGER.debug("StroomAuditService called and the defaultEventLoggingService is: {}", eventLoggingService);
     }
 
     private static void addUserToEvent(final Event event, final uk.gov.gchq.palisade.UserId user) {
         Event.EventSource eventSource = event.getEventSource();
         User stroomUser = EventLoggingUtil.createUser(user.getId());
         eventSource.setUser(stroomUser);
+        LOGGER.debug("addUserToEvent called and the event is: {}, and userId is: {}", event, user);
+
     }
 
     private static void addPurposeToEvent(final Event event, final uk.gov.gchq.palisade.Context context) {
@@ -105,15 +110,18 @@ public class StroomAuditService implements AuditService {
         Purpose purpose = new Purpose();
         purpose.setJustification(context.getPurpose());
         eventDetail.setPurpose(purpose);
+        LOGGER.debug("addPurposeToEvent called and the event is: {}, and context is: {}", event, context);
     }
 
     private static Outcome createOutcome(final boolean success) {
         Outcome outcome = new Outcome();
         outcome.setSuccess(success);
+        LOGGER.debug("createOutcome called and the success is: {}, and outcome is: {}", success, outcome);
         return outcome;
     }
 
     private static Event generateNewGenericEvent(final DefaultEventLoggingService loggingService, final AuditRequest request) {
+        LOGGER.debug("generateNewGenericEvent called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
         Event event = loggingService.createEvent();
         // set the event time
         Event.EventTime eventTime = EventLoggingUtil.createEventTime(Date.from(request.timestamp.toInstant()));
@@ -133,11 +141,13 @@ public class StroomAuditService implements AuditService {
         eventSource.setGenerator(EVENT_GENERATOR);
         eventSource.setDevice(DeviceUtil.createDevice(request.serverHostname, request.serverIp));
         event.setEventSource(eventSource);
+        LOGGER.debug("generateNewGenericEvent returned {}", event);
         return event;
     }
 
     private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
+        LOGGER.debug("onRegisterRequestComplete called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
         RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (RegisterRequestCompleteAuditRequest) request;
         Event authorisationEvent = generateNewGenericEvent(loggingService, registerRequestCompleteAuditRequest);
         Event.EventDetail authorisationEventDetail = new Event.EventDetail();
@@ -152,11 +162,13 @@ public class StroomAuditService implements AuditService {
         // if no files then authorisation request failure
         Set<LeafResource> resources = registerRequestCompleteAuditRequest.leafResources;
         if (resources.isEmpty()) {
+            LOGGER.debug("onRegisterRequestComplete resources is empty");
             authorisationEventDetail.setTypeId(REGISTER_REQUEST_NO_RESOURCES_TYPE_ID);
             authorisationEventDetail.setDescription(REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION);
             outcome = createOutcome(false);
             outcome.setDescription(REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION);
         } else {
+            LOGGER.debug("onRegisterRequestComplete resources is not empty");
             authorisationEventDetail.setTypeId(REGISTER_REQUEST_COMPLETED_TYPE_ID);
             authorisationEventDetail.setDescription(REGISTER_REQUEST_COMPLETED_DESCRIPTION);
             for (LeafResource resource : resources) {
@@ -171,10 +183,13 @@ public class StroomAuditService implements AuditService {
         authorise.setAction(Authorisation.REQUEST);
         authorisationEventDetail.setAuthorise(authorise);
         loggingService.log(authorisationEvent);
+        LOGGER.debug("onRegisterRequestComplete authorisationEvent is {}", authorisationEvent);
+
     }
 
     private static void onRegisterRequestException(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
+        LOGGER.debug("onRegisterRequestException called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
         RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest = (RegisterRequestExceptionAuditRequest) request;
         // authorisation exception
         Event exceptionEvent = generateNewGenericEvent(loggingService, registerRequestExceptionAuditRequest);
@@ -191,14 +206,17 @@ public class StroomAuditService implements AuditService {
         authorise.getObjects().add(stroomResource);
         Outcome outcome = createOutcome(false);
         if (registerRequestExceptionAuditRequest.serviceClass.getSimpleName().equalsIgnoreCase("UserService")) {
+            LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is UserService");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION);
             outcome.setDescription(REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION);
         } else if (registerRequestExceptionAuditRequest.serviceClass.getSimpleName().equalsIgnoreCase("ResourceService")) {
+            LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is ResourceService");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION);
             outcome.setDescription(REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION);
         } else {
+            LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is not set");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION);
             outcome.setDescription(registerRequestExceptionAuditRequest.exception.getMessage());
@@ -207,10 +225,12 @@ public class StroomAuditService implements AuditService {
         authorise.setAction(Authorisation.REQUEST);
         exceptionEventDetail.setAuthorise(authorise);
         loggingService.log(exceptionEvent);
+        LOGGER.debug("onRegisterRequestException authorisationEvent is {}", exceptionEvent);
     }
 
     private static void onReadRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
+        LOGGER.debug("onReadRequestComplete called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
         ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest = (ReadRequestCompleteAuditRequest) request;
         // view request
         Event viewEvent = generateNewGenericEvent(loggingService, readRequestCompleteAuditRequest);
@@ -245,10 +265,12 @@ public class StroomAuditService implements AuditService {
         resource.setType(readRequestCompleteAuditRequest.leafResource.getType());
         view.getObjects().add(resource);
         loggingService.log(viewEvent);
+        LOGGER.debug("onReadRequestComplete returned {}", viewEvent);
     }
 
     private static void onReadRequestException(final DefaultEventLoggingService loggingService, final AuditRequest request) {
         requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
+        LOGGER.debug("onReadRequestException called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
         ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = (ReadRequestExceptionAuditRequest) request;
         // view request
         Event viewEvent = generateNewGenericEvent(loggingService, readRequestExceptionAuditRequest);
@@ -259,10 +281,12 @@ public class StroomAuditService implements AuditService {
         Outcome outcome = createOutcome(false);
         view.setOutcome(outcome);
         if (readRequestExceptionAuditRequest.exception.getMessage().startsWith(TOKEN_NOT_FOUND_MESSAGE)) {
+            LOGGER.debug("onReadRequestException readRequestExceptionAuditRequest starts with Token not found");
             viewEventDetail.setTypeId(READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID);
             viewEventDetail.setDescription(READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION);
             outcome.setDescription(READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION);
         } else {
+            LOGGER.debug("onReadRequestException readRequestExceptionAuditRequest doesnt starts with Token not found");
             viewEventDetail.setTypeId(READ_REQUEST_EXCEPTION_OTHER_TYPE_ID);
             viewEventDetail.setDescription(READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION);
             outcome.setDescription(readRequestExceptionAuditRequest.exception.getMessage());
@@ -278,6 +302,8 @@ public class StroomAuditService implements AuditService {
         token.setValue(readRequestExceptionAuditRequest.token);
         view.getData().add(token);
         loggingService.log(viewEvent);
+        LOGGER.debug("onReadRequestException returned {}", viewEvent);
+
     }
 
     /**
@@ -286,6 +312,7 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService systemName(final String systemName) {
         requireNonNull(systemName, "The system name cannot be null.");
+        LOGGER.debug("systemName is {}", systemName);
         SYSTEM.setName(systemName);
         return this;
     }
@@ -304,15 +331,18 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService organisation(final String organisation) {
         requireNonNull(organisation, "The organisation cannot be null.");
+        LOGGER.debug("organisation is {}", organisation);
         SYSTEM.setOrganisation(organisation);
         return this;
     }
 
     public String getOrganisation() {
+        LOGGER.debug("organisation is {}", SYSTEM.getOrganisation());
         return SYSTEM.getOrganisation();
     }
 
     public void setOrganisation(final String organisation) {
+        LOGGER.debug("organisation is {}", organisation);
         organisation(organisation);
     }
 
@@ -322,6 +352,7 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService systemEnv(final String env) {
         requireNonNull(env, "The env cannot be null.");
+        LOGGER.debug("systemEnv is {}", env);
         SYSTEM.setEnvironment(env);
         return this;
     }
@@ -340,6 +371,7 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService systemDescription(final String description) {
         requireNonNull(description, "The description cannot be null.");
+        LOGGER.debug("systemDescription is {}", description);
         SYSTEM.setDescription(description);
         return this;
     }
@@ -376,6 +408,7 @@ public class StroomAuditService implements AuditService {
      */
     public StroomAuditService systemClassification(final String systemClassification) {
         requireNonNull(systemClassification, "The systemClassification cannot be null.");
+        LOGGER.debug("systemClassification is {}", systemClassification);
         Classification classification = new Classification();
         classification.setText(systemClassification);
         SYSTEM.setClassification(classification);
@@ -383,10 +416,12 @@ public class StroomAuditService implements AuditService {
     }
 
     public String getSystemClassification() {
+        LOGGER.debug("systemClassification is {}", SYSTEM.getClassification().getText());
         return SYSTEM.getClassification().getText();
     }
 
     public void setSystemClassification(final String systemClassification) {
+        LOGGER.debug("systemClassification is {}", systemClassification);
         systemClassification(systemClassification);
     }
 

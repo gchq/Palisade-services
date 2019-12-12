@@ -41,6 +41,9 @@ management:
         - health
         - info
         - metrics
+        - loggers
+    loggers:
+      enabled: true
 
 audit:
   implementations:

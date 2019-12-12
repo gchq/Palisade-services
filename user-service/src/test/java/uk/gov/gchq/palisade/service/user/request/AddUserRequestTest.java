@@ -1,31 +1,76 @@
 package uk.gov.gchq.palisade.service.user.request;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotEquals;
 
 @RunWith(JUnit4.class)
 public class AddUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
+
+    private Logger logger;
+    private ListAppender<ILoggingEvent> appender;
+
+    @Before
+    public void setup() {
+        logger = (Logger) LoggerFactory.getLogger(AddUserRequest.class);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+    }
+
+    @After
+    public void tearDown() {
+        logger.detachAppender(appender);
+        appender.stop();
+    }
+
+    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
 
 
     @Test
     public void AddUserRequestTest() {
         final AddUserRequest subject = AddUserRequest.create(new RequestId().id("newId")).withUser(new User().userId("newUser"));
         assertThat("AddUserRequest not constructed", subject.user.getUserId().getId(), is(equalTo("newUser")));
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertNotEquals(0, debugMessages.size());
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("AddUserRequest.create with requestId"),
+                Matchers.anyOf(
+                        Matchers.containsString("AddUserRequest with requestId"))
+        ));
     }
 
     @Test
