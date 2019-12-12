@@ -40,30 +40,30 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - name: web
-          containerPort: 8082
-          protocol: TCP
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8082
-          initialDelaySeconds: 10
-          failureThreshold: 5
-          periodSeconds: 20
-          timeoutSeconds: 5
-        resources:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: web
+              containerPort: 8082
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 10
+            failureThreshold: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 10
+            failureThreshold: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
           {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

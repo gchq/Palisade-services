@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -23,10 +22,10 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.port }}
-    targetPort: 8082
-    protocol: TCP
-    name: web
+    - port: {{ .Values.service.port }}
+      targetPort: 8082
+      protocol: TCP
+      name: web
   selector:
     app.kubernetes.io/name: {{ include "data-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
