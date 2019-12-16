@@ -34,6 +34,12 @@ global:
   namespace: default
   uniqueNamespace: false
 
+data-service:
+  autoscale:
+    minReplicas: 1
+    maxReplicas: 3
+    cpu: 80
+
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
   install: false

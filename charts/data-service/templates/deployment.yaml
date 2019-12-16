@@ -24,9 +24,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
-    autoscale/minReplicas: "1"
-    autoscale/maxReplicas: "3"
-    autoscale/cpu: "80"
+    autoscale/minReplicas: "{{ .Values.autoscale.minReplicas }}"
+    autoscale/maxReplicas: "{{ .Values.autoscale.maxReplicas }}"
+    autoscale/cpu: "{{ .Values.autoscale.cpu }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
