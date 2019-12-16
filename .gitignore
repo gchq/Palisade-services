@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Copyright 2019 Crown Copyright
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,3 +44,49 @@ services-launcher/.log
 ##VSCODE default files that dont need to be tracked
 eclipse-formatter.xml
 .vscode/
+=======
+# Copyright 2019 Crown Copyright
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+
+target/
+*.iml
+.project/
+*.project
+bin/
+*.class
+*/atlassian-ide*
+.idea/
+.classpath/
+*.classpath
+*.pem
+*.DS_Store
+*.flattened-pom.xml
+_book
+node_modules/
+.extract/
+.settings/
+.terraform/
+backend.tf
+terraform.tfvars
+terraform.tfstate
+terraform.tfstate.backup
+dependency-reduced-pom.xml
+velocity.log.*
+velocity.log
+*.factorypath
+
+##VSCODE default files that dont need to be tracked
+eclipse-formatter.xml
+.vscode/
+>>>>>>> Stashed changes
