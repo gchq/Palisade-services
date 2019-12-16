@@ -15,18 +15,21 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik
+  name: metrics-server
   namespace: kube-system
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: metrics-server
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Metrics-server"
+  annotations:
+    {{- toYaml .Values.service.annotations | trim | nindent 4 }}
 spec:
-  externalTrafficPolicy: Local
-  type: LoadBalancer
   ports:
-    - protocol: TCP
-      name: web
-      port: 80
-    - protocol: TCP
-      name: admin
-      port: {{ .Values.admin.port }}
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+      targetPort: https
   selector:
-    app.kubernetes.io/name: traefik
-    app.kubernetes.io/part-of: traefik
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: metrics-server
+  type: {{ .Values.service.type }}

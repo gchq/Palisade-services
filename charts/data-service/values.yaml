@@ -16,9 +16,10 @@ replicaCount: 1
 
 service:
   port: 80
+  type: ClusterIP
 
 image:
-  repository: palisade/data-service
+  name: data-service
   tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 
@@ -29,6 +30,11 @@ resources:
   requests:
     cpu: 250m
     memory: 1Gi
+
+autoscale:
+  minReplicas: 1
+  maxReplicas: 3
+  cpu: 80
 
 nodeSelector: {}
 tolerations: []
