@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 # values.yaml and templates taken from:
-# https://github.com/helm/charts/blob/master/stable/metrics-server/values.yaml
+# https://github.com/helm/charts/blob/master/stable/metrics-server
 
 image:
   repository: gcr.io/google_containers/metrics-server-amd64
