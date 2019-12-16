@@ -33,6 +33,7 @@ global:
   nodes: 1
   namespace: default
   uniqueNamespace: false
+  repository: palisade
 
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
