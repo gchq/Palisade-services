@@ -155,7 +155,8 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.outputDirectory}/values.yaml" toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
+                                        <copy file="${project.build.outputDirectory}/values.yaml"
+                                              toFile="../charts/${project.artifactId}/values.yaml" overwrite="true"/>
                                     </tasks>
                                 </configuration>
                             </execution>
@@ -199,7 +200,8 @@
                 <configuration>
                     <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+                    <generateGitPropertiesFile>false
+                    </generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
@@ -302,7 +304,7 @@
                     <tag>${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                        <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
             </plugin>

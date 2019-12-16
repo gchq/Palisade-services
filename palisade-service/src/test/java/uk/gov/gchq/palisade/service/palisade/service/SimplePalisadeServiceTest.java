@@ -22,7 +22,6 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -55,6 +54,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,12 +87,14 @@ public class SimplePalisadeServiceTest {
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
     private Map<LeafResource, Policy> policies = new HashMap<>();
     private MultiPolicy multiPolicy;
+    private ExecutorService executor;
 
     @Before
     public void setup() {
+        executor = Executors.newSingleThreadExecutor();
         setupCacheService();
         mockOtherServices();
-        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, applicationConfig.getAsyncExecutor(), aggregationService);
+        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, executor, aggregationService);
         LOGGER.info("Simple Palisade Service created: {}", service);
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");

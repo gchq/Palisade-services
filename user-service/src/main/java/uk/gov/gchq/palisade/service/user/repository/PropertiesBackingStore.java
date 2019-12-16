@@ -338,7 +338,7 @@ public class PropertiesBackingStore implements BackingStore {
     public SimpleCacheObject get(final String key) {
         LOGGER.debug("Getting from cache: {}", key);
         String cacheKey = BackingStore.keyCheck(key);
-        //enforce and any expiries and persist
+        //enforce and any expires and persist
         update(false);
         synchronized (this) {
             String b64Value = props.getProperty(cacheKey);

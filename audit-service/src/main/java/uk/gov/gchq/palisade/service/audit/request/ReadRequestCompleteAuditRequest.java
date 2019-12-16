@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -34,6 +36,7 @@ import static java.util.Objects.requireNonNull;
  * {@link AuditRequest} This class is used for the indication to the Audit logs that processing has been completed.
  */
 public class ReadRequestCompleteAuditRequest extends AuditRequest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadRequestCompleteAuditRequest.class);
 
     public final User user;
     public final LeafResource leafResource;
@@ -52,6 +55,7 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
         this.rulesApplied = requireNonNull(rulesApplied);
         this.numberOfRecordsReturned = numberOfRecordsReturned;
         this.numberOfRecordsProcessed = numberOfRecordsProcessed;
+        LOGGER.debug("ReadRequestCompleteAuditRequest called with originalRequestId: {}, user: {}, leafResource: {}, context: {}, rulesApplied: {}, numberOfRecordsReturned: {}, numberOfRecordsProcessed: {}", originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
     }
 
     /**
@@ -61,6 +65,7 @@ public class ReadRequestCompleteAuditRequest extends AuditRequest {
      * @return {@link ReadRequestCompleteAuditRequest}
      */
     public static IUser create(final RequestId original) {
+        LOGGER.debug("ReadRequestCompleteAuditRequest.create called with RequestId: {}", original);
         return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
     }
 

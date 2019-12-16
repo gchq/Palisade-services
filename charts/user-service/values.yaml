@@ -16,10 +16,11 @@ replicaCount: 1
 
 service:
   port: 80
+  type: ClusterIP
 
 image:
   repository: palisade/user-service
-  tag: a310f31-SNAPSHOT
+  tag: f268320-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:

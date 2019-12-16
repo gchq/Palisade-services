@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import java.util.concurrent.CompletableFuture;
@@ -25,11 +28,12 @@ import java.util.concurrent.CompletableFuture;
  */
 public class SimpleAuditService implements AuditService {
     public static final String CONFIG_KEY = "simple";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
     public static final String CACHE_IMPL_KEY = "user.svc.hashmap.cache.svc";
 
     @Override
     public CompletableFuture<Boolean> audit(final AuditRequest request) {
+        LOGGER.debug("SimpleAuditService.audit called with {}", request);
         return null;
     }
 }

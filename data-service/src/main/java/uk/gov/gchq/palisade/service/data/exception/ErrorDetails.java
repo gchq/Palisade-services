@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -29,19 +30,19 @@ public class ErrorDetails {
 
     private ZonedDateTime date;
     private String message;
-    private String details;
+    private Optional<String> details;
     private List<StackTraceElement> stackTrace;
 
-    private ErrorDetails() { }
+    private ErrorDetails() {
+    }
 
-    public ErrorDetails(final ZonedDateTime date, final String message, final String details, final StackTraceElement[]  trace) {
+    public ErrorDetails(final ZonedDateTime date, final String message, final String details, final StackTraceElement[] trace) {
         requireNonNull(date, "Date cannot be null");
         requireNonNull(message, "Message cannot be null");
-        requireNonNull(details, "Details cannot be null");
         requireNonNull(trace, "Trace cannot be null");
         this.date = date;
         this.message = message;
-        this.details = details;
+        this.details = Optional.ofNullable(details);
         this.stackTrace = Arrays.asList(trace);
     }
 
@@ -61,8 +62,7 @@ public class ErrorDetails {
     }
 
     public void setDetails(final String details) {
-        requireNonNull(details, "Details cannot be null");
-        this.details = details;
+        this.details = Optional.ofNullable(details);
     }
 
     public void setStackTrace(final List<StackTraceElement> stackTrace) {
@@ -80,8 +80,7 @@ public class ErrorDetails {
         return message;
     }
 
-    public String getDetails() {
-        requireNonNull(details, "Details cannot be null");
+    public Optional<String> getDetails() {
         return details;
     }
 
