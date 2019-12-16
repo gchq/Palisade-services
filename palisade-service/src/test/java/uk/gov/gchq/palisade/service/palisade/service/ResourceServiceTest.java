@@ -29,7 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
@@ -43,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -58,15 +59,17 @@ public class ResourceServiceTest {
     private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResourceService resourceService;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private ExecutorService executor;
 
     @Before
     public void setUp() {
+        executor = Executors.newSingleThreadExecutor();
         logger = (Logger) LoggerFactory.getLogger(ResourceService.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
 
-        resourceService = new ResourceService(resourceClient, applicationConfig.getAsyncExecutor());
+        resourceService = new ResourceService(resourceClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
         resources.put(resource, connectionDetail);

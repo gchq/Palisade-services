@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -46,6 +45,8 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,11 +69,13 @@ public class ResultAggregationServiceTest {
     private MultiPolicy multiPolicy;
     private RequestId requestId = new RequestId().id(UUID.randomUUID().toString());
     private RequestId originalRequestId = new RequestId().id("OriginalId");
+    private ExecutorService executor;
 
     @Before
     public void setup() {
+        executor = Executors.newSingleThreadExecutor();
         simpleCacheService.backingStore(new HashMapBackingStore());
-        auditService = new AuditService(auditClient, applicationConfig.getAsyncExecutor());
+        auditService = new AuditService(auditClient, executor);
         service = new ResultAggregationService(auditService, simpleCacheService);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
         request.originalRequestId(originalRequestId);

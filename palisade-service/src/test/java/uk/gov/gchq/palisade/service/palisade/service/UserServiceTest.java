@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
-
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
@@ -29,6 +28,8 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,10 +43,12 @@ public class UserServiceTest {
     private UserService userService;
     private UserId userId = new UserId().id("Bob");
     private User testUser;
+    private ExecutorService executor;
 
     @Before
     public void setup() {
-        userService = new UserService(userClient, applicationConfig.getAsyncExecutor());
+        executor = Executors.newSingleThreadExecutor();
+        userService = new UserService(userClient, executor);
         testUser = new User().userId(userId).roles("Role1", "Role2").auths("Auth1", "Auth2");
     }
 
