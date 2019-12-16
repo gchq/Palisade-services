@@ -56,7 +56,9 @@ so that the application will be available at ```http://localhost/palisade``` and
 ```http://localhost:8080/dashboard/#/```.
 
 Multiple instances of Palisade may be deployed on the same cluster, separated by namespace. The ingress controller will be configured
-to provide a route via that namespace.
+to provide a route via that namespace. It is required that the namespace exists prior to the installation:
+
+```kubectl create namespace testing```
 
 ```helm upgrade --install test . --namespace testing```
 
@@ -67,9 +69,8 @@ This will deploy an additional instance of Palisade called test which may be acc
 Helm will only deploy artifacts to the cluster on upgrade that are new or changed. Pods that require re-deployment must advance the
 image tag using the "push image" profile during the build, as shown above.
 
-#### Helm delete
+#### Generated deployment names
 
-Custom resource definition (CRD) files required by the traefik configurations are pre-loaded by helm and as such must be removed manually if
-the ingress controller sub-chart is removed or subsequent installations will fail. To achieve this run:
+It is possible to let helm generate the deployment name and let the chart create a new namespace for it, then deploy it there:
 
-```kubectl delete -f charts/traefik/templates/custom-resource.yaml```
+```helm upgrade --install --generate-name . --set global.uniqueNamespace=true```
