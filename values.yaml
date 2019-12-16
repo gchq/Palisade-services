@@ -33,6 +33,7 @@ global:
   nodes: 1
   namespace: default
   uniqueNamespace: false
+  repository: palisade
 
 data-service:
   autoscale:

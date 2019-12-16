@@ -19,7 +19,7 @@ service:
   type: ClusterIP
 
 image:
-  repository: palisade/data-service
+  name: data-service
   tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 
