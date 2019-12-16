@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.palisade.exception;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
 
