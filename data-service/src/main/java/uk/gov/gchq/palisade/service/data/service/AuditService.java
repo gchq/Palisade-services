@@ -42,7 +42,7 @@ public class AuditService implements Service {
         try {
             LOGGER.info("Audit request: {}", request);
             response = this.client.audit(request);
-            LOGGER.info("Audit response: {}", response);
+            LOGGER.debug("Audit response: {}", response);
         } catch (Exception ex) {
             LOGGER.error("Failed to log audit request: {}", ex.getMessage());
             throw new RuntimeException(ex);

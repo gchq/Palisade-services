@@ -38,7 +38,7 @@ public class DataApplication {
      * @param args from the command line
      */
     public static void main(final String[] args) {
-        LOGGER.debug("ResourceApplication started with: {}", Arrays.toString(args));
+        LOGGER.debug("DataApplication started with: {}", Arrays.toString(args));
 
         new SpringApplicationBuilder(DataApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
