@@ -37,6 +37,7 @@ terraform.tfstate.backup
 dependency-reduced-pom.xml
 velocity.log.*
 velocity.log
+services-launcher/.log
 *.factorypath
 
 ##VSCODE default files that dont need to be tracked

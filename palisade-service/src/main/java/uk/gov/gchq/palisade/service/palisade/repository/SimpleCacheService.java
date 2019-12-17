@@ -205,17 +205,18 @@ public class SimpleCacheService implements CacheService {
         });
     }
 
+
     @Override
     @SuppressWarnings("unchecked")
     public <V> CompletableFuture<Optional<V>> get(final GetCacheRequest<V> request) {
         requireNonNull(request, "request");
         //make final key name
         String baseKey = request.makeBaseName();
-        LOGGER.debug("Get item with key {}", baseKey);
+        LOGGER.info("Get item with key {}", baseKey);
 
         Supplier<Optional<V>> getFunction = () -> {
             SimpleCacheObject result = doCacheRetrieve(baseKey, maxLocalTTL);
-            LOGGER.debug("Retrieved {} from cache with result {}", baseKey, result);
+            LOGGER.info("Retrieved {} from cache with result {}", baseKey, result);
 
             //assign so Javac can infer the generic type
             BiFunction<byte[], Class<V>, V> decode = codecs.getValueDecoder((Class<V>) result.getValueClass());

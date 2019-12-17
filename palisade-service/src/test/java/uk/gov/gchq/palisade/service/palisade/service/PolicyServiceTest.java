@@ -29,7 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -44,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -61,15 +62,17 @@ public class PolicyServiceTest {
     private MultiPolicy multiPolicy;
     private User testUser = new User().userId("Bob");
     private Map<LeafResource, Policy> policies = new HashMap<>();
+    private ExecutorService executor;
 
     @Before
     public void setUp() {
+        executor = Executors.newSingleThreadExecutor();
         logger = (Logger) LoggerFactory.getLogger(PolicyService.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
 
-        policyService = new PolicyService(policyClient, applicationConfig.getAsyncExecutor());
+        policyService = new PolicyService(policyClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         Policy policy = new Policy().owner(testUser);
         policies.put(resource, policy);
