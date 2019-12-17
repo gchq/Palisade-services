@@ -18,7 +18,7 @@ service:
   port: 80
 
 image:
-  repository: palisade/data-service
+  name: data-service
   tag: a310f31-SNAPSHOT
   pullPolicy: IfNotPresent
 

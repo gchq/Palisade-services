@@ -19,7 +19,7 @@ service:
   type: ClusterIP
 
 image:
-  repository: palisade/user-service
+  name: user-service
   tag: f268320-SNAPSHOT
   pullPolicy: IfNotPresent
 
