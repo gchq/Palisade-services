@@ -23,7 +23,7 @@ spec:
   scaleTargetRef:
     apiVersion: {{ template "deployment.apiVersion" . }}
     kind: Deployment
-    name: {{ template "data-service.fullname" . }}
+    name: {{ template "data-service.name" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
