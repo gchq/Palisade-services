@@ -15,19 +15,28 @@
  */
 package uk.gov.gchq.palisade.service.policy.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
 public class NoPolicyException extends PalisadeRuntimeException {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoPolicyException.class);
+
 
     public NoPolicyException(final String e) {
         super(e);
+        LOGGER.info("NoPolicyException thrown with message: {}", e);
     }
 
     public NoPolicyException(final Throwable cause) {
         super(cause);
+        LOGGER.info("NoPolicyException thrown with throwable: {}", cause);
     }
 
     public NoPolicyException(final String e, final Throwable cause) {
         super(e, cause);
+        LOGGER.info("NoPolicyException thrown with message {}, and throwable: {}", e, cause);
+
     }
 }

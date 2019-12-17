@@ -113,7 +113,6 @@ public class SimplePalisadeService implements PalisadeService {
     @Override
     public CompletableFuture<DataRequestConfig> getDataRequestConfig(
             final GetDataRequestConfig request) {
-        LOGGER.debug("getDataRequestConfig({})", request);
         requireNonNull(request);
         requireNonNull(request.getId());
         // TODO: need to validate that the user is actually requesting the correct info.
@@ -121,6 +120,7 @@ public class SimplePalisadeService implements PalisadeService {
         final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getId().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
         return cacheService.get(cacheRequest)
+
                 .thenApply(cache -> {
                     DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId().getId()));
                     if (null == value.getUser()) {
@@ -128,6 +128,9 @@ public class SimplePalisadeService implements PalisadeService {
                     }
                     LOGGER.debug("Got cache: {}", value);
                     return value;
+                })
+                .exceptionally(exception -> {
+                    throw createCacheException(request.getId().getId());
                 });
     }
 

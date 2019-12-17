@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -37,6 +39,7 @@ import static java.util.Objects.requireNonNull;
  * the resources that this user is approved to read for this data access request.
  */
 public class RegisterRequestCompleteAuditRequest extends AuditRequest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterRequestCompleteAuditRequest.class);
 
     public final User user;
     public final Set<LeafResource> leafResources;
@@ -49,6 +52,8 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
         this.user = requireNonNull(user);
         this.leafResources = requireNonNull(leafResources);
         this.context = requireNonNull(context);
+        LOGGER.debug("RegisterRequestCompleteAuditRequest called with originalRequestId: {}, user: {}, leafResources: {}, context: {}", originalRequestId, user, leafResources, context);
+
     }
 
     /**
@@ -58,6 +63,7 @@ public class RegisterRequestCompleteAuditRequest extends AuditRequest {
      * @return the {@link RegisterRequestCompleteAuditRequest}
      */
     public static IUser create(final RequestId original) {
+        LOGGER.debug("RegisterRequestCompleteAuditRequest.create called with RequestId: {}", original);
         return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
     }
 

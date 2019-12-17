@@ -15,11 +15,13 @@
 target/
 *.iml
 .project/
+*.project
 bin/
 *.class
 */atlassian-ide*
 .idea/
 .classpath/
+*.classpath
 *.pem
 *.DS_Store
 *.flattened-pom.xml
@@ -35,6 +37,8 @@ terraform.tfstate.backup
 dependency-reduced-pom.xml
 velocity.log.*
 velocity.log
+services-launcher/.log
+*.factorypath
 
 ##VSCODE default files that dont need to be tracked
 eclipse-formatter.xml

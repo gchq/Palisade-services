@@ -15,18 +15,21 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
-import com.google.common.collect.ImmutableList;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.Sets;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jtest.LoggingEvent;
-import uk.org.lidalia.slf4jtest.TestLogger;
-import uk.org.lidalia.slf4jtest.TestLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -61,9 +64,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItem;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -81,7 +85,10 @@ public class HierarchicalPolicyServiceTest {
     private final SystemResource systemResource = createTestSystemResource();
     private final DirectoryResource directoryResource = createTestDirectoryResource();
     private HierarchicalPolicyService policyService;
-    private TestLogger LOGGER = TestLoggerFactory.getTestLogger(HierarchicalPolicyService.class);
+
+    private Logger logger;
+    private ListAppender<ILoggingEvent> appender;
+
 
     private static SystemResource createTestSystemResource() {
         return new SystemResource().id("File");
@@ -102,7 +109,11 @@ public class HierarchicalPolicyServiceTest {
     @Before
     public void setup() {
         policyService = new HierarchicalPolicyService(cacheService);
-        LOGGER.clear();
+
+        logger = (Logger) LoggerFactory.getLogger(HierarchicalPolicyService.class);
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
 
         CompletableFuture<Boolean> request1 = policyService.setResourcePolicy(new SetResourcePolicyRequest()
                 .resource(fileResource1)
@@ -137,6 +148,19 @@ public class HierarchicalPolicyServiceTest {
         CompletableFuture.allOf(request1, request2, request3, request4).join();
     }
 
+    @After
+    public void tearDown() {
+        logger.detachAppender(appender);
+        appender.stop();
+    }
+
+    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
+
     @Test
     public void getApplicableResourceLevelRules() {
         // When
@@ -146,32 +170,41 @@ public class HierarchicalPolicyServiceTest {
         assertTrue(optResult.isPresent());
 
         Rules<Object> result = optResult.get();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        assertNotEquals(0, loggingEvents.size());
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
         assertEquals("Resource serialised format is txt, Input is not null", result.getMessage());
         assertEquals(2, result.getRules().keySet().size());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 
     @Test
     public void getApplicableRecordLevelRules() {
         // When
         Optional<Rules<Object>> optResult = policyService.getApplicableRules(fileResource1, false, fileResource1.getType()).join();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
 
         // Then
         assertTrue(optResult.isPresent());
         Rules<Object> result = optResult.get();
         assertEquals("Does nothing, Check user has 'Sensitive' auth", result.getMessage());
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
         assertEquals(2, result.getRules().keySet().size());
-    }
-    // should filter out resources where no policy is defined
 
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
+    }
+
+    //should filter out resources where no policy is defined
     @Test
     public void shouldReturnEmptyResourceRulesOnNoPolicy() {
         // Given
@@ -187,13 +220,17 @@ public class HierarchicalPolicyServiceTest {
 
         // When
         Optional<Rules<Object>> optResult = policyService.getApplicableRules(noPolicyStub, true, noPolicyStub.getType()).join();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
         // Then
         assertFalse(optResult.isPresent());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 
     @Test
@@ -211,13 +248,17 @@ public class HierarchicalPolicyServiceTest {
 
         // When
         Optional<Rules<Object>> optResult = policyService.getApplicableRules(noPolicyStub, false, noPolicyStub.getType()).join();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
-
         // Then
         assertFalse(optResult.isPresent());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 
     @Test
@@ -236,14 +277,18 @@ public class HierarchicalPolicyServiceTest {
 
         CanAccessResponse response = future.get();
         Collection<LeafResource> resources = response.getCanAccessResources();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
-
         // Then
         assertEquals(1, resources.size());
         assertEquals(fileResource1, resources.iterator().next());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Determining access:"),
+                Matchers.anyOf(
+                        Matchers.containsString("Determining access: Context"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 
     @Test
@@ -267,13 +312,17 @@ public class HierarchicalPolicyServiceTest {
                         .resources(Collections.singletonList(noPolicyStub)));
 
         CanAccessResponse response = future.join();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
-
         // Then
-        Assert.assertThat(response.getCanAccessResources(), is(CoreMatchers.equalTo(Collections.emptyList())));
+        Assert.assertThat(response.getCanAccessResources(), is(CoreMatchers.equalTo(emptyList())));
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Determining access"),
+                Matchers.anyOf(
+                        Matchers.containsString("no rules present"),
+                        Matchers.containsString("No policy for StubResource"))
+        ));
     }
 
     @Test
@@ -288,14 +337,18 @@ public class HierarchicalPolicyServiceTest {
         CompletableFuture<MultiPolicy> future = policyService.getPolicy(getPolicyRequest);
         MultiPolicy response = future.get();
         Map<LeafResource, Rules> ruleMap = response.getRuleMap();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
 
         // Then
         assertEquals(1, ruleMap.size());
         assertEquals("Does nothing, Check user has 'Sensitive' auth", ruleMap.get(fileResource1).getMessage());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("getPolicy -"),
+                Matchers.anyOf(
+                        Matchers.containsString("adding resource:"))
+        ));
     }
 
     @Test
@@ -319,13 +372,18 @@ public class HierarchicalPolicyServiceTest {
         CompletableFuture<CanAccessResponse> future2 = policyService.canAccess(new CanAccessRequest().resources(Collections.singletonList(newResource)).user(testUser).context(new Context().purpose("fun")));
         CanAccessResponse response2 = future2.get();
         Collection<LeafResource> resources2 = response2.getCanAccessResources();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
 
         // Then
         assertEquals(0, resources2.size());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Setting resource policy"),
+                Matchers.anyOf(
+                        Matchers.containsString("Determining access:"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 
     @Test
@@ -357,13 +415,18 @@ public class HierarchicalPolicyServiceTest {
         CompletableFuture<CanAccessResponse> future2 = policyService.canAccess(new CanAccessRequest().resources(Collections.singletonList(fileResource1)).user(testUser).context(new Context().purpose("fun")));
         CanAccessResponse response2 = future2.get();
         Collection<LeafResource> resources2 = response2.getCanAccessResources();
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
 
         // Then
         assertEquals(0, resources2.size());
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Setting resource policy "))
+        ));
     }
 
     @Test
@@ -404,10 +467,15 @@ public class HierarchicalPolicyServiceTest {
         );
         assertEquals(1, canAccessAfterResult.get().getCanAccessResources().size());
         assertNotEquals("TestObj2", canAccessAfterResult.get().getCanAccessResources().iterator().next().getType());
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-        List<Level> eventLevel = loggingEvents.stream().map(loggingEvent -> loggingEvent.getLevel()).collect(Collectors.toList());
-        assertThat(eventLevel, not(hasItem(Level.ERROR)));
-        assertThat(eventLevel, not(hasItem(Level.WARN)));
+
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        assertThat(debugMessages, is(not(emptyList())));
+        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
+                Matchers.containsString("Getting the applicable rules"),
+                Matchers.anyOf(
+                        Matchers.containsString("resource is an instance of ChildResource"),
+                        Matchers.containsString("Getting the applicable rules: "))
+        ));
     }
 }
 

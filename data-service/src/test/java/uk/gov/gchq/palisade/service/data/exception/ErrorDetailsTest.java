@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -64,11 +64,15 @@ public class ErrorDetailsTest {
 
     @Test
     public void ErrorDetailsFromJsonTest() throws IOException {
+
         // Given
+        Optional<String> testDetails = Optional.of("Test Details");
         final String jsonString = "{\"date\":\"2019-01-01T00:00:00.000001Z\",\"message\":\"Test Message\",\"details\":\"Test Details\",\"stackTrace\":[]}";
 
         // When
         ErrorDetails result = this.mapper.readValue(jsonString, ErrorDetails.class);
+
+        System.out.println(result.getDetails());
 
         // Then
         assertThat("ErrorDetails could not be parsed from json",
@@ -79,7 +83,7 @@ public class ErrorDetailsTest {
                 equalTo("Test Message"));
         assertThat("ErrorDetails could not be parsed from json",
                 result.getDetails(),
-                equalTo("Test Details"));
+                equalTo(testDetails));
     }
 
     @Test
@@ -88,7 +92,7 @@ public class ErrorDetailsTest {
         final ZonedDateTime date = ZonedDateTime.of(LocalDateTime.ofEpochSecond(1546300800L, 1000, ZoneOffset.UTC), ZoneId.of("UTC"));
         final ErrorDetails details = new ErrorDetails(date, "Test Message", "Test Details", stackTrace);
 
-        String expected = "ErrorDetails[date=2019-01-01T00:00:00.000001Z[UTC],message=Test Message,details=Test Details,stackTrace=[]]";
+        String expected = "ErrorDetails[date=2019-01-01T00:00:00.000001Z[UTC],message=Test Message,details=Optional[Test Details],stackTrace=[]]";
 
         // When
         String actual = details.toString();

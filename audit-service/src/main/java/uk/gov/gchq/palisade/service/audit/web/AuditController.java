@@ -49,15 +49,19 @@ public class AuditController {
         final List<CompletableFuture<Boolean>> audits = this.audit(request);
         final CompletableFuture<Void> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]));
 
-        return results.thenApply(res ->
-            audits.stream().map(CompletableFuture::join).collect(Collectors.toList())
+        boolean result = results.thenApply(res ->
+                audits.stream().map(CompletableFuture::join).collect(Collectors.toList())
         ).get().stream().allMatch(res -> res);
+        LOGGER.debug("AuditRequest result is {}", result);
+        return result;
     }
 
     public List<CompletableFuture<Boolean>> audit(final AuditRequest request) {
-        return services.values().stream().map(
+        List<CompletableFuture<Boolean>> result = services.values().stream().map(
                 auditService -> auditService.audit(request)
         ).collect(Collectors.toList());
+        LOGGER.debug("audit result is {}", result);
+        return result;
     }
 
 }
