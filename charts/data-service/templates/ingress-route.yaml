@@ -13,11 +13,19 @@
 # limitations under the License.
 #
 apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
+kind: IngressRoute
 metadata:
-  name: palisade-pathparam-regex
+  name: data-service
   namespace: {{ include "palisade.namespace" . }}
 spec:
-  replacePathRegex:
-    regex: ^{{ include "palisade-service.root" . }}/palisade/(.*)
-    replacement: /$1
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "data-service.root" . }}/data`)
+      kind: Rule
+      services:
+        - name: data-service
+          port: 80
+      middlewares:
+        - name: data-pathparam-regex
+          namespace: {{ include "palisade.namespace" . }}

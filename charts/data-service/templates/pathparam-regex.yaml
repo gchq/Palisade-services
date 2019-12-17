@@ -15,9 +15,9 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: palisade-pathparam-regex
+  name: data-pathparam-regex
   namespace: {{ include "palisade.namespace" . }}
 spec:
   replacePathRegex:
-    regex: ^{{ include "palisade-service.root" . }}/palisade/(.*)
+    regex: ^{{ include "data-service.root" . }}/data/(.*)
     replacement: /$1

@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
+import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,9 +39,9 @@ public class PolicyController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyController.class);
 
-    private final uk.gov.gchq.palisade.service.policy.service.PolicyService service;
+    private final PolicyService service;
 
-    public PolicyController(final uk.gov.gchq.palisade.service.policy.service.PolicyService service) {
+    public PolicyController(final PolicyService service) {
         this.service = service;
     }
 
