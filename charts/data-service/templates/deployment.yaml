@@ -12,26 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "policy-service.name" . }}
+  name: {{ include "data-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    app.kubernetes.io/name: {{ include "policy-service.name" . }}
-    helm.sh/chart: {{ include "policy-service.chart" . }}
+    helm.sh/chart: {{ include "data-service.chart" . }}
+    app.kubernetes.io/name: {{ include "data-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "policy-service.name" . }}
+      app.kubernetes.io/name: {{ include "data-service.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "policy-service.name" . }}
+        app.kubernetes.io/name: {{ include "data-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
@@ -40,12 +41,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: web
-              containerPort: 8085
+              containerPort: 8082
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: 8085
+              port: 8082
             initialDelaySeconds: 10
             failureThreshold: 5
             periodSeconds: 20
@@ -53,7 +54,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 8085
+              port: 8082
             initialDelaySeconds: 10
             failureThreshold: 5
             periodSeconds: 20
