@@ -13,15 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -30,7 +38,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
@@ -40,11 +47,8 @@ import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
-import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
+import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
@@ -53,18 +57,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@RunWith(JUnit4.class)
-public class SimplePalisadeServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class PalisadeServiceExceptionHandlerTest {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeServiceTest.class);
 
     private final DataRequestConfig expectedConfig = new DataRequestConfig();
@@ -87,6 +90,8 @@ public class SimplePalisadeServiceTest {
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
     private Map<LeafResource, Policy> policies = new HashMap<>();
     private MultiPolicy multiPolicy;
+    private PalisadeController controller;
+    private MockMvc mvc;
     private ExecutorService executor;
 
     @Before
@@ -118,53 +123,10 @@ public class SimplePalisadeServiceTest {
         expectedResponse.resources(resources);
         expectedResponse.originalRequestId(originalRequestId);
         futureResponse.complete(expectedResponse);
-    }
-
-    @Test
-    public void registerDataRequestTest() {
-
-        //Given
-        CompletableFuture<User> futureUser = new CompletableFuture<>();
-        futureUser.complete(user);
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResource = new CompletableFuture<>();
-        futureResource.complete(resources);
-        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
-        futurePolicy.complete(multiPolicy);
-
-        RegisterDataRequest request = new RegisterDataRequest()
-                .userId(new UserId().id("Bob"))
-                .context(new Context().purpose("Testing"))
-                .resourceId("/path/to/new/bob_file.txt");
-
-        when(cacheService.getBackingStore().add(anyString(), any(), any(), any())).thenReturn(true);
-        when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
-        when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
-        when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
-        when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
-        when(aggregationService.aggregateDataRequestResults(any(RegisterDataRequest.class), any(User.class), anyMap(), any(MultiPolicy.class), any(RequestId.class), any(RequestId.class)))
-                .thenReturn(futureResponse);
-
-        //When
-        CompletableFuture<DataRequestResponse> response = service.registerDataRequest(request);
-        DataRequestResponse actualResponse = response.join();
-        actualResponse.originalRequestId(request.getId());
-
-        //Then
-        assertEquals(expectedResponse.getResources(), actualResponse.getResources());
-    }
-
-    @Test(expected = CompletionException.class)
-    public void getDataRequestConfigFromEmptyCacheTest() {
-        LOGGER.info("Expected config: {}", expectedConfig);
-        //Given
-        GetDataRequestConfig requestConfig = new GetDataRequestConfig();
-        requestConfig.requestId(new RequestId().id("requestId"));
-        requestConfig.resource(new FileResource().id("resourceId"));
-        LOGGER.info("Get Data Request Config: {}", requestConfig);
-
-        //When
-        CompletableFuture<DataRequestConfig> cacheConfig = service.getDataRequestConfig(requestConfig);
-        cacheConfig.toCompletableFuture().join();
+        controller = new PalisadeController(service);
+        mvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new PalisadeServiceExceptionHandler())
+                .build();
     }
 
     private void createExpectedDataConfig() {
@@ -186,6 +148,44 @@ public class SimplePalisadeServiceTest {
         expectedConfig.setUser(user);
         expectedConfig.setContext(context);
         expectedConfig.setRules(ruleMap);
+    }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void verifyNullPointerException() throws Exception {
+        // Given
+        RegisterDataRequest registerDataRequest = new RegisterDataRequest();
+        UserId userId = new UserId();
+        userId.setId("1234");
+        registerDataRequest.setUserId(userId);
+        Context context = new Context();
+        Map<String, Object> mapStringObj = new HashMap<>();
+        mapStringObj.put("key1", 789);
+        mapStringObj.put("key2", 3456);
+        context.setContents(mapStringObj);
+        context.purpose("testing");
+        registerDataRequest.setContext(context);
+        registerDataRequest.setResourceId("0345");
+
+        // When
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .post("/registerDataRequest")
+                .content(asJsonString(registerDataRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andReturn().getResponse();
+
+        // Then
+        assertEquals(response.getStatus(), HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString(), containsString("class java.lang.NullPointerException"));
     }
 
     private void mockOtherServices() {
