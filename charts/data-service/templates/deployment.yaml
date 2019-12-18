@@ -66,7 +66,8 @@ spec:
         {{- toYaml .Values.resources | nindent 12 }}
       volumes:
       - name: data-volume
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: {{ include "data-service.name" . }}-pvclaim
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
