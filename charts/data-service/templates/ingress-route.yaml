@@ -15,7 +15,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: data-service
+  name: {{ include "data-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
 spec:
   entryPoints:
@@ -24,7 +24,7 @@ spec:
     - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "data-service.root" . }}/data`)
       kind: Rule
       services:
-        - name: data-service
+        - name: {{ include "data-service.name" . }}
           port: 80
       middlewares:
         - name: data-pathparam-regex
