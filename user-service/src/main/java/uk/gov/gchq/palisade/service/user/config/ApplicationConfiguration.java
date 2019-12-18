@@ -35,12 +35,10 @@ import uk.gov.gchq.palisade.service.user.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.user.service.CacheService;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
-import uk.gov.gchq.palisade.service.user.web.ServiceInstanceRestController;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static java.util.stream.Collectors.toList;
