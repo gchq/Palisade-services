@@ -19,7 +19,7 @@ service:
   type: ClusterIP
 
 image:
-  repository: palisade/@artifactId@
+  name: @artifactId@
   tag: @git.commit.id.abbrev@-@revision@
   pullPolicy: IfNotPresent
 
