@@ -16,160 +16,67 @@
 
 package uk.gov.gchq.palisade.service.launcher.runner;
 
-import org.apache.tools.ant.util.JavaEnvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.launcher.config.DefaultsConfiguration;
-import uk.gov.gchq.palisade.service.launcher.config.OverridableConfiguration;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@Component
 public class ServicesRunner implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
-    private List<OverridableConfiguration> configsFromFile;
-    private DefaultsConfiguration defaultsConfiguration;
+    private Map<String, ProcessBuilder> processBuilders;
 
-    public ServicesRunner(final List<OverridableConfiguration> serviceConfigurations, final DefaultsConfiguration defaultsConfiguration) {
-        this.configsFromFile = serviceConfigurations;
-        this.defaultsConfiguration = defaultsConfiguration;
+    public ServicesRunner(final Map<String, ProcessBuilder> processBuilders) {
+        this.processBuilders = processBuilders;
     }
 
-    File getServicesRoot() {
-        File parent = new File(".").getAbsoluteFile();
-        while (parent != null && !defaultsConfiguration.getRoot().equals(parent.getName())) {
-            parent = parent.getParentFile();
-        }
-        return parent;
-    }
-
-    List<ProcessBuilder> constructProcessRunners(final List<OverridableConfiguration> configs) {
-        return configs.stream()
-                .map((config) -> {
-                    String[] command = createCommand(config);
-                    return new ProcessBuilder()
-                            .command(command)
-                            .directory(getServicesRoot())
-                            .redirectOutput(new File(config.getLog()))
-                            .redirectError(new File(config.getLog()));
-                })
-                .collect(Collectors.toList());
-    }
-
-    List<OverridableConfiguration> loadConfigurations(final List<OverridableConfiguration> configurations, final ApplicationArguments args) {
-        List<OverridableConfiguration> addedConfigs = new ArrayList<>();
-        Set<OverridableConfiguration> removedConfigs = new HashSet<>();
-
-        if (args.getSourceArgs().length > 0) {
-            // --enable=<service-name>
-            for (String serviceName : args.getOptionValues("enable")) {
-                OverridableConfiguration config = new OverridableConfiguration();
-                config.setName(serviceName);
-                addedConfigs.add(config);
-            }
-            // --disable=<service-name>
-            for (String serviceName : args.getOptionValues("disable")) {
-                OverridableConfiguration config = new OverridableConfiguration();
-                config.setName(serviceName);
-                removedConfigs.add(config);
-            }
-        }
-
-        return Stream.of(configurations, addedConfigs)
-                .flatMap(Collection::stream)
-                .filter((x) -> !removedConfigs.contains(x))
-                .map((x) -> x.defaults(defaultsConfiguration))
-                .collect(Collectors.toList());
-    }
-
-    List<Process> launchApplicationsFromProcessBuilders(final List<ProcessBuilder> configurations) {
-        return configurations.stream()
-                .map((pb) -> {
+    Map<String, Process> launchApplications(final Map<String, ProcessBuilder> configurations) {
+        return configurations.entrySet().stream()
+                .map(e -> {
                     try {
-                        Process process = pb.start();
-                        return process;
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.info("Started service: {}", e.getKey());
+                        LOGGER.debug("Service {} started with command: {}", e.getKey(), e.getValue().command());
+                        return new SimpleEntry<>(e.getKey(), e.getValue().start());
+                    } catch (IOException ex) {
+                        LOGGER.error("Error while starting service {}: {}", e.getKey(), ex.getMessage());
+                        ex.printStackTrace();
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
-    Map<Process, Integer> joinProcesses(final List<Process> processes) {
-        return processes.stream()
-                .map((p) -> {
+    Map<String, Integer> joinProcesses(final Map<String, Process> processes) {
+        return processes.entrySet().stream()
+                .map(e -> {
                     try {
-                        return new SimpleEntry<>(p, p.waitFor());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        return new SimpleEntry<>(e.getKey(), e.getValue().waitFor());
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-    }
-
-    String[] createCommand(final OverridableConfiguration config) {
-
-        if (config.getName().equals("policy-service")/* || config.getName().equals("data-service")*/) {
-
-            return new String[]{
-                    JavaEnvUtils.getJreExecutable("java"),
-                    String.format("-cp %s", config.getClasspath()),
-                    String.format("-Dspring.config.location=%s", config.getConfig()),
-                    String.format("-Dspring.profiles.active=%s", config.getProfiles()),
-                    String.format("-Dloader.main=%s", config.getMain()),
-                    config.getLoader()
-            };
-        } else {
-
-            return new String[]{
-                    JavaEnvUtils.getJreExecutable("java"),
-                    "-jar",
-                    String.format("-Dspring.config.location=%s", config.getConfig()),
-                    String.format("-Dspring.profiles.active=%s", config.getProfiles()),
-                    config.getTarget()
-            };
-        }
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
-        LOGGER.info(String.format("Loaded %s service configurations from file", configsFromFile.size()));
-
-        // Build a set of configurations for processes from config and commandline args
-        List<OverridableConfiguration> serviceConfigurations = loadConfigurations(configsFromFile, args);
-        LOGGER.info(String.format("Loaded %s configurations total", serviceConfigurations.size()));
-
-        List<ProcessBuilder> processBuilders = constructProcessRunners(serviceConfigurations);
-        for (ProcessBuilder processBuilder : processBuilders) {
-            LOGGER.info(processBuilder.command().toString());
-        }
-        LOGGER.info(String.format("Prepared %s processes to run", processBuilders.size()));
-
         // Start processes for each service configuration
-        List<Process> processes = launchApplicationsFromProcessBuilders(processBuilders);
-        LOGGER.info(String.format("Launched %s processes, waiting to join", processes.size()));
+        Map<String, Process> processes = launchApplications(processBuilders);
+        LOGGER.info("Launched {} processes, waiting to join", processes.size());
 
         // Wait for retcodes
-        Map<Process, Integer> retCodes = joinProcesses(processes);
-        LOGGER.info(String.format("Joined with retcodes: %s", retCodes.toString()));
+        Map<String, Integer> retCodes = joinProcesses(processes);
+        LOGGER.info("Joined with retcodes: {}", retCodes.toString());
     }
 }

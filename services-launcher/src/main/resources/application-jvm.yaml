@@ -13,9 +13,18 @@
 # limitations under the License.
 #
 launcher:
-  default-service:
-    profiles: jvm
-    loader: org.springframework.boot.loader.JarLauncher
-    main: uk.gov.gchq.palisade.service.policy.PolicyApplication
-    classpath: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar:../Palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-    log: SERVICE-jvm.log
+  services:
+    audit-service:
+      profiles: jvm
+    data-service:
+      profiles: jvm
+    discovery-service:
+      profiles: jvm
+    palisade-service:
+      profiles: jvm
+    policy-service:
+      profiles: jvm
+    resource-service:
+      profiles: jvm
+    user-service:
+      profiles: jvm
