@@ -54,4 +54,19 @@ public class OverridableConfiguration extends ServiceConfiguration {
         return super.getLog() != null || defaultConfig == null ? super.getLog() : defaultConfig.name(getName()).getLog();
     }
 
+    @Override
+    public String getMain() {
+        return super.getMain() != null || defaultConfig == null ? super.getMain() : defaultConfig.name(getName()).getMain();
+    }
+
+    @Override
+    public String getClasspath() {
+        return super.getClasspath() != null || defaultConfig == null ? super.getClasspath() : defaultConfig.name(getName()).getClasspath();
+    }
+
+    @Override
+    public String getLoader() {
+        return super.getLoader() != null || defaultConfig == null ? super.getLoader() : defaultConfig.name(getName()).getLoader();
+    }
+
 }

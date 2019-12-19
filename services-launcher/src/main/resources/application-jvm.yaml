@@ -15,4 +15,7 @@
 launcher:
   default-service:
     profiles: jvm
+    loader: org.springframework.boot.loader.JarLauncher
+    main: uk.gov.gchq.palisade.service.policy.PolicyApplication
+    classpath: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar:../Palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
     log: SERVICE-jvm.log

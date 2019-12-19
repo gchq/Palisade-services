@@ -62,4 +62,19 @@ public class DefaultsConfiguration extends ServiceConfiguration {
         return  getName() == null || super.getLog() == null ? super.getLog() : super.getLog().replace("SERVICE", getName());
     }
 
+    @Override
+    public String getMain() {
+        return getName() == null || super.getMain() == null ? super.getMain() : super.getMain().replace("SERVICE", getName());
+    }
+
+    @Override
+    public String getClasspath() {
+        return getName() == null || super.getClasspath() == null ? super.getClasspath() : super.getClasspath().replace("SERVICE", getName());
+    }
+
+    @Override
+    public String getLoader() {
+        return getName() == null || super.getLoader() == null ? super.getLoader() : super.getLoader().replace("SERVICE", getName());
+    }
+
 }

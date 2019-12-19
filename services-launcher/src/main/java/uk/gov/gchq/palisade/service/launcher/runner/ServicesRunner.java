@@ -61,19 +61,12 @@ public class ServicesRunner implements ApplicationRunner {
     List<ProcessBuilder> constructProcessRunners(final List<OverridableConfiguration> configs) {
         return configs.stream()
                 .map((config) -> {
-                    String[] command = new String[]{
-                            JavaEnvUtils.getJreExecutable("java"),
-                            "-jar",
-                            String.format("-Dspring.config.location=%s", config.getConfig()),
-                            String.format("-Dspring.profiles.active=%s", config.getProfiles()),
-                            config.getTarget()
-                    };
-                    final ProcessBuilder processBuilder = new ProcessBuilder()
+                    String[] command = createCommand(config);
+                    return new ProcessBuilder()
                             .command(command)
                             .directory(getServicesRoot())
                             .redirectOutput(new File(config.getLog()))
                             .redirectError(new File(config.getLog()));
-                    return processBuilder;
                 })
                 .collect(Collectors.toList());
     }
@@ -133,6 +126,30 @@ public class ServicesRunner implements ApplicationRunner {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
+    String[] createCommand(final OverridableConfiguration config) {
+
+        if (config.getName().equals("policy-service")/* || config.getName().equals("data-service")*/) {
+
+            return new String[]{
+                    JavaEnvUtils.getJreExecutable("java"),
+                    String.format("-cp %s", config.getClasspath()),
+                    String.format("-Dspring.config.location=%s", config.getConfig()),
+                    String.format("-Dspring.profiles.active=%s", config.getProfiles()),
+                    String.format("-Dloader.main=%s", config.getMain()),
+                    config.getLoader()
+            };
+        } else {
+
+            return new String[]{
+                    JavaEnvUtils.getJreExecutable("java"),
+                    "-jar",
+                    String.format("-Dspring.config.location=%s", config.getConfig()),
+                    String.format("-Dspring.profiles.active=%s", config.getProfiles()),
+                    config.getTarget()
+            };
+        }
+    }
+
     @Override
     public void run(final ApplicationArguments args) throws Exception {
         LOGGER.info(String.format("Loaded %s service configurations from file", configsFromFile.size()));
@@ -142,6 +159,9 @@ public class ServicesRunner implements ApplicationRunner {
         LOGGER.info(String.format("Loaded %s configurations total", serviceConfigurations.size()));
 
         List<ProcessBuilder> processBuilders = constructProcessRunners(serviceConfigurations);
+        for (ProcessBuilder processBuilder : processBuilders) {
+            LOGGER.info(processBuilder.command().toString());
+        }
         LOGGER.info(String.format("Prepared %s processes to run", processBuilders.size()));
 
         // Start processes for each service configuration

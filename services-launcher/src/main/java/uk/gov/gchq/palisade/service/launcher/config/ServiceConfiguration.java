@@ -24,6 +24,9 @@ public class ServiceConfiguration {
     private String config;
     private String profiles;
     private String log;
+    private String main;
+    private String classpath;
+    private String loader;
 
     // Default constructor
     public ServiceConfiguration() {
@@ -75,6 +78,30 @@ public class ServiceConfiguration {
 
     public void setLog(final String log) {
         this.log = log;
+    }
+
+    public String getMain() {
+        return main;
+    }
+
+    public void setMain(final String main) {
+        this.main = main;
+    }
+
+    public String getClasspath() {
+        return classpath;
+    }
+
+    public void setClasspath(final String classpath) {
+        this.classpath = classpath;
+    }
+
+    public String getLoader() {
+        return loader;
+    }
+
+    public void setLoader(final String loader) {
+        this.loader = loader;
     }
 
     @Override
