@@ -132,7 +132,7 @@ public class ServicesRunner implements ApplicationRunner {
 
             return new String[]{
                     JavaEnvUtils.getJreExecutable("java"),
-                    String.format("-cp %s", config.getClasspath()),
+                    "-cp", String.format(config.getClasspath()),
                     String.format("-Dspring.config.location=%s", config.getConfig()),
                     String.format("-Dspring.profiles.active=%s", config.getProfiles()),
                     String.format("-Dloader.main=%s", config.getMain()),
