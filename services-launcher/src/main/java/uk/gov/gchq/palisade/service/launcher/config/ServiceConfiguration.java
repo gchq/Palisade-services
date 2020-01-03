@@ -16,44 +16,21 @@
 
 package uk.gov.gchq.palisade.service.launcher.config;
 
-import java.util.Objects;
-
 public class ServiceConfiguration {
-    private String name;
-    private String target;
+
+    private String classpath;
     private String config;
+    private String launcher;
+    private String main;
     private String profiles;
     private String log;
-    private String main;
-    private String classpath;
-    private String loader;
 
-    // Default constructor
-    public ServiceConfiguration() {
+    public String getClasspath() {
+        return classpath;
     }
 
-    // Copy constructor
-    public ServiceConfiguration(final ServiceConfiguration copy) {
-        this.name = copy.name;
-        this.target = copy.target;
-        this.config = copy.config;
-        this.log = copy.log;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(final String target) {
-        this.target = target;
+    public void setClasspath(final String classpath) {
+        this.classpath = classpath;
     }
 
     public String getConfig() {
@@ -62,6 +39,22 @@ public class ServiceConfiguration {
 
     public void setConfig(final String config) {
         this.config = config;
+    }
+
+    public String getLauncher() {
+        return launcher;
+    }
+
+    public void setLauncher(final String launcher) {
+        this.launcher = launcher;
+    }
+
+    public String getMain() {
+        return main;
+    }
+
+    public void setMain(final String main) {
+        this.main = main;
     }
 
     public String getProfiles() {
@@ -80,45 +73,4 @@ public class ServiceConfiguration {
         this.log = log;
     }
 
-    public String getMain() {
-        return main;
-    }
-
-    public void setMain(final String main) {
-        this.main = main;
-    }
-
-    public String getClasspath() {
-        return classpath;
-    }
-
-    public void setClasspath(final String classpath) {
-        this.classpath = classpath;
-    }
-
-    public String getLoader() {
-        return loader;
-    }
-
-    public void setLoader(final String loader) {
-        this.loader = loader;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ServiceConfiguration)) {
-            return false;
-        }
-        final ServiceConfiguration that = (ServiceConfiguration) o;
-        return Objects.equals(getName(), that.getName()) &&
-                Objects.equals(getTarget(), that.getTarget());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getName(), getTarget());
-    }
 }

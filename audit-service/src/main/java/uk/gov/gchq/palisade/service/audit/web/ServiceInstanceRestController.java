@@ -33,7 +33,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class ServiceInstanceRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInstanceRestController.class);
 
-
     @Autowired
     private DiscoveryClient discoveryClient;
 
