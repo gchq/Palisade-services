@@ -45,5 +45,8 @@ metricsServer:
   install: false
 
 # dataPath: path to directory to mount as a persistent-volume to be claimed by the data-service
+# - under UNIX, this works as expected and is simply the UNIX path to the directory to mount
+# - under Windows, paths must be rewritten in a 'unix-y' style - i.e. 'C:\Users\Admin\data-dir' -> '/c/Users/Admin/data-dir'
+#   - it is also necessary to ensure the C:\ drive is shared within the 'Docker Desktop' app
 local:
-  dataPath: '/c/data'
+  dataPath: '/data'

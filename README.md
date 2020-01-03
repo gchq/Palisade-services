@@ -45,15 +45,20 @@ and the Kubernetes context configured to point at the target cluster.
 
 ```kubectl config use-context <name>```
 
+In order to mount local directories to the data service, ***Windows users may find it necessary to adjust their firewall settings or change the network category for the "vEthernet (DockerNAT)" card to private*** via PowerShell:
+
+```Set-NetConnectionProfile -InterfaceAlias "vEthernet (DockerNAT)" -NetworkCategory Private``` (required after any docker updates or system reboots)
+
 All deployment parameters are defined in the root ```values.yaml``` file, see inline comments for details.
 
-Example first deployment to a local cluster (from the project root directory) :
+Example first deployment to a local cluster (from the project root directory):
 
-```helm upgrade --install palisade . --set traefik.install=true```
+```helm upgrade --install palisade . --set traefik.install=true,metricsServer.install=true,local.dataPath=$(pwd)```
 
-This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the defult namespace
+This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the default namespace
 so that the application will be available at ```http://localhost/palisade``` and the traefik dashboard will be available at 
 ```http://localhost:8080/dashboard/#/```.
+The working directory from `$(pwd)` will be used as the mount-point to the data service.
 
 Multiple instances of Palisade may be deployed on the same cluster, separated by namespace. The ingress controller will be configured
 to provide a route via that namespace. It is required that the namespace exists prior to the installation:
