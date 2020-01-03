@@ -12,25 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
 
-service:
-  port: 80
-  type: ClusterIP
-
-image:
-  name: resource-service
-  tag: a310f31-SNAPSHOT
-  pullPolicy: IfNotPresent
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resource-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
+  labels:
+    {{- include "resource-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 8086
+    protocol: TCP
+    name: web
+  selector:
+    app.kubernetes.io/name: {{ include "resource-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
