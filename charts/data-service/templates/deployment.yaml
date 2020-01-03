@@ -68,6 +68,7 @@ spec:
       - name: data-volume
         persistentVolumeClaim:
           claimName: {{ include "data-service.name" . }}-pvclaim
+          #readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

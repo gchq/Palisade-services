@@ -40,5 +40,10 @@ global:
 traefik:
   install: false
 
-metrics-server:
+# install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
+metricsServer:
   install: false
+
+# dataPath: path to directory to mount as a persistent-volume to be claimed by the data-service
+local:
+  dataPath: '/c/data'

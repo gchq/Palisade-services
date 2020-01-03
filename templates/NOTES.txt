@@ -15,3 +15,4 @@
 You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }}.
 
 The ingress is located on path {{ include "palisade-service.root" . }}/palisade and the ingress controller dashboard at :{{ .Values.traefik.admin.port }}/dashboard/#/
+The data storage mount point can be found at {{ .Values.local.dataPath }}

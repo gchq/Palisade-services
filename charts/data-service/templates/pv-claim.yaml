@@ -18,6 +18,10 @@ metadata:
   name: {{ include "data-service.name" . }}-pvclaim
   namespace: {{ include "palisade.namespace" . }}
 spec:
+  storageClassName: data-storage
+  selector:
+    matchLabels:
+      for-app: {{ include "palisade.namespace" . }}
   accessModes:
   - ReadOnlyMany
   resources:

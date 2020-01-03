@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-persistent-volume
+  namespace: {{ include "palisade.namespace" . }}
+  labels:
+    for-app: {{ include "palisade.namespace" . }}
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: data-storage
+  capacity:
+    storage: 5Gi
+  accessModes:
+  - ReadOnlyMany
+  hostPath:
+    path: {{ .Values.local.dataPath }}
+    type: DirectoryOrCreate
