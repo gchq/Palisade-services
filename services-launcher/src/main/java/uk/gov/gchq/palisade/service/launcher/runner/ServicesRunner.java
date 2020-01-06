@@ -111,7 +111,7 @@ public class ServicesRunner implements ApplicationRunner {
                         Process process = pb.start();
                         return process;
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error("launchApplicationsFromProcessBuilders failed with error {}", e);
                         return null;
                     }
                 })
@@ -125,7 +125,7 @@ public class ServicesRunner implements ApplicationRunner {
                     try {
                         return new SimpleEntry<>(p, p.waitFor());
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LOGGER.error("joinProcesses failed with error {}", e);
                         return null;
                     }
                 })
