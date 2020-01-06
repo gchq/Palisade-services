@@ -107,7 +107,7 @@ public abstract class ReadResponse {
         }
         final ReadResponse that = (ReadResponse) o;
         return Objects.equals(message, that.message) &&
-                isUsed.equals(that.isUsed);
+                isUsed.get() == that.isUsed.get();
     }
 
     @Override
