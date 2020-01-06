@@ -251,7 +251,8 @@ public class SimpleCacheService implements CacheService {
                 CacheMetadata.populateMetaData(remoteRetrieve);
 
                 //should this be cached?
-                if (remoteRetrieve.getMetadata().get().canBeRetrievedLocally()) {
+                Optional<CacheMetadata> val = remoteRetrieve.getMetadata();
+                if (val.map(CacheMetadata::canBeRetrievedLocally).orElse(false)) {
                     localObjects.put(baseKey, remoteRetrieve);
                     //set up a timer to remove it after the max TTL has elapsed
                     REMOVAL_TIMER.schedule(() -> localObjects.remove(baseKey), localCacheTTL.toMillis(), TimeUnit.MILLISECONDS);
