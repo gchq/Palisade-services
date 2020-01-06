@@ -33,7 +33,7 @@ public class SimpleAuditService implements AuditService {
 
     @Override
     public CompletableFuture<Boolean> audit(final AuditRequest request) {
-        LOGGER.debug("SimpleAuditService.audit called with {}", request);
+        LOGGER.info("SimpleAuditService.audit called with {}", request);
         return null;
     }
 }
