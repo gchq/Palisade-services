@@ -88,12 +88,11 @@ public class SimpleCacheService implements CacheService {
      */
     private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor();
 
-    /**
-     * Create and empty backing store. Note that this is for use by serialisation mechanisms and any attempt to use an
-     * instance of this class without first initialising a backing store will result in exceptions being thrown.
-     */
     public SimpleCacheService() {
-        throw new UnsupportedOperationException();
+        /**
+         * Create and empty backing store. Note that this is for use by serialisation mechanisms and any attempt to use an
+         * instance of this class without first initialising a backing store will result in exceptions being thrown.
+         */
     }
 
     /**
@@ -186,8 +185,8 @@ public class SimpleCacheService implements CacheService {
 
         //is this locally cacheable? If so, check the TTL is present and below the maximum time
         if (localCacheable && (!timeToLive.isPresent() || maxLocalTTL.compareTo(timeToLive.get()) <= 0)) {
-                throw new IllegalArgumentException("time to live must be set and be below " + maxLocalTTL.getSeconds() + " seconds for locally cacheable values");
-            }
+            throw new IllegalArgumentException("time to live must be set and be below " + maxLocalTTL.getSeconds() + " seconds for locally cacheable values");
+        }
 
         //find encoder function
         Function<V, byte[]> encoder = codecs.getValueEncoder(valueClass);
