@@ -40,24 +40,24 @@ import static java.util.Objects.requireNonNull;
  * @param <RULE_DATA_TYPE> The Java class that the rules expect the records of
  *                         data to be in the format of.
  */
-public class policy<RULE_DATA_TYPE> {
+public class Policy<RULE_DATA_TYPE> {
     private Rules<RULE_DATA_TYPE> recordRules;
     private Rules<Resource> resourceRules;
     private User owner;
 
     // no-args constructor required
-    public policy() {
+    public Policy() {
         recordRules = new Rules<>();
         resourceRules = new Rules<>();
     }
 
-    public policy<RULE_DATA_TYPE> recordRules(final Rules<RULE_DATA_TYPE> recordRules) {
+    public Policy<RULE_DATA_TYPE> recordRules(final Rules<RULE_DATA_TYPE> recordRules) {
         requireNonNull(recordRules, "The record level rules cannot be set to null.");
         this.recordRules = recordRules;
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> resourceRules(final Rules<Resource> resourceRules) {
+    public Policy<RULE_DATA_TYPE> resourceRules(final Rules<Resource> resourceRules) {
         requireNonNull(resourceRules, "The resource level rules cannot be set to null.");
         this.resourceRules = resourceRules;
         return this;
@@ -101,75 +101,75 @@ public class policy<RULE_DATA_TYPE> {
         }
     }
 
-    public policy<RULE_DATA_TYPE> recordLevelRule(final String message, final Rule<RULE_DATA_TYPE> rule) {
+    public Policy<RULE_DATA_TYPE> recordLevelRule(final String message, final Rule<RULE_DATA_TYPE> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordRule = getRecordRules();
-        recordRule.rule(generateUUID(), rule);
-        addMessage(message, recordRule);
+        Rules<RULE_DATA_TYPE> recordRules = getRecordRules();
+        recordRules.rule(generateUUID(), rule);
+        addMessage(message, recordRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> recordLevelPredicateRule(final String message, final PredicateRule<RULE_DATA_TYPE> rule) {
+    public Policy<RULE_DATA_TYPE> recordLevelPredicateRule(final String message, final PredicateRule<RULE_DATA_TYPE> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordRule = getRecordRules();
-        recordRule.rule(generateUUID(), rule);
-        addMessage(message, recordRule);
+        Rules<RULE_DATA_TYPE> recordRules = getRecordRules();
+        recordRules.rule(generateUUID(), rule);
+        addMessage(message, recordRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> recordLevelSimplePredicateRule(final String message, final Predicate<RULE_DATA_TYPE> rule) {
+    public Policy<RULE_DATA_TYPE> recordLevelSimplePredicateRule(final String message, final Predicate<RULE_DATA_TYPE> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordRule = getRecordRules();
-        recordRule.simplePredicateRule(generateUUID(), rule);
-        addMessage(message, recordRule);
+        Rules<RULE_DATA_TYPE> recordRules = getRecordRules();
+        recordRules.simplePredicateRule(generateUUID(), rule);
+        addMessage(message, recordRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> recordLevelSimpleFunctionRule(final String message, final Function<RULE_DATA_TYPE, RULE_DATA_TYPE> rule) {
+    public Policy<RULE_DATA_TYPE> recordLevelSimpleFunctionRule(final String message, final Function<RULE_DATA_TYPE, RULE_DATA_TYPE> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordRule = getRecordRules();
-        recordRule.simpleFunctionRule(generateUUID(), rule);
-        addMessage(message, recordRule);
+        Rules<RULE_DATA_TYPE> recordRules = getRecordRules();
+        recordRules.simpleFunctionRule(generateUUID(), rule);
+        addMessage(message, recordRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> resourceLevelRule(final String message, final Rule<Resource> rule) {
+    public Policy<RULE_DATA_TYPE> resourceLevelRule(final String message, final Rule<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<Resource> resourceRule = getResourceRules();
-        resourceRule.rule(generateUUID(), rule);
-        addMessage(message, resourceRule);
+        Rules<Resource> resourceRules = getResourceRules();
+        resourceRules.rule(generateUUID(), rule);
+        addMessage(message, resourceRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> resourceLevelPredicateRule(final String message, final PredicateRule<Resource> rule) {
+    public Policy<RULE_DATA_TYPE> resourceLevelPredicateRule(final String message, final PredicateRule<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<Resource> resourceRule = getResourceRules();
-        resourceRule.rule(generateUUID(), rule);
-        addMessage(message, resourceRule);
+        Rules<Resource> resourceRules = getResourceRules();
+        resourceRules.rule(generateUUID(), rule);
+        addMessage(message, resourceRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> resourceLevelSimplePredicateRule(final String message, final Predicate<Resource> rule) {
+    public Policy<RULE_DATA_TYPE> resourceLevelSimplePredicateRule(final String message, final Predicate<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<Resource> resourceRule = getResourceRules();
-        resourceRule.simplePredicateRule(generateUUID(), rule);
-        addMessage(message, resourceRule);
+        Rules<Resource> resourceRules = getResourceRules();
+        resourceRules.simplePredicateRule(generateUUID(), rule);
+        addMessage(message, resourceRules);
         return this;
     }
 
-    public policy<RULE_DATA_TYPE> resourceLevelSimpleFunctionRule(final String message, final Function<Resource, Resource> rule) {
+    public Policy<RULE_DATA_TYPE> resourceLevelSimpleFunctionRule(final String message, final Function<Resource, Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<Resource> resourceRule = getResourceRules();
-        resourceRule.simpleFunctionRule(generateUUID(), rule);
-        addMessage(message, resourceRule);
+        Rules<Resource> resourceRules = getResourceRules();
+        resourceRules.simpleFunctionRule(generateUUID(), rule);
+        addMessage(message, resourceRules);
         return this;
     }
 
@@ -182,7 +182,7 @@ public class policy<RULE_DATA_TYPE> {
         owner(owner);
     }
 
-    public policy<RULE_DATA_TYPE> owner(final User owner) {
+    public Policy<RULE_DATA_TYPE> owner(final User owner) {
         requireNonNull(owner, "The owner cannot be set to null.");
         this.owner = owner;
         return this;
@@ -198,10 +198,10 @@ public class policy<RULE_DATA_TYPE> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof policy)) {
+        if (!(o instanceof Policy)) {
             return false;
         }
-        policy<?> policy = (policy<?>) o;
+        Policy<?> policy = (Policy<?>) o;
         return getRecordRules().equals(policy.getRecordRules()) &&
                 getResourceRules().equals(policy.getResourceRules()) &&
                 getOwner().equals(policy.getOwner());
@@ -214,7 +214,7 @@ public class policy<RULE_DATA_TYPE> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", policy.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", Policy.class.getSimpleName() + "[", "]")
                 .add("recordRules=" + recordRules)
                 .add("resourceRules=" + resourceRules)
                 .add("owner=" + owner)
