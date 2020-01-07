@@ -294,5 +294,4 @@ public class SimpleDataServiceTest {
         dataReader = Mockito.mock(DataReader.class);
     }
 
-
 }
