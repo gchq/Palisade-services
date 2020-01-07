@@ -28,6 +28,9 @@ import uk.gov.gchq.palisade.service.Service;
 public class RemoveCacheRequest extends CacheRequest {
 
     public RemoveCacheRequest() {
+        /**
+         * Create and empty cache request. Note that this is for use by serialisation mechanisms.
+         */
     }
 
     /**
