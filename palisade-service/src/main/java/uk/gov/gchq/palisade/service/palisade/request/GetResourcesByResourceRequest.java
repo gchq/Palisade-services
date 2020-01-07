@@ -32,8 +32,8 @@ import static java.util.Objects.requireNonNull;
 public class GetResourcesByResourceRequest extends Request {
     private Resource resource;
 
-    // no-args constructor required
     public GetResourcesByResourceRequest() {
+        // no-args constructor required
     }
 
     /**

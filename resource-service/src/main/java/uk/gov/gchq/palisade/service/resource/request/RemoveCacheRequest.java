@@ -36,6 +36,7 @@ public class RemoveCacheRequest extends CacheRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public RemoveCacheRequest key(final String key) {
         super.key(key);
         return this;
@@ -44,6 +45,7 @@ public class RemoveCacheRequest extends CacheRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public RemoveCacheRequest service(final Class<? extends Service> service) {
         super.service(service);
         return this;

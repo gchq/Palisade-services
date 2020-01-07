@@ -35,8 +35,8 @@ import static java.util.Objects.requireNonNull;
 public class MultiPolicy {
     private Map<LeafResource, Policy> policies = new HashMap<>();
 
-    // no-args constructor required
     public MultiPolicy() {
+        // no-args constructor required
     }
 
     /**

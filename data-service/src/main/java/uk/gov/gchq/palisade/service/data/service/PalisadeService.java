@@ -43,6 +43,6 @@ public class PalisadeService implements Service {
             DataRequestConfig response = this.client.getDataRequestConfig(request);
             LOGGER.info("Got config from palisade service: {}", response);
             return response;
-        });
+        }, executor);
     }
 }

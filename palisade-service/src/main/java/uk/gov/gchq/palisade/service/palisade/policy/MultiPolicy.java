@@ -33,8 +33,9 @@ import static java.util.Objects.requireNonNull;
 public class MultiPolicy {
     private Map<LeafResource, Policy> policies = new HashMap<>();
 
-    // no-args constructor required
+
     public MultiPolicy() {
+        // no-args constructor required
     }
 
     /**
@@ -96,9 +97,9 @@ public class MultiPolicy {
      */
     @JsonIgnore
     public Map<LeafResource, Rules> getRuleMap() {
-        Map<LeafResource, Policy> policies = getPolicies();
-        final Map<LeafResource, Rules> rules = new HashMap<>(policies.size());
-        policies.forEach((r, p) -> rules.put(r, p.getRecordRules()));
+        Map<LeafResource, Policy> policiesMap = getPolicies();
+        final Map<LeafResource, Rules> rules = new HashMap<>(policiesMap.size());
+        policiesMap.forEach((r, p) -> rules.put(r, p.getRecordRules()));
         return rules;
     }
 

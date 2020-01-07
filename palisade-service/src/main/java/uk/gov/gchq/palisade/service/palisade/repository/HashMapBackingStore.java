@@ -46,7 +46,7 @@ public class HashMapBackingStore implements BackingStore {
     /**
      * The static cache that will cause all instances of this across a JVM to be shared.
      */
-    private static final ConcurrentHashMap<String, CachedPair> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, CachedPair> STATIC_CACHE = new ConcurrentHashMap<>();
 
     /**
      * The static map that contains the removal handles.
@@ -87,7 +87,7 @@ public class HashMapBackingStore implements BackingStore {
      */
     public HashMapBackingStore(final boolean useStatic) {
         if (useStatic) {
-            cache = CACHE;
+            cache = STATIC_CACHE;
             removals = REMOVAL_HANDLES;
         } else {
             cache = new ConcurrentHashMap<>();
