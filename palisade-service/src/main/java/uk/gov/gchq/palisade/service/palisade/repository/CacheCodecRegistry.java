@@ -38,7 +38,7 @@ public final class CacheCodecRegistry {
     /**
      * JSON encoder.
      */
-    public static final Function<?, byte[]> DEFAULT_ENCODER = x -> JSONSerialiser.serialise(x);
+    public static final Function<?, byte[]> DEFAULT_ENCODER = JSONSerialiser::serialise;
     /**
      * JSON decoder.
      */
