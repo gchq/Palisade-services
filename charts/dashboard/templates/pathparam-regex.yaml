@@ -1,0 +1,9 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: k8s-pathparam-regex
+  namespace: kubernetes-dashboard
+spec:
+  replacePathRegex:
+    regex: ^/kubernetes/(.*)
+    replacement: /$1

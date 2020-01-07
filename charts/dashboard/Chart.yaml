@@ -14,6 +14,6 @@
 #
 apiVersion: v2
 appVersion: "1.0"
-description: A Helm chart for the Traefik Ingress Service
-name: traefik
+description: A Helm chart for the K8S Dashboard Service
+name: dashboard
 version: 0.4.0

@@ -12,8 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: v2
-appVersion: "1.0"
-description: A Helm chart for the Traefik Ingress Service
-name: traefik
-version: 0.4.0
+admin:
+  port:  8080
