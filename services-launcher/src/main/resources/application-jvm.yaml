@@ -16,15 +16,22 @@ launcher:
   services:
     audit-service:
       profiles: jvm
+      log: audit-service-jvm.log
     data-service:
       profiles: jvm
+      log: data-service-jvm.log
     discovery-service:
       profiles: jvm
+      log: discovery-service-jvm.log
     palisade-service:
       profiles: jvm
+      log: palisade-service-jvm.log
     policy-service:
       profiles: jvm
+      log: policy-service-jvm.log
     resource-service:
       profiles: jvm
+      log: resource-service-jvm.log
     user-service:
       profiles: jvm
+      log: user-service-jvm.log
