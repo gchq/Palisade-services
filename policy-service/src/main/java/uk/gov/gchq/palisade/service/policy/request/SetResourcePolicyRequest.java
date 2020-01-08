@@ -36,14 +36,14 @@ import static java.util.Objects.requireNonNull;
 @JsonIgnoreProperties(value = {"originalRequestId"})
 public class SetResourcePolicyRequest extends Request {
     private Resource resource;
-    private policy policy;
+    private Policy policy;
 
     public SetResourcePolicyRequest() {
         // no-args constructor
     }
 
     /**
-     * @param resource the {@link Resource} to set the {@link policy} for
+     * @param resource the {@link Resource} to set the {@link Policy} for
      * @return the {@link SetResourcePolicyRequest}
      */
     public SetResourcePolicyRequest resource(final Resource resource) {
@@ -53,10 +53,10 @@ public class SetResourcePolicyRequest extends Request {
     }
 
     /**
-     * @param policy the {@link policy} to set for the {@link Resource}
+     * @param policy the {@link Policy} to set for the {@link Resource}
      * @return the {@link SetResourcePolicyRequest}
      */
-    public SetResourcePolicyRequest policy(final policy policy) {
+    public SetResourcePolicyRequest policy(final Policy policy) {
         requireNonNull(policy, "The policy cannot be set to null.");
         this.policy = policy;
         return this;
@@ -71,12 +71,12 @@ public class SetResourcePolicyRequest extends Request {
         resource(resource);
     }
 
-    public policy getPolicy() {
+    public Policy getPolicy() {
         requireNonNull(policy, "The policy has not been set.");
         return policy;
     }
 
-    public void setPolicy(final policy policy) {
+    public void setPolicy(final Policy policy) {
         policy(policy);
     }
 

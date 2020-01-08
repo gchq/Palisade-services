@@ -30,60 +30,60 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class contains the mapping of {@link LeafResource}'s to the applicable {@link policy}
+ * This class contains the mapping of {@link LeafResource}'s to the applicable {@link Policy}
  */
 public class MultiPolicy {
-    private Map<LeafResource, policy> policies = new HashMap<>();
+    private Map<LeafResource, Policy> policies = new HashMap<>();
 
     public MultiPolicy() {
         // no-args constructor required
     }
 
     /**
-     * @param policies a mapping of {@link LeafResource}'s to the applicable {@link policy}
+     * @param policies a mapping of {@link LeafResource}'s to the applicable {@link Policy}
      * @return the {@link MultiPolicy}
      */
-    public MultiPolicy policies(final Map<LeafResource, policy> policies) {
+    public MultiPolicy policies(final Map<LeafResource, Policy> policies) {
         requireNonNull(policies, "The policies cannot be set to null.");
         this.policies.clear();
         this.policies.putAll(policies);
         return this;
     }
 
-    public Map<LeafResource, policy> getPolicies() {
+    public Map<LeafResource, Policy> getPolicies() {
         //never null
         return policies;
     }
 
-    public void setPolicies(final Map<LeafResource, policy> policies) {
+    public void setPolicies(final Map<LeafResource, Policy> policies) {
         policies(policies);
     }
 
     /**
-     * Retrieves the {@link policy} associated with the given {@link LeafResource}.
-     * If the resource does not exist then an empty {@link policy} will be returned.
+     * Retrieves the {@link Policy} associated with the given {@link LeafResource}.
+     * If the resource does not exist then an empty {@link Policy} will be returned.
      *
-     * @param resource the resource that you want the {@link policy} for.
-     * @return The {@link policy} for the given {@link LeafResource}.
+     * @param resource the resource that you want the {@link Policy} for.
+     * @return The {@link Policy} for the given {@link LeafResource}.
      */
-    public policy getPolicy(final LeafResource resource) {
+    public Policy getPolicy(final LeafResource resource) {
         requireNonNull(resource, "Cannot search for a policy based on a null resource.");
-        final policy policy = getPolicies().get(resource);
+        final Policy policy = getPolicies().get(resource);
         requireNonNull(policy, "There are no policies for this resource.");
         return policy;
     }
 
     /**
-     * Sets the given {@link policy} to the given {@link LeafResource} provided
-     * there isn't already a {@link policy} assigned to that {@link LeafResource}.
+     * Sets the given {@link Policy} to the given {@link LeafResource} provided
+     * there isn't already a {@link Policy} assigned to that {@link LeafResource}.
      *
-     * @param resource the resource that you want the {@link policy} for
-     * @param policy   The {@link policy} for the given {@link LeafResource}
+     * @param resource the resource that you want the {@link Policy} for
+     * @param policy   The {@link Policy} for the given {@link LeafResource}
      */
-    public void setPolicy(final LeafResource resource, final policy policy) {
+    public void setPolicy(final LeafResource resource, final Policy policy) {
         requireNonNull(resource, "Cannot set a policy to a null resource.");
         requireNonNull(policy, "Cannot set a null policy to a resource.");
-        Map<LeafResource, policy> policyMap = getPolicies();
+        Map<LeafResource, Policy> policyMap = getPolicies();
         if (policyMap.containsKey(resource)) {
             throw new IllegalArgumentException("Policy already exists for resource: " + resource);
         }
@@ -92,13 +92,13 @@ public class MultiPolicy {
     }
 
     /**
-     * This extracts the list of record level rules from the {@link policy} attached to each {@link LeafResource}.
+     * This extracts the list of record level rules from the {@link Policy} attached to each {@link LeafResource}.
      *
      * @return a mapping of the {@link LeafResource}'s to the record level {@link Rules} from the policies.
      */
     @JsonIgnore
     public Map<LeafResource, Rules> getRuleMap() {
-        Map<LeafResource, policy> policyMap = getPolicies();
+        Map<LeafResource, Policy> policyMap = getPolicies();
         final Map<LeafResource, Rules> rules = new HashMap<>(policyMap.size());
         policyMap.forEach((r, p) -> rules.put(r, p.getRecordRules()));
         return rules;
