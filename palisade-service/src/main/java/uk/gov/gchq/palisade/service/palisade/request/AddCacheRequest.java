@@ -49,6 +49,7 @@ import java.util.StringJoiner;
 public class AddCacheRequest<V> extends CacheRequest {
 
     public AddCacheRequest() {
+        //empty constructor needed
     }
 
     /**

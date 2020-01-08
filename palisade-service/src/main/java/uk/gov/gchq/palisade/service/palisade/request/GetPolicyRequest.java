@@ -35,8 +35,8 @@ public class GetPolicyRequest extends Request {
     private Context context;
     private Collection<LeafResource> resources;
 
-    // no-args constructor
     public GetPolicyRequest() {
+        // no-args constructor
     }
 
     /**
