@@ -33,14 +33,14 @@ import static java.util.Objects.requireNonNull;
 @JsonIgnoreProperties(value = {"originalRequestId"})
 public class SetTypePolicyRequest extends Request {
     private String type;
-    private Policy policy;
+    private policy policy;
 
     public SetTypePolicyRequest() {
         // no-args constructor
     }
 
     /**
-     * @param type the {@link String} to set the {@link Policy} for
+     * @param type the {@link String} to set the {@link policy} for
      * @return the {@link SetTypePolicyRequest}
      */
     public SetTypePolicyRequest type(final String type) {
@@ -50,10 +50,10 @@ public class SetTypePolicyRequest extends Request {
     }
 
     /**
-     * @param policy the {@link Policy} to set for the resource type
+     * @param policy the {@link policy} to set for the resource type
      * @return the {@link SetTypePolicyRequest}
      */
-    public SetTypePolicyRequest policy(final Policy policy) {
+    public SetTypePolicyRequest policy(final policy policy) {
         requireNonNull(policy, "The policy cannot be set to null.");
         this.policy = policy;
         return this;
@@ -68,12 +68,12 @@ public class SetTypePolicyRequest extends Request {
         type(type);
     }
 
-    public Policy getPolicy() {
+    public policy getPolicy() {
         requireNonNull(policy, "The policy has not been set.");
         return policy;
     }
 
-    public void setPolicy(final Policy policy) {
+    public void setPolicy(final policy policy) {
         policy(policy);
     }
 
