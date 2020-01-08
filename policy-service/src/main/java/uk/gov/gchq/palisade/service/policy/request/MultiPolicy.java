@@ -83,12 +83,12 @@ public class MultiPolicy {
     public void setPolicy(final LeafResource resource, final Policy policy) {
         requireNonNull(resource, "Cannot set a policy to a null resource.");
         requireNonNull(policy, "Cannot set a null policy to a resource.");
-        Map<LeafResource, Policy> policies = getPolicies();
-        if (policies.containsKey(resource)) {
+        Map<LeafResource, Policy> policyMap = getPolicies();
+        if (policyMap.containsKey(resource)) {
             throw new IllegalArgumentException("Policy already exists for resource: " + resource);
         }
 
-        policies.put(resource, policy);
+        policyMap.put(resource, policy);
     }
 
     /**
@@ -98,9 +98,9 @@ public class MultiPolicy {
      */
     @JsonIgnore
     public Map<LeafResource, Rules> getRuleMap() {
-        Map<LeafResource, Policy> policies = getPolicies();
-        final Map<LeafResource, Rules> rules = new HashMap<>(policies.size());
-        policies.forEach((r, p) -> rules.put(r, p.getRecordRules()));
+        Map<LeafResource, Policy> policyMap = getPolicies();
+        final Map<LeafResource, Rules> rules = new HashMap<>(policyMap.size());
+        policyMap.forEach((r, p) -> rules.put(r, p.getRecordRules()));
         return rules;
     }
 

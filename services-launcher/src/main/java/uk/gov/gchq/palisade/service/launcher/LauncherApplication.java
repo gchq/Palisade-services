@@ -23,6 +23,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class LauncherApplication {
 
     public LauncherApplication() {
+        //no-args contructor needed
     }
 
     public static void main(final String[] args) {

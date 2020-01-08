@@ -38,8 +38,8 @@ public class SetResourcePolicyRequest extends Request {
     private Resource resource;
     private Policy policy;
 
-    // no-args constructor
     public SetResourcePolicyRequest() {
+        // no-args constructor
     }
 
     /**
