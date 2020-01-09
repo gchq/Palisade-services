@@ -38,6 +38,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -49,8 +50,7 @@ public class PalisadeServiceTest {
 
     @Mock
     PalisadeClient palisadeClient;
-    @Mock
-    Executor executor;
+    Executor executor = Executors.newSingleThreadExecutor();
 
     @Before
     public void setUp() {
