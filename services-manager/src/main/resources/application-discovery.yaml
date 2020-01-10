@@ -1,0 +1,49 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+spring:
+  application:
+    name: services-manager
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+
+# Don't register with eureka as it isn't up yet
+eureka:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+# Just start the discovery service, used for bootstrapping all other services
+
+manager:
+  # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+  default:
+    jar-launcher: org.springframework.boot.loader.JarLauncher
+
+  services:
+
+    discovery-service:
+      runner:
+        classpath: discovery-service/target/discovery-service-0.4.0-SNAPSHOT-exec.jar
+        config: discovery-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.palisade.service.discovery.DiscoveryApplication
+        profiles: default
+        log: discovery-service.log
+      logging:
+        level:
+          uk: "INFO"

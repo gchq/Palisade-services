@@ -1,0 +1,58 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+spring:
+  application:
+    name: services-manager
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+
+eureka:
+  instance:
+    hostname: localhost
+    port: 8083
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+    enabled: true
+
+# Options at the command line include:
+# --run : Run all known services
+# --logging : Alter the logging level for all known services
+manager:
+  # Search up path hierarchy for the root directory by name
+  # This allows the services-manager to be less dependant on where it is located and where it was run from
+  root: palisade-services
+
+  services: []
+
+    ###
+    # Example configuration for a service "my-service" with a single class under my.service.MainApplication
+    # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
+    #
+    # my-service:                                                 :: "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's springboot application name
+    #   runner:                                                   :: "services-manager --launch" - configuration for a executable jarfile launch
+    #     classpath: "my-service-exec.jar:/data/types.jar"        :: "java -cp ${classpath}" - classpaths for service and external includes, colon-separated list
+    #     config: "my-service/target/classes"                     :: "java -Dspring.config.location=${config}" - springboot configs filepath, comma-separated list?
+    #     launcher: "org.springframework.boot.loader.JarLauncher" :: "java [-cp ...] ${launcher}" - jvm entrypoint classpath, singleton class
+    #     main: "my.service.MainApplication"                      :: "java -Dloader.main=${main}" - springboot entrypoint classpath, singleton class
+    #     profiles: "default"                                     :: "java -Dspring.profiles.active=${profiles}" - springboot profiles to enable, comma-separated list
+    #     log: "my-service.log"                                   :: "java [args] > ${log}" - logging output filepath, singleton filepath
+    #   logging:                                                  :: "services-manager --logging" - configuration for a job to change log-level
+    #     level:                                                  :: "${logging.level}" - same format as spring's standard logging changes, classpath-loglevel map
+    #       my.service.MainApplication: "INFO"                    :: http POST address ${key} (substitute "." for "/") body "configuredLevel=${value}" - classpath to change and logging level to change to
+    ###

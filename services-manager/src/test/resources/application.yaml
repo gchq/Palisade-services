@@ -1,0 +1,52 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+spring:
+  application:
+    name: services-manager
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
+
+manager:
+  root: palisade-services
+
+  default:
+    library: "../my-external-library.jar"
+    jar-launcher: "org.springframework.boot.loader.JarLauncher"
+
+  services:
+    ###
+    # Example configuration for a service "my-service" with a single class under my.service.MainApplication
+    # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
+    ###
+    my-service:
+      runner:
+        classpath: "my-service-exec.jar:/data/types.jar:${manager.default.library}"
+        config: "my-service/target/classes"
+        launcher: "${manager.default.jar-launcher}"
+        main: "my.service.MainApplication"
+        profiles: "default"
+        log: "my-service.log"
+      logging:
+        level:
+          my.service: "INFO"

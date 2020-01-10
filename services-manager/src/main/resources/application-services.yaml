@@ -1,0 +1,98 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# The manager creates a number of commands to execute for each service in manager.services
+# Extensive use is made of the eureka discovery client to discover services and endpoints - subsequently the "eureka" profile is enabled by default for all services
+
+manager:
+  # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+  default:
+    # library includes relative to manager.root above
+    library: ../palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+    jar-launcher: org.springframework.boot.loader.JarLauncher
+
+  services:
+
+    audit-service:
+      runner:
+        classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar
+        config: audit-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.palisade.service.audit.AuditApplication
+        profiles: eureka,default
+        log: audit-service.log
+      logging:
+        level:
+          uk: "INFO"
+
+    data-service:
+      runner:
+        classpath: data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
+        config: data-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.palisade.service.data.DataApplication
+        profiles: eureka,default
+        log: data-service.log
+      logging:
+        level:
+          uk: "INFO"
+
+    palisade-service:
+      runner:
+        classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar
+        config: palisade-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
+        profiles: eureka,default
+        log: palisade-service.log
+      logging:
+        level:
+          uk: "INFO"
+
+    policy-service:
+      runner:
+        classpath: policy-service/target/policy-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
+        config: policy-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.policy.service.policy.PolicyApplication
+        profiles: eureka,default
+        log: policy-service.log
+      logging:
+        level:
+          uk: "INFO"
+
+    resource-service:
+      runner:
+        classpath: resource-service/target/resource-service-0.4.0-SNAPSHOT-exec.jar
+        config: resource-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.resource.service.resource.ResourceApplication
+        profiles: eureka,default
+        log: resource-service.log
+      logging:
+        level:
+          uk: "INFO"
+
+    user-service:
+      runner:
+        classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar
+        config: user-service/target/classes
+        launcher: ${manager.default.jar-launcher}
+        main: uk.gov.gchq.user.service.user.UserApplication
+        profiles: eureka,default
+        log: user-service.log
+      logging:
+        level:
+          uk: "INFO"
