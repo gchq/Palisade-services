@@ -16,24 +16,25 @@
 
 package uk.gov.gchq.palisade.service.manager.runner;
 
-import com.netflix.discovery.EurekaClient;
+import com.netflix.appinfo.InstanceInfo;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import uk.gov.gchq.palisade.service.manager.config.LoggingConfiguration;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Component("logging-changer")
-public class LoggingChanger implements ApplicationRunner {
+public class LoggingChanger extends EurekaUtils implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingChanger.class);
-
-    @Autowired
-    private EurekaClient eurekaClient;
 
     // Autowired through constructor
     private Map<String, LoggingConfiguration> loggingConfiguration;
@@ -42,10 +43,25 @@ public class LoggingChanger implements ApplicationRunner {
         this.loggingConfiguration = loggingConfiguration;
     }
 
+    Map<String, String> gatherLoggersActuators(Map<String, LoggingConfiguration> configuration) {
+        return Collections.emptyMap();
+    }
+
+    Map<String, RestTemplate> preparePostRequests(Map<String, Pair<String, LoggingConfiguration>> actuators) {
+        return Collections.emptyMap();
+    }
+
+    Map<String, ResponseEntity<String>> postToActuators(Map<String, RestTemplate> requests) {
+        return Collections.emptyMap();
+    }
+
     @Override
     public void run(final ApplicationArguments args) throws Exception {
         if (args.containsOption("logging")) {
             LOGGER.info("Loaded LoggerConfiguration: {}", loggingConfiguration);
+
+            // Get running services and logging actuators to ping
+            List<InstanceInfo> runningServices = getRunningServices();
         }
     }
 

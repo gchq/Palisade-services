@@ -35,7 +35,6 @@ manager:
         log: audit-service.log
       logging:
         level:
-          uk: "INFO"
 
     data-service:
       runner:
@@ -47,7 +46,6 @@ manager:
         log: data-service.log
       logging:
         level:
-          uk: "INFO"
 
     palisade-service:
       runner:
@@ -59,7 +57,6 @@ manager:
         log: palisade-service.log
       logging:
         level:
-          uk: "INFO"
 
     policy-service:
       runner:
@@ -71,7 +68,6 @@ manager:
         log: policy-service.log
       logging:
         level:
-          uk: "INFO"
 
     resource-service:
       runner:
@@ -83,7 +79,6 @@ manager:
         log: resource-service.log
       logging:
         level:
-          uk: "INFO"
 
     user-service:
       runner:
@@ -95,4 +90,3 @@ manager:
         log: user-service.log
       logging:
         level:
-          uk: "INFO"

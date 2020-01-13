@@ -17,11 +17,8 @@
 package uk.gov.gchq.palisade.service.manager.runner;
 
 import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.EurekaClient;
-import com.netflix.discovery.shared.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -30,7 +27,6 @@ import uk.gov.gchq.palisade.service.manager.config.RunnerConfiguration;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,11 +34,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component("services-runner")
-public class ServicesRunner implements ApplicationRunner {
+public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
-
-    @Autowired
-    private EurekaClient eurekaClient;
 
     // Autowired through constructor
     private Map<String, ProcessBuilder> processBuilders;
@@ -53,21 +46,8 @@ public class ServicesRunner implements ApplicationRunner {
         this.runnerConfiguration = runnerConfiguration;
     }
 
-    List<InstanceInfo> getRunningServices() {
-        if (Objects.nonNull(eurekaClient)) {
-            LOGGER.debug("Getting InstanceInfo from EurekaClient");
-            return eurekaClient.getApplications().getRegisteredApplications().stream()
-                    .map(Application::getInstances)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-        } else {
-            LOGGER.debug("EurekaClient is null - is the discovery service running?");
-            return Collections.emptyList();
-        }
-    }
-
-    Map<String, ProcessBuilder> filterRunningServices(Map<String, ProcessBuilder> processBuilders) {
-        Set<String> instanceNames = getRunningServices().stream().map(InstanceInfo::getAppName).collect(Collectors.toSet());
+    Map<String, ProcessBuilder> filterRunningServices(Map<String, ProcessBuilder> processBuilders, List<InstanceInfo> runningServices) {
+        Set<String> instanceNames = runningServices.stream().map(InstanceInfo::getAppName).collect(Collectors.toSet());
         return processBuilders.entrySet().stream()
                 .filter(entry -> {
                     Boolean exists = instanceNames.contains(entry.getKey());
@@ -116,7 +96,8 @@ public class ServicesRunner implements ApplicationRunner {
             LOGGER.info("Loaded RunnerConfiguration: {}", runnerConfiguration);
 
             // Get running services from eureka and warn-don't-start any that are already running
-            Map<String, ProcessBuilder> filteredBuilders = filterRunningServices(processBuilders);
+            List<InstanceInfo> runningServices = getRunningServices();
+            Map<String, ProcessBuilder> filteredBuilders = filterRunningServices(processBuilders, runningServices);
 
             // Start processes for each service configuration
             Map<String, Process> processes = runApplications(filteredBuilders);
