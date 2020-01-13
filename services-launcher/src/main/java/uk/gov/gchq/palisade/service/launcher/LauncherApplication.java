@@ -23,7 +23,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class LauncherApplication {
 
     public LauncherApplication() {
-        //no-args contructor needed
+        // no-args constructor needed for serialization only
     }
 
     public static void main(final String[] args) {

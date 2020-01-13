@@ -33,7 +33,7 @@ public class GetResourcesByResourceRequest extends Request {
     private Resource resource;
 
     public GetResourcesByResourceRequest() {
-        // no-args constructor required
+        // no-args constructor needed for serialization only
     }
 
     /**

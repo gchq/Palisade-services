@@ -38,15 +38,16 @@ import static java.util.Objects.requireNonNull;
  * separating the rules that need to be applied at the resource level or the record level.
  *
  * @param <V> The Java class that the rules expect the records of
- *                         data to be in the format of.
+ *            data to be in the format of.
  */
 public class Policy<V> {
     private Rules<V> recordRules;
     private Rules<Resource> resourceRules;
     private User owner;
 
-    // no-args constructor required
+
     public Policy() {
+        // no-args constructor needed for serialization only
         recordRules = new Rules<>();
         resourceRules = new Rules<>();
     }

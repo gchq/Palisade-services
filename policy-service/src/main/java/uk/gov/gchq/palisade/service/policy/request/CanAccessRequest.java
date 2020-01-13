@@ -40,7 +40,7 @@ public class CanAccessRequest extends Request {
     private Context context;
 
     public CanAccessRequest() {
-        //no args constructor needed
+        // no-args constructor needed for serialization only
     }
 
     /**

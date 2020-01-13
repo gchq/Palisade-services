@@ -33,7 +33,7 @@ public class CanAccessResponse {
     private Collection<LeafResource> canAccessResources;
 
     public CanAccessResponse() {
-        // required no-args constructor
+        // no-args constructor needed for serialization only
     }
 
     public Collection<LeafResource> getCanAccessResources() {

@@ -39,7 +39,7 @@ public class SetResourcePolicyRequest extends Request {
     private Policy policy;
 
     public SetResourcePolicyRequest() {
-        // no-args constructor
+        // no-args constructor needed for serialization only
     }
 
     /**

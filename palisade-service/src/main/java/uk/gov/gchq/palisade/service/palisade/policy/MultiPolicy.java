@@ -35,7 +35,7 @@ public class MultiPolicy {
 
 
     public MultiPolicy() {
-        // no-args constructor required
+        // no-args constructor needed for serialization only
     }
 
     /**

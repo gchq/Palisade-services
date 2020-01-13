@@ -36,7 +36,7 @@ public class GetPolicyRequest extends Request {
     private Collection<LeafResource> resources;
 
     public GetPolicyRequest() {
-        // no-args constructor
+        // no-args constructor needed for serialization only
     }
 
     /**

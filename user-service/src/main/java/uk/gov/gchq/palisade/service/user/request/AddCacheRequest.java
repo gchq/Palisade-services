@@ -62,7 +62,7 @@ public class AddCacheRequest<V> extends CacheRequest {
     private boolean locallyCacheable;
 
     public AddCacheRequest() {
-        //no args constructor needed
+        // no-args constructor needed for serialization only
     }
 
     /**

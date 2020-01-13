@@ -36,7 +36,7 @@ public class MultiPolicy {
     private Map<LeafResource, Policy> policies = new HashMap<>();
 
     public MultiPolicy() {
-        // no-args constructor required
+        // no-args constructor needed for serialization only
     }
 
     /**

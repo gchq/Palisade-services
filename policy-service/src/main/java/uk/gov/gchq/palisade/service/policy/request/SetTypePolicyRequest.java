@@ -36,7 +36,7 @@ public class SetTypePolicyRequest extends Request {
     private Policy policy;
 
     public SetTypePolicyRequest() {
-        // no-args constructor
+        // no-args constructor needed for serialization only
     }
 
     /**
