@@ -49,6 +49,15 @@ In order to mount local directories to the data service, ***Windows users may fi
 
 ```Set-NetConnectionProfile -InterfaceAlias "vEthernet (DockerNAT)" -NetworkCategory Private``` (required after any docker updates or system reboots)
 
+    Note: When running under Windows 10 wsl the directory root must be configured as /c/Users... and not /mnt/c/Users... as this is configured as a network mount. To do this create
+    a file called /etc/wsl.conf under linux, add content
+    
+     [automount]
+     root = /
+     options = "metadata"
+     
+    Reboot.
+
 All deployment parameters are defined in the root ```values.yaml``` file, see inline comments for details.
 
 Example first deployment to a local cluster (from the project root directory):
