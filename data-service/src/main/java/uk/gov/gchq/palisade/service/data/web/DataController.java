@@ -34,39 +34,44 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/")
-public class DataServiceController {
+public class DataController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataServiceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
     private final DataService service;
 
-    public DataServiceController(final DataService service) {
+    public DataController(final DataService service) {
         this.service = service;
     }
 
     @PostMapping(value = "/read", consumes = "application/json", produces = "application/json")
     public ReadResponse readSync(@RequestBody final ReadRequest request) {
-        LOGGER.info("Request received: {}", request.getOriginalRequestId().getId());
-        LOGGER.debug("Invoking read: {}", request);
-        return read(request).join();
+        LOGGER.info("Invoking read: {}", request);
+        ReadResponse response = read(request).join();
+        LOGGER.info("Returning response: {}", response);
+        return response;
     }
 
     // Taken from the following example: https://dzone.com/articles/streaming-data-with-spring-boot-restful-web-service
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
-
-        LOGGER.info("Request received: {}", request.getOriginalRequestId().getId());
+        LOGGER.info("Invoking readChunked: {}", request);
         StreamingResponseBody streamingResponseBody = outputStream -> {
             ReadResponse response = read(request).join();
+            LOGGER.info("Writing response {} to output stream", response);
             response.writeTo(outputStream);
             outputStream.close();
             response.asInputStream().close();
+            LOGGER.debug("IO streams completed and closed");
         };
-        return new ResponseEntity(streamingResponseBody, HttpStatus.OK);
+
+        ResponseEntity<StreamingResponseBody> ret = new ResponseEntity<>(streamingResponseBody, HttpStatus.OK);
+        LOGGER.info("Constructed and returning streamed response: {}", ret);
+        return ret;
     }
 
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
-        LOGGER.info("Request will now be read: {}", request.getOriginalRequestId().getId());
+        LOGGER.debug("Request will now be read: {}", request);
         return service.read(request);
     }
 }
