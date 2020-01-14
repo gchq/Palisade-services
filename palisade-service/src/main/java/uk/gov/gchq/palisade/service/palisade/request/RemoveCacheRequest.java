@@ -29,7 +29,7 @@ public class RemoveCacheRequest extends CacheRequest {
 
     public RemoveCacheRequest() {
         /**
-         * Create and empty cache request. Note that this is for use by serialisation mechanisms.
+         * Create an empty request to remove data from the cache. Note that this is for use by serialisation mechanisms.
          */
     }
 
