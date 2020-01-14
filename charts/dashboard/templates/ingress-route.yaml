@@ -5,7 +5,7 @@ metadata:
   namespace: kubernetes-dashboard
 spec:
   entryPoints:
-    - web
+    - tls
   routes:
     - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`/kubernetes`)
       kind: Rule
@@ -15,3 +15,5 @@ spec:
       middlewares:
         - name: k8s-pathparam-regex
           namespace: kubernetes-dashboard
+  tls:
+    {}

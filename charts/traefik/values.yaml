@@ -17,6 +17,7 @@ container:
     - --api.insecure
     - --accesslog
     - --entrypoints.web.Address=:80
+    - --entrypoints.tls.Address=:443
     - --providers.kubernetescrd
     - --ping=true
 
