@@ -32,7 +32,7 @@ launcher:
   # java -cp [..]policy-service.jar:[...]example-library.jar -Dspring.config.location=policy-service/target/classes/ -Dspring.profiles.active=jvm, -Dloader.main=[...].PolicyApplication [...].JarLauncher
   services:
     audit-service:
-      classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar
+      classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: audit-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.audit.AuditApplication
@@ -53,7 +53,7 @@ launcher:
       profiles: default
       log: discovery-service.log
     palisade-service:
-      classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar
+      classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: palisade-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
@@ -74,7 +74,7 @@ launcher:
       profiles: default
       log: resource-service.log
     user-service:
-      classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar
+      classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: user-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.user.UserApplication

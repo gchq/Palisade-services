@@ -19,10 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,19 +37,19 @@ import static java.util.Objects.requireNonNull;
  */
 public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
-    static final String REGISTER_REQUEST_COMPLETE = "RegisterRequestCompleteAuditRequest";
-    static final String REGISTER_REQUEST_EXCEPTION = "RegisterRequestExceptionAuditRequest";
-    static final String READ_REQUEST_COMPLETE = "ReadRequestCompleteAuditRequest";
-    static final String READ_REQUEST_EXCEPTION = "ReadRequestExceptionAuditRequest";
+    static final String REGISTER_REQUEST_COMPLETE = "AuditRequest$RegisterRequestCompleteAuditRequest";
+    static final String REGISTER_REQUEST_EXCEPTION = "AuditRequest$RegisterRequestExceptionAuditRequest";
+    static final String READ_REQUEST_COMPLETE = "AuditRequest$ReadRequestCompleteAuditRequest";
+    static final String READ_REQUEST_EXCEPTION = "AuditRequest$ReadRequestExceptionAuditRequest";
     private static final Map<Class, BiConsumer<Logger, AuditRequest>> DISPATCHER = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
 
 
     static {
-        DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, LoggerAuditService::onRegisterRequestComplete);
-        DISPATCHER.put(RegisterRequestExceptionAuditRequest.class, LoggerAuditService::onRegisterRequestException);
-        DISPATCHER.put(ReadRequestCompleteAuditRequest.class, LoggerAuditService::onReadRequestComplete);
-        DISPATCHER.put(ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
+        DISPATCHER.put(AuditRequest.RegisterRequestCompleteAuditRequest.class, LoggerAuditService::onRegisterRequestComplete);
+        DISPATCHER.put(AuditRequest.RegisterRequestExceptionAuditRequest.class, LoggerAuditService::onRegisterRequestException);
+        DISPATCHER.put(AuditRequest.ReadRequestCompleteAuditRequest.class, LoggerAuditService::onReadRequestComplete);
+        DISPATCHER.put(AuditRequest.ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
     }
 
     private final Logger logger;
@@ -64,7 +60,7 @@ public class LoggerAuditService implements AuditService {
 
     private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$RegisterRequestCompleteAuditRequest cannot be null");
         LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
         logger.info(msg);
@@ -73,7 +69,7 @@ public class LoggerAuditService implements AuditService {
 
     private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$RegisterRequestExceptionAuditRequest cannot be null");
         LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, request);
         logger.error(msg);
@@ -82,7 +78,7 @@ public class LoggerAuditService implements AuditService {
 
     private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$ReadRequestCompleteAuditRequest cannot be null");
         LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
         logger.info(msg);
@@ -92,7 +88,7 @@ public class LoggerAuditService implements AuditService {
 
     private static void onReadRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$ReadRequestExceptionAuditRequest cannot be null");
         LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
         logger.error(msg);
@@ -112,5 +108,4 @@ public class LoggerAuditService implements AuditService {
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
-
 }
