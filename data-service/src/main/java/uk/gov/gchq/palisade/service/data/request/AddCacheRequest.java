@@ -49,7 +49,7 @@ import java.util.StringJoiner;
 public class AddCacheRequest<V> extends CacheRequest {
 
     public AddCacheRequest() {
-//        Create and cache request. Note that this is for use by serialisation mechanisms.
+//        Create an empty request to add data to the cache. Note that this is for use by serialisation mechanisms.
     }
 
     /**
@@ -312,4 +312,3 @@ public class AddCacheRequest<V> extends CacheRequest {
                 .toString();
     }
 }
-
