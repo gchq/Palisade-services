@@ -128,7 +128,7 @@ public class ResourceController {
             return service.addResource(request).get();
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return false;
+            return null;
         }
     }
 }
