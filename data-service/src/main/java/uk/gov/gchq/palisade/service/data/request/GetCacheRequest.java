@@ -32,7 +32,7 @@ public class GetCacheRequest<V> extends CacheRequest {
 
     public GetCacheRequest() {
         /**
-         * Create and empty cache request. Note that this is for use by serialisation mechanisms.
+         * Create an empty request to get data from the cache. Note that this is for use by serialisation mechanisms.
          */
     }
 
