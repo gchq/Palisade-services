@@ -38,7 +38,7 @@ manager:
   # This allows the services-manager to be less dependant on where it is located and where it was run from
   root: palisade-services
 
-  services: []
+  services: {}
 
     ###
     # Example configuration for a service "my-service" with a single class under my.service.MainApplication

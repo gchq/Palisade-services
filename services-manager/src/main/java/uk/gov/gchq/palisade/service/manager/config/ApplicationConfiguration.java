@@ -65,7 +65,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    Map<String, ServiceConfiguration> serviceConfigurations(ConfigurationMap configurationMap) {
+    Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
         LOGGER.info(configurationMap.getServices().toString());
         return configurationMap.getServices();
     }
@@ -109,4 +109,5 @@ public class ApplicationConfiguration {
                 .peek(e -> LOGGER.info(e.toString()))
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
+
 }

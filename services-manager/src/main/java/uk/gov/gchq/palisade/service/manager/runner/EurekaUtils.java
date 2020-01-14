@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 class EurekaUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
-    @Autowired
+    @Autowired(required = false)
     private EurekaClient eurekaClient;
 
     protected EurekaClient getEurekaClient() {

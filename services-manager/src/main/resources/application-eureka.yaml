@@ -23,6 +23,7 @@ spring:
 
 # Don't register with eureka as it isn't up yet
 eureka:
+  client:
     enabled: false
     registerWithEureka: false
     fetchRegistry: false
@@ -46,4 +47,4 @@ manager:
         log: discovery-service.log
       logging:
         level:
-          uk: "INFO"
+          uk: INFO

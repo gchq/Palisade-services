@@ -27,7 +27,7 @@ manager:
 
     audit-service:
       runner:
-        classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar
+        classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
         config: audit-service/target/classes
         launcher: ${manager.default.jar-launcher}
         main: uk.gov.gchq.palisade.service.audit.AuditApplication
@@ -35,6 +35,7 @@ manager:
         log: audit-service.log
       logging:
         level:
+          uk: INFO
 
     data-service:
       runner:
@@ -46,10 +47,11 @@ manager:
         log: data-service.log
       logging:
         level:
+          uk: INFO
 
     palisade-service:
       runner:
-        classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar
+        classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
         config: palisade-service/target/classes
         launcher: ${manager.default.jar-launcher}
         main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
@@ -57,6 +59,7 @@ manager:
         log: palisade-service.log
       logging:
         level:
+          uk: INFO
 
     policy-service:
       runner:
@@ -68,6 +71,7 @@ manager:
         log: policy-service.log
       logging:
         level:
+          uk: INFO
 
     resource-service:
       runner:
@@ -79,10 +83,11 @@ manager:
         log: resource-service.log
       logging:
         level:
+          uk: INFO
 
     user-service:
       runner:
-        classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar
+        classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
         config: user-service/target/classes
         launcher: ${manager.default.jar-launcher}
         main: uk.gov.gchq.user.service.user.UserApplication
@@ -90,3 +95,4 @@ manager:
         log: user-service.log
       logging:
         level:
+          uk: INFO

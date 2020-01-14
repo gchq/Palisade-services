@@ -46,7 +46,7 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
         this.runnerConfiguration = runnerConfiguration;
     }
 
-    Map<String, ProcessBuilder> filterRunningServices(Map<String, ProcessBuilder> processBuilders, List<InstanceInfo> runningServices) {
+    Map<String, ProcessBuilder> filterRunningServices(final Map<String, ProcessBuilder> processBuilders, final List<InstanceInfo> runningServices) {
         Set<String> instanceNames = runningServices.stream().map(InstanceInfo::getAppName).collect(Collectors.toSet());
         return processBuilders.entrySet().stream()
                 .filter(entry -> {
@@ -54,7 +54,7 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
                     if (exists) {
                         LOGGER.warn("Eureka already has registered instance named {} - excluding from run", entry.getKey());
                     }
-                    return exists;
+                    return !exists;
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -73,34 +73,29 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
-
-    Map<String, Integer> joinProcesses(final Map<String, Process> processes) {
-        return processes.entrySet().stream()
-                .map(e -> {
-                    try {
-                        return new SimpleEntry<>(e.getKey(), e.getValue().waitFor());
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
         if (args.containsOption("run")) {
-            LOGGER.info("Loaded RunnerConfiguration: {}", runnerConfiguration);
+            LOGGER.debug("Loaded RunnerConfiguration: {}", runnerConfiguration);
+            LOGGER.debug("Loaded ProcessBuilders: {}", processBuilders);
 
             // Get running services from eureka and warn-don't-start any that are already running
             List<InstanceInfo> runningServices = getRunningServices();
+            LOGGER.info("Discovered {} running services", runningServices.size());
+            LOGGER.debug("Services discovered: {}", runningServices);
+
             Map<String, ProcessBuilder> filteredBuilders = filterRunningServices(processBuilders, runningServices);
+            LOGGER.info("Prepared to run {} new services:", filteredBuilders.size());
+            LOGGER.debug("Services to run:\n{}", filteredBuilders);
 
             // Start processes for each service configuration
             Map<String, Process> processes = runApplications(filteredBuilders);
+            LOGGER.info("Started {} new processes", processes.size());
+            LOGGER.debug("Processes started:\n{}", processes);
+            System.exit(0);
         }
     }
 }

@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
-import org.apache.tools.ant.util.JavaEnvUtils;
-
 import java.io.File;
 
 public class RunnerConfiguration {
@@ -31,7 +29,7 @@ public class RunnerConfiguration {
 
     ProcessBuilder getProcessBuilder() {
         String[] runnerCommand = new String[]{
-                JavaEnvUtils.getJreExecutable("java"),
+                "java",
                 "-cp", getClasspath(),
                 String.format("-Dspring.location=%s", getConfig()),
                 String.format("-Dspring.profiles.active=%s", getProfiles()),
