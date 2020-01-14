@@ -18,6 +18,7 @@ container:
     - --accesslog
     - --entrypoints.web.Address=:80
     - --entrypoints.tls.Address=:443
+    - --serverstransport.insecureskipverify
     - --providers.kubernetescrd
     - --ping=true
 
