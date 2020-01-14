@@ -173,7 +173,6 @@ public class K8sBackingStore implements BackingStore {
                 throw ex;
             }
         }
-
     }
 
     /**
@@ -225,4 +224,3 @@ public class K8sBackingStore implements BackingStore {
                 .distinct();
     }
 }
-
