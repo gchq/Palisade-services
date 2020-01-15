@@ -51,7 +51,7 @@ import static java.util.Objects.requireNonNull;
         @JsonSubTypes.Type(value = ReadRequestCompleteAuditRequest.class),
         @JsonSubTypes.Type(value = ReadRequestExceptionAuditRequest.class)
 })
-public class AuditRequest<ZoneDateTime> extends Request {
+public class AuditRequest extends Request {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRequest.class);
 
@@ -92,7 +92,7 @@ public class AuditRequest<ZoneDateTime> extends Request {
         if (!super.equals(o)) {
             return false;
         }
-        final AuditRequest<?> that = (AuditRequest<?>) o;
+        final AuditRequest that = (AuditRequest) o;
         return Objects.equals(timestamp, that.timestamp) &&
                 Objects.equals(serverIp, that.serverIp) &&
                 Objects.equals(serverHostname, that.serverHostname);

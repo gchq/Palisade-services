@@ -167,7 +167,7 @@ public class EtcdBackingStore implements BackingStore {
         CompletableFuture<GetResponse> futureValueClass = getKeyValueClient().get(ByteSequence.from(cacheKey + ".class", UTF8));
         CompletableFuture<GetResponse> futureValue = getKeyValueClient().get(ByteSequence.from(cacheKey + ".value", UTF8));
         List<KeyValue> valueClassKV = futureValueClass.join().getKvs();
-        if (valueClassKV.size() == 0) {
+        if (valueClassKV.isEmpty()) {
             return new SimpleCacheObject(Object.class, Optional.empty());
         }
         try {

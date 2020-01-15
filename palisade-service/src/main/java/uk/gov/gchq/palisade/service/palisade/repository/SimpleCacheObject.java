@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.repository;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -147,7 +148,7 @@ public class SimpleCacheObject {
     public String toString() {
         return new StringJoiner(", ", SimpleCacheObject.class.getSimpleName() + "[", "]")
                 .add("valueClass=" + valueClass)
-                .add("value=" + value.orElse("".getBytes()).toString())
+                .add("value=" + Arrays.toString(value.orElse("".getBytes())))
                 .add("metadata=" + metadata.orElse(new CacheMetadata(false)))
                 .toString();
     }

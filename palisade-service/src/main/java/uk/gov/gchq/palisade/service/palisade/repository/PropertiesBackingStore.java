@@ -146,7 +146,7 @@ public class PropertiesBackingStore implements BackingStore {
         WatchFile(final PropertiesBackingStore action, final Path watchPath) {
             requireNonNull(action, "action");
             requireNonNull(watchPath, "watchPath");
-            this.action = new WeakReference<PropertiesBackingStore>(action);
+            this.action = new WeakReference<>(action);
             this.watchPath = watchPath;
         }
 

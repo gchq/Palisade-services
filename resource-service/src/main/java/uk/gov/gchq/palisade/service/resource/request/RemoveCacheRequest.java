@@ -28,11 +28,15 @@ import uk.gov.gchq.palisade.service.Service;
 public class RemoveCacheRequest extends CacheRequest {
 
     public RemoveCacheRequest() {
+        /**
+         * Create an empty request to remove data from the cache. Note that this is for use by serialisation mechanisms.
+         */
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public RemoveCacheRequest key(final String key) {
         super.key(key);
         return this;
@@ -41,6 +45,7 @@ public class RemoveCacheRequest extends CacheRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public RemoveCacheRequest service(final Class<? extends Service> service) {
         super.service(service);
         return this;
