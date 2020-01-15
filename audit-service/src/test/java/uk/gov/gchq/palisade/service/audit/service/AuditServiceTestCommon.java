@@ -26,35 +26,35 @@ class AuditServiceTestCommon {
 
     private static final String TEST_RULES_APPLIED = "human readable description of the rules/policies been applied to the data";
 
-    UserId mockUserID() {
+    static UserId mockUserID() {
         final UserId mockUserId = Mockito.mock(UserId.class);
         Mockito.doReturn(TEST_USER_ID).when(mockUserId).getId();
         Mockito.doReturn(TEST_USER_ID).when(mockUserId).toString();
         return mockUserId;
     }
 
-    User mockUser() {
+    static User mockUser() {
         final User mockUser = Mockito.mock(User.class);
         Mockito.doReturn(mockUserID()).when(mockUser).getUserId();
         Mockito.doReturn(TEST_USER_ID).when(mockUser).toString();
         return mockUser;
     }
 
-    Context mockContext() {
+    static Context mockContext() {
         final Context mockContext = Mockito.mock(Context.class);
         Mockito.doReturn(TEST_PURPOSE).when(mockContext).getPurpose();
         Mockito.doReturn(TEST_PURPOSE).when(mockContext).toString();
         return mockContext;
     }
 
-    RequestId mockOriginalRequestId() {
+    static RequestId mockOriginalRequestId() {
         final RequestId mockOriginalRequestId = Mockito.mock(RequestId.class);
         Mockito.doReturn(TEST_ORIGINAL_REQUEST_ID).when(mockOriginalRequestId).getId();
         Mockito.doReturn(TEST_ORIGINAL_REQUEST_ID).when(mockOriginalRequestId).toString();
         return mockOriginalRequestId;
     }
 
-    LeafResource mockResource() {
+    static LeafResource mockResource() {
         final LeafResource mockResource = Mockito.mock(LeafResource.class);
         Mockito.doReturn(TEST_RESOURCE_ID).when(mockResource).getId();
         Mockito.doReturn(TEST_RESOURCE_ID).when(mockResource).toString();
@@ -63,14 +63,14 @@ class AuditServiceTestCommon {
         return mockResource;
     }
 
-    Exception mockException() {
+    static Exception mockException() {
         final Exception mockException = Mockito.mock(Exception.class);
         Mockito.doReturn(TEST_EXCEPTION_MESSAGE).when(mockException).getMessage();
         Mockito.doReturn(TEST_EXCEPTION_MESSAGE).when(mockException).toString();
         return mockException;
     }
 
-    Rules mockRules() {
+    static Rules mockRules() {
         final Rules mockRules = Mockito.mock(Rules.class);
         Mockito.doReturn(TEST_RULES_APPLIED).when(mockRules).getMessage();
         Mockito.doReturn(TEST_RULES_APPLIED).when(mockRules).toString();
