@@ -35,8 +35,8 @@ public class RegisterDataRequest extends Request {
     private Context context;
     private String resourceId;
 
-    // no-args constructor required
     public RegisterDataRequest() {
+        // no-args constructor needed for serialization only
     }
 
     /**

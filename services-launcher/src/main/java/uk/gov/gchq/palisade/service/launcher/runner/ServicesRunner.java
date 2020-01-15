@@ -60,7 +60,7 @@ public class ServicesRunner implements ApplicationRunner {
 
     List<ProcessBuilder> constructProcessRunners(final List<OverridableConfiguration> configs) {
         return configs.stream()
-                .map((config) -> {
+                .map(config -> {
                     String[] command = new String[]{
                             JavaEnvUtils.getJreExecutable("java"),
                             "-jar",
@@ -68,12 +68,11 @@ public class ServicesRunner implements ApplicationRunner {
                             String.format("-Dspring.profiles.active=%s", config.getProfiles()),
                             config.getTarget()
                     };
-                    final ProcessBuilder processBuilder = new ProcessBuilder()
+                    return new ProcessBuilder()
                             .command(command)
                             .directory(getServicesRoot())
                             .redirectOutput(new File(config.getLog()))
                             .redirectError(new File(config.getLog()));
-                    return processBuilder;
                 })
                 .collect(Collectors.toList());
     }
@@ -99,19 +98,18 @@ public class ServicesRunner implements ApplicationRunner {
 
         return Stream.of(configurations, addedConfigs)
                 .flatMap(Collection::stream)
-                .filter((x) -> !removedConfigs.contains(x))
-                .map((x) -> x.defaults(defaultsConfiguration))
+                .filter(x -> !removedConfigs.contains(x))
+                .map(x -> x.defaults(defaultsConfiguration))
                 .collect(Collectors.toList());
     }
 
     List<Process> launchApplicationsFromProcessBuilders(final List<ProcessBuilder> configurations) {
         return configurations.stream()
-                .map((pb) -> {
+                .map(pb -> {
                     try {
-                        Process process = pb.start();
-                        return process;
+                        return pb.start();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error("launchApplicationsFromProcessBuilders failed with error {}", e);
                         return null;
                     }
                 })
@@ -121,11 +119,11 @@ public class ServicesRunner implements ApplicationRunner {
 
     Map<Process, Integer> joinProcesses(final List<Process> processes) {
         return processes.stream()
-                .map((p) -> {
+                .map(p -> {
                     try {
                         return new SimpleEntry<>(p, p.waitFor());
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LOGGER.error("joinProcesses failed with error {}", e);
                         return null;
                     }
                 })
