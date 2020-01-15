@@ -104,10 +104,8 @@ public class SimplePalisadeService implements PalisadeService {
         CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
         LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
-        CompletableFuture<DataRequestResponse> aggregatedResponse = aggregationService.aggregateDataRequestResults(
+        return aggregationService.aggregateDataRequestResults(
                 request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
-
-        return aggregatedResponse;
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "launcher")
 public class ServicesConfiguration {
     @NestedConfigurationProperty
-    private List<OverridableConfiguration> services = new ArrayList<OverridableConfiguration>();
+    private List<OverridableConfiguration> services = new ArrayList<>();
 
     public List<OverridableConfiguration> getServices() {
         return services;

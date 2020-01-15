@@ -49,6 +49,7 @@ import java.util.StringJoiner;
 public class AddCacheRequest<V> extends CacheRequest {
 
     public AddCacheRequest() {
+        //empty constructor needed
     }
 
     /**
@@ -279,6 +280,7 @@ public class AddCacheRequest<V> extends CacheRequest {
         this.timeToLive = Optional.empty();
     }
 
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -295,6 +297,7 @@ public class AddCacheRequest<V> extends CacheRequest {
                 getValue().equals(that.getValue());
     }
 
+    @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), getTimeToLive(), getValue(), getLocallyCacheable());
     }
