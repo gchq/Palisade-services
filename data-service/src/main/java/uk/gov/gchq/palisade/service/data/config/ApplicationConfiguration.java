@@ -69,7 +69,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleDataService SimpleDataService(final Map<String, BackingStore> backingStores,
+    public SimpleDataService simpleDataService(final Map<String, BackingStore> backingStores,
                                                final AuditService auditService,
                                                final PalisadeService palisadeService,
                                                final DataReader dataReader,
@@ -138,6 +138,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "eureka-client")
     @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
     public ServiceInstanceRestController eurekaClient() {
+        LOGGER.info("Instantiated eurekaClient");
         return new ServiceInstanceRestController();
     }
 

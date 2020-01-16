@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.data.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
@@ -24,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PalisadeService implements Service {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
     private final PalisadeClient client;
     private final Executor executor;
 
@@ -35,6 +38,11 @@ public class PalisadeService implements Service {
 
 
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
-        return CompletableFuture.supplyAsync(() -> this.client.getDataRequestConfig(request), this.executor);
+        LOGGER.info("Getting config from palisade service for data request: {}", request);
+        return CompletableFuture.supplyAsync(() -> {
+            DataRequestConfig response = this.client.getDataRequestConfig(request);
+            LOGGER.info("Got config from palisade service: {}", response);
+            return response;
+        }, executor);
     }
 }

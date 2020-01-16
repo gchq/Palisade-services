@@ -77,20 +77,21 @@ public class SimpleDataService implements DataService {
     }
 
     public SimpleDataService reader(final DataReader reader) {
-        requireNonNull(reader, "The data dataReader cannot be set to null.");
+        requireNonNull(reader, "The data reader cannot be set to null.");
         this.dataReader = reader;
         return this;
     }
 
     public SimpleDataService cacheService(final CacheService cacheService) {
-        requireNonNull(cacheService, "The cacheService service cannot be set to null.");
+        requireNonNull(cacheService, "The cache service cannot be set to null.");
         this.cacheService = cacheService;
-        //changing cacheService service...
         return this;
     }
 
     private void auditRequestReceivedException(final ReadRequest request, final Throwable ex) {
-        LOGGER.debug("Error handling: " + ex.getMessage());
+        LOGGER.error("Error while handling request: {}", request);
+        LOGGER.error("{} was: {}", ex.getClass(), ex.getMessage());
+        LOGGER.info("Auditing error with audit service");
         auditService.audit(ReadRequestExceptionAuditRequest.create(request.getOriginalRequestId())
                 .withToken(request.getToken())
                 .withLeafResource(request.getResource())
@@ -104,18 +105,15 @@ public class SimpleDataService implements DataService {
         LOGGER.debug("Creating async read: {}", request);
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.debug("Starting to read: {}", request);
-            LOGGER.info("Reading request: original id: {}", request.getOriginalRequestId().getId());
 
             final GetDataRequestConfig getConfig = new GetDataRequestConfig()
                     .token(request.getToken())
                     .resource(request.getResource());
             getConfig.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.debug("Calling palisade service with: {}", getConfig);
-            LOGGER.info("Calling the palisade service, id: {}", getConfig.getOriginalRequestId().getId());
 
             final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
             LOGGER.debug("Palisade service returned: {}", config);
-            LOGGER.info("Response received from the palisade service, id: {}", config.getOriginalRequestId().getId());
 
             final DataReaderRequest readerRequest = new DataReaderRequest()
                     .resource(request.getResource())
@@ -124,23 +122,20 @@ public class SimpleDataService implements DataService {
                     .rules(config.getRules().get(request.getResource()));
             readerRequest.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.debug("Calling dataReader with: {}", readerRequest);
-            LOGGER.info("Calling the data reader with request: {}", readerRequest.getOriginalRequestId().getId());
 
             final DataReaderResponse readerResult = getDataReader().read(readerRequest,
                     this.getClass(),
                     auditRequestReceiver);
             LOGGER.debug("Reader returned: {}", readerResult);
-            LOGGER.info("Response received from the data reader");
 
             final ReadResponse response = new NoInputReadResponse(readerResult);
             LOGGER.debug("Returning from read: {}", response);
             return response;
-        })
-                .exceptionally(ex -> {
-                    LOGGER.debug("Error handling: " + ex.getMessage());
-                    auditRequestReceivedException(request, ex);
-                    throw new RuntimeException(ex); //rethrow the exception
-                });
+        }).exceptionally(ex -> {
+            LOGGER.warn("Error handling: " + ex.getMessage());
+            auditRequestReceivedException(request, ex);
+            throw new RuntimeException(ex); //rethrow the exception
+        });
     }
 
     public PalisadeService getPalisadeService() {

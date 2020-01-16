@@ -1,4 +1,3 @@
-
 # Copyright 2019 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
-VOLUME /tmp
 
-ARG JAR_FILE
-
-ADD $JAR_FILE /usr/share/user-service/user-service.jar
-
-LABEL service="user", project="palisade"
-
-ENTRYPOINT ["java", "-jar", "/usr/share/user-service/user-service.jar"]
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resource-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
+  labels:
+    {{- include "resource-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 8086
+    protocol: TCP
+    name: web
+  selector:
+    app.kubernetes.io/name: {{ include "resource-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

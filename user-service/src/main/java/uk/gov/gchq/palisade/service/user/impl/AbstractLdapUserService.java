@@ -82,7 +82,7 @@ import static java.util.Objects.requireNonNull;
  */
 public abstract class AbstractLdapUserService implements UserService {
     public static final long CACHE_TTL_HOURS = 24L;
-    public static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(",
+    protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(",
             ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
     private static Cache<UserId, User> userCache;

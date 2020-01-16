@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 apiVersion: v1
 kind: Service
 metadata:
-    name: {{ include "user-service.name" . }}
-    namespace: {{ include "palisade.namespace" . }}
-    labels:
-            {{ include "user-service.labels" . | indent 4 }}
+  name: {{ include "user-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
+  labels:
+    {{- include "user-service.labels" . | nindent 4 }}
 spec:
-    type: {{ .Values.service.type }}
-    ports:
-    -   port: {{ .Values.service.port }}
-        targetPort: 8087
-        protocol: TCP
-        name: web
-    selector:
-        app.kubernetes.io/name: {{ include "user-service.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 8087
+    protocol: TCP
+    name: web
+  selector:
+    app.kubernetes.io/name: {{ include "user-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+
