@@ -1,3 +1,4 @@
+
 # Copyright 2019 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11
+FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
 VOLUME /tmp
 
 ARG JAR_FILE
