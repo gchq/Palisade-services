@@ -12,5 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-admin:
-  port:  8080
+service:
+  port:  443
+  namespace: kubernetes-dashboard
