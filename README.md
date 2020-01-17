@@ -74,3 +74,16 @@ image tag using the "push image" profile during the build, as shown above.
 It is possible to let helm generate the deployment name and let the chart create a new namespace for it, then deploy it there:
 
 ```helm upgrade --install --generate-name . --set global.uniqueNamespace=true```
+
+#### Kubernetes dashboard ingress
+
+```helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true```
+
+If the [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) is required it must be installed separately as a
+prerequisite, the chart switch installs ingress definitions into traefik for access at ```https://localhost/kubernetes```. Access to the dashboard should be by
+token, this can be obtained by running the following command against the cluster:
+
+```
+    kubectl -n kube-system describe secrets \
+      `kubectl -n kube-system get secrets | awk '/clusterrole-aggregation-controller/ {print $1}'` \
+          | awk '/token:/ {print $2}'
