@@ -73,7 +73,7 @@ public class ResourceServiceTest {
 
         resourceService = new ResourceService(resourceClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
         resources.put(resource, connectionDetail);
     }
 

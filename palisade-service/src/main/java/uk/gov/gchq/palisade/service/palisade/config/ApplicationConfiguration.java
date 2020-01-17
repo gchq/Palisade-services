@@ -83,7 +83,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 resourceService(resourceClient),
                 cacheService(backingStores),
                 getAsyncExecutor(),
-                resultAggregationService(auditClient));
+                resultAggregationService(auditClient, backingStores));
     }
 
     @Bean
@@ -107,8 +107,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
-        CacheService cacheService = new SimpleCacheService();
+    public ResultAggregationService resultAggregationService(final AuditClient auditClient, final Map<String, BackingStore> backingStores) {
+        CacheService cacheService = cacheService(backingStores);
         AuditService auditService = auditService(auditClient);
         return new ResultAggregationService(auditService, cacheService);
     }

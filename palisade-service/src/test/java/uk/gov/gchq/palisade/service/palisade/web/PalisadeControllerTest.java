@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
@@ -57,7 +58,7 @@ public class PalisadeControllerTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        controller = new PalisadeController(palisadeService);
+        controller = new PalisadeController(palisadeService, JSONSerialiser.createDefaultMapper());
     }
 
     @After
