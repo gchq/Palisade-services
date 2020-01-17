@@ -27,6 +27,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 public class ManagerApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagerApplication.class);
 
+    public ManagerApplication() {
+        // no-args constructor needed for serialization only
+    }
+
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ManagerApplication.class).run(args);
     }

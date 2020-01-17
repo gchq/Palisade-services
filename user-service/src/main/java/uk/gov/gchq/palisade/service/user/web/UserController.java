@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    public User GetUserRequest(@RequestBody final GetUserRequest request) {
+    public User getUserRequest(@RequestBody final GetUserRequest request) {
         LOGGER.info("Invoking GetUserRequest: {}", request);
         return this.getUser(request).join();
     }
@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")
-    public Boolean AddUserRequest(@RequestBody final AddUserRequest request) {
+    public Boolean addUserRequest(@RequestBody final AddUserRequest request) {
         LOGGER.info("Invoking AddUserRequest: {}", request);
         return this.addUser(request).join();
     }

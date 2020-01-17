@@ -31,11 +31,15 @@ import uk.gov.gchq.palisade.service.Service;
 public class GetCacheRequest<V> extends CacheRequest {
 
     public GetCacheRequest() {
+        /**
+         * Create an empty request to get data from the cache. Note that this is for use by serialisation mechanisms.
+         */
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public GetCacheRequest key(final String key) {
         super.key(key);
         return this;
@@ -44,6 +48,7 @@ public class GetCacheRequest<V> extends CacheRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public GetCacheRequest service(final Class<? extends Service> service) {
         super.service(service);
         return this;

@@ -93,7 +93,7 @@ spec:
                                  file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         withSonarQubeEnv(installationName: 'sonar') {
-                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
                         }
                     }
                 }
@@ -120,7 +120,7 @@ spec:
                             ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true --set global.repository=${ECR_REGISTRY} --namespace dev'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY} --namespace dev'
                     } else {
                         sh "echo - no deploy"
                     }
