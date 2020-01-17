@@ -22,13 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import uk.gov.gchq.palisade.service.manager.config.LoggingConfiguration;
+import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
@@ -40,44 +38,42 @@ public class LoggingChanger extends EurekaUtils implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingChanger.class);
 
     // Autowired through constructor
-    private Map<String, LoggingConfiguration> loggingConfiguration;
+    private Map<String, ServiceConfiguration> loggingConfiguration;
 
-    public LoggingChanger(final Map<String, LoggingConfiguration> loggingConfiguration) {
+    public LoggingChanger(final Map<String, ServiceConfiguration> loggingConfiguration) {
         this.loggingConfiguration = loggingConfiguration;
     }
 
-    Map<InstanceInfo, LoggingConfiguration> mapInstancesToConfigs(final List<InstanceInfo> instances, final Map<String, LoggingConfiguration> configuration) {
+    Map<InstanceInfo, ServiceConfiguration> mapInstancesToConfigs(final List<InstanceInfo> instances, final Map<String, ServiceConfiguration> configuration) {
         return instances.stream()
-                .map(instance -> new SimpleEntry<>(instance, configuration.get(instance.getAppName())))
+                .filter(instance -> configuration.containsKey(instance.getAppName().toLowerCase()))
+                .map(instance -> new SimpleEntry<>(instance, configuration.get(instance.getAppName().toLowerCase())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    Map<String, ResponseEntity<String>> postEachLevel(final InstanceInfo instance, final Map<String, String> levels) {
-        return levels.entrySet().stream()
-                .map(level -> {
+    Map<String, ResponseEntity<String>> postEachLevel(final InstanceInfo instance, final Map<String, HttpEntity<String>> entities) {
+        return entities.entrySet().stream()
+                .map(entry -> {
+                    String endpoint = entry.getKey();
+                    HttpEntity<String> entity = entry.getValue();
                     // Default spring actuator - this could be retrievable dynamically through the /actuators endpoint
-                    String actuator = String.format("%s:%s/actuator/loggers/%s", instance.getIPAddr(), instance.getPort(), level.getKey());
-                    // Create a JSON object
-                    HttpHeaders header = new HttpHeaders();
-                    header.setContentType(MediaType.APPLICATION_JSON);
-                    // Configure the endpoint to log to the new level
-                    String body = String.format("configuredLevel: %s", level.getValue());
-                    // POST the entity to the actuator, expect a response of OK
-                    HttpEntity<String> entity = new HttpEntity<>(body, header);
+                    String actuator = String.format("http://%s:%s/actuator/loggers/%s", instance.getIPAddr(), instance.getPort(), endpoint);
                     ResponseEntity<String> response = new RestTemplate().postForEntity(actuator, entity, String.class);
-                    return new SimpleEntry<>(level.getKey(), response);
+                    return new SimpleEntry<>(endpoint, response);
                 })
+                .peek(entry -> LOGGER.debug("{}: {}", entry.getKey(), entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    Map<InstanceInfo, Map<String, ResponseEntity<String>>> postEachInstance(final Map<InstanceInfo, LoggingConfiguration> instanceConfigs) {
+    Map<InstanceInfo, Map<String, ResponseEntity<String>>> postEachInstance(final Map<InstanceInfo, ServiceConfiguration> instanceConfigs) {
         return instanceConfigs.entrySet().stream()
                 .map(entry -> {
                     InstanceInfo instance = entry.getKey();
-                    Map<String, String> levels = entry.getValue().getLevel();
+                    Map<String, HttpEntity<String>> entities = entry.getValue().getLoggingChangeEntities();
                     // There may exist multiple level changes per instance as well as multiple instances per service
-                    return new SimpleEntry<>(instance, postEachLevel(instance, levels));
+                    return new SimpleEntry<>(instance, postEachLevel(instance, entities));
                 })
+                .peek(entry -> LOGGER.debug("{}: {}", entry.getKey(), entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -115,23 +111,24 @@ public class LoggingChanger extends EurekaUtils implements ApplicationRunner {
             // Get running services from eureka and map each instance to a logging configuration
             List<InstanceInfo> runningServices = getRunningServices();
             LOGGER.info("Discovered {} running services", runningServices.size());
-            LOGGER.debug("Services discovered: {}", runningServices);
 
-            Map<InstanceInfo, LoggingConfiguration> instanceConfigurations = mapInstancesToConfigs(runningServices, loggingConfiguration);
-            LOGGER.debug("Paired logging configurations with running instances:\n{}", instanceConfigurations);
+            Map<InstanceInfo, ServiceConfiguration> instanceConfigurations = mapInstancesToConfigs(runningServices, loggingConfiguration);
+            LOGGER.info("Mapped {} service instances to logging configurations", instanceConfigurations.size());
 
             // POST a JSON object to each service instance loggers actuator
             Map<InstanceInfo, Map<String, ResponseEntity<String>>> responses = postEachInstance(instanceConfigurations);
-            LOGGER.debug("Full responses from requests:\n{}", responses);
+            Integer numLoggers = responses.values().stream().map(Map::size).reduce(0, Integer::sum);
+            LOGGER.info("Posted {} logging changes to {} service instances", numLoggers, responses.size());
 
             // Wait until all POSTs are complete
             Boolean success = joinAllResponses(responses);
 
             if (!success) {
                 LOGGER.warn("Errors encountered while posting to actuators - check logs");
+                System.exit(1);
             } else {
-                Integer numLoggers = responses.values().stream().map(Map::size).reduce(0, Integer::sum);
-                LOGGER.info("Successfully configured {} instances with {} loggers", responses.size(), numLoggers);
+                LOGGER.info("Success");
+                System.exit(0);
             }
         }
     }

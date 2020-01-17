@@ -44,6 +44,7 @@ class EurekaUtils {
             return eurekaClient.getApplications().getRegisteredApplications().stream()
                     .map(Application::getInstances)
                     .flatMap(List::stream)
+                    .peek(instance -> LOGGER.debug("Discovered {} :: {}:{}/{} ({})", instance.getAppName(), instance.getIPAddr(), instance.getPort(), instance.getSecurePort(), instance.getStatus()))
                     .collect(Collectors.toList());
         } else {
             LOGGER.debug("EurekaClient is null - is the discovery service running?");

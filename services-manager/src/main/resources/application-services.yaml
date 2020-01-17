@@ -14,6 +14,7 @@
 #
 
 # The manager creates a number of commands to execute for each service in manager.services
+# All fields are *technically* optional but some (classpath, launcher, main) are probably required to start the spawned JVM process
 # Extensive use is made of the eureka discovery client to discover services and endpoints - subsequently the "eureka" profile is enabled by default for all services
 
 manager:
@@ -26,73 +27,66 @@ manager:
   services:
 
     audit-service:
-      runner:
-        classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
-        config: audit-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.palisade.service.audit.AuditApplication
-        profiles: eureka,default
-        log: audit-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar
+        - ${manager.default.library}
+      config: audit-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.palisade.service.audit.AuditApplication
+      profiles:
+        - eureka
+      log: audit-service.log
 
     data-service:
-      runner:
-        classpath: data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
-        config: data-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.palisade.service.data.DataApplication
-        profiles: eureka,default
-        log: data-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar
+        - ${manager.default.library}
+      config: data-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.palisade.service.data.DataApplication
+      profiles:
+        - eureka
+      log: data-service.log
 
     palisade-service:
-      runner:
-        classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
-        config: palisade-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
-        profiles: eureka,default
-        log: palisade-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar
+        - ${manager.default.library}
+      config: palisade-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
+      profiles:
+        - eureka
+      log: palisade-service.log
 
     policy-service:
-      runner:
-        classpath: policy-service/target/policy-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
-        config: policy-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.policy.service.policy.PolicyApplication
-        profiles: eureka,default
-        log: policy-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - policy-service/target/policy-service-0.4.0-SNAPSHOT-exec.jar
+        - ${manager.default.library}
+      config: policy-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.policy.service.policy.PolicyApplication
+      profiles:
+        - eureka
+      log: policy-service.log
 
     resource-service:
-      runner:
-        classpath: resource-service/target/resource-service-0.4.0-SNAPSHOT-exec.jar
-        config: resource-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.resource.service.resource.ResourceApplication
-        profiles: eureka,default
-        log: resource-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - resource-service/target/resource-service-0.4.0-SNAPSHOT-exec.jar
+      config: resource-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.resource.service.resource.ResourceApplication
+      profiles:
+        - eureka
+      log: resource-service.log
 
     user-service:
-      runner:
-        classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar:${manager.default.library}
-        config: user-service/target/classes
-        launcher: ${manager.default.jar-launcher}
-        main: uk.gov.gchq.user.service.user.UserApplication
-        profiles: eureka,default
-        log: user-service.log
-      logging:
-        level:
-          uk: INFO
+      classpath:
+        - user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar
+        - ${manager.default.library}
+      config: user-service/target/classes
+      launcher: ${manager.default.jar-launcher}
+      main: uk.gov.gchq.user.service.user.UserApplication
+      profiles:
+        - eureka
+      log: user-service.log

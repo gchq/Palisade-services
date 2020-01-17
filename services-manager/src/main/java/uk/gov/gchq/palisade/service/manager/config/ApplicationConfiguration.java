@@ -51,8 +51,10 @@ public class ApplicationConfiguration {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("ConfigurationMap{");
-            sb.append("services=").append(services);
+            final StringBuilder sb = new StringBuilder("ConfigurationMap{\n");
+            sb.append('\t').append(services.entrySet().stream()
+                    .map(entry -> entry.toString().replace("\n", "\n\t"))
+                    .collect(Collectors.joining("\n\t"))).append('\n');
             sb.append('}');
             return sb.toString();
         }
@@ -66,7 +68,6 @@ public class ApplicationConfiguration {
 
     @Bean
     Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
-        LOGGER.info(configurationMap.getServices().toString());
         return configurationMap.getServices();
     }
 
@@ -81,32 +82,15 @@ public class ApplicationConfiguration {
         return parent;
     }
 
-    @Bean
-    public Map<String, ProcessBuilder> runnerBuilders(final ConfigurationMap configurationMap) {
-        return configurationMap.getServices().entrySet().stream()
+    @Bean("runnerBuilders")
+    public Map<String, ProcessBuilder> runnerBuilders(final Map<String, ServiceConfiguration> runnerConfigs) {
+        return runnerConfigs.entrySet().stream()
                 .map(e -> {
-                    RunnerConfiguration runnerConfig = e.getValue().getRunner();
-                    ProcessBuilder runnerBuilder = runnerConfig.getProcessBuilder()
-                            .directory(getServicesRoot());
-                    return new SimpleEntry<>(e.getKey(), runnerBuilder);
+                    ServiceConfiguration config = e.getValue();
+                    ProcessBuilder builder = config.getProcessBuilder();
+                    builder.directory(getServicesRoot());
+                    return new SimpleEntry<>(e.getKey(), builder);
                 })
-                .peek(e -> LOGGER.info(e.toString()))
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
-
-    @Bean
-    public Map<String, RunnerConfiguration> runnerConfigs(final ConfigurationMap configurationMap) {
-        return configurationMap.getServices().entrySet().stream()
-                .map(e -> new SimpleEntry<>(e.getKey(), e.getValue().getRunner()))
-                .peek(e -> LOGGER.info(e.toString()))
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
-
-    @Bean
-    public Map<String, LoggingConfiguration> loggingConfigs(final ConfigurationMap configurationMap) {
-        return configurationMap.getServices().entrySet().stream()
-                .map(e -> new SimpleEntry<>(e.getKey(), e.getValue().getLogging()))
-                .peek(e -> LOGGER.info(e.toString()))
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 

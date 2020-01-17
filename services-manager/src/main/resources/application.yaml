@@ -25,6 +25,7 @@ eureka:
   instance:
     hostname: localhost
     port: 8083
+    preferIpAddress: true
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
@@ -33,6 +34,7 @@ eureka:
 # Options at the command line include:
 # --run : Run all known services
 # --logging : Alter the logging level for all known services
+# --config : Print out the loaded configuration
 manager:
   # Search up path hierarchy for the root directory by name
   # This allows the services-manager to be less dependant on where it is located and where it was run from
@@ -44,15 +46,17 @@ manager:
     # Example configuration for a service "my-service" with a single class under my.service.MainApplication
     # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
     #
-    # my-service:                                                 :: "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's springboot application name
-    #   runner:                                                   :: "services-manager --launch" - configuration for a executable jarfile launch
-    #     classpath: "my-service-exec.jar:/data/types.jar"        :: "java -cp ${classpath}" - classpaths for service and external includes, colon-separated list
-    #     config: "my-service/target/classes"                     :: "java -Dspring.config.location=${config}" - springboot configs filepath, comma-separated list?
-    #     launcher: "org.springframework.boot.loader.JarLauncher" :: "java [-cp ...] ${launcher}" - jvm entrypoint classpath, singleton class
-    #     main: "my.service.MainApplication"                      :: "java -Dloader.main=${main}" - springboot entrypoint classpath, singleton class
-    #     profiles: "default"                                     :: "java -Dspring.profiles.active=${profiles}" - springboot profiles to enable, comma-separated list
-    #     log: "my-service.log"                                   :: "java [args] > ${log}" - logging output filepath, singleton filepath
-    #   logging:                                                  :: "services-manager --logging" - configuration for a job to change log-level
-    #     level:                                                  :: "${logging.level}" - same format as spring's standard logging changes, classpath-loglevel map
-    #       my.service.MainApplication: "INFO"                    :: http POST address ${key} (substitute "." for "/") body "configuredLevel=${value}" - classpath to change and logging level to change to
+    # my-service:                                               :: "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's Spring Boot application name (in eureka)
+    #   classpath:                                              :: "java -cp ${classpath[0]}:${classpath[1]}" - classpaths for service and external includes, path-separator-separated list (colon or semicolon)
+    #     - "my-service-exec.jar"                               :: first path likely is the compiled (executable) jar
+    #     - "/data/types.jar"                                   :: then any additional libraries added at runtime (serialised datatypes)
+    #   config: "my-service/target/classes"                     :: "java -Dspring.config.location=${config}" - Spring Boot configs filepath, singleton filepath
+    #   launcher: org.springframework.boot.loader.JarLauncher   :: "java [-cp ...] ${launcher}" - jvm entrypoint classpath, singleton class
+    #   main: my.service.MainApplication                        :: "java -Dloader.main=${main}" - springboot entrypoint classpath, singleton class
+    #   profiles:                                               :: Spring Boot profiles to enable, comma-separated list
+    #     - default                                             :: "java -Dspring.profiles.active=${profiles[0]},${profiles[1]}"
+    #   log: my-service.log                                     :: "java [args] > ${log}" - logging output filepath, singleton filepath
+    #   err: my-service.err                                     :: "java [args] 2> ${err}" - error output filepath, singleton filepath
+    #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}" - same format as spring's standard logging changes, classpath-loglevel map
+    #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}" - classpath to change and logging level to change to
     ###

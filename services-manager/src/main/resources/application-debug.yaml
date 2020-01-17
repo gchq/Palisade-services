@@ -13,31 +13,31 @@
 # limitations under the License.
 #
 
+# Start EVERYTHING in DEBUG logging (or kick them into it with the --logging runtime flag)
+# Can be included in the spring active profiles with any other profile
+
+logging:
+  level: &debug
+    uk: "DEBUG"
+
 manager:
-  logging: "DEBUG"
 
   services:
 
     audit-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug
 
     data-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug
 
     palisade-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug
 
     policy-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug
 
     resource-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug
 
     user-service:
-      logging:
-        level: ${manager.logging}
+      level: *debug

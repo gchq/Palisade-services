@@ -23,8 +23,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.manager.config.RunnerConfiguration;
-
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
@@ -39,23 +37,30 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
 
     // Autowired through constructor
     private Map<String, ProcessBuilder> processBuilders;
-    private Map<String, RunnerConfiguration> runnerConfiguration;
 
-    public ServicesRunner(final Map<String, ProcessBuilder> runnerBuilders, final Map<String, RunnerConfiguration> runnerConfiguration) {
-        this.processBuilders = runnerBuilders;
-        this.runnerConfiguration = runnerConfiguration;
+    public ServicesRunner(final Map<String, ProcessBuilder> processBuilders) {
+        this.processBuilders = processBuilders;
+    }
+
+    private Set<String> getRunningServiceNames() {
+        return getRunningServices().stream()
+                .map(InstanceInfo::getAppName)
+                .map(String::toLowerCase)
+                .peek(name -> LOGGER.debug("Normalised {}", name))
+                .collect(Collectors.toSet());
     }
 
     Map<String, ProcessBuilder> filterRunningServices(final Map<String, ProcessBuilder> processBuilders, final List<InstanceInfo> runningServices) {
-        Set<String> instanceNames = runningServices.stream().map(InstanceInfo::getAppName).collect(Collectors.toSet());
+        Set<String> instanceNames = getRunningServiceNames();
         return processBuilders.entrySet().stream()
                 .filter(entry -> {
-                    Boolean exists = instanceNames.contains(entry.getKey());
+                    boolean exists = instanceNames.contains(entry.getKey());
                     if (exists) {
                         LOGGER.warn("Eureka already has registered instance named {} - excluding from run", entry.getKey());
                     }
                     return !exists;
                 })
+                .peek(e -> LOGGER.debug("Preparing to run process: {}", e))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -63,8 +68,7 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
         return configurations.entrySet().stream()
                 .map(e -> {
                     try {
-                        LOGGER.info("Started service: {}", e.getKey());
-                        LOGGER.debug("Service {} started with command: {}", e.getKey(), e.getValue().command());
+                        LOGGER.info("Starting service: {}", e.getKey());
                         return new SimpleEntry<>(e.getKey(), e.getValue().start());
                     } catch (IOException ex) {
                         LOGGER.error("Error while starting service {}: {}", e.getKey(), ex.getMessage());
@@ -73,28 +77,26 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
                     }
                 })
                 .filter(Objects::nonNull)
+                .peek(e -> LOGGER.debug("Running process: {}", e.toString()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
         if (args.containsOption("run")) {
-            LOGGER.debug("Loaded RunnerConfiguration: {}", runnerConfiguration);
             LOGGER.debug("Loaded ProcessBuilders: {}", processBuilders);
 
             // Get running services from eureka and warn-don't-start any that are already running
             List<InstanceInfo> runningServices = getRunningServices();
             LOGGER.info("Discovered {} running services", runningServices.size());
-            LOGGER.debug("Services discovered: {}", runningServices);
 
             Map<String, ProcessBuilder> filteredBuilders = filterRunningServices(processBuilders, runningServices);
             LOGGER.info("Prepared to run {} new services:", filteredBuilders.size());
-            LOGGER.debug("Services to run:\n{}", filteredBuilders);
 
             // Start processes for each service configuration
             Map<String, Process> processes = runApplications(filteredBuilders);
             LOGGER.info("Started {} new processes", processes.size());
-            LOGGER.debug("Processes started:\n{}", processes);
+
             System.exit(0);
         }
     }

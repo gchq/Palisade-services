@@ -37,16 +37,14 @@ manager:
   services:
     ###
     # Example configuration for a service "my-service" with a single class under my.service.MainApplication
-    # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
     ###
     my-service:
-      runner:
-        classpath: "my-service-exec.jar:/data/types.jar:${manager.default.library}"
-        config: "my-service/target/classes"
-        launcher: "${manager.default.jar-launcher}"
-        main: "my.service.MainApplication"
-        profiles: "default"
-        log: "my-service.log"
-      logging:
-        level:
-          my.service: "INFO"
+      classpath: "my-service-exec.jar:/data/types.jar:${manager.default.library}"
+      config: "my-service/target/classes"
+      launcher: "${manager.default.jar-launcher}"
+      main: "my.service.MainApplication"
+      profiles:
+        - "default"
+      log: "my-service.log"
+      level:
+        my.service: "INFO"

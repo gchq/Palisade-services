@@ -29,6 +29,7 @@
     <artifactId>resource-service</artifactId>
 
     <properties>
+        <eureka.version>1.9.16</eureka.version>
         <hadoop.version>3.2.0</hadoop.version>
         <fabric8.version>4.3.0</fabric8.version>
         <protobuf.version>3.5.1</protobuf.version>
@@ -39,7 +40,7 @@
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
-            <scope>compile</scope>
+            <version>${eureka.version}</version>
         </dependency>
         <dependency>
             <groupId>io.etcd</groupId>

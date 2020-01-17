@@ -14,138 +14,84 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --->
 
-
 # <img src="../logos/logo.svg" width="180">
 
-### Palisade Services Launcher
+### Palisade Services Manager
+
 
 ## Documentation
 
 The documentation for the latest release can be found [here](https://gchq.github.io/Palisade).
 
+
 ## Getting started
 
-The Palisade Services Launcher is a configuration-driven process runner with particular considerations to assist in running multiple Palisade services in a local JVM.
+The Palisade Services Manager is a configuration-driven process-spawner and REST-client with particular considerations to assist in managing multiple Palisade services running on local JVMs.
 
-The launcher is designed to be used by defining a collection of SpringBoot configuration files:
- * One for the launcher itself - this defines how it should start up further services
- * One for each service - these are discovered through the above configuration and passed on as an argument to the service jar
+The manager is designed to be used by defining a collection of SpringBoot configuration files:
+ * One set for the manager itself - this defines how it should start up further services or reconfigure those already running
+ * One set for each service - these are discovered through the above configuration and passed on as an argument to the service jar
+    * These wll all already be located in each service's `resources` directory
  
- The launcher configuration further defines two types of configurations:
- * A list of configurations for each service to be run - required fields are:
-    * target (SpringBoot-enabled JAR to run)
-    * config (directory to pass to `-Dspring.config.location=<...>`)
-    * profiles (profiles to pass to `-Dspring.profiles.active=<...>`, `default` for JAR default profile)
-    * log (can be `/dev/null` for no logging)
- * One default configuration - for any required field not defined in the services, its value is deduced from the defaults:
-    * The `root` directory is the first directory matching the field value after traversing up the directory tree from the working directory
-       * Running the launcher from any subdirectory of `palisade-service` does not change application behaviour
-    * A further string substitution is performed on any missing required field - any instance of the keyword `SERVICE` for the appropriate service name defined in the `name` field
-
+ The manager works in several modes, operated by the use of several flags:
+ * `--run` - run the configured services, spawning a new process for each entry
+ * `--logging` - perform a change to the logging level of configured services by REST requests
+ * `--config` - print out a human-readable view of the spring-boot configuration given to the services-manager
+ 
+ 
 ## Examples
 
-### Default Launcher Configuration
-By default, the launcher configuration looks as follows:
-```$xslt
-launcher:
-  default-service:
-    root: palisade-services
-    name: default
-    target: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
-    config: SERVICE/classes
-    profiles: default
-    log: SERVICE.log
+### Starting Services
+If services are already running, using the built-in profiles:  
+ 1. Start Eureka - run `java -jar -Dspring.profiles.active=eureka services-manager-exec.jar --run` and wait for Eureka to start up on `localhost:8083`
+ 2. Start all other services - run `java -jar -Dspring.profiles.active=services services-manager-exec.jar --run` and services should now begin registering with Eureka and appear on the dashboard
+ 3. Begin using Palisade (see [palisade-examples](https://github.com/gchq/Palisade-examples))  
+
+### Enabling Debug Logging
+
+#### At Start-Time
+If services are not running, or debug logging is required from startup, using the built-in profiles:  
+ 1. Start Eureka as above
+ 2. Add the `debug` profile to the services runner - run `java -jar -Dspring.profiles.active=services,debug services-manager-exec.jar --run` and services should now log at `DEBUG` level from startup  
+ 
+#### During Runtime
+If services are already running, using the built-in profiles:  
+ 1. Make a POST to Spring logging actuators - run `java -jar -Dspring.profiles.active=debug services-manager-exec.jar --logging` and services should now begin logging at `DEBUG` level (note that this will not include past debug logs) 
+
+### Creating a new Configuration
+Take a look at the example configuration file:
+```yaml
+manager:
+  # Search up path hierarchy for the root directory by name
+  # This allows the services-manager to be less dependant on where it is located and where it was run from
+  root: palisade-services
+
   services:
-    -
-      name: audit-service
-   ...
+     # Example configuration for a service "my-service" with a single class under my.service.MainApplication
+     # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
+    
+     my-service:                                               # "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's Spring Boot application name (in eureka)
+       classpath:                                              # "java -cp ${classpath[0]}:${classpath[1]}" - classpaths for service and external includes, path-separator-separated list (colon or semicolon)
+         - "my-service-exec.jar"                               # first path likely is the compiled (executable) jar
+         - "/data/types.jar"                                   # then any additional libraries added at runtime (serialised datatypes)
+       config: "my-service/target/classes"                     # "java -Dspring.config.location=${config}" - Spring Boot configs filepath, singleton filepath
+       launcher: org.springframework.boot.loader.JarLauncher   # "java [-cp ...] ${launcher}" - jvm entrypoint classpath, singleton class
+       main: my.service.MainApplication                        # "java -Dloader.main=${main}" - springboot entrypoint classpath, singleton class
+       profiles:                                               # Spring Boot profiles to enable, comma-separated list
+         - default                                             # "java -Dspring.profiles.active=${profiles[0]},${profiles[1]}"
+       log: my-service.log                                     # "java [args] > ${log}" - logging output filepath, singleton filepath
+       err: my-service.err                                     # "java [args] 2> ${err}" - error output filepath, singleton filepath
+       level:                                                  # "java -Dlogging.level.${level.key}=${level.value}" - same format as spring's standard logging changes, classpath-loglevel map
+         my.service.MainApplication: "INFO"                    # ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}" - classpath to change and logging level to change to
 ```
-When loaded, instances of the keyword `SERVICE` are substituted per-service for that service's name.
-In this case, the configuration is equivalent to `java -jar audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar > audit-service.log 2 &> 1`
-
-This default configuration is enough to launch all Palisade services given the existing directory structure and enabling/disabling services can be done using the command-line arguments:  
-`java -jar services-launcher.jar --enable=example-service --enable=another-service --disable=unneccessary-service`
-
-Each service enabled from the command line arguments is instantiated the same as the above services are - a overriden name applied to the default config.
-
-### Disabling Logging
-The default configuration pipes stdout and stderr to log files for each service.
-To disable this, a single change is required to the configuration which can be accomplished using the `nologs` profile provided in `application-nologs.yaml`.
-
-Execute:  
-`java -jar -Dspring.profiles.active=nologs,default services-launcher.jar`
-
-Launcher's `application-nologs.yaml` (provided in the jar and available in services-launcher/target/classes):
-```$xslt
-launcher:
-  default-service:
-    log: /dev/null
-```
-
-### Enabling Eureka - Per-Service
-By default across Palisade services, Eureka service discovery is disabled.
-A common use-case may then be to start _some_ services (here, just the audit-service) with Eureka enabled, while leaving others unmodified.
-
-Execute:  
-`java -jar -Dspring.profiles.active=with-eureka,default services-launcher.jar`
-
-Launcher's `application-with-eureka.yaml`:
-```$xslt
-launcher:
-  services:
-    -
-      name: audit-service
-      profiles: eureka-service,default
-    -
-      name: discovery-service
-   ...
-```
-
-Service's `application-eureka-service.yaml` (either in the local directory or for each service in SERVICE/target/classes):
-```$xslt
-eureka:
-  client:
-    enabled: true
-```
-
-_Note that the discovery service has Eureka enabled by default, so does not need a configuration file defined._  
-
-### Enabling Eureka - Globally
-Similarly to the above, a deployed system may require Eureka enabled for _all_ services, as well as per-service configurations for some services.
-
-Execute:  
-`java -jar -Dspring.profiles.active=with-eureka,default services-launcher.jar`
-
-Launcher's `application-with-eureka.yaml`:
-```$xslt
-launcher:
-  default-service:
-    profiles: eureka-service,default
-  services:
-    -
-      name: audit-service
-      profiles: audit,eureka-service,default
-    -
-      name: discovery-service
-   ...
-```
-
-Service's `application-eureka-service.yaml`:
-```$xslt
-eureka:
-  client:
-    enabled: true
-```
-
-Audit Service's `application-audit.yaml`:
-```$xslt
-# further configuration here
-```
-
+When testing your new configuration, you may find the config flag useful:
+ 1. Write a new configuration `application-mynewprofile.yaml`
+ 2. See what the services-manager has been given by Spring - run `java -jar -Dspring.profiles.active=mynewprofile services-manager-exec.jar --config` and the Java object representing the configuration should be printed  
+ 3. Need more? Add the debug profile too - run `java -jar -Dspring.profiles.active=debug,mynewprofile services-manager-exec.jar --config`  
 
 ## License
 
-Palisade-Common is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
+Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
 
 
 ## Contributing

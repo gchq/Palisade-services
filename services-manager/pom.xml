@@ -29,6 +29,7 @@
     <artifactId>services-manager</artifactId>
 
     <properties>
+        <eureka.version>1.9.16</eureka.version>
         <jetcd.core>0.3.0</jetcd.core>
     </properties>
 
@@ -36,18 +37,7 @@
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-core</artifactId>
-            <version>${jetcd.core}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>${eureka.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -43,7 +44,6 @@ public class ApplicationConfigurationTest {
     @Test
     public void testConfigurationIsLoaded() {
         String serviceKey = "my-service";
-        String packageKey = "my.service";
         LOGGER.debug("Loaded service configuration: {}", services.toString());
 
         assertThat(services.keySet(), contains(serviceKey));
@@ -51,10 +51,10 @@ public class ApplicationConfigurationTest {
         ServiceConfiguration myService = services.get(serviceKey);
         assertThat(myService, notNullValue());
 
-        RunnerConfiguration myRunner = myService.getRunner();
-        assertThat(myRunner, notNullValue());
+        ProcessBuilder myBuilder = myService.getProcessBuilder();
+        assertThat(myBuilder, notNullValue());
 
-        Map<String, String> myLogging = myService.getLogging().getLevel();
-        assertThat(myLogging.keySet(), contains(packageKey));
+        Map<String, HttpEntity<String>> myLogging = myService.getLoggingChangeEntities();
+        assertThat(myLogging, notNullValue());
     }
 }
