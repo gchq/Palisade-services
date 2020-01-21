@@ -28,7 +28,6 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
-import uk.gov.gchq.palisade.service.audit.web.ServiceInstanceRestController;
 
 /**
  * Bean configuration and dependency injection graph
