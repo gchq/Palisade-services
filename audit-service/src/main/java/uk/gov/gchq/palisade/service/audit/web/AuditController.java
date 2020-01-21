@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -47,11 +48,14 @@ public class AuditController {
     public Boolean auditRequest(@RequestBody final AuditRequest request) throws ExecutionException, InterruptedException {
         LOGGER.debug("Invoking GetUserRequest: {}", request);
         final List<CompletableFuture<Boolean>> audits = this.audit(request);
-        final CompletableFuture<Void> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]));
-
-        boolean result = results.thenApply(res ->
-                audits.stream().map(CompletableFuture::join).collect(Collectors.toList())
-        ).get().stream().allMatch(res -> res);
+        Boolean result = audits.stream().allMatch(future -> {
+             try {
+                 return future.get();
+             } catch (InterruptedException | ExecutionException e) {
+                 LOGGER.error(Arrays.toString(e.getStackTrace()));
+                 return false;
+             }
+         });
         LOGGER.debug("AuditRequest result is {}", result);
         return result;
     }

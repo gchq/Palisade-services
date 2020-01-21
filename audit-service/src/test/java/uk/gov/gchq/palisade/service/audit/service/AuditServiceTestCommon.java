@@ -1,6 +1,7 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
 import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -9,6 +10,10 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
+import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
+import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
+import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 class AuditServiceTestCommon {
 
@@ -77,9 +82,42 @@ class AuditServiceTestCommon {
         return mockRules;
     }
 
-    public class UserService implements Service {
+    public static class UserService implements Service {
     }
 
-    public class ResourceService implements Service {
+    public static class ResourceService implements Service {
+    }
+
+    static RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest() {
+        return RegisterRequestCompleteAuditRequest.create(mockOriginalRequestId())
+                .withUser(mockUser())
+                .withLeafResources(Sets.newSet(mockResource()))
+                .withContext(mockContext());
+    }
+
+    static RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest() {
+        return RegisterRequestExceptionAuditRequest.create(mockOriginalRequestId())
+                .withUserId(mockUserID())
+                .withResourceId(mockResource().getId())
+                .withContext(mockContext())
+                .withException(mockException())
+                .withServiceClass(Service.class);
+    }
+
+    static ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest() {
+        return ReadRequestCompleteAuditRequest.create(mockOriginalRequestId())
+                .withUser(mockUser())
+                .withLeafResource(mockResource())
+                .withContext(mockContext())
+                .withRulesApplied(mockRules())
+                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
+                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
+    }
+
+    static ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest() {
+        return ReadRequestExceptionAuditRequest.create(mockOriginalRequestId())
+                .withToken(TEST_TOKEN)
+                .withLeafResource(mockResource())
+                .withException(mockException());
     }
 }
