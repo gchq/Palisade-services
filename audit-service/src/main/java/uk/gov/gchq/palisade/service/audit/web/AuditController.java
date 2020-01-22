@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -47,15 +46,13 @@ public class AuditController {
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
     public Boolean auditRequest(@RequestBody final AuditRequest request) throws ExecutionException, InterruptedException {
         LOGGER.debug("Invoking GetUserRequest: {}", request);
+        // Submit audit to all providing services
         final List<CompletableFuture<Boolean>> audits = this.audit(request);
-        Boolean result = audits.stream().allMatch(future -> {
-             try {
-                 return future.get();
-             } catch (InterruptedException | ExecutionException e) {
-                 LOGGER.error(Arrays.toString(e.getStackTrace()));
-                 return false;
-             }
-         });
+        // Wait for all providers to complete
+        final CompletableFuture<List<Boolean>> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]))
+                .thenApply(res -> audits.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+        // Succeed only if all providers succeeded
+        boolean result = results.get().stream().allMatch(res -> res);
         LOGGER.debug("AuditRequest result is {}", result);
         return result;
     }
