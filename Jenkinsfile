@@ -30,7 +30,12 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
-
+  - name: hadolint
+    image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
+    imagePullPolicy: Always
+    command:
+        - cat
+    tty: true
   - name: docker-daemon
     image: docker:19.03.1-dind
     securityContext:
@@ -97,6 +102,13 @@ spec:
                         }
                     }
                 }
+            }
+        }
+        stage('Hadolinting') {
+            container('hadolint') {
+                sh 'hadolint */Dockerfile | tee -a hadolint_lint.txt'
+                sh 'if [ ! -s hadolint_lint.txt ] ; then echo "Hadolint found no code smells" >> hadolint_lint.txt ; fi'
+                archiveArtifacts 'hadolint_lint.txt'
             }
         }
         stage('Integration Tests') {
