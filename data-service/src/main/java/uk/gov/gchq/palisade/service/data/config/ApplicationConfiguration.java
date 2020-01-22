@@ -29,7 +29,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
+import uk.gov.gchq.palisade.reader.common.AuditRequestCompleteReceiver;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
+import uk.gov.gchq.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.EtcdBackingStore;
@@ -39,12 +45,12 @@ import uk.gov.gchq.palisade.service.data.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.CacheService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
@@ -87,8 +93,18 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public DataReader dataReader() {
-        return new HadoopDataReader();
+    public DataReader dataReader(final CacheService cacheService) {
+        try {
+            return new HadoopDataReader().cacheService(cacheService);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to instantiate HadoopDataReader: {}", ex.getMessage());
+            return new DataReader() {
+                @Override
+                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, final Class<? extends Service> aClass, final AuditRequestCompleteReceiver auditRequestCompleteReceiver) throws NoCapacityException {
+                    return null;
+                }
+            };
+        }
     }
 
     @Bean
@@ -134,6 +150,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         }).findFirst().orElse(null);
     }
 
+    @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();

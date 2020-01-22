@@ -15,8 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.data.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
@@ -27,6 +30,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PalisadeService implements Service {
+
+    @Autowired
+    private ObjectMapper mapper;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
     private final PalisadeClient client;
     private final Executor executor;
@@ -39,10 +46,22 @@ public class PalisadeService implements Service {
 
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
         LOGGER.info("Getting config from palisade service for data request: {}", request);
-        return CompletableFuture.supplyAsync(() -> {
+        String requestConfig = this.client.getDataRequestConfig(request);
+        LOGGER.info(requestConfig);
+        DataRequestConfig config = new DataRequestConfig();
+        try {
+            config = this.mapper.readValue(requestConfig, DataRequestConfig.class);
+            LOGGER.info(config.toString());
+        } catch (JsonProcessingException ex) {
+            LOGGER.error("Error mapping response to string: {}", ex.getMessage());
+        }
+
+        LOGGER.info("Got config from palisade service: {}", requestConfig);
+        /*return CompletableFuture.supplyAsync(() -> {
             DataRequestConfig response = this.client.getDataRequestConfig(request);
             LOGGER.info("Got config from palisade service: {}", response);
             return response;
-        });
+        });*/
+        return CompletableFuture.completedFuture(config);
     }
 }

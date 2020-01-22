@@ -1,3 +1,8 @@
 eureka:
   client:
     enabled: true
+
+web:
+  client:
+    audit-service: localhost:8081
+    palisade-service: localhost:8084
