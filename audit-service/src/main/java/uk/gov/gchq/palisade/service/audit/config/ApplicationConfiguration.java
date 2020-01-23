@@ -61,6 +61,7 @@ public class ApplicationConfiguration {
     }
 
     @Primary
+    @Bean
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
