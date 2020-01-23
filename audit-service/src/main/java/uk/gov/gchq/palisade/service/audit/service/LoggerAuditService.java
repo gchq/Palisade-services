@@ -59,7 +59,7 @@ public class LoggerAuditService implements AuditService {
     private final Logger auditLogger;
 
     public LoggerAuditService(final Logger loggingService) {
-        auditLoggert c = loggingService;
+        auditLogger = loggingService;
     }
 
     private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
