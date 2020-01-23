@@ -46,7 +46,7 @@ public class LoggerAuditService implements AuditService {
     static final String READ_REQUEST_COMPLETE = "ReadRequestCompleteAuditRequest";
     static final String READ_REQUEST_EXCEPTION = "ReadRequestExceptionAuditRequest";
     private static final Map<Class, BiConsumer<Logger, AuditRequest>> DISPATCHER = new HashMap<>();
-    private static final Logger INTERNAL_LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
 
 
     static {
@@ -56,47 +56,47 @@ public class LoggerAuditService implements AuditService {
         DISPATCHER.put(ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
     }
 
-    private final Logger externalLogger;
+    private final Logger auditLogger;
 
     public LoggerAuditService(final Logger loggingService) {
-        externalLogger = loggingService;
+        auditLoggert c = loggingService;
     }
 
     private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
-        INTERNAL_LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
+        LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
         logger.info(msg);
-        INTERNAL_LOGGER.info("RegisterRequestComplete: {}", msg);
+        LOGGER.info("RegisterRequestComplete: {}", msg);
     }
 
     private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
-        INTERNAL_LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
+        LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, request);
         logger.error(msg);
-        INTERNAL_LOGGER.error("RegisterRequestException: {}", msg);
+        LOGGER.error("RegisterRequestException: {}", msg);
     }
 
     private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
-        INTERNAL_LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
+        LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
         logger.info(msg);
-        INTERNAL_LOGGER.info("ReadRequestComplete: {}", msg);
+        LOGGER.info("ReadRequestComplete: {}", msg);
 
     }
 
     private static void onReadRequestException(final Logger logger, final AuditRequest request) {
         requireNonNull(logger, "Logger cannot be null");
         requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
-        INTERNAL_LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
+        LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
         logger.error(msg);
-        INTERNAL_LOGGER.error("ReadRequestException: {}", msg);
+        LOGGER.error("ReadRequestException: {}", msg);
     }
 
     @Override
@@ -104,11 +104,11 @@ public class LoggerAuditService implements AuditService {
         requireNonNull(request, "The audit request can not be null.");
         BiConsumer<Logger, AuditRequest> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
-            handler.accept(externalLogger, request);
+            handler.accept(auditLogger, request);
         } else {
             // received an AuditRequest derived class that is not defined as a Handler above.
             // need to add handler for this class.
-            INTERNAL_LOGGER.error("handler == null for " + request.getClass().getName());
+            LOGGER.error("handler == null for " + request.getClass().getName());
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
