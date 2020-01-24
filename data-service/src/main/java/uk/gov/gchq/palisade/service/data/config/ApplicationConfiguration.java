@@ -74,7 +74,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleDataService SimpleDataService(final Map<String, BackingStore> backingStores,
+    public SimpleDataService simpleDataService(final Map<String, BackingStore> backingStores,
                                                final AuditService auditService,
                                                final PalisadeService palisadeService,
                                                final DataReader dataReader,

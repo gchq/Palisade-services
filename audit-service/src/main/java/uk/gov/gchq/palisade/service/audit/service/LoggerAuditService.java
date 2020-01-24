@@ -52,10 +52,10 @@ public class LoggerAuditService implements AuditService {
         DISPATCHER.put(AuditRequest.ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
     }
 
-    private final Logger logger;
+    private final Logger auditLogger;
 
     public LoggerAuditService(final Logger loggingService) {
-        logger = loggingService;
+        auditLogger = loggingService;
     }
 
     private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
@@ -64,7 +64,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
         logger.info(msg);
-        LOGGER.info("onRegisterRequestComplete called and log message is: {}", msg);
+        LOGGER.info("RegisterRequestComplete: {}", msg);
     }
 
     private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
@@ -73,7 +73,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, request);
         logger.error(msg);
-        LOGGER.error("onRegisterRequestComplete called and log message is: {}", msg);
+        LOGGER.error("RegisterRequestException: {}", msg);
     }
 
     private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
@@ -82,7 +82,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
         logger.info(msg);
-        LOGGER.info("onReadRequestComplete called and log message is: {}", msg);
+        LOGGER.info("ReadRequestComplete: {}", msg);
 
     }
 
@@ -92,7 +92,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
         final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
         logger.error(msg);
-        LOGGER.error("onReadRequestException called and log message is: {}", msg);
+        LOGGER.error("ReadRequestException: {}", msg);
     }
 
     @Override
@@ -100,11 +100,11 @@ public class LoggerAuditService implements AuditService {
         requireNonNull(request, "The audit request can not be null.");
         BiConsumer<Logger, AuditRequest> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
-            handler.accept(logger, request);
+            handler.accept(auditLogger, request);
         } else {
             // received an AuditRequest derived class that is not defined as a Handler above.
             // need to add handler for this class.
-            logger.error("handler == null for " + request.getClass().getName());
+            LOGGER.error("handler == null for " + request.getClass().getName());
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }

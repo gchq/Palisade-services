@@ -32,8 +32,8 @@ import static java.util.Objects.requireNonNull;
 public class CanAccessResponse {
     private Collection<LeafResource> canAccessResources;
 
-    // required no-args constructor
     public CanAccessResponse() {
+        // no-args constructor needed for serialization only
     }
 
     public Collection<LeafResource> getCanAccessResources() {

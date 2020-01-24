@@ -37,6 +37,7 @@ public class GetUserRequest extends Request {
      * Constructs a {@link GetUserRequest} without a {@link UserId}.
      */
     public GetUserRequest() {
+        // no-args constructor needed for serialization only
     }
 
     /**

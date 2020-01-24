@@ -261,7 +261,7 @@ public class SimpleDataServiceTest {
             success = true; //we're expecting an exception because the completablefuture is throwing an exception
         }
 
-        assertEquals(success, true);
+        assertEquals(true, success);
 
         //then
         ArgumentCaptor<ReadRequestExceptionAuditRequest> readRequestExceptionAuditRequestArgumentCaptor = ArgumentCaptor.forClass(ReadRequestExceptionAuditRequest.class);

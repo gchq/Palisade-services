@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.audit.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import event.logging.impl.DefaultEventLoggingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
@@ -56,6 +58,12 @@ public class ApplicationConfiguration {
     public LoggerAuditService loggerAuditService() {
         LOGGER.info("Instantiated LoggerAuditService");
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
+    }
+
+    @Primary
+    @Bean
+    public ObjectMapper objectMapper() {
+        return JSONSerialiser.createDefaultMapper();
     }
 
 }

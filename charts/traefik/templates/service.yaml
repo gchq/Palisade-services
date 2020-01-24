@@ -27,6 +27,9 @@ spec:
         - protocol: TCP
           name: admin
           port: {{ .Values.admin.port }}
+        - protocol: TCP
+          name: tls
+          port: 443
     selector:
         app.kubernetes.io/name: traefik
         app.kubernetes.io/part-of: traefik
