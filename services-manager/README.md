@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --->
 
+<!---
+This file is under substitution in the build process - maven's `process-resources` stage will substitute executable(dot)jar for services-manager-0.4.0-SNAPSHOT-exec.jar
+--->
+
 # <img src="../logos/logo.svg" width="180">
 
 ### Palisade Services Manager
@@ -43,20 +47,24 @@ The manager is designed to be used by defining a collection of SpringBoot config
 
 ### Starting Services
 If services are already running, using the built-in profiles:  
- 1. Start Eureka - run `java -jar -Dspring.profiles.active=eureka services-manager-0.4.0-SNAPSHOT-exec.jar --run` and wait for Eureka to start up on `localhost:8083`
- 2. Start all other services - run `java -jar -Dspring.profiles.active=services services-manager-0.4.0-SNAPSHOT-exec.jar --run` and services should now begin registering with Eureka and appear on the dashboard
- 3. Begin using Palisade (see [palisade-examples](https://github.com/gchq/Palisade-examples))  
+ 1. Start Eureka - `java -jar -Dspring.profiles.active=eureka services-manager-0.4.0-SNAPSHOT-exec.jar --run` 
+    * Wait for Eureka to start up on `localhost:8083`
+ 3. Start all other services - `java -jar -Dspring.profiles.active=services services-manager-0.4.0-SNAPSHOT-exec.jar --run` 
+    * Services should now begin registering with Eureka and appear on the dashboard
+ 4. Begin using Palisade (see [palisade-examples](https://github.com/gchq/Palisade-examples))  
 
 ### Enabling Debug Logging
 
 #### At Start-Time
 If services are not running, or debug logging is required from startup, using the built-in profiles:  
  1. Start Eureka as above
- 2. Add the `debug` profile to the services runner - run `java -jar -Dspring.profiles.active=services,debug services-manager-0.4.0-SNAPSHOT-exec.jar --run` and services should now log at `DEBUG` level from startup  
+ 2. Add the `debug` profile to the services runner - `java -jar -Dspring.profiles.active=services,debug services-manager-0.4.0-SNAPSHOT-exec.jar --run` 
+    * Services should now log at `DEBUG` level from startup  
  
 #### During Runtime
 If services are already running, using the built-in profiles:  
- 1. Make a POST to Spring logging actuators - run `java -jar -Dspring.profiles.active=debug services-manager-0.4.0-SNAPSHOT-exec.jar --logging` and services should now begin logging at `DEBUG` level (note that this will not include past debug logs) 
+ 1. Make a POST to Spring logging actuators - `java -jar -Dspring.profiles.active=debug services-manager-0.4.0-SNAPSHOT-exec.jar --logging` 
+    * Services should now begin logging at `DEBUG` level (note that this will not include past debug logs) 
 
 ### Creating a new Configuration
 Take a look at the example configuration file:
