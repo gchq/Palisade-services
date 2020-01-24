@@ -92,27 +92,68 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>readme-generator</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/doc</directory>
+                                    <includes>
+                                        <include>README.md</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
                 <version>1.5.3</version>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
+                        <id>banner-replacer</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
+                        <configuration>
+                            <file>${basedir}/target/classes/banner.txt</file>
+                            <replacements>
+                                <replacement>
+                                    <token>image.tag</token>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <value>${image.tag}</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>readme-replacer</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <file>${basedir}/README.md</file>
+                            <replacements>
+                                <replacement>
+                                    <token>executable.jar</token>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <value>${project.artifactId}-${project.parent.version}-exec.jar</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <file>${basedir}/target/classes/banner.txt</file>
-                    <replacements>
-                        <replacement>
-                            <token>image.tag</token>
-                            <!--suppress UnresolvedMavenProperty -->
-                            <value>${image.tag}</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

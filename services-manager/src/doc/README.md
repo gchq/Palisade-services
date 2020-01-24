@@ -43,8 +43,8 @@ The manager is designed to be used by defining a collection of SpringBoot config
 
 ### Starting Services
 If services are already running, using the built-in profiles:  
- 1. Start Eureka - run `java -jar -Dspring.profiles.active=eureka services-manager-0.4.0-SNAPSHOT-exec.jar --run` and wait for Eureka to start up on `localhost:8083`
- 2. Start all other services - run `java -jar -Dspring.profiles.active=services services-manager-0.4.0-SNAPSHOT-exec.jar --run` and services should now begin registering with Eureka and appear on the dashboard
+ 1. Start Eureka - run `java -jar -Dspring.profiles.active=eureka executable.jar --run` and wait for Eureka to start up on `localhost:8083`
+ 2. Start all other services - run `java -jar -Dspring.profiles.active=services executable.jar --run` and services should now begin registering with Eureka and appear on the dashboard
  3. Begin using Palisade (see [palisade-examples](https://github.com/gchq/Palisade-examples))  
 
 ### Enabling Debug Logging
@@ -52,11 +52,11 @@ If services are already running, using the built-in profiles:
 #### At Start-Time
 If services are not running, or debug logging is required from startup, using the built-in profiles:  
  1. Start Eureka as above
- 2. Add the `debug` profile to the services runner - run `java -jar -Dspring.profiles.active=services,debug services-manager-0.4.0-SNAPSHOT-exec.jar --run` and services should now log at `DEBUG` level from startup  
+ 2. Add the `debug` profile to the services runner - run `java -jar -Dspring.profiles.active=services,debug executable.jar --run` and services should now log at `DEBUG` level from startup  
  
 #### During Runtime
 If services are already running, using the built-in profiles:  
- 1. Make a POST to Spring logging actuators - run `java -jar -Dspring.profiles.active=debug services-manager-0.4.0-SNAPSHOT-exec.jar --logging` and services should now begin logging at `DEBUG` level (note that this will not include past debug logs) 
+ 1. Make a POST to Spring logging actuators - run `java -jar -Dspring.profiles.active=debug executable.jar --logging` and services should now begin logging at `DEBUG` level (note that this will not include past debug logs) 
 
 ### Creating a new Configuration
 Take a look at the example configuration file:
@@ -86,8 +86,8 @@ manager:
 ```
 When testing your new configuration, you may find the config flag useful:
  1. Write a new configuration `application-mynewprofile.yaml`
- 2. See what the services-manager has been given by Spring - run `java -jar -Dspring.profiles.active=mynewprofile services-manager-0.4.0-SNAPSHOT-exec.jar --config` and the Java object representing the configuration should be printed  
- 3. Need more? Add the debug profile too - run `java -jar -Dspring.profiles.active=debug,mynewprofile services-manager-0.4.0-SNAPSHOT-exec.jar --config`  
+ 2. See what the services-manager has been given by Spring - run `java -jar -Dspring.profiles.active=mynewprofile executable.jar --config` and the Java object representing the configuration should be printed  
+ 3. Need more? Add the debug profile too - run `java -jar -Dspring.profiles.active=debug,mynewprofile executable.jar --config`  
 
 ## License
 

@@ -41,5 +41,5 @@ velocity*
 /palisade-service/
 /policy-service/
 /resource-service/
-/services-launcher/
+/services-manager/
 /user-service/
