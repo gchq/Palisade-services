@@ -55,7 +55,8 @@ feign:
     default-config: default
 
 cache:
-  implementation: hashmap
-  props: "cache.properties"
-  etcd:
-  - http://localhost:2379
+  cache-names: users
+  caffeine:
+    spec:
+      maximumSize: 500
+      expireAfterAccess: 30s

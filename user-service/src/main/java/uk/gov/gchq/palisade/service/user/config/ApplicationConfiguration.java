@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -27,77 +29,31 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.user.repository.BackingStore;
-import uk.gov.gchq.palisade.service.user.repository.EtcdBackingStore;
-import uk.gov.gchq.palisade.service.user.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.user.repository.K8sBackingStore;
-import uk.gov.gchq.palisade.service.user.repository.PropertiesBackingStore;
-import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.user.service.CacheService;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 import uk.gov.gchq.palisade.service.user.web.ServiceInstanceRestController;
 
-import java.net.URI;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static java.util.stream.Collectors.toList;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public CacheConfiguration cacheConfiguration() {
-        return new CacheConfiguration();
-    }
-
-    @Bean
-    public SimpleUserService userService(final CacheService cacheService) {
-        SimpleUserService simpleUserService = new SimpleUserService(cacheService);
+    public SimpleUserService userService() {
+        SimpleUserService simpleUserService = new SimpleUserService();
         LOGGER.info("Instantiated SimpleUserService");
         return simpleUserService;
     }
 
-    @Bean(name = "hashmap")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
-    public HashMapBackingStore hashMapBackingStore() {
-        return new HashMapBackingStore();
-    }
-
-    @Bean(name = "k8s")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "k8s")
-    public K8sBackingStore k8sBackingStore() {
-        return new K8sBackingStore();
-    }
-
-    @Bean(name = "props")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "props")
-    public PropertiesBackingStore propertiesBackingStore() {
-        return new PropertiesBackingStore(Optional.ofNullable(cacheConfiguration().getProps()).orElse("cache.properties"));
-    }
-
-    @Bean(name = "etcd")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "etcd")
-    public EtcdBackingStore etcdBackingStore() {
-        return new EtcdBackingStore(cacheConfiguration().getEtcd().stream().map(URI::create).collect(toList()));
-    }
-
     @Bean
-    public CacheService cacheService(final Set<BackingStore> backingStores) {
-        return backingStores.stream()
-                .map(x -> new SimpleCacheService().backingStore(x))
-                .peek(x -> LOGGER.info("Created candidate cache service {}", x))
-                .findAny().orElseThrow(() -> {
-                    LOGGER.error("No backing store provided and no default found");
-                    return new NullPointerException();
-                });
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager("users");
     }
 
     @Bean

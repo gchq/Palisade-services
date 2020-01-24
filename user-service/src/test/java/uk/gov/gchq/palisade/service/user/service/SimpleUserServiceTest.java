@@ -31,8 +31,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.user.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
@@ -76,12 +74,11 @@ public class SimpleUserServiceTest {
         //Given
         User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
         User user2 = new User().userId("uid2").auths("other_test").roles("role");
-        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
-        SimpleUserService hms = new SimpleUserService(cacheService);
+        SimpleUserService hms = new SimpleUserService();
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
         //When
-        SimpleUserService test = new SimpleUserService(cacheService);
+        SimpleUserService test = new SimpleUserService();
         //add a user to the first service
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user2)).join();
         //both should be in the second service
@@ -107,12 +104,11 @@ public class SimpleUserServiceTest {
     public void shouldSaveToCache() {
         //Given
         User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
-        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(true));
-        SimpleUserService hms = new SimpleUserService(cacheService);
+        SimpleUserService hms = new SimpleUserService();
         hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
 
         //When
-        SimpleUserService test = new SimpleUserService(cacheService);
+        SimpleUserService test = new SimpleUserService();
         GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
         User actual1 = test.getUser(getUserRequest).join();
 
@@ -132,11 +128,10 @@ public class SimpleUserServiceTest {
     @Test(expected = NoSuchUserIdException.class)
     public void throwOnNonExistentUser() throws Throwable {
         //Given
-        CacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore(false));
-        SimpleUserService hms = new SimpleUserService(cacheService);
+        SimpleUserService hms = new SimpleUserService();
 
         //When
-        SimpleUserService test = new SimpleUserService(cacheService);
+        SimpleUserService test = new SimpleUserService();
         try {
             GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
             User actual1 = test.getUser(getUserRequest).join();

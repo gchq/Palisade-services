@@ -1,61 +1,37 @@
-/*
- * Copyright 2019 Crown Copyright
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package uk.gov.gchq.palisade.service.user.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
 
-/**
- * Configuration properties for cache selection and configuration
- */
-@ConfigurationProperties(prefix = "cache")
-public class CacheConfiguration {
+@EnableCaching
+@Configuration
+public class CacheConfiguration extends CachingConfigurerSupport {
 
-    private String implementation;
-    private String props;
-    private List<String> etcd = new ArrayList<>();
+    @Value("cache.caffeine.spec.expireAfterAccess")
+    public Duration duration;
 
-    /**
-     * The backing store implementation type
-     *
-     * @return implementation
-     */
-    public String getImplementation() {
-        return implementation;
-    }
+    @Value("cache.caffeine.spec.maximumSize")
+    public long maximumSize;
 
-    public void setImplementation(final String implementation) {
-        this.implementation = implementation;
-    }
+    @Override
+    public CacheManager cacheManager() {
+        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager() {
 
-    public String getProps() {
-        return props;
-    }
-
-    public void setProps(final String props) {
-        this.props = props;
-    }
-
-    public List<String> getEtcd() {
-        return etcd;
-    }
-
-    public void setEtcd(final List<String> etcd) {
-        this.etcd = etcd;
+            @Override
+            protected Cache createConcurrentMapCache(final String name) {
+                return new ConcurrentMapCache(name,
+                        Caffeine.newBuilder().expireAfterWrite(duration).maximumSize(maximumSize).build().asMap(), false);
+            }
+        };
+        return cacheManager;
     }
 }
