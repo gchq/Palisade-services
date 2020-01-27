@@ -53,6 +53,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheManager cacheManager() {
+        LOGGER.info("Instantiated new CacheManager");
         return new ConcurrentMapCacheManager("users");
     }
 

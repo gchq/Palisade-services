@@ -19,8 +19,6 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.cache.CacheProperties.Caffeine;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
@@ -29,7 +27,6 @@ import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -43,7 +40,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    @Cacheable("users")
+    @Cacheable(value = "users", key = "#request.userId.getId()")
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.debug("Getting User: {}", request);
         requireNonNull(request);
@@ -69,7 +66,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    @CachePut(value = "users")
+    @Cacheable(value = "users", key = "#request.userId.getId()")
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
         LOGGER.debug("Adding User : {}", request);
         requireNonNull(request);

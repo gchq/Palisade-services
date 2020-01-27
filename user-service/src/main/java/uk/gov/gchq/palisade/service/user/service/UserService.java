@@ -15,6 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.user.service;
 
+import org.springframework.cache.annotation.Cacheable;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;

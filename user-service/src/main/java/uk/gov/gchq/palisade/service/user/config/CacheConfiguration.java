@@ -16,10 +16,10 @@ import java.time.Duration;
 @Configuration
 public class CacheConfiguration extends CachingConfigurerSupport {
 
-    @Value("cache.caffeine.spec.expireAfterAccess")
+    @Value("${cache.caffeine.spec.expireAfterAccess}")
     public Duration duration;
 
-    @Value("cache.caffeine.spec.maximumSize")
+    @Value("${cache.caffeine.spec.maximumSize}")
     public long maximumSize;
 
     @Override
@@ -27,8 +27,8 @@ public class CacheConfiguration extends CachingConfigurerSupport {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager() {
 
             @Override
-            protected Cache createConcurrentMapCache(final String name) {
-                return new ConcurrentMapCache(name,
+            protected Cache createConcurrentMapCache(final String cacheNames) {
+                return new ConcurrentMapCache(cacheNames,
                         Caffeine.newBuilder().expireAfterWrite(duration).maximumSize(maximumSize).build().asMap(), false);
             }
         };
