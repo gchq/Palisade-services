@@ -46,22 +46,19 @@ public class PalisadeService implements Service {
 
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
         LOGGER.info("Getting config from palisade service for data request: {}", request);
-        String requestConfig = this.client.getDataRequestConfig(request);
-        LOGGER.info(requestConfig);
-        DataRequestConfig config = new DataRequestConfig();
-        try {
-            config = this.mapper.readValue(requestConfig, DataRequestConfig.class);
-            LOGGER.info(config.toString());
-        } catch (JsonProcessingException ex) {
-            LOGGER.error("Error mapping response to string: {}", ex.getMessage());
-        }
 
-        LOGGER.info("Got config from palisade service: {}", requestConfig);
-        /*return CompletableFuture.supplyAsync(() -> {
-            DataRequestConfig response = this.client.getDataRequestConfig(request);
-            LOGGER.info("Got config from palisade service: {}", response);
-            return response;
-        }, executor);*/
-        return CompletableFuture.completedFuture(config);
+        return CompletableFuture.supplyAsync(() -> {
+            String requestConfig = this.client.getDataRequestConfig(request);
+            DataRequestConfig config = new DataRequestConfig();
+
+            try {
+                config = this.mapper.readValue(requestConfig, DataRequestConfig.class);
+            } catch (JsonProcessingException ex) {
+                LOGGER.error("Error mapping response to string: {}", ex.getMessage());
+            }
+
+            LOGGER.info("Got config from palisade service: {}", config);
+            return config;
+        }, executor);
     }
 }

@@ -25,7 +25,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
@@ -63,6 +68,8 @@ import static java.util.stream.Collectors.toList;
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableAsync
+@EnableScheduling
 @EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
@@ -164,6 +171,21 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             ex.setCorePoolSize(6);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
+    }
+
+    @Bean
+    protected WebMvcConfigurer webMvcConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+                configurer.setTaskExecutor(getTaskExecutor());
+            }
+        };
+    }
+
+    @Bean(name = "concurrentTaskExecutor")
+    public ConcurrentTaskExecutor getTaskExecutor() {
+        return new ConcurrentTaskExecutor(this.getAsyncExecutor());
     }
 
     @Override
