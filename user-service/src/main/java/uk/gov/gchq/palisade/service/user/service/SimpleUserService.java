@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
@@ -40,39 +41,29 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users", key = "#request.userId.getId()")
+    @Cacheable("users")
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        LOGGER.debug("Getting User: {}", request);
+        LOGGER.info("Getting User: {}", request);
         requireNonNull(request);
-        User user = null;
-
-//        GetCacheRequest<User> temp = new GetCacheRequest<User>()
-//                .service(this.getClass())
-//                .key(request.userId.getId());
-
-//        Optional<User> cachedUser = cacheService.get(temp).join();
-//
-//        if (cachedUser.isPresent()) {
-//            user = cachedUser.get();
-//            LOGGER.debug("User {} found cached", user);
-//        }
-        CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
-
-        if (user == null) {
-            LOGGER.error("User {} not found", request);
-            userCompletion.obtrudeException(new NoSuchUserIdException(request.userId.getId()));
-        }
+        CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(null);
+        LOGGER.error("User {} not found", request);
+        userCompletion.obtrudeException(new NoSuchUserIdException(request.userId.getId()));
         return userCompletion;
     }
 
     @Override
-    @Cacheable(value = "users", key = "#request.userId.getId()")
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
-        LOGGER.debug("Adding User : {}", request);
+        LOGGER.info("Adding User : {}", request);
         requireNonNull(request);
         requireNonNull(request.user);
         requireNonNull(request.user.getUserId());
         requireNonNull(request.user.getUserId().getId());
+        addUserToCache(new User().userId(request.getId().toString()));
         return CompletableFuture.completedFuture(true);
+    }
+
+    @CachePut("users")
+    public void addUserToCache(User user) {
+        requireNonNull(user);
     }
 }

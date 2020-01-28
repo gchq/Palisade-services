@@ -20,6 +20,12 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
+  cache:
+    cache-names: users
+    caffeine:
+      spec:
+        maximumSize: 500
+        expireAfterAccess: 300s
 
 server:
   port: 8087
@@ -54,9 +60,3 @@ feign:
         loggerLevel: basic
     default-config: default
 
-cache:
-  cache-names: users
-  caffeine:
-    spec:
-      maximumSize: 500
-      expireAfterAccess: 30s
