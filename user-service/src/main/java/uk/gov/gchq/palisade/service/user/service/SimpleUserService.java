@@ -41,13 +41,15 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    @Cacheable("users")
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        LOGGER.info("Getting User: {}", request);
+        LOGGER.error("Getting User : {} ", request);
         requireNonNull(request);
-        CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(null);
-        LOGGER.error("User {} not found", request);
-        userCompletion.obtrudeException(new NoSuchUserIdException(request.userId.getId()));
+        User user = getUserFromCache(new User().userId(request.getId().toString()));
+        CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
+        if (user == null) {
+            LOGGER.error("User {} not found in cache", request);
+            userCompletion.obtrudeException(new NoSuchUserIdException(request.userId.getId()));
+        }
         return userCompletion;
     }
 
@@ -63,7 +65,13 @@ public class SimpleUserService implements UserService {
     }
 
     @CachePut("users")
-    public void addUserToCache(User user) {
+    public void addUserToCache(final User user) {
         requireNonNull(user);
+    }
+
+    @Cacheable("users")
+    public User getUserFromCache(final User user) {
+        requireNonNull(user);
+        return null;
     }
 }

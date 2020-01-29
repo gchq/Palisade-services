@@ -22,18 +22,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 
 import javax.annotation.PostConstruct;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @EnableEurekaClient
 @EnableFeignClients
@@ -52,9 +53,16 @@ public class UserApplication {
     }
 
     @PostConstruct
-    public void loadUsers(AddUserRequest request) {
-        LOGGER.debug("loadUsers called with: {}", request);
-        User newUser = new User().userId(request.user.getUserId().toString());
-        simpleUserService.addUserToCache(newUser);
+    public void loadUsers() throws IOException {
+        List<String> result = new ArrayList<>();
+//        try (Stream<String> lines = Files.lines(Paths.get(""))) {
+//            result = lines.collect(Collectors.toList());
+//        }
+        result.forEach(user -> {
+            System.out.println(user);
+            User newUser = new User().userId(user);
+            simpleUserService.addUserToCache(newUser);
+        });
+
     }
 }

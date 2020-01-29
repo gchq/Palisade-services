@@ -54,7 +54,6 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -71,7 +70,6 @@ public class AbstractLdapUserServiceTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        AbstractLdapUserService.clearCache();
     }
 
     @After
@@ -131,54 +129,6 @@ public class AbstractLdapUserServiceTest {
         ));
     }
 
-    @Test
-    public void shouldFetchUserDetailsFromCache() throws NamingException {
-        // Given
-        final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
-        final UserId userId = new UserId().id("user01");
-        final LdapContext context = mock(LdapContext.class);
-
-        final String[] attrNames = {"roles", "auths"};
-        final Set<String> auths = Sets.newHashSet("auth1", "auth2");
-        final Set<String> roles = Sets.newHashSet("role1", "role2");
-
-        final Attributes requestAttrs = new BasicAttributes();
-        requestAttrs.put("auths", auths);
-        requestAttrs.put("roles", roles);
-
-        final Map<String, Object> userAttrs = new HashMap<>();
-        userAttrs.put("auths", auths);
-        userAttrs.put("roles", roles);
-
-        given(mock.getAttributeNames()).willReturn(attrNames);
-        given(context.getAttributes("user01", attrNames)).willReturn(requestAttrs);
-        given(mock.getAuths(userId, userAttrs, context)).willReturn(auths);
-        given(mock.getRoles(userId, userAttrs, context)).willReturn(roles);
-
-        final MockLdapUserService service = new MockLdapUserService(context);
-        service.setMock(mock);
-
-        // When
-        GetUserRequest getUserRequest1 = GetUserRequest.create(new RequestId().id("123")).withUserId(userId);
-        getUserRequest1.setOriginalRequestId(new RequestId().id("test user1"));
-        GetUserRequest getUserRequest2 = GetUserRequest.create(new RequestId().id("123")).withUserId(userId);
-        getUserRequest2.setOriginalRequestId(new RequestId().id("test user2"));
-        final User user1 = service.getUser(getUserRequest1).join();
-        final User user2 = service.getUser(getUserRequest2).join();
-
-        // Then
-        assertEquals(userId, user1.getUserId());
-        assertEquals(user1, user2);
-        verify(context, times(1)).getAttributes("user01", attrNames);
-        // Check user objects have been cloned
-        assertNotSame(user1, user2);
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("was not in the cache. Fetching details from LDAP"),
-                Matchers.containsString("was in the cache")
-        ));
-    }
 
     @Test
     public void shouldPerformABasicSearch() throws NamingException {
@@ -292,16 +242,8 @@ public class AbstractLdapUserServiceTest {
             super(context);
         }
 
-        public MockLdapUserService(final LdapContext context, final Long cacheTtlHours) {
-            super(context, cacheTtlHours);
-        }
-
-        public MockLdapUserService(final String ldapConfigPath) throws IOException, NamingException {
+        public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
             super(ldapConfigPath);
-        }
-
-        public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath, @JsonProperty("cacheTtlHours") final Long cacheTtlHours) throws IOException, NamingException {
-            super(ldapConfigPath, cacheTtlHours);
         }
 
         @Override
@@ -321,6 +263,15 @@ public class AbstractLdapUserServiceTest {
 
         public void setMock(final AbstractLdapUserService mock) {
             this.mock = mock;
+        }
+
+        @Override
+        public void addUserToCache(final User user) {
+        }
+
+        @Override
+        public User getUserFromCache(final User user) {
+            return null;
         }
     }
 }

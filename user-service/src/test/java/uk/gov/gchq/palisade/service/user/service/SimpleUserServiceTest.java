@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 
 import java.util.List;
@@ -67,62 +66,6 @@ public class SimpleUserServiceTest {
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
                 .collect(Collectors.toList());
-    }
-
-    @Test
-    public void shouldConfigureAndUseSharedData() {
-        //Given
-        User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
-        User user2 = new User().userId("uid2").auths("other_test").roles("role");
-        SimpleUserService hms = new SimpleUserService();
-        hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
-
-        //When
-        SimpleUserService test = new SimpleUserService();
-        //add a user to the first service
-        hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user2)).join();
-        //both should be in the second service
-        GetUserRequest getUserRequest1 = GetUserRequest.create(new RequestId().id("user1")).withUserId(new UserId().id("uid1"));
-        GetUserRequest getUserRequest2 = GetUserRequest.create(new RequestId().id("user2")).withUserId(new UserId().id("uid2"));
-        User actual1 = test.getUser(getUserRequest1).join();
-        User actual2 = test.getUser(getUserRequest2).join();
-
-        //Then
-        assertThat(user, equalTo(actual1));
-        assertThat(user2, equalTo(actual2));
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Adding User"),
-                Matchers.anyOf(
-                        Matchers.containsString("User Added"))
-        ));
-    }
-
-    @Test
-    public void shouldSaveToCache() {
-        //Given
-        User user = new User().userId("uid1").auths("test", "test2").roles("test_role");
-        SimpleUserService hms = new SimpleUserService();
-        hms.addUser(AddUserRequest.create(new RequestId().id("new")).withUser(user)).join();
-
-        //When
-        SimpleUserService test = new SimpleUserService();
-        GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("uid1")).withUserId(new UserId().id("uid1"));
-        User actual1 = test.getUser(getUserRequest).join();
-
-        //Then
-        assertThat(actual1, equalTo(user));
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Adding User"),
-                Matchers.anyOf(
-                        Matchers.containsString("User Added"),
-                        Matchers.containsString("found cached"))
-        ));
     }
 
     @Test(expected = NoSuchUserIdException.class)

@@ -17,10 +17,10 @@ package uk.gov.gchq.palisade.service.user.impl;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -81,13 +80,10 @@ import static java.util.Objects.requireNonNull;
  * </p>
  */
 public abstract class AbstractLdapUserService implements UserService {
-    public static final long CACHE_TTL_HOURS = 24L;
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(",
             ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
-    private static Cache<UserId, User> userCache;
 
-    private static long cacheTtlHours;
     private final String ldapConfigPath;
 
     protected final LdapContext context;
@@ -99,64 +95,37 @@ public abstract class AbstractLdapUserService implements UserService {
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
     public AbstractLdapUserService(final LdapContext context) {
-        this(context, null);
-    }
-
-    /**
-     * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext} and cache time to live.
-     * NOTE: if the cache has already been initialised then the time to live will NOT be updated.
-     *
-     * @param context       the {@link LdapContext} for making calls to LDAP.
-     * @param cacheTtlHours the time to live in hours for the cache.
-     */
-    public AbstractLdapUserService(final LdapContext context, final Long cacheTtlHours) {
-        requireNonNull(context, "ldap context is required");
         this.context = context;
         this.ldapConfigPath = null;
-        initialiseCache(cacheTtlHours);
     }
 
     /**
      * <p>
-     * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext} and cache time to live.
-     * The cache time to live with be set the default or previously set value.
+     * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
      * </p>
      *
      * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
-     * @throws IOException     if IO issues occur whilst loading the LDAP config.
-     * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
-     */
-    public AbstractLdapUserService(final String ldapConfigPath) throws IOException, NamingException {
-        this(ldapConfigPath, null);
-    }
-
-    /**
-     * <p>
-     * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext} and cache time to live.
-     * NOTE: if the cache has already been initialised then the time to live will NOT be updated.
-     * </p>
-     *
-     * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
-     * @param cacheTtlHours  the time to live in hours for the cache.
      * @throws IOException     if IO issues occur whilst loading the LDAP config.
      * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
      */
     public AbstractLdapUserService(
-            @JsonProperty("ldapConfigPath") final String ldapConfigPath,
-            @JsonProperty("cacheTtlHours") final Long cacheTtlHours)
+            @JsonProperty("ldapConfigPath") final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
         this.ldapConfigPath = ldapConfigPath;
         this.context = createContext(ldapConfigPath);
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
-
-        initialiseCache(cacheTtlHours);
     }
 
-    public static void clearCache() {
-        if (null != userCache) {
-            userCache.invalidateAll();
-        }
+    @CachePut("users")
+    public void addUserToCache(final User user) {
+        requireNonNull(user);
+    }
+
+    @Cacheable("users")
+    public User getUserFromCache(final User user) {
+        requireNonNull(user);
+        return null;
     }
 
     @Override
@@ -167,7 +136,7 @@ public abstract class AbstractLdapUserService implements UserService {
         requireNonNull(userId, "userId has not been set");
         requireNonNull(userId.getId(), "userId has not been set");
 
-        final User cachedUser = userCache.getIfPresent(userId);
+        final User cachedUser = getUserFromCache(new User().userId(request.getId().toString()));
         if (null != cachedUser) {
             LOGGER.debug("User {} was in the cache.", userId);
             return CompletableFuture.completedFuture(cachedUser.clone());
@@ -188,7 +157,6 @@ public abstract class AbstractLdapUserService implements UserService {
             }
 
             final User user = new User().userId(userId).auths(auths).roles(roles);
-            userCache.put(userId.clone(), user);
             return user;
         });
     }
@@ -249,16 +217,6 @@ public abstract class AbstractLdapUserService implements UserService {
             config.load(getClass().getResourceAsStream(ldapConfigPath));
         }
         return new InitialLdapContext(config, null);
-    }
-
-    protected void initialiseCache(final Long cacheTtlHours) {
-        if (null == userCache) {
-            AbstractLdapUserService.cacheTtlHours = null != cacheTtlHours ? cacheTtlHours : CACHE_TTL_HOURS;
-            userCache = CacheBuilder.newBuilder()
-                    .maximumSize(10000)
-                    .expireAfterWrite(AbstractLdapUserService.cacheTtlHours, TimeUnit.HOURS)
-                    .build();
-        }
     }
 
     protected Map<String, Object> getAttributes(final UserId userId) throws NamingException {
@@ -337,13 +295,5 @@ public abstract class AbstractLdapUserService implements UserService {
         }
         LOGGER.debug("Returning formatted input as {}", result);
         return result;
-    }
-
-    public long getCacheTTlHours() {
-        return cacheTtlHours;
-    }
-
-    public String getLdapConfigPath() {
-        return ldapConfigPath;
     }
 }

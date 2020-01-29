@@ -54,4 +54,6 @@ public interface UserService extends Service {
     CompletableFuture<Boolean> addUser(final AddUserRequest request);
 
     void addUserToCache(final User user);
+
+    User getUserFromCache(final User user);
 }
