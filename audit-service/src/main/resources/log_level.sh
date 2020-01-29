@@ -85,8 +85,10 @@ pods=ele['items']
 release=os.environ["RELEASE"]
 selected=list();
 for pod in pods:
-        if release==pod['metadata']['labels']['app.kubernetes.io/instance']:
-                selected.append(pod['status']['podIP'] + ":" + str(pod['spec']['containers'][0]['livenessProbe']['httpGet']['port']));
+  if 'labels' in pod['metadata']:
+    if 'app.kubernetes.io/instance' in pod['metadata']['labels']:
+      if release==pod['metadata']['labels']['app.kubernetes.io/instance'] and "Job"!=pod['metadata']['ownerReferences'][0]['kind']:
+        selected.append(pod['status']['podIP'] + ":" + str(pod['spec']['containers'][0]['livenessProbe']['httpGet']['port']));
 print " ".join(selected)
 --END2
 
