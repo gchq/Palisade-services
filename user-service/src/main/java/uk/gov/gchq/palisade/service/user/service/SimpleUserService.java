@@ -42,7 +42,7 @@ public class SimpleUserService implements UserService {
 
     @Override
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        LOGGER.error("Getting User : {} ", request);
+        LOGGER.info("Getting User : {} ", request);
         requireNonNull(request);
         User user = getUserFromCache(new User().userId(request.getId().toString()));
         CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
