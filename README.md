@@ -90,8 +90,8 @@ token, this can be obtained by running the following command against the cluster
 ```
 #### Changing application log level
 
-All instances of the audit-service pod contain a script that will identify all application pods in that release and change their log level at runtime:
+All instances of the palisade-service pod contain a script that will identify all application pods in that release and change their log level at runtime:
 
-```kubectl exec -it audit-service-7bb4d75d85-g8cgx -- bash /usr/share/audit-service/log-level -t```
+```kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-service/log-level -t```
 
 Use the ```-h``` flag to see usage instructions.

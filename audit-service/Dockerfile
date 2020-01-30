@@ -19,8 +19,6 @@ ARG JAR_FILE
 
 ADD $JAR_FILE /usr/share/audit-service/audit-service.jar
 
-ADD src/main/resources/log_level.sh /usr/share/audit-service/log-level
-
 LABEL service="audit", project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/audit-service/audit-service.jar"]
