@@ -19,6 +19,8 @@ ARG JAR_FILE
 
 ADD $JAR_FILE /usr/share/palisade-service/palisade-service.jar
 
+ADD src/main/resources/log_level.sh /usr/share/palisade-service/log-level
+
 LABEL service="palisade", project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
