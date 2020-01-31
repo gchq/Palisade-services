@@ -87,3 +87,11 @@ token, this can be obtained by running the following command against the cluster
     kubectl -n kube-system describe secrets \
       `kubectl -n kube-system get secrets | awk '/clusterrole-aggregation-controller/ {print $1}'` \
           | awk '/token:/ {print $2}'
+```
+#### Changing application log level
+
+All instances of the palisade-service pod contain a script that will identify all application pods in that release and change their log level at runtime:
+
+```kubectl exec -it palisade-service-7bb4d75d85-g8cgx -- bash /usr/share/palisade-service/log-level -t```
+
+Use the ```-h``` flag to see usage instructions.
