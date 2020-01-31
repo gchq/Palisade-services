@@ -23,6 +23,7 @@
 *~
 Jenkinsfile
 mvn_dependency_tree.txt
+hadolint.yaml
 pom.xml
 README.md
 velocity*

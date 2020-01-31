@@ -46,12 +46,13 @@ public class AuditController {
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
     public Boolean auditRequest(@RequestBody final AuditRequest request) throws ExecutionException, InterruptedException {
         LOGGER.debug("Invoking GetUserRequest: {}", request);
+        // Submit audit to all providing services
         final List<CompletableFuture<Boolean>> audits = this.audit(request);
-        final CompletableFuture<Void> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]));
-
-        boolean result = results.thenApply(res ->
-                audits.stream().map(CompletableFuture::join).collect(Collectors.toList())
-        ).get().stream().allMatch(res -> res);
+        // Wait for all providers to complete
+        final CompletableFuture<List<Boolean>> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]))
+                .thenApply(res -> audits.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+        // Succeed only if all providers succeeded
+        boolean result = results.get().stream().allMatch(res -> res);
         LOGGER.debug("AuditRequest result is {}", result);
         return result;
     }
