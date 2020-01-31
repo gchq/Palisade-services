@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2019 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -31,7 +33,7 @@ import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -60,28 +62,32 @@ import static java.util.Objects.requireNonNull;
 })
 public class AuditRequest extends Request {
 
-    public final Date timestamp;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditRequest.class);
+
+    public final ZonedDateTime timestamp;
     public final String serverIp;
     public final String serverHostname;
 
-    private AuditRequest() {
+    protected AuditRequest() {
         this.timestamp = null;
         this.serverIp = null;
         this.serverHostname = null;
     }
 
-    private AuditRequest(final RequestId originalRequestId) {
+    protected AuditRequest(final RequestId originalRequestId) {
         super.setOriginalRequestId(requireNonNull(originalRequestId));
-
-        this.timestamp = new Date();
+        LOGGER.debug("AuditRequest called passing in {}", originalRequestId);
+        this.timestamp = ZonedDateTime.now();
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
+            LOGGER.error("AuditRequest UnknownHostException: {}", e);
             throw new RuntimeException(e);
         }
         serverHostname = inetAddress.getHostName();
         serverIp = inetAddress.getHostAddress();
+        LOGGER.debug("AuditRequest instantiated and serverHostname is: {}, and serverIP is {}", serverHostname, serverIp);
     }
 
     /**
