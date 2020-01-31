@@ -27,21 +27,9 @@ import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.mockito.internal.util.collections.Sets;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -54,14 +42,6 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
     private ListAppender<ILoggingEvent> appender;
 
     private static AuditService auditService;
-
-    private static UserId userId = mockUserID();
-    private static User user = mockUser();
-    private static Context context = mockContext();
-    private static RequestId requestId = mockOriginalRequestId();
-    private static LeafResource resource = mockResource();
-    private static Exception exception = mockException();
-    private static Rules rules = mockRules();
 
     @Before
     public void setUp() {
@@ -81,27 +61,11 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
 
     @DataPoints
     public static AuditRequest[] requests = new AuditRequest[] {
-            RegisterRequestCompleteAuditRequest.create(requestId)
-                    .withUser(user)
-                    .withLeafResources(Sets.newSet(resource))
-                    .withContext(context),
-            RegisterRequestExceptionAuditRequest.create(requestId)
-                    .withUserId(userId)
-                    .withResourceId(resource.getId())
-                    .withContext(context)
-                    .withException(exception)
-                    .withServiceClass(Service.class),
-            ReadRequestCompleteAuditRequest.create(requestId)
-                    .withUser(user)
-                    .withLeafResource(resource)
-                    .withContext(context)
-                    .withRulesApplied(rules)
-                    .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
-                    .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED),
-            ReadRequestExceptionAuditRequest.create(requestId)
-                    .withToken(TEST_TOKEN)
-                    .withLeafResource(resource)
-                    .withException(exception)
+            registerRequestCompleteAuditRequest(),
+            registerRequestExceptionAuditRequest(),
+            readRequestCompleteAuditRequest(),
+            readRequestExceptionAuditRequest()
+
     };
 
     private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
