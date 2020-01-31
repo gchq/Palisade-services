@@ -60,7 +60,6 @@ public class ApplicationConfiguration {
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
-<<<<<<<<< Temporary merge branch 1
     @Primary
     @Bean
     public ObjectMapper objectMapper() {
