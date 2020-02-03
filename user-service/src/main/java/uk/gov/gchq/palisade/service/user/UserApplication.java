@@ -64,9 +64,9 @@ public class UserApplication {
             String data = new String(bdata, StandardCharsets.UTF_8);
             User newUser = new User().userId(data);
             simpleUserService.addUserToCache(newUser);
+            LOGGER.info("Users {} added to cache", newUser);
         } catch (IOException e) {
             LOGGER.error("IOException", e);
         }
-
     }
 }
