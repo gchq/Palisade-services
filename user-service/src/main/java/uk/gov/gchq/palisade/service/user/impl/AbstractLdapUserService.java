@@ -118,14 +118,15 @@ public abstract class AbstractLdapUserService implements UserService {
     }
 
     @CachePut("users")
-    public void addUserToCache(final User user) {
+    public User addUserToCache(final User user) {
         requireNonNull(user);
+        return user;
     }
 
     @Cacheable("users")
     public User getUserFromCache(final User user) {
         requireNonNull(user);
-        return null;
+        return user;
     }
 
     @Override

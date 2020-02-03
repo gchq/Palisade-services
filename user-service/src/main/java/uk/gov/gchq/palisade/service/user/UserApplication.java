@@ -27,16 +27,16 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.FileCopyUtils;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 
 import javax.annotation.PostConstruct;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 @EnableEurekaClient
@@ -53,20 +53,5 @@ public class UserApplication {
         LOGGER.debug("UserApplication started with: {}", UserApplication.class.toString(), "main", Arrays.toString(args));
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
-    }
-
-    @PostConstruct
-    public void loadUsers() throws IOException {
-        Resource resource = new ClassPathResource("users.txt");
-        InputStream inputStream = resource.getInputStream();
-        try {
-            byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
-            String data = new String(bdata, StandardCharsets.UTF_8);
-            User newUser = new User().userId(data);
-            simpleUserService.addUserToCache(newUser);
-            LOGGER.info("Users {} added to cache", newUser);
-        } catch (IOException e) {
-            LOGGER.error("IOException", e);
-        }
     }
 }

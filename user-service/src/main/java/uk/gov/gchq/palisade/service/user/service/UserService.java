@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
@@ -53,7 +54,7 @@ public interface UserService extends Service {
      */
     CompletableFuture<Boolean> addUser(final AddUserRequest request);
 
-    void addUserToCache(final User user);
+    User addUserToCache(final User user);
 
-    User getUserFromCache(final User user);
+    User getUserFromCache(final UserId key);
 }
