@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
 
-    @PostMapping(path = "/getPolicy", consumes = "application/json", produces = "application/json")
+    @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
     MultiPolicy getPolicy(final GetPolicyRequest request);
 
 }
