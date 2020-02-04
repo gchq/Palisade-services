@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -27,7 +26,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
-import uk.gov.gchq.palisade.service.user.web.ServiceInstanceRestController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -52,14 +50,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        ServiceInstanceRestController serviceInstanceRestController = new ServiceInstanceRestController();
-        LOGGER.info("Instantiated eurekaClient");
-        return serviceInstanceRestController;
     }
 
     @Override

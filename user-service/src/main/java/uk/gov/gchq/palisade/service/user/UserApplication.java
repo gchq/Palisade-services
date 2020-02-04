@@ -25,19 +25,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
-
-import javax.annotation.PostConstruct;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 
 @EnableEurekaClient
 @EnableFeignClients
@@ -50,7 +39,7 @@ public class UserApplication {
     SimpleUserService simpleUserService;
 
     public static void main(final String[] args) {
-        LOGGER.debug("UserApplication started with: {}", UserApplication.class.toString(), "main", Arrays.toString(args));
+        LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }

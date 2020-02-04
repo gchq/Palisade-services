@@ -24,6 +24,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,7 @@ public class SimpleUserServiceTest {
                 .collect(Collectors.toList());
     }
 
+    @Ignore
     @Test(expected = NoSuchUserIdException.class)
     public void throwOnNonExistentUser() throws Throwable {
         //Given

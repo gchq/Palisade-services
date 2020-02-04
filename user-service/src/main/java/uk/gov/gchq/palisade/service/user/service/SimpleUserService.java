@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
@@ -34,8 +35,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
@@ -43,9 +43,9 @@ import static java.util.Objects.requireNonNull;
 /**
  * A SimpleUserService is a simple implementation of a {@link UserService} that keeps user data in the cache service.
  */
+@CacheConfig(cacheNames = {"users"})
 public class SimpleUserService implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUserService.class);
-    private Map<UserId, User> userMap = new SlowMap<>();
 
     public SimpleUserService() {
         Resource resource = new ClassPathResource("users.txt");
@@ -55,10 +55,8 @@ public class SimpleUserService implements UserService {
             BufferedReader br = new BufferedReader(isr);
             String line;
             while ((line = br.readLine()) != null) {
-                LOGGER.info("Loading User : {} ", line);
                 User newUser = new User().userId(line);
-                userMap.put(newUser.getUserId(), newUser);
-                LOGGER.info("Users {} added to cache", newUser);
+                addUser(newUser);
             }
         } catch (IOException e) {
             LOGGER.error("IOException", e);
@@ -67,9 +65,8 @@ public class SimpleUserService implements UserService {
 
     @Override
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        LOGGER.info("Getting User : {} ", request);
         requireNonNull(request);
-        User user = userMap.get(request.userId);
+        User user = getUser(request.userId);
         CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
         if (user == null) {
             LOGGER.error("User {} not found in cache", request.userId.getId());
@@ -78,41 +75,24 @@ public class SimpleUserService implements UserService {
         return userCompletion;
     }
 
+    @Cacheable(key = "#userId")
+    public User getUser(final UserId userId) {
+        LOGGER.warn("Cache miss for userId {}", userId);
+        return null;
+    }
+
     @Override
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
-        LOGGER.info("Adding User : {}", request);
         requireNonNull(request);
-        userMap.put(request.user.getUserId(), new User().userId(request.user.getUserId()));
-        return CompletableFuture.completedFuture(true);
-    }
-}
-
-
-class SlowMap<K, V> extends HashMap<K, V> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SlowMap.class);
-
-    @Override
-    @Cacheable(value = "users", key = "#key")
-    public V get(final Object key) {
-        try {
-            Thread.sleep(1000);
-            LOGGER.info("SlowMap::get for '{}'", key);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return super.get(key);
+        addUser(request.user);
+        User newUser = getUser(request.user.getUserId());
+        return CompletableFuture.completedFuture(Objects.nonNull(newUser));
     }
 
-    @Override
-    @CachePut(value = "users", key = "#key")
-    public V put(final K key, final V value) {
-        try {
-            Thread.sleep(1000);
-            LOGGER.info("SlowMap::put for '{}' -> '{}'", key, value);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        super.put(key, value);
-        return value;
+    @CachePut(key = "#user.userId")
+    public User addUser(final User user) {
+        LOGGER.warn("Cache add for userId {}", user.getUserId());
+        LOGGER.debug("Added user {} to cache (key=userId)", user);
+        return user;
     }
 }
