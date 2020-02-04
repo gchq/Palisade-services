@@ -15,11 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.data.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
@@ -30,9 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PalisadeService implements Service {
-
-    @Autowired
-    private ObjectMapper mapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
     private final PalisadeClient client;
@@ -48,17 +42,10 @@ public class PalisadeService implements Service {
         LOGGER.info("Getting config from palisade service for data request: {}", request);
 
         return CompletableFuture.supplyAsync(() -> {
-            String requestConfig = this.client.getDataRequestConfig(request);
-            DataRequestConfig config = new DataRequestConfig();
+            DataRequestConfig requestConfig = this.client.getDataRequestConfig(request);
 
-            try {
-                config = this.mapper.readValue(requestConfig, DataRequestConfig.class);
-            } catch (JsonProcessingException ex) {
-                LOGGER.error("Error mapping response to string: {}", ex.getMessage());
-            }
-
-            LOGGER.info("Got config from palisade service: {}", config);
-            return config;
+            LOGGER.info("Got config from palisade service: {}", requestConfig);
+            return requestConfig;
         }, executor);
     }
 }

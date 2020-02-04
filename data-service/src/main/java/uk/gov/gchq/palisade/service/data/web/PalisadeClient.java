@@ -19,12 +19,13 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
+import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 
 @FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
 public interface PalisadeClient {
 
     @PostMapping(path = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
-    String getDataRequestConfig(final GetDataRequestConfig request);
+    DataRequestConfig getDataRequestConfig(final GetDataRequestConfig request);
 
 }
