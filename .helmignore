@@ -23,6 +23,7 @@
 *~
 Jenkinsfile
 mvn_dependency_tree.txt
+hadolint.yaml
 pom.xml
 README.md
 velocity*
@@ -41,5 +42,6 @@ velocity*
 /palisade-service/
 /policy-service/
 /resource-service/
+/services-manager/
 /services-launcher/
 /user-service/
