@@ -88,6 +88,7 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
      * The cache time to live with be set the default or previously set value.
      *
+     * @param cache   userService
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
     public AbstractLdapUserService(final UserService cache, final LdapContext context) {
@@ -101,6 +102,7 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
      * </p>
      *
+     * @param cache          userService
      * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
      * @throws IOException     if IO issues occur whilst loading the LDAP config.
      * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
