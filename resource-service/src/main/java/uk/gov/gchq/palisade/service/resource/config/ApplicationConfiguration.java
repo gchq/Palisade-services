@@ -52,15 +52,9 @@ import static java.util.stream.Collectors.toList;
  * Bean configuration and dependency injection graph
  */
 @org.springframework.context.annotation.Configuration
-@EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-    @Bean
-    public CacheConfiguration cacheConfiguration() {
-        return new CacheConfiguration();
-    }
 
     @Bean
     public HadoopResourceService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
@@ -72,48 +66,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new Configuration();
     }
 
-    @Bean(name = "hashmap")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
-    public HashMapBackingStore hashMapBackingStore() {
-        return new HashMapBackingStore();
-    }
-
-    @Bean(name = "k8s")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "k8s")
-    public K8sBackingStore k8sBackingStore() {
-        return new K8sBackingStore();
-    }
-
-    @Bean(name = "props")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "props")
-    public PropertiesBackingStore propertiesBackingStore() {
-        return new PropertiesBackingStore(Optional.ofNullable(cacheConfiguration().getProps()).orElse("cache.properties"));
-    }
-
-    @Bean(name = "etcd")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "etcd")
-    public EtcdBackingStore etcdBackingStore() {
-        return new EtcdBackingStore(cacheConfiguration().getEtcd().stream().map(URI::create).collect(toList()));
-    }
-
-    @Bean
-    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
-        }).findFirst().orElse(null);
-    }
-
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
     }
 
     @Override
@@ -125,10 +81,4 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
-    }
-
 }
