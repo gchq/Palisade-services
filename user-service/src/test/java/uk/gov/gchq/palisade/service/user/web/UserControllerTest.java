@@ -77,7 +77,9 @@ public class UserControllerTest {
     public void addAndGetUser() {
         User user = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         AddUserRequest addUserRequest = AddUserRequest.create(new RequestId().id("addUserRequest")).withUser(user);
-        userController.addUserRequest(addUserRequest);
+        Boolean addedUser = userController.addUserRequest(addUserRequest);
+
+        assertThat(true, is(equalTo(addedUser)));
 
         GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("getUserRequest")).withUserId(user.getUserId());
         User expected = userController.getUserRequest(getUserRequest);
