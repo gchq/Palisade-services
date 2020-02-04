@@ -62,8 +62,7 @@ public class DataController {
             LOGGER.info("Writing response {} to output stream", response);
             response.writeTo(outputStream);
             outputStream.close();
-            response.asInputStream().close();
-            LOGGER.debug("IO streams completed and closed");
+            LOGGER.info("IO streams completed and closed");
         };
 
         ResponseEntity<StreamingResponseBody> ret = new ResponseEntity<>(streamingResponseBody, HttpStatus.OK);
