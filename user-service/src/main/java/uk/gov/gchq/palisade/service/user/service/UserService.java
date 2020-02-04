@@ -16,12 +16,9 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * <p> The core API for the user service. </p> <p> The responsibility of the user service is to maintain the mapping
@@ -32,24 +29,23 @@ import java.util.concurrent.CompletableFuture;
  * Palisade. For example, this could be via a centralised PKI service or by a SASL/Kerberos implementation. </p>
  */
 public interface UserService extends Service {
-
     /**
      * Look up a user by their ID. The request contains the {@link uk.gov.gchq.palisade.UserId} to lookup from the
      * {@link UserService}. If the requested {@link uk.gov.gchq.palisade.UserId} doesn't exist in this {@link
      * UserService} then an exception will be thrown.
      *
-     * @param request specifying the user ID to look up
-     * @return a {@link CompletableFuture} which will be fulfilled with the user details
-     * @throws NoSuchUserIdException if the contained {@link uk.gov.gchq.palisade.UserId} could not be found
+     * @param userId the user ID to look up
+     * @return a {@link User} with the user details
+     * @throws NoSuchUserIdException if the {@link uk.gov.gchq.palisade.UserId} could not be found
      */
-    CompletableFuture<User> getUser(final GetUserRequest request) throws NoSuchUserIdException;
+    User getUser(final UserId userId);
 
     /**
-     * Adds the contained user to the {@link UserService}. The given request will contain the {@link User} which should
-     * be fully populated with all the necessary attributes about the user such as roles and authorisations.
+     * Adds the user to the {@link UserService}. The {@link User} should be fully populated with all the necessary
+     * attributes about the user such as roles and authorisations.
      *
-     * @param request the request specifying the user with details to add
-     * @return a {@link CompletableFuture} which will complete as ${@code true} once the user has been added
+     * @param user the user with details to add
+     * @return the instance of {@link User} which has been added (for caching reasons)
      */
-    CompletableFuture<Boolean> addUser(final AddUserRequest request);
+    User addUser(final User user);
 }

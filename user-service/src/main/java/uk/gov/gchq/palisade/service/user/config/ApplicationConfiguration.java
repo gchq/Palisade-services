@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
+import uk.gov.gchq.palisade.service.user.service.CachedUserService;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -40,10 +40,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public SimpleUserService userService() {
-        SimpleUserService simpleUserService = new SimpleUserService();
-        LOGGER.info("Instantiated SimpleUserService");
-        return simpleUserService;
+    public CachedUserService userService() {
+        CachedUserService cachedUserService = new CachedUserService();
+        LOGGER.info("Instantiated CachedUserService");
+        return cachedUserService;
     }
 
     @Bean

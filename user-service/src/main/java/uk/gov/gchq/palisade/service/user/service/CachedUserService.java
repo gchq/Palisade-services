@@ -16,28 +16,30 @@
 
 package uk.gov.gchq.palisade.service.user.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-import java.util.HashMap;
-import java.util.Objects;
+@CacheConfig(cacheNames = {"users"})
+public class CachedUserService implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedUserService.class);
 
-public class MockUserService extends HashMap<UserId, User> implements UserService {
-
-    @Override
+    @Cacheable(key = "#userId")
     public User getUser(final UserId userId) {
-        User user = this.get(userId);
-        if (Objects.nonNull(user)) {
-            return user;
-        } else {
-            throw new NoSuchUserIdException("No such key: " + userId.toString());
-        }
+        LOGGER.info("Cache miss for userId {}", userId);
+        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
     }
 
-    @Override
+    @CachePut(key = "#user.userId")
     public User addUser(final User user) {
-        this.put(user.getUserId(), user);
-        return this.getUser(user.getUserId());
+        LOGGER.info("Cache add for userId {}", user.getUserId());
+        LOGGER.debug("Added user {} to cache (key=userId)", user);
+        return user;
     }
 }

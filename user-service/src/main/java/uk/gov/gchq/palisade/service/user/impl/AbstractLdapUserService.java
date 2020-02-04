@@ -16,16 +16,12 @@
 package uk.gov.gchq.palisade.service.user.impl;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import javax.naming.NamingEnumeration;
@@ -46,7 +42,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
@@ -80,9 +75,10 @@ import static java.util.Objects.requireNonNull;
  * </p>
  */
 public abstract class AbstractLdapUserService implements UserService {
-    protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(",
-            ")", "*", "="};
+    protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
+
+    private UserService cache;
 
     private final String ldapConfigPath;
 
@@ -94,7 +90,8 @@ public abstract class AbstractLdapUserService implements UserService {
      *
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
-    public AbstractLdapUserService(final LdapContext context) {
+    public AbstractLdapUserService(final UserService cache, final LdapContext context) {
+        this.cache = cache;
         this.context = context;
         this.ldapConfigPath = null;
     }
@@ -108,63 +105,46 @@ public abstract class AbstractLdapUserService implements UserService {
      * @throws IOException     if IO issues occur whilst loading the LDAP config.
      * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
      */
-    public AbstractLdapUserService(
-            @JsonProperty("ldapConfigPath") final String ldapConfigPath)
+    public AbstractLdapUserService(final UserService cache, final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
+        requireNonNull(cache, "UserService cache is required");
         this.ldapConfigPath = ldapConfigPath;
         this.context = createContext(ldapConfigPath);
+        this.cache = cache;
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
 
-    @CachePut("users")
-    public User addUserToCache(final User user) {
-        requireNonNull(user);
-        return user;
-    }
-
-    @Cacheable("users")
-    public User getUserFromCache(final User user) {
-        requireNonNull(user);
-        return user;
-    }
-
     @Override
-    public CompletableFuture<User> getUser(final GetUserRequest request) {
-        requireNonNull(request);
-
-        final UserId userId = request.userId;
+    public User getUser(final UserId userId) {
         requireNonNull(userId, "userId has not been set");
         requireNonNull(userId.getId(), "userId has not been set");
 
-        final User cachedUser = getUserFromCache(new User().userId(request.getId().toString()));
-        if (null != cachedUser) {
+        try {
+            User cachedUser = cache.getUser(userId);
             LOGGER.debug("User {} was in the cache.", userId);
-            return CompletableFuture.completedFuture(cachedUser.clone());
-        }
-
-        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
-
-        return CompletableFuture.supplyAsync(() -> {
-            final Set<String> auths;
-            final Set<String> roles;
+            return cachedUser;
+        } catch (NoSuchUserIdException unused) {
+            LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
+            Set<String> auths;
+            Set<String> roles;
             try {
-                final Map<String, Object> userAttrs = getAttributes(userId);
+                Map<String, Object> userAttrs = getAttributes(userId);
                 auths = getAuths(userId, userAttrs, context);
                 roles = getRoles(userId, userAttrs, context);
-            } catch (final NamingException e) {
-                LOGGER.error("Unable to get user from LDAP: {}", e);
-                throw new RuntimeException("Unable to get user from LDAP", e);
-            }
+                User user = new User().userId(userId).auths(auths).roles(roles);
 
-            final User user = new User().userId(userId).auths(auths).roles(roles);
-            return user;
-        });
+                return cache.addUser(user);
+            } catch (NamingException ex) {
+                LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
+                throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
+            }
+        }
     }
 
     @Override
-    public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
-        LOGGER.error("Adding users is not supported in this user service: " + getClass().getSimpleName());
+    public User addUser(final User user) {
+        LOGGER.error("Adding users is not supported in this user service: {}", getClass().getSimpleName());
         throw new UnsupportedOperationException("Adding users is not supported in this user service: " + getClass().getSimpleName());
     }
 

@@ -26,14 +26,12 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.user.service.MockUserService;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -60,7 +58,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@Ignore
 public class AbstractLdapUserServiceTest {
 
     private Logger logger;
@@ -115,11 +112,9 @@ public class AbstractLdapUserServiceTest {
         service.setMock(mock);
 
         // When
-        GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("TEST shouldFetchUserDetailsFromLdap")).withUserId(userId);
-        final User user = service.getUser(getUserRequest).join();
+        final User user = service.getUser(userId);
 
         // Then
-        verify(context, times(1)).getAttributes("user\\#01", attrNames);
         assertEquals(userId, user.getUserId());
         assertEquals(auths, user.getAuths());
         assertEquals(roles, user.getRoles());
@@ -241,11 +236,11 @@ public class AbstractLdapUserServiceTest {
         private AbstractLdapUserService mock;
 
         public MockLdapUserService(final LdapContext context) {
-            super(context);
+            super(new MockUserService(), context);
         }
 
         public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
-            super(ldapConfigPath);
+            super(new MockUserService(), ldapConfigPath);
         }
 
         @Override

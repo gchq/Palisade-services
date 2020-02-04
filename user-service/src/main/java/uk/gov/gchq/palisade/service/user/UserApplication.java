@@ -26,7 +26,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
+import uk.gov.gchq.palisade.service.user.service.CachedUserService;
 
 @EnableEurekaClient
 @EnableFeignClients
@@ -36,7 +36,7 @@ public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
 
     @Autowired
-    SimpleUserService simpleUserService;
+    CachedUserService cachedUserService;
 
     public static void main(final String[] args) {
         LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);

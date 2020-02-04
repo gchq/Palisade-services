@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.user.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,12 @@ import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
-import java.util.concurrent.CompletableFuture;
+import javax.annotation.PostConstruct;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 @RestController
 @RequestMapping(path = "/")
@@ -43,22 +50,31 @@ public class UserController {
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
     public User getUserRequest(@RequestBody final GetUserRequest request) {
         LOGGER.info("Invoking GetUserRequest: {}", request);
-        return this.getUser(request).join();
+        return service.getUser(request.userId);
     }
 
     @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")
     public Boolean addUserRequest(@RequestBody final AddUserRequest request) {
         LOGGER.info("Invoking AddUserRequest: {}", request);
-        return this.addUser(request).join();
+        return service.addUser(request.user).equals(request.user);
     }
 
-    public CompletableFuture<User> getUser(final GetUserRequest request) {
-        LOGGER.debug("Getting User: {}", request);
-        return service.getUser(request);
-    }
-
-    public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
-        LOGGER.info("Adding User: {}", request);
-        return service.addUser(request);
+    @PostConstruct
+    public void initPostConstruct() {
+        Resource resource = new ClassPathResource("users.txt");
+        try {
+            InputStream inputStream = resource.getInputStream();
+            InputStreamReader isr = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                User newUser = new User().userId(line);
+                service.addUser(newUser);
+            }
+        } catch (IOException e) {
+            LOGGER.error("IOException", e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to add user to {}: {}", service.getClass(), e);
+        }
     }
 }

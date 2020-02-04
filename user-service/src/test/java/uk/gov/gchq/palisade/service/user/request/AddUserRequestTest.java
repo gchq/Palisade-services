@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.service.SimpleUserService;
 
 import java.io.IOException;
 import java.util.List;
