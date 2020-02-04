@@ -45,7 +45,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class SimpleUserService implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUserService.class);
-    private Map<UserId, User> mapmap = new SlowMap<>();
+    private Map<UserId, User> userMap = new SlowMap<>();
 
     public SimpleUserService() {
         Resource resource = new ClassPathResource("users.txt");
@@ -55,8 +55,9 @@ public class SimpleUserService implements UserService {
             BufferedReader br = new BufferedReader(isr);
             String line;
             while ((line = br.readLine()) != null) {
+                LOGGER.info("Loading User : {} ", line);
                 User newUser = new User().userId(line);
-                mapmap.put(newUser.getUserId(), newUser);
+                userMap.put(newUser.getUserId(), newUser);
                 LOGGER.info("Users {} added to cache", newUser);
             }
         } catch (IOException e) {
@@ -68,7 +69,7 @@ public class SimpleUserService implements UserService {
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.info("Getting User : {} ", request);
         requireNonNull(request);
-        User user = getUserFromCache(request.userId);
+        User user = userMap.get(request.userId);
         CompletableFuture<User> userCompletion = CompletableFuture.completedFuture(user);
         if (user == null) {
             LOGGER.error("User {} not found in cache", request.userId.getId());
@@ -81,51 +82,37 @@ public class SimpleUserService implements UserService {
     public CompletableFuture<Boolean> addUser(final AddUserRequest request) {
         LOGGER.info("Adding User : {}", request);
         requireNonNull(request);
-        requireNonNull(request.user);
-        requireNonNull(request.user.getUserId());
-        requireNonNull(request.user.getUserId().getId());
-        addUserToCache(new User().userId(request.user.getUserId()));
+        userMap.put(request.user.getUserId(), new User().userId(request.user.getUserId()));
         return CompletableFuture.completedFuture(true);
-    }
-
-    @CachePut(value = "users", key = "#user.userId")
-    public User addUserToCache(final User user) {
-        LOGGER.info("addUserToCache : {}", user.getUserId().getId());
-        requireNonNull(user);
-        return mapmap.put(user.getUserId(), user);
-    }
-
-
-    @Cacheable("users")
-    public User getUserFromCache(final UserId key) {
-        LOGGER.info("getUserFromCache : {}", key.getId());
-        requireNonNull(key);
-        return mapmap.get(key);
     }
 }
 
-class SlowMap<K, V> extends HashMap<K, V> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUserService.class);
 
+class SlowMap<K, V> extends HashMap<K, V> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SlowMap.class);
+
+    @Override
     @Cacheable(value = "users", key = "#key")
     public V get(final Object key) {
         try {
             Thread.sleep(1000);
-            LOGGER.info("Stuff did things slowly {} ", key);
+            LOGGER.info("SlowMap::get for '{}'", key);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return super.get(key);
     }
 
+    @Override
     @CachePut(value = "users", key = "#key")
     public V put(final K key, final V value) {
         try {
             Thread.sleep(1000);
-            LOGGER.info("Stuff did things slowly in this put {}, {} ", key, value);
+            LOGGER.info("SlowMap::put for '{}' -> '{}'", key, value);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return super.put(key, value);
+        super.put(key, value);
+        return value;
     }
 }

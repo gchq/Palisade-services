@@ -264,14 +264,5 @@ public class AbstractLdapUserServiceTest {
         public void setMock(final AbstractLdapUserService mock) {
             this.mock = mock;
         }
-
-        @Override
-        public void addUserToCache(final User user) {
-        }
-
-        @Override
-        public User getUserFromCache(final User user) {
-            return null;
-        }
     }
 }
