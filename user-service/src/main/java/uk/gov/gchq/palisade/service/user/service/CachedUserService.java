@@ -42,4 +42,5 @@ public class CachedUserService implements UserService {
         LOGGER.debug("Added user {} to cache (key=userId)", user);
         return user;
     }
+
 }
