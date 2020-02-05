@@ -25,9 +25,8 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
+import uk.gov.gchq.palisade.service.resource.service.CachedResourceService;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -40,8 +39,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public HadoopResourceService resourceService(final Configuration config) throws IOException {
-        return new HadoopResourceService(config);
+    public CachedResourceService resourceService() {
+        CachedResourceService cachedResourceService = new CachedResourceService();
+        LOGGER.info("Instantiated CachedResourceService");
+        return cachedResourceService;
     }
 
     @Bean
