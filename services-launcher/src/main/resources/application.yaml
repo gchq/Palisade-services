@@ -21,6 +21,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+app:
+  version: '@project.version@'
+
 # The launcher creates a command to execute for each service in launcher.services
 # These are built from launcher.defaults with SERVICE substituted for the service.name
 # and any other overrides specified will replace the default
@@ -32,49 +35,49 @@ launcher:
   # java -cp [..]policy-service.jar:[...]example-library.jar -Dspring.config.location=policy-service/target/classes/ -Dspring.profiles.active=jvm, -Dloader.main=[...].PolicyApplication [...].JarLauncher
   services:
     audit-service:
-      classpath: audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+      classpath: audit-service/target/audit-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: audit-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.audit.AuditApplication
       profiles: default
       log: audit-service.log
     data-service:
-      classpath: data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+      classpath: data-service/target/data-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: data-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.data.DataApplication
       profiles: default
       log: data-service.log
     discovery-service:
-      classpath: discovery-service/target/discovery-service-0.4.0-SNAPSHOT-exec.jar
+      classpath: discovery-service/target/discovery-service-${app.version}-exec.jar
       config: discovery-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.discovery.DiscoveryApplication
       profiles: default
       log: discovery-service.log
     palisade-service:
-      classpath: palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+      classpath: palisade-service/target/palisade-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: palisade-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
       profiles: default
       log: palisade-service.log
     policy-service:
-      classpath: policy-service/target/policy-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+      classpath: policy-service/target/policy-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: policy-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.policy.PolicyApplication
       profiles: default
       log: policy-service.log
     resource-service:
-      classpath: resource-service/target/resource-service-0.4.0-SNAPSHOT-exec.jar
+      classpath: resource-service/target/resource-service-${app.version}-exec.jar
       config: resource-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.resource.ResourceApplication
       profiles: default
       log: resource-service.log
     user-service:
-      classpath: user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
+      classpath: user-service/target/user-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
       config: user-service/target/classes/
       launcher: org.springframework.boot.loader.JarLauncher
       main: uk.gov.gchq.palisade.service.user.UserApplication
