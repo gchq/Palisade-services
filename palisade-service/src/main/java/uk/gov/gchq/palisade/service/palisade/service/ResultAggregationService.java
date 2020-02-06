@@ -77,7 +77,7 @@ public class ResultAggregationService implements Service {
             auditRegisterRequestComplete(request, user, policy, auditService);
             cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
 
-            final DataRequestResponse response = new DataRequestResponse().resources(filteredResources);
+            final DataRequestResponse response = new DataRequestResponse().resources(filteredResources).token(requestId.getId());
             response.setOriginalRequestId(originalRequestId);
             LOGGER.debug("Aggregated request with response: {}", response);
 
@@ -140,7 +140,7 @@ public class ResultAggregationService implements Service {
         final AddCacheRequest<DataRequestConfig> cacheRequest = new AddCacheRequest<>()
                 .key(requestId.getId())
                 .value(dataRequestConfig)
-                .service(this.getClass());
+                .service(SimplePalisadeService.class);
         LOGGER.debug("Caching: {}", cacheRequest);
         final Boolean success = cacheService.add(cacheRequest).join();
         if (null == success || !success) {

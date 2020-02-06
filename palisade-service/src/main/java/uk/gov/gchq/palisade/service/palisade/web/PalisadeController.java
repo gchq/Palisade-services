@@ -15,8 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,12 +36,16 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping(path = "/")
 public class PalisadeController {
 
+    @Autowired
+    private ObjectMapper mapper;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeController.class);
 
     private final PalisadeService service;
 
-    public PalisadeController(final PalisadeService service) {
+    public PalisadeController(final PalisadeService service, final ObjectMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")

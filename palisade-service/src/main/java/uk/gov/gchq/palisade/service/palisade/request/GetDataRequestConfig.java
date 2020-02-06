@@ -13,34 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.palisade.request;
 
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.request.Request;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Objects;
-import java.util.StringJoiner;
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.service.request.DataRequestConfig;
+import uk.gov.gchq.palisade.service.request.Request;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * This class is used to request the {@link DataRequestConfig}
+ */
 public class GetDataRequestConfig extends Request {
-    private RequestId requestId;
+    private RequestId token;
     private Resource resource;
 
-    public RequestId getRequestId() {
-        requireNonNull(requestId, "The request id has not been set.");
-        return requestId;
-    }
-
-    public GetDataRequestConfig requestId(final RequestId requestId) {
+    public GetDataRequestConfig token(final RequestId requestId) {
         requireNonNull(requestId, "The request id cannot be set to null.");
-        this.requestId = requestId;
+        this.token = requestId;
         return this;
     }
 
-    public void setRequestId(final RequestId requestId) {
-        requestId(requestId);
+    public GetDataRequestConfig resource(final Resource resource) {
+        requireNonNull(resource, "The resource cannot be set to null.");
+        this.resource = resource;
+        return this;
+    }
+
+    public RequestId getToken() {
+        requireNonNull(token, "The request id has not been set.");
+        return token;
     }
 
     public Resource getResource() {
@@ -48,10 +56,8 @@ public class GetDataRequestConfig extends Request {
         return resource;
     }
 
-    public GetDataRequestConfig resource(final Resource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
-        return this;
+    public void setToken(final RequestId token) {
+        token(token);
     }
 
     public void setResource(final Resource resource) {
@@ -63,27 +69,34 @@ public class GetDataRequestConfig extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetDataRequestConfig)) {
+
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
-        GetDataRequestConfig that = (GetDataRequestConfig) o;
-        return getRequestId().equals(that.getRequestId()) &&
-                getResource().equals(that.getResource());
+
+        final GetDataRequestConfig that = (GetDataRequestConfig) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(token, that.token)
+                .append(resource, that.resource)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getRequestId(), getResource());
+        return new HashCodeBuilder(7, 37)
+                .appendSuper(super.hashCode())
+                .append(token)
+                .append(resource)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", GetDataRequestConfig.class.getSimpleName() + "[", "]")
-                .add("requestId=" + requestId)
-                .add("resource=" + resource)
+        return new ToStringBuilder(this)
+                .append("token", token)
+                .append("resource", resource)
                 .toString();
     }
 }

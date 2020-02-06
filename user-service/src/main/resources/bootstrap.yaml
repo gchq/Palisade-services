@@ -14,7 +14,7 @@
 #
 spring:
   application:
-    name: audit-service
+    name: user-service
   cloud:
     config:
       enabled: false

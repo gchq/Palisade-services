@@ -104,7 +104,6 @@ public class DataControllerTest {
         InputStream input = Mockito.mock(InputStream.class);
         OutputStream output = Mockito.mock(OutputStream.class);
         Mockito.when(dataService.read(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
-        Mockito.when(response.asInputStream()).thenReturn(input);
 
         // When
         controller.readChunked(request).getBody().writeTo(output);
