@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -26,17 +25,12 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import uk.gov.gchq.palisade.service.user.service.CachedUserService;
-
 @EnableEurekaClient
 @EnableFeignClients
 @EnableCaching
 @SpringBootApplication
 public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
-
-    @Autowired
-    CachedUserService cachedUserService;
 
     public static void main(final String[] args) {
         LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);
