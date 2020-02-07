@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -27,8 +28,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.policy.service.CachedPolicyService;
-import uk.gov.gchq.palisade.service.policy.service.HierarchicalPolicyService;
+import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
+import uk.gov.gchq.palisade.service.policy.service.PolicyService;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -41,19 +44,24 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean("cachedUserService")
-    public CachedPolicyService cachedPolicyService() {
-        CachedPolicyService cachedPolicyService = new CachedPolicyService();
-        LOGGER.debug("Instantiated CachedPolicyService");
-        return cachedPolicyService;
+    @Bean
+    @Qualifier("impl")
+    public PolicyService nullPolicyService() {
+        return new NullPolicyService();
     }
 
-    @Primary
-    @Bean("hierarchialPolicyService")
-    public HierarchicalPolicyService hierarchicalPolicyService(final CachedPolicyService cache) {
-        HierarchicalPolicyService hierarchicalPolicyService = new HierarchicalPolicyService(cache);
+    @Bean("cachingProxy")
+    public PolicyServiceCachingProxy cachedPolicyService(@Qualifier("impl") PolicyService service) {
+        PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy();
+        LOGGER.debug("Instantiated CachedPolicyService");
+        return policyServiceCachingProxy;
+    }
+
+    @Bean("hierarchicalProxy")
+    public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
+        PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
         LOGGER.debug("Instantiated HierarchicalPolicyService");
-        return hierarchicalPolicyService;
+        return policyServiceHierarchyProxy;
     }
 
     @Bean

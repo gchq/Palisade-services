@@ -26,7 +26,6 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -42,24 +41,23 @@ import static java.util.Objects.requireNonNull;
  * If there are any negation rules then all rules inherited from up the
  * chain should be checked to see if any rules need removing due to the negation rule.
  */
-public class HierarchicalPolicyService implements PolicyService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HierarchicalPolicyService.class);
+public class PolicyServiceHierarchyProxy implements PolicyService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
-    private static final String DATA_TYPE_POLICIES_PREFIX = "dataTypePolicy.";
-    private static final String RESOURCE_POLICIES_PREFIX = "resourcePolicy.";
+    PolicyServiceCachingProxy service;
 
-    private CachedPolicyService cache;
-
-    public HierarchicalPolicyService(final CachedPolicyService cache) {
-        this.cache = cache;
+    public PolicyServiceHierarchyProxy(final PolicyServiceCachingProxy service) {
+        this.service = service;
     }
 
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
         LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, resource);
-        Optional<Rules> rules = getApplicableRules(resource, Policy::getResourceRules);
-        Optional<Resource> canAccessResource = rules.map(rule -> Util.applyRulesToItem(resource, user, context, rule, new AtomicLong(0), new AtomicLong(0)));
-        return cache.cacheCanAccess(user, context, resource, canAccessResource);
+        Optional<Resource> canAccessResource = service.canAccess(user, context, resource);
+        // If the service says we can access the resource naively, check up the resource hierarchy
+        // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
+        return canAccessResource.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules)
+                .map(rule -> Util.applyRulesToItem(resource, user, context, rule, new AtomicLong(0), new AtomicLong(0))));
     }
 
     /**
@@ -72,21 +70,21 @@ public class HierarchicalPolicyService implements PolicyService {
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
      */
-    private Optional<Rules> getApplicableRules(final Resource resource, final Function<Policy, Rules> rulesExtractor) {
+    private <T> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
         LOGGER.debug("Getting the applicable rules: {}", resource);
-        Optional<Rules> inheritedRules;
+        Optional<Rules<T>> inheritedRules;
         if (resource instanceof ChildResource) {
             // We will also need the policy applied to the parent resource
             LOGGER.debug("resource {} an instance of ChildResource", resource);
-            inheritedRules = getApplicableRules(((ChildResource) resource).getParent(), rulesExtractor);
+            inheritedRules = getHierarchicalRules(((ChildResource) resource).getParent(), rulesExtractor);
         } else {
             // We are at top of hierarchy
-            LOGGER.debug("resource {} NOT an instance of ChildResource (top of hierachy)", resource);
+            LOGGER.debug("resource {} NOT an instance of ChildResource (top of hierarchy)", resource);
             inheritedRules = Optional.empty();
         }
 
-        Optional<Policy> newPolicy = cache.getPolicy(resource);
-        Optional<Rules> newRules = newPolicy.map(rulesExtractor);
+        Optional<Policy> newPolicy = service.getPolicy(resource);
+        Optional<Rules<T>> newRules = newPolicy.map(rulesExtractor);
 
         // If both present, merge both
         // If either present, return present
@@ -113,27 +111,22 @@ public class HierarchicalPolicyService implements PolicyService {
 
     @Override
     public Optional<Policy> getPolicy(final Resource resource) {
-        try {
-            Optional<Policy> policy = cache.getPolicy(resource);
-            LOGGER.info("{} :: {} retrieved from cache", resource, policy);
-            return policy;
-        } catch (NoSuchElementException ex) {
-            Optional<Rules> optionalRules = getApplicableRules(resource, Policy::getRecordRules);
-            return optionalRules.map(rules -> new Policy().recordRules(rules));
-        }
+        // FIXME: Required explicit cast to object
+        Optional<Rules<Object>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
+        return optionalRules.map(rules -> new Policy().recordRules(rules));
     }
 
     @Override
-    public Policy setResourcePolicy(Resource resource, Policy policy) {
+    public <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy) {
         requireNonNull(resource, "type cannot be null");
         LOGGER.debug("Setting Resource policy {} to resource {}", policy, resource);
-        return cache.setResourcePolicy(resource, policy);
+        return service.setResourcePolicy(resource, policy);
     }
 
     @Override
-    public Policy setTypePolicy(String type, Policy policy) {
+    public <T> Policy<T> setTypePolicy(String type, Policy<T> policy) {
         requireNonNull(type, "type cannot be null");
         LOGGER.debug("Setting Type policy {} to data type {}", policy, type);
-        return cache.setTypePolicy(type, policy);
+        return service.setTypePolicy(type, policy);
     }
 }

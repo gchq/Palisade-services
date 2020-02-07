@@ -77,14 +77,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
-public class HierarchicalPolicyServiceTest {
+public class PolicyServiceHierarchyProxyTest {
     private static final SimpleCacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore());
     private final User user = new User().userId("testUser");
     private final FileResource fileResource1 = createTestFileResource(1);
     private final FileResource fileResource2 = createTestFileResource(2);
     private final SystemResource systemResource = createTestSystemResource();
     private final DirectoryResource directoryResource = createTestDirectoryResource();
-    private HierarchicalPolicyService policyService;
+    private PolicyServiceHierarchyProxy policyService;
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
@@ -108,9 +108,9 @@ public class HierarchicalPolicyServiceTest {
 
     @Before
     public void setup() {
-        policyService = new HierarchicalPolicyService(cacheService);
+        policyService = new PolicyServiceHierarchyProxy(cacheService);
 
-        logger = (Logger) LoggerFactory.getLogger(HierarchicalPolicyService.class);
+        logger = (Logger) LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
