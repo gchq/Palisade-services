@@ -47,8 +47,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * <p>
- * An {@code AbstractLdapUserService} is an implementation of a {@link UserService} that
- * connects to LDAP to lookup users.
+ * An {@code AbstractLdapUserService} connects to LDAP to lookup users.
  * </p>
  * To use this LDAP user service you will
  * need to extend this class and implement 3 methods:
@@ -64,21 +63,12 @@ import static java.util.Objects.requireNonNull;
  * </li>
  * </ul>
  * <p>
- * This abstract implementation also includes a basic cache to reduce the number
- * of calls to LDAP. The default time to live for the cache is 24 hours. You
- * can change the time to live hours using the cacheTtlHours parameter. Please
- * note the cache and time to live value is static so it will be shared for
- * all instances in the same JVM.
- * </p>
- * <p>
  * This implementation does not allow you to add users.
  * </p>
  */
 public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
-
-    private UserService cache;
 
     private final String ldapConfigPath;
 
@@ -88,11 +78,9 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.
      * The cache time to live with be set the default or previously set value.
      *
-     * @param cache   userService
      * @param context the {@link LdapContext} for making calls to LDAP.
      */
-    public AbstractLdapUserService(final UserService cache, final LdapContext context) {
-        this.cache = cache;
+    public AbstractLdapUserService(final LdapContext context) {
         this.context = context;
         this.ldapConfigPath = null;
     }
@@ -102,18 +90,15 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
      * </p>
      *
-     * @param cache          userService
      * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
      * @throws IOException     if IO issues occur whilst loading the LDAP config.
      * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
      */
-    public AbstractLdapUserService(final UserService cache, final String ldapConfigPath)
+    public AbstractLdapUserService(final String ldapConfigPath)
             throws IOException, NamingException {
         requireNonNull(ldapConfigPath, "ldapConfigPath is required");
-        requireNonNull(cache, "UserService cache is required");
         this.ldapConfigPath = ldapConfigPath;
         this.context = createContext(ldapConfigPath);
-        this.cache = cache;
         requireNonNull(context, "Unable to construct ldap context from: " + ldapConfigPath);
     }
 
@@ -121,26 +106,13 @@ public abstract class AbstractLdapUserService implements UserService {
     public User getUser(final UserId userId) {
         requireNonNull(userId, "userId has not been set");
         requireNonNull(userId.getId(), "userId has not been set");
-
+        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
         try {
-            User cachedUser = cache.getUser(userId);
-            LOGGER.debug("User {} was in the cache.", userId);
-            return cachedUser;
-        } catch (NoSuchUserIdException unused) {
-            LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
-            Set<String> auths;
-            Set<String> roles;
-            try {
-                Map<String, Object> userAttrs = getAttributes(userId);
-                auths = getAuths(userId, userAttrs, context);
-                roles = getRoles(userId, userAttrs, context);
-                User user = new User().userId(userId).auths(auths).roles(roles);
-
-                return cache.addUser(user);
-            } catch (NamingException ex) {
-                LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
-                throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
-            }
+            Map<String, Object> userAttrs = getAttributes(userId);
+            return new User().userId(userId).auths(getAuths(userId, userAttrs, context)).roles(getRoles(userId, userAttrs, context));
+        } catch (NamingException ex) {
+            LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
+            throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
         }
     }
 

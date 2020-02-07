@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -25,9 +26,12 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.user.service.CachedUserService;
+import uk.gov.gchq.palisade.service.user.impl.NullUserService;
+import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 
@@ -40,10 +44,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public CachedUserService userService() {
-        CachedUserService cachedUserService = new CachedUserService();
-        LOGGER.info("Instantiated CachedUserService");
-        return cachedUserService;
+    public UserServiceProxy userService(final Set<UserService> userServices) {
+        UserServiceProxy userServiceProxy = new UserServiceProxy(userServices.stream().findFirst().orElse(null));
+        LOGGER.info("Instantiated UserServiceProxy");
+        return userServiceProxy;
+    }
+
+    @Bean(name = "nullUserService")
+    @ConditionalOnProperty(prefix = "user-service", name = "service", havingValue = "null-user-service", matchIfMissing = true)
+    public NullUserService nullUserService() {
+        return new NullUserService();
     }
 
     @Bean

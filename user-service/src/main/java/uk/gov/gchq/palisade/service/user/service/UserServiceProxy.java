@@ -24,23 +24,28 @@ import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
 @CacheConfig(cacheNames = {"users"})
-public class CachedUserService implements UserService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedUserService.class);
+public class UserServiceProxy {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProxy.class);
+
+    private UserService service;
+
+    public UserServiceProxy(UserService service) {
+        this.service = service;
+    }
 
     @Cacheable(key = "#userId")
     public User getUser(final UserId userId) {
         LOGGER.info("Cache miss for userId {}", userId);
-        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
+        return service.getUser(userId);
     }
 
     @CachePut(key = "#user.userId")
     public User addUser(final User user) {
         LOGGER.info("Cache add for userId {}", user.getUserId());
         LOGGER.debug("Added user {} to cache (key=userId)", user);
-        return user;
+        return service.addUser(user);
     }
 
 }

@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.service.MockUserService;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -236,11 +235,11 @@ public class AbstractLdapUserServiceTest {
         private AbstractLdapUserService mock;
 
         public MockLdapUserService(final LdapContext context) {
-            super(new MockUserService(), context);
+            super(context);
         }
 
         public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
-            super(new MockUserService(), ldapConfigPath);
+            super(ldapConfigPath);
         }
 
         @Override
