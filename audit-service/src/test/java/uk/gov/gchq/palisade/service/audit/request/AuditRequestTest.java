@@ -1,4 +1,4 @@
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +12,6 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -66,18 +65,6 @@ public class AuditRequestTest {
         final AuditRequest.RegisterRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, AuditRequest.RegisterRequestCompleteAuditRequest.class);
 
         assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
-    }
-
-    @Test
-    public void RegisterRequestExceptionAuditRequestTest() {
-        final AuditRequest.RegisterRequestExceptionAuditRequest subject = AuditRequest.RegisterRequestExceptionAuditRequest.create(new RequestId().id("304958"))
-                .withUserId(new User().userId("username").getUserId())
-                .withResourceId("resource")
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a reason for access", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
-                .withException(new SecurityException("not allowed"))
-                .withServiceClass(UserService.class);
-
-        assertThat("RegisterRequestExceptionAuditRequest not constructed", subject.resourceId, is(equalTo("resource")));
     }
 
 }

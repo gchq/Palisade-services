@@ -32,6 +32,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
@@ -98,7 +99,10 @@ public class ResourceControllerTest {
 
     private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
     {
-        requestMethods.put(GetResourcesByIdRequest.class, request -> controller.getResourcesById((GetResourcesByIdRequest) request));
+        requestMethods.put(GetResourcesByIdRequest.class, request -> {
+            request.originalRequestId(new RequestId().id("originalId"));
+            return controller.getResourcesById((GetResourcesByIdRequest) request);
+        });
         requestMethods.put(GetResourcesByResourceRequest.class, request -> controller.getResourcesByResource((GetResourcesByResourceRequest) request));
         requestMethods.put(GetResourcesBySerialisedFormatRequest.class, request -> controller.getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request));
         requestMethods.put(GetResourcesByTypeRequest.class, request -> controller.getResourcesByType((GetResourcesByTypeRequest) request));
@@ -131,6 +135,7 @@ public class ResourceControllerTest {
         resourceService.willThrow(exception);
 
         // When
+        request.setOriginalRequestId(new RequestId().id("originalId"));
         method.apply(request);
 
         // Then
