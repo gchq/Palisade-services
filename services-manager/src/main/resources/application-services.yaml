@@ -16,11 +16,16 @@
 # The manager creates a number of commands to execute for each service in manager.services
 # All fields are *technically* optional but some (classpath, launcher, main) are probably required to start the spawned JVM process
 # Extensive use is made of the eureka discovery client to discover services and endpoints - subsequently the "eureka" profile is enabled by default for all services
+# Extract the project version (x.y.z-REVISION etc.)
+app:
+  version: '@project.version@'
+
 
 manager:
   # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   default:
-    # library includes relative to manager.root above
+    # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
+    # While the example library happens to be the same version as services, it should be declared here as a static name
     library: ../palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
     jar-launcher: org.springframework.boot.loader.JarLauncher
 
@@ -28,7 +33,7 @@ manager:
 
     audit-service:
       classpath:
-        - audit-service/target/audit-service-0.4.0-SNAPSHOT-exec.jar
+        - audit-service/target/audit-service-${app.version}-exec.jar
         - ${manager.default.library}
       config: audit-service/target/classes
       launcher: ${manager.default.jar-launcher}
@@ -39,7 +44,7 @@ manager:
 
     data-service:
       classpath:
-        - data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar
+        - data-service/target/data-service-${app.version}-exec.jar
         - ${manager.default.library}
       config: data-service/target/classes
       launcher: ${manager.default.jar-launcher}
@@ -50,7 +55,7 @@ manager:
 
     palisade-service:
       classpath:
-        - palisade-service/target/palisade-service-0.4.0-SNAPSHOT-exec.jar
+        - palisade-service/target/palisade-service-${app.version}-exec.jar
         - ${manager.default.library}
       config: palisade-service/target/classes
       launcher: ${manager.default.jar-launcher}
@@ -61,7 +66,7 @@ manager:
 
     policy-service:
       classpath:
-        - policy-service/target/policy-service-0.4.0-SNAPSHOT-exec.jar
+        - policy-service/target/policy-service-${app.version}-exec.jar
         - ${manager.default.library}
       config: policy-service/target/classes
       launcher: ${manager.default.jar-launcher}
@@ -72,7 +77,7 @@ manager:
 
     resource-service:
       classpath:
-        - resource-service/target/resource-service-0.4.0-SNAPSHOT-exec.jar
+        - resource-service/target/resource-service-${app.version}-exec.jar
       config: resource-service/target/classes
       launcher: ${manager.default.jar-launcher}
       main: uk.gov.gchq.resource.service.resource.ResourceApplication
@@ -82,7 +87,7 @@ manager:
 
     user-service:
       classpath:
-        - user-service/target/user-service-0.4.0-SNAPSHOT-exec.jar
+        - user-service/target/user-service-${app.version}-exec.jar
         - ${manager.default.library}
       config: user-service/target/classes
       launcher: ${manager.default.jar-launcher}

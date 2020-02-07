@@ -14,6 +14,9 @@
 #
 
 # Just start the discovery service, used for configuring all other services
+# Extract the project version (x.y.z-REVISION etc.)
+app:
+  version: '@project.version@'
 
 # Don't register with eureka as it isn't up yet
 eureka:
@@ -31,7 +34,7 @@ manager:
 
     discovery-service:
       classpath:
-        - discovery-service/target/discovery-service-0.4.0-SNAPSHOT-exec.jar
+        - discovery-service/target/discovery-service-${app.version}-exec.jar
       config: discovery-service/target/classes
       launcher: ${manager.default.jar-launcher}
       main: uk.gov.gchq.palisade.service.discovery.DiscoveryApplication
