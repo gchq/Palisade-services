@@ -111,7 +111,6 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
 
     @Override
     public Optional<Policy> getPolicy(final Resource resource) {
-        // FIXME: Required explicit cast to object
         Optional<Rules<Object>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
         return optionalRules.map(rules -> new Policy().recordRules(rules));
     }
