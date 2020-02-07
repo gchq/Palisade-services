@@ -68,6 +68,10 @@ public interface PolicyService extends Service {
      *                list of the resources the user wants access too.
      * @return a {@link MultiPolicy} containing the mapping of resource to {@link Policy}
      */
+    // FIXME: This cannot be typed as <T> Optional<Policy<T>> getPolicy(Resource resource)
+    // There must be some input argument to specify T
+    // Either through typing the class  --  <T> PolicyService<T>
+    // Or supplying some sort of constructor factory  --  Producer<T>
     Optional<Policy> getPolicy(Resource resource);
 
     default Map<Resource, Policy> getPolicy(final Collection<Resource> resources) {
@@ -85,7 +89,7 @@ public interface PolicyService extends Service {
      * @return a {@link CompletableFuture} {@link Boolean} which is true if
      * the policy was successfully set.
      */
-    Policy setResourcePolicy(Resource resource, Policy policy);
+    <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
 
     /**
      * This method allows for the setting of a policy to a resource type.
@@ -95,6 +99,6 @@ public interface PolicyService extends Service {
      * @return a {@link CompletableFuture} {@link Boolean} which is true if
      * the policy was successfully set.
      */
-    Policy setTypePolicy(String type, Policy policy);
+    <T> Policy<T> setTypePolicy(String type, Policy<T> policy);
 
 }
