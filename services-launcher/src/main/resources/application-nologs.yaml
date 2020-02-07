@@ -12,7 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-launcher:
-  default-service:
+services:
+  audit-service:
+    log: /dev/null
+  data-service:
+    log: /dev/null
+  discovery-service:
+    log: /dev/null
+  palisade-service:
+    log: /dev/null
+  policy-service:
+    log: /dev/null
+  resource-service:
+    log: /dev/null
+  user-service:
     log: /dev/null

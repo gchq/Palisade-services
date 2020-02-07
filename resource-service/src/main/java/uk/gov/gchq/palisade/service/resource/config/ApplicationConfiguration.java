@@ -36,8 +36,7 @@ import uk.gov.gchq.palisade.service.resource.repository.K8sBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.resource.service.CacheService;
-import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.web.ServiceInstanceRestController;
+import uk.gov.gchq.palisade.service.resource.service.HadoopResourceConfigurationService;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,8 +62,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public HadoopResourceService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
-        return new HadoopResourceService(config);
+    public HadoopResourceConfigurationService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
+        return new HadoopResourceConfigurationService(config, cacheService(backingStore));
     }
 
     @Bean
@@ -108,12 +107,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        return new ServiceInstanceRestController();
     }
 
     @Override

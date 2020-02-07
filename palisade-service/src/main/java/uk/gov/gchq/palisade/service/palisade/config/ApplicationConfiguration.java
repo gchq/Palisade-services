@@ -47,7 +47,6 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
-import uk.gov.gchq.palisade.service.palisade.web.ServiceInstanceRestController;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.net.URI;
@@ -84,7 +83,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 resourceService(resourceClient),
                 cacheService(backingStores),
                 getAsyncExecutor(),
-                resultAggregationService(auditClient));
+                resultAggregationService(auditClient, backingStores));
     }
 
     @Bean
@@ -108,8 +107,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
-        CacheService cacheService = new SimpleCacheService();
+    public ResultAggregationService resultAggregationService(final AuditClient auditClient, final Map<String, BackingStore> backingStores) {
+        CacheService cacheService = cacheService(backingStores);
         AuditService auditService = auditService(auditClient);
         return new ResultAggregationService(auditService, cacheService);
     }
@@ -156,13 +155,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        LOGGER.info("Instantiated eurekaClient");
-        return new ServiceInstanceRestController();
     }
 
     @Override

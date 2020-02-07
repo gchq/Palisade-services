@@ -87,7 +87,7 @@ public class ResultAggregationServiceTest {
                 .parent(new DirectoryResource().id("/path/to/")
                         .parent(new DirectoryResource().id("/path/")
                                 .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
         resources.put(resource, connectionDetail);
 
         Policy policy = new Policy();
