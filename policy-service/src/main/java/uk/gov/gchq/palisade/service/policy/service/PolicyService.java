@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
@@ -24,7 +27,12 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * The core API for the policy service.
@@ -48,8 +56,7 @@ public interface PolicyService extends Service {
      * @return a {@link CanAccessResponse} which contains a collection of the
      * resources that the user is allowed access too.
      */
-    // TODO: should this return bitmap  = READ, WRITE,EXECUTE ?
-    CompletableFuture<CanAccessResponse> canAccess(final CanAccessRequest request);
+    Optional<Resource> canAccess(final User user, final Context context, final Resource resource);
 
     /**
      * This method gets the record level {@link Policy}'s that apply to the list
@@ -61,7 +68,14 @@ public interface PolicyService extends Service {
      *                list of the resources the user wants access too.
      * @return a {@link MultiPolicy} containing the mapping of resource to {@link Policy}
      */
-    CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request);
+    Optional<Policy> getPolicy(Resource resource);
+
+    default Map<Resource, Policy> getPolicy(final Collection<Resource> resources) {
+        return resources.stream()
+                .map(resource -> getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+    }
 
     /**
      * This method allows for the setting of a policy to a resource.
@@ -71,7 +85,7 @@ public interface PolicyService extends Service {
      * @return a {@link CompletableFuture} {@link Boolean} which is true if
      * the policy was successfully set.
      */
-    CompletableFuture<Boolean> setResourcePolicy(final SetResourcePolicyRequest request);
+    Policy setResourcePolicy(Resource resource, Policy policy);
 
     /**
      * This method allows for the setting of a policy to a resource type.
@@ -81,6 +95,6 @@ public interface PolicyService extends Service {
      * @return a {@link CompletableFuture} {@link Boolean} which is true if
      * the policy was successfully set.
      */
-    CompletableFuture<Boolean> setTypePolicy(final SetTypePolicyRequest request);
+    Policy setTypePolicy(String type, Policy policy);
 
 }

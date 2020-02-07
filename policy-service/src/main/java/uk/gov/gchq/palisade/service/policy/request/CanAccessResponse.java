@@ -20,7 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 
 import java.util.Collection;
 
@@ -30,22 +30,22 @@ import static java.util.Objects.requireNonNull;
  * The purpose of this class is to wrap the response of the Policy store's can access requests.
  */
 public class CanAccessResponse {
-    private Collection<LeafResource> canAccessResources;
+    private Collection<Resource> canAccessResources;
 
     public CanAccessResponse() {
         // no-args constructor needed for serialization only
     }
 
-    public Collection<LeafResource> getCanAccessResources() {
+    public Collection<Resource> getCanAccessResources() {
         requireNonNull(canAccessResources, "The can access resources collection has not been set.");
         return canAccessResources;
     }
 
-    public void setCanAccessResources(final Collection<LeafResource> canAccessResources) {
+    public void setCanAccessResources(final Collection<Resource> canAccessResources) {
         canAccessResources(canAccessResources);
     }
 
-    public CanAccessResponse canAccessResources(final Collection<LeafResource> canAccessResources) {
+    public CanAccessResponse canAccessResources(final Collection<Resource> canAccessResources) {
         requireNonNull(canAccessResources, "The can access resources collection cannot be set to null.");
         this.canAccessResources = canAccessResources;
         return this;

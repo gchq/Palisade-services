@@ -19,8 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -29,95 +27,39 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.policy.repository.BackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.EtcdBackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.K8sBackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.PropertiesBackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.policy.service.CacheService;
+import uk.gov.gchq.palisade.service.policy.service.CachedPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.HierarchicalPolicyService;
-import uk.gov.gchq.palisade.service.policy.web.ServiceInstanceRestController;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean
-    public CacheConfiguration cacheConfiguration() {
-        return new CacheConfiguration();
+    @Bean("cachedUserService")
+    public CachedPolicyService cachedPolicyService() {
+        CachedPolicyService cachedPolicyService = new CachedPolicyService();
+        LOGGER.debug("Instantiated CachedPolicyService");
+        return cachedPolicyService;
     }
 
-    @Bean
-    public HierarchicalPolicyService hierarchicalPolicyService(final Map<String, BackingStore> backingStores) {
-        HierarchicalPolicyService hierarchicalPolicyService = new HierarchicalPolicyService(cacheService(backingStores));
+    @Primary
+    @Bean("hierarchialPolicyService")
+    public HierarchicalPolicyService hierarchicalPolicyService(final CachedPolicyService cache) {
+        HierarchicalPolicyService hierarchicalPolicyService = new HierarchicalPolicyService(cache);
         LOGGER.debug("Instantiated HierarchicalPolicyService");
         return hierarchicalPolicyService;
-    }
-
-    @Bean(name = "hashmap")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
-    public HashMapBackingStore hashMapBackingStore() {
-        return new HashMapBackingStore();
-    }
-
-    @Bean(name = "k8s")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "k8s")
-    public K8sBackingStore k8sBackingStore() {
-        return new K8sBackingStore();
-    }
-
-    @Bean(name = "props")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "props")
-    public PropertiesBackingStore propertiesBackingStore() {
-        return new PropertiesBackingStore(Optional.ofNullable(cacheConfiguration().getProps()).orElse("cache.properties"));
-    }
-
-    @Bean(name = "etcd")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "etcd")
-    public EtcdBackingStore etcdBackingStore() {
-        return new EtcdBackingStore(cacheConfiguration().getEtcd().stream().map(URI::create).collect(toList()));
-    }
-
-    @Bean
-    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        CacheService service = Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.debug("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
-        }).findFirst().orElse(null);
-        if (service != null) {
-            LOGGER.debug("Instantiated cacheService: {}", service.getClass());
-        } else {
-            LOGGER.error("Failed to instantiate cacheService, returned null");
-        }
-        return service;
     }
 
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        ServiceInstanceRestController restController = new ServiceInstanceRestController();
-        LOGGER.debug("Instantiated eurekaClient");
-        return restController;
     }
 
     @Override
@@ -134,6 +76,4 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new ApplicationAsyncExceptionHandler();
     }
-
-
 }

@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
@@ -36,7 +36,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class CanAccessRequest extends Request {
     private User user;
-    private Collection<LeafResource> resources;
+    private Collection<Resource> resources;
     private Context context;
 
     public CanAccessRequest() {
@@ -44,10 +44,10 @@ public class CanAccessRequest extends Request {
     }
 
     /**
-     * @param resources the collection of {@link LeafResource}'s to be accessed
+     * @param resources the collection of {@link Resource}'s to be accessed
      * @return the {@link CanAccessRequest}
      */
-    public CanAccessRequest resources(final Collection<LeafResource> resources) {
+    public CanAccessRequest resources(final Collection<Resource> resources) {
         requireNonNull(resources, "The resources cannot be set to null.");
         this.resources = resources;
         return this;
@@ -77,14 +77,14 @@ public class CanAccessRequest extends Request {
      * Utility method to allow the CanAccessRequest to be created as part of a
      * chain of asynchronous requests.
      *
-     * @param futureResources   a completable future that will return a collection of {@link LeafResource}'s.
+     * @param futureResources   a completable future that will return a collection of {@link Resource}'s.
      * @param futureUser        a completable future that will return a {@link User}.
      * @param purpose           the purpose that the user stated for why they want access to the data.
      * @param originalRequestId the requestId of the service creating this object
      * @return a completable future containing the {@link CanAccessRequest}.
      */
     public static CompletableFuture<CanAccessRequest> create(
-            final CompletableFuture<? extends Collection<LeafResource>> futureResources,
+            final CompletableFuture<? extends Collection<Resource>> futureResources,
             final CompletableFuture<User> futureUser,
             final String purpose,
             final RequestId originalRequestId) {
@@ -100,14 +100,14 @@ public class CanAccessRequest extends Request {
      * Utility method to allow the CanAccessRequest to be created as part of a
      * chain of asynchronous requests.
      *
-     * @param resources         a collection of {@link LeafResource}'s that the user wants access to.
+     * @param resources         a collection of {@link Resource}'s that the user wants access to.
      * @param futureUser        a completable future that will return a {@link User}.
      * @param purpose           the purpose that the user stated for why they want access to the data.
      * @param originalRequestId the requestId of the service creating this object
      * @return a completable future containing the {@link CanAccessRequest}.
      */
     public static CompletableFuture<CanAccessRequest> create(
-            final Collection<LeafResource> resources,
+            final Collection<Resource> resources,
             final CompletableFuture<User> futureUser,
             final String purpose,
             final RequestId originalRequestId) {
@@ -118,12 +118,12 @@ public class CanAccessRequest extends Request {
         });
     }
 
-    public Collection<LeafResource> getResources() {
+    public Collection<Resource> getResources() {
         requireNonNull(resources, "The resources have not been set.");
         return resources;
     }
 
-    public void setResources(final Collection<LeafResource> resources) {
+    public void setResources(final Collection<Resource> resources) {
         resources(resources);
     }
 
