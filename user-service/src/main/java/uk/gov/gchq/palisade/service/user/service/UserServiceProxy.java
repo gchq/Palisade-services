@@ -26,9 +26,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 
 @CacheConfig(cacheNames = {"users"})
-public class UserServiceProxy {
+public class UserServiceProxy implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProxy.class);
-
     private UserService service;
 
     public UserServiceProxy(final UserService service) {

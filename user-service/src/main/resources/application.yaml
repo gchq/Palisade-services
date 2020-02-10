@@ -58,4 +58,4 @@ feign:
     default-config: default
 
 user-service:
-  implementation: null
+  implementation: null-user-service

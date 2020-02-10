@@ -26,7 +26,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.user.impl.NullUserService;
+import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
@@ -46,13 +46,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public UserServiceProxy userService(final Set<UserService> userServices) {
         UserServiceProxy userServiceProxy = new UserServiceProxy(userServices.stream().findFirst().orElse(null));
-        LOGGER.info("Instantiated UserServiceProxy");
+        LOGGER.info("Instantiated UserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
         return userServiceProxy;
     }
 
-    @Bean(name = "nullUserService")
+    @Bean(name = "null-user-service")
     @ConditionalOnProperty(prefix = "user-service", name = "service", havingValue = "null-user-service", matchIfMissing = true)
     public NullUserService nullUserService() {
+        LOGGER.info("Instantiated NullUserService");
         return new NullUserService();
     }
 
