@@ -1,14 +1,5 @@
 package uk.gov.gchq.palisade.service.user.service;
 
-import org.junit.Test;
-import org.testcontainers.shaded.org.apache.commons.lang.ObjectUtils.Null;
-
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-
 /*
  * Copyright 2020 Crown Copyright
  *
@@ -23,8 +14,18 @@ import static org.junit.Assert.*;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */public class NullUserServiceTest {
-     NullUserService nullUserService = new NullUserService();
+ */
+
+import org.junit.Test;
+
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
+public class NullUserServiceTest {
+    NullUserService nullUserService = new NullUserService();
 
     @Test(expected = NoSuchUserIdException.class)
     public void getUser() {
