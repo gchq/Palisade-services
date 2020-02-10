@@ -31,7 +31,7 @@ public class UserServiceProxy {
 
     private UserService service;
 
-    public UserServiceProxy(UserService service) {
+    public UserServiceProxy(final UserService service) {
         this.service = service;
     }
 

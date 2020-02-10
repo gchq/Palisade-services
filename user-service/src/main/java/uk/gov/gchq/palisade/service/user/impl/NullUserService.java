@@ -23,12 +23,12 @@ import uk.gov.gchq.palisade.service.user.service.UserService;
 public class NullUserService implements UserService {
 
     @Override
-    public User getUser(UserId userId) {
+    public User getUser(final UserId userId) {
         throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
     }
 
     @Override
-    public User addUser(User user) {
+    public User addUser(final User user) {
         return user;
     }
 
