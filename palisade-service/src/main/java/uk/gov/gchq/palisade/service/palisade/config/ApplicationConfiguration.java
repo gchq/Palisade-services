@@ -47,7 +47,6 @@ import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
-import uk.gov.gchq.palisade.service.palisade.web.ServiceInstanceRestController;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.net.URI;
@@ -73,44 +72,44 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeService palisadeService(final Map<String, BackingStore> backingStores,
-                                           final AuditClient auditClient,
-                                           final UserClient userClient,
-                                           final PolicyClient policyClient,
-                                           final ResourceClient resourceClient) {
-        return new SimplePalisadeService(auditService(auditClient),
-                userService(userClient),
-                policyService(policyClient),
-                resourceService(resourceClient),
-                cacheService(backingStores),
-                getAsyncExecutor(),
-                resultAggregationService(auditClient));
+    public PalisadeService palisadeService(final AuditService auditService,
+                                           final UserService userService,
+                                           final PolicyService policyService,
+                                           final ResourceService resourceService,
+                                           final CacheService cacheService,
+                                           final Executor executor,
+                                           final ResultAggregationService resultAggregationService) {
+        return new SimplePalisadeService(auditService,
+                userService,
+                policyService,
+                resourceService,
+                cacheService,
+                executor,
+                resultAggregationService);
     }
 
     @Bean
-    public UserService userService(final UserClient userClient) {
-        return new UserService(userClient, getAsyncExecutor());
+    public UserService userService(final UserClient userClient, final Executor executor) {
+        return new UserService(userClient, executor);
     }
 
     @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient, getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient, final Executor executor) {
+        return new AuditService(auditClient, executor);
     }
 
     @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient) {
-        return new ResourceService(resourceClient, getAsyncExecutor());
+    public ResourceService resourceService(final ResourceClient resourceClient, final Executor executor) {
+        return new ResourceService(resourceClient, executor);
     }
 
     @Bean
-    public PolicyService policyService(final PolicyClient policyClient) {
-        return new PolicyService(policyClient, getAsyncExecutor());
+    public PolicyService policyService(final PolicyClient policyClient, final Executor executor) {
+        return new PolicyService(policyClient, executor);
     }
 
     @Bean
-    public ResultAggregationService resultAggregationService(final AuditClient auditClient) {
-        CacheService cacheService = new SimpleCacheService();
-        AuditService auditService = auditService(auditClient);
+    public ResultAggregationService resultAggregationService(final AuditService auditService, final CacheService cacheService) {
         return new ResultAggregationService(auditService, cacheService);
     }
 
@@ -158,15 +157,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return JSONSerialiser.createDefaultMapper();
     }
 
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        LOGGER.info("Instantiated eurekaClient");
-        return new ServiceInstanceRestController();
-    }
-
     @Override
     @Bean("threadPoolTaskExecutor")
+    @Primary
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");

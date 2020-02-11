@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.data.service;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 
@@ -58,5 +59,7 @@ public interface DataService extends Service {
      *                             workload issues or lack of capacity
      */
     CompletableFuture<ReadResponse> read(final ReadRequest request) throws NoCapacityException;
+
+    CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request);
 
 }

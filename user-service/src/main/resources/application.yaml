@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
 # limitations under the License.
 #
 spring:
+  cache:
+    caffeine:
+      spec: expireAfterWrite=60m, maximumSize=500
   application:
     name: user-service
   output:
@@ -54,8 +57,5 @@ feign:
         loggerLevel: basic
     default-config: default
 
-cache:
-  implementation: hashmap
-  props: "cache.properties"
-  etcd:
-  - http://localhost:2379
+user-service:
+  implementation: null-user-service

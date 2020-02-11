@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.Spy;
+import org.mockito.internal.util.collections.Sets;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import uk.gov.gchq.palisade.Context;
@@ -19,10 +20,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 import java.util.HashSet;
 
@@ -73,7 +72,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestWithNoResources() {
         // Given
-        final AuditRequest auditRequest = RegisterRequestCompleteAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
                 .withUser(user)
                 .withLeafResources(new HashSet<>(0))
                 .withContext(context);
@@ -100,7 +99,10 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestSuccessful() {
         // Given
-        final AuditRequest auditRequest = registerRequestCompleteAuditRequest();
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
+                .withUser(user)
+                .withLeafResources(Sets.newSet(resource))
+                .withContext(context);
 
         // When
         auditService.audit(auditRequest);
@@ -125,7 +127,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestUserException() {
         // Given
-        final AuditRequest auditRequest = RegisterRequestExceptionAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
                 .withUserId(userId)
                 .withResourceId(resource.getId())
                 .withContext(context)
@@ -156,7 +158,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestResourceException() {
         // Given
-        final AuditRequest auditRequest = RegisterRequestExceptionAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
                 .withUserId(userId)
                 .withResourceId(resource.getId())
                 .withContext(context)
@@ -186,7 +188,12 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestOtherException() {
         // Given
-        final AuditRequest auditRequest = registerRequestExceptionAuditRequest();
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
+                .withUserId(userId)
+                .withResourceId(resource.getId())
+                .withContext(context)
+                .withException(exception)
+                .withServiceClass(Service.class);
 
         // When
         auditService.audit(auditRequest);
@@ -211,7 +218,13 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditReadRequestSuccessful() {
         // Given
-        final AuditRequest auditRequest = readRequestCompleteAuditRequest();
+        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
+                .withUser(user)
+                .withLeafResource(resource)
+                .withContext(context)
+                .withRulesApplied(rules)
+                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
+                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
 
         // When
         auditService.audit(auditRequest);
@@ -238,7 +251,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     public void auditReadRequestTokenException() {
         // Given
         Mockito.doReturn(TOKEN_NOT_FOUND_MESSAGE).when(exception).getMessage();
-        final AuditRequest auditRequest = ReadRequestExceptionAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
                 .withToken(TEST_TOKEN)
                 .withLeafResource(resource)
                 .withException(exception);
@@ -265,7 +278,10 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditReadRequestOtherException() {
         // Given
-        final AuditRequest auditRequest = readRequestExceptionAuditRequest();
+        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
+                .withToken(TEST_TOKEN)
+                .withLeafResource(resource)
+                .withException(exception);
 
         // When
         auditService.audit(auditRequest);

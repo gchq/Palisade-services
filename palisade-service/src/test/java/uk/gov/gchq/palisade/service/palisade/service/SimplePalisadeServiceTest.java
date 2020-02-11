@@ -22,6 +22,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -35,7 +36,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.impl.MockDataService;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
@@ -104,7 +104,7 @@ public class SimplePalisadeServiceTest {
                         .parent(new DirectoryResource().id("/path/to/")
                                 .parent(new DirectoryResource().id("/path/")
                                         .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().service(new MockDataService());
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
         Policy policy = new Policy();
@@ -158,7 +158,7 @@ public class SimplePalisadeServiceTest {
         LOGGER.info("Expected config: {}", expectedConfig);
         //Given
         GetDataRequestConfig requestConfig = new GetDataRequestConfig();
-        requestConfig.requestId(new RequestId().id("requestId"));
+        requestConfig.token(new RequestId().id("requestId"));
         requestConfig.resource(new FileResource().id("resourceId"));
         LOGGER.info("Get Data Request Config: {}", requestConfig);
 
