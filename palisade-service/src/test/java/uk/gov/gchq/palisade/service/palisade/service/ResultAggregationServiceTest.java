@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -32,7 +33,6 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.impl.MockDataService;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
@@ -87,7 +87,7 @@ public class ResultAggregationServiceTest {
                 .parent(new DirectoryResource().id("/path/to/")
                         .parent(new DirectoryResource().id("/path/")
                                 .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
         Policy policy = new Policy();
