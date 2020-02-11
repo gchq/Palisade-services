@@ -48,6 +48,11 @@
             <artifactId>json-path</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.netflix.eureka</groupId>
+            <artifactId>eureka-client</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
             <version>${jetcd.version}</version>

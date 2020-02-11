@@ -34,10 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 import java.sql.Date;
 import java.util.HashMap;
@@ -80,10 +76,10 @@ public class StroomAuditService implements AuditService {
     private static final String EVENT_GENERATOR = "Palisade";
 
     static {
-        DISPATCHER.put(RegisterRequestCompleteAuditRequest.class, StroomAuditService::onRegisterRequestComplete);
-        DISPATCHER.put(RegisterRequestExceptionAuditRequest.class, StroomAuditService::onRegisterRequestException);
-        DISPATCHER.put(ReadRequestCompleteAuditRequest.class, StroomAuditService::onReadRequestComplete);
-        DISPATCHER.put(ReadRequestExceptionAuditRequest.class, StroomAuditService::onReadRequestException);
+        DISPATCHER.put(AuditRequest.RegisterRequestCompleteAuditRequest.class, StroomAuditService::onRegisterRequestComplete);
+        DISPATCHER.put(AuditRequest.RegisterRequestExceptionAuditRequest.class, StroomAuditService::onRegisterRequestException);
+        DISPATCHER.put(AuditRequest.ReadRequestCompleteAuditRequest.class, StroomAuditService::onReadRequestComplete);
+        DISPATCHER.put(AuditRequest.ReadRequestExceptionAuditRequest.class, StroomAuditService::onReadRequestException);
     }
 
     private final DefaultEventLoggingService eventLogger;
@@ -146,9 +142,9 @@ public class StroomAuditService implements AuditService {
     }
 
     private static void onRegisterRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
-        requireNonNull(request, "RegisterRequestCompleteAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$RegisterRequestCompleteAuditRequest cannot be null");
         LOGGER.debug("onRegisterRequestComplete called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
-        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (RegisterRequestCompleteAuditRequest) request;
+        AuditRequest.RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = (AuditRequest.RegisterRequestCompleteAuditRequest) request;
         Event authorisationEvent = generateNewGenericEvent(loggingService, registerRequestCompleteAuditRequest);
         Event.EventDetail authorisationEventDetail = new Event.EventDetail();
         authorisationEvent.setEventDetail(authorisationEventDetail);
@@ -188,9 +184,9 @@ public class StroomAuditService implements AuditService {
     }
 
     private static void onRegisterRequestException(final DefaultEventLoggingService loggingService, final AuditRequest request) {
-        requireNonNull(request, "RegisterRequestExceptionAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$RegisterRequestExceptionAuditRequest cannot be null");
         LOGGER.debug("onRegisterRequestException called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
-        RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest = (RegisterRequestExceptionAuditRequest) request;
+        AuditRequest.RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest = (AuditRequest.RegisterRequestExceptionAuditRequest) request;
         // authorisation exception
         Event exceptionEvent = generateNewGenericEvent(loggingService, registerRequestExceptionAuditRequest);
         Event.EventDetail exceptionEventDetail = new Event.EventDetail();
@@ -229,9 +225,9 @@ public class StroomAuditService implements AuditService {
     }
 
     private static void onReadRequestComplete(final DefaultEventLoggingService loggingService, final AuditRequest request) {
-        requireNonNull(request, "ReadRequestCompleteAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$ReadRequestCompleteAuditRequest cannot be null");
         LOGGER.debug("onReadRequestComplete called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
-        ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest = (ReadRequestCompleteAuditRequest) request;
+        AuditRequest.ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest = (AuditRequest.ReadRequestCompleteAuditRequest) request;
         // view request
         Event viewEvent = generateNewGenericEvent(loggingService, readRequestCompleteAuditRequest);
         Event.EventDetail viewEventDetail = new Event.EventDetail();
@@ -269,9 +265,9 @@ public class StroomAuditService implements AuditService {
     }
 
     private static void onReadRequestException(final DefaultEventLoggingService loggingService, final AuditRequest request) {
-        requireNonNull(request, "ReadRequestExceptionAuditRequest cannot be null");
+        requireNonNull(request, "AuditRequest$ReadRequestExceptionAuditRequest cannot be null");
         LOGGER.debug("onReadRequestException called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, request);
-        ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = (ReadRequestExceptionAuditRequest) request;
+        AuditRequest.ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = (AuditRequest.ReadRequestExceptionAuditRequest) request;
         // view request
         Event viewEvent = generateNewGenericEvent(loggingService, readRequestExceptionAuditRequest);
         Event.EventDetail viewEventDetail = new Event.EventDetail();

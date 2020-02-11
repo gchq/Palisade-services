@@ -25,11 +25,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
+import uk.gov.gchq.palisade.reader.common.AuditRequestCompleteReceiver;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
+import uk.gov.gchq.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.EtcdBackingStore;
@@ -39,13 +50,12 @@ import uk.gov.gchq.palisade.service.data.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.CacheService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
-import uk.gov.gchq.palisade.service.data.web.ServiceInstanceRestController;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
@@ -58,6 +68,8 @@ import static java.util.stream.Collectors.toList;
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableAsync
+@EnableScheduling
 @EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
@@ -88,8 +100,18 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public DataReader dataReader() {
-        return new HadoopDataReader();
+    public DataReader dataReader(final CacheService cacheService) {
+        try {
+            return new HadoopDataReader().cacheService(cacheService);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to instantiate HadoopDataReader: {}", ex.getMessage());
+            return new DataReader() {
+                @Override
+                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, final Class<? extends Service> aClass, final AuditRequestCompleteReceiver auditRequestCompleteReceiver) throws NoCapacityException {
+                    return null;
+                }
+            };
+        }
     }
 
     @Bean
@@ -135,13 +157,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         }).findFirst().orElse(null);
     }
 
-    @Bean(name = "eureka-client")
-    @ConditionalOnProperty(prefix = "eureka.client", name = "enabled")
-    public ServiceInstanceRestController eurekaClient() {
-        LOGGER.info("Instantiated eurekaClient");
-        return new ServiceInstanceRestController();
-    }
-
+    @Bean
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
@@ -155,6 +171,21 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             ex.setCorePoolSize(6);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
+    }
+
+    @Bean
+    protected WebMvcConfigurer webMvcConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+                configurer.setTaskExecutor(getTaskExecutor());
+            }
+        };
+    }
+
+    @Bean(name = "concurrentTaskExecutor")
+    public ConcurrentTaskExecutor getTaskExecutor() {
+        return new ConcurrentTaskExecutor(this.getAsyncExecutor());
     }
 
     @Override

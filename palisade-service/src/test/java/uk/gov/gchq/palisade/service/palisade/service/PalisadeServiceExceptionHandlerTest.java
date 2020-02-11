@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -123,7 +124,7 @@ public class PalisadeServiceExceptionHandlerTest {
         expectedResponse.resources(resources);
         expectedResponse.originalRequestId(originalRequestId);
         futureResponse.complete(expectedResponse);
-        controller = new PalisadeController(service);
+        controller = new PalisadeController(service, JSONSerialiser.createDefaultMapper());
         mvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new PalisadeServiceExceptionHandler())
                 .build();

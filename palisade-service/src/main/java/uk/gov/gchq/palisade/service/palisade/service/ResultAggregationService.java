@@ -140,7 +140,7 @@ public class ResultAggregationService implements Service {
         final AddCacheRequest<DataRequestConfig> cacheRequest = new AddCacheRequest<>()
                 .key(requestId.getId())
                 .value(dataRequestConfig)
-                .service(this.getClass());
+                .service(SimplePalisadeService.class);
         LOGGER.debug("Caching: {}", cacheRequest);
         final Boolean success = cacheService.add(cacheRequest).join();
         if (null == success || !success) {

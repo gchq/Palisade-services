@@ -112,11 +112,12 @@ public class SimplePalisadeService implements PalisadeService {
     public CompletableFuture<DataRequestConfig> getDataRequestConfig(
             final GetDataRequestConfig request) {
         requireNonNull(request);
-        requireNonNull(request.getId());
+        requireNonNull(request.getToken());
         // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
-        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getId().getId()).service(this.getClass());
+        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getToken().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
+
         return cacheService.get(cacheRequest)
 
                 .thenApply(cache -> {

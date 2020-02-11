@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
@@ -91,7 +92,8 @@ public class ResourceServiceTest {
     @Test
     public void infoOnGetResourcesRequest() {
         // Given
-        GetResourcesByIdRequest request = Mockito.mock(GetResourcesByIdRequest.class);
+        GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
+        request.setOriginalRequestId(new RequestId().id("Original ID"));
         Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
         Mockito.when(resourceClient.getResourcesById(request)).thenReturn(response);
 
@@ -102,10 +104,10 @@ public class ResourceServiceTest {
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
+                Matchers.containsString(request.getOriginalRequestId().getId()),
                 Matchers.anyOf(
                         Matchers.containsString(response.toString()),
-                        Matchers.containsString("Not completed"))
+                        Matchers.containsString("Original ID"))
         ));
 
     }
@@ -117,6 +119,7 @@ public class ResourceServiceTest {
 
         //When
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
+        request.setOriginalRequestId(new RequestId().id("Original ID"));
         CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(request);
 
         //Then

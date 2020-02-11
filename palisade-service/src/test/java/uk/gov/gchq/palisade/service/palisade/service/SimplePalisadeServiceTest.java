@@ -158,7 +158,7 @@ public class SimplePalisadeServiceTest {
         LOGGER.info("Expected config: {}", expectedConfig);
         //Given
         GetDataRequestConfig requestConfig = new GetDataRequestConfig();
-        requestConfig.requestId(new RequestId().id("requestId"));
+        requestConfig.token(new RequestId().id("requestId"));
         requestConfig.resource(new FileResource().id("resourceId"));
         LOGGER.info("Get Data Request Config: {}", requestConfig);
 

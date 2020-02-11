@@ -25,6 +25,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    MultiPolicy getPolicy(final GetPolicyRequest request);
+    MultiPolicy getPolicySync(final GetPolicyRequest request);
 
 }

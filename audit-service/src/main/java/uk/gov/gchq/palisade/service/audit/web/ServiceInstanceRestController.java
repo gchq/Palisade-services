@@ -31,7 +31,6 @@ import java.util.List;
 public class ServiceInstanceRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInstanceRestController.class);
 
-
     @Autowired
     private DiscoveryClient discoveryClient;
 

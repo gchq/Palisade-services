@@ -18,10 +18,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.audit.request.RegisterRequestExceptionAuditRequest;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -63,7 +59,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestSuccessful() {
         // Given
-        final AuditRequest auditRequest = RegisterRequestCompleteAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
                 .withUser(user)
                 .withLeafResources(Sets.newSet(resource))
                 .withContext(context);
@@ -88,7 +84,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditRegisterRequestException() {
         // Given
-        final AuditRequest auditRequest = RegisterRequestExceptionAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
                 .withUserId(userId)
                 .withResourceId(resource.getId())
                 .withContext(context)
@@ -117,7 +113,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
     @Test
     public void auditReadRequestSuccessful() {
         // Given
-        final AuditRequest auditRequest = ReadRequestCompleteAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
                 .withUser(user)
                 .withLeafResource(resource)
                 .withContext(context)
@@ -149,7 +145,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
     public void auditReadRequestException() {
 
         // Given
-        final AuditRequest auditRequest = ReadRequestExceptionAuditRequest.create(requestId)
+        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
                 .withToken(TEST_TOKEN)
                 .withLeafResource(resource)
                 .withException(exception);
