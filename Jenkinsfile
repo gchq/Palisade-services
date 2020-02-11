@@ -129,10 +129,11 @@ spec:
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     if (("${env.BRANCH_NAME}" == "develop") ||
-                            ("${env.BRANCH_NAME}" == "master")) {
+                            ("${env.BRANCH_NAME}" == "master") ||
+                            ("${env.BRANCH_NAME}" == "PAL-512-IngressRoute")) {
                         sh 'palisade-login'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY} --namespace dev'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
                     } else {
                         sh "echo - no deploy"
                     }
