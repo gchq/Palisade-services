@@ -18,8 +18,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/user-service/user-service.jar
+COPY $JAR_FILE /usr/share/user-service/user-service.jar
 
-LABEL service="user", project="palisade"
+LABEL service="user" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/user-service/user-service.jar"]
