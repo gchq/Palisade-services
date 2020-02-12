@@ -1,9 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "web.client.user-service",
-      "type": "java.lang.String",
-      "description": "url for the user service."
-    }
-  ]
-}

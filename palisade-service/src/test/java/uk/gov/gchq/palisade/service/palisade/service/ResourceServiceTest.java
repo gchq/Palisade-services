@@ -37,7 +37,6 @@ import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.impl.MockDataService;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.util.HashMap;
@@ -73,7 +72,7 @@ public class ResourceServiceTest {
 
         resourceService = new ResourceService(resourceClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
     }
 
