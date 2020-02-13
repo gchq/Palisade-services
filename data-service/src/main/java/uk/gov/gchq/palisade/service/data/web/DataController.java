@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 import uk.gov.gchq.palisade.service.data.service.DataService;
@@ -61,7 +62,6 @@ public class DataController {
             LOGGER.info("Writing response {} to output stream", response);
             response.writeTo(outputStream);
             outputStream.close();
-            response.asInputStream().close();
             LOGGER.debug("IO streams completed and closed");
         };
 
@@ -70,8 +70,21 @@ public class DataController {
         return ret;
     }
 
+    @PostMapping(value = "/addSerialiser", consumes = "application/json", produces = "application/json")
+    public CompletableFuture<Boolean> readSync(@RequestBody final AddSerialiserRequest request) {
+        LOGGER.info("Invoking addSerialiser: {}", request);
+        CompletableFuture<Boolean> response = addSerialiser(request);
+        LOGGER.info("Request processed. Result: {}", response.join());
+        return response;
+    }
+
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
         LOGGER.debug("Request will now be read: {}", request);
         return service.read(request);
+    }
+
+    public CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request) {
+        LOGGER.debug("Serialiser will now be added to the cache {}", request);
+        return service.addSerialiser(request);
     }
 }

@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/policy-service/policy-service.jar
+COPY $JAR_FILE /usr/share/policy-service/policy-service.jar
 
-LABEL service="policy", project="palisade"
+LABEL service="policy" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/policy-service/policy-service.jar"]

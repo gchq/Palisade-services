@@ -12,25 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-spring:
-  application:
-    name: services-launcher
-  output:
-    ansi:
-      enabled: always
-  main:
-    allow-bean-definition-overriding: true
-
-# The launcher creates a command to execute for each service in launcher.services
-# These are built from launcher.defaults with SERVICE substituted for the service.name
-# and any other overrides specified will replace the default
 launcher:
-  default-service:
-    root: palisade-services
-    name: default
-    target: target
-    config: SERVICE-config
-    log: .log
   services:
-    -
-      name: dummy-service
+    audit-service:
+      profiles: jvm
+      log: audit-service-jvm.log
+    data-service:
+      profiles: jvm
+      log: data-service-jvm.log
+    discovery-service:
+      profiles: jvm
+      log: discovery-service-jvm.log
+    palisade-service:
+      profiles: jvm
+      log: palisade-service-jvm.log
+    policy-service:
+      profiles: jvm
+      log: policy-service-jvm.log
+    resource-service:
+      profiles: jvm
+      log: resource-service-jvm.log
+    user-service:
+      profiles: jvm
+      log: user-service-jvm.log
