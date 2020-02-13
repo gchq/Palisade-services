@@ -19,11 +19,9 @@ package uk.gov.gchq.palisade.service.launcher.config;
 public class ServiceConfiguration {
 
     private String classpath;
-    private String config;
-    private String launcher;
-    private String main;
-    private String profiles;
+    private String path;
     private String log;
+    private String profiles;
 
     public String getClasspath() {
         return classpath;
@@ -31,30 +29,6 @@ public class ServiceConfiguration {
 
     public void setClasspath(final String classpath) {
         this.classpath = classpath;
-    }
-
-    public String getConfig() {
-        return config;
-    }
-
-    public void setConfig(final String config) {
-        this.config = config;
-    }
-
-    public String getLauncher() {
-        return launcher;
-    }
-
-    public void setLauncher(final String launcher) {
-        this.launcher = launcher;
-    }
-
-    public String getMain() {
-        return main;
-    }
-
-    public void setMain(final String main) {
-        this.main = main;
     }
 
     public String getProfiles() {
@@ -73,4 +47,11 @@ public class ServiceConfiguration {
         this.log = log;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(final String path) {
+        this.path = path;
+    }
 }

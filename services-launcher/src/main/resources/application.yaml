@@ -30,56 +30,42 @@ app:
 launcher:
   # search up path for a named root directory
   root: palisade-services
-  # library root relative to launcher.root above
-  library-root: ../palisade-examples/example-library
-  # java -cp [..]policy-service.jar:[...]example-library.jar -Dspring.config.location=policy-service/target/classes/ -Dspring.profiles.active=jvm, -Dloader.main=[...].PolicyApplication [...].JarLauncher
+  # library relative to launcher.root above
+  example-library: ../palisade-examples/example-library/target/
+  # java -Dloader.path=[...]policy-service-jar-with-dependencies.jar,[...]example-library-jar-with-dependencies.jar -Dspring.profiles.active=jvm -jar [...]policy-service-exec.jar
   services:
     audit-service:
-      classpath: audit-service/target/audit-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-      config: audit-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.audit.AuditApplication
+      classpath: audit-service/target/audit-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
       profiles: default
       log: audit-service.log
     data-service:
-      classpath: data-service/target/data-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-      config: data-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.data.DataApplication
+      classpath: data-service/target/data-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
       profiles: default
       log: data-service.log
     discovery-service:
       classpath: discovery-service/target/discovery-service-${app.version}-exec.jar
-      config: discovery-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.discovery.DiscoveryApplication
+      path:
       profiles: default
       log: discovery-service.log
     palisade-service:
-      classpath: palisade-service/target/palisade-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-      config: palisade-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
+      classpath: palisade-service/target/palisade-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
       profiles: default
       log: palisade-service.log
     policy-service:
-      classpath: policy-service/target/policy-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-      config: policy-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.policy.PolicyApplication
+      classpath: policy-service/target/policy-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
       profiles: default
       log: policy-service.log
     resource-service:
       classpath: resource-service/target/resource-service-${app.version}-exec.jar
-      config: resource-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.resource.ResourceApplication
+      path:
       profiles: default
       log: resource-service.log
     user-service:
-      classpath: user-service/target/user-service-${app.version}-exec.jar:${launcher.library-root}/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-      config: user-service/target/classes/
-      launcher: org.springframework.boot.loader.JarLauncher
-      main: uk.gov.gchq.palisade.service.user.UserApplication
+      classpath: user-service/target/user-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
       profiles: default
       log: user-service.log
