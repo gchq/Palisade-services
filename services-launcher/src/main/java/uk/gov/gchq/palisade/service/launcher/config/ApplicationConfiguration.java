@@ -73,11 +73,9 @@ public class ApplicationConfiguration {
                     ServiceConfiguration config = e.getValue();
                     String[] command = new String[] {
                             JavaEnvUtils.getJreExecutable("java"),
-                            "-cp", config.getClasspath(),
-                            String.format("-Dspring.config.location=%s", config.getConfig()),
+                            String.format("-Dloader.path=%s", config.getPath()),
                             String.format("-Dspring.profiles.active=%s", config.getProfiles()),
-                            String.format("-Dloader.main=%s", config.getMain()),
-                            config.getLauncher()
+                            "-jar", config.getClasspath()
                     };
                     ProcessBuilder pb = new ProcessBuilder()
                             .command(command)
