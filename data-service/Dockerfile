@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/palisade-service/data-service.jar
+COPY $JAR_FILE /usr/share/palisade-service/data-service.jar
 
-LABEL service="data", project="palisade"
+LABEL service="data" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/data-service.jar"]

@@ -17,10 +17,10 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/palisade-service/palisade-service.jar
+COPY $JAR_FILE /usr/share/palisade-service/palisade-service.jar
 
-ADD src/main/resources/log_level.sh /usr/share/palisade-service/log-level
+COPY src/main/resources/log_level.sh /usr/share/palisade-service/log-level
 
-LABEL service="palisade", project="palisade"
+LABEL service="palisade" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
