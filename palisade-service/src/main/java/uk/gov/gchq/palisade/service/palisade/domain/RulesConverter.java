@@ -23,6 +23,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import java.io.IOException;
+import java.util.Optional;
 
 @Converter
 public class RulesConverter implements AttributeConverter<Rules<?>, String>  {
@@ -45,7 +47,14 @@ public class RulesConverter implements AttributeConverter<Rules<?>, String>  {
     }
 
     @Override
-    public Rules<?> convertToEntityAttribute(final String s) {
-        return null;
+    public Rules<?> convertToEntityAttribute(final String attribute) {
+        if (Optional.ofNullable(attribute).isPresent()) {
+            try {
+                return this.objectMapper.readValue(attribute, Rules.class);
+            } catch (IOException e) {
+                LOGGER.error("Conversion error whilst trying to convert string(JSON) to user.", e);
+            }
+        }
+        return new Rules<>();
     }
 }

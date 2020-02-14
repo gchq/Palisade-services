@@ -31,8 +31,8 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 @Entity
 @Table(name = "leaf_resource_rules",
         uniqueConstraints = {@UniqueConstraint(columnNames = "id")},
-        indexes = {@Index(name = "request", columnList = "request_id, id"),
-                @Index(name = "resource", columnList = "id, request_id")})
+        indexes = {@Index(name = "leaf_resource_rules_request", columnList = "request_id, id"),
+                @Index(name = "leaf_resource_rules_resource", columnList = "id, request_id")})
 public class LeafResourceRulesEntity {
 
     @Id
@@ -42,12 +42,12 @@ public class LeafResourceRulesEntity {
     @Column(name = "request_id", columnDefinition = "varchar(255)")
     private String requestId;
 
-    @Column(name = "leaf_resource", columnDefinition = "json")
-    @Convert(attributeName = "leafResource", converter = LeafResourceConverter.class)
+    @Column(name = "leaf_resource", columnDefinition = "clob")
+    @Convert(converter = LeafResourceConverter.class)
     private LeafResource leafResource;
 
-    @Column(name = "rules", columnDefinition = "json")
-    @Convert(attributeName = "rules", converter = RulesConverter.class)
+    @Column(name = "rules", columnDefinition = "clob")
+    @Convert(converter = RulesConverter.class)
     private Rules<?> rules;
 
     public LeafResourceRulesEntity() { }

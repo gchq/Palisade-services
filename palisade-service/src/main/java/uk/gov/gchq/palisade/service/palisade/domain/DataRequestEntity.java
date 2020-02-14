@@ -44,12 +44,12 @@ public class DataRequestEntity {
     @Column(name = "request_id", columnDefinition = "varchar(255)")
     private String requestId;
 
-    @Column(name = "user", columnDefinition = "json")
-    @Convert(attributeName = "user", converter = UserConverter.class)
+    @Column(name = "user", columnDefinition = "clob")
+    @Convert(converter = UserConverter.class)
     private User user;
 
-    @Column(name = "context", columnDefinition = "json")
-    @Convert(attributeName = "context", converter = ContextConverter.class)
+    @Column(name = "context", columnDefinition = "clob")
+    @Convert(converter = ContextConverter.class)
     private Context context;
 
     @Transient
@@ -60,7 +60,8 @@ public class DataRequestEntity {
     public DataRequestEntity(final DataRequestConfig config) {
         this.requestId = config.getOriginalRequestId().getId();
         this.context = config.getContext();
-        this.leafResourceMap = config.getRules();
+        this.user = config.getUser();
+        this.leafResourceMap = Optional.ofNullable(config.getRules()).orElseGet(Collections::emptyMap);
     }
 
     public DataRequestConfig dataRequestConfig() {
@@ -98,6 +99,6 @@ public class DataRequestEntity {
     }
 
     public void setLeafResourceMap(Map<LeafResource, Rules> leafResourceMap) {
-        this.leafResourceMap = leafResourceMap;
+        this.leafResourceMap = Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
     }
 }
