@@ -24,6 +24,9 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.repository.DataRequestRepository;
+import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -47,24 +50,20 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-    //Cache keys
-    public static final String RES_COUNT_KEY = "res_count_";
-    /*
-     * Duration for how long the count of resources requested should live in the cache.
-     */
-    public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
+
     private final AuditService auditService;
     private final PolicyService policyService;
     private final UserService userService;
     private final ResourceService resourceService;
     private final CacheService cacheService;
+    private final PersistenceLayer persistenceLayer;
     private final ResultAggregationService aggregationService;
 
     private final Executor executor;
 
     public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService,
-                                 final CacheService cacheService, final Executor executor, final ResultAggregationService resultAggregationService) {
+                                 final CacheService cacheService, final PersistenceLayer persistenceLayer, final Executor executor, final ResultAggregationService resultAggregationService) {
         requireNonNull(auditService, "auditService");
         requireNonNull(userService, "userService");
         requireNonNull(policyService, "policyService");
@@ -77,6 +76,7 @@ public class SimplePalisadeService implements PalisadeService {
         this.policyService = policyService;
         this.resourceService = resourceService;
         this.cacheService = cacheService;
+        this.persistenceLayer = persistenceLayer;
         this.executor = executor;
         this.aggregationService = resultAggregationService;
     }

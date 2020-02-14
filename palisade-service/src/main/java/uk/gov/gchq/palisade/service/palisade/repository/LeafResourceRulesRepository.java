@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.domain;
+package uk.gov.gchq.palisade.service.palisade.repository;
 
 import org.springframework.data.repository.CrudRepository;
+import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceRulesEntity;
 
-public interface DataRequestRepository extends CrudRepository<DataRequestEntity, String> {
+import java.util.List;
 
-    DataRequestEntity getByRequestId(String requestId);
+public interface LeafResourceRulesRepository extends CrudRepository<LeafResourceRulesEntity, String> {
+
+    List<LeafResourceRulesEntity> getByRequestId(String requestId);
+
+    LeafResourceRulesEntity getByIdAndRequestId(String id, String requestId);
 
 }

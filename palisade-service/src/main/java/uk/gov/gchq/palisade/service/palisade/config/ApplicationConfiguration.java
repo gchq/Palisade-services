@@ -31,9 +31,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.DataRequestRepository;
 import uk.gov.gchq.palisade.service.palisade.repository.EtcdBackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.repository.K8sBackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.service.AuditService;
@@ -71,19 +75,27 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new CacheConfiguration();
     }
 
+    @Bean(name = "jpa-persistence")
+    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository) {
+        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository);
+    }
+
     @Bean
-    public PalisadeService palisadeService(final Map<String, BackingStore> backingStores,
-                                           final AuditClient auditClient,
-                                           final UserClient userClient,
-                                           final PolicyClient policyClient,
-                                           final ResourceClient resourceClient) {
-        return new SimplePalisadeService(auditService(auditClient),
-                userService(userClient),
-                policyService(policyClient),
-                resourceService(resourceClient),
-                cacheService(backingStores),
+    public PalisadeService palisadeService(final PersistenceLayer persistenceLayer,
+                                           final CacheService cacheService,
+                                           final AuditService auditService,
+                                           final UserService userService,
+                                           final PolicyService policyService,
+                                           final ResourceService resourceService,
+                                           final ResultAggregationService resultAggregationService) {
+        return new SimplePalisadeService(auditService,
+                userService,
+                policyService,
+                resourceService,
+                cacheService,
+                persistenceLayer,
                 getAsyncExecutor(),
-                resultAggregationService(auditClient, backingStores));
+                resultAggregationService);
     }
 
     @Bean
@@ -107,10 +119,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResultAggregationService resultAggregationService(final AuditClient auditClient, final Map<String, BackingStore> backingStores) {
-        CacheService cacheService = cacheService(backingStores);
-        AuditService auditService = auditService(auditClient);
-        return new ResultAggregationService(auditService, cacheService);
+    public ResultAggregationService resultAggregationService(final AuditService auditService, final CacheService cacheService, final PersistenceLayer persistenceLayer) {
+        return new ResultAggregationService(auditService, cacheService, persistenceLayer);
     }
 
     @Bean(name = "hashmap")

@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
@@ -43,12 +44,14 @@ public class ResultAggregationService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
     private AuditService auditService;
     private CacheService cacheService;
+    private PersistenceLayer persistenceLayer;
 
-    public ResultAggregationService(final AuditService auditService, final CacheService cacheService) {
+    public ResultAggregationService(final AuditService auditService, final CacheService cacheService, final PersistenceLayer persistenceLayer) {
         requireNonNull(auditService, "Audit Service");
         requireNonNull(cacheService, "Cache Service");
         this.auditService = auditService;
         this.cacheService = cacheService;
+        this.persistenceLayer = persistenceLayer;
     }
 
     public CompletionStage<DataRequestResponse> aggregateDataRequestResults(

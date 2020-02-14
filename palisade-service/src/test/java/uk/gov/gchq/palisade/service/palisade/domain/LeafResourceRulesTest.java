@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;

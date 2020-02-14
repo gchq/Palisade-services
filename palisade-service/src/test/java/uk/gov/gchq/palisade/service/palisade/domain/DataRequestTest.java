@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.palisade.repository.DataRequestRepository;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.util.AbstractMap.SimpleEntry;
