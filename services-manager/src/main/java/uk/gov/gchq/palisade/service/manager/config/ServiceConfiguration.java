@@ -100,8 +100,8 @@ public class ServiceConfiguration {
             command.add(String.format("-Dspring.profiles.active=%s", String.join(SPRING_LIST_SEP, profiles)));
         }
         // -Dlogging.level (logging level)
-        level.forEach((clazz, level) ->
-                command.add(String.format("-Dlogging.level.%s=%s", clazz, level)));
+        level.forEach((classpath, logLevel) ->
+                command.add(String.format("-Dlogging.level.%s=%s", classpath, logLevel)));
         // -jar (jar to run)
         command.add("-jar");
         command.add(jar);
