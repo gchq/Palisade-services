@@ -29,7 +29,7 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: true
+    enabled: false
 
 # Options at the command line include:
 # --run : Run all known services

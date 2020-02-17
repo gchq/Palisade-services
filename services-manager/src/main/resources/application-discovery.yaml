@@ -22,8 +22,6 @@ app:
 eureka:
   client:
     enabled: false
-    registerWithEureka: false
-    fetchRegistry: false
 
 manager:
   services:

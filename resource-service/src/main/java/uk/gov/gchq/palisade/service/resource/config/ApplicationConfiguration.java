@@ -37,7 +37,6 @@ import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.resource.service.CacheService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.web.ServiceInstanceRestController;
 
 import java.io.IOException;
 import java.net.URI;
