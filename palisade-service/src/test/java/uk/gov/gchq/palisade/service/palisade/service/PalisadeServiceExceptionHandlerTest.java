@@ -30,6 +30,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -109,7 +110,7 @@ public class PalisadeServiceExceptionHandlerTest {
                         .parent(new DirectoryResource().id("/path/to/")
                                 .parent(new DirectoryResource().id("/path/")
                                         .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
         Policy policy = new Policy();

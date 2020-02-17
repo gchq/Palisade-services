@@ -47,12 +47,9 @@ manager:
     # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
     #
     # my-service:                                               :: "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's Spring Boot application name (in eureka)
-    #   classpath:                                              :: "java -cp ${classpath[0]}:${classpath[1]}" - classpaths for service and external includes, path-separator-separated list (colon or semicolon)
-    #     - "my-service-exec.jar"                               :: first path likely is the compiled (executable) jar
-    #     - "/data/types.jar"                                   :: then any additional libraries added at runtime (serialised datatypes)
-    #   config: "my-service/target/classes"                     :: "java -Dspring.config.location=${config}" - Spring Boot configs filepath, singleton filepath
-    #   launcher: org.springframework.boot.loader.JarLauncher   :: "java [-cp ...] ${launcher}" - jvm entrypoint classpath, singleton class
-    #   main: my.service.MainApplication                        :: "java -Dloader.main=${main}" - springboot entrypoint classpath, singleton class
+    #   jar: my-service.jar                                     :: "java -jar ${jar}" - executable jar file with main entry point
+    #   paths:                                                  :: Additional (external) libraries to dynamically load at runtime (e.g. example library)
+    #     - "/data/types.jar"                                   :: "java -Dloader.path=${paths[0]},${paths[1]}"
     #   profiles:                                               :: Spring Boot profiles to enable, comma-separated list
     #     - default                                             :: "java -Dspring.profiles.active=${profiles[0]},${profiles[1]}"
     #   log: my-service.log                                     :: "java [args] > ${log}" - logging output filepath, singleton filepath

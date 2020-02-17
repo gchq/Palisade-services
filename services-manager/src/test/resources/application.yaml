@@ -31,20 +31,16 @@ manager:
   root: palisade-services
 
   default:
-    library: "../my-external-library.jar"
-    jar-launcher: "org.springframework.boot.loader.JarLauncher"
+    library: "../my/external/library.jar"
 
   services:
     ###
     # Example configuration for a service "my-service" with a single class under my.service.MainApplication
     ###
     my-service:
-      classpath: "my-service-exec.jar:/data/types.jar:${manager.default.library}"
-      config: "my-service/target/classes"
-      launcher: "${manager.default.jar-launcher}"
-      main: "my.service.MainApplication"
-      profiles:
-        - "default"
+      jar: my-service-exec.jar:/data/types.jar
+      paths:
+        - ${manager.default.library}
       log: "my-service.log"
       level:
         my.service: "INFO"

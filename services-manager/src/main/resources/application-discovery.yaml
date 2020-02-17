@@ -26,19 +26,8 @@ eureka:
     fetchRegistry: false
 
 manager:
-  # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
-  default:
-    jar-launcher: org.springframework.boot.loader.JarLauncher
-
   services:
-
     discovery-service:
-      classpath:
-        - discovery-service/target/discovery-service-${app.version}-exec.jar
-      config: discovery-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.palisade.service.discovery.DiscoveryApplication
-      profiles:
-        - default
+      jar: discovery-service/target/discovery-service-${app.version}-exec.jar
       log: discovery-service.log
       err: discovery-service.err

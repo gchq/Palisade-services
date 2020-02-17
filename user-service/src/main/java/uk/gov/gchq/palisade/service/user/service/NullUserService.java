@@ -13,11 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.user.service;
 
-package uk.gov.gchq.palisade.service.manager.runner;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-import org.junit.Ignore;
+public class NullUserService implements UserService {
 
-@Ignore
-public class LoggingChangerTest {
+    @Override
+    public User getUser(final UserId userId) {
+        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
+    }
+
+    @Override
+    public User addUser(final User user) {
+        return user;
+    }
+
 }

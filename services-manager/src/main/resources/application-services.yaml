@@ -26,72 +26,58 @@ manager:
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
     # While the example library happens to be the same version as services, it should be declared here as a static name
-    library: ../palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT-jar-with-dependencies.jar
-    jar-launcher: org.springframework.boot.loader.JarLauncher
+    library: ../palisade-examples/example-library/target/
 
   services:
 
     audit-service:
-      classpath:
-        - audit-service/target/audit-service-${app.version}-exec.jar
+      jar: audit-service/target/audit-service-${app.version}-exec.jar
+      paths:
         - ${manager.default.library}
-      config: audit-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.palisade.service.audit.AuditApplication
       profiles:
         - eureka
       log: audit-service.log
+      err: audit-service.err
 
     data-service:
-      classpath:
-        - data-service/target/data-service-${app.version}-exec.jar
+      jar: data-service/target/data-service-${app.version}-exec.jar
+      paths:
         - ${manager.default.library}
-      config: data-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.palisade.service.data.DataApplication
       profiles:
         - eureka
       log: data-service.log
+      err: data-service.err
 
     palisade-service:
-      classpath:
-        - palisade-service/target/palisade-service-${app.version}-exec.jar
+      jar: palisade-service/target/palisade-service-${app.version}-exec.jar
+      paths:
         - ${manager.default.library}
-      config: palisade-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.palisade.service.palisade.PalisadeApplication
       profiles:
         - eureka
       log: palisade-service.log
+      err: palisade-service.err
 
     policy-service:
-      classpath:
-        - policy-service/target/policy-service-${app.version}-exec.jar
+      jar: policy-service/target/policy-service-${app.version}-exec.jar
+      paths:
         - ${manager.default.library}
-      config: policy-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.policy.service.policy.PolicyApplication
       profiles:
         - eureka
       log: policy-service.log
+      err: policy-service.err
 
     resource-service:
-      classpath:
-        - resource-service/target/resource-service-${app.version}-exec.jar
-      config: resource-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.resource.service.resource.ResourceApplication
+      jar: resource-service/target/resource-service-${app.version}-exec.jar
       profiles:
         - eureka
       log: resource-service.log
+      err: resource-service.err
 
     user-service:
-      classpath:
-        - user-service/target/user-service-${app.version}-exec.jar
+      jar: user-service/target/user-service-${app.version}-exec.jar
+      paths:
         - ${manager.default.library}
-      config: user-service/target/classes
-      launcher: ${manager.default.jar-launcher}
-      main: uk.gov.gchq.user.service.user.UserApplication
       profiles:
         - eureka
       log: user-service.log
+      err: user-service.err

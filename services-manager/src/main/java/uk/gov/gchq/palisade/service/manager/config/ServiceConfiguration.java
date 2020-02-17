@@ -32,27 +32,79 @@ import java.util.stream.Collectors;
 public class ServiceConfiguration {
     private static final String SPRING_LIST_SEP = ",";
 
-    private List<String> classpath = Collections.emptyList();
-    private Optional<String> config = Optional.empty();
-    private Optional<String> launcher = Optional.empty();
-    private Optional<String> main = Optional.empty();
+    private String jar;
+    private List<String> paths = Collections.emptyList();
     private List<String> profiles = Collections.singletonList("default");
     private Optional<String> log = Optional.empty();
     private Optional<String> err = Optional.empty();
     private Map<String, String> level = Collections.emptyMap();
 
+    public String getJar() {
+        return jar;
+    }
+
+    public void setJar(final String jar) {
+        this.jar = jar;
+    }
+
+    public List<String> getPaths() {
+        return paths;
+    }
+
+    public void setPaths(final List<String> paths) {
+        this.paths = paths;
+    }
+
+    public List<String> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(final List<String> profiles) {
+        this.profiles = profiles;
+    }
+
+    public Optional<String> getLog() {
+        return log;
+    }
+
+    public void setLog(final Optional<String> log) {
+        this.log = log;
+    }
+
+    public Optional<String> getErr() {
+        return err;
+    }
+
+    public void setErr(final Optional<String> err) {
+        this.err = err;
+    }
+
+    public Map<String, String> getLevel() {
+        return level;
+    }
+
+    public void setLevel(final Map<String, String> level) {
+        this.level = level;
+    }
+
     public ProcessBuilder getProcessBuilder() {
         ArrayList<String> command = new ArrayList<>();
+        // java (JVM)
         command.add("java");
-        if (!classpath.isEmpty()) {
-            command.add("-cp");
-            command.add(String.join(File.pathSeparator, classpath));
+        // -Dloader.path (include extra jars)
+        if (!paths.isEmpty()) {
+            command.add(String.format("-Dloader.path=%s", String.join(SPRING_LIST_SEP, paths)));
         }
-        config.ifPresent(config -> command.add(String.format("-Dspring.location=%s", config)));
-        command.add(String.format("-Dspring.profiles.active=%s", String.join(SPRING_LIST_SEP, profiles)));
-        level.forEach((clazz, level) -> command.add(String.format("-Dlogging.level.%s=%s", clazz, level)));
-        main.ifPresent(main -> command.add(String.format("-Dloader.main=%s", main)));
-        launcher.ifPresent(command::add);
+        // -Dspring.profiles.active (spring profiles)
+        if (!profiles.isEmpty()) {
+            command.add(String.format("-Dspring.profiles.active=%s", String.join(SPRING_LIST_SEP, profiles)));
+        }
+        // -Dlogging.level (logging level)
+        level.forEach((clazz, level) ->
+                command.add(String.format("-Dlogging.level.%s=%s", clazz, level)));
+        // -jar (jar to run)
+        command.add("-jar");
+        command.add(jar);
 
         ProcessBuilder pb = new ProcessBuilder().command(command);
         log.ifPresent(log -> pb.redirectOutput(new File(log)));
@@ -74,45 +126,11 @@ public class ServiceConfiguration {
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void setClasspath(final List<String> classpath) {
-        this.classpath = classpath;
-    }
-
-    public void setConfig(final String config) {
-        this.config = Optional.ofNullable(config);
-    }
-
-    public void setLauncher(final String launcher) {
-        this.launcher = Optional.ofNullable(launcher);
-    }
-
-    public void setMain(final String main) {
-        this.main = Optional.ofNullable(main);
-    }
-
-    public void setProfiles(final List<String> profiles) {
-        this.profiles = profiles;
-    }
-
-    public void setLog(final String log) {
-        this.log = Optional.ofNullable(log);
-    }
-
-    public void setErr(final String err) {
-        this.err = Optional.ofNullable(err);
-    }
-
-    public void setLevel(final Map<String, String> level) {
-        this.level = level;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("RunnerConfiguration{\n");
-        sb.append("\tclasspath=").append(classpath).append('\n');
-        sb.append("\tconfig=").append(config).append('\n');
-        sb.append("\tlauncher=").append(launcher).append('\n');
-        sb.append("\tmain=").append(main).append('\n');
+        sb.append("\tjar=").append(jar).append('\n');
+        sb.append("\tpaths=").append(paths).append('\n');
         sb.append("\tprofiles=").append(profiles).append('\n');
         sb.append("\tlog=").append(log).append('\n');
         sb.append("\terr=").append(err).append('\n');

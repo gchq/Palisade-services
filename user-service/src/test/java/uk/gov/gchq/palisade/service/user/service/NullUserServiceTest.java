@@ -1,3 +1,5 @@
+package uk.gov.gchq.palisade.service.user.service;
+
 /*
  * Copyright 2020 Crown Copyright
  *
@@ -14,30 +16,27 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.service;
+import org.junit.Test;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-import java.util.HashMap;
-import java.util.Objects;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
-public class MockUserService extends HashMap<UserId, User> implements UserService {
+public class NullUserServiceTest {
+    NullUserService nullUserService = new NullUserService();
 
-    @Override
-    public User getUser(final UserId userId) {
-        User user = this.get(userId);
-        if (Objects.nonNull(user)) {
-            return user;
-        } else {
-            throw new NoSuchUserIdException("No such key: " + userId.toString());
-        }
+    @Test(expected = NoSuchUserIdException.class)
+    public void getUser() {
+        User user = new User().userId("testUser");
+        nullUserService.getUser(user.getUserId());
     }
 
-    @Override
-    public User addUser(final User user) {
-        this.put(user.getUserId(), user);
-        return this.getUser(user.getUserId());
+    @Test
+    public void addUser() {
+        User user = new User().userId("testUser");
+        User actual = nullUserService.addUser(user);
+        assertThat(user, is(actual));
     }
 }

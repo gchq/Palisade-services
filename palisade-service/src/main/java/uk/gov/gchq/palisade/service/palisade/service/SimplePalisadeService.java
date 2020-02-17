@@ -49,7 +49,7 @@ import static java.util.Objects.requireNonNull;
 public class SimplePalisadeService implements PalisadeService {
     //Cache keys
     public static final String RES_COUNT_KEY = "res_count_";
-    /*
+    /**
      * Duration for how long the count of resources requested should live in the cache.
      */
     public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
@@ -97,19 +97,13 @@ public class SimplePalisadeService implements PalisadeService {
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
         final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
-        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-        GetPolicyRequest policyRequest = new GetPolicyRequest();
-        try {
-            policyRequest = policyRequest.user(user.get()).context(request.getContext()).resources(resources.get().keySet());
-            policyRequest.setOriginalRequestId(originalRequestId);
-        } catch (Exception ex) {
-            LOGGER.error("Error occurred: {}", ex.getMessage());
-        }
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
+        policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting policy from policyService: {}", request);
         CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
+        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
         LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
-
         return aggregationService.aggregateDataRequestResults(
                 request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
     }
