@@ -41,6 +41,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Objects.requireNonNull;
 
@@ -109,6 +110,17 @@ public class SimpleDataService implements DataService {
                 .withException(ex));
     }
 
+    private void auditRequestComplete(final DataReaderRequest request, AtomicLong recordsProcessed, AtomicLong recordsReturned) {
+        LOGGER.info("Auditing completed read with audit service");
+        auditService.audit(AuditRequest.ReadRequestCompleteAuditRequest.create(request.getOriginalRequestId())
+                .withUser(request.getUser())
+                .withLeafResource(request.getResource())
+                .withContext(request.getContext())
+                .withRulesApplied(request.getRules())
+                .withNumberOfRecordsReturned(recordsReturned.get())
+                .withNumberOfRecordsProcessed(recordsProcessed.get()));
+    }
+
     @Override
     public CompletableFuture<ReadResponse> read(final ReadRequest request) {
         requireNonNull(request, "The request cannot be null.");
@@ -134,10 +146,11 @@ public class SimpleDataService implements DataService {
             readerRequest.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.info("Calling dataReader with: {}", readerRequest);
 
-            final DataReaderResponse readerResult = getDataReader().read(readerRequest,
-                    this.getClass(),
-                    auditRequestReceiver);
+            AtomicLong recordsProcessed = new AtomicLong(0);
+            AtomicLong recordsReturned = new AtomicLong(0);
+            final DataReaderResponse readerResult = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
             LOGGER.info("Reader returned: {}", readerResult);
+            LOGGER.info("Processed {} and returned {} records", recordsProcessed.get(), recordsReturned.get());
 
             final ReadResponse response = new NoInputReadResponse(readerResult);
             LOGGER.debug("Returning from read: {}", response);
