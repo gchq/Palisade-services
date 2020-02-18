@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -113,13 +115,11 @@ public class SimplePalisadeService implements PalisadeService {
             final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
-        // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
         final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getToken().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
 
         return cacheService.get(cacheRequest)
-
                 .thenApply(cache -> {
                     DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId().getId()));
                     if (null == value.getUser()) {
@@ -127,6 +127,13 @@ public class SimplePalisadeService implements PalisadeService {
                     }
                     LOGGER.debug("Got cache: {}", value);
                     return value;
+                })
+                .thenApply(config -> {
+                    Map<LeafResource, Rules> filteredRules = config.getRules().entrySet().stream()
+                            .filter(entry -> entry.getKey().equals(request.getResource()))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    config.setRules(filteredRules);
+                    return config;
                 })
                 .exceptionally(exception -> {
                     throw createCacheException(request.getId().getId());
