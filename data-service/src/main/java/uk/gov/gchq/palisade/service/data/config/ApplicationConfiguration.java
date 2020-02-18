@@ -34,13 +34,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
-import uk.gov.gchq.palisade.reader.common.AuditRequestCompleteReceiver;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.CacheService;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.EtcdBackingStore;
@@ -61,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.stream.Collectors.toList;
 
@@ -107,7 +106,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.error("Failed to instantiate HadoopDataReader: {}", ex.getMessage());
             return new DataReader() {
                 @Override
-                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, final Class<? extends Service> aClass, final AuditRequestCompleteReceiver auditRequestCompleteReceiver) throws NoCapacityException {
+                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, AtomicLong recordsProcessed, AtomicLong recordsReturned) throws NoCapacityException {
                     return null;
                 }
             };
