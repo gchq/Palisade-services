@@ -113,23 +113,15 @@ public class SimplePalisadeService implements PalisadeService {
             final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
-        // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
         final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getToken().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
 
         return cacheService.get(cacheRequest)
-
                 .thenApply(cache -> {
-                    DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId().getId()));
-                    if (null == value.getUser()) {
-                        throw createCacheException(request.getId().getId());
-                    }
+                    DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getToken().getId()));
                     LOGGER.debug("Got cache: {}", value);
                     return value;
-                })
-                .exceptionally(exception -> {
-                    throw createCacheException(request.getId().getId());
                 });
     }
 

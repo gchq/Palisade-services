@@ -118,8 +118,7 @@ public class SimpleDataService implements DataService {
             LOGGER.debug("Starting to read: {}", request);
 
             final GetDataRequestConfig getConfig = new GetDataRequestConfig()
-                    .token(new RequestId().id(request.getToken()))
-                    .resource(request.getResource());
+                    .token(new RequestId().id(request.getToken()));
             getConfig.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.debug("Calling palisade service with: {}", getConfig);
 

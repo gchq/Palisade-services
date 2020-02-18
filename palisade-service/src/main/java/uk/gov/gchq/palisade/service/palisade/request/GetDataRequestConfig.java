@@ -21,7 +21,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -32,17 +31,10 @@ import static java.util.Objects.requireNonNull;
  */
 public class GetDataRequestConfig extends Request {
     private RequestId token;
-    private Resource resource;
 
     public GetDataRequestConfig token(final RequestId requestId) {
         requireNonNull(requestId, "The request id cannot be set to null.");
         this.token = requestId;
-        return this;
-    }
-
-    public GetDataRequestConfig resource(final Resource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
         return this;
     }
 
@@ -51,17 +43,8 @@ public class GetDataRequestConfig extends Request {
         return token;
     }
 
-    public Resource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
-        return resource;
-    }
-
     public void setToken(final RequestId token) {
         token(token);
-    }
-
-    public void setResource(final Resource resource) {
-        resource(resource);
     }
 
     @Override
@@ -79,7 +62,6 @@ public class GetDataRequestConfig extends Request {
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
                 .append(token, that.token)
-                .append(resource, that.resource)
                 .isEquals();
     }
 
@@ -88,7 +70,6 @@ public class GetDataRequestConfig extends Request {
         return new HashCodeBuilder(7, 37)
                 .appendSuper(super.hashCode())
                 .append(token)
-                .append(resource)
                 .toHashCode();
     }
 
@@ -96,7 +77,6 @@ public class GetDataRequestConfig extends Request {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("token", token)
-                .append("resource", resource)
                 .toString();
     }
 }
