@@ -21,29 +21,51 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+app:
+  version: '@project.version@'
+
 # The launcher creates a command to execute for each service in launcher.services
 # These are built from launcher.defaults with SERVICE substituted for the service.name
 # and any other overrides specified will replace the default
 launcher:
-  default-service:
-    root: palisade-services
-    name: default
-    target: SERVICE/target/SERVICE-0.4.0-SNAPSHOT-exec.jar
-    config: SERVICE/classes
-    profiles: default
-    log: SERVICE.log
+  # search up path for a named root directory
+  root: palisade-services
+  # library relative to launcher.root above
+  example-library: ../palisade-examples/example-library/target/
+  # java -Dloader.path=[...]policy-service-jar-with-dependencies.jar,[...]example-library-jar-with-dependencies.jar -Dspring.profiles.active=jvm -jar [...]policy-service-exec.jar
   services:
-    -
-      name: audit-service
-    -
-      name: data-service
-    -
-      name: discovery-service
-    -
-      name: palisade-service
-    -
-      name: policy-service
-    -
-      name: resource-service
-    -
-      name: user-service
+    audit-service:
+      classpath: audit-service/target/audit-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
+      profiles: default
+      log: audit-service.log
+    data-service:
+      classpath: data-service/target/data-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
+      profiles: default
+      log: data-service.log
+    discovery-service:
+      classpath: discovery-service/target/discovery-service-${app.version}-exec.jar
+      path:
+      profiles: default
+      log: discovery-service.log
+    palisade-service:
+      classpath: palisade-service/target/palisade-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
+      profiles: default
+      log: palisade-service.log
+    policy-service:
+      classpath: policy-service/target/policy-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
+      profiles: default
+      log: policy-service.log
+    resource-service:
+      classpath: resource-service/target/resource-service-${app.version}-exec.jar
+      path:
+      profiles: default
+      log: resource-service.log
+    user-service:
+      classpath: user-service/target/user-service-${app.version}-exec.jar
+      path: ${launcher.example-library}
+      profiles: default
+      log: user-service.log

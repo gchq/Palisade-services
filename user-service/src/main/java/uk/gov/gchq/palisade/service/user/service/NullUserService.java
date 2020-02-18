@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.web;
-
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-@FeignClient(name = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
+public class NullUserService implements UserService {
 
-    @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final GetUserRequest request);
+    @Override
+    public User getUser(final UserId userId) {
+        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
+    }
+
+    @Override
+    public User addUser(final User user) {
+        return user;
+    }
 
 }

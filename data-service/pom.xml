@@ -106,17 +106,17 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-ribbon</artifactId>
             <version>${spring-cloud-starter-ribbon.version}</version>
-        </dependency>
+        </dependency><!--
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
+        </dependency>--><!--
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>readers-common</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>hadoop-reader</artifactId>
@@ -263,6 +263,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layout>ZIP</layout>
+                </configuration>
                 <executions>
                     <execution>
                         <id>repackage</id>

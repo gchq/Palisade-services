@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.data.request;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
@@ -30,22 +31,24 @@ import static java.util.Objects.requireNonNull;
  * This class is used to request the {@link DataRequestConfig}.
  */
 public class GetDataRequestConfig extends Request {
-    private String token;
+    private RequestId token;
     private Resource resource;
 
-    public String getToken() {
-        requireNonNull(token, "The token has not been set.");
-        return token;
-    }
-
-    public GetDataRequestConfig token(final String token) {
-        requireNonNull(token, "The token cannot be set to null.");
-        this.token = token;
+    public GetDataRequestConfig token(final RequestId requestId) {
+        requireNonNull(requestId, "The request id cannot be set to null.");
+        this.token = requestId;
         return this;
     }
 
-    public void setToken(final String token) {
-        token(token);
+    public GetDataRequestConfig resource(final Resource resource) {
+        requireNonNull(resource, "The resource cannot be set to null.");
+        this.resource = resource;
+        return this;
+    }
+
+    public RequestId getToken() {
+        requireNonNull(token, "The request id has not been set.");
+        return token;
     }
 
     public Resource getResource() {
@@ -53,10 +56,8 @@ public class GetDataRequestConfig extends Request {
         return resource;
     }
 
-    public GetDataRequestConfig resource(final Resource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
-        return this;
+    public void setToken(final RequestId token) {
+        token(token);
     }
 
     public void setResource(final Resource resource) {

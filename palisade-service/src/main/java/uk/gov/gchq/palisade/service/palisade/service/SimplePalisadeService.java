@@ -89,20 +89,20 @@ public class SimplePalisadeService implements PalisadeService {
 
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
-
         LOGGER.debug("Getting user from userService: {}", userRequest);
         final CompletableFuture<User> user = userService.getUser(userRequest);
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
+        resourceRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
         final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
-        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
         final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
         policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting policy from policyService: {}", request);
         CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
 
+        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
         LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
         return aggregationService.aggregateDataRequestResults(
                 request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
@@ -112,11 +112,12 @@ public class SimplePalisadeService implements PalisadeService {
     public CompletableFuture<DataRequestConfig> getDataRequestConfig(
             final GetDataRequestConfig request) {
         requireNonNull(request);
-        requireNonNull(request.getId());
+        requireNonNull(request.getToken());
         // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
-        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getId().getId()).service(this.getClass());
+        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getToken().getId()).service(this.getClass());
         LOGGER.debug("Getting cached data: {}", cacheRequest);
+
         return cacheService.get(cacheRequest)
 
                 .thenApply(cache -> {
