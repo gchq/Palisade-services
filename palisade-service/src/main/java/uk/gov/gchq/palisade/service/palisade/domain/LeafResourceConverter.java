@@ -19,16 +19,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+
 import java.io.IOException;
 import java.util.Optional;
 
 @Converter
-public class LeafResourceConverter implements AttributeConverter<LeafResource, String>  {
+public class LeafResourceConverter implements AttributeConverter<LeafResource, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeafResourceConverter.class);
 
     private final ObjectMapper objectMapper;
@@ -38,7 +40,7 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
     }
 
     @Override
-    public String convertToDatabaseColumn(LeafResource leafResource) {
+    public String convertToDatabaseColumn(final LeafResource leafResource) {
         try {
             return this.objectMapper.writeValueAsString(leafResource);
         } catch (JsonProcessingException e) {
@@ -48,7 +50,7 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
     }
 
     @Override
-    public LeafResource convertToEntityAttribute(String attribute) {
+    public LeafResource convertToEntityAttribute(final String attribute) {
         if (Optional.ofNullable(attribute).isPresent()) {
             try {
                 return this.objectMapper.readValue(attribute, LeafResource.class);

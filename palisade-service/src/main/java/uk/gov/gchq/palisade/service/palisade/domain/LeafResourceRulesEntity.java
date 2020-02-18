@@ -26,6 +26,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 @Entity
@@ -50,7 +51,8 @@ public class LeafResourceRulesEntity {
     @Convert(converter = RulesConverter.class)
     private Rules<?> rules;
 
-    public LeafResourceRulesEntity() { }
+    public LeafResourceRulesEntity() {
+    }
 
     public LeafResourceRulesEntity(final RequestId request, final LeafResource leafResource, final Rules<?> rules) {
         this.requestId = request.getId();
@@ -67,7 +69,7 @@ public class LeafResourceRulesEntity {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -75,7 +77,7 @@ public class LeafResourceRulesEntity {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(final String requestId) {
         this.requestId = requestId;
     }
 
@@ -83,7 +85,7 @@ public class LeafResourceRulesEntity {
         return leafResource;
     }
 
-    public void setLeafResource(LeafResource leafResource) {
+    public void setLeafResource(final LeafResource leafResource) {
         this.leafResource = leafResource;
     }
 
@@ -91,7 +93,7 @@ public class LeafResourceRulesEntity {
         return rules;
     }
 
-    public void setRules(Rules<?> rules) {
+    public void setRules(final Rules<?> rules) {
         this.rules = rules;
     }
 }

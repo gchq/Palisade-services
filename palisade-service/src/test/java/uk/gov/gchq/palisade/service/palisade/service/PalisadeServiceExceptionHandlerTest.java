@@ -46,6 +46,7 @@ import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
@@ -75,6 +76,7 @@ public class PalisadeServiceExceptionHandlerTest {
     private ResultAggregationService aggregationService;
     private AuditService auditService;
     private SimpleCacheService cacheService;
+    private PersistenceLayer persistenceLayer;
     private PolicyService policyService;
     private ResourceService resourceService;
     private UserService userService;
@@ -99,7 +101,7 @@ public class PalisadeServiceExceptionHandlerTest {
         executor = Executors.newSingleThreadExecutor();
         setupCacheService();
         mockOtherServices();
-        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, executor, aggregationService);
+        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, persistenceLayer, executor, aggregationService);
         LOGGER.info("Simple Palisade Service created: {}", service);
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
@@ -194,6 +196,7 @@ public class PalisadeServiceExceptionHandlerTest {
         resourceService = Mockito.mock(ResourceService.class);
         userService = Mockito.mock(UserService.class);
         aggregationService = Mockito.mock(ResultAggregationService.class);
+        persistenceLayer = Mockito.mock(PersistenceLayer.class);
     }
 
     private void setupCacheService() {

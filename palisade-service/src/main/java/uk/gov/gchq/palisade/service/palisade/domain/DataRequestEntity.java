@@ -30,6 +30,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +56,8 @@ public class DataRequestEntity {
     @Transient
     private Map<LeafResource, Rules> leafResourceMap;
 
-    public DataRequestEntity() { }
+    public DataRequestEntity() {
+    }
 
     public DataRequestEntity(final DataRequestConfig config) {
         this.requestId = config.getOriginalRequestId().getId();
@@ -74,7 +76,7 @@ public class DataRequestEntity {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(final String requestId) {
         this.requestId = requestId;
     }
 
@@ -82,7 +84,7 @@ public class DataRequestEntity {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(final User user) {
         this.user = user;
     }
 
@@ -90,7 +92,7 @@ public class DataRequestEntity {
         return context;
     }
 
-    public void setContext(Context context) {
+    public void setContext(final Context context) {
         this.context = context;
     }
 
@@ -98,7 +100,7 @@ public class DataRequestEntity {
         return Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
     }
 
-    public void setLeafResourceMap(Map<LeafResource, Rules> leafResourceMap) {
+    public void setLeafResourceMap(final Map<LeafResource, Rules> leafResourceMap) {
         this.leafResourceMap = Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
     }
 }

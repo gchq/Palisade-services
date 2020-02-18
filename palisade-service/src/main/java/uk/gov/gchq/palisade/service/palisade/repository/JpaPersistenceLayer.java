@@ -20,6 +20,7 @@ import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceRulesEntity;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import javax.transaction.Transactional;
+
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,8 +50,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         final DataRequestEntity dataRequest = new DataRequestEntity(dataRequestConfig);
 
         final List<LeafResourceRulesEntity> resources = dataRequestConfig.getRules().entrySet().stream()
-                                                            .map(entry -> new LeafResourceRulesEntity(dataRequestConfig.getId(), entry.getKey(), entry.getValue()))
-                                                                .collect(Collectors.toList());
+                .map(entry -> new LeafResourceRulesEntity(dataRequestConfig.getId(), entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
 
         this.leafResourceRulesRepository.saveAll(resources);
         this.dataRequestRepository.save(dataRequest);

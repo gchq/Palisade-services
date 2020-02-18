@@ -19,10 +19,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -37,7 +39,7 @@ public class ContextConverter implements AttributeConverter<Context, String> {
     }
 
     @Override
-    public String convertToDatabaseColumn(Context context) {
+    public String convertToDatabaseColumn(final Context context) {
         try {
             return this.objectMapper.writeValueAsString(context);
         } catch (JsonProcessingException e) {
@@ -47,7 +49,7 @@ public class ContextConverter implements AttributeConverter<Context, String> {
     }
 
     @Override
-    public Context convertToEntityAttribute(String attribute) {
+    public Context convertToEntityAttribute(final String attribute) {
         if (Optional.ofNullable(attribute).isPresent()) {
             try {
                 return this.objectMapper.readValue(attribute, Context.class);

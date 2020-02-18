@@ -19,15 +19,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.rule.Rules;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+
 import java.io.IOException;
 import java.util.Optional;
 
 @Converter
-public class RulesConverter implements AttributeConverter<Rules<?>, String>  {
+public class RulesConverter implements AttributeConverter<Rules<?>, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RulesConverter.class);
 
     private final ObjectMapper objectMapper;

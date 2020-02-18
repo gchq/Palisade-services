@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.repository;
 
 import org.springframework.data.repository.CrudRepository;
+
 import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceRulesEntity;
 
 import java.util.List;
