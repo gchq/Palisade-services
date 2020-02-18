@@ -46,7 +46,6 @@ import uk.gov.gchq.palisade.service.data.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.K8sBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
@@ -80,22 +79,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public SimpleDataService simpleDataService(final Map<String, BackingStore> backingStores,
+    public SimpleDataService simpleDataService(final CacheService cacheService,
                                                final AuditService auditService,
                                                final PalisadeService palisadeService,
-                                               final DataReader dataReader,
-                                               final AuditRequestReceiver auditRequestReceiver) {
-        return new SimpleDataService(cacheService(backingStores),
-                auditService,
-                palisadeService,
-                dataReader,
-                auditRequestReceiver
-        );
-    }
-
-    @Bean
-    public AuditRequestReceiver auditRequestReceiver(final AuditService auditService) {
-        return new AuditRequestReceiver(auditService);
+                                               final DataReader dataReader) {
+        return new SimpleDataService(cacheService, auditService, palisadeService, dataReader);
     }
 
     @Bean
@@ -106,7 +94,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             LOGGER.error("Failed to instantiate HadoopDataReader: {}", ex.getMessage());
             return new DataReader() {
                 @Override
-                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, AtomicLong recordsProcessed, AtomicLong recordsReturned) throws NoCapacityException {
+                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) throws NoCapacityException {
                     return null;
                 }
             };

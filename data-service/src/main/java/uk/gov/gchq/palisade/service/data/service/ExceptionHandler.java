@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -46,7 +45,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
-    @ExceptionHandler({
+    @org.springframework.web.bind.annotation.ExceptionHandler({
             NoPolicyException.class,
             NullPointerException.class,
             FileNotFoundException.class,

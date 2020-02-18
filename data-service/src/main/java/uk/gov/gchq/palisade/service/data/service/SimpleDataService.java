@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
-import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
@@ -66,14 +65,12 @@ public class SimpleDataService implements DataService {
     private DataReader dataReader;
     private CacheService cacheService;
     private AuditService auditService;
-    private AuditRequestReceiver auditRequestReceiver;
 
-    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader, final AuditRequestReceiver auditRequestReceiver) {
+    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader) {
         this.cacheService = cacheService;
         this.auditService = auditService;
         this.palisadeService = palisadeService;
         this.dataReader = dataReader;
-        this.auditRequestReceiver = auditRequestReceiver;
     }
 
     public SimpleDataService auditService(final AuditService auditService) {
@@ -110,7 +107,7 @@ public class SimpleDataService implements DataService {
                 .withException(ex));
     }
 
-    private void auditRequestComplete(final DataReaderRequest request, AtomicLong recordsProcessed, AtomicLong recordsReturned) {
+    private void auditRequestComplete(final DataReaderRequest request, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
         LOGGER.info("Auditing completed read with audit service");
         auditService.audit(AuditRequest.ReadRequestCompleteAuditRequest.create(request.getOriginalRequestId())
                 .withUser(request.getUser())
