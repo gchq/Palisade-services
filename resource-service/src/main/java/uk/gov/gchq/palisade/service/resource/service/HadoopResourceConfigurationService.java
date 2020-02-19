@@ -21,17 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.request.AddCacheRequest;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
@@ -39,53 +33,40 @@ public class HadoopResourceConfigurationService extends HadoopResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HadoopResourceConfigurationService.class);
 
-    private final CacheService cacheService;
     private HadoopResourceService resourceService;
     private Configuration configuration;
 
-    public HadoopResourceConfigurationService(final Configuration configuration, final CacheService cacheService) throws IOException {
-        this.cacheService = cacheService;
+    public HadoopResourceConfigurationService(final Configuration configuration) throws IOException {
         this.configuration = configuration;
         resourceService = new HadoopResourceService(configuration);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request) {
-        return resourceService.getResourcesByResource(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
+        return resourceService.getResourcesByResource(resource);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
-        return resourceService.getResourcesById(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesById(final String string) {
+        return resourceService.getResourcesById(string);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request) {
-        return resourceService.getResourcesByType(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesByType(final String string) {
+        return resourceService.getResourcesByType(string);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
-        return resourceService.getResourcesBySerialisedFormat(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String string) {
+        return resourceService.getResourcesBySerialisedFormat(string);
     }
 
     @Override
-    public CompletableFuture<Boolean>   addResource(final AddResourceRequest addResourceRequest) {
-        LOGGER.debug("Adding Resource : {}", addResourceRequest);
-        LOGGER.info("Adding Resource: {}", addResourceRequest.getId().getId());
-        requireNonNull(addResourceRequest, "Request cannot be empty");
-        requireNonNull(addResourceRequest.getResource(), "Request Resource cannot be empty");
-        requireNonNull(addResourceRequest.getConnectionDetail(), "Request Connection cannot be empty");
+    public Resource addResource(final Resource resource) {
+        LOGGER.debug("Adding Resource : {}", resource);
+        LOGGER.info("Adding Resource: {}", resource.getId());
+        requireNonNull(resource, "Request cannot be empty");
 
-        AddCacheRequest<ConnectionDetail> addCacheRequest = new AddCacheRequest<ConnectionDetail>()
-                .service(this.getClass())
-                .key(addResourceRequest.getResource().toString())
-                .value(addResourceRequest.getConnectionDetail());
-        cacheService.add(addCacheRequest).join();
-        resourceService.addDataService(addCacheRequest.getValue());
-        LOGGER.debug("Resource added: {}", addCacheRequest);
-        LOGGER.info("Resource added: {}, {}", addCacheRequest.getKey(), addCacheRequest.getValue());
-
-        return CompletableFuture.completedFuture(true);
+        return resource;
     }
 }

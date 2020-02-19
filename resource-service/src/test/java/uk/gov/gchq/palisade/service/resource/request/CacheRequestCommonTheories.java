@@ -10,6 +10,11 @@ import org.mockito.Mock;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
+import uk.gov.gchq.palisade.service.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.request.CacheRequest;
+import uk.gov.gchq.palisade.service.request.GetCacheRequest;
+import uk.gov.gchq.palisade.service.request.ListCacheRequest;
+import uk.gov.gchq.palisade.service.request.RemoveCacheRequest;
 import uk.gov.gchq.palisade.service.resource.impl.MockDataService;
 
 import static org.hamcrest.MatcherAssert.assertThat;

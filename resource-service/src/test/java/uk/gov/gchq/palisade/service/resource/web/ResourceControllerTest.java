@@ -24,16 +24,19 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
@@ -42,8 +45,10 @@ import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.request.Request;
 import uk.gov.gchq.palisade.service.resource.impl.MockResourceService;
+import uk.gov.gchq.palisade.service.resource.service.ResourceServiceCachingProxy;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +59,7 @@ import java.util.stream.Collectors;
 
 @RunWith(Theories.class)
 public class ResourceControllerTest {
+    private static LeafResource resource = new FileResource().id("/path/test_file.txt").type("test").serialisedFormat("txt");
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private ResourceController controller;
@@ -66,7 +72,7 @@ public class ResourceControllerTest {
         appender.start();
         logger.addAppender(appender);
         resourceService = new MockResourceService();
-        controller = new ResourceController(resourceService);
+        controller = new ResourceController(new ResourceServiceCachingProxy(resourceService));
     }
 
     @After
@@ -82,20 +88,28 @@ public class ResourceControllerTest {
                 .collect(Collectors.toList());
     }
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @DataPoints("GetRequests")
     public static List<Request> requests = Arrays.asList(
+            new GetResourcesByIdRequest().resourceId(resource.getId()),
+            new GetResourcesByResourceRequest().resource(resource),
+            new GetResourcesBySerialisedFormatRequest().serialisedFormat(resource.getSerialisedFormat()),
+            new GetResourcesByTypeRequest().type(resource.getType()));
+
+    @DataPoints("GetErrorRequests")
+    public static List<Request> errorRequests = Arrays.asList(
             new GetResourcesByIdRequest(),
             new GetResourcesByResourceRequest(),
             new GetResourcesBySerialisedFormatRequest(),
             new GetResourcesByTypeRequest());
 
-    @DataPoint("AddRequests")
-    public static AddResourceRequest addRequest = new AddResourceRequest();
+    @DataPoint("AddRequest")
+    public static AddResourceRequest addRequest = new AddResourceRequest().resource(resource);
 
-    @DataPoints
-    public static List<Exception> exceptions = Arrays.asList(
-            new InterruptedException("InterruptedException"),
-            new ExecutionException("ExecutionException", null));
+    @DataPoint("AddErrorRequest")
+    public static AddResourceRequest addErrorRequest = new AddResourceRequest();
 
     private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
     {
@@ -129,26 +143,18 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void errorOnRequestException(@FromDataPoints("GetRequests") Request request, Exception exception) {
+    public void errorOnRequestException(@FromDataPoints("GetErrorRequests") Request request) {
         // Given
         Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
-        resourceService.willThrow(exception);
+        expectedException.expect(NullPointerException.class);
 
         // When
         request.setOriginalRequestId(new RequestId().id("originalId"));
         method.apply(request);
-
-        // Then
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
-
-        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(exception.getMessage())
-        ));
     }
 
     @Theory
-    public void infoOnAddResourceRequest(@FromDataPoints("AddRequests") AddResourceRequest request) {
+    public void infoOnAddResourceRequest(@FromDataPoints("AddRequest") AddResourceRequest request) {
         // Given
         Boolean expectedResponse = true;
 
@@ -166,19 +172,12 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void errorOnAddException(@FromDataPoints("AddRequests") AddResourceRequest request, Exception exception) {
+    public void errorOnAddException(@FromDataPoints("AddErrorRequest") AddResourceRequest request) {
+
         // Given
-        resourceService.willThrow(exception);
+        expectedException.expect(NullPointerException.class);
 
         // When
         controller.addResource(request);
-
-        // Then
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
-
-        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(exception.getMessage())
-        ));
     }
 }

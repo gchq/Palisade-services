@@ -30,7 +30,7 @@ import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.resource.service.ResourceServiceCachingProxy;
 
 import java.util.Map;
 
@@ -40,10 +40,10 @@ public class ResourceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-    private ResourceService service;
+    private ResourceServiceCachingProxy service;
 
-    public ResourceController(final ResourceService service) {
-        this.service = service;
+    public ResourceController(final ResourceServiceCachingProxy resourceService) {
+        this.service = resourceService;
     }
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
@@ -66,7 +66,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.info("Invoking getResourceByType: {}", request);
         Map<LeafResource, ConnectionDetail> response = service.getResourcesByType(request.getType());
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
@@ -74,7 +74,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
         Map<LeafResource, ConnectionDetail> response = service.getResourcesBySerialisedFormat(request.getSerialisedFormat());
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 

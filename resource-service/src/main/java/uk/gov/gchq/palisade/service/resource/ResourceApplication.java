@@ -21,17 +21,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
-import java.util.Arrays;
-
+@EnableCaching
 @EnableEurekaClient
 @SpringBootApplication
 public class ResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceApplication.class);
 
     public static void main(final String[] args) {
-        LOGGER.debug("ResourceApplication started with: {}", Arrays.toString(args));
+        LOGGER.debug("ResourceApplication started with: {} {} {}", ResourceApplication.class, "main", args);
 
         new SpringApplicationBuilder(ResourceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);

@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.resource.impl;
 import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
@@ -30,11 +30,10 @@ import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class MockResourceService implements ResourceService {
+public class MockResourceService extends HashMap<String, Resource> implements ResourceService {
     private Map<LeafResource, ConnectionDetail> resourcesForIds = Mockito.mock(Map.class);
     private Map<LeafResource, ConnectionDetail> resourcesForResource = Mockito.mock(Map.class);
     private Map<LeafResource, ConnectionDetail> resourcesForType = Mockito.mock(Map.class);
@@ -68,43 +67,39 @@ public class MockResourceService implements ResourceService {
         serviceThrows = ex;
     }
 
-    private CompletableFuture<Map<LeafResource, ConnectionDetail>> handleRequest(Request request) {
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> future = CompletableFuture.supplyAsync(resourceSupplier.apply(request));
-        if (serviceThrows != null) {
-            future.obtrudeException(serviceThrows);
-        }
-        return future;
+    private Map<LeafResource, ConnectionDetail> handleRequest(Request request) {
+        return resourceSupplier.apply(request).get();
     }
-    private CompletableFuture<Boolean> handleRequest(AddResourceRequest request) {
-        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> true);
-        if (serviceThrows != null) {
-            future.obtrudeException(serviceThrows);
-        }
-        return future;
+    private Resource handleAddRequest(Resource resource) {
+        return resource;
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByResource(final GetResourcesByResourceRequest request) {
-        return handleRequest(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
+        GetResourcesByResourceRequest resourceRequest = new GetResourcesByResourceRequest();
+        return handleRequest(resourceRequest);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
-        return handleRequest(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
+        GetResourcesByIdRequest idRequest = new GetResourcesByIdRequest();
+        return handleRequest(idRequest);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesByType(final GetResourcesByTypeRequest request) {
-        return handleRequest(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
+        GetResourcesByTypeRequest typeRequest = new GetResourcesByTypeRequest();
+        return handleRequest(typeRequest);
     }
 
     @Override
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
-        return handleRequest(request);
+    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String resourceFormat) {
+        GetResourcesBySerialisedFormatRequest formatRequest = new GetResourcesBySerialisedFormatRequest();
+        return handleRequest(formatRequest);
     }
 
     @Override
-    public CompletableFuture<Boolean> addResource(final AddResourceRequest request) {
-        return handleRequest(request);
+    public Resource addResource(final Resource resource) {
+        return handleAddRequest(resource);
     }
 }

@@ -37,7 +37,6 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  +- io.grpc:grpc-core:jar:1.17.1:compile
 |  |  +- io.grpc:grpc-context:jar:1.17.1:compile
 |  |  +- com.google.code.gson:gson:jar:2.8.6:compile
-|  |  +- com.google.errorprone:error_prone_annotations:jar:2.2.0:compile
 |  |  +- com.google.code.findbugs:jsr305:jar:3.0.2:compile
 |  |  +- org.codehaus.mojo:animal-sniffer-annotations:jar:1.17:compile
 |  |  +- io.opencensus:opencensus-api:jar:0.17.0:compile
@@ -119,6 +118,11 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  \- org.springframework.cloud:spring-cloud-netflix-hystrix:jar:2.2.0.RELEASE:compile
 |     \- org.springframework.boot:spring-boot-starter-aop:jar:2.2.0.RELEASE:compile
 |        \- org.aspectj:aspectjweaver:jar:1.9.4:compile
++- org.springframework.boot:spring-boot-starter-cache:jar:2.2.0.RELEASE:compile
+|  \- org.springframework:spring-context-support:jar:5.2.0.RELEASE:compile
++- com.github.ben-manes.caffeine:caffeine:jar:2.8.1:compile
+|  +- org.checkerframework:checker-qual:jar:3.1.0:compile
+|  \- com.google.errorprone:error_prone_annotations:jar:2.3.4:compile
 +- uk.gov.gchq.palisade:common:jar:0.4.0-SNAPSHOT:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.10.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.10.0:compile
