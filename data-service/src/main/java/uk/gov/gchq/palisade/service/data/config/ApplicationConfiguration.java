@@ -25,12 +25,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
+import uk.gov.gchq.palisade.reader.common.AuditRequestCompleteReceiver;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.EtcdBackingStore;
@@ -87,9 +95,18 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new AuditRequestReceiver(auditService);
     }
 
-    @Bean
-    public DataReader dataReader() throws IOException {
-        return new HadoopDataReader();
+    public DataReader dataReader(final CacheService cacheService) {
+        try {
+            return new HadoopDataReader().cacheService(cacheService);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to instantiate HadoopDataReader: {}", ex.getMessage());
+            return new DataReader() {
+                @Override
+                public DataReaderResponse read(final DataReaderRequest dataReaderRequest, final Class<? extends Service> aClass, final AuditRequestCompleteReceiver auditRequestCompleteReceiver) throws NoCapacityException {
+                    return null;
+                }
+            };
+        }
     }
 
     @Bean
@@ -154,5 +171,20 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new ApplicationAsyncExceptionHandler();
+    }
+
+    @Bean
+    protected WebMvcConfigurer webMvcConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+                configurer.setTaskExecutor(getTaskExecutor());
+            }
+        };
+    }
+
+    @Bean(name = "concurrentTaskExecutor")
+    public ConcurrentTaskExecutor getTaskExecutor() {
+        return new ConcurrentTaskExecutor(this.getAsyncExecutor());
     }
 }

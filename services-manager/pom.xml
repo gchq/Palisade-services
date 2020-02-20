@@ -91,25 +91,22 @@
                     <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
+            <!-- a number of stages for generating a README.md with correct versions (iptc. services-manager-VERSION-exec.jar -->
+            <!--  -->
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>readme-generator</id>
+                        <id>copy-and-rename-file</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/main/resources/doc</directory>
-                                    <includes>
-                                        <include>README.md</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <sourceFile>${basedir}/src/main/resources/doc/README-TEMPLATE.md</sourceFile>
+                            <destinationFile>${basedir}/README.md</destinationFile>
                         </configuration>
                     </execution>
                 </executions>
