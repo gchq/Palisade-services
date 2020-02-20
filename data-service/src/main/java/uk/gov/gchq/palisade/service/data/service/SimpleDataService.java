@@ -147,7 +147,7 @@ public class SimpleDataService implements DataService {
             AtomicLong recordsReturned = new AtomicLong(0);
             final DataReaderResponse readerResult = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
             LOGGER.info("Reader returned: {}", readerResult);
-            LOGGER.info("Processed {} and returned {} records", recordsProcessed.get(), recordsReturned.get());
+            LOGGER.info("Processed {} and returned {} records, reader returned: {}", recordsProcessed.get(), recordsReturned.get(), readerResult);
 
             final ReadResponse response = new NoInputReadResponse(readerResult);
             LOGGER.debug("Returning from read: {}", response);
