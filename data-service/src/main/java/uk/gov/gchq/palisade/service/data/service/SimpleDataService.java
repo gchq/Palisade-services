@@ -146,12 +146,10 @@ public class SimpleDataService implements DataService {
             AtomicLong recordsProcessed = new AtomicLong(0);
             AtomicLong recordsReturned = new AtomicLong(0);
             final DataReaderResponse readerResult = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
-            LOGGER.info("Reader returned: {}", readerResult);
+            auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
             LOGGER.info("Processed {} and returned {} records, reader returned: {}", recordsProcessed.get(), recordsReturned.get(), readerResult);
 
-            final ReadResponse response = new NoInputReadResponse(readerResult);
-            LOGGER.debug("Returning from read: {}", response);
-            return response;
+            return (ReadResponse) new NoInputReadResponse(readerResult);
         }).exceptionally(ex -> {
             LOGGER.warn("Error handling: " + ex.getMessage());
             auditRequestReceivedException(request, ex);
