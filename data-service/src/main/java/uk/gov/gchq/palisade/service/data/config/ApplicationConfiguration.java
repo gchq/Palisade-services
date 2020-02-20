@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -67,6 +69,8 @@ import static java.util.stream.Collectors.toList;
  */
 @Configuration
 @EnableConfigurationProperties(CacheConfiguration.class)
+@EnableAsync
+@EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
@@ -95,6 +99,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new AuditRequestReceiver(auditService);
     }
 
+    @Bean
     public DataReader dataReader(final CacheService cacheService) {
         try {
             return new HadoopDataReader().cacheService(cacheService);
