@@ -30,7 +30,6 @@ import org.springframework.util.ReflectionUtils;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.reader.common.AuditRequestCompleteReceiver;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
@@ -40,7 +39,6 @@ import uk.gov.gchq.palisade.service.CacheService;
 import uk.gov.gchq.palisade.service.data.repository.BackingStore;
 import uk.gov.gchq.palisade.service.data.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
@@ -77,22 +75,12 @@ public class SimpleDataServiceTest {
     LeafResource leafResource;
 
 
-    private class AuditRequestReceiverTest extends AuditRequestReceiver {
-
-        public AuditRequestReceiverTest(AuditService auditService) {
-            super(auditService);
-        }
-    }
-
-    private AuditRequestReceiver auditRequestReceiver;
-
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         setupCacheService();
         mockOtherServices();
-        simpleDataService = new SimpleDataService(cacheService, auditService, palisadeService, dataReader, auditRequestReceiver);
+        simpleDataService = new SimpleDataService(cacheService, auditService, palisadeService, dataReader);
         LOGGER.info("Simple Data Service created: {}", simpleDataService);
     }
 
@@ -194,7 +182,7 @@ public class SimpleDataServiceTest {
         when(readRequest.getOriginalRequestId()).thenReturn(requestId);
         when(readRequest.getResource()).thenReturn(leafResource);
         DataReaderResponse dataReaderResponse = Mockito.mock(DataReaderResponse.class);
-        when(dataReader.read(any(DataReaderRequest.class), any(), any(AuditRequestCompleteReceiver.class))).thenReturn(dataReaderResponse);
+        when(dataReader.read(any(DataReaderRequest.class), any(), any())).thenReturn(dataReaderResponse);
 
         DataRequestConfig dataRequestConfig = Mockito.mock(DataRequestConfig.class);
 
@@ -237,7 +225,7 @@ public class SimpleDataServiceTest {
         when(readRequest.getOriginalRequestId()).thenReturn(requestId);
         when(readRequest.getResource()).thenReturn(leafResource);
         DataReaderResponse dataReaderResponse = Mockito.mock(DataReaderResponse.class);
-        when(dataReader.read(any(DataReaderRequest.class), any(), any(AuditRequestCompleteReceiver.class))).thenReturn(dataReaderResponse);
+        when(dataReader.read(any(DataReaderRequest.class), any(), any())).thenReturn(dataReaderResponse);
         DataRequestConfig dataRequestConfig = Mockito.mock(DataRequestConfig.class);
         User user = Mockito.mock(User.class);
         when(dataRequestConfig.getUser()).thenReturn(user);
@@ -290,7 +278,6 @@ public class SimpleDataServiceTest {
 
     private void mockOtherServices() {
         auditService = Mockito.mock(AuditService.class);
-        auditRequestReceiver = new AuditRequestReceiverTest(auditService);
         palisadeService = Mockito.mock(PalisadeService.class);
         dataReader = Mockito.mock(DataReader.class);
     }
