@@ -30,8 +30,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceConfigurationService;
-import uk.gov.gchq.palisade.service.resource.service.NullResourceService;
 import uk.gov.gchq.palisade.service.resource.service.ResourceServiceCachingProxy;
+import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -46,11 +46,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean(name = "null")
-    @ConditionalOnProperty(prefix = "resource-service", name = "implementation", havingValue = "null", matchIfMissing = true)
-    public NullResourceService nullResourceService() {
-        LOGGER.info("Instantiated NullResourceService");
-        return new NullResourceService();
+    @Bean(name = "simple")
+    @ConditionalOnProperty(prefix = "resource-service", name = "implementation", havingValue = "simple", matchIfMissing = true)
+    public SimpleResourceService simpleResourceService() {
+        LOGGER.info("Instantiated SimpleResourceService");
+        return new SimpleResourceService();
     }
 
     @Bean(name = "hadoop")

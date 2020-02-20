@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
@@ -63,14 +63,14 @@ public class ResourceServiceCachingProxy {
         return service.getResourcesBySerialisedFormat(serialisedFormat);
     }
 
-    @Caching(put = {
-            @CachePut(cacheNames = "resources", key = "#resource"),
-            @CachePut(cacheNames = "resourceId", key = "#resource.id"),
-            @CachePut(cacheNames = "resourceType", key = "#resource.type"),
-            @CachePut(cacheNames = "resourceFormat", key = "#resource.serialisedFormat")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "resources", key = "#resource"),
+            @CacheEvict(cacheNames = "resourceId", key = "#resource.id"),
+            @CacheEvict(cacheNames = "resourceType", key = "#resource.type"),
+            @CacheEvict(cacheNames = "resourceFormat", key = "#resource.serialisedFormat")
     })
     public Resource addResource(final Resource resource) {
-        LOGGER.info("Cache add for resource: {}", resource.getId());
+        LOGGER.info("Cache evict for resource: {}", resource);
         return service.addResource(resource);
     }
 }

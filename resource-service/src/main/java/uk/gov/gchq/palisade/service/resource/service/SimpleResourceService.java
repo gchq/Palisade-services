@@ -20,34 +20,49 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-public class NullResourceService implements ResourceService {
+public class SimpleResourceService implements ResourceService {
 
+    private Map<Resource, Map<LeafResource, ConnectionDetail>> resources = new HashMap<>();
+    private Map<String, Resource> resourceIds = new HashMap<>();
+    private Map<String, Resource> resourceTypes = new HashMap<>();
+    private Map<String, Resource> resourceFormats = new HashMap<>();
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
-        throw new RuntimeException(String.format("No resource matching %s found in cache", resource));
+        return resources.get(resource);
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
-        throw new RuntimeException(String.format("No resource matching id %s found in cache", resourceId));
+        return resources.get(resourceIds.get(resourceId));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
-        throw new RuntimeException(String.format("No resource matching type %s found in cache", resourceType));
+        return resources.get(resourceTypes.get(resourceType));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String resourceFormat) {
-        throw new RuntimeException(String.format("No resource matching format %s found in cache", resourceFormat));
+        return resources.get(resourceFormats.get(resourceFormat));
     }
 
     @Override
-    public Resource addResource(final Resource leafResource) {
-        return leafResource;
+    public Resource addResource(final Resource resource) {
+        if (resource instanceof LeafResource) {
+            resources.put(resource, Collections.singletonMap((LeafResource) resource, new SimpleConnectionDetail().uri("localhost:8082")));
+            resourceIds.put(resource.getId(), resource);
+            resourceTypes.put(((LeafResource) resource).getType(), resource);
+            resourceFormats.put(((LeafResource) resource).getSerialisedFormat(), resource);
+            return resource;
+        } else {
+            return null;
+        }
     }
 }

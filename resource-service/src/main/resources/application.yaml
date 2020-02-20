@@ -49,4 +49,4 @@ management:
       enabled: true
 
 resource-service:
-  implementation: hadoop
+  implementation: simple
