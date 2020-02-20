@@ -68,9 +68,9 @@ import static java.util.stream.Collectors.toList;
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableConfigurationProperties(CacheConfiguration.class)
 @EnableAsync
 @EnableScheduling
-@EnableConfigurationProperties(CacheConfiguration.class)
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
@@ -173,6 +173,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         }).findFirst().orElse(null);
     }
 
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new ApplicationAsyncExceptionHandler();
+    }
+
     @Bean
     protected WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
@@ -186,10 +191,5 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "concurrentTaskExecutor")
     public ConcurrentTaskExecutor getTaskExecutor() {
         return new ConcurrentTaskExecutor(this.getAsyncExecutor());
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
     }
 }

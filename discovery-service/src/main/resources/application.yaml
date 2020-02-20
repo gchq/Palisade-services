@@ -28,9 +28,14 @@ eureka:
   instance:
     hostname: localhost
     port: 8083
+    preferIpAddress: true
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000 # default 60000
+    response-cache-update-interval-ms: 3000 # default 30000
 
 management:
   endpoints:
@@ -40,3 +45,6 @@ management:
         - health
         - info
         - metrics
+        - loggers
+    loggers:
+      enabled: true
