@@ -29,6 +29,7 @@
     <artifactId>policy-service</artifactId>
 
     <properties>
+        <eureka.version>1.9.16</eureka.version>
         <fabric8.version>4.3.0</fabric8.version>
         <bcprov-jdk15on>1.61</bcprov-jdk15on>
         <jetcd.version>0.3.0</jetcd.version>
@@ -46,6 +47,7 @@
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
+            <version>${eureka.version}</version>
         </dependency>
         <dependency>
             <groupId>io.etcd</groupId>
