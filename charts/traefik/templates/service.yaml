@@ -20,6 +20,12 @@ metadata:
 spec:
     externalTrafficPolicy: Local
     type: LoadBalancer
+    {{- if .Values.global.globalIPAddresses }}
+    loadBalancerSourceRanges:
+    {{- range .Values.global.globalIPAddresses }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
     ports:
         - protocol: TCP
           name: web
