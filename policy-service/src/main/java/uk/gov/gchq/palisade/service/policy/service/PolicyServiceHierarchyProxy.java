@@ -27,7 +27,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -44,9 +43,9 @@ import static java.util.Objects.requireNonNull;
 public class PolicyServiceHierarchyProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
-    PolicyServiceCachingProxy service;
+    PolicyService service;
 
-    public PolicyServiceHierarchyProxy(final PolicyServiceCachingProxy service) {
+    public PolicyServiceHierarchyProxy(final PolicyService service) {
         this.service = service;
     }
 
@@ -57,7 +56,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         // If the service says we can access the resource naively, check up the resource hierarchy
         // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
         return canAccessResource.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules)
-                .map(rule -> Util.applyRulesToItem(resource, user, context, rule, new AtomicLong(0), new AtomicLong(0))));
+                .map(rule -> Util.applyRulesToItem(resource, user, context, rule)));
     }
 
     /**

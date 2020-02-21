@@ -15,467 +15,190 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import com.google.common.collect.Sets;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.HasSensitiveAuthRule;
-import uk.gov.gchq.palisade.policy.HasTestingPurpose;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.StubResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.policy.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
-import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
-import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.MultiPolicy;
+import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
-import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
 @RunWith(JUnit4.class)
 public class PolicyServiceHierarchyProxyTest {
-    private static final SimpleCacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore());
     private final User user = new User().userId("testUser");
-    private final FileResource fileResource1 = createTestFileResource(1);
-    private final FileResource fileResource2 = createTestFileResource(2);
-    private final SystemResource systemResource = createTestSystemResource();
-    private final DirectoryResource directoryResource = createTestDirectoryResource();
-    private PolicyServiceHierarchyProxy policyService;
+    private final User sensitiveUser = new User().userId("sensitiveTestUser").addAuths(Collections.singleton("Sensitive"));
+    private final User secretUser = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
+    private final Context context = new Context().purpose("testing");
 
-    private Logger logger;
-    private ListAppender<ILoggingEvent> appender;
+    // A system that only allows text files to be seen
+    private final SystemResource txtSystem = new SystemResource().id("/txt");
+    private final Policy txtPolicy = new Policy<>()
+            .owner(user)
+            .resourceLevelRule("Resource serialised format is txt", new IsTextResourceRule());
 
+    // A directory that only allows JSON serialisation
+    private final DirectoryResource jsonDirectory = new DirectoryResource().id("/txt/json").parent(txtSystem);
+    private final Policy jsonPolicy = new Policy<>()
+            .owner(user)
+            .resourceLevelRule("Does nothing", (PredicateRule<Resource>) (resource, user, context) -> resource instanceof LeafResource && ((LeafResource) resource).getSerialisedFormat().equals("json"));
 
-    private static SystemResource createTestSystemResource() {
-        return new SystemResource().id("File");
-    }
+    // A text file containing json data - this should be accessible
+    private final FileResource accessibleJsonTxtFile = new FileResource().id("/txt/json/json.txt").type("txt").serialisedFormat("json").parent(jsonDirectory);
+    // An avro file containing json data - this should be inaccessible due to the system policy
+    private final FileResource inaccessibleJsonAvroFile = new FileResource().id("/txt/json/json.avro").type("avro").serialisedFormat("json").parent(jsonDirectory);
+    // A text file containing pickle data - this should be inaccessible due to the directory policy
+    private final FileResource inaccessiblePickleTxtFile = new FileResource().id("/txt/json/pickled.txt").type("txt").serialisedFormat("pickle").parent(jsonDirectory);
 
-    private static DirectoryResource createTestDirectoryResource() {
-        DirectoryResource directoryResource = new DirectoryResource().id("File://temp");
-        directoryResource.setParent(createTestSystemResource());
-        return directoryResource;
-    }
+    // A sensitive directory that only allows authorised users to view contents of records
+    private final DirectoryResource sensitiveDirectory = new DirectoryResource().id("/txt/sensitive").parent(txtSystem);
+    private final Policy sensitivePolicy = new Policy<>()
+            .owner(sensitiveUser)
+            .resourceLevelRule("Does nothing", new PassThroughRule<>())
+            .recordLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>());
 
-    private static FileResource createTestFileResource(final int i) {
-        FileResource fileResource = new FileResource().id("File://temp/TestObj_00" + i + ".txt").type("TestObj" + i).serialisedFormat("txt");
-        fileResource.setParent(createTestDirectoryResource());
-        return fileResource;
-    }
+    // A sensitive text file containing a report of salary information - the content should be accessible to authorised users only
+    private final FileResource sensitiveTxtFile = new FileResource().id("/txt/sensitive/report.txt").type("txt").serialisedFormat("txt").parent(sensitiveDirectory);
+    // A sensitive CSV of salary information - this should be inaccessible due to the system policy
+    private final FileResource sensitiveCsvFile = new FileResource().id("/txt/sensitive/salary.csv").type("csv").serialisedFormat("txt").parent(sensitiveDirectory);
+
+    // A secret directory that allows authorised users to view resources and secret users to view contents of records
+    private final DirectoryResource secretDirectory = new DirectoryResource().id("/txt/secret").parent(txtSystem);
+    private final Policy secretPolicy = new Policy<>()
+            .owner(secretUser)
+            .resourceLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>())
+            .recordLevelRule("Check user has 'Secret' auth", (PredicateRule<Object>) (resource, user, context) -> user.getAuths().contains("Secret"));
+
+    // A secret file - accessible only to the secret user
+    private final FileResource secretTxtFile = new FileResource().id("/txt/secret/secrets.txt").type("txt").serialisedFormat("txt").parent(secretDirectory);
+
+    private final FileResource newFile = new FileResource().id("/new/file.txt").type("txt").serialisedFormat("txt").parent(new SystemResource().id("/new"));
+
+    // A do-nothing policy to apply to leaf resources
+    private final Policy passThroughPolicy = new Policy<>()
+            .owner(user)
+            .resourceLevelRule("Does nothing", new PassThroughRule<>())
+            .recordLevelRule("Does nothing", new PassThroughRule<>());
+
+    private final Set<DirectoryResource> directoryResources = new HashSet<>(Arrays.asList(jsonDirectory, sensitiveDirectory, secretDirectory));
+    private final Set<FileResource> fileResources = new HashSet<>(Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile));
+
+    private PolicyServiceHierarchyProxy hierarchyProxy;
+    private PolicyService serviceMock;
 
     @Before
     public void setup() {
-        policyService = new PolicyServiceHierarchyProxy(cacheService);
+        serviceMock = new SimplePolicyService();
+        hierarchyProxy = new PolicyServiceHierarchyProxy(serviceMock);
 
-        logger = (Logger) LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
-        appender = new ListAppender<>();
-        appender.start();
-        logger.addAppender(appender);
+        // Add the system resource to the policy service
+        assumeThat(hierarchyProxy.setResourcePolicy(txtSystem, txtPolicy), equalTo(txtPolicy));
 
-        CompletableFuture<Boolean> request1 = policyService.setResourcePolicy(new SetResourcePolicyRequest()
-                .resource(fileResource1)
-                .policy(new Policy<>()
-                        .owner(user)
-                        .resourceLevelRule("Input is not null", new PassThroughRule<>())
-                        .recordLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>()))
-        );
+        // Add the directory resources to the policy service
+        assumeThat(hierarchyProxy.setResourcePolicy(jsonDirectory, jsonPolicy), equalTo(jsonPolicy));
+        assumeThat(hierarchyProxy.setResourcePolicy(sensitiveDirectory, sensitivePolicy), equalTo(sensitivePolicy));
+        assumeThat(hierarchyProxy.setResourcePolicy(secretDirectory, secretPolicy), equalTo(secretPolicy));
 
-        CompletableFuture<Boolean> request2 = policyService.setResourcePolicy(new SetResourcePolicyRequest()
-                .resource(fileResource2)
-                .policy(new Policy<>()
-                        .owner(user)
-                        .resourceLevelRule("Input is not null", new PassThroughRule<>())
-                        .recordLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>()))
-        );
-
-        CompletableFuture<Boolean> request3 = policyService.setResourcePolicy(new SetResourcePolicyRequest()
-                .resource(directoryResource)
-                .policy(new Policy<>()
-                        .owner(user)
-                        .recordLevelRule("Does nothing", new PassThroughRule<>()))
-        );
-
-        CompletableFuture<Boolean> request4 = policyService.setResourcePolicy(new SetResourcePolicyRequest()
-                .resource(systemResource)
-                .policy(new Policy<>()
-                        .owner(user)
-                        .resourceLevelRule("Resource serialised format is txt", new IsTextResourceRule()))
-        );
-
-        CompletableFuture.allOf(request1, request2, request3, request4).join();
-    }
-
-    @After
-    public void tearDown() {
-        logger.detachAppender(appender);
-        appender.stop();
-    }
-
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
-        return appender.list.stream()
-                .filter(predicate)
-                .map(ILoggingEvent::getFormattedMessage)
-                .collect(Collectors.toList());
+        // Add the file resources to the policy service
+        for (FileResource fileResource : fileResources) {
+            assumeThat(hierarchyProxy.setResourcePolicy(fileResource, passThroughPolicy), equalTo(passThroughPolicy));
+        }
     }
 
     @Test
-    public void getApplicableResourceLevelRules() {
-        // When
-        Optional<Rules<Object>> optResult = policyService.getApplicableRules(fileResource1, true, fileResource1.getType()).join();
-
-        // Then
-        assertTrue(optResult.isPresent());
-
-        Rules<Object> result = optResult.get();
-        assertEquals("Resource serialised format is txt, Input is not null", result.getMessage());
-        assertEquals(2, result.getRules().keySet().size());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
+    public void getRecordLevelRules() {
     }
 
     @Test
-    public void getApplicableRecordLevelRules() {
-        // When
-        Optional<Rules<Object>> optResult = policyService.getApplicableRules(fileResource1, false, fileResource1.getType()).join();
+    public void shouldReturnNoPolicyWhenNotSet() {
+        // Given - there are no policies for the requested resource
+        // newFile
 
-        // Then
-        assertTrue(optResult.isPresent());
-        Rules<Object> result = optResult.get();
-        assertEquals("Does nothing, Check user has 'Sensitive' auth", result.getMessage());
-        assertEquals(2, result.getRules().keySet().size());
+        // When - a policy is requested on a resource
+        Optional<Policy> policy = hierarchyProxy.getPolicy(newFile);
 
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
-    }
-
-    //should filter out resources where no policy is defined
-    @Test
-    public void shouldReturnEmptyResourceRulesOnNoPolicy() {
-        // Given
-        User user = new User().userId("testUser").auths("Sensitive");
-        Context context = new Context().purpose("testing");
-
-        // Set up a resource and parent with no policy attached
-        SystemResource noPolicyParent = new SystemResource().id("nowhere");
-        StubResource noPolicyStub = new StubResource();
-        noPolicyStub.type("test").id("something");
-        noPolicyStub.serialisedFormat("something");
-        noPolicyStub.parent(noPolicyParent);
-
-        // When
-        Optional<Rules<Object>> optResult = policyService.getApplicableRules(noPolicyStub, true, noPolicyStub.getType()).join();
-        // Then
-        assertFalse(optResult.isPresent());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
+        // Then - no such policy was retrieved
+        assertFalse(policy.isPresent());
     }
 
     @Test
-    public void shouldReturnEmptyRecordRulesOnNoPolicy() {
-        // Given
-        User user = new User().userId("testUser").auths("Sensitive");
-        Context context = new Context().purpose("testing");
+    public void canAccessResources() {
+        // Given - there are accessible resources
+        // accessibleJsonTxtFile for user, sensitiveTxtFile for sensitiveUser, secretTxtFile for secretUser
 
-        // Set up a resource and parent with no policy attached
-        SystemResource noPolicyParent = new SystemResource().id("nowhere");
-        StubResource noPolicyStub = new StubResource();
-        noPolicyStub.type("test").id("something");
-        noPolicyStub.serialisedFormat("something");
-        noPolicyStub.parent(noPolicyParent);
+        // When - access to the resource is queried
+        Optional<Resource> resource = hierarchyProxy.canAccess(user, context, accessibleJsonTxtFile);
+        // Then - the resource is accessible
+        assertTrue(resource.isPresent());
 
-        // When
-        Optional<Rules<Object>> optResult = policyService.getApplicableRules(noPolicyStub, false, noPolicyStub.getType()).join();
-        // Then
-        assertFalse(optResult.isPresent());
+        // When - access to the resource is queried
+        resource = hierarchyProxy.canAccess(sensitiveUser, context, sensitiveTxtFile);
+        // Then - the resource is accessible
+        assertTrue(resource.isPresent());
 
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
+        // When - access to the resource is queried
+        resource = hierarchyProxy.canAccess(secretUser, context, secretTxtFile);
+        // Then - the resource is accessible
+        assertTrue(resource.isPresent());
     }
 
     @Test
-    public void canAccessIsValid() throws InterruptedException, ExecutionException, TimeoutException {
-        // Given
-        User user = new User().userId("testUser").auths("Sensitive");
-        Context context = new Context().purpose("testing");
+    public void cannotAccessNonResources() {
+        // Given - there are inaccessible resources
+        // everything but accessibleJsonTxtFile for user
+        HashSet<FileResource> resources = new HashSet<>(fileResources);
+        resources.remove(accessibleJsonTxtFile);
+        for (FileResource fileResource : resources) {
+            // When - access to the resource is queried
+            Optional<Resource> resource = hierarchyProxy.canAccess(user, context, fileResource);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
 
-        // When
-        CompletableFuture<CanAccessResponse> future = policyService.canAccess(
-                new CanAccessRequest()
-                        .resources(Collections.singletonList(fileResource1))
-                        .user(user)
-                        .context(context));
+        // Given - there are inaccessible resources
+        // everything but (accessible/sensitive)TxtFile for sensitiveUser
+        resources = new HashSet<>(fileResources);
+        resources.remove(accessibleJsonTxtFile);
+        resources.remove(sensitiveTxtFile);
+        for (FileResource fileResource : resources) {
+            // When - access to the resource is queried
+            Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
 
-
-        CanAccessResponse response = future.get();
-        Collection<LeafResource> resources = response.getCanAccessResources();
-        // Then
-        assertEquals(1, resources.size());
-        assertEquals(fileResource1, resources.iterator().next());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Determining access:"),
-                Matchers.anyOf(
-                        Matchers.containsString("Determining access: Context"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
-    }
-
-    @Test
-    public void shouldRemoveResourcesWithNoPolicy() {
-        // Given
-        User user = new User().userId("testUser").auths("Sensitive");
-        Context context = new Context().purpose("testing");
-
-        // Set up a resource and parent with no policy attached
-        SystemResource noPolicyParent = new SystemResource().id("nowhere");
-        StubResource noPolicyStub = new StubResource();
-        noPolicyStub.type("test").id("something");
-        noPolicyStub.serialisedFormat("something");
-        noPolicyStub.parent(noPolicyParent);
-
-        // When
-        CompletableFuture<CanAccessResponse> future = policyService.canAccess(
-                new CanAccessRequest()
-                        .user(user)
-                        .context(context)
-                        .resources(Collections.singletonList(noPolicyStub)));
-
-        CanAccessResponse response = future.join();
-        // Then
-        Assert.assertThat(response.getCanAccessResources(), is(CoreMatchers.equalTo(emptyList())));
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Determining access"),
-                Matchers.anyOf(
-                        Matchers.containsString("no rules present"),
-                        Matchers.containsString("No policy for StubResource"))
-        ));
-    }
-
-    @Test
-    public void getPolicy() throws InterruptedException, ExecutionException, TimeoutException {
-        // Given
-        User user = new User().userId("testUser").auths("Sensitive");
-        Context context = new Context().purpose("testing");
-
-        // When
-        GetPolicyRequest getPolicyRequest = new GetPolicyRequest().user(user).context(context).resources(Collections.singletonList(fileResource1));
-        getPolicyRequest.setOriginalRequestId(new RequestId().id("test getPolicy"));
-        CompletableFuture<MultiPolicy> future = policyService.getPolicy(getPolicyRequest);
-        MultiPolicy response = future.get();
-        Map<LeafResource, Rules> ruleMap = response.getRuleMap();
-
-        // Then
-        assertEquals(1, ruleMap.size());
-        assertEquals("Does nothing, Check user has 'Sensitive' auth", ruleMap.get(fileResource1).getMessage());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("getPolicy -"),
-                Matchers.anyOf(
-                        Matchers.containsString("adding resource:"))
-        ));
-    }
-
-    @Test
-    public void setPolicyForNewResource() throws InterruptedException, ExecutionException, TimeoutException {
-        // Given
-        User testUser = new User().userId("testUser").auths("Sensitive");
-        FileResource newResource = new FileResource().id("File://temp/TestObj_002.txt").type("TestObj").serialisedFormat("txt");
-        newResource.setParent(createTestDirectoryResource());
-        Policy newPolicy = new Policy()
-                .owner(testUser)
-                .resourceLevelRule("Purpose is testing", new HasTestingPurpose<>());
-
-        // When
-        CompletableFuture<Boolean> future = policyService.setResourcePolicy(new SetResourcePolicyRequest().resource(newResource).policy(newPolicy));
-        Boolean result = future.get();
-
-        // Then
-        assertTrue(result);
-
-        // When
-        CompletableFuture<CanAccessResponse> future2 = policyService.canAccess(new CanAccessRequest().resources(Collections.singletonList(newResource)).user(testUser).context(new Context().purpose("fun")));
-        CanAccessResponse response2 = future2.get();
-        Collection<LeafResource> resources2 = response2.getCanAccessResources();
-
-        // Then
-        assertEquals(0, resources2.size());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Setting resource policy"),
-                Matchers.anyOf(
-                        Matchers.containsString("Determining access:"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
-    }
-
-    @Test
-    public void setPolicyForExistingResource() throws InterruptedException, ExecutionException, TimeoutException {
-        // Given
-        User testUser = new User().userId("testUser").auths("Sensitive");
-        Context testContext = new Context().purpose("testing");
-
-        // When
-        CompletableFuture<CanAccessResponse> future1 = policyService.canAccess(new CanAccessRequest().resources(Collections.singletonList(fileResource1)).user(testUser).context(testContext));
-        CanAccessResponse response = future1.get();
-        Collection<LeafResource> resources = response.getCanAccessResources();
-
-        // Then
-        assertEquals(1, resources.size());
-        assertEquals(fileResource1, resources.iterator().next());
-
-        // Given
-        Policy newPolicy = new Policy().owner(testUser).resourceLevelRule("Purpose is testing", new HasTestingPurpose<>());
-
-        // When
-        CompletableFuture<Boolean> future = policyService.setResourcePolicy(new SetResourcePolicyRequest().resource(fileResource1).policy(newPolicy));
-        Boolean result = future.get();
-
-        // Then
-        assertTrue(result);
-
-        // When
-        CompletableFuture<CanAccessResponse> future2 = policyService.canAccess(new CanAccessRequest().resources(Collections.singletonList(fileResource1)).user(testUser).context(new Context().purpose("fun")));
-        CanAccessResponse response2 = future2.get();
-        Collection<LeafResource> resources2 = response2.getCanAccessResources();
-
-        // Then
-        assertEquals(0, resources2.size());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Setting resource policy "))
-        ));
-    }
-
-    @Test
-    public void setTypePolicy() throws InterruptedException, ExecutionException, TimeoutException {
-        // Given
-        final User testUser = new User().userId("testUser").auths("Sensitive");
-
-        // Check before policy added
-        final CompletableFuture<CanAccessResponse> canAccessBeforeResult = policyService.canAccess(
-                new CanAccessRequest()
-                        .resources(Arrays.asList(fileResource1, fileResource2))
-                        .user(testUser)
-                        .context(new Context().purpose("fun"))
-        );
-        final Set<String> types = canAccessBeforeResult.get().getCanAccessResources().stream().map(LeafResource::getType).collect(Collectors.toSet());
-        assertEquals(Sets.newHashSet("TestObj1", "TestObj2"), types);
-        assertEquals(2, canAccessBeforeResult.get().getCanAccessResources().size());
-
-
-        final Policy newPolicy = new Policy()
-                .owner(testUser)
-                .resourceLevelPredicateRule("Purpose is testing", (resource, user, context) -> context.getPurpose().equals("testing"));
-
-        // When
-        final CompletableFuture<Boolean> setPolicyResult = policyService.setTypePolicy(
-                new SetTypePolicyRequest()
-                        .type("TestObj2")
-                        .policy(newPolicy)
-        );
-
-        // Then
-        assertTrue(setPolicyResult.get());
-        final CompletableFuture<CanAccessResponse> canAccessAfterResult = policyService.canAccess(
-                new CanAccessRequest()
-                        .resources(Collections.singletonList(fileResource1))
-                        .user(testUser)
-                        .context(new Context().purpose("fun"))
-        );
-        assertEquals(1, canAccessAfterResult.get().getCanAccessResources().size());
-        assertNotEquals("TestObj2", canAccessAfterResult.get().getCanAccessResources().iterator().next().getType());
-
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(debugMessages, is(not(emptyList())));
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Getting the applicable rules"),
-                Matchers.anyOf(
-                        Matchers.containsString("resource is an instance of ChildResource"),
-                        Matchers.containsString("Getting the applicable rules: "))
-        ));
+        // Given - there are inaccessible resources
+        // everything except (accessible/sensitive/secret)TxtFile for secretUser
+        resources = new HashSet<>(fileResources);
+        resources.remove(accessibleJsonTxtFile);
+        resources.remove(sensitiveTxtFile);
+        resources.remove(secretTxtFile);
+        for (FileResource fileResource : resources) {
+            // When - access to the resource is queried
+            Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
     }
 }
 

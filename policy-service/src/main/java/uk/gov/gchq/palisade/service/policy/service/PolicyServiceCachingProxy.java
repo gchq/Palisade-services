@@ -45,13 +45,6 @@ public class PolicyServiceCachingProxy implements PolicyService {
         return service.canAccess(user, context, resource);
     }
 
-    // This is needed for canAccess calls to be cacheable but is never used
-    @CachePut(key="''.concat(#user).concat('-').concat(#context).concat('-').concat(#resource)")
-    public Optional<Resource> setAccess(final User user, final Context context, final Resource resource, Optional<Resource> cacheVal) {
-        LOGGER.debug("Key triplet {}-{}-{} with access {} added to cache", user, context, resource, cacheVal);
-        return cacheVal;
-    }
-
     @Override
     @Cacheable(key = "#resource")
     public Optional<Policy> getPolicy(final Resource resource) {
