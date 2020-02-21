@@ -28,6 +28,7 @@ eureka:
   instance:
     hostname: localhost
     port: 8083
+    preferIpAddress: true
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
@@ -41,6 +42,10 @@ management:
         - health
         - info
         - metrics
+        - loggers
+    loggers:
+      enabled: true
+
 
 web:
   client:

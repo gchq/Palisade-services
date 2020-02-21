@@ -130,6 +130,8 @@ spec:
                     if (("${env.BRANCH_NAME}" == "develop") ||
                             ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
+                        //now extract the public IP addresses that this will be open on
+                        sh 'extract-addresses'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                         sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
                     } else {

@@ -65,5 +65,4 @@ public class ApplicationConfiguration {
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
-
 }
