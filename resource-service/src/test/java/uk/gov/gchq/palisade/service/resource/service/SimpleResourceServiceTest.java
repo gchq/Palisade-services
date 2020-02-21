@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import ch.qos.logback.classic.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,16 +23,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.web.ResourceController;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,13 +38,7 @@ import static org.hamcrest.core.Is.is;
 public class SimpleResourceServiceTest {
 
     private static LeafResource resource = new FileResource().id("/path/test_file.txt").type("test").serialisedFormat("txt");
-    private Logger logger;
-    private ResourceController controller;
 
-    private Map<Resource, Map<LeafResource, ConnectionDetail>> resources = new HashMap<>();
-    private Map<String, Resource> resourceIds = new HashMap<>();
-    private Map<String, Resource> resourceTypes = new HashMap<>();
-    private Map<String, Resource> resourceFormats = new HashMap<>();
     private Map<LeafResource, ConnectionDetail> resourceMap = new HashMap<>();
     private SimpleConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("localhost");
 
@@ -58,13 +47,7 @@ public class SimpleResourceServiceTest {
 
     @Before
     public void setUp() {
-        logger = (Logger) LoggerFactory.getLogger(ResourceController.class);
-        controller = new ResourceController(new ResourceServiceCachingProxy(resourceService));
         resourceMap.put(resource, connectionDetail);
-        resources.put(resource, Collections.singletonMap(resource, connectionDetail));
-        resourceIds.put("/path/test_file.txt", resource);
-        resourceTypes.put("test", resource);
-        resourceFormats.put("txt", resource);
     }
 
     @Test

@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
@@ -28,6 +31,8 @@ import java.util.Map;
 
 public class SimpleResourceService implements ResourceService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
+
     private Map<Resource, Map<LeafResource, ConnectionDetail>> resources = new HashMap<>();
     private Map<String, Resource> resourceIds = new HashMap<>();
     private Map<String, Resource> resourceTypes = new HashMap<>();
@@ -35,27 +40,32 @@ public class SimpleResourceService implements ResourceService {
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
+        LOGGER.debug("Getting resource by {}", resource);
         return resources.get(resource);
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
+        LOGGER.debug("Getting resource by {}", resourceId);
         return resources.get(resourceIds.get(resourceId));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
+        LOGGER.debug("Getting resource by {}", resourceType);
         return resources.get(resourceTypes.get(resourceType));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String resourceFormat) {
+        LOGGER.debug("Getting resource by {}", resourceFormat);
         return resources.get(resourceFormats.get(resourceFormat));
     }
 
     @Override
     public Resource addResource(final Resource resource) {
         if (resource instanceof LeafResource) {
+            LOGGER.info("Adding Resource [ {} ] details to SimpleResourceService", resource);
             resources.put(resource, Collections.singletonMap((LeafResource) resource, new SimpleConnectionDetail().uri("localhost:8082")));
             resourceIds.put(resource.getId(), resource);
             resourceTypes.put(((LeafResource) resource).getType(), resource);
