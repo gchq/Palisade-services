@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.policy.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -29,7 +30,7 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 
 import java.util.Optional;
 
-@CacheConfig(cacheNames = "policies")
+@CacheConfig(cacheNames = {"resourcePolicy, typePolicy, accessPolicy"})
 public class PolicyServiceCachingProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceCachingProxy.class);
     private final PolicyService service;
@@ -39,28 +40,30 @@ public class PolicyServiceCachingProxy implements PolicyService {
     }
 
     @Override
-    @Cacheable(key="''.concat(#user).concat('-').concat(#context).concat('-').concat(#resource)")
+    @Cacheable(value = "accessPolicy", key = "''.concat(#user.hashCode()).concat('-').concat(#context.hashCode()).concat('-').concat(#resource.hashCode())")
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
-        LOGGER.debug("Key triplet {}-{}-{} not found in cache", user, context, resource);
+        LOGGER.debug("Key triplet {}-{}-{} not found in cache", user.hashCode(), context.hashCode(), resource.hashCode());
         return service.canAccess(user, context, resource);
     }
 
     @Override
-    @Cacheable(key = "#resource")
+    @Cacheable(value = "resourcePolicy", key = "#resource")
     public Optional<Policy> getPolicy(final Resource resource) {
         LOGGER.debug("Resource {} not found in cache", resource);
         return service.getPolicy(resource);
     }
 
     @Override
-    @CachePut(key = "#resource")
+    @CachePut(value = "resourcePolicy", key = "#resource")
+    @CacheEvict("accessPolicy")
     public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         LOGGER.debug("Resource {} with policy {} added to cache", resource, policy);
         return service.setResourcePolicy(resource, policy);
     }
 
     @Override
-    @CachePut(key = "#type")
+    @CachePut(value = "typePolicy", key = "#type")
+    @CacheEvict("accessPolicy")
     public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         LOGGER.debug("Type {} with policy {} added to cache", type, policy);
         return service.setTypePolicy(type, policy);

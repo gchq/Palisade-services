@@ -44,7 +44,7 @@ import static java.util.Objects.requireNonNull;
 public class PolicyServiceHierarchyProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
-    PolicyService service;
+    final PolicyService service;
 
     public PolicyServiceHierarchyProxy(final PolicyService service) {
         this.service = service;
@@ -57,8 +57,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         // If the service says we can access the resource naively, check up the resource hierarchy
         // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
         Optional<Rules<Resource>> accessRules = serviceCanAccess.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules));
-        Optional<Resource> hierarchyCanAccess = accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
-        return hierarchyCanAccess;
+        return accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
     }
 
     /**
@@ -67,6 +66,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
      *
      * @param resource        A {@link Resource} to get the applicable rules for.
      * @param rulesExtractor  The rule type to extract from each policy
+     * @param <T>             The record tpe for this resource
      *
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
@@ -123,18 +123,18 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
     @Override
     public Optional<Policy> getPolicy(final Resource resource) {
         Optional<Rules<Object>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
-        return optionalRules.map(rules -> new Policy().recordRules(rules));
+        return optionalRules.map(rules -> new Policy<>().recordRules(rules));
     }
 
     @Override
-    public <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy) {
+    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         requireNonNull(resource, "type cannot be null");
         LOGGER.debug("Setting Resource policy {} to resource {}", policy, resource);
         return service.setResourcePolicy(resource, policy);
     }
 
     @Override
-    public <T> Policy<T> setTypePolicy(String type, Policy<T> policy) {
+    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         requireNonNull(type, "type cannot be null");
         LOGGER.debug("Setting Type policy {} to data type {}", policy, type);
         return service.setTypePolicy(type, policy);

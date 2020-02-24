@@ -61,7 +61,7 @@ public class PolicyController {
         return new CanAccessResponse().canAccessResources(resources);
     }
 
-    public Collection<Resource> canAccess(User user, Context context, Collection<Resource> resources) {
+    public Collection<Resource> canAccess(final User user, final Context context, final Collection<Resource> resources) {
         LOGGER.info("Filtering out resources for user {} with context {}", user, context);
         return resources.stream()
                 .map(resource -> service.canAccess(user, context, resource))

@@ -51,7 +51,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean("cachingProxy")
-    public PolicyServiceCachingProxy cachedPolicyService(@Qualifier("impl") PolicyService service) {
+    public PolicyServiceCachingProxy cachedPolicyService(final @Qualifier("impl") PolicyService service) {
         PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
         LOGGER.debug("Instantiated CachedPolicyService");
         return policyServiceCachingProxy;

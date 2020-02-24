@@ -19,19 +19,12 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
-import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
-import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
-import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -49,29 +42,28 @@ public interface PolicyService extends Service {
      * the resource given their purpose. This is where any resource level
      * access controls are enforced.
      *
-     * @param request a {@link CanAccessRequest} containing the user requesting
-     *                the data, the query time context containing environmental
-     *                variables such as why they want the data and
-     *                collection of resource's containing that data.
-     * @return a {@link CanAccessResponse} which contains a collection of the
-     * resources that the user is allowed access too.
+     * @param user the {@link User}| requesting the data
+     * @param context the query time {@link Context} containing environmental variables
+     *                such as why they want the data
+     * @param resource the {@link Resource} being queried for access
+     * @return an Optional {@link Resource} which is only present if the resource
+     *         is accessible
      */
     Optional<Resource> canAccess(final User user, final Context context, final Resource resource);
 
     /**
-     * This method gets the record level {@link Policy}'s that apply to the list
-     * of resources that the user has requested access too.
+     * This method gets the {@link Policy}s that apply to the resource
+     * that the user has requested.
      *
-     * @param request a {@link GetPolicyRequest} containing the user requesting
-     *                the data, the query time context containing environmental
-     *                variables such as why they want the data and
-     *                list of the resources the user wants access too.
-     * @return a {@link MultiPolicy} containing the mapping of resource to {@link Policy}
+     * @param resource a {@link Resource} to get policies for
+     *
+     * @return an Optional {@link Policy} if any policies exist for the resource
      */
     // FIXME: This cannot be typed as <T> Optional<Policy<T>> getPolicy(Resource resource)
     // There must be some input argument to specify T
     // Either through typing the class  --  <T> PolicyService<T>
     // Or supplying some sort of constructor factory  --  Producer<T>
+    // Or passing the class as an argument  --  getPolicy(Resource, Class<? extends T>)
     Optional<Policy> getPolicy(Resource resource);
 
     default Map<Resource, Policy> getPolicy(final Collection<Resource> resources) {
@@ -84,21 +76,22 @@ public interface PolicyService extends Service {
     /**
      * This method allows for the setting of a policy to a resource.
      *
-     * @param request a {@link SetResourcePolicyRequest} containing the
-     *                resource and the policy to set on that resource.
-     * @return a {@link CompletableFuture} {@link Boolean} which is true if
-     * the policy was successfully set.
+     * @param resource a {@link Resource} to set a policy for
+     * @param policy the {@link Policy} to apply to this resource
+     * @param <T> the record type for this resource
+     *
+     * @return the {@link Policy} that was added (may be different to what was requested)
      */
     <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
 
     /**
      * This method allows for the setting of a policy to a resource type.
      *
-     * @param request a {@link SetTypePolicyRequest} containing the
-     *                resource type and the policy to set on that resource.
-     * @return a {@link CompletableFuture} {@link Boolean} which is true if
-     * the policy was successfully set.
+     * @param type a resource type to apply a blanket policy to
+     * @param policy the {@link Policy} to apply to this type
+     * @param <T> the record type for this resource
+     *
+     * @return the {@link Policy} that was added (may be different to what was requested)
      */
     <T> Policy<T> setTypePolicy(String type, Policy<T> policy);
-
 }
