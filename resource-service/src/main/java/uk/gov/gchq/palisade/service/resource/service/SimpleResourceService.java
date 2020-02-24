@@ -65,11 +65,15 @@ public class SimpleResourceService implements ResourceService {
     @Override
     public Resource addResource(final Resource resource) {
         if (resource instanceof LeafResource) {
-            LOGGER.info("Adding Resource [ {} ] details to SimpleResourceService", resource);
+            LOGGER.info("Adding Resource [ {} ] to SimpleResourceService", resource);
             resources.put(resource, Collections.singletonMap((LeafResource) resource, new SimpleConnectionDetail().uri("localhost:8082")));
+            LOGGER.info("Added to cache resources with key {}", resource);
             resourceIds.put(resource.getId(), resource);
+            LOGGER.info("Added to cache resourceId with key {}", resource.getId());
             resourceTypes.put(((LeafResource) resource).getType(), resource);
+            LOGGER.info("Added to cache resourceType with key {}", ((LeafResource) resource).getType());
             resourceFormats.put(((LeafResource) resource).getSerialisedFormat(), resource);
+            LOGGER.info("Added to cache resourceFormat with key {}", ((LeafResource) resource).getSerialisedFormat());
             return resource;
         } else {
             return null;
