@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.policy.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +50,7 @@ public class PolicyController {
 
     private final PolicyService service;
 
-    public PolicyController(final PolicyService service) {
+    public PolicyController(final @Qualifier("impl") PolicyService service) {
         this.service = service;
     }
 

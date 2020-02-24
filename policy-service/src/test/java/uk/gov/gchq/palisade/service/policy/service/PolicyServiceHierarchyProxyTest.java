@@ -15,10 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -31,102 +33,143 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.PredicateRule;
+import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
 
 @RunWith(JUnit4.class)
 public class PolicyServiceHierarchyProxyTest {
-    private final User user = new User().userId("testUser");
-    private final User sensitiveUser = new User().userId("sensitiveTestUser").addAuths(Collections.singleton("Sensitive"));
-    private final User secretUser = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
-    private final Context context = new Context().purpose("testing");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxyTest.class);
+
+    private static final User user = new User().userId("testUser");
+    private static final User sensitiveUser = new User().userId("sensitiveTestUser").addAuths(Collections.singleton("Sensitive"));
+    private static final User secretUser = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
+    private static final Context context = new Context().purpose("Testing");
+
+    /**
+     * Setup a collection of resources with policies like so:
+     * /txt - only txt type files are viewable
+     *   /txt/json - only json format files are viewable
+     *     /txt/json/json.txt - an accessible json txt file
+     *     /txt/json/json.avro - an inaccessible json avro file (breaks /txt rule)
+     *     /txt/json/pickled.txt - an inaccessible pickle txt file (breaks /txt/json rule)
+     *   /txt/sensitive - only users with sensitive auth can view
+     *     /txt/sensitive/report.txt - an accessible (to sensitive auths) txt file
+     *     /txt/sensitive/salary.csv - an inaccessible csv file (breaks /txt rule)
+     *   /txt/secret - only users with secret auth can view, a purpose of testing will redact all record-level info
+     *     /txt/secret/secrets.txt - an accessible (to secret auths) txt file
+     * /new - a directory to be added with a pass-thru policy (do nothing)
+     *   /new/file.exe - an accessible executable (not under /txt policy)
+     **/
 
     // A system that only allows text files to be seen
-    private final SystemResource txtSystem = new SystemResource().id("/txt");
-    private final Policy txtPolicy = new Policy<>()
+    private static final SystemResource txtSystem = new SystemResource().id("/txt");
+    private static final Policy txtPolicy = new Policy<>()
             .owner(user)
             .resourceLevelRule("Resource serialised format is txt", new IsTextResourceRule());
 
-    // A directory that only allows JSON serialisation
-    private final DirectoryResource jsonDirectory = new DirectoryResource().id("/txt/json").parent(txtSystem);
-    private final Policy jsonPolicy = new Policy<>()
+    // A directory that only allows JSON types
+    private static final DirectoryResource jsonDirectory = new DirectoryResource().id("/txt/json").parent(txtSystem);
+    private static final Policy jsonPolicy = new Policy<>()
             .owner(user)
-            .resourceLevelRule("Does nothing", (PredicateRule<Resource>) (resource, user, context) -> resource instanceof LeafResource && ((LeafResource) resource).getSerialisedFormat().equals("json"));
+            .resourceLevelRule("Resource type is json", (PredicateRule<Resource>) (resource, user, context) -> resource instanceof LeafResource && ((LeafResource) resource).getType().equals("json"));
 
     // A text file containing json data - this should be accessible
-    private final FileResource accessibleJsonTxtFile = new FileResource().id("/txt/json/json.txt").type("txt").serialisedFormat("json").parent(jsonDirectory);
+    private static final FileResource accessibleJsonTxtFile = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json").parent(jsonDirectory);
     // An avro file containing json data - this should be inaccessible due to the system policy
-    private final FileResource inaccessibleJsonAvroFile = new FileResource().id("/txt/json/json.avro").type("avro").serialisedFormat("json").parent(jsonDirectory);
+    private static final FileResource inaccessibleJsonAvroFile = new FileResource().id("/txt/json/json.avro").serialisedFormat("avro").type("json").parent(jsonDirectory);
     // A text file containing pickle data - this should be inaccessible due to the directory policy
-    private final FileResource inaccessiblePickleTxtFile = new FileResource().id("/txt/json/pickled.txt").type("txt").serialisedFormat("pickle").parent(jsonDirectory);
+    private static final FileResource inaccessiblePickleTxtFile = new FileResource().id("/txt/json/pickled.txt").serialisedFormat("txt").type("pickle").parent(jsonDirectory);
 
-    // A sensitive directory that only allows authorised users to view contents of records
-    private final DirectoryResource sensitiveDirectory = new DirectoryResource().id("/txt/sensitive").parent(txtSystem);
-    private final Policy sensitivePolicy = new Policy<>()
+    // A sensitive directory that only allows sensitive authorised users
+    private static final DirectoryResource sensitiveDirectory = new DirectoryResource().id("/txt/sensitive").parent(txtSystem);
+    private static final Policy sensitivePolicy = new Policy<>()
             .owner(sensitiveUser)
-            .resourceLevelRule("Does nothing", new PassThroughRule<>())
-            .recordLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>());
+            .resourceLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>());
 
-    // A sensitive text file containing a report of salary information - the content should be accessible to authorised users only
-    private final FileResource sensitiveTxtFile = new FileResource().id("/txt/sensitive/report.txt").type("txt").serialisedFormat("txt").parent(sensitiveDirectory);
+    // A sensitive text file containing a report of salary information - this is accessible to authorised users only
+    private static final FileResource sensitiveTxtFile = new FileResource().id("/txt/sensitive/report.txt").serialisedFormat("txt").type("txt").parent(sensitiveDirectory);
     // A sensitive CSV of salary information - this should be inaccessible due to the system policy
-    private final FileResource sensitiveCsvFile = new FileResource().id("/txt/sensitive/salary.csv").type("csv").serialisedFormat("txt").parent(sensitiveDirectory);
+    private static final FileResource sensitiveCsvFile = new FileResource().id("/txt/sensitive/salary.csv").serialisedFormat("csv").type("txt").parent(sensitiveDirectory);
 
-    // A secret directory that allows authorised users to view resources and secret users to view contents of records
-    private final DirectoryResource secretDirectory = new DirectoryResource().id("/txt/secret").parent(txtSystem);
-    private final Policy secretPolicy = new Policy<>()
+    // A secret directory that allows only secret authorised users
+    private static final DirectoryResource secretDirectory = new DirectoryResource().id("/txt/secret").parent(txtSystem);
+    private static final Policy secretPolicy = new Policy<>()
             .owner(secretUser)
-            .resourceLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>())
-            .recordLevelRule("Check user has 'Secret' auth", (PredicateRule<Object>) (resource, user, context) -> user.getAuths().contains("Secret"));
+            .resourceLevelRule("Check user has 'Secret' auth", (PredicateRule<Resource>) (resource, user, context) -> user.getAuths().contains("Secret"))
+            .recordLevelPredicateRule("Redact all with 'Testing' purpose", (record, user, context) -> context.getPurpose().equals("Testing"));
 
     // A secret file - accessible only to the secret user
-    private final FileResource secretTxtFile = new FileResource().id("/txt/secret/secrets.txt").type("txt").serialisedFormat("txt").parent(secretDirectory);
+    private static final FileResource secretTxtFile = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(secretDirectory);
 
-    private final FileResource newFile = new FileResource().id("/new/file.txt").type("txt").serialisedFormat("txt").parent(new SystemResource().id("/new"));
+    private static final FileResource newFile = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
 
     // A do-nothing policy to apply to leaf resources
-    private final Policy passThroughPolicy = new Policy<>()
+    private static final Policy passThroughPolicy = new Policy<>()
             .owner(user)
             .resourceLevelRule("Does nothing", new PassThroughRule<>())
             .recordLevelRule("Does nothing", new PassThroughRule<>());
 
-    private final Set<DirectoryResource> directoryResources = new HashSet<>(Arrays.asList(jsonDirectory, sensitiveDirectory, secretDirectory));
-    private final Set<FileResource> fileResources = new HashSet<>(Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile));
+    private static final Set<DirectoryResource> directoryResources = new HashSet<>(Arrays.asList(jsonDirectory, sensitiveDirectory, secretDirectory));
+    private static final Set<FileResource> fileResources = new HashSet<>(Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile));
 
-    private PolicyServiceHierarchyProxy hierarchyProxy;
-    private PolicyService serviceMock;
+    private static final PolicyService service = new SimplePolicyService();
+    private static final PolicyServiceHierarchyProxy hierarchyProxy = new PolicyServiceHierarchyProxy(service);
 
-    @Before
-    public void setup() {
-        serviceMock = new SimplePolicyService();
-        hierarchyProxy = new PolicyServiceHierarchyProxy(serviceMock);
-
+    @BeforeClass
+    public static void setupClass() {
         // Add the system resource to the policy service
-        assumeThat(hierarchyProxy.setResourcePolicy(txtSystem, txtPolicy), equalTo(txtPolicy));
+        assertThat(hierarchyProxy.setResourcePolicy(txtSystem, txtPolicy), equalTo(txtPolicy));
 
         // Add the directory resources to the policy service
-        assumeThat(hierarchyProxy.setResourcePolicy(jsonDirectory, jsonPolicy), equalTo(jsonPolicy));
-        assumeThat(hierarchyProxy.setResourcePolicy(sensitiveDirectory, sensitivePolicy), equalTo(sensitivePolicy));
-        assumeThat(hierarchyProxy.setResourcePolicy(secretDirectory, secretPolicy), equalTo(secretPolicy));
+        assertThat(hierarchyProxy.setResourcePolicy(jsonDirectory, jsonPolicy), equalTo(jsonPolicy));
+        assertThat(hierarchyProxy.setResourcePolicy(sensitiveDirectory, sensitivePolicy), equalTo(sensitivePolicy));
+        assertThat(hierarchyProxy.setResourcePolicy(secretDirectory, secretPolicy), equalTo(secretPolicy));
 
         // Add the file resources to the policy service
         for (FileResource fileResource : fileResources) {
-            assumeThat(hierarchyProxy.setResourcePolicy(fileResource, passThroughPolicy), equalTo(passThroughPolicy));
+            assertThat(hierarchyProxy.setResourcePolicy(fileResource, passThroughPolicy), equalTo(passThroughPolicy));
         }
     }
 
     @Test
     public void getRecordLevelRules() {
+        // Given - there are record-level rules for the requested resource
+        // secretDirectory and (by hierarchy) secretFile
+
+        // When - a record-level policy is requested on a resource
+        Optional<Policy> secretDirPolicies = hierarchyProxy.getPolicy(secretDirectory);
+        Optional<Map<String, Rule<Object>>> secretDirRules = secretDirPolicies.map(Policy::getRecordRules).map(Rules::getRules);
+
+        // Then - the record-level rules are returned
+        assertTrue(secretDirRules.isPresent());
+        assertThat(secretDirRules.get(), not(Collections.emptyMap()));
+
+        // When - a record-level policy is requested on a resource
+        Optional<Policy> secretFilePolicies = hierarchyProxy.getPolicy(secretTxtFile);
+        Optional<Map<String, Rule<Object>>> secretFileRules = secretFilePolicies.map(Policy::getRecordRules).map(Rules::getRules);
+
+        // Then - the record-level rules are returned (and include all those of the parent directory)
+        assertTrue(secretFileRules.isPresent());
+        assertThat(secretFileRules.get(), not(Collections.emptyMap()));
+        for (Entry<String, Rule<Object>> entry : secretDirRules.get().entrySet()) {
+            assertThat(secretFileRules.get(), hasEntry(entry.getKey(), entry.getValue()));
+        }
     }
 
     @Test
@@ -172,7 +215,7 @@ public class PolicyServiceHierarchyProxyTest {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(user, context, fileResource);
             // Then - the resource is accessible
-            assertTrue(resource.isPresent());
+            assertFalse(resource.isPresent());
         }
 
         // Given - there are inaccessible resources
@@ -184,7 +227,7 @@ public class PolicyServiceHierarchyProxyTest {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
             // Then - the resource is accessible
-            assertTrue(resource.isPresent());
+            assertFalse(resource.isPresent());
         }
 
         // Given - there are inaccessible resources
@@ -197,7 +240,7 @@ public class PolicyServiceHierarchyProxyTest {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
             // Then - the resource is accessible
-            assertTrue(resource.isPresent());
+            assertFalse(resource.isPresent());
         }
     }
 }

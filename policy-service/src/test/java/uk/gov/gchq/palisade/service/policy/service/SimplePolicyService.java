@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.policy.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -28,13 +31,20 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SimplePolicyService implements PolicyService {
-    Map<Resource, Policy> policyMap = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePolicyService.class);
+
+    private final Map<Resource, Policy> policyMap = new HashMap<>();
 
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
-        Optional<Resource> canAccess = Optional.of(resource);
         Collection<Rule<Resource>> resourceRules = policyMap.get(resource).getResourceRules().getRules().values();
-        resourceRules.forEach(rule -> canAccess.map(rsc -> rule.apply(rsc, user, context)));
+        LOGGER.info("Resource {} has rules {}", resource, resourceRules);
+        Optional<Resource> canAccess = resourceRules.stream()
+                .reduce(
+                        Optional.of(resource), // Id: reduce over the requested resource
+                        (acc, rule) -> acc.map(rsc -> rule.apply(rsc, user, context)), // Acc: apply each rule to the resource
+                        (lPartial, rPartial) -> lPartial.flatMap(rsc -> rPartial)); // Comb: a resource is accessible if both partial results are accessible
+        LOGGER.info("User {} with context {} has accessibility {}", user, context, canAccess);
         return canAccess;
     }
 

@@ -26,6 +26,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.Policy;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -52,11 +53,12 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
         LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, resource);
-        Optional<Resource> canAccessResource = service.canAccess(user, context, resource);
+        Optional<Resource> serviceCanAccess = service.canAccess(user, context, resource);
         // If the service says we can access the resource naively, check up the resource hierarchy
         // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
-        return canAccessResource.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules)
-                .map(rule -> Util.applyRulesToItem(resource, user, context, rule)));
+        Optional<Rules<Resource>> accessRules = serviceCanAccess.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules));
+        Optional<Resource> hierarchyCanAccess = accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
+        return hierarchyCanAccess;
     }
 
     /**
@@ -76,6 +78,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
             // We will also need the policy applied to the parent resource
             LOGGER.debug("resource {} an instance of ChildResource", resource);
             inheritedRules = getHierarchicalRules(((ChildResource) resource).getParent(), rulesExtractor);
+            LOGGER.debug("Inherited rules {} for resource {}", inheritedRules, resource);
         } else {
             // We are at top of hierarchy
             LOGGER.debug("resource {} NOT an instance of ChildResource (top of hierarchy)", resource);
@@ -92,20 +95,29 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
     }
 
     private <T> Rules<T> mergeRules(final Rules<T> inheritedRules, final Rules<T> newRules) {
-        LOGGER.debug("inheritedRules and newRules both present MessageInherited:{} MessageNew:{} RulesInherited:{} RulesNew:{}", inheritedRules.getMessage(), newRules.getMessage(),
-                inheritedRules.getRules(), newRules.getRules());
-        //both present --> merge
+        LOGGER.debug("inheritedRules and newRules both present\n MessageInherited: {}\n MessageNew: {}\n RulesInherited: {}\n RulesNew: {}",
+                inheritedRules.getMessage(), newRules.getMessage(), inheritedRules.getRules(), newRules.getRules());
+        Rules<T> mergedRules = new Rules<>();
+
+        // Merge messages
+        ArrayList<String> messages = new ArrayList<>();
         String inheritedMessage = inheritedRules.getMessage();
         String newMessage = newRules.getMessage();
-        if (!inheritedMessage.equals(Rules.NO_RULES_SET) && !newMessage.equals(Rules.NO_RULES_SET)) {
-            inheritedRules.message(inheritedMessage + ", " + newMessage);
-        } else if (!newMessage.equals(Rules.NO_RULES_SET)) {
-            inheritedRules.message(newMessage);
+        if (!inheritedMessage.equals(Rules.NO_RULES_SET)) {
+            messages.add(inheritedMessage);
         }
-        //don't test for inheritedRules != Rules.NO_RULES_SET as that is the default case, there is nothing to do
-        inheritedRules.addRules(newRules.getRules());
-        LOGGER.debug("mergeRules -  Message:{} Rules:{}", inheritedRules.getMessage(), inheritedRules.getRules());
-        return inheritedRules;
+        if (!newMessage.equals(Rules.NO_RULES_SET)) {
+            messages.add(newMessage);
+        }
+        mergedRules.message(String.join(",", messages));
+        LOGGER.debug("Merged messages: {} + {} -> {}", inheritedRules.getMessage(), newRules.getMessage(), mergedRules.getMessage());
+
+        // Merge rules
+        mergedRules.addRules(inheritedRules.getRules());
+        mergedRules.addRules(newRules.getRules());
+        LOGGER.debug("Merged rules: {} + {} -> {}", inheritedRules.getRules(), newRules.getRules(), mergedRules.getRules());
+
+        return mergedRules;
     }
 
     @Override
