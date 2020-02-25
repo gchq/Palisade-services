@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 

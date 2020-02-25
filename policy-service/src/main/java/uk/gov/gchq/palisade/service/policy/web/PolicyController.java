@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.policy.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +34,7 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
@@ -50,23 +50,23 @@ public class PolicyController {
 
     private final PolicyService service;
 
-    public PolicyController(final @Qualifier("impl") PolicyService service) {
+    public PolicyController(final PolicyServiceHierarchyProxy service) {
         this.service = service;
     }
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
     public CanAccessResponse canAccess(@RequestBody final CanAccessRequest request) {
-        LOGGER.info("Invoking registerDataRequest: {}", request);
+        LOGGER.info("Invoking canAccess: {}", request);
         Collection<Resource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
         return new CanAccessResponse().canAccessResources(resources);
     }
 
     public Collection<Resource> canAccess(final User user, final Context context, final Collection<Resource> resources) {
         LOGGER.info("Filtering out resources for user {} with context {}", user, context);
-        return resources.stream()
-                .map(resource -> service.canAccess(user, context, resource))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+         return resources.stream()
+                 .map(resource -> service.canAccess(user, context, resource))
+                 .flatMap(Optional::stream)
+                 .collect(Collectors.toList());
     }
 
     @PostMapping(value = "/getPolicySync", consumes = "application/json", produces = "application/json")
@@ -85,13 +85,13 @@ public class PolicyController {
     }
 
     @PutMapping(value = "/setResourcePolicyAsync", consumes = "application/json", produces = "application/json")
-    public void setResourcePolicyAsync(final SetResourcePolicyRequest request) {
+    public void setResourcePolicyAsync(@RequestBody final SetResourcePolicyRequest request) {
         LOGGER.info("Invoking setResourcePolicyAsync: {}", request);
         service.setResourcePolicy(request.getResource(), request.getPolicy());
     }
 
     @PutMapping(value = "/setTypePolicyAsync", consumes = "application/json", produces = "application/json")
-    public void setTypePolicyAsync(final SetTypePolicyRequest request) {
+    public void setTypePolicyAsync(@RequestBody final SetTypePolicyRequest request) {
         LOGGER.info("Invoking setTypePolicyAsync: {}", request);
         service.setTypePolicy(request.getType(), request.getPolicy());
     }

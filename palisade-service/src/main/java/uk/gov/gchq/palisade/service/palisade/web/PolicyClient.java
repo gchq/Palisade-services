@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.palisade.web;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")

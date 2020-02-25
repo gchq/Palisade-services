@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;

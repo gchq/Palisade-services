@@ -34,8 +34,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.policy.Policy;
+import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
+import uk.gov.gchq.palisade.service.palisade.request.Policy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 

@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.policy;
+
+package uk.gov.gchq.palisade.service.palisade.request;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 
-import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -198,27 +200,35 @@ public class Policy<RULE_DATA_TYPE> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Policy)) {
+
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Policy<?> policy = (Policy<?>) o;
-        return getRecordRules().equals(policy.getRecordRules()) &&
-                getResourceRules().equals(policy.getResourceRules()) &&
-                getOwner().equals(policy.getOwner());
+
+        final Policy<?> policy = (Policy<?>) o;
+
+        return new EqualsBuilder()
+                .append(resourceRules, policy.resourceRules)
+                .append(recordRules, policy.recordRules)
+                .append(owner, policy.owner)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRecordRules(), getResourceRules(), getOwner());
+        return new HashCodeBuilder(17, 37)
+                .append(resourceRules)
+                .append(recordRules)
+                .append(owner)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Policy.class.getSimpleName() + "[", "]")
-                .add("recordRules=" + recordRules)
-                .add("resourceRules=" + resourceRules)
-                .add("owner=" + owner)
+        return new ToStringBuilder(this)
+                .append("resourceRules", resourceRules)
+                .append("recordRules", recordRules)
+                .append("owner", owner)
                 .toString();
     }
-
 }
