@@ -51,13 +51,13 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
     }
 
     @Override
-    public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
+    public <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource) {
         LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, resource);
         Optional<Resource> serviceCanAccess = service.canAccess(user, context, resource);
         // If the service says we can access the resource naively, check up the resource hierarchy
         // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
         Optional<Rules<Resource>> accessRules = serviceCanAccess.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules));
-        return accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
+        return (Optional<R>) accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
     }
 
     /**

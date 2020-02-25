@@ -16,13 +16,10 @@
 
 package uk.gov.gchq.palisade.service.policy.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -30,22 +27,22 @@ import static java.util.Objects.requireNonNull;
  * The purpose of this class is to wrap the response of the Policy store's can access requests.
  */
 public class CanAccessResponse {
-    private Collection<Resource> canAccessResources;
+    private Collection<LeafResource> canAccessResources;
 
     public CanAccessResponse() {
         // no-args constructor needed for serialization only
     }
 
-    public Collection<Resource> getCanAccessResources() {
+    public Collection<LeafResource> getCanAccessResources() {
         requireNonNull(canAccessResources, "The can access resources collection has not been set.");
         return canAccessResources;
     }
 
-    public void setCanAccessResources(final Collection<Resource> canAccessResources) {
+    public void setCanAccessResources(final Collection<LeafResource> canAccessResources) {
         canAccessResources(canAccessResources);
     }
 
-    public CanAccessResponse canAccessResources(final Collection<Resource> canAccessResources) {
+    public CanAccessResponse canAccessResources(final Collection<LeafResource> canAccessResources) {
         requireNonNull(canAccessResources, "The can access resources collection cannot be set to null.");
         this.canAccessResources = canAccessResources;
         return this;
@@ -56,29 +53,23 @@ public class CanAccessResponse {
         if (this == o) {
             return true;
         }
-
         if (!(o instanceof CanAccessResponse)) {
             return false;
         }
-
         final CanAccessResponse that = (CanAccessResponse) o;
-
-        return new EqualsBuilder()
-                .append(canAccessResources, that.canAccessResources)
-                .isEquals();
+        return Objects.equals(canAccessResources, that.canAccessResources);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(canAccessResources)
-                .toHashCode();
+        return Objects.hash(canAccessResources);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("canAccessResources", canAccessResources)
-                .toString();
+        final StringBuilder sb = new StringBuilder("CanAccessResponse{");
+        sb.append("canAccessResources=").append(canAccessResources);
+        sb.append('}');
+        return sb.toString();
     }
 }

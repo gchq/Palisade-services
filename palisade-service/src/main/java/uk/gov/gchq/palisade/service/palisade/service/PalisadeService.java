@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.palisade.service;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.exception.NoPolicyException;
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;

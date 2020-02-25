@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
@@ -28,6 +26,7 @@ import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -39,11 +38,11 @@ import static java.util.Objects.requireNonNull;
  * service but not needed by the rest of the palisade services. That includes
  * separating the rules that need to be applied at the resource level or the record level.
  *
- * @param <RULE_DATA_TYPE> The Java class that the rules expect the records of
- *                         data to be in the format of.
+ * @param <T> The Java class that the rules expect the records of
+ *            data to be in the format of.
  */
-public class Policy<RULE_DATA_TYPE> {
-    private Rules<RULE_DATA_TYPE> recordRules;
+public class Policy<T> {
+    private Rules<T> recordRules;
     private Rules<Resource> resourceRules;
     private User owner;
 
@@ -53,13 +52,13 @@ public class Policy<RULE_DATA_TYPE> {
         resourceRules = new Rules<>();
     }
 
-    public Policy<RULE_DATA_TYPE> recordRules(final Rules<RULE_DATA_TYPE> recordRules) {
+    public Policy<T> recordRules(final Rules<T> recordRules) {
         requireNonNull(recordRules, "The record level rules cannot be set to null.");
         this.recordRules = recordRules;
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceRules(final Rules<Resource> resourceRules) {
+    public Policy<T> resourceRules(final Rules<Resource> resourceRules) {
         requireNonNull(resourceRules, "The resource level rules cannot be set to null.");
         this.resourceRules = resourceRules;
         return this;
@@ -70,12 +69,12 @@ public class Policy<RULE_DATA_TYPE> {
         return "Resource level rules: " + getResourceRules().getMessage() + ", record level rules: " + getRecordRules().getMessage();
     }
 
-    public Rules<RULE_DATA_TYPE> getRecordRules() {
+    public Rules<T> getRecordRules() {
         // will never be null
         return recordRules;
     }
 
-    public void setRecordRules(final Rules<RULE_DATA_TYPE> recordRules) {
+    public void setRecordRules(final Rules<T> recordRules) {
         recordRules(recordRules);
     }
 
@@ -103,43 +102,43 @@ public class Policy<RULE_DATA_TYPE> {
         }
     }
 
-    public Policy<RULE_DATA_TYPE> recordLevelRule(final String message, final Rule<RULE_DATA_TYPE> rule) {
+    public Policy<T> recordLevelRule(final String message, final Rule<T> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordLevelRules = getRecordRules();
+        Rules<T> recordLevelRules = getRecordRules();
         recordLevelRules.rule(generateUUID(), rule);
         addMessage(message, recordLevelRules);
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> recordLevelPredicateRule(final String message, final PredicateRule<RULE_DATA_TYPE> rule) {
+    public Policy<T> recordLevelPredicateRule(final String message, final PredicateRule<T> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordLevelRules = getRecordRules();
+        Rules<T> recordLevelRules = getRecordRules();
         recordLevelRules.rule(generateUUID(), rule);
         addMessage(message, recordLevelRules);
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> recordLevelSimplePredicateRule(final String message, final Predicate<RULE_DATA_TYPE> rule) {
+    public Policy<T> recordLevelSimplePredicateRule(final String message, final Predicate<T> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordLevelRules = getRecordRules();
+        Rules<T> recordLevelRules = getRecordRules();
         recordLevelRules.simplePredicateRule(generateUUID(), rule);
         addMessage(message, recordLevelRules);
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> recordLevelSimpleFunctionRule(final String message, final Function<RULE_DATA_TYPE, RULE_DATA_TYPE> rule) {
+    public Policy<T> recordLevelSimpleFunctionRule(final String message, final Function<T, T> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
-        Rules<RULE_DATA_TYPE> recordLevelRules = getRecordRules();
+        Rules<T> recordLevelRules = getRecordRules();
         recordLevelRules.simpleFunctionRule(generateUUID(), rule);
         addMessage(message, recordLevelRules);
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceLevelRule(final String message, final Rule<Resource> rule) {
+    public Policy<T> resourceLevelRule(final String message, final Rule<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<Resource> resourceLevelRules = getResourceRules();
@@ -148,7 +147,7 @@ public class Policy<RULE_DATA_TYPE> {
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceLevelPredicateRule(final String message, final PredicateRule<Resource> rule) {
+    public Policy<T> resourceLevelPredicateRule(final String message, final PredicateRule<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<Resource> resourceLevelRules = getResourceRules();
@@ -157,7 +156,7 @@ public class Policy<RULE_DATA_TYPE> {
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceLevelSimplePredicateRule(final String message, final Predicate<Resource> rule) {
+    public Policy<T> resourceLevelSimplePredicateRule(final String message, final Predicate<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<Resource> resourceLevelRules = getResourceRules();
@@ -166,7 +165,7 @@ public class Policy<RULE_DATA_TYPE> {
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceLevelSimpleFunctionRule(final String message, final Function<Resource, Resource> rule) {
+    public Policy<T> resourceLevelSimpleFunctionRule(final String message, final Function<Resource, Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<Resource> resourceLevelRules = getResourceRules();
@@ -184,7 +183,7 @@ public class Policy<RULE_DATA_TYPE> {
         owner(owner);
     }
 
-    public Policy<RULE_DATA_TYPE> owner(final User owner) {
+    public Policy<T> owner(final User owner) {
         requireNonNull(owner, "The owner cannot be set to null.");
         this.owner = owner;
         return this;
@@ -200,27 +199,18 @@ public class Policy<RULE_DATA_TYPE> {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Policy)) {
             return false;
         }
-
         final Policy<?> policy = (Policy<?>) o;
-
-        return new EqualsBuilder()
-                .append(resourceRules, policy.resourceRules)
-                .append(recordRules, policy.recordRules)
-                .append(owner, policy.owner)
-                .isEquals();
+        return Objects.equals(recordRules, policy.recordRules) &&
+                Objects.equals(resourceRules, policy.resourceRules) &&
+                Objects.equals(owner, policy.owner);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(resourceRules)
-                .append(recordRules)
-                .append(owner)
-                .toHashCode();
+        return Objects.hash(recordRules, resourceRules, owner);
     }
 
     @Override

@@ -25,12 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.MultiPolicy;
-import uk.gov.gchq.palisade.service.policy.request.Policy;
+import uk.gov.gchq.palisade.service.policy.request.GetPolicyResponse;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
@@ -57,11 +57,11 @@ public class PolicyController {
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
     public CanAccessResponse canAccess(@RequestBody final CanAccessRequest request) {
         LOGGER.info("Invoking canAccess: {}", request);
-        Collection<Resource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
+        Collection<LeafResource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
         return new CanAccessResponse().canAccessResources(resources);
     }
 
-    public Collection<Resource> canAccess(final User user, final Context context, final Collection<Resource> resources) {
+    public Collection<LeafResource> canAccess(final User user, final Context context, final Collection<LeafResource> resources) {
         LOGGER.info("Filtering out resources for user {} with context {}", user, context);
          return resources.stream()
                  .map(resource -> service.canAccess(user, context, resource))
@@ -70,18 +70,18 @@ public class PolicyController {
     }
 
     @PostMapping(value = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    public MultiPolicy getPolicySync(@RequestBody final GetPolicyRequest request) {
+    public GetPolicyResponse getPolicySync(@RequestBody final GetPolicyRequest request) {
         LOGGER.info("Invoking getPolicySync: {}", request);
-        Collection<Resource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
+        Collection<LeafResource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
         /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
          * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
          * be record level rules. Either list may be empty, but they should at least be present
          */
-        Map<Resource, Policy> multiPolicy = resources.stream()
-                .map(resource -> service.getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
+        Map<LeafResource, Rules> multiPolicy = resources.stream()
+                .map(resource -> service.getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy.getRecordRules())))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-        return new MultiPolicy().policies(multiPolicy);
+        return new GetPolicyResponse().recordRules(multiPolicy);
     }
 
     @PutMapping(value = "/setResourcePolicyAsync", consumes = "application/json", produces = "application/json")

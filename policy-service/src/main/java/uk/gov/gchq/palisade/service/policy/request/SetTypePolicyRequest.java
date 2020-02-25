@@ -17,13 +17,13 @@
 package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -92,27 +92,20 @@ public class SetTypePolicyRequest extends Request {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof SetTypePolicyRequest)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final SetTypePolicyRequest that = (SetTypePolicyRequest) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(type, that.type)
-                .append(policy, that.policy)
-                .isEquals();
+        return Objects.equals(type, that.type) &&
+                Objects.equals(policy, that.policy);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 29)
-                .appendSuper(super.hashCode())
-                .append(type)
-                .append(policy)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), type, policy);
     }
 
     @Override

@@ -18,13 +18,13 @@ package uk.gov.gchq.palisade.service.palisade.web;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetPolicyResponse;
 
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    MultiPolicy getPolicySync(final GetPolicyRequest request);
+    GetPolicyResponse getPolicySync(final GetPolicyRequest request);
 
 }

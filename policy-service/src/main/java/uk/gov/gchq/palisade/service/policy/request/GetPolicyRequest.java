@@ -16,17 +16,15 @@
 
 package uk.gov.gchq.palisade.service.policy.request;
 
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -37,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 public class GetPolicyRequest extends Request {
     private User user;
     private Context context;
-    private Collection<Resource> resources;
+    private Collection<LeafResource> resources;
 
     public GetPolicyRequest() {
         // no-args constructor needed for serialization only
@@ -57,7 +55,7 @@ public class GetPolicyRequest extends Request {
      * @param resources a collection of {@link Resource}'s to be accessed
      * @return the {@link GetPolicyRequest}
      */
-    public GetPolicyRequest resources(final Collection<Resource> resources) {
+    public GetPolicyRequest resources(final Collection<LeafResource> resources) {
         this.resources = resources;
         return this;
     }
@@ -82,12 +80,12 @@ public class GetPolicyRequest extends Request {
         return this;
     }
 
-    public Collection<Resource> getResources() {
+    public Collection<LeafResource> getResources() {
         requireNonNull(resources, "The resources have not been set.");
         return resources;
     }
 
-    public void setResources(final Collection<Resource> resources) {
+    public void setResources(final Collection<LeafResource> resources) {
         resources(resources);
     }
 
@@ -96,29 +94,21 @@ public class GetPolicyRequest extends Request {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof GetPolicyRequest)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final GetPolicyRequest that = (GetPolicyRequest) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(context, that.context)
-                .append(resources, that.resources)
-                .isEquals();
+        return Objects.equals(user, that.user) &&
+                Objects.equals(context, that.context) &&
+                Objects.equals(resources, that.resources);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(19, 29)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(context)
-                .append(resources)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), user, context, resources);
     }
 
     @Override

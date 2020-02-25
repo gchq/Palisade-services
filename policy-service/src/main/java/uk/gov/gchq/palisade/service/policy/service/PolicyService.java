@@ -46,16 +46,18 @@ public interface PolicyService extends Service {
      * @param context the query time {@link Context} containing environmental variables
      *                such as why they want the data
      * @param resource the {@link Resource} being queried for access
+     * @param <R>      the type of resource (may be a supertype)
      * @return an Optional {@link Resource} which is only present if the resource
      *         is accessible
      */
-    Optional<Resource> canAccess(final User user, final Context context, final Resource resource);
+    <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource);
 
     /**
      * This method gets the {@link Policy}s that apply to the resource
      * that the user has requested.
      *
      * @param resource a {@link Resource} to get policies for
+     * @param <R>      the type of resource (may be a supertype)
      *
      * @return an Optional {@link Policy} if any policies exist for the resource
      */
@@ -64,9 +66,9 @@ public interface PolicyService extends Service {
     // Either through typing the class  --  <T> PolicyService<T>
     // Or supplying some sort of constructor factory  --  Producer<T>
     // Or passing the class as an argument  --  getPolicy(Resource, Class<? extends T>)
-    Optional<Policy> getPolicy(Resource resource);
+    <R extends Resource> Optional<Policy> getPolicy(R resource);
 
-    default Map<Resource, Policy> getPolicy(final Collection<Resource> resources) {
+    default <R extends Resource> Map<R, Policy> getPolicy(final Collection<R> resources) {
         return resources.stream()
                 .map(resource -> getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
                 .flatMap(Optional::stream)
