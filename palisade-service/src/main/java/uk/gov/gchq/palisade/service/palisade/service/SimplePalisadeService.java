@@ -28,7 +28,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
@@ -49,8 +48,6 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-    //Cache keys
-    public static final String RES_COUNT_KEY = "res_count_";
     /**
      * Duration for how long the count of resources requested should live in the cache.
      */
@@ -101,13 +98,13 @@ public class SimplePalisadeService implements PalisadeService {
 
         final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
         policyRequest.setOriginalRequestId(originalRequestId);
-        LOGGER.debug("Getting policy from policyService: {}", request);
-        CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
+        LOGGER.debug("Getting rules from policyService: {}", request);
+        CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest);
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
+        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \nrules:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), rules.join(), requestId, originalRequestId);
         return aggregationService.aggregateDataRequestResults(
-                request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
+                request, user.join(), resources.join(), rules.join(), requestId, originalRequestId).toCompletableFuture();
     }
 
     @Override

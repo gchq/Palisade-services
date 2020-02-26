@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.policy.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +31,9 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.GetPolicyResponse;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
@@ -50,7 +49,7 @@ public class PolicyController {
 
     private final PolicyService service;
 
-    public PolicyController(final PolicyServiceHierarchyProxy service) {
+    public PolicyController(final @Qualifier("controller") PolicyService service) {
         this.service = service;
     }
 
@@ -70,18 +69,17 @@ public class PolicyController {
     }
 
     @PostMapping(value = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    public GetPolicyResponse getPolicySync(@RequestBody final GetPolicyRequest request) {
+    public Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request) {
         LOGGER.info("Invoking getPolicySync: {}", request);
         Collection<LeafResource> resources = canAccess(request.getUser(), request.getContext(), request.getResources());
         /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
          * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
          * be record level rules. Either list may be empty, but they should at least be present
          */
-        Map<LeafResource, Rules> multiPolicy = resources.stream()
+        return resources.stream()
                 .map(resource -> service.getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy.getRecordRules())))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-        return new GetPolicyResponse().recordRules(multiPolicy);
     }
 
     @PutMapping(value = "/setResourcePolicyAsync", consumes = "application/json", produces = "application/json")

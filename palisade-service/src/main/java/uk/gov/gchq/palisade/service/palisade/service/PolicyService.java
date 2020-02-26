@@ -18,11 +18,13 @@ package uk.gov.gchq.palisade.service.palisade.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -38,10 +40,10 @@ public class PolicyService implements Service {
         this.executor = executor;
     }
 
-    public CompletableFuture<MultiPolicy> getPolicy(final GetPolicyRequest request) {
+    public CompletableFuture<Map<LeafResource, Rules>> getPolicy(final GetPolicyRequest request) {
         LOGGER.debug("Getting policy from policy service: {}", request);
 
-        CompletionStage<MultiPolicy> policy;
+        CompletionStage<Map<LeafResource, Rules>> policy;
         try {
             LOGGER.info("Policy request: {}", request);
             policy = CompletableFuture.supplyAsync(() -> client.getPolicySync(request), this.executor);

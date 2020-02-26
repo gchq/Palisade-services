@@ -26,15 +26,14 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.request.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
@@ -56,17 +55,15 @@ import static org.mockito.Mockito.when;
 public class ResultAggregationServiceTest {
 
     private AuditClient auditClient = Mockito.mock(AuditClient.class);
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private AuditService auditService;
     private SimpleCacheService simpleCacheService = new SimpleCacheService();
-    private Map<LeafResource, Policy> policies = new HashMap<>();
     private ResultAggregationService service;
     private DataRequestResponse response = new DataRequestResponse();
 
     private RegisterDataRequest request;
     private User user;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
-    private MultiPolicy multiPolicy;
+    private Map<LeafResource, Rules> rules = new HashMap<>();
     private RequestId requestId = new RequestId().id(UUID.randomUUID().toString());
     private RequestId originalRequestId = new RequestId().id("OriginalId");
     private ExecutorService executor;
@@ -90,10 +87,8 @@ public class ResultAggregationServiceTest {
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
-        Policy policy = new Policy();
-        policy.setOwner(user);
-        policies.put(resource, policy);
-        multiPolicy = new MultiPolicy().policies(policies);
+        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        rules.put(resource, rule);
 
         response.originalRequestId(originalRequestId);
         response.resources(resources);
@@ -106,7 +101,7 @@ public class ResultAggregationServiceTest {
         when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, user, resources, multiPolicy, requestId, originalRequestId).toCompletableFuture().get();
+        DataRequestResponse actual = service.aggregateDataRequestResults(request, user, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
 
         //Then
         assertEquals(response.getResources(), actual.getResources());
@@ -119,6 +114,6 @@ public class ResultAggregationServiceTest {
         when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, null, resources, multiPolicy, requestId, originalRequestId).toCompletableFuture().get();
+        DataRequestResponse actual = service.aggregateDataRequestResults(request, null, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
     }
 }

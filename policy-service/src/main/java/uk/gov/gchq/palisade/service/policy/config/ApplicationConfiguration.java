@@ -44,7 +44,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean
+    @Bean("nullService")
     @Qualifier("impl")
     public PolicyService nullPolicyService() {
         return new NullPolicyService();
@@ -58,6 +58,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean("hierarchicalProxy")
+    @Qualifier("controller")
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
         PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
         LOGGER.debug("Instantiated HierarchicalPolicyService");

@@ -27,6 +27,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -35,9 +36,6 @@ import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.request.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.request.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
@@ -68,7 +66,6 @@ public class SimplePalisadeServiceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeServiceTest.class);
 
     private final DataRequestConfig expectedConfig = new DataRequestConfig();
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResultAggregationService aggregationService;
     private AuditService auditService;
     private SimpleCacheService cacheService;
@@ -80,13 +77,11 @@ public class SimplePalisadeServiceTest {
     private DataRequestResponse expectedResponse = new DataRequestResponse();
     private RegisterDataRequest dataRequest = new RegisterDataRequest();
     private DataRequestConfig dataRequestConfig = new DataRequestConfig();
-    private RequestId requestId = new RequestId().id("Bob");
     private RequestId originalRequestId = new RequestId().id("Bob");
 
     private User user;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
-    private Map<LeafResource, Policy> policies = new HashMap<>();
-    private MultiPolicy multiPolicy;
+    private Map<LeafResource, Rules> rules = new HashMap<>();
     private ExecutorService executor;
 
     @Before
@@ -107,13 +102,11 @@ public class SimplePalisadeServiceTest {
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
-        Policy policy = new Policy();
-        policy.setOwner(user);
-        policies.put(resource, policy);
-        multiPolicy = new MultiPolicy().policies(policies);
+        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        rules.put(resource, rule);
 
         dataRequest.userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
-        dataRequestConfig.user(user).context(dataRequest.getContext()).rules(multiPolicy.getRuleMap());
+        dataRequestConfig.user(user).context(dataRequest.getContext()).rules(rules);
         dataRequestConfig.setOriginalRequestId(originalRequestId);
         expectedResponse.resources(resources);
         expectedResponse.originalRequestId(originalRequestId);
@@ -128,8 +121,8 @@ public class SimplePalisadeServiceTest {
         futureUser.complete(user);
         CompletableFuture<Map<LeafResource, ConnectionDetail>> futureResource = new CompletableFuture<>();
         futureResource.complete(resources);
-        CompletableFuture<MultiPolicy> futurePolicy = new CompletableFuture<>();
-        futurePolicy.complete(multiPolicy);
+        CompletableFuture<Map<LeafResource, Rules>> futurePolicy = new CompletableFuture<>();
+        futurePolicy.complete(rules);
 
         RegisterDataRequest request = new RegisterDataRequest()
                 .userId(new UserId().id("Bob"))
@@ -141,7 +134,7 @@ public class SimplePalisadeServiceTest {
         when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
         when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
         when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
-        when(aggregationService.aggregateDataRequestResults(any(RegisterDataRequest.class), any(User.class), anyMap(), any(MultiPolicy.class), any(RequestId.class), any(RequestId.class)))
+        when(aggregationService.aggregateDataRequestResults(any(RegisterDataRequest.class), any(User.class), anyMap(), anyMap(), any(RequestId.class), any(RequestId.class)))
                 .thenReturn(futureResponse);
 
         //When

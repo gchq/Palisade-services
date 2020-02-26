@@ -55,7 +55,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
 
     @Override
     @CachePut(value = "resourcePolicy", key = "#resource")
-    @CacheEvict("accessPolicy")
+    @CacheEvict(value = "accessPolicy")
     public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         LOGGER.debug("Resource {} with policy {} added to cache", resource, policy);
         return service.setResourcePolicy(resource, policy);
@@ -63,7 +63,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
 
     @Override
     @CachePut(value = "typePolicy", key = "#type")
-    @CacheEvict("accessPolicy")
+    @CacheEvict(value = "accessPolicy")
     public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         LOGGER.debug("Type {} with policy {} added to cache", type, policy);
         return service.setTypePolicy(type, policy);
