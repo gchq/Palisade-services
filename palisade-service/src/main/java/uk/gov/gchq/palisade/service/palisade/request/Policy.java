@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -197,38 +198,26 @@ public class Policy<RULE_DATA_TYPE> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (!(o instanceof Policy)) return false;
         final Policy<?> policy = (Policy<?>) o;
-
-        return new EqualsBuilder()
-                .append(resourceRules, policy.resourceRules)
-                .append(recordRules, policy.recordRules)
-                .append(owner, policy.owner)
-                .isEquals();
+        return Objects.equals(recordRules, policy.recordRules) &&
+                Objects.equals(resourceRules, policy.resourceRules) &&
+                Objects.equals(owner, policy.owner);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(resourceRules)
-                .append(recordRules)
-                .append(owner)
-                .toHashCode();
+        return Objects.hash(recordRules, resourceRules, owner);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("resourceRules", resourceRules)
-                .append("recordRules", recordRules)
-                .append("owner", owner)
-                .toString();
+        final StringBuilder sb = new StringBuilder("Policy{");
+        sb.append("recordRules=").append(recordRules);
+        sb.append(", resourceRules=").append(resourceRules);
+        sb.append(", owner=").append(owner);
+        sb.append('}');
+        return sb.toString();
     }
 }
