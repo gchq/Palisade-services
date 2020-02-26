@@ -76,8 +76,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository) {
-        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository);
+    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
+        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, executor);
     }
 
     @Bean

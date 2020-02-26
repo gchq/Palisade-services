@@ -162,6 +162,7 @@ public class SimplePalisadeServiceTest {
         requestConfig.token(new RequestId().id("requestId"));
         requestConfig.resource(new FileResource().id("resourceId"));
         LOGGER.info("Get Data Request Config: {}", requestConfig);
+        when(persistenceLayer.getAsync(anyString())).thenReturn(CompletableFuture.failedFuture(new CompletionException(new RuntimeException())));
 
         //When
         CompletableFuture<DataRequestConfig> cacheConfig = service.getDataRequestConfig(requestConfig);
@@ -201,5 +202,6 @@ public class SimplePalisadeServiceTest {
     private void setupCacheService() {
         final BackingStore store = Mockito.mock(BackingStore.class);
         cacheService = new SimpleCacheService().backingStore(store);
+        persistenceLayer = Mockito.mock(PersistenceLayer.class);
     }
 }

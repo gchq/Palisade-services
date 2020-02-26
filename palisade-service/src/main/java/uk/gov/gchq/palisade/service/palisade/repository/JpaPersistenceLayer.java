@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.palisade.repository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.service.palisade.domain.DataRequestEntity;
 import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceRulesEntity;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
@@ -23,16 +26,24 @@ import javax.transaction.Transactional;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+import static uk.gov.gchq.palisade.service.palisade.service.PalisadeService.TOKEN_NOT_FOUND_MESSAGE;
+
 public class JpaPersistenceLayer implements PersistenceLayer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
 
     private DataRequestRepository dataRequestRepository;
     private LeafResourceRulesRepository leafResourceRulesRepository;
+    private Executor executor;
 
-    public JpaPersistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository) {
+    public JpaPersistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
         this.dataRequestRepository = dataRequestRepository;
         this.leafResourceRulesRepository = leafResourceRulesRepository;
+        this.executor = executor;
     }
 
     @Override
@@ -42,6 +53,16 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
         dataRequest.setLeafResourceMap(leafResourceRules.stream().map(LeafResourceRulesEntity::leafResourceRules).collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue)));
         return dataRequest.dataRequestConfig();
+    }
+
+    @Override
+    public CompletableFuture<DataRequestConfig> getAsync(final String requestId) {
+        return CompletableFuture.supplyAsync(() -> Optional.ofNullable(this.get(requestId))
+                .map(result -> {
+                    LOGGER.debug("Got cache: {}", result);
+                    return result;
+                })
+                .orElseThrow(() -> new RuntimeException(TOKEN_NOT_FOUND_MESSAGE + requestId)), this.executor);
     }
 
     @Override

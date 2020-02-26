@@ -57,7 +57,7 @@ public class ResultAggregationServiceTest {
     private AuditClient auditClient = Mockito.mock(AuditClient.class);
     private AuditService auditService;
     private SimpleCacheService simpleCacheService = new SimpleCacheService();
-    private PersistenceLayer persistenceLayer;
+    private PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
     private Map<LeafResource, Policy> policies = new HashMap<>();
     private ResultAggregationService service;
     private DataRequestResponse response = new DataRequestResponse();

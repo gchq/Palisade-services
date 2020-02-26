@@ -78,7 +78,13 @@ public class ResultAggregationService implements Service {
 
             PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
             auditRegisterRequestComplete(request, user, policy, auditService);
-            cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
+            //cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
+            final DataRequestConfig dataRequestConfig = new DataRequestConfig()
+                    .user(user)
+                    .context(request.getContext())
+                    .rules(policy.getRuleMap());
+            dataRequestConfig.setOriginalRequestId(originalRequestId);
+            this.persistenceLayer.put(dataRequestConfig);
 
             final DataRequestResponse response = new DataRequestResponse().resources(filteredResources).token(requestId.getId());
             response.setOriginalRequestId(originalRequestId);
