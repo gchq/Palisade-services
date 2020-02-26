@@ -79,6 +79,7 @@ manager:
      # Where appropriate, each entry is formatted as "TAG: [VALUE] :: USAGE - DESCRIPTION"
     
      my-service:                                               # "spring.application.name=${my-service}" - tag for the service being managed, should match with the service's Spring Boot application name (in eureka)
+      jar: my-service.jar                                     # "java -jar ${jar}" - executable service jar file with main entry point
        paths:                                                  # Additional (external) libraries to dynamically load at runtime (e.g. example library)
          - "/data/types.jar"                                   # "java -Dloader.path=${paths[0]},${paths[1]}"
        profiles:                                               # Spring Boot profiles to enable, comma-separated list
