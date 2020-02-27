@@ -43,13 +43,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
@@ -125,9 +123,6 @@ public class PolicyServiceHierarchyProxyTest {
             .resourceLevelRule("Does nothing", new PassThroughRule<>())
             .recordLevelRule("Does nothing", new PassThroughRule<>());
 
-    private static final Set<DirectoryResource> directoryResources = new HashSet<>(Arrays.asList(jsonDirectory, sensitiveDirectory, secretDirectory));
-    private static final Set<FileResource> fileResources = new HashSet<>(Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile));
-
     private static final PolicyService service = new SimplePolicyService();
     private static final PolicyServiceHierarchyProxy hierarchyProxy = new PolicyServiceHierarchyProxy(service);
 
@@ -142,7 +137,7 @@ public class PolicyServiceHierarchyProxyTest {
         assertThat(hierarchyProxy.setResourcePolicy(secretDirectory, secretPolicy), equalTo(secretPolicy));
 
         // Add the file resources to the policy service
-        for (FileResource fileResource : fileResources) {
+        for (FileResource fileResource : Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile)) {
             assertThat(hierarchyProxy.setResourcePolicy(fileResource, passThroughPolicy), equalTo(passThroughPolicy));
         }
     }
@@ -181,7 +176,7 @@ public class PolicyServiceHierarchyProxyTest {
         Optional<Policy> policy = hierarchyProxy.getPolicy(newFile);
 
         // Then - no such policy was retrieved
-        assertFalse(policy.isPresent());
+        assertTrue(policy.isEmpty());
     }
 
     @Test
@@ -190,58 +185,78 @@ public class PolicyServiceHierarchyProxyTest {
         // accessibleJsonTxtFile for user, sensitiveTxtFile for sensitiveUser, secretTxtFile for secretUser
 
         // When - access to the resource is queried
-        Optional<Resource> resource = hierarchyProxy.canAccess(user, context, accessibleJsonTxtFile);
-        // Then - the resource is accessible
-        assertTrue(resource.isPresent());
+        for (User accessingUser : Arrays.asList(user, sensitiveUser, secretUser)) {
+            Optional<Resource> resource = hierarchyProxy.canAccess(accessingUser, context, accessibleJsonTxtFile);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
 
         // When - access to the resource is queried
-        resource = hierarchyProxy.canAccess(sensitiveUser, context, sensitiveTxtFile);
-        // Then - the resource is accessible
-        assertTrue(resource.isPresent());
+        for (User accessingUser : Arrays.asList(sensitiveUser, secretUser)) {
+            Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, sensitiveTxtFile);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
 
-        // When - access to the resource is queried
-        resource = hierarchyProxy.canAccess(secretUser, context, secretTxtFile);
-        // Then - the resource is accessible
-        assertTrue(resource.isPresent());
+        for (User accessingUser : Arrays.asList(secretUser)) {
+            // When - access to the resource is queried
+            Optional<Resource> resource = hierarchyProxy.canAccess(secretUser, context, secretTxtFile);
+            // Then - the resource is accessible
+            assertTrue(resource.isPresent());
+        }
     }
 
     @Test
-    public void cannotAccessNonResources() {
+    public void cannotAccessRedactedResources() {
+        HashSet<FileResource> files = new HashSet<>(Arrays.asList(accessibleJsonTxtFile, inaccessibleJsonAvroFile, inaccessiblePickleTxtFile, sensitiveTxtFile, sensitiveCsvFile, secretTxtFile));
+
         // Given - there are inaccessible resources
         // everything but accessibleJsonTxtFile for user
-        HashSet<FileResource> resources = new HashSet<>(fileResources);
+        HashSet<FileResource> resources = new HashSet<>(files);
         resources.remove(accessibleJsonTxtFile);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(user, context, fileResource);
-            // Then - the resource is accessible
-            assertFalse(resource.isPresent());
+            // Then - the resource is not accessible
+            assertTrue(resource.isEmpty());
         }
 
         // Given - there are inaccessible resources
         // everything but (accessible/sensitive)TxtFile for sensitiveUser
-        resources = new HashSet<>(fileResources);
+        resources = new HashSet<>(files);
         resources.remove(accessibleJsonTxtFile);
         resources.remove(sensitiveTxtFile);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
-            // Then - the resource is accessible
-            assertFalse(resource.isPresent());
+            // Then - the resource is not accessible
+            assertTrue(resource.isEmpty());
         }
 
         // Given - there are inaccessible resources
         // everything except (accessible/sensitive/secret)TxtFile for secretUser
-        resources = new HashSet<>(fileResources);
+        resources = new HashSet<>(files);
         resources.remove(accessibleJsonTxtFile);
         resources.remove(sensitiveTxtFile);
         resources.remove(secretTxtFile);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
             Optional<Resource> resource = hierarchyProxy.canAccess(sensitiveUser, context, fileResource);
-            // Then - the resource is accessible
-            assertFalse(resource.isPresent());
+            // Then - the resource is not accessible
+            assertTrue(resource.isEmpty());
         }
+    }
+
+    @Test
+    public void cannotAccessResourceWithoutPolicies() {
+        // Given - there are resources with no policies
+        // newFile
+
+        // When - access to the resource is queried
+        Optional<Resource> resource = hierarchyProxy.canAccess(user, context, newFile);
+
+        // Then - the resource is not accessible
+        assertTrue(resource.isEmpty());
     }
 }
 
