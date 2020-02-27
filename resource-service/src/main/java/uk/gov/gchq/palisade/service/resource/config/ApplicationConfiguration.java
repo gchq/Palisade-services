@@ -67,8 +67,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return cachingProxy;
     }
 
-    @Bean
+    @Bean(name = "hadoopConfig")
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
+        LOGGER.info("Initialised Hadoop Configuration");
         return new org.apache.hadoop.conf.Configuration();
     }
 

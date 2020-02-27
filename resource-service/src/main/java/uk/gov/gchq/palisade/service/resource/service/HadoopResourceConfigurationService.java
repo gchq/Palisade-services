@@ -47,18 +47,18 @@ public class HadoopResourceConfigurationService extends HadoopResourceService {
     }
 
     @Override
-    public Map<LeafResource, ConnectionDetail> getResourcesById(final String string) {
-        return resourceService.getResourcesById(string);
+    public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
+        return resourceService.getResourcesById(resourceId);
     }
 
     @Override
-    public Map<LeafResource, ConnectionDetail> getResourcesByType(final String string) {
-        return resourceService.getResourcesByType(string);
+    public Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
+        return resourceService.getResourcesByType(resourceType);
     }
 
     @Override
-    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String string) {
-        return resourceService.getResourcesBySerialisedFormat(string);
+    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String resourceSerialisedFormat) {
+        return resourceService.getResourcesBySerialisedFormat(resourceSerialisedFormat);
     }
 
     @Override

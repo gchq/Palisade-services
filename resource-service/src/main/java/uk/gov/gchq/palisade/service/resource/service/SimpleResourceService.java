@@ -40,25 +40,25 @@ public class SimpleResourceService implements ResourceService {
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
-        LOGGER.debug("Getting resource by {}", resource);
+        LOGGER.info("Getting resource by {}", resource);
         return resources.get(resource);
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
-        LOGGER.debug("Getting resource by {}", resourceId);
+        LOGGER.info("Getting resource by {}", resourceId);
         return resources.get(resourceIds.get(resourceId));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
-        LOGGER.debug("Getting resource by {}", resourceType);
+        LOGGER.info("Getting resource by {}", resourceType);
         return resources.get(resourceTypes.get(resourceType));
     }
 
     @Override
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String resourceFormat) {
-        LOGGER.debug("Getting resource by {}", resourceFormat);
+        LOGGER.info("Getting resource by {}", resourceFormat);
         return resources.get(resourceFormats.get(resourceFormat));
     }
 

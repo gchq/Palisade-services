@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -29,6 +30,7 @@ import uk.gov.gchq.palisade.service.ResourceService;
 
 import java.util.Map;
 
+@CacheConfig(cacheNames = {"resources", "resourceId", "resourceType", "resourceFormat"})
 public class ResourceServiceCachingProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceServiceCachingProxy.class);
@@ -39,35 +41,35 @@ public class ResourceServiceCachingProxy {
         this.service = service;
     }
 
-    @Cacheable(cacheNames = "resources", key = "#resource")
+    @Cacheable(value = "resources", key = "#resource")
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(final Resource resource) {
         LOGGER.info("Cache miss for resource {}", resource);
         return service.getResourcesByResource(resource);
     }
 
-    @Cacheable(cacheNames = "resourceId", key = "#resourceId")
+    @Cacheable(value = "resourceId", key = "#resourceId")
     public Map<LeafResource, ConnectionDetail> getResourcesById(final String resourceId) {
         LOGGER.info("Cache miss for resourceId {}", resourceId);
         return service.getResourcesById(resourceId);
     }
 
-    @Cacheable(cacheNames = "resourceType", key = "#resourceType")
+   @Cacheable(value = "resourceType", key = "#resourceType")
     public  Map<LeafResource, ConnectionDetail> getResourcesByType(final String resourceType) {
         LOGGER.info("Cache miss for resourceType {}", resourceType);
         return service.getResourcesByType(resourceType);
     }
 
-    @Cacheable(cacheNames = "resourceFormat", key = "#serialisedFormat")
+    @Cacheable(value = "resourceFormat", key = "#serialisedFormat")
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final String serialisedFormat) {
         LOGGER.info("Cache miss for resourceFormat {}", serialisedFormat);
         return service.getResourcesBySerialisedFormat(serialisedFormat);
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = "resources", key = "#resource"),
-            @CacheEvict(cacheNames = "resourceId", key = "#resource.id"),
-            @CacheEvict(cacheNames = "resourceType", key = "#resource.type"),
-            @CacheEvict(cacheNames = "resourceFormat", key = "#resource.serialisedFormat")
+            @CacheEvict(value = "resources", key = "#resource"),
+            @CacheEvict(value = "resourceId", key = "#resource.id"),
+            @CacheEvict(value = "resourceType", key = "#resource.type"),
+            @CacheEvict(value = "resourceFormat", key = "#resource.serialisedFormat")
     })
     public Resource addResource(final Resource resource) {
         LOGGER.info("Cache evict for resource: {}", resource);
