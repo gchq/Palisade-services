@@ -37,15 +37,19 @@ public class SimplePolicyService implements PolicyService {
 
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
-        Collection<Rule<Resource>> resourceRules = policyMap.get(resource).getResourceRules().getRules().values();
-        LOGGER.info("Resource {} has rules {}", resource, resourceRules);
-        Optional<Resource> canAccess = resourceRules.stream()
-                .reduce(
-                        Optional.of(resource), // Id: reduce over the requested resource
-                        (acc, rule) -> acc.map(rsc -> rule.apply(rsc, user, context)), // Acc: apply each rule to the resource
-                        (lPartial, rPartial) -> lPartial.flatMap(rsc -> rPartial)); // Comb: a resource is accessible if both partial results are accessible
-        LOGGER.info("User {} with context {} has accessibility {}", user, context, canAccess);
-        return canAccess;
+        if (policyMap.containsKey(resource)) {
+            Collection<Rule<Resource>> resourceRules = policyMap.get(resource).getResourceRules().getRules().values();
+            LOGGER.info("Resource {} has rules {}", resource, resourceRules);
+            Optional<Resource> canAccess = resourceRules.stream()
+                    .reduce(
+                            Optional.of(resource), // Id: reduce over the requested resource
+                            (acc, rule) -> acc.map(rsc -> rule.apply(rsc, user, context)), // Acc: apply each rule to the resource
+                            (lPartial, rPartial) -> lPartial.flatMap(rsc -> rPartial)); // Comb: a resource is accessible if both partial results are accessible
+            LOGGER.info("User {} with context {} has accessibility {}", user, context, canAccess);
+            return canAccess;
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
