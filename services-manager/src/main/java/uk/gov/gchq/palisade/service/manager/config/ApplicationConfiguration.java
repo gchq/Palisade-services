@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     public static class ConfigurationMap {
 

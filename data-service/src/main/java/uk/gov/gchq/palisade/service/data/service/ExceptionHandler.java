@@ -36,7 +36,7 @@ import java.time.ZonedDateTime;
 @ControllerAdvice(assignableTypes = DataController.class)
 @RequestMapping(produces = "application/json")
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandler.class);
+    private static final Logger debugLOGGER = LoggerFactory.getLogger(ExceptionHandler.class);
     private static final String MESSAGE = "The application encountered an issue while processing the request.";
 
     /**
@@ -54,7 +54,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
             Exception.class
     })
     public ResponseEntity<Object> handleCustomException(final Exception ex, final WebRequest request) {
-        LOGGER.warn("Delegating exception handling for {} from request {}", ex, request);
+        debugLOGGER.warn("Delegating exception handling for {} from request {}", ex, request);
 
         if (ex instanceof NoPolicyException) {
             return noPolicyExceptionHandler((NoPolicyException) ex, request);
@@ -80,7 +80,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> noPolicyExceptionHandler(final NoPolicyException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-       LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+       debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 
@@ -93,7 +93,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> nullPointerExceptionHandler(final NullPointerException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-        LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+        debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
 
@@ -106,7 +106,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> fileNotFoundExceptionHandler(final FileNotFoundException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-        LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+        debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 
@@ -119,7 +119,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> ioExceptionHandler(final IOException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-        LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+        debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -132,7 +132,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> runtimeExceptionHandler(final RuntimeException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-        LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+        debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -145,7 +145,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> globalExceptionHandler(final Exception ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-        LOGGER.error("Error from data service, details: {}, and request {}", details, request);
+        debugLOGGER.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
