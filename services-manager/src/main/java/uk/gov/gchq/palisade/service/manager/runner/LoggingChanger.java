@@ -89,13 +89,13 @@ public class LoggingChanger extends EurekaUtils implements ApplicationRunner {
                                 Boolean success = statusClass == 2;
                                 // Log any errors that may have occurred
                                 LOGGER.debug("Response from instance {} and logger {}:\n{}", instance, logger, response);
-                                if (!success) {
+                                if (Boolean.FALSE.equals(success)) {
                                     LOGGER.warn("Instance {} and logger {} encountered errors while posting to actuator: status code was {}", instance, logger, response.getStatusCode());
                                 }
                                 return success;
                             })
                             .reduce(true, (x, y) -> x && y);
-                    if (!instanceSuccess) {
+                    if (Boolean.FALSE.equals(instanceSuccess)) {
                         LOGGER.warn("Instance {} encountered errors while posting to actuators", instance);
                     }
                     return instanceSuccess;
@@ -123,7 +123,7 @@ public class LoggingChanger extends EurekaUtils implements ApplicationRunner {
             // Wait until all POSTs are complete
             Boolean success = joinAllResponses(responses);
 
-            if (!success) {
+            if (Boolean.FALSE.equals(success)) {
                 LOGGER.warn("Errors encountered while posting to actuators - check logs");
                 System.exit(1);
             } else {
