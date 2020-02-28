@@ -22,6 +22,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -101,7 +102,7 @@ public class SimplePalisadeServiceTest {
                         .parent(new DirectoryResource().id("/path/to/")
                                 .parent(new DirectoryResource().id("/path/")
                                         .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
         Policy policy = new Policy();

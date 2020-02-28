@@ -33,7 +33,7 @@ public class PolicyApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyApplication.class);
 
     public static void main(final String[] args) {
-        LOGGER.debug("PolicyApplication started with: {}", PolicyApplication.class.toString(), "main", Arrays.toString(args));
+        LOGGER.debug("PolicyApplication started with: {} {} {}", PolicyApplication.class.toString(), "main", Arrays.toString(args));
         new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }

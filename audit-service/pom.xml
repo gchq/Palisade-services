@@ -35,6 +35,7 @@
     <artifactId>audit-service</artifactId>
 
     <properties>
+        <eureka.version>1.9.16</eureka.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
     </properties>
@@ -43,6 +44,7 @@
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
+            <version>${eureka.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -226,6 +228,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layout>ZIP</layout>
+                </configuration>
                 <executions>
                     <execution>
                         <id>repackage</id>

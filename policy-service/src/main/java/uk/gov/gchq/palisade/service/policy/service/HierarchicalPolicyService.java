@@ -41,7 +41,6 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -102,7 +101,7 @@ public class HierarchicalPolicyService implements PolicyService {
                     Optional<Rules<LeafResource>> rules = futureRules.join();
                     if (rules.isPresent()) {
                         LOGGER.debug("resource {}, has the following policy {}", resource, rules);
-                        return Util.applyRulesToItem(resource, user, context, rules.get(), new AtomicLong(0), new AtomicLong(0));
+                        return Util.applyRulesToItem(resource, user, context, rules.get());
                     } else {
                         LOGGER.debug("No policy for {}, removing resource from list...", resource);
                         return null;

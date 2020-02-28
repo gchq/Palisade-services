@@ -1,5 +1,5 @@
 
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/user-service/user-service.jar
+COPY $JAR_FILE /usr/share/user-service/user-service.jar
 
-LABEL service="user", project="palisade"
+LABEL service="user" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/user-service/user-service.jar"]
