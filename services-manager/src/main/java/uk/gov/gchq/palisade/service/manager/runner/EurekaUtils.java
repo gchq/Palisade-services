@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 class EurekaUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EurekaUtils.class);
 
     @Autowired(required = false)
     private EurekaClient eurekaClient;
