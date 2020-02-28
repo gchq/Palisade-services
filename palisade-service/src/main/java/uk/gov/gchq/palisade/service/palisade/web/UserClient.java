@@ -15,7 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
+import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import uk.gov.gchq.palisade.User;
@@ -26,5 +28,8 @@ public interface UserClient {
 
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
     User getUser(final GetUserRequest request);
+
+    @GetMapping(path = "/actuator/health", produces = "application/json")
+    Response getHealth();
 
 }

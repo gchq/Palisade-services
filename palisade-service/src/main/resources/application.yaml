@@ -35,6 +35,9 @@ eureka:
     enabled: false
 
 management:
+  endpoint:
+    health:
+      show-details: always
   endpoints:
     web:
       exposure:
