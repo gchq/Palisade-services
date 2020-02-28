@@ -8,3 +8,14 @@ web:
     policy-service: localhost:8085
     resource-service: localhost:8086
     user-service: localhost:8087
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./cache-h2
+    username:
+    password:
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true

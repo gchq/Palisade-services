@@ -37,9 +37,7 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
-import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
-import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -71,7 +69,6 @@ public class SimplePalisadeServiceTest {
     private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResultAggregationService aggregationService;
     private AuditService auditService;
-    private SimpleCacheService cacheService;
     private PersistenceLayer persistenceLayer;
     private PolicyService policyService;
     private ResourceService resourceService;
@@ -93,9 +90,8 @@ public class SimplePalisadeServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        setupCacheService();
         mockOtherServices();
-        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, persistenceLayer, executor, aggregationService);
+        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, persistenceLayer, executor, aggregationService);
         LOGGER.info("Simple Palisade Service created: {}", service);
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
@@ -137,7 +133,6 @@ public class SimplePalisadeServiceTest {
                 .context(new Context().purpose("Testing"))
                 .resourceId("/path/to/new/bob_file.txt");
 
-        when(cacheService.getBackingStore().add(anyString(), any(), any(), any())).thenReturn(true);
         when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
         when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
         when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
@@ -199,9 +194,4 @@ public class SimplePalisadeServiceTest {
         persistenceLayer = Mockito.mock(PersistenceLayer.class);
     }
 
-    private void setupCacheService() {
-        final BackingStore store = Mockito.mock(BackingStore.class);
-        cacheService = new SimpleCacheService().backingStore(store);
-        persistenceLayer = Mockito.mock(PersistenceLayer.class);
-    }
 }

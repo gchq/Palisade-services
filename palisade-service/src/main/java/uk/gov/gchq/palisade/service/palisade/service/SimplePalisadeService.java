@@ -52,26 +52,24 @@ public class SimplePalisadeService implements PalisadeService {
     private final PolicyService policyService;
     private final UserService userService;
     private final ResourceService resourceService;
-    private final CacheService cacheService;
     private final PersistenceLayer persistenceLayer;
     private final ResultAggregationService aggregationService;
 
     private final Executor executor;
 
     public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService,
-                                 final CacheService cacheService, final PersistenceLayer persistenceLayer, final Executor executor, final ResultAggregationService resultAggregationService) {
+                                 final PersistenceLayer persistenceLayer, final Executor executor, final ResultAggregationService resultAggregationService) {
         requireNonNull(auditService, "auditService");
         requireNonNull(userService, "userService");
         requireNonNull(policyService, "policyService");
         requireNonNull(resourceService, "resourceService");
-        requireNonNull(cacheService, "cacheService");
+        requireNonNull(persistenceLayer, "persistenceLayer");
         requireNonNull(executor, "executor");
         requireNonNull(resultAggregationService, "resultAggregationService");
         this.auditService = auditService;
         this.userService = userService;
         this.policyService = policyService;
         this.resourceService = resourceService;
-        this.cacheService = cacheService;
         this.persistenceLayer = persistenceLayer;
         this.executor = executor;
         this.aggregationService = resultAggregationService;

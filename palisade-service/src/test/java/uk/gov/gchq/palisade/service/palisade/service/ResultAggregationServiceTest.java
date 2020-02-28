@@ -33,9 +33,7 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.policy.Policy;
-import uk.gov.gchq.palisade.service.palisade.repository.HashMapBackingStore;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
-import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
@@ -56,7 +54,6 @@ public class ResultAggregationServiceTest {
 
     private AuditClient auditClient = Mockito.mock(AuditClient.class);
     private AuditService auditService;
-    private SimpleCacheService simpleCacheService = new SimpleCacheService();
     private PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
     private Map<LeafResource, Policy> policies = new HashMap<>();
     private ResultAggregationService service;
@@ -73,9 +70,8 @@ public class ResultAggregationServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        simpleCacheService.backingStore(new HashMapBackingStore());
         auditService = new AuditService(auditClient, executor);
-        service = new ResultAggregationService(auditService, simpleCacheService, persistenceLayer);
+        service = new ResultAggregationService(auditService, persistenceLayer);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");

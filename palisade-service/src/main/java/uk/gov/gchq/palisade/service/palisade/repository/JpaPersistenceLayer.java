@@ -76,5 +76,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
         this.leafResourceRulesRepository.saveAll(resources);
         this.dataRequestRepository.save(dataRequest);
+        LOGGER.debug("cached: {}", dataRequestConfig);
     }
 }
