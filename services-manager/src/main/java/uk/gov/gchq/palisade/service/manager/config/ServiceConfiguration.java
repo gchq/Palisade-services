@@ -107,7 +107,7 @@ public class ServiceConfiguration {
         command.add(jar);
 
         ProcessBuilder pb = new ProcessBuilder().command(command);
-        log.ifPresent(log -> pb.redirectOutput(new File(log)));
+        log.ifPresent(logged -> pb.redirectOutput(new File(logged)));
         err.ifPresent(err -> pb.redirectError(new File(err)));
 
         return pb;
