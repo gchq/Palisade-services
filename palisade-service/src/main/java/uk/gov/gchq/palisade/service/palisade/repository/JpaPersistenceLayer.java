@@ -36,9 +36,9 @@ import static uk.gov.gchq.palisade.service.palisade.service.PalisadeService.TOKE
 public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
 
-    private DataRequestRepository dataRequestRepository;
-    private LeafResourceRulesRepository leafResourceRulesRepository;
-    private Executor executor;
+    private final DataRequestRepository dataRequestRepository;
+    private final LeafResourceRulesRepository leafResourceRulesRepository;
+    private final Executor executor;
 
     public JpaPersistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
         this.dataRequestRepository = dataRequestRepository;
