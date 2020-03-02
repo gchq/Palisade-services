@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static uk.gov.gchq.palisade.service.palisade.service.PalisadeService.TOKEN_NOT_FOUND_MESSAGE;
 
 public class JpaPersistenceLayer implements PersistenceLayer {
@@ -41,11 +42,17 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private final Executor executor;
 
     public JpaPersistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
-        this.dataRequestRepository = dataRequestRepository;
-        this.leafResourceRulesRepository = leafResourceRulesRepository;
-        this.executor = executor;
+        this.dataRequestRepository = requireNonNull(dataRequestRepository, "DataRequestRepository");
+        this.leafResourceRulesRepository = requireNonNull(leafResourceRulesRepository, "LeafResourceRulesRepository");
+        this.executor = requireNonNull(executor, "Executor");
     }
 
+    /**
+     * Read the persisted data back into the domain storage objects and then convert them into the original application message types.
+     *
+     * @param requestId of the original request
+     * @return the {@link DataRequestConfig} object for this request id
+     */
     @Override
     public DataRequestConfig get(final String requestId) {
         final List<LeafResourceRulesEntity> leafResourceRules = this.leafResourceRulesRepository.getByRequestId(requestId);
@@ -65,6 +72,11 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                 .orElseThrow(() -> new RuntimeException(TOKEN_NOT_FOUND_MESSAGE + requestId)), this.executor);
     }
 
+    /**
+     * Convert the application message type to storage domain objects and write them to storage.
+     *
+     * @param dataRequestConfig message object to be persisted
+     */
     @Override
     @Transactional
     public void put(final DataRequestConfig dataRequestConfig) {
