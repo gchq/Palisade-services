@@ -28,6 +28,8 @@ import javax.persistence.Converter;
 import java.io.IOException;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 @Converter
 public class ContextConverter implements AttributeConverter<Context, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextConverter.class);
@@ -35,11 +37,14 @@ public class ContextConverter implements AttributeConverter<Context, String> {
     private final ObjectMapper objectMapper;
 
     public ContextConverter(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+        this.objectMapper = requireNonNull(objectMapper, "objectMapper");
     }
 
     @Override
     public String convertToDatabaseColumn(final Context context) {
+        if (Optional.ofNullable(context).isEmpty()) {
+            return null;
+        }
         try {
             return this.objectMapper.writeValueAsString(context);
         } catch (JsonProcessingException e) {

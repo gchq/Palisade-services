@@ -29,6 +29,8 @@ import javax.persistence.UniqueConstraint;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 
+import static java.util.Objects.requireNonNull;
+
 @Entity
 @Table(name = "leaf_resource_rules",
         uniqueConstraints = {@UniqueConstraint(columnNames = "id")},
@@ -55,8 +57,8 @@ public class LeafResourceRulesEntity {
     }
 
     public LeafResourceRulesEntity(final RequestId request, final LeafResource leafResource, final Rules<?> rules) {
-        this.requestId = request.getId();
-        this.id = leafResource.getId();
+        this.requestId = requireNonNull(request, "RequestId").getId();
+        this.id = requireNonNull(leafResource, "LeafResource").getId();
         this.leafResource = leafResource;
         this.rules = rules;
     }
@@ -70,7 +72,7 @@ public class LeafResourceRulesEntity {
     }
 
     public void setId(final String id) {
-        this.id = id;
+        this.id = requireNonNull(id, "id");
     }
 
     public String getRequestId() {
@@ -78,7 +80,7 @@ public class LeafResourceRulesEntity {
     }
 
     public void setRequestId(final String requestId) {
-        this.requestId = requestId;
+        this.requestId = requireNonNull(requestId, "requestId");
     }
 
     public LeafResource getLeafResource() {
@@ -86,7 +88,7 @@ public class LeafResourceRulesEntity {
     }
 
     public void setLeafResource(final LeafResource leafResource) {
-        this.leafResource = leafResource;
+        this.leafResource = requireNonNull(leafResource, "LeafResource");
     }
 
     public Rules<?> getRules() {
@@ -94,6 +96,6 @@ public class LeafResourceRulesEntity {
     }
 
     public void setRules(final Rules<?> rules) {
-        this.rules = rules;
+        this.rules = requireNonNull(rules, "Rules<?>");
     }
 }

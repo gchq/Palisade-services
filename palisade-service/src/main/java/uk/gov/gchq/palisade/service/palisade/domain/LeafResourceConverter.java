@@ -29,6 +29,8 @@ import javax.persistence.Converter;
 import java.io.IOException;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 @Converter
 public class LeafResourceConverter implements AttributeConverter<LeafResource, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeafResourceConverter.class);
@@ -36,11 +38,14 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
     private final ObjectMapper objectMapper;
 
     public LeafResourceConverter(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+        this.objectMapper = requireNonNull(objectMapper, "objectMapper");
     }
 
     @Override
     public String convertToDatabaseColumn(final LeafResource leafResource) {
+        if (Optional.ofNullable(leafResource).isEmpty()) {
+            return null;
+        }
         try {
             return this.objectMapper.writeValueAsString(leafResource);
         } catch (JsonProcessingException e) {

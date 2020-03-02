@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 @Entity
 @Table(name = "data_request",
         uniqueConstraints = {@UniqueConstraint(columnNames = "request_id")},
@@ -60,7 +62,7 @@ public class DataRequestEntity {
     }
 
     public DataRequestEntity(final DataRequestConfig config) {
-        this.requestId = config.getOriginalRequestId().getId();
+        this.requestId = requireNonNull(config, "DataRequestConfig").getOriginalRequestId().getId();
         this.context = config.getContext();
         this.user = config.getUser();
         this.leafResourceMap = Optional.ofNullable(config.getRules()).orElseGet(Collections::emptyMap);
@@ -77,7 +79,7 @@ public class DataRequestEntity {
     }
 
     public void setRequestId(final String requestId) {
-        this.requestId = requestId;
+        this.requestId = requireNonNull(requestId, "requestId");
     }
 
     public User getUser() {
@@ -85,7 +87,7 @@ public class DataRequestEntity {
     }
 
     public void setUser(final User user) {
-        this.user = user;
+        this.user = requireNonNull(user, "user");
     }
 
     public Context getContext() {
@@ -93,7 +95,7 @@ public class DataRequestEntity {
     }
 
     public void setContext(final Context context) {
-        this.context = context;
+        this.context = requireNonNull(context, "context");
     }
 
     public Map<LeafResource, Rules> getLeafResourceMap() {
