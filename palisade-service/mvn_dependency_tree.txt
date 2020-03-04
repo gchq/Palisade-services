@@ -235,7 +235,6 @@ uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
 |  +- org.assertj:assertj-core:jar:3.13.2:test
 |  +- org.hamcrest:hamcrest:jar:2.1:test
 |  +- org.mockito:mockito-core:jar:3.1.0:test
-|  |  +- net.bytebuddy:byte-buddy:jar:1.10.1:test
 |  |  +- net.bytebuddy:byte-buddy-agent:jar:1.10.1:test
 |  |  \- org.objenesis:objenesis:jar:2.6:test
 |  +- org.skyscreamer:jsonassert:jar:1.5.0:test

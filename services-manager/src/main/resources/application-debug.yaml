@@ -13,6 +13,10 @@
 # limitations under the License.
 #
 
+eureka:
+  client:
+    enabled: true
+
 # Start EVERYTHING in DEBUG logging (or kick them into it with the --logging runtime flag)
 # Can be included in the spring active profiles with any other profile
 
