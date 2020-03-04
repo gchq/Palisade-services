@@ -20,27 +20,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.reader.common.CachedSerialisedDataReader.MapWrap;
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.service.CacheService;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadResponse;
-import uk.gov.gchq.palisade.service.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -61,13 +56,11 @@ public class SimpleDataService implements DataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
     public static final String SERIALISER_KEY = "cached.serialiser.map";
 
+    private AuditService auditService;
     private PalisadeService palisadeService;
     private DataReader dataReader;
-    private CacheService cacheService;
-    private AuditService auditService;
 
-    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader) {
-        this.cacheService = cacheService;
+    public SimpleDataService(final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader) {
         this.auditService = auditService;
         this.palisadeService = palisadeService;
         this.dataReader = dataReader;
@@ -91,10 +84,59 @@ public class SimpleDataService implements DataService {
         return this;
     }
 
-    public SimpleDataService cacheService(final CacheService cacheService) {
-        requireNonNull(cacheService, "The cache service cannot be set to null.");
-        this.cacheService = cacheService;
-        return this;
+    DataReaderRequest constructReaderRequest(final ReadRequest request) {
+        final GetDataRequestConfig getConfig = new GetDataRequestConfig()
+                .token(new RequestId().id(request.getToken()))
+                .resource(request.getResource());
+        getConfig.setOriginalRequestId(request.getOriginalRequestId());
+        LOGGER.info("Calling palisade service with: {}", getConfig);
+
+        final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
+        LOGGER.info("Palisade service returned: {}", config);
+
+        final DataReaderRequest readerRequest = new DataReaderRequest()
+                .resource(request.getResource())
+                .user(config.getUser())
+                .context(config.getContext())
+                .rules(config.getRules().get(request.getResource()));
+        readerRequest.setOriginalRequestId(request.getOriginalRequestId());
+
+        return readerRequest;
+    }
+
+    @Override
+    public Consumer<OutputStream> read(final ReadRequest dataRequest) throws NoCapacityException {
+        return out -> {
+            try {
+                final AtomicLong recordsProcessed = new AtomicLong(0);
+                final AtomicLong recordsReturned = new AtomicLong(0);
+
+                LOGGER.debug("Querying palisade service for token {} and resource {}", dataRequest.getToken(), dataRequest.getResource());
+                DataReaderRequest readerRequest = constructReaderRequest(dataRequest);
+
+                LOGGER.debug("Reading from reader with request {}", readerRequest);
+                DataReaderResponse readerResponse = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
+
+                LOGGER.debug("Writing reader response {} to output stream", readerResponse);
+                ReadResponse dataResponse = new NoInputReadResponse(readerResponse).message(dataRequest.toString());
+                dataResponse.writeTo(out);
+                out.close();
+
+                LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
+                auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
+            } catch (IOException | NoCapacityException ex) {
+                auditRequestReceivedException(dataRequest, ex);
+            }
+        };
+    }
+
+    @Override
+    public Boolean addSerialiser(final AddSerialiserRequest request) {
+        LOGGER.info("Processing AddSerialiserRequest: {}", request);
+
+        getDataReader().addSerialiser(request.getDataFlavour(), request.getSerialiser());
+
+        return true;
     }
 
     private void auditRequestReceivedException(final ReadRequest request, final Throwable ex) {
@@ -118,64 +160,6 @@ public class SimpleDataService implements DataService {
                 .withNumberOfRecordsProcessed(recordsProcessed.get()));
     }
 
-    @Override
-    public CompletableFuture<ReadResponse> read(final ReadRequest request) {
-        requireNonNull(request, "The request cannot be null.");
-
-        LOGGER.debug("Creating async read: {}", request);
-        return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("Starting to read: {}", request);
-
-            final GetDataRequestConfig getConfig = new GetDataRequestConfig()
-                    .token(new RequestId().id(request.getToken()))
-                    .resource(request.getResource());
-            getConfig.setOriginalRequestId(request.getOriginalRequestId());
-            LOGGER.debug("Calling palisade service with: {}", getConfig);
-
-            final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
-            LOGGER.info("Palisade service returned: {}", config);
-
-            final DataReaderRequest readerRequest = new DataReaderRequest()
-                    .resource(request.getResource())
-                    .user(config.getUser())
-                    .context(config.getContext())
-                    .rules(config.getRules().get(request.getResource()));
-            readerRequest.setOriginalRequestId(request.getOriginalRequestId());
-            LOGGER.info("Calling dataReader with: {}", readerRequest);
-
-            AtomicLong recordsProcessed = new AtomicLong(0);
-            AtomicLong recordsReturned = new AtomicLong(0);
-            final DataReaderResponse readerResult = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
-            auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
-            LOGGER.info("Processed {} and returned {} records, reader returned: {}", recordsProcessed.get(), recordsReturned.get(), readerResult);
-
-            return (ReadResponse) new NoInputReadResponse(readerResult);
-        }).exceptionally(ex -> {
-            LOGGER.warn("Error handling: " + ex.getMessage());
-            auditRequestReceivedException(request, ex);
-            throw new RuntimeException(ex); //rethrow the exception
-        });
-    }
-
-    @Override
-    public CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request) {
-        LOGGER.info("Processing AddSerialiserRequest: {}", request);
-
-        //Create map of DataFlavour and Serialiser
-        Map<DataFlavour, Serialiser<?>> typeMap = new HashMap<>();
-        typeMap.put(request.getDataFlavour(), request.getSerialiser());
-
-        //Create AddCacheRequest
-        AddCacheRequest<MapWrap> cacheRequest = new AddCacheRequest<>()
-                .service(Service.class)
-                .key(SERIALISER_KEY)
-                .value(new MapWrap(typeMap));
-        cacheService.add(cacheRequest).join();
-        LOGGER.debug("Serialiser added: {}", cacheRequest);
-
-        return CompletableFuture.completedFuture(true);
-    }
-
     public PalisadeService getPalisadeService() {
         requireNonNull(palisadeService, "The palisade service has not been set.");
         return palisadeService;
@@ -194,15 +178,6 @@ public class SimpleDataService implements DataService {
 
     public void setDataReader(final DataReader dataReader) {
         reader(dataReader);
-    }
-
-    public CacheService getCacheService() {
-        requireNonNull(cacheService, "The cacheService has not been set.");
-        return cacheService;
-    }
-
-    public void setCacheService(final CacheService cacheService) {
-        cacheService(cacheService);
     }
 
     public AuditService getAuditService() {

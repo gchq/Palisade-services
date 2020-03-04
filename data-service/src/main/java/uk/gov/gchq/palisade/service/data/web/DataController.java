@@ -28,10 +28,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
-import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 import uk.gov.gchq.palisade.service.data.service.DataService;
-
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/")
@@ -45,46 +42,24 @@ public class DataController {
         this.service = service;
     }
 
-    @PostMapping(value = "/read", consumes = "application/json", produces = "application/json")
-    public ReadResponse readSync(@RequestBody final ReadRequest request) {
-        LOGGER.info("Invoking read: {}", request);
-        ReadResponse response = read(request).join();
-        LOGGER.info("Returning response: {}", response);
-        return response;
-    }
-
-    // Taken from the following example: https://dzone.com/articles/streaming-data-with-spring-boot-restful-web-service
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
-        LOGGER.info("Invoking readChunked: {}", request);
-        StreamingResponseBody streamingResponseBody = outputStream -> {
-            ReadResponse response = read(request).join();
-            LOGGER.info("Writing response {} to output stream", response);
-            response.writeTo(outputStream);
-            outputStream.close();
-            LOGGER.debug("IO streams completed and closed");
-        };
+        LOGGER.info("Invoking read (chunked): {}", request);
+        StreamingResponseBody stream = out -> service.read(request).accept(out);
 
-        ResponseEntity<StreamingResponseBody> ret = new ResponseEntity<>(streamingResponseBody, HttpStatus.OK);
-        LOGGER.info("Constructed and returning streamed response: {}", ret);
-        return ret;
+        LOGGER.info("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
     @PostMapping(value = "/addSerialiser", consumes = "application/json", produces = "application/json")
-    public CompletableFuture<Boolean> readSync(@RequestBody final AddSerialiserRequest request) {
+    public Boolean addSerialiser(@RequestBody final AddSerialiserRequest request) {
         LOGGER.info("Invoking addSerialiser: {}", request);
-        CompletableFuture<Boolean> response = addSerialiser(request);
-        LOGGER.info("Request processed. Result: {}", response.join());
+        Boolean response = service.addSerialiser(request);
+
+        LOGGER.info("Request processed. Result: {}", response);
         return response;
     }
 
-    public CompletableFuture<ReadResponse> read(final ReadRequest request) {
-        LOGGER.debug("Request will now be read: {}", request);
-        return service.read(request);
-    }
 
-    public CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request) {
-        LOGGER.debug("Serialiser will now be added to the cache {}", request);
-        return service.addSerialiser(request);
-    }
+
 }
