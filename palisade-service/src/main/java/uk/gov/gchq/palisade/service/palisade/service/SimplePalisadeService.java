@@ -22,9 +22,8 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.request.GetCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
@@ -32,12 +31,10 @@ import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -48,34 +45,31 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-    /**
-     * Duration for how long the count of resources requested should live in the cache.
-     */
-    public static final Duration COUNT_PERSIST_DURATION = Duration.ofMinutes(10);
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
+
     private final AuditService auditService;
     private final PolicyService policyService;
     private final UserService userService;
     private final ResourceService resourceService;
-    private final CacheService cacheService;
+    private final PersistenceLayer persistenceLayer;
     private final ResultAggregationService aggregationService;
 
     private final Executor executor;
 
     public SimplePalisadeService(final AuditService auditService, final UserService userService, final PolicyService policyService, final ResourceService resourceService,
-                                 final CacheService cacheService, final Executor executor, final ResultAggregationService resultAggregationService) {
+                                 final PersistenceLayer persistenceLayer, final Executor executor, final ResultAggregationService resultAggregationService) {
         requireNonNull(auditService, "auditService");
         requireNonNull(userService, "userService");
         requireNonNull(policyService, "policyService");
         requireNonNull(resourceService, "resourceService");
-        requireNonNull(cacheService, "cacheService");
+        requireNonNull(persistenceLayer, "persistenceLayer");
         requireNonNull(executor, "executor");
         requireNonNull(resultAggregationService, "resultAggregationService");
         this.auditService = auditService;
         this.userService = userService;
         this.policyService = policyService;
         this.resourceService = resourceService;
-        this.cacheService = cacheService;
+        this.persistenceLayer = persistenceLayer;
         this.executor = executor;
         this.aggregationService = resultAggregationService;
     }
@@ -112,33 +106,11 @@ public class SimplePalisadeService implements PalisadeService {
             final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
+        // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
-        final GetCacheRequest<DataRequestConfig> cacheRequest = new GetCacheRequest<>().key(request.getToken().getId()).service(this.getClass());
-        LOGGER.debug("Getting cached data: {}", cacheRequest);
+        LOGGER.debug("Getting cached data: {}", request);
 
-        return cacheService.get(cacheRequest)
-                .thenApply(cache -> {
-                    DataRequestConfig value = cache.orElseThrow(() -> createCacheException(request.getId().getId()));
-                    if (null == value.getUser()) {
-                        throw createCacheException(request.getId().getId());
-                    }
-                    LOGGER.debug("Got cache: {}", value);
-                    return value;
-                })
-                .thenApply(config -> {
-                    Map<LeafResource, Rules> filteredRules = config.getRules().entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(request.getResource()))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                    config.setRules(filteredRules);
-                    return config;
-                })
-                .exceptionally(exception -> {
-                    throw createCacheException(request.getId().getId());
-                });
-    }
-
-    private RuntimeException createCacheException(final String id) {
-        return new RuntimeException(TOKEN_NOT_FOUND_MESSAGE + id);
+        return this.persistenceLayer.getAsync(request.getId().getId());
     }
 
 }

@@ -44,8 +44,7 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.repository.BackingStore;
-import uk.gov.gchq.palisade.service.palisade.repository.SimpleCacheService;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
@@ -72,7 +71,7 @@ public class PalisadeServiceExceptionHandlerTest {
     private final DataRequestConfig expectedConfig = new DataRequestConfig();
     private ResultAggregationService aggregationService;
     private AuditService auditService;
-    private SimpleCacheService cacheService;
+    private PersistenceLayer persistenceLayer;
     private PolicyService policyService;
     private ResourceService resourceService;
     private UserService userService;
@@ -93,9 +92,8 @@ public class PalisadeServiceExceptionHandlerTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        setupCacheService();
         mockOtherServices();
-        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, cacheService, executor, aggregationService);
+        service = new SimplePalisadeService(auditService, userService, policyService, resourceService, persistenceLayer, executor, aggregationService);
         LOGGER.info("Simple Palisade Service created: {}", service);
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
@@ -189,10 +187,7 @@ public class PalisadeServiceExceptionHandlerTest {
         resourceService = Mockito.mock(ResourceService.class);
         userService = Mockito.mock(UserService.class);
         aggregationService = Mockito.mock(ResultAggregationService.class);
+        persistenceLayer = Mockito.mock(PersistenceLayer.class);
     }
 
-    private void setupCacheService() {
-        final BackingStore store = Mockito.mock(BackingStore.class);
-        cacheService = new SimpleCacheService().backingStore(store);
-    }
 }

@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.manager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -25,7 +23,6 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @EnableEurekaClient
 @SpringBootApplication
 public class ManagerApplication {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManagerApplication.class);
 
     public ManagerApplication() {
         // no-args constructor needed for serialization only
