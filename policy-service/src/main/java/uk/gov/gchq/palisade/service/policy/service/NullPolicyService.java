@@ -23,10 +23,17 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 
 import java.util.Optional;
 
+/**
+ * A default do-nothing Policy Service designed to work with the Caching and Hierarchy layers.
+ * Within cache TTL and cache size, the set...Policy methods will add to the cache, getPolicy will get from the cache
+ * and the service will declare all Resources available unless Policy dictates otherwise.
+ *
+ * After cache TTL timeout, the service will effectively be reset and empty
+ */
 public class NullPolicyService implements PolicyService {
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
-        // By default, all resources can be accessed (this may be overruled by hierarchy)
+        // By default, all resources can be accessed (this may be overruled by hierarchy and policies on the resource)
         return Optional.of(resource);
     }
 

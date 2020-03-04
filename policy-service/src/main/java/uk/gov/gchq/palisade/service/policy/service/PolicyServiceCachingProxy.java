@@ -30,6 +30,16 @@ import uk.gov.gchq.palisade.service.policy.request.Policy;
 
 import java.util.Optional;
 
+
+/**
+ * This acts as a caching layer on top of an implementation of a policy service. This does not have any hierarchy logic
+ * as that is handled before it reaches caching. In this way, a hierarchical traversal for policies is more
+ * cache-friendly.
+ * The three caches are used as follows:
+ * - resourcePolicy is a map of Resources to Policies, another proxy may query for each parent resource etc.
+ * - typePolicy is a map of Types to Policies
+ * - accessPolicy is a map of CanAccessRequests (or equivalent of) to an Optional (available) Resource
+ */
 @CacheConfig(cacheNames = {"resourcePolicy, typePolicy, accessPolicy"})
 public class PolicyServiceCachingProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceCachingProxy.class);
@@ -40,24 +50,26 @@ public class PolicyServiceCachingProxy implements PolicyService {
     }
 
     @Override
-    @Cacheable(value = "accessPolicy", key = "''.concat(#user.hashCode()).concat('-').concat(#context.hashCode()).concat('-').concat(#resource.hashCode())")
+    @Cacheable(value = "accessPolicy", key = "''.concat(#resource.getId()).concat('-').concat(#context.hashCode()).concat('-').concat(#user.hashCode())")
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
         LOGGER.debug("Key triplet {}-{}-{} not found in cache", user.hashCode(), context.hashCode(), resource.hashCode());
         return service.canAccess(user, context, resource);
     }
 
     @Override
-    @Cacheable(value = "resourcePolicy", key = "#resource")
+    @Cacheable(value = "resourcePolicy", key = "#resource.id")
     public Optional<Policy> getPolicy(final Resource resource) {
-        LOGGER.debug("Resource {} not found in cache", resource);
+        LOGGER.debug("ResourceId for {} not found in cache", resource);
+        LOGGER.info("ResourceId {} not found in cache", resource.getId());
         return service.getPolicy(resource);
     }
 
     @Override
-    @CachePut(value = "resourcePolicy", key = "#resource")
+    @CachePut(value = "resourcePolicy", key = "#resource.id")
     @CacheEvict(value = "accessPolicy")
     public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        LOGGER.debug("Resource {} with policy {} added to cache", resource, policy);
+        LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, policy);
+        LOGGER.info("ResourceId {} with PolicyMessage {} added to cache", resource.getId(), policy.getMessage());
         return service.setResourcePolicy(resource, policy);
     }
 

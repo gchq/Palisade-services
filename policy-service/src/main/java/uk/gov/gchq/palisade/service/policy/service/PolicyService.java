@@ -42,7 +42,7 @@ public interface PolicyService extends Service {
      * the resource given their purpose. This is where any resource level
      * access controls are enforced.
      *
-     * @param user the {@link User}| requesting the data
+     * @param user the {@link User} requesting the data
      * @param context the query time {@link Context} containing environmental variables
      *                such as why they want the data
      * @param resource the {@link Resource} being queried for access
