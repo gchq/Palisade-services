@@ -95,7 +95,7 @@ public class PolicyServiceTest {
         Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
 
         // When
-        policyService.getPolicy(request);
+        policyService.getPolicy(request).join();
 
         // Then
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
