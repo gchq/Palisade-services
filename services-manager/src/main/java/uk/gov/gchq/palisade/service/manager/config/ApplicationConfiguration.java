@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,7 +33,6 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     public static class ConfigurationMap {
 

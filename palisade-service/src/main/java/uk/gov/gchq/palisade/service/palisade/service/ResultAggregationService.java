@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.Objects.requireNonNull;
@@ -42,13 +41,13 @@ public class ResultAggregationService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
     private AuditService auditService;
-    private CacheService cacheService;
+    private PersistenceLayer persistenceLayer;
 
-    public ResultAggregationService(final AuditService auditService, final CacheService cacheService) {
+    public ResultAggregationService(final AuditService auditService, final PersistenceLayer persistenceLayer) {
         requireNonNull(auditService, "Audit Service");
-        requireNonNull(cacheService, "Cache Service");
+        requireNonNull(persistenceLayer, "Persistence Layer");
         this.auditService = auditService;
-        this.cacheService = cacheService;
+        this.persistenceLayer = persistenceLayer;
     }
 
     public CompletionStage<DataRequestResponse> aggregateDataRequestResults(
@@ -75,7 +74,12 @@ public class ResultAggregationService implements Service {
 
             PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
             auditRegisterRequestComplete(request, user, policy, auditService);
-            cache(cacheService, request, user, requestId, policy, filteredResources.size(), originalRequestId);
+            final DataRequestConfig dataRequestConfig = new DataRequestConfig()
+                    .user(user)
+                    .context(request.getContext())
+                    .rules(policy.getRuleMap());
+            dataRequestConfig.setOriginalRequestId(originalRequestId);
+            this.persistenceLayer.put(dataRequestConfig);
 
             final DataRequestResponse response = new DataRequestResponse().resources(filteredResources).token(requestId.getId());
             response.setOriginalRequestId(originalRequestId);
@@ -127,25 +131,4 @@ public class ResultAggregationService implements Service {
         auditService.audit(auditRequestWithException);
     }
 
-    private void cache(final CacheService cacheService,
-                       final RegisterDataRequest request, final User user,
-                       final RequestId requestId, final MultiPolicy multiPolicy,
-                       final int resCount,
-                       final RequestId originalRequestId) {
-        DataRequestConfig dataRequestConfig = new DataRequestConfig()
-                .user(user)
-                .context(request.getContext())
-                .rules(multiPolicy.getRuleMap());
-        dataRequestConfig.setOriginalRequestId(originalRequestId);
-        final AddCacheRequest<DataRequestConfig> cacheRequest = new AddCacheRequest<>()
-                .key(requestId.getId())
-                .value(dataRequestConfig)
-                .service(SimplePalisadeService.class);
-        LOGGER.debug("Caching: {}", cacheRequest);
-        final Boolean success = cacheService.add(cacheRequest).join();
-        if (null == success || !success) {
-            throw new CompletionException(new RuntimeException("Failed to cache request: " + request));
-        }
-        LOGGER.debug("Cache request successful");
-    }
 }
