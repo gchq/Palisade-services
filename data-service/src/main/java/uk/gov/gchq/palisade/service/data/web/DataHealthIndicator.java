@@ -44,7 +44,7 @@ public class DataHealthIndicator extends AbstractHealthIndicator {
             throw new Exception("Palisade service down");
         }
         builder.up()
-                .withDetail("Palisade Service", readBody(palisadeHealth.body()));
+                .withDetail("Palisade Service", readBody(palisadeHealth.body()).substring(0, 14) + "}");
     }
 
     private String readBody(final Body body) {

@@ -48,6 +48,7 @@ manager:
         - ${manager.default.library}
       profiles:
         - eureka
+        - local
       log: data-service.log
       err: data-service.err
 
