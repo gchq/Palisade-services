@@ -31,7 +31,6 @@ import java.util.Scanner;
 @EnableFeignClients
 @Component
 public class DataHealthIndicator extends AbstractHealthIndicator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataHealthIndicator.class);
     private final PalisadeClient palisadeClient;
 
     public DataHealthIndicator(final PalisadeClient palisadeClient) {
@@ -54,7 +53,7 @@ public class DataHealthIndicator extends AbstractHealthIndicator {
         try {
             InputStream is = body.asInputStream();
             Scanner sc = new Scanner(is);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while (sc.hasNext()) {
                 sb.append(sc.nextLine());
             }
