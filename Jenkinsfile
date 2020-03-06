@@ -77,7 +77,7 @@ spec:
         stage('Integration Tests') {
             git url: 'https://github.com/gchq/Palisade-services.git'
             sh "git checkout ${env.BRANCH_NAME}"
-            x = sh "git tag --sort version:refname | tail -1"
+            echo sh "git tag --sort version:refname | tail -1"
             git branch: "${x}" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
