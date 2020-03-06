@@ -75,10 +75,14 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Integration Tests') {
-            git branch: "develop" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
+            sh '''
+                git clone ${env.BRANCH_NAME} https://github.com/gchq/Palisade-services.git
+                cd Palisade-services
+                x = git tag --sort version:refname | tail -1
+            '''
+            git branch: "${x}" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        echo sh(returnStdout: true, script: "git tag --sort version:refname | tail -1").trim()
                         sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                     }
                 }
