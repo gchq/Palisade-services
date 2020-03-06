@@ -76,7 +76,7 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Integration Tests') {
-        git branch: develop , url: 'https://github.com/gchq/Palisade-integration-tests.git'
+        git branch: "develop" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
