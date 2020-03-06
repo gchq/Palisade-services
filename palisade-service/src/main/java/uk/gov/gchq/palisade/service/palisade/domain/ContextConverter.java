@@ -23,14 +23,12 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Context;
 
 import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 import java.io.IOException;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-@Converter
 public class ContextConverter implements AttributeConverter<Context, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextConverter.class);
 
