@@ -76,7 +76,6 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Integration Tests') {
-        z = sh(script: "git describe --tags ${commit}", returnStdout: true)?.trim()
         git branch: develop , url: 'https://github.com/gchq/Palisade-integration-tests.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
