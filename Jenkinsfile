@@ -111,9 +111,8 @@ spec:
             }
         }
         stage('Integration Tests') {
-        env.GIT_TAG = sh(script: "git describe --tags ${commit}", returnStdout: true)?.trim()
-        echo env.git_tag
-            git branch: git_tag, url: 'https://github.com/gchq/Palisade-integration-tests.git'
+        z = sh(script: "git describe --tags ${commit}", returnStdout: true)?.trim()
+            git branch: z, url: 'https://github.com/gchq/Palisade-integration-tests.git'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
