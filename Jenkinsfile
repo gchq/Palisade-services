@@ -50,7 +50,6 @@ spec:
     env:
       - name: DOCKER_TLS_CERTDIR
         value: ""
-
   - name: maven
     image: jnlp-slave-palisade:jdk11
     imagePullPolicy: Never
@@ -76,49 +75,11 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Integration Tests') {
-        git branch: "develop" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            container('docker-cmds') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
-                }
-            }
-        }
-
-
-        stage('Maven deploy') {
-            x = env.BRANCH_NAME
-
-            if (x.substring(0, 2) == "PR") {
-                y = x.substring(3)
-                git url: 'https://github.com/gchq/Palisade-services.git'
-                sh "git fetch origin pull/${y}/head:${x}"
-                sh "git checkout ${x}"
-            } else { //just a normal branch
-                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
-            }
-            container('maven') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    if (("${env.BRANCH_NAME}" == "develop") ||
-                            ("${env.BRANCH_NAME}" == "master")) {
-                        sh 'palisade-login'
-                        //now extract the public IP addresses that this will be open on
-                        sh 'extract-addresses'
-                        sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
-                    } else {
-                        sh "echo - no deploy"
+            git branch: "develop" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                     }
                 }
-            }
         }
-    }
-    // No need to occupy a node
-            stage("SonarQube Quality Gate"){
-              timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-                def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-                if (qg.status != 'OK') {
-                  error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
-                }
-              }
-            }
 }
