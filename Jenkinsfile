@@ -75,11 +75,9 @@ spec:
             echo sh(script: 'env|sort', returnStdout: true)
         }
         stage('Integration Tests') {
-            sh '''
-                git clone ${env.BRANCH_NAME} https://github.com/gchq/Palisade-services.git
-                cd Palisade-services
-                x = git tag --sort version:refname | tail -1
-            '''
+            git url: 'https://github.com/gchq/Palisade-services.git'
+            sh "git checkout ${env.BRANCH_NAME}"
+            x = sh "git tag --sort version:refname | tail -1"
             git branch: "${x}" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
