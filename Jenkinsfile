@@ -110,7 +110,17 @@ spec:
             }
         }
         stage('Integration Tests') {
-        git branch: "${env.BRANCH_NAME} || develop", url: 'https://github.com/gchq/Palisade-services.git'
+        x = "develop"
+        '''
+        git clone https://github.com/gchq/Palisade-integration-tests.git
+        cd Palisade-integration-tests
+        exists=`git show-ref refs/heads/<branch-name>`
+        if [ -n "$exists" ]; then
+            x = ${env.BRANCH_NAME}
+            echo 'branch exists!'
+        fi
+        '''
+        git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-integration-tests.git'
 
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
