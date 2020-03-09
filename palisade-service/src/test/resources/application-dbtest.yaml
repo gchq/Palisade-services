@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-replicaCount: 1
+eureka:
+  client:
+    enabled: false
 
-service:
-  port: 80
-  type: ClusterIP
-
-image:
-  name: palisade-service
-  tag: 8b2b345-SNAPSHOT
-  pullPolicy: IfNotPresent
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: {}
-tolerations: []
-affinity: {}
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username:
+    password:
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
