@@ -86,6 +86,7 @@ spec:
                 x=${q}
                 echo develop branch exists
             fi
+            git checkout ${x}
             echo stuff did things and others
         ''', returnStdout: true)
             container('docker-cmds') {
