@@ -77,18 +77,16 @@ spec:
         }
 
         stage('Integration Tests') {
-        '''
-        x = "develop"
-        git clone https://github.com/gchq/Palisade-integration-tests.git
-        cd Palisade-integration-tests
-        if git show-ref --quiet refs/heads/${env.BRANCH_NAME}; then
-            x = ${env.BRANCH_NAME}
-            echo develop branch exists
-        fi
-        echo stuff did things and others
-        '''
-        git branch: "${x}", url: 'https://github.com/gchq/Palisade-integration-tests.git'
-
+        echo sh(script: '''
+            x = "develop"
+            git clone https://github.com/gchq/Palisade-integration-tests.git
+            cd Palisade-integration-tests
+            if git show-ref --quiet refs/heads/${env.BRANCH_NAME}; then
+                x = ${env.BRANCH_NAME}
+                echo develop branch exists
+            fi
+            echo stuff did things and others
+        ''', returnStdout: true)
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
