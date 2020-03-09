@@ -116,7 +116,7 @@ spec:
         sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
+                    sh 'mvn -s $MAVEN_SETTINGS install'
                 }
             }
         }
