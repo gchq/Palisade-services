@@ -29,7 +29,7 @@ manager:
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
     # While the example library happens to be the same version as services, it should be declared here as a static name
-    library: ../palisade-examples/example-library/target/
+    library: ../Palisade-examples/example-library/target/
 
   services:
 
