@@ -114,10 +114,9 @@ spec:
         '''
         git clone https://github.com/gchq/Palisade-integration-tests.git
         cd Palisade-integration-tests
-        exists=`git show-ref refs/heads/<branch-name>`
-        if [ -n "$exists" ]; then
+        if git show-ref --quiet refs/heads/${env.BRANCH_NAME}; then
             x = ${env.BRANCH_NAME}
-            echo 'branch exists!'
+            echo develop branch exists
         fi
         '''
         git branch: "${x}", url: 'https://github.com/gchq/Palisade-integration-tests.git'
