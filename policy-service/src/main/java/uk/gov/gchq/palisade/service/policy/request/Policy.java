@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.UUID;
-
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
