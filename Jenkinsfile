@@ -78,11 +78,11 @@ spec:
 
         stage('Integration Tests') {
         echo sh(script: '''
-            x = "develop"
+            x="develop"
             git clone https://github.com/gchq/Palisade-integration-tests.git
             cd Palisade-integration-tests
             if git show-ref --quiet refs/heads/${env.BRANCH_NAME}; then
-                x = ${env.BRANCH_NAME}
+                x=${env.BRANCH_NAME}
                 echo develop branch exists
             fi
             echo stuff did things and others
