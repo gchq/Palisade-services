@@ -45,6 +45,8 @@ spec:
           containerPort: 80
         - name: admin
           containerPort: {{ .Values.admin.port }}
+        - name: tls
+          containerPort: 443
         livenessProbe:
           httpGet:
             port: {{ .Values.admin.port }}

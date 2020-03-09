@@ -39,8 +39,8 @@ public class CanAccessRequest extends Request {
     private Collection<LeafResource> resources;
     private Context context;
 
-    // no-args constructor required
     public CanAccessRequest() {
+        // no-args constructor needed for serialization only
     }
 
     /**

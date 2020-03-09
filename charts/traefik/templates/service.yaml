@@ -20,6 +20,12 @@ metadata:
 spec:
   externalTrafficPolicy: Local
   type: LoadBalancer
+  {{- if .Values.global.globalIPAddresses }}
+  loadBalancerSourceRanges:
+  {{- range .Values.global.globalIPAddresses }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
   ports:
     - protocol: TCP
       name: web
@@ -27,6 +33,9 @@ spec:
     - protocol: TCP
       name: admin
       port: {{ .Values.admin.port }}
+    - protocol: TCP
+      name: tls
+      port: 443
   selector:
     app.kubernetes.io/name: traefik
     app.kubernetes.io/part-of: traefik

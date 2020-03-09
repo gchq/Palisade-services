@@ -19,18 +19,28 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.reader.common.CachedSerialisedDataReader.MapWrap;
+import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.AuditRequestReceiver;
+import uk.gov.gchq.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
+import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadResponse;
+import uk.gov.gchq.palisade.service.request.AddCacheRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,19 +59,18 @@ import static java.util.Objects.requireNonNull;
  */
 public class SimpleDataService implements DataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
+    public static final String SERIALISER_KEY = "cached.serialiser.map";
 
     private PalisadeService palisadeService;
     private DataReader dataReader;
     private CacheService cacheService;
     private AuditService auditService;
-    private AuditRequestReceiver auditRequestReceiver;
 
-    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader, final AuditRequestReceiver auditRequestReceiver) {
+    public SimpleDataService(final CacheService cacheService, final AuditService auditService, final PalisadeService palisadeService, final DataReader dataReader) {
         this.cacheService = cacheService;
         this.auditService = auditService;
         this.palisadeService = palisadeService;
         this.dataReader = dataReader;
-        this.auditRequestReceiver = auditRequestReceiver;
     }
 
     public SimpleDataService auditService(final AuditService auditService) {
@@ -92,10 +101,21 @@ public class SimpleDataService implements DataService {
         LOGGER.error("Error while handling request: {}", request);
         LOGGER.error("{} was: {}", ex.getClass(), ex.getMessage());
         LOGGER.info("Auditing error with audit service");
-        auditService.audit(ReadRequestExceptionAuditRequest.create(request.getOriginalRequestId())
+        auditService.audit(AuditRequest.ReadRequestExceptionAuditRequest.create(request.getOriginalRequestId())
                 .withToken(request.getToken())
                 .withLeafResource(request.getResource())
                 .withException(ex));
+    }
+
+    private void auditRequestComplete(final DataReaderRequest request, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
+        LOGGER.info("Auditing completed read with audit service");
+        auditService.audit(AuditRequest.ReadRequestCompleteAuditRequest.create(request.getOriginalRequestId())
+                .withUser(request.getUser())
+                .withLeafResource(request.getResource())
+                .withContext(request.getContext())
+                .withRulesApplied(request.getRules())
+                .withNumberOfRecordsReturned(recordsReturned.get())
+                .withNumberOfRecordsProcessed(recordsProcessed.get()));
     }
 
     @Override
@@ -107,13 +127,13 @@ public class SimpleDataService implements DataService {
             LOGGER.debug("Starting to read: {}", request);
 
             final GetDataRequestConfig getConfig = new GetDataRequestConfig()
-                    .token(request.getToken())
+                    .token(new RequestId().id(request.getToken()))
                     .resource(request.getResource());
             getConfig.setOriginalRequestId(request.getOriginalRequestId());
             LOGGER.debug("Calling palisade service with: {}", getConfig);
 
             final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
-            LOGGER.debug("Palisade service returned: {}", config);
+            LOGGER.info("Palisade service returned: {}", config);
 
             final DataReaderRequest readerRequest = new DataReaderRequest()
                     .resource(request.getResource())
@@ -121,21 +141,39 @@ public class SimpleDataService implements DataService {
                     .context(config.getContext())
                     .rules(config.getRules().get(request.getResource()));
             readerRequest.setOriginalRequestId(request.getOriginalRequestId());
-            LOGGER.debug("Calling dataReader with: {}", readerRequest);
+            LOGGER.info("Calling dataReader with: {}", readerRequest);
 
-            final DataReaderResponse readerResult = getDataReader().read(readerRequest,
-                    this.getClass(),
-                    auditRequestReceiver);
-            LOGGER.debug("Reader returned: {}", readerResult);
+            AtomicLong recordsProcessed = new AtomicLong(0);
+            AtomicLong recordsReturned = new AtomicLong(0);
+            final DataReaderResponse readerResult = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
+            auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
+            LOGGER.info("Processed {} and returned {} records, reader returned: {}", recordsProcessed.get(), recordsReturned.get(), readerResult);
 
-            final ReadResponse response = new NoInputReadResponse(readerResult);
-            LOGGER.debug("Returning from read: {}", response);
-            return response;
+            return (ReadResponse) new NoInputReadResponse(readerResult);
         }).exceptionally(ex -> {
             LOGGER.warn("Error handling: " + ex.getMessage());
             auditRequestReceivedException(request, ex);
             throw new RuntimeException(ex); //rethrow the exception
         });
+    }
+
+    @Override
+    public CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request) {
+        LOGGER.info("Processing AddSerialiserRequest: {}", request);
+
+        //Create map of DataFlavour and Serialiser
+        Map<DataFlavour, Serialiser<?>> typeMap = new HashMap<>();
+        typeMap.put(request.getDataFlavour(), request.getSerialiser());
+
+        //Create AddCacheRequest
+        AddCacheRequest<MapWrap> cacheRequest = new AddCacheRequest<>()
+                .service(Service.class)
+                .key(SERIALISER_KEY)
+                .value(new MapWrap(typeMap));
+        cacheService.add(cacheRequest).join();
+        LOGGER.debug("Serialiser added: {}", cacheRequest);
+
+        return CompletableFuture.completedFuture(true);
     }
 
     public PalisadeService getPalisadeService() {
@@ -150,6 +188,7 @@ public class SimpleDataService implements DataService {
 
     public DataReader getDataReader() {
         requireNonNull(dataReader, "The data dataReader has not been set.");
+        LOGGER.info("DataReader acquired: {}", dataReader.toString());
         return dataReader;
     }
 
@@ -158,7 +197,7 @@ public class SimpleDataService implements DataService {
     }
 
     public CacheService getCacheService() {
-        requireNonNull(cacheService, "The cacheService service has not been set.");
+        requireNonNull(cacheService, "The cacheService has not been set.");
         return cacheService;
     }
 

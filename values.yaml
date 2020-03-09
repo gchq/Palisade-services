@@ -35,6 +35,7 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
+  globalIPAddresses:
 
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
@@ -42,6 +43,10 @@ traefik:
 
 # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
 metricsServer:
+  install: false
+
+# install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+dashboard:
   install: false
 
 # dataPath: path to directory to mount as a persistent-volume to be claimed by the data-service

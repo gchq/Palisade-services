@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11
+FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
 VOLUME /tmp
 
 ARG JAR_FILE
 
-ADD $JAR_FILE /usr/share/palisade-service/palisade-service.jar
+COPY $JAR_FILE /usr/share/palisade-service/palisade-service.jar
 
-LABEL service="palisade", project="palisade"
+COPY src/main/resources/log_level.sh /usr/share/palisade-service/log-level
+
+LABEL service="palisade" project="palisade"
 
 ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/palisade-service.jar"]

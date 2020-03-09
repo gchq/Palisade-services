@@ -18,11 +18,11 @@ package uk.gov.gchq.palisade.service.data.repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.data.request.AddCacheRequest;
-import uk.gov.gchq.palisade.service.data.request.GetCacheRequest;
-import uk.gov.gchq.palisade.service.data.request.ListCacheRequest;
-import uk.gov.gchq.palisade.service.data.request.RemoveCacheRequest;
-import uk.gov.gchq.palisade.service.data.service.CacheService;
+import uk.gov.gchq.palisade.service.CacheService;
+import uk.gov.gchq.palisade.service.request.AddCacheRequest;
+import uk.gov.gchq.palisade.service.request.GetCacheRequest;
+import uk.gov.gchq.palisade.service.request.ListCacheRequest;
+import uk.gov.gchq.palisade.service.request.RemoveCacheRequest;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -88,11 +88,11 @@ public class SimpleCacheService implements CacheService {
      */
     private static final ScheduledExecutorService REMOVAL_TIMER = Executors.newSingleThreadScheduledExecutor();
 
-    /**
-     * Create and empty backing store. Note that this is for use by serialisation mechanisms and any attempt to use an
-     * instance of this class without first initialising a backing store will result in exceptions being thrown.
-     */
     public SimpleCacheService() {
+        /**
+         * Create and empty backing store. Note that this is for use by serialisation mechanisms and any attempt to use an
+         * instance of this class without first initialising a backing store will result in exceptions being thrown.
+         */
     }
 
     /**
@@ -184,10 +184,8 @@ public class SimpleCacheService implements CacheService {
         boolean localCacheable = request.getLocallyCacheable();
 
         //is this locally cacheable? If so, check the TTL is present and below the maximum time
-        if (localCacheable) {
-            if (!timeToLive.isPresent() || (timeToLive.isPresent() && maxLocalTTL.compareTo(timeToLive.get()) <= 0)) {
-                throw new IllegalArgumentException("time to live must be set and be below " + maxLocalTTL.getSeconds() + " seconds for locally cacheable values");
-            }
+        if (localCacheable && (!timeToLive.isPresent() || maxLocalTTL.compareTo(timeToLive.get()) <= 0)) {
+            throw new IllegalArgumentException("time to live must be set and be below " + maxLocalTTL.getSeconds() + " seconds for locally cacheable values");
         }
 
         //find encoder function
@@ -251,7 +249,8 @@ public class SimpleCacheService implements CacheService {
                 CacheMetadata.populateMetaData(remoteRetrieve);
 
                 //should this be cached?
-                if (remoteRetrieve.getMetadata().get().canBeRetrievedLocally()) {
+                Optional<CacheMetadata> val = remoteRetrieve.getMetadata();
+                if (val.map(CacheMetadata::canBeRetrievedLocally).orElse(false)) {
                     localObjects.put(baseKey, remoteRetrieve);
                     //set up a timer to remove it after the max TTL has elapsed
                     REMOVAL_TIMER.schedule(() -> localObjects.remove(baseKey), localCacheTTL.toMillis(), TimeUnit.MILLISECONDS);

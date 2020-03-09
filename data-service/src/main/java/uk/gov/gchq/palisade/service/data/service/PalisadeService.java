@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class PalisadeService implements Service {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
     private final PalisadeClient client;
     private final Executor executor;
@@ -39,10 +40,12 @@ public class PalisadeService implements Service {
 
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
         LOGGER.info("Getting config from palisade service for data request: {}", request);
+
         return CompletableFuture.supplyAsync(() -> {
-            DataRequestConfig response = this.client.getDataRequestConfig(request);
-            LOGGER.info("Got config from palisade service: {}", response);
-            return response;
-        });
+            DataRequestConfig requestConfig = this.client.getDataRequestConfig(request);
+
+            LOGGER.info("Got config from palisade service: {}", requestConfig);
+            return requestConfig;
+        }, executor);
     }
 }

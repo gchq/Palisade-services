@@ -97,7 +97,7 @@ public class PolicyServiceTest {
         // Given
         GetPolicyRequest request = Mockito.mock(GetPolicyRequest.class);
         MultiPolicy response = Mockito.mock(MultiPolicy.class);
-        Mockito.when(policyClient.getPolicy(request)).thenReturn(response);
+        Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
 
         // When
         policyService.getPolicy(request);
@@ -116,7 +116,7 @@ public class PolicyServiceTest {
     @Test
     public void getPolicyReturnsPolicy() {
         //Given
-        when(policyClient.getPolicy(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
+        when(policyClient.getPolicySync(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
 
         //When
         GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));

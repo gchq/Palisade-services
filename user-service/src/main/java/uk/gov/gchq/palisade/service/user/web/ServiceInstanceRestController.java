@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,11 @@ package uk.gov.gchq.palisade.service.user.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class ServiceInstanceRestController {
@@ -33,7 +31,7 @@ public class ServiceInstanceRestController {
     @Autowired
     private DiscoveryClient discoveryClient;
 
-    @RequestMapping(value = "/service-instances/{applicationName}", method = GET)
+    @GetMapping(value = "/service-instances/{applicationName}")
     public List<ServiceInstance> serviceInstancesByApplicationName(
             @PathVariable final String applicationName) {
         return this.discoveryClient.getInstances(applicationName);

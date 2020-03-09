@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,12 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
-
+  - name: hadolint
+    image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
+    imagePullPolicy: Always
+    command:
+        - cat
+    tty: true
   - name: docker-daemon
     image: docker:19.03.1-dind
     securityContext:
@@ -89,14 +94,20 @@ spec:
         }
         stage('SonarQube analysis') {
             container('docker-cmds') {
-                withCredentials([string(credentialsId: 'b01b7c11-ccdf-4ac5-b022-28c9b861379a', variable: 'KEYSTORE_PASS'),
+                withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
+                                 string(credentialsId: 'b01b7c11-ccdf-4ac5-b022-28c9b861379a', variable: 'KEYSTORE_PASS'),
                                  file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         withSonarQubeEnv(installationName: 'sonar') {
-                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
                         }
                     }
                 }
+            }
+        }
+        stage('Hadolinting') {
+            container('hadolint') {
+                sh 'hadolint */Dockerfile'
             }
         }
         stage('Integration Tests') {
@@ -119,8 +130,10 @@ spec:
                     if (("${env.BRANCH_NAME}" == "develop") ||
                             ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
+                        //now extract the public IP addresses that this will be open on
+                        sh 'extract-addresses'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true --set global.repository=${ECR_REGISTRY} --namespace dev'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
                     } else {
                         sh "echo - no deploy"
                     }
@@ -128,4 +141,13 @@ spec:
             }
         }
     }
+    // No need to occupy a node
+            stage("SonarQube Quality Gate"){
+              timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+                def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+                if (qg.status != 'OK') {
+                  error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                }
+              }
+            }
 }

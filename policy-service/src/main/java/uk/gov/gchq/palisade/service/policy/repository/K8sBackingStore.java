@@ -43,12 +43,11 @@ public class K8sBackingStore implements BackingStore {
     private final Config config = new ConfigBuilder().build();
     private final KubernetesClient client = new DefaultKubernetesClient(config);
 
-    private static final String NAMESPACE = "default";
-    private final String namespace = Optional.ofNullable(client.getNamespace()).orElse(NAMESPACE);
+    private final String namespace = Optional.ofNullable(client.getNamespace()).orElse("default");
+
 
     public K8sBackingStore() {
         LOGGER.debug("Current namespace is: {}", this.namespace);
-
         try {
             this.client.namespaces().list().getItems().forEach(ns -> LOGGER.debug("Found namespace {} with status: {}", ns.getMetadata().getName(), ns.getStatus()));
         } catch (KubernetesClientException e) {
@@ -60,6 +59,7 @@ public class K8sBackingStore implements BackingStore {
     /**
      * Clean up the resource
      */
+    @Override
     public void close() {
         client.close();
     }
@@ -71,7 +71,7 @@ public class K8sBackingStore implements BackingStore {
      * @return the new value of the key
      * @throws IllegalArgumentException if the key is empty or whitespace
      */
-    public static String convertKeyToCompatible(final String key) throws IllegalArgumentException {
+    public static String convertKeyToCompatible(final String key) {
         //only allow lower case alphanumberic character or -
         if (key.trim().length() == 0) {
             throw new IllegalArgumentException("key empty or contains only whitespace");
@@ -155,13 +155,11 @@ public class K8sBackingStore implements BackingStore {
             return new SimpleCacheObject(Object.class, Optional.empty());
         } else {
             try {
-                if (configMap.getData().containsKey("expiryTimestamp")) {
-                    if (Instant.now().isAfter(Instant.ofEpochMilli(Long.parseLong(configMap.getData().get("expiryTimestamp"))))) {
-                        remove(key);
-                        LOGGER.debug("Timeout getting for key: {}", key);
+                if (configMap.getData().containsKey("expiryTimestamp") && Instant.now().isAfter(Instant.ofEpochMilli(Long.parseLong(configMap.getData().get("expiryTimestamp"))))) {
+                    remove(key);
+                    LOGGER.debug("Timeout getting for key: {}", key);
 
-                        return new SimpleCacheObject(Object.class, Optional.empty());
-                    }
+                    return new SimpleCacheObject(Object.class, Optional.empty());
                 }
                 String className = Class.forName(configMap.getData().get("valueClass")).toString();
                 byte[] data = configMap.getData().get("value").getBytes(StandardCharsets.UTF_8);

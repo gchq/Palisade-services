@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,28 @@
 
 package uk.gov.gchq.palisade.service.user.service;
 
-
-import org.mockito.Mockito;
-
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-import java.util.concurrent.CompletionStage;
+import java.util.HashMap;
+import java.util.Objects;
 
-public class MockUserService {
-    private static UserService mock = Mockito.mock(UserService.class);
+public class MockUserService extends HashMap<UserId, User> implements UserService {
 
-    public static UserService getMock() {
-        return mock;
-    }
-
-    public static void setMock(final UserService mock) {
-        if (null == mock) {
-            MockUserService.mock = Mockito.mock(UserService.class);
+    @Override
+    public User getUser(final UserId userId) {
+        User user = this.get(userId);
+        if (Objects.nonNull(user)) {
+            return user;
+        } else {
+            throw new NoSuchUserIdException("No such key: " + userId.toString());
         }
-        MockUserService.mock = mock;
     }
 
-    public CompletionStage<User> getUser(final GetUserRequest request) {
-        return mock.getUser(request);
+    @Override
+    public User addUser(final User user) {
+        this.put(user.getUserId(), user);
+        return this.getUser(user.getUserId());
     }
 }

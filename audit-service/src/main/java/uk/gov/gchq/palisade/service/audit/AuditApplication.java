@@ -30,7 +30,6 @@ import java.util.Arrays;
 public class AuditApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditApplication.class);
 
-
     public static void main(final String[] args) {
         LOGGER.debug("AuditApplication started with: {}", AuditApplication.class.toString(), "main", Arrays.toString(args));
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)
