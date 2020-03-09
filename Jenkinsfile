@@ -79,10 +79,6 @@ spec:
         stage('Integration Tests') {
         q = env.BRANCH_NAME
         git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-        echo sh(script: '''
-            git checkout ${q} || git checkout develop
-            echo stuff did things and others
-        ''', returnStdout: true)
         sh "git checkout ${q} || git checkout develop"
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
