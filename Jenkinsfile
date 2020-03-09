@@ -111,15 +111,14 @@ spec:
             }
         }
         stage('Integration Tests') {
-            git url: 'https://github.com/gchq/Palisade-services.git'
-            sh "git checkout ${env.BRANCH_NAME}"
-            sh "git tag --sort version:refname | tail -1"
-            git branch: "develop" , url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                container('docker-cmds') {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
-                    }
+        sh 'git clone https://github.com/gchq/Palisade-integration-tests.git'
+        sh 'cd Palisade-integration-tests'
+        sh 'git checkout ${env.BRANCH_NAME} || git checkout develop'
+            container('docker-cmds') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                 }
+            }
         }
         stage('Maven deploy') {
             x = env.BRANCH_NAME
