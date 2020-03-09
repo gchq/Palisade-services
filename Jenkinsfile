@@ -80,7 +80,6 @@ spec:
         q = env.BRANCH_NAME
         git url: 'https://github.com/gchq/Palisade-integration-tests.git'
         sh "git fetch origin develop"
-        sh "git fetch origin ${q}"
         sh "git checkout ${q} || git checkout develop"
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
