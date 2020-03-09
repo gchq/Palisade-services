@@ -112,7 +112,7 @@ spec:
         stage('Integration Tests') {
         sh 'git clone https://github.com/gchq/Palisade-integration-tests.git'
         sh 'cd Palisade-integration-tests'
-        sh 'git checkout ${env.BRANCH_NAME} || git checkout develop'
+        sh 'git checkout ${env.BRANCH_NAME}'
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
