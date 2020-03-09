@@ -78,15 +78,9 @@ spec:
 
         stage('Integration Tests') {
         q = env.BRANCH_NAME
+        git url: 'https://github.com/gchq/Palisade-integration-tests.git'
         echo sh(script: '''
-            x="develop"
-            git clone https://github.com/gchq/Palisade-integration-tests.git
-            cd Palisade-integration-tests
-            if git show-ref --quiet refs/heads/${q}; then
-                x=${q}
-                echo develop branch exists
-            fi
-            git checkout ${x}
+            git checkout ${q} || git checkout develop
             echo stuff did things and others
         ''', returnStdout: true)
             container('docker-cmds') {
