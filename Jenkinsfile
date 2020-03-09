@@ -110,8 +110,8 @@ spec:
             }
         }
         stage('Integration Tests') {
-        x = "develop"
         '''
+        x = "develop"
         git clone https://github.com/gchq/Palisade-integration-tests.git
         cd Palisade-integration-tests
         if git show-ref --quiet refs/heads/${env.BRANCH_NAME}; then
