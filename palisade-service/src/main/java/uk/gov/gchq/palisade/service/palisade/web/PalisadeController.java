@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path = "/")
@@ -61,9 +62,9 @@ public class PalisadeController {
     }
 
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
-    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) {
+    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) throws ExecutionException, InterruptedException {
         LOGGER.info("Invoking getDataRequestConfig: {}", request);
-        DataRequestConfig response = getDataRequestConfig(request).join();
+        DataRequestConfig response = getDataRequestConfig(request).get();
         LOGGER.info("Returning response: {}", response);
         return response;
     }

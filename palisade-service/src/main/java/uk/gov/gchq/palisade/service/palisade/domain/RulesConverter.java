@@ -23,14 +23,12 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 import java.io.IOException;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-@Converter
 public class RulesConverter implements AttributeConverter<Rules<?>, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RulesConverter.class);
 

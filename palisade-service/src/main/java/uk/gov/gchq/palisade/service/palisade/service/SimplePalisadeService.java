@@ -113,11 +113,10 @@ public class SimplePalisadeService implements PalisadeService {
             final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
-        // TODO: need to validate that the user is actually requesting the correct info.
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
         LOGGER.debug("Getting cached data: {}", request);
 
-        return this.persistenceLayer.getAsync(request.getId().getId());
+        return this.persistenceLayer.getAsync(request.getOriginalRequestId().getId());
     }
 
 }
