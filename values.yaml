@@ -55,8 +55,9 @@ dashboard:
 # - under UNIX, this works as expected and is simply the UNIX path to the directory to mount
 # - under Windows, paths must be rewritten in a 'unix-y' style - i.e. 'C:\Users\Admin\data-dir' -> '/c/Users/Admin/data-dir'
 #   - it is also necessary to ensure the C:\ drive is shared within the 'Docker Desktop' app
-#   - if using WSL
+#   - if using WSL, ensure Windows C:\ is mounted under /c/ instead of /mnt/c/ to enable optimal compatibility
+# efsVolumeHandle: $(aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text)
+# - the filesystem id of the (AWS) EFS volume to mount when in cloud/aws mode
 storage:
   dataPath: '/data'
-  # aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text
   efsVolumeHandle: 'fs-10e2b3db'
