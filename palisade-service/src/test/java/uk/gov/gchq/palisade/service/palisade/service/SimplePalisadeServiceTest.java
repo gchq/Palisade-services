@@ -157,6 +157,7 @@ public class SimplePalisadeServiceTest {
         GetDataRequestConfig requestConfig = new GetDataRequestConfig();
         requestConfig.token(new RequestId().id("requestId"));
         requestConfig.resource(new FileResource().id("resourceId"));
+        requestConfig.setOriginalRequestId(new RequestId().id("original-request-id"));
         LOGGER.info("Get Data Request Config: {}", requestConfig);
         when(persistenceLayer.getAsync(anyString())).thenReturn(CompletableFuture.failedFuture(new CompletionException(new RuntimeException())));
 
