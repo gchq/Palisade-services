@@ -59,4 +59,4 @@ dashboard:
 storage:
   dataPath: '/data'
   # aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text
-  efsVolumeHandle: ''
+  efsVolumeHandle: 'fs-10e2b3db'
