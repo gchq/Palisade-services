@@ -11,14 +11,13 @@ spec:
     storage: 5Gi
   accessModes:
   - ReadOnlyMany
+  storageClassName: data-storage
   {{- if eq .Values.hosting "local" }}
-  storageClassName: hostpath-data-storage
   hostPath:
     path: {{ .Values.storage.dataPath }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "cloud" }}
   {{- if eq .Values.cloudProvider "aws" }}
-  storageClassName: efs-data-storage
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ .Values.storage.efsVolumeHandle  }}

@@ -60,4 +60,4 @@ dashboard:
 # - the filesystem id of the (AWS) EFS volume to mount when in cloud/aws mode
 storage:
   dataPath: '/data'
-  efsVolumeHandle: 'fs-10e2b3db'
+  efsVolumeHandle: fs-10e2b3db
