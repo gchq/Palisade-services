@@ -21,8 +21,10 @@ namespaces:
   uat: uat
   prod: prod
 
-# hosting: local, metal or cloud and defines configuration parameter choices for some child charts according to deployment environment
-hosting: local
+# hosting: local, metal or cloud - defines configuration parameter choices for some child charts according to deployment environment
+hosting: cloud
+# cloudProvider: aws - if hosting in cloud, defines configuration for the cloud provider
+cloudProvider: aws
 
 # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
 # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
@@ -53,5 +55,8 @@ dashboard:
 # - under UNIX, this works as expected and is simply the UNIX path to the directory to mount
 # - under Windows, paths must be rewritten in a 'unix-y' style - i.e. 'C:\Users\Admin\data-dir' -> '/c/Users/Admin/data-dir'
 #   - it is also necessary to ensure the C:\ drive is shared within the 'Docker Desktop' app
-local:
+#   - if using WSL
+storage:
   dataPath: '/data'
+  # aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text
+  efsVolumeHandle: ''
