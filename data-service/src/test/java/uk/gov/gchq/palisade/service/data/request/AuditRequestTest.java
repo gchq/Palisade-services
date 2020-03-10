@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.data.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -24,12 +25,15 @@ import org.junit.runners.JUnit4;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.data.request.AuditRequest.RegisterRequestCompleteAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.AuditRequest.RegisterRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.service.PalisadeService;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestCompleteAuditRequest;
+import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -38,7 +42,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -46,55 +49,75 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @RunWith(JUnit4.class)
 public class AuditRequestTest {
 
-    public final ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper;
+    private static LeafResource resource = new FileResource()
+            .id("/docs/type_file.txt")
+            .serialisedFormat("txt")
+            .type("type")
+            .parent(new DirectoryResource().id("/docs").parent(new SystemResource().id("/")));
+    private static Rules<Resource> rules = new Rules<>();
+
+    @Before
+    public void setup() {
+        mapper = JSONSerialiser.createDefaultMapper();
+    }
 
     @Test
-    public void RegisterRequestCompleteAuditRequestTest() {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("456"))
+    public void ReadRequestCompleteAuditRequestTest() {
+        final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("456"))
                 .withUser(new User().userId("a user"))
-                .withLeafResources(Stream.of(new FileResource()).collect(toSet()))
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
+                .withLeafResource(resource)
+                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
+                .withRulesApplied(rules)
+                .withNumberOfRecordsReturned(1L)
+                .withNumberOfRecordsProcessed(1L);
 
         assertThat("RegisterRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("a user")));
     }
 
     @Test
-    public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
-                .withUser(new User().userId("user"))
-                .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
+    public void ReadRequestCompleteAuditRequestToJsonTest() throws IOException {
+        final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("a user"))
+                .withLeafResource(resource)
+                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
+                .withRulesApplied(rules)
+                .withNumberOfRecordsReturned(1L)
+                .withNumberOfRecordsProcessed(1L);
 
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;
 
-        assertThat("RegisterRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResources, context, timestamp, serverIp, serverHostname")));
+        System.out.println(asNode);
+
+        assertThat("RegisterRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed, timestamp, serverIp, serverHostname")));
     }
 
     @Test
-    public void RegisterRequestCompleteAuditRequestFromJsonTest() throws IOException {
-        final RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
-                .withUser(new User().userId("user"))
-                .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
+    public void ReadRequestCompleteAuditRequestFromJsonTest() throws IOException {
+        final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("a user"))
+                .withLeafResource(resource)
+                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
+                .withRulesApplied(rules)
+                .withNumberOfRecordsReturned(1L)
+                .withNumberOfRecordsProcessed(1L);
 
-        final String jsonString = "{\"class\":\"AuditRequest$RegisterRequestCompleteAuditRequest\",\"id\":{\"id\":\"5942c37d-43e3-419c-bf1c-bb7153d395c8\"},\"originalRequestId\":{\"id\":\"123\"},\"user\":{\"userId\":{\"id\":\"user\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"leafResources\":[{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/usr/share/resource/test_resource\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"resource\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"share\"}},\"serialisedFormat\":\"none\",\"type\":\"standard\"}],\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"a string\":\"java.lang.String\"}}}";
+        final String jsonString = "{\"class\":\"AuditRequest$ReadRequestCompleteAuditRequest\",\"id\":{\"id\":\"3d911110-4ea3-4853-936e-2386a0fab799\"},\"originalRequestId\":{\"id\":\"123\"},\"user\":{\"userId\":{\"id\":\"a user\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"leafResource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/docs/type_file.txt\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"/docs/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/\"}},\"serialisedFormat\":\"txt\",\"type\":\"type\"},\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"a string\":\"java.lang.String\"}},\"rulesApplied\":{\"message\":\"no rules set\",\"rules\":{}},\"numberOfRecordsReturned\":1,\"numberOfRecordsProcessed\":1}";
 
-        final RegisterRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, RegisterRequestCompleteAuditRequest.class);
+        final ReadRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, ReadRequestCompleteAuditRequest.class);
 
         assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
     }
 
     @Test
-    public void RegisterRequestExceptionAuditRequestTest() {
-        final RegisterRequestExceptionAuditRequest subject = RegisterRequestExceptionAuditRequest.create(new RequestId().id("304958"))
-                .withUserId(new User().userId("username").getUserId())
-                .withResourceId("resource")
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a reason for access", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
-                .withException(new SecurityException("not allowed"))
-                .withServiceClass(PalisadeService.class);
+    public void ReadRequestExceptionAuditRequestTest() {
+        final ReadRequestExceptionAuditRequest subject = ReadRequestExceptionAuditRequest.create(new RequestId().id("304958"))
+                .withToken("token")
+                .withLeafResource(resource)
+                .withException(new SecurityException("not allowed"));
 
-        assertThat("RegisterRequestExceptionAuditRequest not constructed", subject.resourceId, is(equalTo("resource")));
+        assertThat("ReadRequestExceptionAuditRequest not constructed", subject.leafResource, is(equalTo(resource)));
     }
 
 }
