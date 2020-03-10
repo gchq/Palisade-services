@@ -83,7 +83,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         final DataRequestEntity dataRequest = new DataRequestEntity(dataRequestConfig);
 
         final List<LeafResourceRulesEntity> resources = dataRequestConfig.getRules().entrySet().stream()
-                .map(entry -> new LeafResourceRulesEntity(dataRequestConfig.getId(), entry.getKey(), entry.getValue()))
+                .map(entry -> new LeafResourceRulesEntity(dataRequestConfig.getOriginalRequestId(), entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
 
         this.leafResourceRulesRepository.saveAll(resources);
