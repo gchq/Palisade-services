@@ -27,8 +27,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import static java.util.Objects.requireNonNull;
 
@@ -128,7 +128,7 @@ public class Policy<RULE_DATA_TYPE> {
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> recordLevelSimpleFunctionRule(final String message, final Function<RULE_DATA_TYPE, RULE_DATA_TYPE> rule) {
+    public Policy<RULE_DATA_TYPE> recordLevelSimpleFunctionRule(final String message, final UnaryOperator<RULE_DATA_TYPE> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<RULE_DATA_TYPE> recordLevelRules = getRecordRules();
@@ -164,7 +164,7 @@ public class Policy<RULE_DATA_TYPE> {
         return this;
     }
 
-    public Policy<RULE_DATA_TYPE> resourceLevelSimpleFunctionRule(final String message, final Function<Resource, Resource> rule) {
+    public Policy<RULE_DATA_TYPE> resourceLevelSimpleFunctionRule(final String message, final UnaryOperator<Resource> rule) {
         requireNonNull(message, "The message cannot be null and should indicate what the rule is doing.");
         requireNonNull(rule, "Cannot set a null rule.");
         Rules<Resource> resourceLevelRules = getResourceRules();
