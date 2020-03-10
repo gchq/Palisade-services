@@ -117,7 +117,7 @@ public class SimplePalisadeService implements PalisadeService {
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
         LOGGER.debug("Getting cached data: {}", request);
 
-        return this.persistenceLayer.getAsync(request.getId().getId());
+        return this.persistenceLayer.getAsync(request.getOriginalRequestId().getId());
     }
 
 }
