@@ -24,14 +24,12 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 
 import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 import java.io.IOException;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-@Converter
 public class LeafResourceConverter implements AttributeConverter<LeafResource, String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LeafResourceConverter.class);
 
