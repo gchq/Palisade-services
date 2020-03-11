@@ -92,28 +92,34 @@ spec:
                 }
             }
         }
-        //stage('SonarQube analysis') {
-        //    container('docker-cmds') {
-        //        withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
-        //                         string(credentialsId: 'b01b7c11-ccdf-4ac5-b022-28c9b861379a', variable: 'KEYSTORE_PASS'),
-        //                         file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
-        //            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-        //                withSonarQubeEnv(installationName: 'sonar') {
-        //                    sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        //stage('Hadolinting') {
-        //    container('hadolint') {
-        //        sh 'hadolint */Dockerfile'
-        //    }
-        //}
-        //stage('Integration Tests') {
-        //    git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
-        //    build job: "Palisade-integration-tests/develop"
-        //}
+        stage('SonarQube analysis') {
+            container('docker-cmds') {
+                withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
+                                 string(credentialsId: 'b01b7c11-ccdf-4ac5-b022-28c9b861379a', variable: 'KEYSTORE_PASS'),
+                                 file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        withSonarQubeEnv(installationName: 'sonar') {
+                            sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Hadolinting') {
+            container('hadolint') {
+                sh 'hadolint */Dockerfile'
+            }
+        }
+        stage('Integration Tests') {
+        git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+        sh "git fetch origin develop"
+        sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
+            container('docker-cmds') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -s $MAVEN_SETTINGS install'
+                }
+            }
+        }
         stage('Maven deploy') {
             x = env.BRANCH_NAME
 
@@ -128,13 +134,12 @@ spec:
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     if (("${env.BRANCH_NAME}" == "develop") ||
-                            ("${env.BRANCH_NAME}" == "master")||
-                            ("${env.BRANCH_NAME}" == "PAL-289-data-service-helm-charts")) {
+                            ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
                         //now extract the public IP addresses that this will be open on
                         sh 'extract-addresses'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,metrics.install=true --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} --namespace dev'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
                     } else {
                         sh "echo - no deploy"
                     }
