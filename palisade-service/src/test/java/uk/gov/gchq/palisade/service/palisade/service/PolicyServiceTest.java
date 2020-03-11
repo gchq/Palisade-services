@@ -106,7 +106,6 @@ public class PolicyServiceTest {
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
                 Matchers.anyOf(
                         Matchers.containsString(response.toString()),
                         Matchers.containsString("Not completed"))

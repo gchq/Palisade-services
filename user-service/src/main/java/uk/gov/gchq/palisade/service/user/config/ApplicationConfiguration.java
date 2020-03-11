@@ -18,30 +18,59 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
-
+import java.util.stream.Collectors;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableConfigurationProperties
+@EnableAutoConfiguration
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    @Bean
+    @ConfigurationProperties(prefix = "population")
+    ConfigurationMap configurationMap() {
+        System.out.println("Configuration map time...");
+        return new ConfigurationMap();
+    }
+
+    @Bean
+    Map<String, UserConfiguration> userConfigurations(final ConfigurationMap configurationMap) {
+        Map<String, UserConfiguration> map = configurationMap.getUserConfigs();
+        LOGGER.info("Users: {}", map);
+        return configurationMap.getUserConfigs();
+    }
+
+    @Bean
+    Set<User> prepopUsers(final Map<String, UserConfiguration> userConfigurationMap) {
+        return userConfigurationMap.entrySet().stream()
+                .map(entry -> entry.getValue().buildUser(new UserId().id(entry.getKey())))
+                .collect(Collectors.toSet());
+    }
 
     @Bean
     public UserServiceProxy userService(final Set<UserService> userServices) {

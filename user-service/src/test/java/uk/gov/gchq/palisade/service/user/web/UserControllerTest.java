@@ -36,6 +36,8 @@ import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.MockUserService;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -47,7 +49,7 @@ import static org.junit.Assert.assertNotEquals;
 
 @RunWith(JUnit4.class)
 public class UserControllerTest {
-    public UserController userController = new UserController(new MockUserService());
+    public UserController userController = new UserController(new MockUserService(), new HashSet<>());
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
