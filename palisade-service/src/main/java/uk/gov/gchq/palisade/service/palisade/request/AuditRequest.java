@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -54,9 +53,7 @@ import static java.util.Objects.requireNonNull;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = AuditRequest.RegisterRequestCompleteAuditRequest.class),
-        @JsonSubTypes.Type(value = AuditRequest.RegisterRequestExceptionAuditRequest.class),
-        @JsonSubTypes.Type(value = AuditRequest.ReadRequestCompleteAuditRequest.class),
-        @JsonSubTypes.Type(value = AuditRequest.ReadRequestExceptionAuditRequest.class)
+        @JsonSubTypes.Type(value = AuditRequest.RegisterRequestExceptionAuditRequest.class)
 })
 public class AuditRequest extends Request {
 
@@ -233,167 +230,6 @@ public class AuditRequest extends Request {
                     .add("context=" + context)
                     .add("exception=" + exception)
                     .add("serviceClass=" + serviceClass)
-                    .toString();
-        }
-    }
-
-    /**
-     * This is one of the objects that is passed to the audit-service to be able to store an audit record. This class extends
-     * {@link AuditRequest} This class is used for the indication to the Audit logs that processing has been completed.
-     */
-    public static final class ReadRequestCompleteAuditRequest extends AuditRequest {
-
-        public final User user;
-        public final LeafResource leafResource;
-        public final Context context;
-        public final Rules rulesApplied;
-        public final long numberOfRecordsReturned;
-        public final long numberOfRecordsProcessed;
-
-        @JsonCreator
-        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
-                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
-            super(originalRequestId);
-            this.user = requireNonNull(user);
-            this.leafResource = requireNonNull(leafResource);
-            this.context = requireNonNull(context);
-            this.rulesApplied = requireNonNull(rulesApplied);
-            this.numberOfRecordsReturned = numberOfRecordsReturned;
-            this.numberOfRecordsProcessed = numberOfRecordsProcessed;
-        }
-
-        public interface IUser {
-            /**
-             * @param user {@link User} is the user that made the initial registration request to access data
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            ILeafResource withUser(User user);
-        }
-
-        public interface ILeafResource {
-            /**
-             * @param leafResource the {@link LeafResource} which the data has just finished being read
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            IContext withLeafResource(LeafResource leafResource);
-        }
-
-        public interface IContext {
-            /**
-             * @param context the context that was passed by the client to the palisade service
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            IRulesApplied withContext(Context context);
-        }
-
-        public interface IRulesApplied {
-            /**
-             * @param rules {@link Rules} is the rules that are being applied to this resource for this request
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            INumberOfRecordsReturned withRulesApplied(Rules rules);
-        }
-
-        public interface INumberOfRecordsReturned {
-            /**
-             * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            INumberOfRecordsProcessed withNumberOfRecordsReturned(long numberOfRecordsReturned);
-        }
-
-        public interface INumberOfRecordsProcessed {
-            /**
-             * @param numberOfRecordsProcessed is the number of records that was processed from this resource
-             * @return the {@link ReadRequestCompleteAuditRequest}
-             */
-            ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(long numberOfRecordsProcessed);
-        }
-
-        /**
-         * Static factory method.
-         *
-         * @param original the original request id
-         * @return {@link ReadRequestCompleteAuditRequest}
-         */
-        public static IUser create(final RequestId original) {
-            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("user=" + user)
-                    .add("leafResource=" + leafResource)
-                    .add("context=" + context)
-                    .add("rulesApplied=" + rulesApplied)
-                    .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
-                    .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
-                    .toString();
-        }
-    }
-
-    /**
-     * This is one of the objects that is passed to the audit-service
-     * to be able to store an audit record. This class extends {@link Request} This class
-     * is used for the indication to the Audit logs that an exception has been received.
-     */
-    public static final class ReadRequestExceptionAuditRequest extends AuditRequest {
-
-        public final String token;
-        public final LeafResource leafResource;
-        public final Throwable exception;
-
-        @JsonCreator
-        private ReadRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("token") final String token, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("exception") final Throwable exception) {
-            super(originalRequestId);
-            this.token = requireNonNull(token);
-            this.leafResource = requireNonNull(leafResource);
-            this.exception = requireNonNull(exception);
-        }
-
-        public interface IToken {
-            /**
-             * @param token this is the token that is used to retrieve cached information from the palisade service
-             * @return the {@link ReadRequestExceptionAuditRequest}
-             */
-            ILeafResource withToken(String token);
-        }
-
-        public interface ILeafResource {
-            /**
-             * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
-             * @return the {@link ReadRequestExceptionAuditRequest}
-             */
-            IThrowable withLeafResource(LeafResource leafResource);
-        }
-
-        public interface IThrowable {
-            /**
-             * @param exception {@link Throwable} is the type of the exception while processing
-             * @return the {@link ReadRequestExceptionAuditRequest}
-             */
-            ReadRequestExceptionAuditRequest withException(Throwable exception);
-        }
-
-        /**
-         * Static factory method.
-         *
-         * @param original request id.
-         * @return the {@link ReadRequestExceptionAuditRequest}
-         */
-        public static IToken create(final RequestId original) {
-            return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("token='" + token + "'")
-                    .add("leafResource=" + leafResource)
-                    .add("exception=" + exception)
                     .toString();
         }
     }
