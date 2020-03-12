@@ -26,19 +26,6 @@ hosting: cloud
 # cloudProvider: aws - if hosting in cloud, defines configuration for the cloud provider
 cloudProvider: aws
 
-# hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
-# nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
-# namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
-# uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
-# repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
-global:
-  hostname: localhost
-  nodes: 1
-  namespace: default
-  uniqueNamespace: false
-  repository: palisade
-  globalIPAddresses:
-
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
   install: false
@@ -51,13 +38,28 @@ metricsServer:
 dashboard:
   install: false
 
-# dataPath: path to directory to mount as a persistent-volume to be claimed by the data-service
+# hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
+# nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
+# namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
+# uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
+# repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
+# local.path: path to directory to mount as a persistent-volume to be claimed by the data-service
 # - under UNIX, this works as expected and is simply the UNIX path to the directory to mount
 # - under Windows, paths must be rewritten in a 'unix-y' style - i.e. 'C:\Users\Admin\data-dir' -> '/c/Users/Admin/data-dir'
 #   - it is also necessary to ensure the C:\ drive is shared within the 'Docker Desktop' app
 #   - if using WSL, ensure Windows C:\ is mounted under /c/ instead of /mnt/c/ to enable optimal compatibility
-# efsVolumeHandle: $(aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text)
+# cloud.aws.efsVolumeHandle: $(aws efs describe-file-systems --query "FileSystems[*].FileSystemId" --output text)
 # - the filesystem id of the (AWS) EFS volume to mount when in cloud/aws mode
-storage:
-  dataPath: '/data'
-  efsVolumeHandle: fs-10e2b3db
+# globalIPAddresses: THIS MUST BE AT THE BOTTOM, autofilled by a script
+global:
+  hostname: localhost
+  nodes: 1
+  namespace: default
+  uniqueNamespace: false
+  repository: palisade
+  local:
+    path: '/data'
+  cloud:
+    aws:
+      efsVolumeHandle: null
+  globalIPAddresses:
