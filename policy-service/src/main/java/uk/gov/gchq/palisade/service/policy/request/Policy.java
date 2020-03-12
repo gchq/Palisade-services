@@ -38,7 +38,8 @@ import static java.util.Objects.requireNonNull;
  * service but not needed by the rest of the palisade services. That includes
  * separating the rules that need to be applied at the resource level or the record level.
  *
- * @param <T> the java class to deserialise the record into, used for typing rules (UnaryOperators on T)
+ * @param <T> The Java class that the rules expect the records of data to be in
+ *           the format of, e.g. a Rule<T> recordRule vs a Rule<Resource> resourceRule
  */
 public class Policy<T> {
     private Rules<T> recordRules;
