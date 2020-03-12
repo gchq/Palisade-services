@@ -18,13 +18,14 @@ You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespa
 
 Deployment target is set to host on {{ .Values.hosting }}
 {{- if eq .Values.hosting "cloud" -}}
-    {{- println -}}Expecting {{ .Values.cloudProvider }} as the cloud provider, with EFS volume handle {{ .Values.storage.efsVolumeHandle }}{{- println -}}
+Expecting {{ .Values.cloudProvider }} as the cloud provider, with EFS volume handle {{ .Values.storage.efsVolumeHandle }}
+The data storage mount point can be found at {{ .Values.global.cloud.aws.path }}
 {{- else if eq .Values.hosting "local" -}}}
-    {{- println -}}
+The data storage mount point can be found at {{ .Values.global.local.path }}
 {{- else if eq .Values.hosting "metal" -}}}
-    {{- println -}}
+Metal deployment target has not been configured yet.
 {{- end -}}
-The data storage mount point can be found at {{ .Values.storage.dataPath }}
+
 The ingress is located on path {{ include "palisade-service.root" . }}/palisade and the ingress controller dashboard at :{{ .Values.traefik.admin.port }}/dashboard/#/
 {{- if .Values.dashboard.install -}}
 {{- if .Release.IsInstall -}}
