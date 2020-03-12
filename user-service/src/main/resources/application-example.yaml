@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-spring:
-  cache:
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
 
 eureka:
   client:
@@ -34,3 +30,8 @@ population:
         public
       roles:
         ESTATES
+    - userId: eve
+      auths:
+        public
+      roles:
+        IT
