@@ -39,12 +39,10 @@ public class ApplicationConfiguration {
         private Map<String, ServiceConfiguration> services = new HashMap<>();
 
         public Map<String, ServiceConfiguration> getServices() {
-            System.out.println("Getting service configuration: " + this.services);
             return services;
         }
 
         public void setServices(final Map<String, ServiceConfiguration> services) {
-            System.out.println("Setting service configuration: " + services);
             this.services = services;
         }
 
@@ -62,14 +60,11 @@ public class ApplicationConfiguration {
     @Bean
     @ConfigurationProperties(prefix = "manager")
     ConfigurationMap configurationMap() {
-        System.out.println("Configuration map time...");
         return new ConfigurationMap();
     }
 
     @Bean
     Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
-        System.out.println("Service Configuration bean time");
-        System.out.println();
         return configurationMap.getServices();
     }
 
