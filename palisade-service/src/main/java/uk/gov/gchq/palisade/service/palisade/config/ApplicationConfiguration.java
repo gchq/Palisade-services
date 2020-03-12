@@ -27,6 +27,10 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.palisade.domain.ContextConverter;
+import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceConverter;
+import uk.gov.gchq.palisade.service.palisade.domain.RulesConverter;
+import uk.gov.gchq.palisade.service.palisade.domain.UserConverter;
 import uk.gov.gchq.palisade.service.palisade.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.palisade.repository.DataRequestRepository;
 import uk.gov.gchq.palisade.service.palisade.repository.JpaPersistenceLayer;
@@ -58,6 +62,26 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
         return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, executor);
+    }
+
+    @Bean
+    public ContextConverter contextConverter(final ObjectMapper objectMapper) {
+        return new ContextConverter(objectMapper);
+    }
+
+    @Bean
+    public LeafResourceConverter leafResourceConverter(final ObjectMapper objectMapper) {
+        return new LeafResourceConverter(objectMapper);
+    }
+
+    @Bean
+    public RulesConverter rulesConverter(final ObjectMapper objectMapper) {
+        return new RulesConverter(objectMapper);
+    }
+
+    @Bean
+    public UserConverter userConverter(final ObjectMapper objectMapper) {
+        return new UserConverter(objectMapper);
     }
 
     @Bean
