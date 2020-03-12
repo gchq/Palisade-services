@@ -75,6 +75,7 @@ public class CanAccessRequest extends Request {
     }
 
     public void setResources(final Collection<LeafResource> resources) {
+        requireNonNull(resources, "The resources has not been set.");
         resources(resources);
     }
 
