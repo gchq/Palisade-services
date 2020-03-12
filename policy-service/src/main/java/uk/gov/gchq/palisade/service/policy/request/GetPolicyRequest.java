@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used in the request to get the policies that apply to the
- * collection of {@link Resource}'s.
+ * collection of {@link LeafResource}'s.
  */
 public class GetPolicyRequest extends Request {
     private User user;

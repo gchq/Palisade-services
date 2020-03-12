@@ -94,7 +94,7 @@ public class CanAccessRequest extends Request {
 
     public void setContext(final Context context) {
         requireNonNull(context, "The context has not been set");
-        this.context = context;
+        context(context);
     }
 
     @Override

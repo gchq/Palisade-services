@@ -109,12 +109,12 @@ public class ResultAggregationService implements Service {
         return resources;
     }
 
-    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final Map<LeafResource, Rules> policy, final AuditService auditService) {
+    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final Map<LeafResource, Rules> rules, final AuditService auditService) {
         RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
                 .withUser(user)
-                .withLeafResources(policy.keySet())
+                .withLeafResources(rules.keySet())
                 .withContext(request.getContext());
-        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, policy);
+        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, rules);
         auditService.audit(registerRequestCompleteAuditRequest);
     }
 
