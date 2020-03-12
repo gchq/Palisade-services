@@ -18,7 +18,7 @@ You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespa
 
 Deployment target is set to host on {{ .Values.hosting }}
 {{- if eq .Values.hosting "cloud" -}}
-Expecting {{ .Values.cloudProvider }} as the cloud provider, with EFS volume handle {{ .Values.storage.efsVolumeHandle }}
+    {{- println -}}Expecting {{ .Values.cloudProvider }} as the cloud provider, with EFS volume handle {{ .Values.global.cloud.aws.efsVolumeHandle }}
 The data storage mount point can be found at {{ .Values.global.cloud.aws.path }}
 {{- else if eq .Values.hosting "local" -}}}
 The data storage mount point can be found at {{ .Values.global.local.path }}
