@@ -14,15 +14,15 @@ spec:
   storageClassName: data-storage
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.storage.dataPath }}
+    path: {{ .Values.global.local.path }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "cloud" }}
   {{- if eq .Values.cloudProvider "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.storage.efsVolumeHandle  }}
+    volumeHandle: {{ .Values.global.cloyud.aws.efsVolumeHandle  }}
     volumeAttributes:
-      path: {{ .Values.storage.dataPath }}
+      path: {{ .Values.global.cloud.aws.path }}
   {{- end }}
   {{- else if eq .Values.hosting "metal" }}
   # TODO: what to do for storage on bare-metal deployment

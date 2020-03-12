@@ -61,5 +61,6 @@ global:
     path: '/data'
   cloud:
     aws:
+      path: '/data'
       efsVolumeHandle: null
   globalIPAddresses:
