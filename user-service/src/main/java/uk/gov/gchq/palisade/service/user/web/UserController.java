@@ -24,13 +24,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.config.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.config.UserData;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import javax.annotation.PostConstruct;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/")
@@ -38,11 +41,11 @@ public class UserController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private UserService service;
-    private Set<User> users;
+    private UserConfiguration userConfig;
 
-    public UserController(@Qualifier("userService") final UserService service, final Set<User> users) {
+    public UserController(@Qualifier("userService") final UserService service, final UserConfiguration configuration) {
         this.service = service;
-        this.users = users;
+        this.userConfig = configuration;
     }
 
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
@@ -60,6 +63,15 @@ public class UserController {
     @PostConstruct
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        users.forEach(service::addUser);
+        LOGGER.info("Preloaded information: {}", userConfig.getUsers());
+        List<User> userList = new ArrayList<>();
+        List<UserData> usersData = userConfig.getUsers();
+        for (UserData userData : usersData) {
+            User user = UserData.buildUser(userData);
+            userList.add(user);
+        }
+        for (User user : userList) {
+            service.addUser(user);
+        }
     }
 }

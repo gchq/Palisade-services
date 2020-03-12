@@ -22,9 +22,15 @@ eureka:
     enabled: true
 
 population:
-  alice:
-    auths:
-      - private
-      - public
-    roles:
-      - HR
+  users:
+    - userId: alice
+      auths:
+        public
+        private
+      roles:
+        HR
+    - userId: bob
+      auths:
+        public
+      roles:
+        ESTATES

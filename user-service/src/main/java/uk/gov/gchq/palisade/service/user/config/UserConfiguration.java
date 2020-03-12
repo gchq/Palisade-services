@@ -16,82 +16,34 @@
 
 package uk.gov.gchq.palisade.service.user.config;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
-import static java.util.Objects.requireNonNull;
-
+@Configuration
+@ConfigurationProperties(prefix = "population")
 public class UserConfiguration {
 
-    private Set<String> roles = Collections.emptySet();
-    private Set<String> auths = Collections.emptySet();
+    @NestedConfigurationProperty
+    private List<UserData> users = new ArrayList<>();
 
-    public UserConfiguration auths(final String... auths) {
-        requireNonNull(auths, "Cannot add null auths.");
-        this.auths.clear();
-        Collections.addAll(this.auths, auths);
-        return this;
+    public UserConfiguration() {
     }
 
-    public UserConfiguration auths(final Set<String> auths) {
-        requireNonNull(auths, "Cannot add null auths.");
-        this.auths.clear();
-        this.auths.addAll(auths);
-        return this;
+    public UserConfiguration(final List<UserData> users) {
+        this.users = users;
     }
 
-    public void setAuths(final Set<String> auths) {
-        auths(auths);
+    public List<UserData> getUsers() {
+        return users;
     }
 
-    public Set<String> getAuths() {
-        return auths;
-    }
-
-    public UserConfiguration addAuths(final Set<String> auths) {
-        requireNonNull(auths, "Cannot add null auths.");
-        this.auths.addAll(auths);
-        return this;
-    }
-
-    public UserConfiguration roles(final String... roles) {
-        requireNonNull(roles, "Cannot add null roles.");
-        this.roles.clear();
-        Collections.addAll(this.roles, roles);
-        return this;
-    }
-
-    public void setRoles(final Set<String> roles) {
-        roles(roles);
-    }
-
-    public UserConfiguration roles(final Set<String> roles) {
-        requireNonNull(roles, "Cannot add null roles.");
-        this.roles.clear();
-        this.roles.addAll(roles);
-        return this;
-    }
-
-    public Set<String> getRoles() {
-        // roles cannot be null
-        return roles;
-    }
-
-    public UserConfiguration addRoles(final Set<String> roles) {
-        requireNonNull(roles, "Cannot add null roles.");
-        this.roles.addAll(roles);
-        return this;
-    }
-
-    public User buildUser(final UserId userId) {
-        return new User()
-                .userId(userId)
-                .addAuths(this.getAuths())
-                .roles(this.getRoles());
+    public void setUsers(final List<UserData> users) {
+        this.users = users;
     }
 
     @Override
@@ -105,22 +57,18 @@ public class UserConfiguration {
         }
 
         final UserConfiguration that = (UserConfiguration) o;
-
-        return Objects.equals(roles, that.roles) &&
-                Objects.equals(auths, that.auths);
+        return Objects.equals(users, that.users);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roles, auths);
+        return Objects.hash(users);
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("UserConfiguration{\n");
-        sb.append("\troles=").append(roles).append('\n');
-        sb.append("\tauths=").append(auths).append('\n');
-        sb.append('}');
-        return sb.toString();
+        return "UserConfiguration{" +
+                "users=" + users +
+                '}';
     }
 }
