@@ -20,7 +20,7 @@ spec:
   {{- if eq .Values.cloudProvider "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.global.cloyud.aws.efsVolumeHandle  }}
+    volumeHandle: {{ .Values.global.cloud.aws.efsVolumeHandle  }}
     volumeAttributes:
       path: {{ .Values.global.cloud.aws.path }}
   {{- end }}
