@@ -64,16 +64,13 @@ public class ClientReadResponseTest {
 
         //then
         assertEquals(stream, clientReadResponse.asInputStream());
-
     }
 
     @Test
     public void writeTo() throws IOException {
-
         //given
         OutputStream outputStream = Mockito.mock(OutputStream.class);
         when(stream.read(any())).thenReturn(-1);
-
 
         //when
         try {
@@ -82,9 +79,7 @@ public class ClientReadResponseTest {
             fail();
         }
 
-
         //then
         verify(stream, times(1)).read(any());
-
     }
 }
