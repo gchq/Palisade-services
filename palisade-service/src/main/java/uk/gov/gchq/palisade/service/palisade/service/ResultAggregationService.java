@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestExceptionAuditRequest;
@@ -54,30 +54,29 @@ public class ResultAggregationService implements Service {
             final RegisterDataRequest request,
             final User user,
             final Map<LeafResource, ConnectionDetail> resource,
-            final MultiPolicy policy,
+            final Map<LeafResource, Rules> rules,
             final RequestId requestId,
             final RequestId originalRequestId) {
 
         LOGGER.debug("aggregateDataRequestResults({}, {}, {}, {}, {}, {})",
-                request, user, resource, policy, request, originalRequestId);
+                request, user, resource, rules, request, originalRequestId);
         requireNonNull(request, "request");
         requireNonNull(user, "user");
         requireNonNull(resource, "resource");
-        requireNonNull(policy, "policy");
+        requireNonNull(rules, "rules");
         requireNonNull(requestId, "request ID");
         requireNonNull(originalRequestId, "original request ID");
 
         try {
-            //remove any resources from the map that the policy doesn't contain details for -> user should not even be told about
-            //resources they don't have permission to see
-            Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, policy);
+            // remove any resources from the map that the rules doesn't contain details for -> user should not even be told about
+            // resources they don't have permission to see
+            Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, rules);
 
-            PalisadeService.ensureRecordRulesAvailableFor(policy, filteredResources.keySet());
-            auditRegisterRequestComplete(request, user, policy, auditService);
+            auditRegisterRequestComplete(request, user, rules, auditService);
             final DataRequestConfig dataRequestConfig = new DataRequestConfig()
                     .user(user)
                     .context(request.getContext())
-                    .rules(policy.getRuleMap());
+                    .rules(rules);
             dataRequestConfig.setOriginalRequestId(originalRequestId);
             this.persistenceLayer.put(dataRequestConfig);
 
@@ -95,27 +94,27 @@ public class ResultAggregationService implements Service {
     }
 
     /**
-     * Removes all resource mappings in the {@code resources} that do not have a defined policy in {@code policy}.
+     * Removes all resource mappings in the {@code resources} that do not have defined rules in {@code rules}.
      *
      * @param resources the resources to modify
-     * @param policy    the policy for all resources
+     * @param rules    the rules for all resources
      * @return the {@code resources} map after filtering
      */
-    private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final MultiPolicy policy) {
-        LOGGER.debug("removeDisallowedResources({}, {})", resources, policy);
+    private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final Map<LeafResource, Rules> rules) {
+        LOGGER.debug("removeDisallowedResources({}, {})", resources, rules);
 
-        resources.keySet().retainAll(policy.getPolicies().keySet());
+        resources.keySet().retainAll(rules.keySet());
 
         LOGGER.debug("Allowed resources: {}", resources);
         return resources;
     }
 
-    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final MultiPolicy multiPolicy, final AuditService auditService) {
+    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final Map<LeafResource, Rules> rules, final AuditService auditService) {
         RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
                 .withUser(user)
-                .withLeafResources(multiPolicy.getPolicies().keySet())
+                .withLeafResources(rules.keySet())
                 .withContext(request.getContext());
-        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, multiPolicy);
+        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, rules);
         auditService.audit(registerRequestCompleteAuditRequest);
     }
 
@@ -130,5 +129,4 @@ public class ResultAggregationService implements Service {
         LOGGER.error("Auditing request exception: \n\t{}\n\t{}", request, ex);
         auditService.audit(auditRequestWithException);
     }
-
 }

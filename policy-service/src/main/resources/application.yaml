@@ -13,6 +13,9 @@
 # limitations under the License.
 #
 spring:
+  cache:
+    caffeine:
+      spec: expireAfterWrite=60m, maximumSize=500
   application:
     name: policy-service
   output:
@@ -45,9 +48,3 @@ management:
         - loggers
     loggers:
       enabled: true
-
-cache:
-  implementation: hashmap
-  props: "cache.properties"
-  etcd:
-  - http://localhost:2379

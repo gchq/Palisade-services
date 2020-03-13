@@ -214,30 +214,31 @@ uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
 |     |  |  \- org.scijava:native-lib-loader:jar:2.0.2:test
 |     |  \- com.kohlschutter.junixsocket:junixsocket-common:jar:2.0.4:test
 |     \- net.java.dev.jna:jna-platform:jar:4.5.2:test
-\- org.springframework.boot:spring-boot-starter-test:jar:2.2.0.RELEASE:test
-   +- org.springframework.boot:spring-boot-test:jar:2.2.0.RELEASE:test
-   +- org.springframework.boot:spring-boot-test-autoconfigure:jar:2.2.0.RELEASE:test
-   +- com.jayway.jsonpath:json-path:jar:2.4.0:test
-   |  \- net.minidev:json-smart:jar:2.3:test
-   |     \- net.minidev:accessors-smart:jar:1.2:test
-   |        \- org.ow2.asm:asm:jar:5.0.4:test
-   +- jakarta.xml.bind:jakarta.xml.bind-api:jar:2.3.2:compile
-   +- org.junit.jupiter:junit-jupiter:jar:5.5.2:test
-   |  +- org.junit.jupiter:junit-jupiter-api:jar:5.5.2:test
-   |  |  +- org.opentest4j:opentest4j:jar:1.2.0:test
-   |  |  \- org.junit.platform:junit-platform-commons:jar:1.5.2:test
-   |  +- org.junit.jupiter:junit-jupiter-params:jar:5.5.2:test
-   |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.5.2:test
-   +- org.junit.vintage:junit-vintage-engine:jar:5.5.2:test
-   |  +- org.apiguardian:apiguardian-api:jar:1.1.0:test
-   |  \- org.junit.platform:junit-platform-engine:jar:1.5.2:test
-   +- org.mockito:mockito-junit-jupiter:jar:3.1.0:test
-   +- org.assertj:assertj-core:jar:3.13.2:test
-   +- org.hamcrest:hamcrest:jar:2.1:test
-   +- org.mockito:mockito-core:jar:3.1.0:test
-   |  +- net.bytebuddy:byte-buddy-agent:jar:1.10.1:test
-   |  \- org.objenesis:objenesis:jar:2.6:test
-   +- org.skyscreamer:jsonassert:jar:1.5.0:test
-   |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
-   +- org.springframework:spring-test:jar:5.2.0.RELEASE:test
-   \- org.xmlunit:xmlunit-core:jar:2.6.3:test
++- org.springframework.boot:spring-boot-starter-test:jar:2.2.0.RELEASE:test
+|  +- org.springframework.boot:spring-boot-test:jar:2.2.0.RELEASE:test
+|  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:2.2.0.RELEASE:test
+|  +- com.jayway.jsonpath:json-path:jar:2.4.0:test
+|  |  \- net.minidev:json-smart:jar:2.3:test
+|  |     \- net.minidev:accessors-smart:jar:1.2:test
+|  |        \- org.ow2.asm:asm:jar:5.0.4:test
+|  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:2.3.2:compile
+|  +- org.junit.jupiter:junit-jupiter:jar:5.5.2:test
+|  |  +- org.junit.jupiter:junit-jupiter-api:jar:5.5.2:test
+|  |  |  +- org.opentest4j:opentest4j:jar:1.2.0:test
+|  |  |  \- org.junit.platform:junit-platform-commons:jar:1.5.2:test
+|  |  +- org.junit.jupiter:junit-jupiter-params:jar:5.5.2:test
+|  |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.5.2:test
+|  +- org.junit.vintage:junit-vintage-engine:jar:5.5.2:test
+|  |  +- org.apiguardian:apiguardian-api:jar:1.1.0:test
+|  |  \- org.junit.platform:junit-platform-engine:jar:1.5.2:test
+|  +- org.mockito:mockito-junit-jupiter:jar:3.1.0:test
+|  +- org.assertj:assertj-core:jar:3.13.2:test
+|  +- org.hamcrest:hamcrest:jar:2.1:test
+|  +- org.mockito:mockito-core:jar:3.1.0:test
+|  |  +- net.bytebuddy:byte-buddy-agent:jar:1.10.1:test
+|  |  \- org.objenesis:objenesis:jar:2.6:test
+|  +- org.skyscreamer:jsonassert:jar:1.5.0:test
+|  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
+|  +- org.springframework:spring-test:jar:5.2.0.RELEASE:test
+|  \- org.xmlunit:xmlunit-core:jar:2.6.3:test
+\- uk.gov.gchq.palisade:common:jar:tests:0.4.0-SNAPSHOT:test

@@ -16,18 +16,14 @@
 
 package uk.gov.gchq.palisade.service.policy.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -44,7 +40,7 @@ public class CanAccessRequest extends Request {
     }
 
     /**
-     * @param resources the collection of {@link LeafResource}'s to be accessed
+     * @param resources the collection of {@link LeafResource}s to be accessed
      * @return the {@link CanAccessRequest}
      */
     public CanAccessRequest resources(final Collection<LeafResource> resources) {
@@ -73,51 +69,6 @@ public class CanAccessRequest extends Request {
         return this;
     }
 
-    /**
-     * Utility method to allow the CanAccessRequest to be created as part of a
-     * chain of asynchronous requests.
-     *
-     * @param futureResources   a completable future that will return a collection of {@link LeafResource}'s.
-     * @param futureUser        a completable future that will return a {@link User}.
-     * @param purpose           the purpose that the user stated for why they want access to the data.
-     * @param originalRequestId the requestId of the service creating this object
-     * @return a completable future containing the {@link CanAccessRequest}.
-     */
-    public static CompletableFuture<CanAccessRequest> create(
-            final CompletableFuture<? extends Collection<LeafResource>> futureResources,
-            final CompletableFuture<User> futureUser,
-            final String purpose,
-            final RequestId originalRequestId) {
-        return CompletableFuture.allOf(futureResources, futureUser)
-                .thenApply(t -> {
-                    CanAccessRequest canAccessRequest = new CanAccessRequest().resources(futureResources.join()).user(futureUser.join()).context(new Context().purpose(purpose));
-                    canAccessRequest.setOriginalRequestId(originalRequestId);
-                    return canAccessRequest;
-                });
-    }
-
-    /**
-     * Utility method to allow the CanAccessRequest to be created as part of a
-     * chain of asynchronous requests.
-     *
-     * @param resources         a collection of {@link LeafResource}'s that the user wants access to.
-     * @param futureUser        a completable future that will return a {@link User}.
-     * @param purpose           the purpose that the user stated for why they want access to the data.
-     * @param originalRequestId the requestId of the service creating this object
-     * @return a completable future containing the {@link CanAccessRequest}.
-     */
-    public static CompletableFuture<CanAccessRequest> create(
-            final Collection<LeafResource> resources,
-            final CompletableFuture<User> futureUser,
-            final String purpose,
-            final RequestId originalRequestId) {
-        return futureUser.thenApply(auths -> {
-            CanAccessRequest canAccessRequest = new CanAccessRequest().resources(resources).user(futureUser.join()).context(new Context().purpose(purpose));
-            canAccessRequest.setOriginalRequestId(originalRequestId);
-            return canAccessRequest;
-        });
-    }
-
     public Collection<LeafResource> getResources() {
         requireNonNull(resources, "The resources have not been set.");
         return resources;
@@ -141,34 +92,30 @@ public class CanAccessRequest extends Request {
         return context;
     }
 
+    public void setContext(final Context context) {
+        context(context);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof CanAccessRequest)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final CanAccessRequest that = (CanAccessRequest) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(user, that.user)
-                .append(resources, that.resources)
-                .append(context, that.context)
-                .isEquals();
+        return Objects.equals(user, that.user) &&
+                Objects.equals(resources, that.resources) &&
+                Objects.equals(context, that.context);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(11, 13)
-                .appendSuper(super.hashCode())
-                .append(user)
-                .append(resources)
-                .append(context)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), user, resources, context);
     }
 
     @Override
