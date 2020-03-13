@@ -45,3 +45,28 @@ global:
   uniqueNamespace: false
   repository: palisade
   globalIPAddresses:
+  localMount:
+    enabled: true
+    volumeHandle: dummy
+  classpathjars:
+    directory: /tmp/Palisade/classpathjars
+  persistence:
+    storageClass:
+    annotations: {}
+    accessMode:
+    - ReadWriteOnce
+    persistentVolumeReclaimPolicy: "Retain"
+    persistenceVolumeAccessModes:
+    - "ReadWriteOnce"
+    - "ReadOnlyMany"
+    enabled: true
+    hostpath: /tmp/Palisade
+    storageTierName:
+    - "classpath"
+    selectors:
+      classpath: "classpathjars"
+    size: 2Gi
+    pvcSizes:
+      policy:
+        size: 1Gi
+
