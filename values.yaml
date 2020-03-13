@@ -69,4 +69,3 @@ global:
     pvcSizes:
       policy:
         size: 1Gi
-
