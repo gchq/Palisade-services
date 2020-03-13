@@ -75,7 +75,6 @@ public class CanAccessRequest extends Request {
     }
 
     public void setResources(final Collection<LeafResource> resources) {
-        requireNonNull(resources, "The resources has not been set.");
         resources(resources);
     }
 
@@ -85,7 +84,6 @@ public class CanAccessRequest extends Request {
     }
 
     public void setUser(final User user) {
-        requireNonNull(context, "The user has not been set.");
         user(user);
     }
 
@@ -95,7 +93,6 @@ public class CanAccessRequest extends Request {
     }
 
     public void setContext(final Context context) {
-        requireNonNull(context, "The context has not been set");
         context(context);
     }
 
