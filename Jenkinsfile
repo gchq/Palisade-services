@@ -111,8 +111,14 @@ spec:
             }
         }
         stage('Integration Tests') {
-            git branch: "develop", url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            build job: "Palisade-integration-tests/develop"
+        git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+        sh "git fetch origin develop"
+        sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
+            container('docker-cmds') {
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    sh 'mvn -s $MAVEN_SETTINGS install'
+                }
+            }
         }
         stage('Maven deploy') {
             x = env.BRANCH_NAME
