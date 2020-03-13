@@ -32,8 +32,7 @@ import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/")
@@ -63,14 +62,9 @@ public class UserController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        List<User> userList = new ArrayList<>();
-        List<UserData> usersData = userConfig.getUsers();
-        for (UserData userData : usersData) {
-            User user = UserData.buildUser(userData);
-            userList.add(user);
-        }
-        for (User user : userList) {
-            service.addUser(user);
-        }
+        userConfig.getUsers().stream()
+                .map(UserData::buildUser)
+                .collect(Collectors.toList())
+                .forEach(user -> service.addUser(user));
     }
 }
