@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.user.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +31,6 @@ import uk.gov.gchq.palisade.service.user.config.UserData;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-
-import javax.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +60,9 @@ public class UserController {
         return service.addUser(request.user).equals(request.user);
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        LOGGER.info("Preloaded information: {}", userConfig.getUsers());
         List<User> userList = new ArrayList<>();
         List<UserData> usersData = userConfig.getUsers();
         for (UserData userData : usersData) {

@@ -81,8 +81,6 @@ public class ApplicationConfiguration {
 
     @Bean("runnerBuilders")
     public Map<String, ProcessBuilder> runnerBuilders(final Map<String, ServiceConfiguration> runnerConfigs) {
-        System.out.println();
-        System.out.println("Runner Configs: " + runnerConfigs);
         return runnerConfigs.entrySet().stream()
                 .map(e -> {
                     ServiceConfiguration config = e.getValue();
