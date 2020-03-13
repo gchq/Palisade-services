@@ -85,6 +85,7 @@ public class CanAccessRequest extends Request {
     }
 
     public void setUser(final User user) {
+        requireNonNull(context, "The user has not been set.");
         user(user);
     }
 
