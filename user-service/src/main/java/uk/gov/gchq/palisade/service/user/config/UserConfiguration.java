@@ -29,20 +29,20 @@ import java.util.Objects;
 public class UserConfiguration {
 
     @NestedConfigurationProperty
-    private List<UserData> users = new ArrayList<>();
+    private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
 
     public UserConfiguration() {
     }
 
-    public UserConfiguration(final List<UserData> users) {
+    public UserConfiguration(final List<StdUserCacheWarmerFactory> users) {
         this.users = users;
     }
 
-    public List<UserData> getUsers() {
+    public List<StdUserCacheWarmerFactory> getCacheWarmerFactory() {
         return users;
     }
 
-    public void setUsers(final List<UserData> users) {
+    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
         this.users = users;
     }
 

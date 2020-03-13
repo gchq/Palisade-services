@@ -27,6 +27,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.CacheWarmerFactory;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
@@ -43,6 +44,11 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    @Bean
+    public CacheWarmerFactory stdUserCacheWarmerFactory() {
+        return new StdUserCacheWarmerFactory();
+    }
 
     @Bean
     public UserServiceProxy userService(final Set<UserService> userServices) {

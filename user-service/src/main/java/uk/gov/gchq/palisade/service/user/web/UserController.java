@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.user.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -26,17 +27,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.config.StdUserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.user.config.UserConfiguration;
-import uk.gov.gchq.palisade.service.user.config.UserData;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping(path = "/")
 public class UserController {
+
+    @Autowired
+    private StdUserCacheWarmerFactory stdUserCacheWarmerFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private UserService service;
@@ -62,9 +64,8 @@ public class UserController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        userConfig.getUsers().stream()
-                .map(UserData::buildUser)
-                .collect(Collectors.toList())
-                .forEach(user -> service.addUser(user));
+        userConfig.getCacheWarmerFactory().forEach(cacheWarmer ->
+                stdUserCacheWarmerFactory.warm(cacheWarmer, service)
+        );
     }
 }
