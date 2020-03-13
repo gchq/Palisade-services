@@ -39,7 +39,8 @@ import static java.util.Objects.requireNonNull;
  * separating the rules that need to be applied at the resource level or the record level.
  *
  * @param <T> The Java class that the rules expect the records of data to be in
- *            the format of, e.g. a Rule<T> recordRule vs a Rule<Resource> resourceRule
+ *            the format of, e.g. a Policy Int has Rules Resource for coarse filtering
+ *            and Rules Int for fine filtering of files containing Ints
  */
 public class Policy<T> {
     private Rules<T> recordRules;
