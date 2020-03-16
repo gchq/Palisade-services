@@ -22,8 +22,8 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
@@ -91,21 +91,15 @@ public class SimplePalisadeService implements PalisadeService {
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
         final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
 
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
+        policyRequest.setOriginalRequestId(originalRequestId);
+        LOGGER.debug("Getting rules from policyService: {}", request);
+        CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest);
+
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-        GetPolicyRequest policyRequest = new GetPolicyRequest();
-        try {
-            policyRequest = policyRequest.user(user.get()).context(request.getContext()).resources(resources.get().keySet());
-            policyRequest.setOriginalRequestId(originalRequestId);
-        } catch (Exception ex) {
-            LOGGER.error("Error occurred: {}", ex.getMessage());
-        }
-        LOGGER.debug("Getting policy from policyService: {}", request);
-        CompletableFuture<MultiPolicy> multiPolicy = policyService.getPolicy(policyRequest);
-
-        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \npolicy:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId);
-
+        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \nrules:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), rules.join(), requestId, originalRequestId);
         return aggregationService.aggregateDataRequestResults(
-                request, user.join(), resources.join(), multiPolicy.join(), requestId, originalRequestId).toCompletableFuture();
+                request, user.join(), resources.join(), rules.join(), requestId, originalRequestId).toCompletableFuture();
     }
 
     @Override

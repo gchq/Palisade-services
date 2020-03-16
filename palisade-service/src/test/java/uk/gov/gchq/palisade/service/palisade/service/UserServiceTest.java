@@ -21,9 +21,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
 
     private UserClient userClient = Mockito.mock(UserClient.class);
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private UserService userService;
     private UserId userId = new UserId().id("Bob");
     private User testUser;
