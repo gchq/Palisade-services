@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 fullnameOverride: palisade-services
-
 namespaces:
   default: default
   dev: dev
   uat: uat
   prod: prod
-
 # hosting: local, metal or cloud and defines configuration parameter choices for some child charts according to deployment environment
 hosting: local
-
-
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
   install: false
