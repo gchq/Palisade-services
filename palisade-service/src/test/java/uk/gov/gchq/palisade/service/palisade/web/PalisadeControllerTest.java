@@ -40,6 +40,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -94,7 +95,7 @@ public class PalisadeControllerTest {
     }
 
     @Test
-    public void infoOnGetDataRequestConfig() {
+    public void infoOnGetDataRequestConfig() throws ExecutionException, InterruptedException {
         // Given
         GetDataRequestConfig request = Mockito.mock(GetDataRequestConfig.class);
         DataRequestConfig response = Mockito.mock(DataRequestConfig.class);
