@@ -20,8 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.CacheWarmerFactory;
-import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -77,14 +75,12 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
     }
 
     @Override
-    public void warm(final CacheWarmerFactory cacheWarmerFactory, final Service service) {
+    public User warm(final CacheWarmerFactory cacheWarmerFactory) {
         StdUserCacheWarmerFactory userCacheWarmerFactory = (StdUserCacheWarmerFactory) cacheWarmerFactory;
-        User user = new User()
+        return new User()
                 .userId(userCacheWarmerFactory.getUserId())
                 .roles(userCacheWarmerFactory.getRoles())
                 .auths(userCacheWarmerFactory.getAuths());
-
-        ((UserService) service).addUser(user);
     }
 
     @Override

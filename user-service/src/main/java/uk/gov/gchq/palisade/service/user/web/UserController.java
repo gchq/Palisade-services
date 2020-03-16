@@ -64,8 +64,8 @@ public class UserController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        userConfig.getCacheWarmerFactory().forEach(cacheWarmer ->
-                stdUserCacheWarmerFactory.warm(cacheWarmer, service)
-        );
+        userConfig.getCacheWarmerFactory().stream()
+                .map(cacheWarmer -> stdUserCacheWarmerFactory.warm(cacheWarmer))
+                .forEach(user -> service.addUser(user));
     }
 }

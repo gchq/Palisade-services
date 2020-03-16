@@ -47,6 +47,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     public CacheWarmerFactory stdUserCacheWarmerFactory() {
+        LOGGER.info("Standard User Data Instantiated");
         return new StdUserCacheWarmerFactory();
     }
 
