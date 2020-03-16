@@ -55,8 +55,10 @@ public class ExceptionHandlerTest {
         expectedStatuses.put(new Exception(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoints
-    private static Set<Exception> exceptionSet = expectedStatuses.keySet();
+    public static Set<Exception> exceptionSet = expectedStatuses.keySet();
 
 
 

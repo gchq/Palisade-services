@@ -78,7 +78,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class HierarchicalPolicyServiceTest {
-    private static final SimpleCacheService cacheService = new SimpleCacheService().backingStore(new HashMapBackingStore());
+    private static final SimpleCacheService CACHE_SERVICE = new SimpleCacheService().backingStore(new HashMapBackingStore());
     private final User user = new User().userId("testUser");
     private final FileResource fileResource1 = createTestFileResource(1);
     private final FileResource fileResource2 = createTestFileResource(2);
@@ -108,7 +108,7 @@ public class HierarchicalPolicyServiceTest {
 
     @Before
     public void setup() {
-        policyService = new HierarchicalPolicyService(cacheService);
+        policyService = new HierarchicalPolicyService(CACHE_SERVICE);
 
         logger = (Logger) LoggerFactory.getLogger(HierarchicalPolicyService.class);
         appender = new ListAppender<>();
@@ -154,7 +154,7 @@ public class HierarchicalPolicyServiceTest {
         appender.stop();
     }
 
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
