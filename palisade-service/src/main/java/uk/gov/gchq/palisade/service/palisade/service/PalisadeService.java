@@ -15,18 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.palisade.exception.NoPolicyException;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -64,28 +57,4 @@ public interface PalisadeService {
      */
     CompletableFuture<DataRequestConfig> getDataRequestConfig(GetDataRequestConfig request);
 
-    /**
-     * Checks that each {@link LeafResource} in a request has record level policy associated with it in the {@link
-     * MultiPolicy}.
-     *
-     * @param policy    policy being applied to a request
-     * @param resources the list of resources being processed
-     * @return the {@code} policy object
-     * @throws NoPolicyException if no record level rules are available for any {@link LeafResource} in {@code resources}
-     */
-    static MultiPolicy ensureRecordRulesAvailableFor(final MultiPolicy policy, final Collection<LeafResource> resources) {
-        Objects.requireNonNull(policy, "policy");
-        Objects.requireNonNull(resources, "resources");
-        final Map<LeafResource, Rules> ruleMap = policy.getRuleMap();
-        resources.forEach(resource -> {
-            if (!ruleMap.containsKey(resource)) {
-                throw new NoPolicyException("No policy record rules available for " + resource);
-            }
-            if (!ruleMap.get(resource).containsRules()) {
-                //policy available but is empty
-                //TODO: audit this because it is unusual behaviour
-            }
-        });
-        return policy;
-    }
 }

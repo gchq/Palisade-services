@@ -17,14 +17,14 @@
 package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -91,33 +91,25 @@ public class SetResourcePolicyRequest extends Request {
         throw new ForbiddenException("Should not call SetResourcePolicyRequest.getOriginalRequestId()");
     }
 
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof SetResourcePolicyRequest)) {
             return false;
         }
-
-        final SetResourcePolicyRequest that = (SetResourcePolicyRequest) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(resource, that.resource)
-                .append(policy, that.policy)
-                .isEquals();
+        if (!super.equals(o)) {
+            return false;
+        }
+        final SetResourcePolicyRequest request = (SetResourcePolicyRequest) o;
+        return Objects.equals(resource, request.resource) &&
+                Objects.equals(policy, request.policy);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 29)
-                .appendSuper(super.hashCode())
-                .append(resource)
-                .append(policy)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), resource, policy);
     }
 
     @Override
