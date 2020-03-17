@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.user.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -36,9 +35,6 @@ import uk.gov.gchq.palisade.service.user.service.UserService;
 @RestController
 @RequestMapping(path = "/")
 public class UserController {
-
-    @Autowired
-    private StdUserCacheWarmerFactory stdUserCacheWarmerFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private UserService service;
@@ -65,7 +61,7 @@ public class UserController {
     public void initPostConstruct() {
         // Add example users to the user-service cache
         userConfig.getCacheWarmerFactory().stream()
-                .map(cacheWarmer -> stdUserCacheWarmerFactory.warm())
+                .map(StdUserCacheWarmerFactory::warm)
                 .forEach(user -> service.addUser(user));
     }
 }
