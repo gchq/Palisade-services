@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -48,8 +49,10 @@ import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
+import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Bean configuration and dependency injection graph.
@@ -58,6 +61,12 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    @Bean
+    @ConfigurationProperties(prefix = "web.client")
+    public ClientConfiguration clientConfiguration() {
+        return new ClientConfiguration();
+    }
 
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
@@ -106,8 +115,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient, getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> auditUriSupplier = () -> clientConfig
+                .getClientUri("audit-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'audit-service' - see 'web.client' properties or discovery service registration"));
+        return new AuditService(auditClient, auditUriSupplier, getAsyncExecutor());
     }
 
     @Bean

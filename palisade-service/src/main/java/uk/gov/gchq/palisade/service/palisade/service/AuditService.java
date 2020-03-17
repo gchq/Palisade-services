@@ -22,16 +22,20 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
+import java.net.URI;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 public class AuditService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
     private final AuditClient client;
+    private final Supplier<URI> clientUri;
     private final Executor executor;
 
-    public AuditService(final AuditClient auditClient, final Executor executor) {
+    public AuditService(final AuditClient auditClient, final Supplier<URI> clientUri, final Executor executor) {
         this.client = auditClient;
+        this.clientUri = clientUri;
         this.executor = executor;
     }
 
@@ -41,7 +45,7 @@ public class AuditService implements Service {
         Boolean response;
         try {
             LOGGER.info("Audit request: {}", request);
-            response = this.client.audit(request);
+            response = this.client.audit(this.clientUri.get(), request);
             LOGGER.info("Audit response: {}", response);
         } catch (Exception ex) {
             LOGGER.error("Failed to log audit request: {}", ex.getMessage());
