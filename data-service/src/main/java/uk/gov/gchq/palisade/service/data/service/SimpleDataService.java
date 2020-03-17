@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.reader.common.CachedSerialisedDataReader.MapWrap;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
@@ -165,10 +166,10 @@ public class SimpleDataService implements DataService {
         typeMap.put(request.getDataFlavour(), request.getSerialiser());
 
         //Create AddCacheRequest
-        AddCacheRequest<HashMap> cacheRequest = new AddCacheRequest<>()
+        AddCacheRequest<MapWrap> cacheRequest = new AddCacheRequest<>()
                 .service(Service.class)
                 .key(SERIALISER_KEY)
-                .value(typeMap);
+                .value(new MapWrap(typeMap));
         cacheService.add(cacheRequest).join();
         LOGGER.debug("Serialiser added: {}", cacheRequest);
 
