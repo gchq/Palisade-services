@@ -55,7 +55,7 @@ public class PalisadeController {
     }
 
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
-    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) throws ExecutionException, InterruptedException {
+    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) {
         LOGGER.info("Invoking getDataRequestConfig: {}", request);
         DataRequestConfig response = this.service.getDataRequestConfig(request).join();
         LOGGER.info("Returning response: {}", response);
