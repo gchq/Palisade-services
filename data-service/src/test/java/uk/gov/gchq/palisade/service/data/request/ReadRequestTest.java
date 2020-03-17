@@ -46,12 +46,11 @@ public class ReadRequestTest {
         String token = "token";
         readRequest.token(token);
 
-        //then
+        //when
         String readToken = readRequest.getToken();
 
-        //when
+        //then
         assertEquals(readToken, token);
-
     }
 
     @Test
