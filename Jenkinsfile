@@ -139,7 +139,7 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,metrics.install=true --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} --set global.cloud.aws.efsVolumeHandle=$EFS_HANDLE --namespace adam'
+                            sh 'helm upgrade --install palisade .  --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} --set global.cloud.aws.efsVolumeHandle=$EFS_HANDLE --namespace adam'
                         } else {
                             sh "echo - no deploy"
                         }
