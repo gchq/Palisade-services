@@ -46,8 +46,11 @@ public class PolicyService implements Service {
         CompletionStage<Map<LeafResource, Rules>> policy;
         try {
             LOGGER.info("Policy request: {}", request);
-            policy = CompletableFuture.supplyAsync(() -> client.getPolicySync(request), this.executor);
-            LOGGER.info("Got policy: {}", policy);
+            policy = CompletableFuture.supplyAsync(() -> {
+                Map<LeafResource, Rules> response = client.getPolicySync(request);
+                LOGGER.info("Got policy: {}", response);
+                return response;
+            }, this.executor);
         } catch (Exception ex) {
             LOGGER.error("Failed to get policy: {}", ex.getMessage());
             throw new RuntimeException(ex);

@@ -36,6 +36,7 @@ import uk.gov.gchq.palisade.service.resource.repository.K8sBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
 import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
 import uk.gov.gchq.palisade.service.resource.service.CacheService;
+import uk.gov.gchq.palisade.service.resource.service.HadoopResourceConfigurationService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 
 import java.io.IOException;
@@ -62,8 +63,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public HadoopResourceService resourceService(final Configuration config, final Map<String, BackingStore> backingStore) throws IOException {
-        return new HadoopResourceService(config);
+    public HadoopResourceService resourceService(final Configuration config) throws IOException {
+        return new HadoopResourceConfigurationService(config);
     }
 
     @Bean

@@ -38,7 +38,7 @@ eureka:
 manager:
   # Search up path hierarchy for the root directory by name
   # This allows the services-manager to be less dependant on where it is located and where it was run from
-  root: palisade-services
+  root: Palisade-services
 
   services: {}
 
