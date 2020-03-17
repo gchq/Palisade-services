@@ -75,12 +75,11 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
     }
 
     @Override
-    public User warm(final CacheWarmerFactory cacheWarmerFactory) {
-        StdUserCacheWarmerFactory userCacheWarmerFactory = (StdUserCacheWarmerFactory) cacheWarmerFactory;
+    public User warm() {
         return new User()
-                .userId(userCacheWarmerFactory.getUserId())
-                .roles(userCacheWarmerFactory.getRoles())
-                .auths(userCacheWarmerFactory.getAuths());
+                .userId(this.getUserId())
+                .roles(this.getRoles())
+                .auths(this.getAuths());
     }
 
     @Override

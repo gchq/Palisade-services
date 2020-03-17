@@ -45,7 +45,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean
+    @Bean(name = "stdUserCacheWarmer")
+    @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer", matchIfMissing = true)
     public CacheWarmerFactory stdUserCacheWarmerFactory() {
         LOGGER.info("Standard User Data Instantiated");
         return new StdUserCacheWarmerFactory();

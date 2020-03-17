@@ -65,7 +65,7 @@ public class UserController {
     public void initPostConstruct() {
         // Add example users to the user-service cache
         userConfig.getCacheWarmerFactory().stream()
-                .map(cacheWarmer -> stdUserCacheWarmerFactory.warm(cacheWarmer))
+                .map(cacheWarmer -> stdUserCacheWarmerFactory.warm())
                 .forEach(user -> service.addUser(user));
     }
 }
