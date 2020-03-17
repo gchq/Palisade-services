@@ -1,31 +1,33 @@
+{{- if .Values.global.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: data-persistent-volume
-  namespace: {{ include "palisade.namespace" . }}
+  name: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
   labels:
     type: amazonEBS
-    storageTier: "data_service_selector"
-    for-app: {{ include "palisade.namespace" . }}
+    storage-tier: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
 spec:
-  persistentVolumeReclaimPolicy: Retain
   capacity:
-    storage: 5Gi
+    storage: {{ .Values.global.persistence.size }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.persistence.persistentVolumeReclaimPolicy | default "Retain" | quote }}
+  {{- if .Values.global.localMount.enabled }}
   accessModes:
-  - ReadOnlyMany
-  storageClassName: efs-sc
-  {{- if eq .Values.hosting "local" }}
+    {{- range .Values.global.persistence.persistenceVolumeAccessModes }}
+  - {{ . | quote }}
+    {{- end }}
   hostPath:
-    path: {{ .Values.global.local.path }}
-    type: DirectoryOrCreate
-  {{- else if eq .Values.hosting "cloud" }}
-  {{- if eq .Values.cloudProvider "aws" }}
+    # Directory location on host
+    path: {{ required "need to define the policy directory by using --set global.persistence.hostpath=localpath location" .Values.global.persistence.hostpath  | quote }}
+    type: Directory
+  {{- else }}
+  accessModes:
+  - ReadWriteMany
+  volumeMode: Filesystem
+  storageClassName: {{ .Values.global.persistence.storageClass | default "efs-sc" | quote }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.global.cloud.aws.efsVolumeHandle  }}
+    volumeHandle: {{ .Values.global.localMount.volumeHandle  }}
     volumeAttributes:
-      path: {{ .Values.global.cloud.aws.path }}
+      path: /data-mountpoint
   {{- end }}
-  {{- else if eq .Values.hosting "metal" }}
-  # TODO: what to do for storage on bare-metal deployment
   {{- end }}

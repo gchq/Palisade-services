@@ -67,7 +67,7 @@ spec:
       volumes:
       - name: data-volume
         persistentVolumeClaim:
-          claimName: {{ include "data-service.name" . }}-pvclaim
+          claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
           readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:

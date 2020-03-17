@@ -21,10 +21,6 @@ namespaces:
   uat: uat
   prod: prod
 
-# hosting: local, metal or cloud - defines configuration parameter choices for some child charts according to deployment environment
-hosting: cloud
-# cloudProvider: aws - if hosting in cloud, defines configuration for the cloud provider
-cloudProvider: aws
 
 # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
 traefik:
@@ -57,10 +53,28 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
-  local:
-    path: '/data'
-  cloud:
-    aws:
-      path: '/data'
-      efsVolumeHandle: null
+  localMount:
+    enabled: true
+    volumeHandle: dummy
+  classpathjars:
+    directory: /tmp/Palisade/classpathjars
+  persistence:
+    storageClass:
+    annotations: {}
+    accessMode:
+    - "ReadWriteOnce"
+    persistentVolumeReclaimPolicy: "Retain"
+    persistenceVolumeAccessModes:
+    - "ReadWriteOnce"
+    - "ReadOnlyMany"
+    enabled: true
+    hostpath: /tmp/Palisade
+    storageTierName:
+    - "data-service-pvclaim"
+    selectors:
+      classpath: "classpathjars"
+    size: 2Gi
+    pvcSizes:
+      policy:
+        size: 1Gi
   globalIPAddresses:

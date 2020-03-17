@@ -1,29 +1,30 @@
-# Copyright 2019 Crown Copyright
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+{{- if and .Values.global.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "data-service.name" . }}-pvclaim
-  namespace: {{ include "palisade.namespace" . }}
+  name: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+  labels:
+    "app.kubernetes.io/name": {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+    "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
+    "app.kubernetes.io/instance": "{{ .Release.Name }}"
+    "app.kubernetes.io/component": {{ (index .Values.global.persistence.storageTierName 0) | quote }}
 spec:
-  storageClassName: efs-sc
-  selector:
-    matchLabels:
-      storage-tier: "data_service_selector"
+  storageClassName: {{ .Values.global.persistence.storageClass | default "" | quote }}
+  {{- if .Values.global.localMount.enabled }}
   accessModes:
-  - ReadOnlyMany
+    {{- range .Values.global.persistence.accessMode }}
+  - {{ . | quote }}
+    {{- end }}
+  {{ else }}
+  accessModes:
+  - ReadWriteMany
+  storageClassName: efs-sc
+  {{ end }}
   resources:
     requests:
-      storage: 5Gi
+      storage: {{ .Values.global.persistence.pvcSizes.policy.size }}
+  selector:
+    matchLabels:
+      storage-tier: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+  {{- end }}
