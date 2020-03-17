@@ -21,9 +21,9 @@ import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
-import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 
-import java.util.concurrent.CompletableFuture;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 /**
  * The core API for the data service.
@@ -52,14 +52,16 @@ public interface DataService extends Service {
      *                request with the palisade service. The request can be
      *                altered to contain only a subset of the resources to be
      *                read by this data service instance.
-     * @return a {@link CompletableFuture} {@link ReadResponse} containing the
-     * {@link java.io.InputStream} of data and/or a message (error/warning/info) to be
-     * returned to the client.
-     * @throws NoCapacityException if the data service is unable to serve this request due to
-     *                             workload issues or lack of capacity
+     * @return a {@link Consumer} {@link OutputStream} callback to sink the file into
+     *         and apply appropriate complete/exception auditing
      */
-    CompletableFuture<ReadResponse> read(final ReadRequest request) throws NoCapacityException;
+    Consumer<OutputStream> read(final ReadRequest request);
 
-    CompletableFuture<Boolean> addSerialiser(final AddSerialiserRequest request);
+    /**
+     * Used to add a new serialiser to the data reader
+     * @param request a request describing the serialiser to add
+     * @return a {@link Boolean} true/false on success/failure
+     */
+    Boolean addSerialiser(final AddSerialiserRequest request);
 
 }

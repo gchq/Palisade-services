@@ -20,14 +20,17 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
+
+import java.util.Map;
 
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    MultiPolicy getPolicySync(final GetPolicyRequest request);
+    Map<LeafResource, Rules> getPolicySync(final GetPolicyRequest request);
 
     @GetMapping(path = "/actuator/health", produces = "application/*+json")
     Response getHealth();

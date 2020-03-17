@@ -29,13 +29,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.policy.Policy;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
@@ -48,20 +48,15 @@ import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PolicyServiceTest {
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private PolicyClient policyClient = Mockito.mock(PolicyClient.class);
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private PolicyService policyService;
-    private MultiPolicy multiPolicy;
-    private User testUser = new User().userId("Bob");
-    private Map<LeafResource, Policy> policies = new HashMap<>();
+    private Map<LeafResource, Rules> rules = new HashMap<>();
     private ExecutorService executor;
 
     @Before
@@ -74,9 +69,9 @@ public class PolicyServiceTest {
 
         policyService = new PolicyService(policyClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-        Policy policy = new Policy().owner(testUser);
-        policies.put(resource, policy);
-        multiPolicy = new MultiPolicy().policies(policies);
+        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        rules.put(resource, rule);
+
     }
 
     @After
@@ -96,11 +91,11 @@ public class PolicyServiceTest {
     public void infoOnGetPolicyRequest() {
         // Given
         GetPolicyRequest request = Mockito.mock(GetPolicyRequest.class);
-        MultiPolicy response = Mockito.mock(MultiPolicy.class);
+        Map<LeafResource, Rules> response = Mockito.mock(Map.class);
         Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
 
         // When
-        policyService.getPolicy(request);
+        policyService.getPolicy(request).join();
 
         // Then
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
@@ -116,14 +111,15 @@ public class PolicyServiceTest {
     @Test
     public void getPolicyReturnsPolicy() {
         //Given
-        when(policyClient.getPolicySync(any(GetPolicyRequest.class))).thenReturn(multiPolicy);
+        GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
+        Map<LeafResource, Rules> response = Mockito.mock(Map.class);
+        Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
 
         //When
-        GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
-        CompletableFuture<MultiPolicy> actual = policyService.getPolicy(request);
+        CompletableFuture<Map<LeafResource, Rules>> actual = policyService.getPolicy(request);
 
         //Then
-        assertEquals(multiPolicy, actual.join());
+        MatcherAssert.assertThat(response, equalTo(actual.join()));
     }
 
 }

@@ -36,6 +36,7 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -43,9 +44,6 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.palisade.policy.MultiPolicy;
-import uk.gov.gchq.palisade.service.palisade.policy.Policy;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
@@ -71,7 +69,6 @@ public class PalisadeServiceExceptionHandlerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeServiceTest.class);
 
     private final DataRequestConfig expectedConfig = new DataRequestConfig();
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResultAggregationService aggregationService;
     private AuditService auditService;
     private PersistenceLayer persistenceLayer;
@@ -83,13 +80,11 @@ public class PalisadeServiceExceptionHandlerTest {
     private DataRequestResponse expectedResponse = new DataRequestResponse();
     private RegisterDataRequest dataRequest = new RegisterDataRequest();
     private DataRequestConfig dataRequestConfig = new DataRequestConfig();
-    private RequestId requestId = new RequestId().id("Bob");
     private RequestId originalRequestId = new RequestId().id("Bob");
 
     private User user;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
-    private Map<LeafResource, Policy> policies = new HashMap<>();
-    private MultiPolicy multiPolicy;
+    private Map<LeafResource, Rules> rules = new HashMap<>();
     private PalisadeController controller;
     private MockMvc mvc;
     private ExecutorService executor;
@@ -111,13 +106,12 @@ public class PalisadeServiceExceptionHandlerTest {
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
         resources.put(resource, connectionDetail);
 
-        Policy policy = new Policy();
-        policy.setOwner(user);
-        policies.put(resource, policy);
-        multiPolicy = new MultiPolicy().policies(policies);
+        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        rules.put(resource, rule);
+
 
         dataRequest.userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
-        dataRequestConfig.user(user).context(dataRequest.getContext()).rules(multiPolicy.getRuleMap());
+        dataRequestConfig.user(user).context(dataRequest.getContext()).rules(rules);
         dataRequestConfig.setOriginalRequestId(originalRequestId);
         expectedResponse.resources(resources);
         expectedResponse.originalRequestId(originalRequestId);
