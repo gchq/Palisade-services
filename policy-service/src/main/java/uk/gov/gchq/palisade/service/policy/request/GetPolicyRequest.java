@@ -56,6 +56,7 @@ public class GetPolicyRequest extends Request {
      * @return the {@link GetPolicyRequest}
      */
     public GetPolicyRequest resources(final Collection<LeafResource> resources) {
+        requireNonNull(resources, "The resources cannot be set to null.");
         this.resources = resources;
         return this;
     }
