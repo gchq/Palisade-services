@@ -18,10 +18,10 @@ metadata:
   name: {{ include "data-service.name" . }}-pvclaim
   namespace: {{ include "palisade.namespace" . }}
 spec:
-  storageClassName: data-storage
+  storageClassName: efs-sc
   selector:
     matchLabels:
-      for-app: {{ include "palisade.namespace" . }}
+      storage-tier: "data_service_selector"
   accessModes:
   - ReadOnlyMany
   resources:

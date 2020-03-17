@@ -4,6 +4,8 @@ metadata:
   name: data-persistent-volume
   namespace: {{ include "palisade.namespace" . }}
   labels:
+    type: amazonEBS
+    storageTier: "data_service_selector"
     for-app: {{ include "palisade.namespace" . }}
 spec:
   persistentVolumeReclaimPolicy: Retain
@@ -11,7 +13,7 @@ spec:
     storage: 5Gi
   accessModes:
   - ReadOnlyMany
-  storageClassName: data-storage
+  storageClassName: efs-sc
   {{- if eq .Values.hosting "local" }}
   hostPath:
     path: {{ .Values.global.local.path }}
