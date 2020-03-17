@@ -20,6 +20,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
@@ -29,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used in the request to get the policies that apply to the
- * collection of {@link LeafResource}'s.
+ * collection of {@link Resource}'s.
  */
 public class GetPolicyRequest extends Request {
     private User user;
@@ -51,7 +52,7 @@ public class GetPolicyRequest extends Request {
     }
 
     /**
-     * @param resources a collection of {@link LeafResource}'s to be accessed
+     * @param resources a collection of {@link Resource}'s to be accessed
      * @return the {@link GetPolicyRequest}
      */
     public GetPolicyRequest resources(final Collection<LeafResource> resources) {
