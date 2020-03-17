@@ -27,5 +27,7 @@ manager:
   services:
     discovery-service:
       jar: discovery-service/target/discovery-service-${app.version}-exec.jar
+      profiles:
+        - discovery
       log: discovery-service.log
       err: discovery-service.err
