@@ -28,6 +28,6 @@ spec:
     driver: efs.csi.aws.com
     volumeHandle: {{ .Values.global.localMount.volumeHandle  }}
     volumeAttributes:
-      path: /classpath-jars
+      path: "/"
   {{- end }}
   {{- end }}
