@@ -27,7 +27,6 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.CacheWarmerFactory;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
@@ -46,8 +45,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean(name = "stdUserCacheWarmer")
-    @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer", matchIfMissing = true)
-    public CacheWarmerFactory stdUserCacheWarmerFactory() {
+    @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer")
+    public StdUserCacheWarmerFactory stdUserCacheWarmerFactory() {
         LOGGER.info("Standard User Data Instantiated");
         return new StdUserCacheWarmerFactory();
     }
