@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -53,9 +54,13 @@ import java.util.function.Supplier;
 @EnableAsync
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    @Bean
+    @ConfigurationProperties(prefix = "web")
+    public ClientConfiguration clientConfiguration() {
+        return new ClientConfiguration();
+    }
 
     @Bean
     public SimpleDataService simpleDataService(final AuditService auditService,
