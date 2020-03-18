@@ -20,10 +20,6 @@
 app:
   version: '@project.version@'
 
-eureka:
-  client:
-    enabled: true
-
 manager:
   # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   default:
