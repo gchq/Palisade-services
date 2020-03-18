@@ -32,9 +32,6 @@ public class ClientConfiguration {
     @Autowired(required = false)
     private EurekaClient eurekaClient;
 
-    public ClientConfiguration() {
-    }
-
     public Map<String, URI> getClient() {
         return client;
     }
@@ -55,7 +52,7 @@ public class ClientConfiguration {
     }
 
     private Optional<URI> eurekaResolve(final String serviceName) {
-        return Optional.ofNullable(eurekaClient).flatMap(client -> client.getApplications().getRegisteredApplications().stream()
+        return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
                 .map(Application::getInstances)
                 .flatMap(List::stream)
                 .filter(instance -> instance.getAppName().equalsIgnoreCase(serviceName))
