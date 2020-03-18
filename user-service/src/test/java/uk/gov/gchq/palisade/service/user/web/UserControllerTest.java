@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.config.UserConfiguration;
+import uk.gov.gchq.palisade.service.user.config.StdUserConfiguration;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.MockUserService;
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertNotEquals;
 
 @RunWith(JUnit4.class)
 public class UserControllerTest {
-    public UserController userController = new UserController(new MockUserService(), new UserConfiguration());
+    public UserController userController = new UserController(new MockUserService(), new StdUserConfiguration());
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;

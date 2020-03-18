@@ -44,17 +44,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean(name = "stdUserData")
+    @Bean
     @ConditionalOnProperty(prefix = "cache", name = "configuration", havingValue = "stdUserData")
-    public UserConfiguration userConfiguration() {
-        LOGGER.info("Standard User Configuration");
-        return new UserConfiguration();
+    public StdUserConfiguration userConfiguration() {
+        LOGGER.info("Standard User Configuration Instantiated");
+        return new StdUserConfiguration();
     }
 
     @Bean(name = "stdUserCacheWarmer")
     @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer")
     public StdUserCacheWarmerFactory stdUserCacheWarmerFactory() {
-        LOGGER.info("Standard User Data Instantiated");
+        LOGGER.info("Standard User Cache Warmer Instantiated");
         return new StdUserCacheWarmerFactory();
     }
 

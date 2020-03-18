@@ -20,30 +20,35 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
+import uk.gov.gchq.palisade.service.CacheWarmerFactory;
+import uk.gov.gchq.palisade.service.UserConfiguration;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Configuration
 @ConfigurationProperties(prefix = "population")
-public class UserConfiguration {
+public class StdUserConfiguration implements UserConfiguration {
 
     @NestedConfigurationProperty
     private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
 
-    public UserConfiguration() {
+    public StdUserConfiguration() {
     }
 
-    public UserConfiguration(final List<StdUserCacheWarmerFactory> users) {
+    public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
         this.users = users;
     }
 
+    @Override
     public List<StdUserCacheWarmerFactory> getCacheWarmerFactory() {
         return users;
     }
 
-    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
-        this.users = users;
+    @Override
+    public void setCacheWarmerFactory(final List<? extends CacheWarmerFactory> users) {
+        this.users = (List<StdUserCacheWarmerFactory>) users;
     }
 
     @Override
@@ -56,7 +61,7 @@ public class UserConfiguration {
             return false;
         }
 
-        final UserConfiguration that = (UserConfiguration) o;
+        final StdUserConfiguration that = (StdUserConfiguration) o;
         return Objects.equals(users, that.users);
     }
 
@@ -67,7 +72,7 @@ public class UserConfiguration {
 
     @Override
     public String toString() {
-        return "UserConfiguration{" +
+        return "StdUserConfiguration{" +
                 "users=" + users +
                 '}';
     }
