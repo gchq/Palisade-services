@@ -30,8 +30,6 @@ import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
-import java.util.concurrent.ExecutionException;
-
 @RestController
 @RequestMapping(path = "/")
 public class PalisadeController {
