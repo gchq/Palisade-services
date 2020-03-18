@@ -35,15 +35,7 @@ spec:
         app.kubernetes.io/name: {{ include "data-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      #init-path will mkdir on the mount point 
-      initContainers:
-      - name: init-path
-        image: busybox:1.28
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        volumeMounts:
-        - mountPath: /data
-          name: data-volume
-        command: ['sh', "mkdir -p /data/data-service-data-point"]
+      #init-path will mkdir on the mount point
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
