@@ -44,6 +44,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    @Bean(name = "stdUserData")
+    @ConditionalOnProperty(prefix = "cache", name = "configuration", havingValue = "stdUserData")
+    public UserConfiguration userConfiguration() {
+        LOGGER.info("Standard User Configuration");
+        return new UserConfiguration();
+    }
+
     @Bean(name = "stdUserCacheWarmer")
     @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer")
     public StdUserCacheWarmerFactory stdUserCacheWarmerFactory() {

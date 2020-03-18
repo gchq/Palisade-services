@@ -63,3 +63,4 @@ user-service:
 
 cache:
   warmer: stdUserCacheWarmer
+  configuration: stdUserData
