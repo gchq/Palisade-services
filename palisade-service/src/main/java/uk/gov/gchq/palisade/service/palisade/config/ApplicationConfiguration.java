@@ -63,7 +63,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConfigurationProperties(prefix = "web.client")
+    @ConfigurationProperties(prefix = "web")
     public ClientConfiguration clientConfiguration() {
         return new ClientConfiguration();
     }
@@ -110,8 +110,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public UserService userService(final UserClient userClient) {
-        return new UserService(userClient, getAsyncExecutor());
+    public UserService userService(final UserClient userClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> userUriSupplier = () -> clientConfig
+                .getClientUri("user-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'user-service' - see 'web.client' properties or discovery service registration"));
+        return new UserService(userClient, userUriSupplier, getAsyncExecutor());
     }
 
     @Bean
@@ -123,13 +126,19 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient) {
-        return new ResourceService(resourceClient, getAsyncExecutor());
+    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> resourceUriSupplier = () -> clientConfig
+                .getClientUri("resource-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'resource-service' - see 'web.client' properties or discovery service registration"));
+        return new ResourceService(resourceClient, resourceUriSupplier, getAsyncExecutor());
     }
 
     @Bean
-    public PolicyService policyService(final PolicyClient policyClient) {
-        return new PolicyService(policyClient, getAsyncExecutor());
+    public PolicyService policyService(final PolicyClient policyClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> policyUriSupplier = () -> clientConfig
+                .getClientUri("policy-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'policy-service' - see 'web.client' properties or discovery service registration"));
+        return new PolicyService(policyClient, policyUriSupplier, getAsyncExecutor());
     }
 
     @Bean

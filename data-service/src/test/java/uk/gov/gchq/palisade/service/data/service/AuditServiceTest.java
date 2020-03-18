@@ -34,9 +34,11 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -56,7 +58,14 @@ public class AuditServiceTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        auditService = new AuditService(auditClient, executor);
+        Supplier<URI> uriSupplier = () -> {
+            try {
+                return new URI("audit-service");
+            } catch (Exception e) {
+                return null;
+            }
+        };
+        auditService = new AuditService(auditClient, uriSupplier, executor);
     }
 
     @After
@@ -77,18 +86,17 @@ public class AuditServiceTest {
         // Given
         AuditRequest request = Mockito.mock(AuditRequest.class);
         Boolean response = true;
-        Mockito.when(auditClient.audit(request)).thenReturn(response);
+        Mockito.when(auditClient.audit(Mockito.any(), Mockito.eq(request))).thenReturn(response);
 
         // When
         auditService.audit(request);
 
         // Then
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
-        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString())
-        ));
 
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.WARN || event.getLevel() == Level.ERROR);
-        MatcherAssert.assertThat(errorMessages, Matchers.empty());
+        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
+                Matchers.containsString(request.toString()),
+                Matchers.containsString(response.toString())
+        ));
     }
 }

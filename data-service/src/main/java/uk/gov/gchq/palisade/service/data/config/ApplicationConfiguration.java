@@ -41,8 +41,10 @@ import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Bean configuration and dependency injection graph
@@ -68,13 +70,19 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient) {
-        return new PalisadeService(palisadeClient, getAsyncExecutor());
+    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> palisadeUriSupplier = () -> clientConfig
+                .getClientUri("palisade-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'palisade-service' - see 'web.client' properties or discovery service registration"));
+        return new PalisadeService(palisadeClient, palisadeUriSupplier, getAsyncExecutor());
     }
 
     @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient, getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
+        Supplier<URI> auditUriSupplier = () -> clientConfig
+                .getClientUri("audit-service")
+                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'audit-service' - see 'web.client' properties or discovery service registration"));
+        return new AuditService(auditClient, auditUriSupplier, getAsyncExecutor());
     }
 
     @Bean

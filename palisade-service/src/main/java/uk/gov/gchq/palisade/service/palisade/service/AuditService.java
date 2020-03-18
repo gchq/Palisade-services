@@ -30,12 +30,12 @@ public class AuditService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
     private final AuditClient client;
-    private final Supplier<URI> clientUri;
+    private final Supplier<URI> uriSupplier;
     private final Executor executor;
 
-    public AuditService(final AuditClient auditClient, final Supplier<URI> clientUri, final Executor executor) {
+    public AuditService(final AuditClient auditClient, final Supplier<URI> uriSupplier, final Executor executor) {
         this.client = auditClient;
-        this.clientUri = clientUri;
+        this.uriSupplier = uriSupplier;
         this.executor = executor;
     }
 
@@ -45,7 +45,9 @@ public class AuditService implements Service {
         Boolean response;
         try {
             LOGGER.info("Audit request: {}", request);
-            response = this.client.audit(this.clientUri.get(), request);
+            URI clientUri = this.uriSupplier.get();
+            LOGGER.debug("Using client uri: {}", clientUri);
+            response = this.client.audit(clientUri, request);
             LOGGER.info("Audit response: {}", response);
         } catch (Exception ex) {
             LOGGER.error("Failed to log audit request: {}", ex.getMessage());

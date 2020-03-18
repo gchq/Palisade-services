@@ -58,7 +58,13 @@ public class AuditServiceTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        Supplier<URI> uriSupplier = () -> {try {return new URI("audit-service");} catch (Exception e) {return null;}};
+        Supplier<URI> uriSupplier = () -> {
+            try {
+                return new URI("audit-service");
+            } catch (Exception e) {
+                return null;
+            }
+        };
         auditService = new AuditService(auditClient, uriSupplier, executor);
     }
 
