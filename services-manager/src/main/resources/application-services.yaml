@@ -27,16 +27,15 @@ manager:
   # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
-    example-library: ../Palisade-examples/example-library/target/example-library-${library.version}-SNAPSHOT.jar
-    hr-data-generator: ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}-SNAPSHOT.jar
+    example-libs: &libraries
+    - ../Palisade-examples/example-library/target/example-library-${library.version}-SNAPSHOT.jar
+    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}-SNAPSHOT.jar
 
   services:
 
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.example-library}
-        - ${manager.default.hr-data-generator}
+      paths: *libraries
       profiles:
         - eureka
       log: audit-service.log
@@ -44,9 +43,7 @@ manager:
 
     data-service:
       jar: data-service/target/data-service-${app.version}-exec.jar
-      paths:
-      - ${manager.default.example-library}
-      - ${manager.default.hr-data-generator}
+      paths: *libraries
       profiles:
         - eureka
       log: data-service.log
@@ -54,9 +51,7 @@ manager:
 
     palisade-service:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
-      paths:
-      - ${manager.default.example-library}
-      - ${manager.default.hr-data-generator}
+      paths: *libraries
       profiles:
         - eureka
       log: palisade-service.log
@@ -64,9 +59,7 @@ manager:
 
     policy-service:
       jar: policy-service/target/policy-service-${app.version}-exec.jar
-      paths:
-      - ${manager.default.example-library}
-      - ${manager.default.hr-data-generator}
+      paths: *libraries
       profiles:
         - eureka
       log: policy-service.log
@@ -81,9 +74,7 @@ manager:
 
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar
-      paths:
-      - ${manager.default.example-library}
-      - ${manager.default.hr-data-generator}
+      paths: *libraries
       profiles:
         - eureka
       log: user-service.log
