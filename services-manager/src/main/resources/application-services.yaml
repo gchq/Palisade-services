@@ -19,14 +19,16 @@
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
+# While the library happens to be the same version as services, it should be declared here as a static name
+library:
+  version: ${app.version}
 
 manager:
   # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
-    # While the example library happens to be the same version as services, it should be declared here as a static name
-    example-library: ../Palisade-examples/example-library/target/example-library-0.4.0-SNAPSHOT.jar
-    hr-data-generator: ../Palisade-examples/hr-data-generator/target/hr-data-generator-0.4.0-SNAPSHOT.jar
+    example-library: ../Palisade-examples/example-library/target/example-library-${library.version}-SNAPSHOT.jar
+    hr-data-generator: ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}-SNAPSHOT.jar
 
   services:
 
