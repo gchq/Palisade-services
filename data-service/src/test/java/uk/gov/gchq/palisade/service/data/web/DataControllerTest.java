@@ -76,7 +76,8 @@ public class DataControllerTest {
     public void infoOnReadChunkedRequest() throws IOException {
         // Given
         ReadRequest request = Mockito.mock(ReadRequest.class);
-        Consumer<OutputStream> response = out -> {};
+        Consumer<OutputStream> response = out -> {
+        };
         OutputStream output = Mockito.mock(OutputStream.class);
         Mockito.when(dataService.read(request)).thenReturn(response);
 
