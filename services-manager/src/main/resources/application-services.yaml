@@ -28,8 +28,8 @@ manager:
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
     example-libs: &libraries
-    - ../Palisade-examples/example-library/target/example-library-${library.version}-SNAPSHOT.jar
-    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}-SNAPSHOT.jar
+    - ../Palisade-examples/example-library/target/example-library-${library.version}.jar
+    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}.jar
 
   services:
 
