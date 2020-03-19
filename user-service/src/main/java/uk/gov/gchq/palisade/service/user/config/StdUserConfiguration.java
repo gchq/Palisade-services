@@ -20,7 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.CacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 
 import java.util.ArrayList;
@@ -46,9 +45,8 @@ public class StdUserConfiguration implements UserConfiguration {
         return users;
     }
 
-    @Override
-    public void setCacheWarmerFactory(final List<? extends CacheWarmerFactory> users) {
-        this.users = (List<StdUserCacheWarmerFactory>) users;
+    public void setCacheWarmerFactory(final List<StdUserCacheWarmerFactory> users) {
+        this.users = users;
     }
 
     @Override
