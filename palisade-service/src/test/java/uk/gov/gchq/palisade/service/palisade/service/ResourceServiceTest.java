@@ -36,7 +36,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.util.HashMap;
@@ -57,7 +56,6 @@ public class ResourceServiceTest {
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private ResourceClient resourceClient = Mockito.mock(ResourceClient.class);
-    private ApplicationConfiguration applicationConfig = new ApplicationConfiguration();
     private ResourceService resourceService;
     private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
     private ExecutorService executor;

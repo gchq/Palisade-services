@@ -32,14 +32,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
-import uk.gov.gchq.palisade.service.data.request.ReadResponse;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -75,35 +73,12 @@ public class DataControllerTest {
     }
 
     @Test
-    public void infoOnReadRequest() {
-        // Given
-        ReadRequest request = Mockito.mock(ReadRequest.class);
-        ReadResponse response = Mockito.mock(ReadResponse.class);
-        Mockito.when(dataService.read(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
-
-        // When
-        controller.readSync(request);
-
-        // Then
-        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
-
-        MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(response.toString())
-        ));
-
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.WARN || event.getLevel() == Level.ERROR);
-        MatcherAssert.assertThat(errorMessages, Matchers.empty());
-    }
-
-    @Test
     public void infoOnReadChunkedRequest() throws IOException {
         // Given
         ReadRequest request = Mockito.mock(ReadRequest.class);
-        ReadResponse response = Mockito.mock(ReadResponse.class);
-        InputStream input = Mockito.mock(InputStream.class);
+        Consumer<OutputStream> response = out -> {};
         OutputStream output = Mockito.mock(OutputStream.class);
-        Mockito.when(dataService.read(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        Mockito.when(dataService.read(request)).thenReturn(response);
 
         // When
         controller.readChunked(request).getBody().writeTo(output);
@@ -112,8 +87,7 @@ public class DataControllerTest {
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(response.toString())
+                Matchers.containsString(request.toString())
         ));
 
         List<String> errorMessages = getMessages(event -> event.getLevel() == Level.WARN || event.getLevel() == Level.ERROR);
