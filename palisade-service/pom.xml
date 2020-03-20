@@ -30,6 +30,7 @@
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
+        <databind.version>2.9.10.3</databind.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <apache.commons.version>1.19</apache.commons.version>
     </properties>
@@ -39,6 +40,11 @@
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
             <version>${eureka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${databind.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

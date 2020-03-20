@@ -54,6 +54,7 @@ manager:
       paths: *libraries
       profiles:
         - eureka
+        - jvm
       log: palisade-service.log
       err: palisade-service.err
 
