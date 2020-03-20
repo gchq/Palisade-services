@@ -76,7 +76,7 @@ public class AbstractLdapUserServiceTest {
         appender.stop();
     }
 
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
@@ -140,16 +140,16 @@ public class AbstractLdapUserServiceTest {
         service.setMock(mock);
 
         final Attributes searchResult1Attrs = new BasicAttributes();
-        final Set<String> attr1_1 = Sets.newHashSet("auth1", "auth2");
-        final int attr1_2 = 10;
-        searchResult1Attrs.put("attr1_1", attr1_1);
-        searchResult1Attrs.put("attr1_2", attr1_2);
+        final Set<String> search1Attr1 = Sets.newHashSet("auth1", "auth2");
+        final int search1Attr2 = 10;
+        searchResult1Attrs.put("search1Attr1", search1Attr1);
+        searchResult1Attrs.put("search1Attr2", search1Attr2);
 
         final Attributes searchResult2Attrs = new BasicAttributes();
-        final Long attr2_1 = 5L;
-        final String attr2_2 = "attr2_2";
-        searchResult1Attrs.put("attr2_1", attr2_1);
-        searchResult1Attrs.put("attr2_2", attr2_2);
+        final Long search2Att1 = 5L;
+        final String search2Attr2 = "search2Attr2";
+        searchResult2Attrs.put("search2Att1", search2Att1);
+        searchResult2Attrs.put("search2Attr2", search2Attr2);
 
         final SearchResult searchResult1 = new SearchResult("key1", "value1", searchResult1Attrs);
         final SearchResult searchResult2 = new SearchResult("key2", "value2", searchResult2Attrs);
@@ -193,7 +193,7 @@ public class AbstractLdapUserServiceTest {
         verify(context, times(1)).search(searchBase,
                 new BasicAttributes(attrIdForUserId, userId.getId()),
                 requestAttrs);
-        final Set<Object> expectedResults = Sets.newHashSet(attr1_1, attr1_2, attr2_1, attr2_2);
+        final Set<Object> expectedResults = Sets.newHashSet(search1Attr1, search1Attr2, search2Att1, search2Attr2);
         assertEquals(expectedResults, results);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
