@@ -44,8 +44,11 @@ public class UserService implements Service {
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);
-            user = CompletableFuture.supplyAsync(() -> userClient.getUser(request), this.executor);
-            LOGGER.info("Got user: {}", user);
+            user = CompletableFuture.supplyAsync(() -> {
+                User response = userClient.getUser(request);
+                LOGGER.info("Got user: {}", response);
+                return response;
+            }, this.executor);
         } catch (Exception ex) {
             LOGGER.error("Failed to get user: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception
