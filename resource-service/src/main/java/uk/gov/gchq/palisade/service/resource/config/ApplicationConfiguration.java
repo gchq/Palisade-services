@@ -20,7 +20,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -29,24 +28,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.resource.repository.BackingStore;
-import uk.gov.gchq.palisade.service.resource.repository.EtcdBackingStore;
-import uk.gov.gchq.palisade.service.resource.repository.HashMapBackingStore;
-import uk.gov.gchq.palisade.service.resource.repository.K8sBackingStore;
-import uk.gov.gchq.palisade.service.resource.repository.PropertiesBackingStore;
-import uk.gov.gchq.palisade.service.resource.repository.SimpleCacheService;
-import uk.gov.gchq.palisade.service.resource.service.CacheService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceConfigurationService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Bean configuration and dependency injection graph
@@ -70,38 +57,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public Configuration hadoopConfiguration() {
         return new Configuration();
-    }
-
-    @Bean(name = "hashmap")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "hashmap", matchIfMissing = true)
-    public HashMapBackingStore hashMapBackingStore() {
-        return new HashMapBackingStore();
-    }
-
-    @Bean(name = "k8s")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "k8s")
-    public K8sBackingStore k8sBackingStore() {
-        return new K8sBackingStore();
-    }
-
-    @Bean(name = "props")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "props")
-    public PropertiesBackingStore propertiesBackingStore() {
-        return new PropertiesBackingStore(Optional.ofNullable(cacheConfiguration().getProps()).orElse("cache.properties"));
-    }
-
-    @Bean(name = "etcd")
-    @ConditionalOnProperty(prefix = "cache", name = "implementation", havingValue = "etcd")
-    public EtcdBackingStore etcdBackingStore() {
-        return new EtcdBackingStore(cacheConfiguration().getEtcd().stream().map(URI::create).collect(toList()));
-    }
-
-    @Bean
-    public CacheService cacheService(final Map<String, BackingStore> backingStores) {
-        return Optional.of(new SimpleCacheService()).stream().peek(cache -> {
-            LOGGER.info("Cache backing implementation = {}", Objects.requireNonNull(backingStores.values().stream().findFirst().orElse(null)).getClass().getSimpleName());
-            cache.backingStore(backingStores.values().stream().findFirst().orElse(null));
-        }).findFirst().orElse(null);
     }
 
     @Bean
