@@ -42,6 +42,7 @@ public class ExceptionHandlerTest {
     private WebRequest request = Mockito.mock(WebRequest.class);
 
     private static Map<Exception, HttpStatus> expectedStatuses = new HashMap<>();
+
     static {
         // Requested entity not found (policy, resource etc.)
         expectedStatuses.put(new NoPolicyException(baseException), HttpStatus.NOT_FOUND);
@@ -54,11 +55,15 @@ public class ExceptionHandlerTest {
         expectedStatuses.put(new Exception(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoints
     public static Set<Exception> exceptionSet = expectedStatuses.keySet();
 
+
+
     @Theory
-    public void handlerReturnsCorrectStatus(Exception exception) {
+    public void handlerReturnsCorrectStatus(final Exception exception) {
         // Given
         ExceptionHandler handler = new ExceptionHandler();
 

@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -48,14 +49,14 @@ import static org.junit.Assert.assertThat;
 public class LeafResourceRulesTest {
 
     private static class Employee {
-        public String name;
-        public String telephone;
-        public String postcode;
+        private String name;
+        private String telephone;
+        private String postcode;
     }
 
     private static class PhoneRule implements Rule<Employee> {
         @Override
-        public Employee apply(Employee employee, User user, Context context) {
+        public Employee apply(final Employee employee, final User user, final Context context) {
             employee.telephone = null;
             return employee;
         }
