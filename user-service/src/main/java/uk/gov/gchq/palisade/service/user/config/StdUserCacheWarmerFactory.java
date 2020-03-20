@@ -40,7 +40,7 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
         this.roles = Collections.emptySet();
     }
 
-    public StdUserCacheWarmerFactory(final String userId, final Set<String> roles, final Set<String> auths, final Set<String> trainingCourses) {
+    public StdUserCacheWarmerFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
         this.auths = auths;
         this.roles = roles;
