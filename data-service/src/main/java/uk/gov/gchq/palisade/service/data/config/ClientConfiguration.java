@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 public class ClientConfiguration {
     private Map<String, URI> client;
 
@@ -37,10 +39,12 @@ public class ClientConfiguration {
     }
 
     public void setClient(final Map<String, URI> client) {
+        requireNonNull(client);
         this.client = client;
     }
 
     public Optional<URI> getClientUri(final String serviceName) {
+        requireNonNull(serviceName);
         // If possible, use eureka
         // Otherwise, fall back to config yaml
         return eurekaResolve(serviceName)

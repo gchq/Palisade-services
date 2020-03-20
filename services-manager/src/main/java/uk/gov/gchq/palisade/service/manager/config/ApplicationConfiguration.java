@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 @Configuration
 @EnableConfigurationProperties
 @EnableAutoConfiguration
@@ -43,6 +45,7 @@ public class ApplicationConfiguration {
         }
 
         public void setServices(final Map<String, ServiceConfiguration> services) {
+            requireNonNull(services);
             this.services = services;
         }
 
