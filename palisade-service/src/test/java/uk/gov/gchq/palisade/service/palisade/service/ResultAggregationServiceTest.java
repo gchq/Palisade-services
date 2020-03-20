@@ -71,7 +71,13 @@ public class ResultAggregationServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        Supplier<URI> uriSupplier = () -> {try {return new URI("audit-service");} catch (Exception e) {return null;}};
+        Supplier<URI> uriSupplier = () -> {
+            try {
+                return new URI("audit-service");
+            } catch (Exception e) {
+                return null;
+            }
+        };
         auditService = new AuditService(auditClient, uriSupplier, executor);
         service = new ResultAggregationService(auditService, persistenceLayer);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
