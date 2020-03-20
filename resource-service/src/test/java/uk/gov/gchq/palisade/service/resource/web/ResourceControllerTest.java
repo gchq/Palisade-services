@@ -75,13 +75,15 @@ public class ResourceControllerTest {
         appender.stop();
     }
 
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
                 .collect(Collectors.toList());
     }
 
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoints("GetRequests")
     public static List<Request> requests = Arrays.asList(
             new GetResourcesByIdRequest(),
@@ -89,15 +91,20 @@ public class ResourceControllerTest {
             new GetResourcesBySerialisedFormatRequest(),
             new GetResourcesByTypeRequest());
 
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoint("AddRequests")
     public static AddResourceRequest addRequest = new AddResourceRequest();
 
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoints
     public static List<Exception> exceptions = Arrays.asList(
             new InterruptedException("InterruptedException"),
             new ExecutionException("ExecutionException", null));
 
     private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
+
     {
         requestMethods.put(GetResourcesByIdRequest.class, request -> {
             request.originalRequestId(new RequestId().id("originalId"));
@@ -109,7 +116,7 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void infoOnGetResourceRequest(@FromDataPoints("GetRequests") Request request) {
+    public void infoOnGetResourceRequest(@FromDataPoints("GetRequests") final Request request) {
         // Given
         Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
         Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
@@ -129,7 +136,7 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void errorOnRequestException(@FromDataPoints("GetRequests") Request request, Exception exception) {
+    public void errorOnRequestException(@FromDataPoints("GetRequests") final Request request, final Exception exception) {
         // Given
         Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
         resourceService.willThrow(exception);
@@ -148,7 +155,7 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void infoOnAddResourceRequest(@FromDataPoints("AddRequests") AddResourceRequest request) {
+    public void infoOnAddResourceRequest(@FromDataPoints("AddRequests") final AddResourceRequest request) {
         // Given
         Boolean expectedResponse = true;
 
@@ -166,7 +173,7 @@ public class ResourceControllerTest {
     }
 
     @Theory
-    public void errorOnAddException(@FromDataPoints("AddRequests") AddResourceRequest request, Exception exception) {
+    public void errorOnAddException(@FromDataPoints("AddRequests") final AddResourceRequest request, final Exception exception) {
         // Given
         resourceService.willThrow(exception);
 

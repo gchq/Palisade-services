@@ -41,6 +41,7 @@ public class MockResourceService implements ResourceService {
     private Map<LeafResource, ConnectionDetail> resourcesForSerialisedFormat = Mockito.mock(Map.class);
 
     private Map<Class<? extends Request>, Map<LeafResource, ConnectionDetail>> resourceMap = new HashMap<>();
+
     {
         resourceMap.put(GetResourcesByIdRequest.class, resourcesForIds);
         resourceMap.put(GetResourcesByTypeRequest.class, resourcesForType);
@@ -59,23 +60,24 @@ public class MockResourceService implements ResourceService {
         resourceSupplier = request -> () -> resourceMap.get(request.getClass());
     }
 
-    public MockResourceService(Exception ex) {
+    public MockResourceService(final Exception ex) {
         super();
         this.willThrow(ex);
     }
 
-    public void willThrow(Exception ex) {
+    public void willThrow(final Exception ex) {
         serviceThrows = ex;
     }
 
-    private CompletableFuture<Map<LeafResource, ConnectionDetail>> handleRequest(Request request) {
+    private CompletableFuture<Map<LeafResource, ConnectionDetail>> handleRequest(final Request request) {
         CompletableFuture<Map<LeafResource, ConnectionDetail>> future = CompletableFuture.supplyAsync(resourceSupplier.apply(request));
         if (serviceThrows != null) {
             future.obtrudeException(serviceThrows);
         }
         return future;
     }
-    private CompletableFuture<Boolean> handleRequest(AddResourceRequest request) {
+
+    private CompletableFuture<Boolean> handleRequest(final AddResourceRequest request) {
         CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> true);
         if (serviceThrows != null) {
             future.obtrudeException(serviceThrows);
