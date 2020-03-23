@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.data.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,7 +41,7 @@ public class DataController {
         this.service = service;
     }
 
-    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
         LOGGER.info("Invoking read (chunked): {}", request);
         StreamingResponseBody stream = out -> service.read(request).accept(out);
@@ -59,7 +58,6 @@ public class DataController {
         LOGGER.info("Request processed. Result: {}", response);
         return response;
     }
-
 
 
 }

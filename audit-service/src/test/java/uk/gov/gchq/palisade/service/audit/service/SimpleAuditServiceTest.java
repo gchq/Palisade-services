@@ -59,7 +59,9 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
         appender.stop();
     }
 
-    @DataPoints
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    @DataPoints()
     public static AuditRequest[] requests = new AuditRequest[] {
             registerRequestCompleteAuditRequest(),
             registerRequestExceptionAuditRequest(),
@@ -68,7 +70,7 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
 
     };
 
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
@@ -76,7 +78,7 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
     }
 
     @Theory
-    public void auditOnAuditRequest(AuditRequest request) {
+    public void auditOnAuditRequest(final AuditRequest request) {
         // When
         auditService.audit(request);
 

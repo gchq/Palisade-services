@@ -50,7 +50,7 @@ public class SetTypePolicyRequestTest {
     }
 
     @Test
-    public void SetTypePolicyRequestToJsonTest() throws IOException{
+    public void SetTypePolicyRequestToJsonTest() throws IOException {
 
         // Given
         final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
