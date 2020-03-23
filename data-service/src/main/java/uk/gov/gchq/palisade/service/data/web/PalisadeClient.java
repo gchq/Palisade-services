@@ -17,15 +17,17 @@ package uk.gov.gchq.palisade.service.data.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
+import java.net.URI;
 
 @FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
 public interface PalisadeClient {
 
     @PostMapping(path = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
-    DataRequestConfig getDataRequestConfig(final GetDataRequestConfig request);
+    DataRequestConfig getDataRequestConfig(final URI url, @RequestBody final GetDataRequestConfig request);
 
 }

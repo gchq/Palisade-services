@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 @Configuration
 @EnableConfigurationProperties
 @EnableAutoConfiguration
@@ -43,6 +45,7 @@ public class ApplicationConfiguration {
         }
 
         public void setServices(final Map<String, ServiceConfiguration> services) {
+            requireNonNull(services);
             this.services = services;
         }
 

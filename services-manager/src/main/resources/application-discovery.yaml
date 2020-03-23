@@ -18,7 +18,7 @@
 app:
   version: '@project.version@'
 
-# Don't register with eureka as it isn't up yet
+# Don't ever register with eureka as it isn't up yet (it's being started here)
 eureka:
   client:
     enabled: false

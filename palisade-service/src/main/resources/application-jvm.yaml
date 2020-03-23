@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-eureka:
-  client:
-    enabled: true
-
-web:
-  client:
-    audit-service: localhost:8081
-    policy-service: localhost:8085
-    resource-service: localhost:8086
-    user-service: localhost:8087
 
 spring:
   datasource:
