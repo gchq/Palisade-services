@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,24 +19,23 @@
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
-
-eureka:
-  client:
-    enabled: true
+# While the library happens to be the same version as services, it should be declared here as a static name
+library:
+  version: ${app.version}
 
 manager:
   # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   default:
     # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
-    # While the example library happens to be the same version as services, it should be declared here as a static name
-    library: ../palisade-examples/example-library/target/
+    example-libs: &libraries
+    - ../Palisade-examples/example-library/target/example-library-${library.version}.jar
+    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}.jar
 
   services:
 
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.library}
+      paths: *libraries
       profiles:
         - eureka
       log: audit-service.log
@@ -44,8 +43,7 @@ manager:
 
     data-service:
       jar: data-service/target/data-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.library}
+      paths: *libraries
       profiles:
         - eureka
         - local
@@ -54,18 +52,17 @@ manager:
 
     palisade-service:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.library}
+      paths: *libraries
       profiles:
         - eureka
+        - jvm
         - local
       log: palisade-service.log
       err: palisade-service.err
 
     policy-service:
       jar: policy-service/target/policy-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.library}
+      paths: *libraries
       profiles:
         - eureka
       log: policy-service.log
@@ -80,8 +77,7 @@ manager:
 
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar
-      paths:
-        - ${manager.default.library}
+      paths: *libraries
       profiles:
         - eureka
       log: user-service.log

@@ -30,9 +30,6 @@ import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 @RestController
 @RequestMapping(path = "/")
 public class PalisadeController {
@@ -52,25 +49,17 @@ public class PalisadeController {
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")
     public DataRequestResponse registerDataRequestSync(@RequestBody final RegisterDataRequest request) {
         LOGGER.info("Invoking registerDataRequest: {}", request);
-        DataRequestResponse response = this.registerDataRequest(request).join();
+        DataRequestResponse response = this.service.registerDataRequest(request).join();
         LOGGER.info("Returning response: {}", response);
         return response;
-    }
-
-    public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
-        return service.registerDataRequest(request);
     }
 
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
-    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) throws ExecutionException, InterruptedException {
+    public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) {
         LOGGER.info("Invoking getDataRequestConfig: {}", request);
-        DataRequestConfig response = getDataRequestConfig(request).get();
+        DataRequestConfig response = this.service.getDataRequestConfig(request).join();
         LOGGER.info("Returning response: {}", response);
         return response;
-    }
-
-    public CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
-        return this.service.getDataRequestConfig(request);
     }
 
 }

@@ -39,6 +39,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -67,7 +69,14 @@ public class PolicyServiceTest {
         appender.start();
         logger.addAppender(appender);
 
-        policyService = new PolicyService(policyClient, executor);
+        Supplier<URI> uriSupplier = () -> {
+            try {
+                return new URI("audit-service");
+            } catch (Exception e) {
+                return null;
+            }
+        };
+        policyService = new PolicyService(policyClient, uriSupplier, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
@@ -80,7 +89,7 @@ public class PolicyServiceTest {
         appender.stop();
     }
 
-    private List<String> getMessages(Predicate<ILoggingEvent> predicate) {
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
@@ -92,7 +101,7 @@ public class PolicyServiceTest {
         // Given
         GetPolicyRequest request = Mockito.mock(GetPolicyRequest.class);
         Map<LeafResource, Rules> response = Mockito.mock(Map.class);
-        Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
+        Mockito.when(policyClient.getPolicySync(Mockito.any(), Mockito.eq(request))).thenReturn(response);
 
         // When
         policyService.getPolicy(request).join();
@@ -113,7 +122,7 @@ public class PolicyServiceTest {
         //Given
         GetPolicyRequest request = new GetPolicyRequest().user(new User().userId("Bob")).context(new Context().purpose("Testing"));
         Map<LeafResource, Rules> response = Mockito.mock(Map.class);
-        Mockito.when(policyClient.getPolicySync(request)).thenReturn(response);
+        Mockito.when(policyClient.getPolicySync(Mockito.any(), Mockito.eq(request))).thenReturn(response);
 
         //When
         CompletableFuture<Map<LeafResource, Rules>> actual = policyService.getPolicy(request);

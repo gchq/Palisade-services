@@ -23,18 +23,22 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
+import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 public class UserService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserClient userClient;
+    private final Supplier<URI> uriSupplier;
     private final Executor executor;
 
-    public UserService(final UserClient userClient, final Executor executor) {
+    public UserService(final UserClient userClient, final Supplier<URI> uriSupplier, final Executor executor) {
         this.userClient = userClient;
+        this.uriSupplier = uriSupplier;
         this.executor = executor;
     }
 
@@ -44,8 +48,13 @@ public class UserService implements Service {
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);
-            user = CompletableFuture.supplyAsync(() -> userClient.getUser(request), this.executor);
-            LOGGER.info("Got user: {}", user);
+            user = CompletableFuture.supplyAsync(() -> {
+                URI clientUri = this.uriSupplier.get();
+                LOGGER.debug("Using client uri: {}", clientUri);
+                User response = userClient.getUser(clientUri, request);
+                LOGGER.info("Got user: {}", response);
+                return response;
+            }, this.executor);
         } catch (Exception ex) {
             LOGGER.error("Failed to get user: {}", ex.getMessage());
             throw new RuntimeException(ex); //rethrow the exception

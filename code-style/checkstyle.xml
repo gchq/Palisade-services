@@ -20,6 +20,7 @@
         "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+    <module name="SuppressWarningsFilter" />
     <module name="Translation"/>
     <module name="FileLength"/>
     <module name="FileTabCharacter">
@@ -38,6 +39,7 @@
     </module>
 
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
         <module name="OuterTypeNumber">
             <property name="max" value="1"/>
         </module>

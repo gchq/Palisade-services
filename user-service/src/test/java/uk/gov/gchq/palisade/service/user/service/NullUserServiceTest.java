@@ -1,5 +1,3 @@
-package uk.gov.gchq.palisade.service.user.service;
-
 /*
  * Copyright 2020 Crown Copyright
  *
@@ -15,6 +13,8 @@ package uk.gov.gchq.palisade.service.user.service;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package uk.gov.gchq.palisade.service.user.service;
 
 import org.junit.Test;
 

@@ -19,15 +19,18 @@ import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
+
+import java.net.URI;
 
 @FeignClient(name = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
 
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final GetUserRequest request);
+    User getUser(final URI url, @RequestBody final GetUserRequest request);
 
     @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth();

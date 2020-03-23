@@ -108,26 +108,21 @@ public class SimpleDataServiceTest {
         ArgumentCaptor<ReadRequestExceptionAuditRequest> readRequestExceptionAuditRequestArgumentCaptor = ArgumentCaptor.forClass(ReadRequestExceptionAuditRequest.class);
         verify(auditService, times(1)).audit(readRequestExceptionAuditRequestArgumentCaptor.capture());
         ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = readRequestExceptionAuditRequestArgumentCaptor.getValue();
-        {
-            Field field = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
-            ReflectionUtils.makeAccessible(field);
-            String generatedToken = (String) ReflectionUtils.getField(field, readRequestExceptionAuditRequest);
-            assertEquals(token, generatedToken);
-        }
 
-        {
-            Field field = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
-            ReflectionUtils.makeAccessible(field);
-            LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(field, readRequestExceptionAuditRequest);
-            assertEquals(leafResource, generatedLeafResource);
-        }
+        Field tokenField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
+        ReflectionUtils.makeAccessible(tokenField);
+        String generatedToken = (String) ReflectionUtils.getField(tokenField, readRequestExceptionAuditRequest);
+        assertEquals(token, generatedToken);
 
-        {
-            Field field = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "exception");
-            ReflectionUtils.makeAccessible(field);
-            Throwable generatedException = (Throwable) ReflectionUtils.getField(field, readRequestExceptionAuditRequest);
-            assertEquals(throwable, generatedException);
-        }
+        Field leafField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
+        ReflectionUtils.makeAccessible(leafField);
+        LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(leafField, readRequestExceptionAuditRequest);
+        assertEquals(leafResource, generatedLeafResource);
+
+        Field exceptionField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "exception");
+        ReflectionUtils.makeAccessible(exceptionField);
+        Throwable generatedException = (Throwable) ReflectionUtils.getField(exceptionField, readRequestExceptionAuditRequest);
+        assertEquals(throwable, generatedException);
     }
 
     @Test
@@ -233,19 +228,17 @@ public class SimpleDataServiceTest {
         ArgumentCaptor<ReadRequestExceptionAuditRequest> readRequestExceptionAuditRequestArgumentCaptor = ArgumentCaptor.forClass(ReadRequestExceptionAuditRequest.class);
         verify(auditService, times(1)).audit(readRequestExceptionAuditRequestArgumentCaptor.capture());
         ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = readRequestExceptionAuditRequestArgumentCaptor.getValue();
-        {
-            Field field = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
-            ReflectionUtils.makeAccessible(field);
-            String generatedToken = (String) ReflectionUtils.getField(field, readRequestExceptionAuditRequest);
-            assertEquals(token, generatedToken);
-        }
 
-        {
-            Field field = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
-            ReflectionUtils.makeAccessible(field);
-            LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(field, readRequestExceptionAuditRequest);
-            assertEquals(leafResource, generatedLeafResource);
-        }
+        Field tokenField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
+        ReflectionUtils.makeAccessible(tokenField);
+        String generatedToken = (String) ReflectionUtils.getField(tokenField, readRequestExceptionAuditRequest);
+        assertEquals(token, generatedToken);
+
+        Field leafField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
+        ReflectionUtils.makeAccessible(leafField);
+        LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(leafField, readRequestExceptionAuditRequest);
+        assertEquals(leafResource, generatedLeafResource);
+
     }
 
     private void mockOtherServices() {
