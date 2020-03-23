@@ -20,6 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.CacheWarmerFactory;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -75,11 +76,16 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
     }
 
     @Override
-    public User warm() {
+    public User userWarm() {
         return new User()
                 .userId(this.getUserId())
                 .roles(this.getRoles())
                 .auths(this.getAuths());
+    }
+
+    @Override
+    public Policy policyWarm() {
+        return null;
     }
 
     @Override

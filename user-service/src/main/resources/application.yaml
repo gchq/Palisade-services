@@ -62,5 +62,5 @@ user-service:
   implementation: null-user-service
 
 cache:
-  warmer: stdUserCacheWarmer
-  configuration: stdUserData
+  userWarmer: stdUserCacheWarmer
+  userConfig: stdUserData
