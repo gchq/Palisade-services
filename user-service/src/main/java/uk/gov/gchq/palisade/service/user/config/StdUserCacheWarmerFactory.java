@@ -76,7 +76,6 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
 
     @Override
     public User warm() {
-        System.out.println("Using the StdUser warm method");
         return new User()
                 .userId(this.getUserId())
                 .roles(this.getRoles())
