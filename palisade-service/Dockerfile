@@ -23,4 +23,4 @@ COPY src/main/resources/log_level.sh /usr/share/palisade-service/log-level
 
 LABEL service="palisade" project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
+ENTRYPOINT ["java", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
