@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.service.data.Generated;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -46,77 +46,76 @@ public class ErrorDetails {
         this.stackTrace = Arrays.asList(trace);
     }
 
-    public void setLocalDate(final ZonedDateTime date) {
-        requireNonNull(date, "Date cannot be null");
-        this.date = date;
-    }
-
-    public void setDate(final String dateString) {
-        requireNonNull(dateString, "String value cannot be null");
-        this.date = ZonedDateTime.parse(dateString);
-    }
-
-    public void setMessage(final String message) {
-        requireNonNull(message, "Message cannot be null");
-        this.message = message;
-    }
-
-    public void setDetails(final String details) {
-        this.details = Optional.ofNullable(details);
-    }
-
-    public void setStackTrace(final List<StackTraceElement> stackTrace) {
-        requireNonNull(stackTrace, "Stack Trace cannot be null");
-        this.stackTrace = stackTrace;
-    }
-
+    @Generated
     public ZonedDateTime getDate() {
-        requireNonNull(date, "Date cannot be null");
         return date;
     }
 
+    @Generated
+    public void setDate(final ZonedDateTime date) {
+        this.date = date;
+    }
+
+    @Generated
     public String getMessage() {
-        requireNonNull(message, "Message cannot be null");
         return message;
     }
 
+    @Generated
+    public void setMessage(final String message) {
+        this.message = message;
+    }
+
+    @Generated
     public Optional<String> getDetails() {
         return details;
     }
 
+    @Generated
+    public void setDetails(final Optional<String> details) {
+        this.details = details;
+    }
+
+    @Generated
     public List<StackTraceElement> getStackTrace() {
-        requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("date", date)
-                .append("message", message)
-                .append("details", details)
-                .append("stackTrace", stackTrace)
-                .toString();
+    @Generated
+    public void setStackTrace(final List<StackTraceElement> stackTrace) {
+        this.stackTrace = stackTrace;
     }
 
     @Override
+    @Generated
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ErrorDetails{");
+        sb.append("date=").append(date);
+        sb.append(", message='").append(message).append('\'');
+        sb.append(", details=").append(details);
+        sb.append(", stackTrace=").append(stackTrace);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ErrorDetails)) {
             return false;
         }
-
-        final ErrorDetails details1 = (ErrorDetails) o;
-        return Objects.equals(date, details1.date) &&
-                Objects.equals(message, details1.message) &&
-                Objects.equals(details, details1.details) &&
-                Objects.equals(stackTrace, details1.stackTrace);
+        final ErrorDetails that = (ErrorDetails) o;
+        return Objects.equals(date, that.date) &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(details, that.details) &&
+                Objects.equals(stackTrace, that.stackTrace);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(date, message, details, stackTrace);
     }

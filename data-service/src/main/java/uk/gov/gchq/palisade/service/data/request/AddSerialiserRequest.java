@@ -16,9 +16,9 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
+import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -46,49 +46,56 @@ public class AddSerialiserRequest extends Request {
         return this;
     }
 
+    @Generated
     public DataFlavour getDataFlavour() {
-        requireNonNull(dataFlavour, "The data flavour has not been set.");
         return dataFlavour;
     }
 
+    @Generated
     public void setDataFlavour(final DataFlavour dataFlavour) {
-        dataFlavour(dataFlavour);
+        this.dataFlavour = dataFlavour;
     }
 
+    @Generated
     public Serialiser<?> getSerialiser() {
-        requireNonNull(serialiser, "The serialiser has not been set.");
         return serialiser;
     }
 
+    @Generated
     public void setSerialiser(final Serialiser<?> serialiser) {
-        serialiser(serialiser);
+        this.serialiser = serialiser;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof AddSerialiserRequest)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final AddSerialiserRequest that = (AddSerialiserRequest) o;
-        return dataFlavour.equals(that.dataFlavour) &&
-                serialiser.equals(that.serialiser);
+        return Objects.equals(dataFlavour, that.dataFlavour) &&
+                Objects.equals(serialiser, that.serialiser);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), dataFlavour, serialiser);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("dataFlavour", dataFlavour)
-                .append("serialiser", serialiser)
-                .toString();
+        final StringBuilder sb = new StringBuilder("AddSerialiserRequest{");
+        sb.append("dataFlavour=").append(dataFlavour);
+        sb.append(", serialiser=").append(serialiser);
+        sb.append('}');
+        return sb.toString();
     }
 }

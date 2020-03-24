@@ -16,14 +16,13 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -46,57 +45,56 @@ public class GetDataRequestConfig extends Request {
         return this;
     }
 
+    @Generated
     public RequestId getToken() {
-        requireNonNull(token, "The request id has not been set.");
         return token;
     }
 
+    @Generated
+    public void setToken(final RequestId token) {
+        this.token = token;
+    }
+
+    @Generated
     public Resource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
         return resource;
     }
 
-    public void setToken(final RequestId token) {
-        token(token);
-    }
-
+    @Generated
     public void setResource(final Resource resource) {
-        resource(resource);
+        this.resource = resource;
     }
 
     @Override
+    @Generated
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("GetDataRequestConfig{");
+        sb.append("token=").append(token);
+        sb.append(", resource=").append(resource);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof GetDataRequestConfig)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final GetDataRequestConfig that = (GetDataRequestConfig) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(token, that.token)
-                .append(resource, that.resource)
-                .isEquals();
+        return Objects.equals(token, that.token) &&
+                Objects.equals(resource, that.resource);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(7, 37)
-                .appendSuper(super.hashCode())
-                .append(token)
-                .append(resource)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("token", token)
-                .append("resource", resource)
-                .toString();
+        return Objects.hash(super.hashCode(), token, resource);
     }
 }

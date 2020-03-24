@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.service.data.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,6 +81,7 @@ public abstract class ReadResponse {
      *
      * @return the previous value
      */
+    @Generated
     protected boolean setUsed() {
         return isUsed.getAndSet(true);
     }
@@ -90,16 +92,19 @@ public abstract class ReadResponse {
         return this;
     }
 
+    @Generated
     public String getMessage() {
         requireNonNull(message, "The message has not been set.");
         return message;
     }
 
+    @Generated
     public void setMessage(final String message) {
         message(message);
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -117,6 +122,7 @@ public abstract class ReadResponse {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return new HashCodeBuilder(17, 61)
                 .append(message)
@@ -124,6 +130,7 @@ public abstract class ReadResponse {
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this)
                 .append("message", message)

@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
@@ -162,6 +163,7 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
                     .add(super.toString())
@@ -229,6 +231,7 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
                     .add(super.toString())
@@ -240,6 +243,7 @@ public class AuditRequest extends Request {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -257,11 +261,13 @@ public class AuditRequest extends Request {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), timestamp, serverIp, serverHostname);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new StringJoiner(", ", AuditRequest.class.getSimpleName() + "[", "]")
                 .add(super.toString())

@@ -17,12 +17,11 @@
 package uk.gov.gchq.palisade.service.data.request;
 
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -47,55 +46,56 @@ public class ReadRequest extends Request {
         return this;
     }
 
+    @Generated
     public String getToken() {
-        requireNonNull(token, "The token has not been set.");
         return token;
     }
 
+    @Generated
     public void setToken(final String token) {
-        token(token);
+        this.token = token;
     }
 
+    @Generated
     public LeafResource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
         return resource;
     }
 
+    @Generated
     public void setResource(final LeafResource resource) {
-        resource(resource);
+        this.resource = resource;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReadRequest)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final ReadRequest that = (ReadRequest) o;
-
-        return new EqualsBuilder()
-                .append(token, that.token)
-                .append(resource, that.resource)
-                .isEquals();
+        return Objects.equals(token, that.token) &&
+                Objects.equals(resource, that.resource);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(47, 37)
-                .append(token)
-                .append(resource)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), token, resource);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("token", token)
-                .append("resource", resource)
-                .toString();
+        final StringBuilder sb = new StringBuilder("ReadRequest{");
+        sb.append("token='").append(token).append('\'');
+        sb.append(", resource=").append(resource);
+        sb.append('}');
+        return sb.toString();
     }
 }

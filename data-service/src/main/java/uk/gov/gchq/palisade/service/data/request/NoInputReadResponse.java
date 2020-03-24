@@ -23,6 +23,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.ResponseWriter;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
+import uk.gov.gchq.palisade.service.data.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +79,7 @@ public class NoInputReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -96,6 +98,7 @@ public class NoInputReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
@@ -104,6 +107,7 @@ public class NoInputReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())

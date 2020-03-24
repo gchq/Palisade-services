@@ -21,6 +21,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import uk.gov.gchq.palisade.service.data.Generated;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,6 +69,7 @@ public class ClientReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -85,6 +88,7 @@ public class ClientReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .appendSuper(super.hashCode())
@@ -93,6 +97,7 @@ public class ClientReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
