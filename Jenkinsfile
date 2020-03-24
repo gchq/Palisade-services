@@ -77,7 +77,6 @@ spec:
         }
         stage('Unit Tests, Checkstyle and Install') {
             x = env.BRANCH_NAME
-
             if (x.substring(0, 2) == "PR") {
                 y = x.substring(3)
                 git url: 'https://github.com/gchq/Palisade-services.git'
@@ -88,7 +87,7 @@ spec:
             }
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install'
+                    sh 'mvn -s $MAVEN_SETTINGS install -pl data-service'
                 }
             }
         }
@@ -111,9 +110,9 @@ spec:
             }
         }
         //stage('Integration Tests') {
-        //git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-        //sh "git fetch origin develop"
-        //sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
+        //    git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+        //    sh "git fetch origin develop"
+        //    sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
         //    container('docker-cmds') {
         //        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
         //            sh 'mvn -s $MAVEN_SETTINGS install'
@@ -148,12 +147,12 @@ spec:
         }
     }
     // No need to occupy a node
-            stage("SonarQube Quality Gate"){
-              timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-                def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-                if (qg.status != 'OK') {
-                  error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
-                }
-              }
+    stage("SonarQube Quality Gate"){
+        timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+            def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+            if (qg.status != 'OK') {
+                error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
             }
+        }
+    }
 }
