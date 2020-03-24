@@ -34,3 +34,23 @@ resources:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+persistence:
+  storageClass:
+  annotations: {}
+  accessMode:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: "Retain"
+  persistenceVolumeAccessModes:
+  - "ReadWriteOnce"
+  - "ReadOnlyMany"
+  enabled: true
+  selectors:
+    policy: "policy"
+  size: 2Gi
+  pvcSizes:
+    policy:
+      size: 1Gi
+master:
+  componentName:
+  - "efc-ebs-policy-service"

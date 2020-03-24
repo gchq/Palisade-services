@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/policy-service/policy-service.jar
 
 LABEL service="policy" project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/policy-service/policy-service.jar"]
+ENTRYPOINT ["java", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/policy-service/policy-service.jar"]
