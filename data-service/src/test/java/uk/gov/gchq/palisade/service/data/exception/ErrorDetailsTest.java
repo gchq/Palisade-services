@@ -19,16 +19,10 @@ package uk.gov.gchq.palisade.service.data.exception;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,13 +30,11 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnit4.class)
 public class ErrorDetailsTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDetailsTest.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private StackTraceElement[] stackTrace = {};
 
@@ -86,18 +78,4 @@ public class ErrorDetailsTest {
                 equalTo(testDetails));
     }
 
-    @Test
-    public void toStringTest() throws ParseException {
-        // Given
-        final ZonedDateTime date = ZonedDateTime.of(LocalDateTime.ofEpochSecond(1546300800L, 1000, ZoneOffset.UTC), ZoneId.of("UTC"));
-        final ErrorDetails details = new ErrorDetails(date, "Test Message", "Test Details", stackTrace);
-
-        String expected = "ErrorDetails[date=2019-01-01T00:00:00.000001Z[UTC],message=Test Message,details=Optional[Test Details],stackTrace=[]]";
-
-        // When
-        String actual = details.toString();
-
-        // Then
-        assertEquals(actual, expected);
-    }
 }

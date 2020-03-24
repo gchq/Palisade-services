@@ -24,5 +24,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Generated {
-
+    /**
+     * Used by JaCoCo and SonarQube, any method annotated with an annotation with
+     * a simple name of "Generated' is ignored from code coverage reports. For best
+     * results, this should be integrated into one's IDE. In IntelliJ, this is done
+     * through: Code -> Generate -> [method] -> ... -> Prepend "@Generated" to the
+     * velocity template.
+     */
 }
