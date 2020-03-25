@@ -45,15 +45,15 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(prefix = "cache", name = "configuration", havingValue = "stdUserData")
+    @ConditionalOnProperty(prefix = "cache", name = "userConfig", havingValue = "stdUserConfig")
     public StdUserConfiguration userConfiguration() {
         LOGGER.info("Standard User Configuration Instantiated");
         return new StdUserConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "cache", name = "warmer", havingValue = "stdUserCacheWarmer")
-    public StdUserCacheWarmerFactory cacheWarmerFactory() {
+    @ConditionalOnProperty(prefix = "cache", name = "userWarmer", havingValue = "stdUserCacheWarmer")
+    public StdUserCacheWarmerFactory userCacheWarmerFactory() {
         LOGGER.info("Standard User Cache Warmer Instantiated");
         return new StdUserCacheWarmerFactory();
     }
