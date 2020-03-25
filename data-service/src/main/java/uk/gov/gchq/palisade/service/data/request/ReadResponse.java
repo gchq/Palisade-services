@@ -20,11 +20,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.ToStringBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -110,24 +110,18 @@ public abstract class ReadResponse {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReadResponse)) {
             return false;
         }
-
         final ReadResponse that = (ReadResponse) o;
-
-        return new EqualsBuilder()
-                .append(message, that.message)
-                .isEquals();
+        return Objects.equals(message, that.message) &&
+                Objects.equals(isUsed, that.isUsed);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return new HashCodeBuilder(17, 61)
-                .append(message)
-                .toHashCode();
+        return Objects.hash(message, isUsed);
     }
 
     @Override

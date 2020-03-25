@@ -31,7 +31,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
