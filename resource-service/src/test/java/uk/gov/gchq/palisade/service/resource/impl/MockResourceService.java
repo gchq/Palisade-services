@@ -50,6 +50,7 @@ public class MockResourceService implements ResourceService {
         resourceMap.put(GetResourcesBySerialisedFormatRequest.class, resourcesForSerialisedFormat);
         resourceMap.put(GetResourcesByResourceRequest.class, resourcesForResource);
     }
+
     public MockResourceService() {
         resourceSupplier = request -> () -> resourceMap.get(request.getClass());
     }
