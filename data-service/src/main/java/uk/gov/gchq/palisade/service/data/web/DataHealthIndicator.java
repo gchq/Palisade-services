@@ -36,7 +36,6 @@ import java.util.Scanner;
 public class DataHealthIndicator extends AbstractHealthIndicator {
     private final PalisadeService palisadeService;
     private final AuditService auditService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataHealthIndicator.class);
 
 
     public DataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
