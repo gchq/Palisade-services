@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.policy.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.CacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
@@ -48,9 +53,11 @@ public class PolicyController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyController.class);
 
     private final PolicyService service;
+    private PolicyConfiguration policyConfig;
 
-    public PolicyController(final @Qualifier("controller") PolicyService service) {
+    public PolicyController(final @Qualifier("controller") PolicyService service, final @Qualifier("policyConfiguration") PolicyConfiguration configuration) {
         this.service = service;
+        this.policyConfig = configuration;
     }
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
@@ -92,5 +99,15 @@ public class PolicyController {
     public void setTypePolicyAsync(@RequestBody final SetTypePolicyRequest request) {
         LOGGER.info("Invoking setTypePolicyAsync: {}", request);
         service.setTypePolicy(request.getType(), request.getPolicy());
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPostConstruct() {
+        // Add example Policies to the policy-service cache
+        Resource resource = policyConfig.createResource();
+        policyConfig.getPolicies().stream()
+                .map(CacheWarmerFactory::policyWarm)
+                //.forEach(policy -> LOGGER.info(policy.toString()));
+                .forEach(policy -> service.setResourcePolicy(resource, policy));
     }
 }
