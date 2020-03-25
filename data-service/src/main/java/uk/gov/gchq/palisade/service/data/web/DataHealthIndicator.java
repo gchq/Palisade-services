@@ -17,8 +17,6 @@ package uk.gov.gchq.palisade.service.data.web;
 
 import feign.Response;
 import feign.Response.Body;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.openfeign.EnableFeignClients;
