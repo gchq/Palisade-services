@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.domain;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -74,34 +75,42 @@ public class DataRequestEntity {
         return request;
     }
 
+    @Generated
     public String getRequestId() {
         return requestId;
     }
 
+    @Generated
     public void setRequestId(final String requestId) {
         this.requestId = requireNonNull(requestId, "requestId");
     }
 
+    @Generated
     public User getUser() {
         return user;
     }
 
+    @Generated
     public void setUser(final User user) {
         this.user = requireNonNull(user, "user");
     }
 
+    @Generated
     public Context getContext() {
         return context;
     }
 
+    @Generated
     public void setContext(final Context context) {
         this.context = requireNonNull(context, "context");
     }
 
+    @Generated
     public Map<LeafResource, Rules> getLeafResourceMap() {
         return Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
     }
 
+    @Generated
     public void setLeafResourceMap(final Map<LeafResource, Rules> leafResourceMap) {
         this.leafResourceMap = Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
     }

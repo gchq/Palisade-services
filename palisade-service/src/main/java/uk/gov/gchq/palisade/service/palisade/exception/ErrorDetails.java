@@ -16,13 +16,14 @@
 
 package uk.gov.gchq.palisade.service.palisade.exception;
 
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.Generated;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -46,60 +47,71 @@ public class ErrorDetails {
         this.stackTrace = Arrays.asList(trace);
     }
 
+    @Generated
     public void setLocalDate(final ZonedDateTime date) {
         requireNonNull(date, "Date cannot be null");
         this.date = date;
     }
 
+    @Generated
     public void setDate(final String dateString) {
         requireNonNull(dateString, "String value cannot be null");
         this.date = ZonedDateTime.parse(dateString);
     }
 
+    @Generated
     public void setMessage(final String message) {
         requireNonNull(message, "Message cannot be null");
         this.message = message;
     }
 
+    @Generated
     public void setDetails(final String details) {
         this.details = Optional.ofNullable(details);
     }
 
+    @Generated
     public void setStackTrace(final List<StackTraceElement> stackTrace) {
         requireNonNull(stackTrace, "Stack Trace cannot be null");
         this.stackTrace = stackTrace;
     }
 
+    @Generated
     public ZonedDateTime getDate() {
         requireNonNull(date, "Date cannot be null");
         return date;
     }
 
+    @Generated
     public String getMessage() {
         requireNonNull(message, "Message cannot be null");
         return message;
     }
 
+    @Generated
     public Optional<String> getDetails() {
         return details;
     }
 
+    @Generated
     public List<StackTraceElement> getStackTrace() {
         requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("date", date)
-                .append("message", message)
-                .append("details", details)
-                .append("stackTrace", stackTrace)
+        return new StringJoiner(", ", ErrorDetails.class.getSimpleName() + "[", "]")
+                .add("date=" + date)
+                .add("message='" + message + "'")
+                .add("details=" + details)
+                .add("stackTrace=" + stackTrace)
                 .toString();
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -117,6 +129,7 @@ public class ErrorDetails {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(date, message, details, stackTrace);
     }
