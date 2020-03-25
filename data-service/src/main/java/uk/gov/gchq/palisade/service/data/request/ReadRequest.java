@@ -17,11 +17,12 @@
 package uk.gov.gchq.palisade.service.data.request;
 
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -92,10 +93,9 @@ public class ReadRequest extends Request {
     @Override
     @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ReadRequest{");
-        sb.append("token='").append(token).append('\'');
-        sb.append(", resource=").append(resource);
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", ReadRequest.class.getSimpleName() + "[", "]")
+                .add("token='" + token + "'")
+                .add("resource=" + resource)
+                .toString();
     }
 }

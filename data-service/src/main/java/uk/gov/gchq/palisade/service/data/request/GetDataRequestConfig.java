@@ -16,13 +16,14 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -68,11 +69,10 @@ public class GetDataRequestConfig extends Request {
     @Override
     @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GetDataRequestConfig{");
-        sb.append("token=").append(token);
-        sb.append(", resource=").append(resource);
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", GetDataRequestConfig.class.getSimpleName() + "[", "]")
+                .add("token=" + token)
+                .add("resource=" + resource)
+                .toString();
     }
 
     @Override

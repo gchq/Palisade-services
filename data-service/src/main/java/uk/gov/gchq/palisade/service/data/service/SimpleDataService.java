@@ -19,12 +19,12 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
@@ -70,21 +70,21 @@ public class SimpleDataService implements DataService {
     @Generated
     public SimpleDataService auditService(final AuditService auditService) {
         requireNonNull(auditService, "The audit service cannot be set to null");
-        this.auditService = auditService;
+        this.setAuditService(auditService);
         return this;
     }
 
     @Generated
     public SimpleDataService palisadeService(final PalisadeService palisadeService) {
         requireNonNull(palisadeService, "The palisade service cannot be set to null.");
-        this.palisadeService = palisadeService;
+        this.setPalisadeService(palisadeService);
         return this;
     }
 
     @Generated
-    public SimpleDataService reader(final DataReader reader) {
-        requireNonNull(reader, "The data reader cannot be set to null.");
-        this.dataReader = reader;
+    public SimpleDataService dataReader(final DataReader dataReader) {
+        requireNonNull(dataReader, "The data reader cannot be set to null.");
+        this.setDataReader(dataReader);
         return this;
     }
 
@@ -165,36 +165,35 @@ public class SimpleDataService implements DataService {
     }
 
     @Generated
-    public PalisadeService getPalisadeService() {
-        requireNonNull(palisadeService, "The palisade service has not been set.");
-        return palisadeService;
-    }
-
-    @Generated
-    public void setPalisadeService(final PalisadeService palisadeService) {
-        palisadeService(palisadeService);
-    }
-
-    @Generated
-    public DataReader getDataReader() {
-        requireNonNull(dataReader, "The data dataReader has not been set.");
-        LOGGER.info("DataReader acquired: {}", dataReader.toString());
-        return dataReader;
-    }
-
-    @Generated
-    public void setDataReader(final DataReader dataReader) {
-        reader(dataReader);
-    }
-
-    @Generated
     public AuditService getAuditService() {
-        requireNonNull(auditService, "The audit service has not been set.");
         return auditService;
     }
 
     @Generated
     public void setAuditService(final AuditService auditService) {
-        auditService(auditService);
+        requireNonNull(auditService);
+        this.auditService = auditService;
+    }
+
+    @Generated
+    public PalisadeService getPalisadeService() {
+        return palisadeService;
+    }
+
+    @Generated
+    public void setPalisadeService(final PalisadeService palisadeService) {
+        requireNonNull(palisadeService);
+        this.palisadeService = palisadeService;
+    }
+
+    @Generated
+    public DataReader getDataReader() {
+        return dataReader;
+    }
+
+    @Generated
+    public void setDataReader(final DataReader dataReader) {
+        requireNonNull(dataReader);
+        this.dataReader = dataReader;
     }
 }

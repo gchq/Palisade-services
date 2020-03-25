@@ -16,13 +16,14 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.service.data.Generated;
+import uk.gov.gchq.palisade.Generated;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,6 +54,7 @@ public class ErrorDetails {
 
     @Generated
     public void setDate(final ZonedDateTime date) {
+        requireNonNull(date);
         this.date = date;
     }
 
@@ -63,6 +65,7 @@ public class ErrorDetails {
 
     @Generated
     public void setMessage(final String message) {
+        requireNonNull(message);
         this.message = message;
     }
 
@@ -73,6 +76,7 @@ public class ErrorDetails {
 
     @Generated
     public void setDetails(final Optional<String> details) {
+        requireNonNull(details);
         this.details = details;
     }
 
@@ -83,19 +87,8 @@ public class ErrorDetails {
 
     @Generated
     public void setStackTrace(final List<StackTraceElement> stackTrace) {
+        requireNonNull(stackTrace);
         this.stackTrace = stackTrace;
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ErrorDetails{");
-        sb.append("date=").append(date);
-        sb.append(", message='").append(message).append('\'');
-        sb.append(", details=").append(details);
-        sb.append(", stackTrace=").append(stackTrace);
-        sb.append('}');
-        return sb.toString();
     }
 
     @Override
@@ -118,5 +111,16 @@ public class ErrorDetails {
     @Generated
     public int hashCode() {
         return Objects.hash(date, message, details, stackTrace);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", ErrorDetails.class.getSimpleName() + "[", "]")
+                .add("date=" + date)
+                .add("message='" + message + "'")
+                .add("details=" + details)
+                .add("stackTrace=" + stackTrace)
+                .toString();
     }
 }

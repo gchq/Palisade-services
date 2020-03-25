@@ -16,12 +16,13 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
-import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,15 +35,17 @@ public class AddSerialiserRequest extends Request {
     private DataFlavour dataFlavour;
     private Serialiser<?> serialiser;
 
+    @Generated
     public AddSerialiserRequest dataFlavour(final DataFlavour dataFlavour) {
         requireNonNull(dataFlavour, "The data flavour cannot be set to null.");
-        this.dataFlavour = dataFlavour;
+        this.setDataFlavour(dataFlavour);
         return this;
     }
 
+    @Generated
     public AddSerialiserRequest serialiser(final Serialiser<?> serialiser) {
         requireNonNull(serialiser, "The serialiser cannot be set to null.");
-        this.serialiser = serialiser;
+        this.setSerialiser(serialiser);
         return this;
     }
 
@@ -53,6 +56,7 @@ public class AddSerialiserRequest extends Request {
 
     @Generated
     public void setDataFlavour(final DataFlavour dataFlavour) {
+        requireNonNull(dataFlavour);
         this.dataFlavour = dataFlavour;
     }
 
@@ -63,6 +67,7 @@ public class AddSerialiserRequest extends Request {
 
     @Generated
     public void setSerialiser(final Serialiser<?> serialiser) {
+        requireNonNull(serialiser);
         this.serialiser = serialiser;
     }
 
@@ -92,10 +97,9 @@ public class AddSerialiserRequest extends Request {
     @Override
     @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("AddSerialiserRequest{");
-        sb.append("dataFlavour=").append(dataFlavour);
-        sb.append(", serialiser=").append(serialiser);
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", AddSerialiserRequest.class.getSimpleName() + "[", "]")
+                .add("dataFlavour=" + dataFlavour)
+                .add("serialiser=" + serialiser)
+                .toString();
     }
 }

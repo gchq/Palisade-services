@@ -19,12 +19,13 @@ package uk.gov.gchq.palisade.service.data.request;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.ToStringBuilder;
-import uk.gov.gchq.palisade.service.data.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
@@ -132,8 +133,9 @@ public abstract class ReadResponse {
     @Override
     @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("message", message)
+        return new StringJoiner(", ", ReadResponse.class.getSimpleName() + "[", "]")
+                .add("message='" + message + "'")
+                .add("isUsed=" + isUsed)
                 .toString();
     }
 }

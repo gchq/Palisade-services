@@ -21,7 +21,7 @@ import com.netflix.discovery.shared.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
-import uk.gov.gchq.palisade.service.data.Generated;
+import uk.gov.gchq.palisade.Generated;
 
 import java.net.URI;
 import java.util.List;

@@ -21,11 +21,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import uk.gov.gchq.palisade.service.data.Generated;
+import uk.gov.gchq.palisade.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -99,9 +100,8 @@ public class ClientReadResponse extends ReadResponse {
     @Override
     @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("stream", stream)
+        return new StringJoiner(", ", ClientReadResponse.class.getSimpleName() + "[", "]")
+                .add("stream=" + stream)
                 .toString();
     }
 }

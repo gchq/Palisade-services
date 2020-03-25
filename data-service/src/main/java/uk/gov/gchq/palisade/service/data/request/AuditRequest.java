@@ -21,11 +21,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.data.Generated;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
@@ -166,7 +166,6 @@ public class AuditRequest extends Request {
         @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("user=" + user)
                     .add("leafResource=" + leafResource)
                     .add("context=" + context)
@@ -234,7 +233,6 @@ public class AuditRequest extends Request {
         @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("token='" + token + "'")
                     .add("leafResource=" + leafResource)
                     .add("exception=" + exception)
@@ -270,7 +268,6 @@ public class AuditRequest extends Request {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
                 .add("timestamp=" + timestamp)
                 .add("serverIp='" + serverIp + "'")
                 .add("serverHostname='" + serverHostname + "'")
