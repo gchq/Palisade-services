@@ -45,9 +45,3 @@ management:
         - loggers
     loggers:
       enabled: true
-
-cache:
-  implementation: hashmap
-  props: "cache.properties"
-  etcd:
-  - http://localhost:2379

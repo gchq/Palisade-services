@@ -28,13 +28,8 @@
     <artifactId>user-service</artifactId>
 
     <properties>
-        <fabric8.version>4.3.0</fabric8.version>
-        <bcprov-jdk15on>1.61</bcprov-jdk15on>
-        <guava.version>28.1-jre</guava.version>
-        <jetcd.version>0.3.0</jetcd.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <swagger.version>1.5.21</swagger.version>
-        <testcontainers.version>1.10.5</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -97,12 +92,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
