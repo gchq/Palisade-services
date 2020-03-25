@@ -130,18 +130,16 @@ spec:
                 git branch: "${env.BRANCH_NAME}", url: 'https://github.com/gchq/Palisade-services.git'
             }
             container('maven') {
-                withCredentials([string(credentialsId: 'fdf44684-3ce1-4f6b-9f1b-f2c452bd0d22', variable: 'EFS_HANDLE')]) {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        if (("${env.BRANCH_NAME}" == "develop") ||
-                                ("${env.BRANCH_NAME}" == "master")) {
-                            sh 'palisade-login'
-                            //now extract the public IP addresses that this will be open on
-                            sh 'extract-addresses'
-                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade .  --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
-                        } else {
-                            sh "echo - no deploy"
-                        }
+                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                    if (("${env.BRANCH_NAME}" == "develop") ||
+                            ("${env.BRANCH_NAME}" == "master")) {
+                        sh 'palisade-login'
+                        //now extract the public IP addresses that this will be open on
+                        sh 'extract-addresses'
+                        sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                    } else {
+                        sh "echo - no deploy"
                     }
                 }
             }

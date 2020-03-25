@@ -35,31 +35,38 @@ spec:
         app.kubernetes.io/name: {{ include "user-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      volumes:
+      - name: "classjars"
+        persistentVolumeClaim:
+          claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-          - name: web
-            containerPort: 8087
-            protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8087
-            initialDelaySeconds: 10
-            failureThreshold: 5
-            periodSeconds: 20
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8087
-            initialDelaySeconds: 10
-            failureThreshold: 5
-            periodSeconds: 20
-            timeoutSeconds: 5
-          resources:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: web
+          containerPort: 8087
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8087
+          initialDelaySeconds: 10
+          failureThreshold: 5
+          periodSeconds: 20
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8087
+          initialDelaySeconds: 10
+          failureThreshold: 5
+          periodSeconds: 20
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: "/usr/share/classpath"
+          name: "classjars"
+        resources:
           {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
