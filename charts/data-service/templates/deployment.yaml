@@ -68,13 +68,13 @@ spec:
         resources:
         {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-      - name: data-volume
-        persistentVolumeClaim:
-          claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
-          readOnly: true
       - name: classjars
         persistentVolumeClaim:
           claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+          readOnly: true
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: {{ (index .Values.global.persistence.storageTierName 1) | quote }}
           readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
