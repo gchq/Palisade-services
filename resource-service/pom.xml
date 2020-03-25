@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2019 Crown Copyright
+  ~ Copyright 2020 Crown Copyright
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -31,9 +31,6 @@
     <properties>
         <eureka.version>1.9.16</eureka.version>
         <hadoop.version>3.2.0</hadoop.version>
-        <fabric8.version>4.3.0</fabric8.version>
-        <protobuf.version>3.5.1</protobuf.version>
-        <jetcd.core>0.3.0</jetcd.core>
     </properties>
 
     <dependencies>
@@ -41,32 +38,6 @@
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
             <version>${eureka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-core</artifactId>
-            <version>${jetcd.core}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>${fabric8.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-model</artifactId>
-            <version>${fabric8.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
