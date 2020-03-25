@@ -17,10 +17,15 @@ package uk.gov.gchq.palisade.service.data.web;
 
 import feign.Response;
 import feign.Response.Body;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.stereotype.Component;
+
+import uk.gov.gchq.palisade.service.data.service.AuditService;
+import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,22 +34,33 @@ import java.util.Scanner;
 @EnableFeignClients
 @Component
 public class DataHealthIndicator extends AbstractHealthIndicator {
-    private final PalisadeClient palisadeClient;
+    private final PalisadeService palisadeService;
+    private final AuditService auditService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataHealthIndicator.class);
 
-    public DataHealthIndicator(final PalisadeClient palisadeClient) {
-        this.palisadeClient = palisadeClient;
+
+    public DataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
+        this.palisadeService = palisadeService;
+        this.auditService = auditService;
     }
 
     @Override
     protected void doHealthCheck(final Health.Builder builder) throws Exception {
         // Use the builder to build the health status details that should be reported.
         // If you throw an exception, the status will be DOWN with the exception message.
-        Response palisadeHealth = palisadeClient.getHealth();
+        Response palisadeHealth = palisadeService.getHealth();
+
+        Response auditHealth = auditService.getHealth();
+
         if (palisadeHealth.status() != 200) {
             throw new Exception("Palisade service down");
         }
+        if (auditHealth.status() != 200) {
+            throw new Exception("Audit service down");
+        }
         builder.up()
-                .withDetail("Palisade Service", readBody(palisadeHealth.body()).substring(0, 14) + "}");
+                .withDetail("Palisade Service", readBody(palisadeHealth.body()).substring(0, 14) + "}")
+                .withDetail("Audit Service", readBody(auditHealth.body()).substring(0, 14) + "}");
     }
 
     private String readBody(final Body body) {

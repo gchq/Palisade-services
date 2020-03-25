@@ -46,7 +46,6 @@ manager:
       paths: *libraries
       profiles:
         - eureka
-        - local
       log: data-service.log
       err: data-service.err
 
@@ -56,7 +55,6 @@ manager:
       profiles:
         - eureka
         - jvm
-        - local
       log: palisade-service.log
       err: palisade-service.err
 

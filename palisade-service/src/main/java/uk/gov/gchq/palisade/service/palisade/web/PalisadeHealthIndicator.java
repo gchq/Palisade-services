@@ -22,6 +22,11 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.stereotype.Component;
 
+import uk.gov.gchq.palisade.service.palisade.service.AuditService;
+import uk.gov.gchq.palisade.service.palisade.service.PolicyService;
+import uk.gov.gchq.palisade.service.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.palisade.service.UserService;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -29,23 +34,26 @@ import java.util.Scanner;
 @EnableFeignClients
 @Component
 public class PalisadeHealthIndicator extends AbstractHealthIndicator {
-    private final PolicyClient policyClient;
-    private final ResourceClient resourceClient;
-    private final UserClient userClient;
+    private final AuditService auditService;
+    private final PolicyService policyService;
+    private final ResourceService resourceService;
+    private final UserService userService;
 
-    public PalisadeHealthIndicator(final PolicyClient policyClient, final ResourceClient resourceClient, final UserClient userClient) {
-        this.policyClient = policyClient;
-        this.resourceClient = resourceClient;
-        this.userClient = userClient;
+    public PalisadeHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
+        this.auditService = auditService;
+        this.policyService = policyService;
+        this.resourceService = resourceService;
+        this.userService = userService;
     }
 
     @Override
     protected void doHealthCheck(final Health.Builder builder) throws Exception {
         // Use the builder to build the health status details that should be reported.
         // If you throw an exception, the status will be DOWN with the exception message.
-        Response policyHealth = policyClient.getHealth();
-        Response resourceHealth = resourceClient.getHealth();
-        Response userHealth = userClient.getHealth();
+        Response auditHealth = auditService.getHealth();
+        Response policyHealth = policyService.getHealth();
+        Response resourceHealth = resourceService.getHealth();
+        Response userHealth = userService.getHealth();
         if (policyHealth.status() != 200) {
             throw new Exception("Policy service down");
         }
@@ -56,6 +64,7 @@ public class PalisadeHealthIndicator extends AbstractHealthIndicator {
             throw new Exception("User service down");
         }
         builder.up()
+                .withDetail("Audit Service", readBody(auditHealth.body()))
                 .withDetail("Policy Service", readBody(policyHealth.body()))
                 .withDetail("Resource Service", readBody(resourceHealth.body()))
                 .withDetail("User Service", readBody(userHealth.body()));

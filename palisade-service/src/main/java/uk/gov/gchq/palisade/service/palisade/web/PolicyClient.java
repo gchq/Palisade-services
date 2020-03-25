@@ -35,6 +35,6 @@ public interface PolicyClient {
     Map<LeafResource, Rules> getPolicySync(final URI url, @RequestBody final GetPolicyRequest request);
 
     @GetMapping(path = "/actuator/health", produces = "application/*+json")
-    Response getHealth();
+    Response getHealth(final URI url);
 
 }

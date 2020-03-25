@@ -33,6 +33,6 @@ public interface PalisadeClient {
     DataRequestConfig getDataRequestConfig(final URI url, @RequestBody final GetDataRequestConfig request);
 
     @GetMapping(path = "/actuator/health", produces = "application/*+json")
-    Response getHealth();
+    Response getHealth(final URI url);
 
 }

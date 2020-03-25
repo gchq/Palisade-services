@@ -33,6 +33,6 @@ public interface UserClient {
     User getUser(final URI url, @RequestBody final GetUserRequest request);
 
     @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth();
+    Response getHealth(final URI url);
 
 }
