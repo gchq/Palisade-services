@@ -20,6 +20,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -27,7 +29,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 public class ServiceConfiguration {
     private static final String SPRING_LIST_SEP = ",";
@@ -39,51 +44,69 @@ public class ServiceConfiguration {
     private Optional<String> err = Optional.empty();
     private Map<String, String> level = Collections.emptyMap();
 
+    @uk.gov.gchq.palisade.Generated
     public String getJar() {
         return jar;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setJar(final String jar) {
+        requireNonNull(jar);
         this.jar = jar;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public List<String> getPaths() {
         return paths;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setPaths(final List<String> paths) {
+        requireNonNull(paths);
         this.paths = paths;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public List<String> getProfiles() {
         return profiles;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setProfiles(final List<String> profiles) {
+        requireNonNull(profiles);
         this.profiles = profiles;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public Optional<String> getLog() {
         return log;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setLog(final Optional<String> log) {
+        requireNonNull(log);
         this.log = log;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public Optional<String> getErr() {
         return err;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setErr(final Optional<String> err) {
+        requireNonNull(err);
         this.err = err;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public Map<String, String> getLevel() {
         return level;
     }
 
+    @uk.gov.gchq.palisade.Generated
     public void setLevel(final Map<String, String> level) {
+        requireNonNull(level);
         this.level = level;
     }
 
@@ -127,15 +150,15 @@ public class ServiceConfiguration {
     }
 
     @Override
+    @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("RunnerConfiguration{\n");
-        sb.append("\tjar=").append(jar).append('\n');
-        sb.append("\tpaths=").append(paths).append('\n');
-        sb.append("\tprofiles=").append(profiles).append('\n');
-        sb.append("\tlog=").append(log).append('\n');
-        sb.append("\terr=").append(err).append('\n');
-        sb.append("\tlevel=").append(level).append('\n');
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", ServiceConfiguration.class.getSimpleName() + "[", "]")
+                .add("jar='" + jar + "'")
+                .add("paths=" + paths)
+                .add("profiles=" + profiles)
+                .add("log=" + log)
+                .add("err=" + err)
+                .add("level=" + level)
+                .toString();
     }
 }
