@@ -45,10 +45,8 @@ spec:
             containerPort: 8082
             protocol: TCP
         volumeMounts:
-        - mountPath: "/data"
+        - mountPath: "usr/share/data"
           name: data-volume
-        - mountPath: "/usr/share/classpath"
-          name: "classjars"
         livenessProbe:
           httpGet:
             path: /actuator/health
@@ -71,10 +69,6 @@ spec:
       - name: classjars
         persistentVolumeClaim:
           claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
-          readOnly: true
-      - name: data-volume
-        persistentVolumeClaim:
-          claimName: {{ (index .Values.global.persistence.storageTierName 1) | quote }}
           readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:

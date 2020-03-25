@@ -58,7 +58,6 @@ global:
     hostpath: /tmp/Palisade
     storageTierName:
     - "classpath"
-    - "data"
     selectors:
       classpath: "classpathjars"
     size: 2Gi

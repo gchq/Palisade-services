@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/palisade-service/data-service.jar
 
 LABEL service="data" project="palisade"
 
-ENTRYPOINT ["java", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/palisade-service/data-service.jar"]
+ENTRYPOINT ["java", "-classpath", "/usr/share/data", "-jar", "/usr/share/palisade-service/data-service.jar"]
