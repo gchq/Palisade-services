@@ -54,32 +54,15 @@ public class ErrorDetails {
     }
 
     @Generated
-    public void setDate(final String dateString) {
-        requireNonNull(dateString, "String value cannot be null");
-        this.date = ZonedDateTime.parse(dateString);
-    }
-
-    @Generated
-    public void setMessage(final String message) {
-        requireNonNull(message, "Message cannot be null");
-        this.message = message;
-    }
-
-    @Generated
-    public void setDetails(final String details) {
-        this.details = Optional.ofNullable(details);
-    }
-
-    @Generated
-    public void setStackTrace(final List<StackTraceElement> stackTrace) {
-        requireNonNull(stackTrace, "Stack Trace cannot be null");
-        this.stackTrace = stackTrace;
-    }
-
-    @Generated
     public ZonedDateTime getDate() {
         requireNonNull(date, "Date cannot be null");
         return date;
+    }
+
+    @Generated
+    public void setDate(final String dateString) {
+        requireNonNull(dateString, "String value cannot be null");
+        this.date = ZonedDateTime.parse(dateString);
     }
 
     @Generated
@@ -89,14 +72,31 @@ public class ErrorDetails {
     }
 
     @Generated
+    public void setMessage(final String message) {
+        requireNonNull(message, "Message cannot be null");
+        this.message = message;
+    }
+
+    @Generated
     public Optional<String> getDetails() {
         return details;
+    }
+
+    @Generated
+    public void setDetails(final String details) {
+        this.details = Optional.ofNullable(details);
     }
 
     @Generated
     public List<StackTraceElement> getStackTrace() {
         requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
+    }
+
+    @Generated
+    public void setStackTrace(final List<StackTraceElement> stackTrace) {
+        requireNonNull(stackTrace, "Stack Trace cannot be null");
+        this.stackTrace = stackTrace;
     }
 
     @Override

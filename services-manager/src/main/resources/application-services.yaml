@@ -37,7 +37,7 @@ manager:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
       paths: *libraries
       profiles:
-        - eureka
+      - eureka
       log: audit-service.log
       err: audit-service.err
 
@@ -45,7 +45,7 @@ manager:
       jar: data-service/target/data-service-${app.version}-exec.jar
       paths: *libraries
       profiles:
-        - eureka
+      - eureka
       log: data-service.log
       err: data-service.err
 
@@ -53,8 +53,8 @@ manager:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
       paths: *libraries
       profiles:
-        - eureka
-        - jvm
+      - eureka
+      - jvm
       log: palisade-service.log
       err: palisade-service.err
 
@@ -62,14 +62,14 @@ manager:
       jar: policy-service/target/policy-service-${app.version}-exec.jar
       paths: *libraries
       profiles:
-        - eureka
+      - eureka
       log: policy-service.log
       err: policy-service.err
 
     resource-service:
       jar: resource-service/target/resource-service-${app.version}-exec.jar
       profiles:
-        - eureka
+      - eureka
       log: resource-service.log
       err: resource-service.err
 
@@ -77,6 +77,6 @@ manager:
       jar: user-service/target/user-service-${app.version}-exec.jar
       paths: *libraries
       profiles:
-        - eureka
+      - eureka
       log: user-service.log
       err: user-service.err

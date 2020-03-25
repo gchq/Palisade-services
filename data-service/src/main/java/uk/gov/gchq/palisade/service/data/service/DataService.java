@@ -53,12 +53,13 @@ public interface DataService extends Service {
      *                altered to contain only a subset of the resources to be
      *                read by this data service instance.
      * @return a {@link Consumer} {@link OutputStream} callback to sink the file into
-     *         and apply appropriate complete/exception auditing
+     * and apply appropriate complete/exception auditing
      */
     Consumer<OutputStream> read(final ReadRequest request);
 
     /**
      * Used to add a new serialiser to the data reader
+     *
      * @param request a request describing the serialiser to add
      * @return a {@link Boolean} true/false on success/failure
      */

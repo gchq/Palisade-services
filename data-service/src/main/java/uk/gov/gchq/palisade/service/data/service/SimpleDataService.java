@@ -54,9 +54,8 @@ import static java.util.Objects.requireNonNull;
  * </p>
  */
 public class SimpleDataService implements DataService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
     public static final String SERIALISER_KEY = "cached.serialiser.map";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
     private AuditService auditService;
     private PalisadeService palisadeService;
     private DataReader dataReader;

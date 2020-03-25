@@ -75,6 +75,7 @@ public class StroomAuditService implements AuditService {
     private static final Map<Class, BiConsumer<DefaultEventLoggingService, AuditRequest>> DISPATCHER = new HashMap<>();
     private static final System SYSTEM = new System();
     private static final String EVENT_GENERATOR = "Palisade";
+    private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
 
     static {
         DISPATCHER.put(AuditRequest.RegisterRequestCompleteAuditRequest.class, StroomAuditService::onRegisterRequestComplete);
@@ -85,7 +86,6 @@ public class StroomAuditService implements AuditService {
 
     private final DefaultEventLoggingService eventLogger;
     private final Logger errorLogger;
-    private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
 
 
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {

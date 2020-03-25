@@ -17,13 +17,14 @@
 package uk.gov.gchq.palisade.service.policy.request;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -43,9 +44,10 @@ public class CanAccessRequest extends Request {
      * @param resources the collection of {@link LeafResource}s to be accessed
      * @return the {@link CanAccessRequest}
      */
+    @Generated
     public CanAccessRequest resources(final Collection<LeafResource> resources) {
         requireNonNull(resources, "The resources cannot be set to null.");
-        this.resources = resources;
+        this.setResources(resources);
         return this;
     }
 
@@ -53,9 +55,10 @@ public class CanAccessRequest extends Request {
      * @param user the {@link User} wanting access to the resource
      * @return the {@link CanAccessRequest}
      */
+    @Generated
     public CanAccessRequest user(final User user) {
         requireNonNull(user, "The user cannot be set to null.");
-        this.user = user;
+        this.setUser(user);
         return this;
     }
 
@@ -63,40 +66,48 @@ public class CanAccessRequest extends Request {
      * @param context containing contextual information such as purpose or environmental data that can influence policies
      * @return the {@link CanAccessRequest}
      */
+    @Generated
     public CanAccessRequest context(final Context context) {
         requireNonNull(context, "The context cannot be set to null.");
-        this.context = context;
+        this.setContext(context);
         return this;
     }
 
-    public Collection<LeafResource> getResources() {
-        requireNonNull(resources, "The resources have not been set.");
-        return resources;
-    }
-
-    public void setResources(final Collection<LeafResource> resources) {
-        resources(resources);
-    }
-
+    @Generated
     public User getUser() {
-        requireNonNull(user, "The user has not been set.");
         return user;
     }
 
+    @Generated
     public void setUser(final User user) {
-        user(user);
+        requireNonNull(user);
+        this.user = user;
     }
 
+    @Generated
+    public Collection<LeafResource> getResources() {
+        return resources;
+    }
+
+    @Generated
+    public void setResources(final Collection<LeafResource> resources) {
+        requireNonNull(resources);
+        this.resources = resources;
+    }
+
+    @Generated
     public Context getContext() {
-        requireNonNull(context, "The context has not been set.");
         return context;
     }
 
+    @Generated
     public void setContext(final Context context) {
-        context(context);
+        requireNonNull(context);
+        this.context = context;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -114,17 +125,18 @@ public class CanAccessRequest extends Request {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), user, resources, context);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("user", user)
-                .append("resources", resources)
-                .append("context", context)
+        return new StringJoiner(", ", CanAccessRequest.class.getSimpleName() + "[", "]")
+                .add("user=" + user)
+                .add("resources=" + resources)
+                .add("context=" + context)
                 .toString();
     }
 }

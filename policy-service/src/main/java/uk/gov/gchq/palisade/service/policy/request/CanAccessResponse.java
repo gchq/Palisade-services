@@ -16,10 +16,12 @@
 
 package uk.gov.gchq.palisade.service.policy.request;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,19 +35,22 @@ public class CanAccessResponse {
         // no-args constructor needed for serialization only
     }
 
+    @Generated
+    public CanAccessResponse canAccessResources(final Collection<LeafResource> canAccessResources) {
+        requireNonNull(canAccessResources, "The can access resources collection cannot be set to null.");
+        this.setCanAccessResources(canAccessResources);
+        return this;
+    }
+
+    @Generated
     public Collection<LeafResource> getCanAccessResources() {
-        requireNonNull(canAccessResources, "The can access resources collection has not been set.");
         return canAccessResources;
     }
 
+    @Generated
     public void setCanAccessResources(final Collection<LeafResource> canAccessResources) {
-        canAccessResources(canAccessResources);
-    }
-
-    public CanAccessResponse canAccessResources(final Collection<LeafResource> canAccessResources) {
-        requireNonNull(canAccessResources, "The can access resources collection cannot be set to null.");
+        requireNonNull(canAccessResources);
         this.canAccessResources = canAccessResources;
-        return this;
     }
 
     @Override
@@ -66,10 +71,10 @@ public class CanAccessResponse {
     }
 
     @Override
+    @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CanAccessResponse{");
-        sb.append("canAccessResources=").append(canAccessResources);
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", CanAccessResponse.class.getSimpleName() + "[", "]")
+                .add("canAccessResources=" + canAccessResources)
+                .toString();
     }
 }

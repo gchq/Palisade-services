@@ -36,6 +36,40 @@ import static java.util.Objects.requireNonNull;
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
 
+    @Value("${manager.root}")
+    private String root;
+
+    @Bean
+    @ConfigurationProperties(prefix = "manager")
+    ConfigurationMap configurationMap() {
+        return new ConfigurationMap();
+    }
+
+    @Bean
+    Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
+        return configurationMap.getServices();
+    }
+
+    private File getServicesRoot() {
+        File parent = new File(".").getAbsoluteFile();
+        while (parent != null && !root.equals(parent.getName())) {
+            parent = parent.getParentFile();
+        }
+        return parent;
+    }
+
+    @Bean("runnerBuilders")
+    public Map<String, ProcessBuilder> runnerBuilders(final Map<String, ServiceConfiguration> runnerConfigs) {
+        return runnerConfigs.entrySet().stream()
+                .map(e -> {
+                    ServiceConfiguration config = e.getValue();
+                    ProcessBuilder builder = config.getProcessBuilder();
+                    builder.directory(getServicesRoot());
+                    return new SimpleEntry<>(e.getKey(), builder);
+                })
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+    }
+
     public static class ConfigurationMap {
 
         private Map<String, ServiceConfiguration> services = new HashMap<>();
@@ -58,40 +92,6 @@ public class ApplicationConfiguration {
             sb.append('}');
             return sb.toString();
         }
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "manager")
-    ConfigurationMap configurationMap() {
-        return new ConfigurationMap();
-    }
-
-    @Bean
-    Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
-        return configurationMap.getServices();
-    }
-
-    @Value("${manager.root}")
-    private String root;
-
-    private File getServicesRoot() {
-        File parent = new File(".").getAbsoluteFile();
-        while (parent != null && !root.equals(parent.getName())) {
-            parent = parent.getParentFile();
-        }
-        return parent;
-    }
-
-    @Bean("runnerBuilders")
-    public Map<String, ProcessBuilder> runnerBuilders(final Map<String, ServiceConfiguration> runnerConfigs) {
-        return runnerConfigs.entrySet().stream()
-                .map(e -> {
-                    ServiceConfiguration config = e.getValue();
-                    ProcessBuilder builder = config.getProcessBuilder();
-                    builder.directory(getServicesRoot());
-                    return new SimpleEntry<>(e.getKey(), builder);
-                })
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
     }
 
 }

@@ -56,4 +56,4 @@ manager:
     #   err: my-service.err                                     :: "java [args] 2> ${err}" - error output filepath, singleton filepath
     #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}" - same format as spring's standard logging changes, classpath-loglevel map
     #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}" - classpath to change and logging level to change to
-    ###
+  ###

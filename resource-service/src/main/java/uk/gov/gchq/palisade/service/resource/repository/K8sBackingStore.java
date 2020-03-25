@@ -58,14 +58,6 @@ public class K8sBackingStore implements BackingStore {
     }
 
     /**
-     * Clean up the resource
-     */
-    @Override
-    public void close() {
-        client.close();
-    }
-
-    /**
      * Remove characters that are not permitted in Kubernetes config map keys
      *
      * @param key to the item that is to be persisted
@@ -80,6 +72,13 @@ public class K8sBackingStore implements BackingStore {
         return key.toLowerCase().replaceAll("[^a-z0-9\\-]", "");
     }
 
+    /**
+     * Clean up the resource
+     */
+    @Override
+    public void close() {
+        client.close();
+    }
 
     /**
      * Store the given data in the backing store. The byte array <code>value</code> is assumed to encode an object of

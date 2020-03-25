@@ -17,8 +17,6 @@
 package uk.gov.gchq.palisade.service.data.request;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import uk.gov.gchq.palisade.Generated;
 
