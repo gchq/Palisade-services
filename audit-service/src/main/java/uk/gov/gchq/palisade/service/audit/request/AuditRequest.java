@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -145,9 +146,9 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("user=" + user)
                     .add("leafResources=" + leafResources)
                     .add("context=" + context)
@@ -231,9 +232,9 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", RegisterRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("userId=" + userId)
                     .add("resourceId='" + resourceId + "'")
                     .add("context=" + context)
@@ -327,9 +328,9 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("user=" + user)
                     .add("leafResource=" + leafResource)
                     .add("context=" + context)
@@ -394,9 +395,9 @@ public class AuditRequest extends Request {
         }
 
         @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
                     .add("token='" + token + "'")
                     .add("leafResource=" + leafResource)
                     .add("exception=" + exception)
@@ -405,6 +406,7 @@ public class AuditRequest extends Request {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -415,21 +417,22 @@ public class AuditRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
-        AuditRequest that = (AuditRequest) o;
-        return timestamp.equals(that.timestamp) &&
-                serverIp.equals(that.serverIp) &&
-                serverHostname.equals(that.serverHostname);
+        final AuditRequest that = (AuditRequest) o;
+        return Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(serverIp, that.serverIp) &&
+                Objects.equals(serverHostname, that.serverHostname);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), timestamp, serverIp, serverHostname);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new StringJoiner(", ", AuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
                 .add("timestamp=" + timestamp)
                 .add("serverIp='" + serverIp + "'")
                 .add("serverHostname='" + serverHostname + "'")

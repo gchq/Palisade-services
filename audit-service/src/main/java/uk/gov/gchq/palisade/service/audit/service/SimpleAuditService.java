@@ -29,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 public class SimpleAuditService implements AuditService {
     public static final String CONFIG_KEY = "simple";
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
-    public static final String CACHE_IMPL_KEY = "user.svc.hashmap.cache.svc";
 
     @Override
     public CompletableFuture<Boolean> audit(final AuditRequest request) {

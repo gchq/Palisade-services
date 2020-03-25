@@ -32,6 +32,7 @@ import event.logging.util.EventLoggingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
@@ -313,10 +314,12 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getSystemName() {
         return SYSTEM.getName();
     }
 
+    @Generated
     public void setSystemName(final String systemName) {
         systemName(systemName);
     }
@@ -332,11 +335,13 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getOrganisation() {
         LOGGER.debug("organisation is {}", SYSTEM.getOrganisation());
         return SYSTEM.getOrganisation();
     }
 
+    @Generated
     public void setOrganisation(final String organisation) {
         LOGGER.debug("organisation is {}", organisation);
         organisation(organisation);
@@ -353,10 +358,12 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getSystemEnv() {
         return SYSTEM.getEnvironment();
     }
 
+    @Generated
     public void setSystemEnv(final String systemEnv) {
         systemEnv(systemEnv);
     }
@@ -372,10 +379,12 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getSystemDescription() {
         return SYSTEM.getDescription();
     }
 
+    @Generated
     public void setSystemDescription(final String description) {
         systemDescription(description);
     }
@@ -390,10 +399,12 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getSystemVersion() {
         return SYSTEM.getVersion();
     }
 
+    @Generated
     public void setSystemVersion(final String systemVersion) {
         systemVersion(systemVersion);
     }
@@ -411,11 +422,13 @@ public class StroomAuditService implements AuditService {
         return this;
     }
 
+    @Generated
     public String getSystemClassification() {
         LOGGER.debug("systemClassification is {}", SYSTEM.getClassification().getText());
         return SYSTEM.getClassification().getText();
     }
 
+    @Generated
     public void setSystemClassification(final String systemClassification) {
         LOGGER.debug("systemClassification is {}", systemClassification);
         systemClassification(systemClassification);
