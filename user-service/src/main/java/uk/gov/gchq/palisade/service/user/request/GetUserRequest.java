@@ -22,10 +22,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -63,7 +65,16 @@ public class GetUserRequest extends Request {
         return userId -> new GetUserRequest(null, original, userId);
     }
 
+    public interface IUserId {
+        /**
+         * @param userId userId
+         * @return the {@link GetUserRequest}
+         */
+        GetUserRequest withUserId(final UserId userId);
+    }
+
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -74,34 +85,21 @@ public class GetUserRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
-
-        GetUserRequest that = (GetUserRequest) o;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(userId, that.userId)
-                .isEquals();
+        final GetUserRequest that = (GetUserRequest) o;
+        return Objects.equals(userId, that.userId);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(17, 61)
-                .appendSuper(super.hashCode())
-                .append(userId)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), userId);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new StringJoiner(", ", GetUserRequest.class.getSimpleName() + "[", "]")
                 .add("userId=" + userId)
                 .toString();
-    }
-
-    public interface IUserId {
-        /**
-         * @param userId userId
-         * @return the {@link GetUserRequest}
-         */
-        GetUserRequest withUserId(final UserId userId);
     }
 }
