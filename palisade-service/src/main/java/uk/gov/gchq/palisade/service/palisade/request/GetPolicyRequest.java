@@ -61,6 +61,16 @@ public class GetPolicyRequest extends Request {
         return this;
     }
 
+    /**
+     * @param context the context for the user accessing the resource
+     * @return the {@link GetPolicyRequest}
+     */
+    @Generated
+    public GetPolicyRequest context(final Context context) {
+        this.setContext(context);
+        return this;
+    }
+
     @Generated
     public User getUser() {
         return user;

@@ -122,6 +122,7 @@ public class AuditRequest extends Request {
                 .add("timestamp=" + timestamp)
                 .add("serverIp='" + serverIp + "'")
                 .add("serverHostname='" + serverHostname + "'")
+                .add(super.toString())
                 .toString();
     }
 
@@ -162,6 +163,7 @@ public class AuditRequest extends Request {
                     .add("user=" + user)
                     .add("leafResources=" + leafResources)
                     .add("context=" + context)
+                    .add(super.toString())
                     .toString();
         }
 
@@ -234,6 +236,7 @@ public class AuditRequest extends Request {
                     .add("context=" + context)
                     .add("exception=" + exception)
                     .add("serviceClass=" + serviceClass)
+                    .add(super.toString())
                     .toString();
         }
 
@@ -323,6 +326,7 @@ public class AuditRequest extends Request {
                     .add("rulesApplied=" + rulesApplied)
                     .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
                     .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
+                    .add(super.toString())
                     .toString();
         }
 
@@ -411,6 +415,7 @@ public class AuditRequest extends Request {
                     .add("token='" + token + "'")
                     .add("leafResource=" + leafResource)
                     .add("exception=" + exception)
+                    .add(super.toString())
                     .toString();
         }
 
