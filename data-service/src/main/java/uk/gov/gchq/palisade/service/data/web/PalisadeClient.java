@@ -32,7 +32,7 @@ public interface PalisadeClient {
     @PostMapping(path = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
     DataRequestConfig getDataRequestConfig(final URI url, @RequestBody final GetDataRequestConfig request);
 
-    @GetMapping(path = "/actuator/health", produces = "application/*+json")
+    @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
 
 }

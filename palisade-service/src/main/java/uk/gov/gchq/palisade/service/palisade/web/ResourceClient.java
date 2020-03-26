@@ -50,7 +50,7 @@ public interface ResourceClient {
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(final URI url, @RequestBody final AddResourceRequest request);
 
-    @GetMapping(path = "/actuator/health", produces = "application/*+json")
+    @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
 
 }
