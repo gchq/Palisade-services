@@ -77,6 +77,7 @@ spec:
         }
         stage('Unit Tests, Checkstyle and Install') {
             x = env.BRANCH_NAME
+
             if (x.substring(0, 2) == "PR") {
                 y = x.substring(3)
                 git url: 'https://github.com/gchq/Palisade-services.git'
@@ -121,6 +122,7 @@ spec:
         }
         stage('Maven deploy') {
             x = env.BRANCH_NAME
+
             if (x.substring(0, 2) == "PR") {
                 y = x.substring(3)
                 git url: 'https://github.com/gchq/Palisade-services.git'
@@ -132,8 +134,7 @@ spec:
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     if (("${env.BRANCH_NAME}" == "develop") ||
-                            ("${env.BRANCH_NAME}" == "master") ||
-                            ("${env.BRANCH_NAME}" == "PAL-289-data-service-helm-charts")) {
+                            ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
                         //now extract the public IP addresses that this will be open on
                         sh 'extract-addresses'
