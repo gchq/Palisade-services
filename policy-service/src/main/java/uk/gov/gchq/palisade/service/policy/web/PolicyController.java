@@ -31,7 +31,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.CacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
@@ -106,8 +106,7 @@ public class PolicyController {
         // Add example Policies to the policy-service cache
         Resource resource = policyConfig.createResource();
         policyConfig.getPolicies().stream()
-                .map(CacheWarmerFactory::policyWarm)
-                //.forEach(policy -> LOGGER.info(policy.toString()));
+                .map(PolicyCacheWarmerFactory::policyWarm)
                 .forEach(policy -> service.setResourcePolicy(resource, policy));
     }
 }

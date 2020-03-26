@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.CacheWarmerFactory;
+import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
@@ -61,7 +61,7 @@ public class UserController {
     public void initPostConstruct() {
         // Add example users to the user-service cache
         userConfig.getUsers().stream()
-                .map(CacheWarmerFactory::userWarm)
+                .map(UserCacheWarmerFactory::userWarm)
                 .forEach(user -> service.addUser(user));
     }
 }

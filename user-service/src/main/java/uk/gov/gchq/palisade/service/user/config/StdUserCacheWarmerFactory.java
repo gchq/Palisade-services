@@ -19,8 +19,7 @@ package uk.gov.gchq.palisade.service.user.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.CacheWarmerFactory;
-import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -29,7 +28,7 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties
-public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
+public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
 
     private String userId;
     private Set<String> auths;
@@ -81,11 +80,6 @@ public class StdUserCacheWarmerFactory implements CacheWarmerFactory {
                 .userId(this.getUserId())
                 .roles(this.getRoles())
                 .auths(this.getAuths());
-    }
-
-    @Override
-    public Policy policyWarm() {
-        return null;
     }
 
     @Override
