@@ -16,6 +16,7 @@ replicaCount: 1
 
 service:
   port: 80
+  type: ClusterIP
 
 image:
   name: data-service
@@ -29,6 +30,12 @@ resources:
   requests:
     cpu: 250m
     memory: 1Gi
+
+autoscaling:
+  targetCPUUtilizationPercentage: 50
+  targetMemoryUtilizationPercentage: 50
+  minReplicas: 1
+  maxReplicas: 3
 
 nodeSelector: {}
 tolerations: []

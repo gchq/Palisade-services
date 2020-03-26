@@ -22,16 +22,18 @@
 # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
 
 fullnameOverride: palisade-services
+hosting: local
+traefik:
+  install: false
+metricsServer:
+  install: false
+dashboard:
+  install: false
 namespaces:
   default: default
   dev: dev
   uat: uat
   prod: prod
-hosting: local
-traefik:
-  install: false
-dashboard:
-  install: false
 global:
   hostname: localhost
   nodes: 1
