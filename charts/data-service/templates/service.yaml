@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
-VOLUME /tmp
-
-ARG JAR_FILE
-
-COPY $JAR_FILE /usr/share/palisade-service/data-service.jar
-
-LABEL service="data" project="palisade"
-
-ENTRYPOINT ["java", "-classpath", "/usr/share/data", "-jar", "/usr/share/palisade-service/data-service.jar"]
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "data-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
+  labels:
+    {{ include "data-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8082
+      protocol: TCP
+      name: web
+  selector:
+    app.kubernetes.io/name: {{ include "data-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
