@@ -1,0 +1,33 @@
+{{- if .Values.global.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+  labels:
+    type: amazonEBS
+    storage-tier: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+spec:
+  capacity:
+    storage: {{ .Values.global.persistence.size }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.persistence.persistentVolumeReclaimPolicy | default "Retain" | quote }}
+  {{- if .Values.global.localMount.enabled }}
+  accessModes:
+    {{- range .Values.global.persistence.persistenceVolumeAccessModes }}
+  - {{ . | quote }}
+    {{- end }}
+  hostPath:
+    # Directory location on host
+    path: {{ required "need to define the policy directory by using --set global.persistence.hostpath=localpath location" .Values.global.persistence.hostpath  | quote }}
+    type: Directory
+  {{- else }}
+  accessModes:
+  - ReadWriteMany
+  volumeMode: Filesystem
+  storageClassName: {{ .Values.global.persistence.storageClass | default "efs-sc" | quote }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.global.localMount.volumeHandle  }}
+    volumeAttributes:
+      path: "/"
+  {{- end }}
+  {{- end }}

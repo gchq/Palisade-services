@@ -138,7 +138,7 @@ spec:
                         //now extract the public IP addresses that this will be open on
                         sh 'extract-addresses'
                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --namespace dev'
+                        sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
                     } else {
                         sh "echo - no deploy"
                     }
@@ -147,9 +147,11 @@ spec:
         }
     }
     // No need to occupy a node
-    stage("SonarQube Quality Gate"){
-        timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-            def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+    stage("SonarQube Quality Gate") {
+        timeout(time: 1, unit: 'HOURS') {
+            // Just in case something goes wrong, pipeline will be killed after a timeout
+            def qg = waitForQualityGate()
+            // Reuse taskId previously collected by withSonarQubeEnv
             if (qg.status != 'OK') {
                 error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
             }
