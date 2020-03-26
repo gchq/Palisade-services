@@ -15,27 +15,27 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: traefik
-    namespace: kube-system
+  name: traefik
+  namespace: kube-system
 spec:
-    externalTrafficPolicy: Local
-    type: LoadBalancer
-    {{- if .Values.global.globalIPAddresses }}
-    loadBalancerSourceRanges:
-    {{- range .Values.global.globalIPAddresses }}
-    - {{ . }}
-    {{- end }}
-    {{- end }}
-    ports:
-        - protocol: TCP
-          name: web
-          port: 80
-        - protocol: TCP
-          name: admin
-          port: {{ .Values.admin.port }}
-        - protocol: TCP
-          name: tls
-          port: 443
-    selector:
-        app.kubernetes.io/name: traefik
-        app.kubernetes.io/part-of: traefik
+  externalTrafficPolicy: Local
+  type: LoadBalancer
+  {{- if .Values.global.globalIPAddresses }}
+  loadBalancerSourceRanges:
+  {{- range .Values.global.globalIPAddresses }}
+  - {{ . }}
+  {{- end }}
+  {{- end }}
+  ports:
+    - protocol: TCP
+      name: web
+      port: 80
+    - protocol: TCP
+      name: admin
+      port: {{ .Values.admin.port }}
+    - protocol: TCP
+      name: tls
+      port: 443
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: traefik
