@@ -45,7 +45,7 @@ spec:
             containerPort: 8082
             protocol: TCP
         volumeMounts:
-        - mountPath: "usr/share/data"
+        - mountPath: "/usr/share/data"
           name: data-volume
         livenessProbe:
           httpGet:
