@@ -143,7 +143,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeHealthIndicator dataHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
+    public PalisadeHealthIndicator palisadeHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
         return new PalisadeHealthIndicator(auditService, policyService, resourceService, userService);
     }
 

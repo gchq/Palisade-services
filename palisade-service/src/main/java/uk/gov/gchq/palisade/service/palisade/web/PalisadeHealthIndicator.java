@@ -54,6 +54,9 @@ public class PalisadeHealthIndicator extends AbstractHealthIndicator {
         Response policyHealth = policyService.getHealth();
         Response resourceHealth = resourceService.getHealth();
         Response userHealth = userService.getHealth();
+        if (auditHealth.status() != 200) {
+            throw new Exception("Audit service down");
+        }
         if (policyHealth.status() != 200) {
             throw new Exception("Policy service down");
         }
