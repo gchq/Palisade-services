@@ -48,32 +48,24 @@ public class ErrorDetails {
     }
 
     @Generated
-    public void setLocalDate(final ZonedDateTime date) {
-        requireNonNull(date, "Date cannot be null");
-        this.date = date;
-    }
-
-    @Generated
     public ZonedDateTime getDate() {
-        requireNonNull(date, "Date cannot be null");
         return date;
     }
 
     @Generated
-    public void setDate(final String dateString) {
-        requireNonNull(dateString, "String value cannot be null");
-        this.date = ZonedDateTime.parse(dateString);
+    public void setDate(final ZonedDateTime date) {
+        requireNonNull(date);
+        this.date = date;
     }
 
     @Generated
     public String getMessage() {
-        requireNonNull(message, "Message cannot be null");
         return message;
     }
 
     @Generated
     public void setMessage(final String message) {
-        requireNonNull(message, "Message cannot be null");
+        requireNonNull(message);
         this.message = message;
     }
 
@@ -83,19 +75,19 @@ public class ErrorDetails {
     }
 
     @Generated
-    public void setDetails(final String details) {
-        this.details = Optional.ofNullable(details);
+    public void setDetails(final Optional<String> details) {
+        requireNonNull(details);
+        this.details = details;
     }
 
     @Generated
     public List<StackTraceElement> getStackTrace() {
-        requireNonNull(stackTrace, "Stack Trace cannot be null");
         return stackTrace;
     }
 
     @Generated
     public void setStackTrace(final List<StackTraceElement> stackTrace) {
-        requireNonNull(stackTrace, "Stack Trace cannot be null");
+        requireNonNull(stackTrace);
         this.stackTrace = stackTrace;
     }
 

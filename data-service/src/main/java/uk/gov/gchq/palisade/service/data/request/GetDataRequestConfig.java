@@ -53,6 +53,7 @@ public class GetDataRequestConfig extends Request {
 
     @Generated
     public void setToken(final RequestId token) {
+        requireNonNull(token);
         this.token = token;
     }
 
@@ -63,6 +64,7 @@ public class GetDataRequestConfig extends Request {
 
     @Generated
     public void setResource(final Resource resource) {
+        requireNonNull(resource);
         this.resource = resource;
     }
 

@@ -86,19 +86,19 @@ public abstract class ReadResponse {
 
     public ReadResponse message(final String message) {
         requireNonNull(message, "The message cannot be set to null.");
-        this.message = message;
+        this.setMessage(message);
         return this;
     }
 
     @Generated
     public String getMessage() {
-        requireNonNull(message, "The message has not been set.");
         return message;
     }
 
     @Generated
     public void setMessage(final String message) {
-        message(message);
+        requireNonNull(message);
+        this.message = message;
     }
 
     @Override

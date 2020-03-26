@@ -37,13 +37,13 @@ public class ReadRequest extends Request {
 
     public ReadRequest token(final String token) {
         requireNonNull(token, "The token cannot be set to null.");
-        this.token = token;
+        this.setToken(token);
         return this;
     }
 
     public ReadRequest resource(final LeafResource resource) {
         requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
+        this.setResource(resource);
         return this;
     }
 
@@ -54,6 +54,7 @@ public class ReadRequest extends Request {
 
     @Generated
     public void setToken(final String token) {
+        requireNonNull(token);
         this.token = token;
     }
 
@@ -64,6 +65,7 @@ public class ReadRequest extends Request {
 
     @Generated
     public void setResource(final LeafResource resource) {
+        requireNonNull(resource);
         this.resource = resource;
     }
 
