@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,17 @@ public class AuditService implements Service {
         }
 
         return response;
+    }
+
+    public Response getHealth() {
+        try {
+            URI clientUri = this.uriSupplier.get();
+            LOGGER.debug("Using client uri: {}", clientUri);
+            return this.client.getHealth(clientUri);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to get health: {}", ex.getMessage());
+            throw new RuntimeException(ex); //rethrow the exception
+        }
     }
 
 }

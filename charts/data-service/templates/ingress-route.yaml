@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  namespace: kube-system
-  name: traefik-ingress-controller
+  name: {{ include "data-service.name" . }}
+  namespace: {{ include "palisade.namespace" . }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Values.global.hostname }}`) && PathPrefix(`{{ include "data-service.root" . }}/data`)
+      kind: Rule
+      services:
+        - name: {{ include "data-service.name" . }}
+          port: 80
+      middlewares:
+        - name: data-pathparam-regex
+          namespace: {{ include "palisade.namespace" . }}

@@ -51,7 +51,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.info("Invoking getResourceById: {}", request);
         Map<LeafResource, ConnectionDetail> response = getResourcesByIdRequest(request);
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
@@ -59,7 +59,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
         LOGGER.info("Invoking getResourcesByResource: {}", request);
         Map<LeafResource, ConnectionDetail> response = getResourceByResourceRequest(request);
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
@@ -67,7 +67,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.info("Invoking getResourceByType: {}", request);
         Map<LeafResource, ConnectionDetail> response = getResourceByTypeRequest(request);
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
@@ -75,7 +75,7 @@ public class ResourceController {
     public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
         Map<LeafResource, ConnectionDetail> response = getResourceBySerialisedFormat(request);
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
@@ -83,7 +83,7 @@ public class ResourceController {
     public Boolean addResource(@RequestBody final AddResourceRequest request) {
         LOGGER.info("Invoking addResource: {}", request);
         Boolean response = addResourceRequest(request);
-        LOGGER.info("Returning reponse {}", response);
+        LOGGER.info("Returning response {}", response);
         return response;
     }
 
