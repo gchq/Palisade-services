@@ -17,13 +17,14 @@
 package uk.gov.gchq.palisade.service.data.request;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import uk.gov.gchq.palisade.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -67,36 +68,32 @@ public class ClientReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ClientReadResponse)) {
             return false;
         }
-
-        ClientReadResponse that = (ClientReadResponse) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(stream, that.stream)
-                .isEquals();
+        if (!super.equals(o)) {
+            return false;
+        }
+        final ClientReadResponse that = (ClientReadResponse) o;
+        return Objects.equals(stream, that.stream);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .appendSuper(super.hashCode())
-                .append(stream)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), stream);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("stream", stream)
+        return new StringJoiner(", ", ClientReadResponse.class.getSimpleName() + "[", "]")
+                .add("stream=" + stream)
                 .toString();
     }
 }

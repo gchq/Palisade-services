@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.domain;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
@@ -28,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -67,35 +69,56 @@ public class LeafResourceRulesEntity {
         return new SimpleImmutableEntry<>(this.leafResource, this.rules);
     }
 
+    @Generated
     public String getId() {
         return id;
     }
 
+    @Generated
     public void setId(final String id) {
         this.id = requireNonNull(id, "id");
     }
 
+    @Generated
     public String getRequestId() {
         return requestId;
     }
 
+    @Generated
     public void setRequestId(final String requestId) {
         this.requestId = requireNonNull(requestId, "requestId");
     }
 
+    @Generated
     public LeafResource getLeafResource() {
         return leafResource;
     }
 
+    @Generated
     public void setLeafResource(final LeafResource leafResource) {
         this.leafResource = requireNonNull(leafResource, "LeafResource");
     }
 
+    @Generated
     public Rules<?> getRules() {
         return rules;
     }
 
+    @Generated
     public void setRules(final Rules<?> rules) {
         this.rules = requireNonNull(rules, "Rules<?>");
+    }
+
+    // No hashCode or equals as this is inappropriate for usage ot the class as a db entry
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", LeafResourceRulesEntity.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("requestId='" + requestId + "'")
+                .add("leafResource=" + leafResource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
     }
 }

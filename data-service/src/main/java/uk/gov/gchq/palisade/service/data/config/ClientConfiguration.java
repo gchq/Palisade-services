@@ -21,6 +21,8 @@ import com.netflix.discovery.shared.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +36,12 @@ public class ClientConfiguration {
     @Autowired(required = false)
     private EurekaClient eurekaClient;
 
+    @Generated
     public Map<String, URI> getClient() {
         return client;
     }
 
+    @Generated
     public void setClient(final Map<String, URI> client) {
         requireNonNull(client);
         this.client = client;

@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.palisade.request.ReadResponse;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface DataService  extends Service {
+public interface DataService extends Service {
 
     CompletableFuture<ReadResponse> read(final ReadRequest request) throws NoCapacityException;
 

@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +36,7 @@ class EurekaUtils {
     @Autowired(required = false)
     private EurekaClient eurekaClient;
 
+    @Generated
     protected EurekaClient getEurekaClient() {
         return this.eurekaClient;
     }

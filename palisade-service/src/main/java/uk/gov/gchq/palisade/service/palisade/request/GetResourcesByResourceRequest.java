@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -40,22 +41,26 @@ public class GetResourcesByResourceRequest extends Request {
      * @param resource the {@link Resource} you want to run an {@code ls} on
      * @return the {@link GetResourcesByResourceRequest}
      */
+    @Generated
     public GetResourcesByResourceRequest resource(final Resource resource) {
         requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
+        this.setResource(resource);
         return this;
     }
 
+    @Generated
     public Resource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
         return resource;
     }
 
+    @Generated
     public void setResource(final Resource resource) {
-        resource(resource);
+        requireNonNull(resource);
+        this.resource = resource;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -66,16 +71,18 @@ public class GetResourcesByResourceRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
-        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
-        return getResource().equals(that.getResource());
+        final GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
+        return Objects.equals(resource, that.resource);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getResource());
+        return Objects.hash(super.hashCode(), resource);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
                 .add("resource=" + resource)

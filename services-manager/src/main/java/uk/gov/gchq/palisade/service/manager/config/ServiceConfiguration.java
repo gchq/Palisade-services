@@ -20,14 +20,20 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 public class ServiceConfiguration {
     private static final String SPRING_LIST_SEP = ",";
@@ -39,51 +45,69 @@ public class ServiceConfiguration {
     private Optional<String> err = Optional.empty();
     private Map<String, String> level = Collections.emptyMap();
 
+    @Generated
     public String getJar() {
         return jar;
     }
 
+    @Generated
     public void setJar(final String jar) {
+        requireNonNull(jar);
         this.jar = jar;
     }
 
+    @Generated
     public List<String> getPaths() {
         return paths;
     }
 
+    @Generated
     public void setPaths(final List<String> paths) {
+        requireNonNull(paths);
         this.paths = paths;
     }
 
+    @Generated
     public List<String> getProfiles() {
         return profiles;
     }
 
+    @Generated
     public void setProfiles(final List<String> profiles) {
+        requireNonNull(profiles);
         this.profiles = profiles;
     }
 
+    @Generated
     public Optional<String> getLog() {
         return log;
     }
 
+    @Generated
     public void setLog(final Optional<String> log) {
+        requireNonNull(log);
         this.log = log;
     }
 
+    @Generated
     public Optional<String> getErr() {
         return err;
     }
 
+    @Generated
     public void setErr(final Optional<String> err) {
+        requireNonNull(err);
         this.err = err;
     }
 
+    @Generated
     public Map<String, String> getLevel() {
         return level;
     }
 
+    @Generated
     public void setLevel(final Map<String, String> level) {
+        requireNonNull(level);
         this.level = level;
     }
 
@@ -127,15 +151,39 @@ public class ServiceConfiguration {
     }
 
     @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ServiceConfiguration)) {
+            return false;
+        }
+        final ServiceConfiguration that = (ServiceConfiguration) o;
+        return Objects.equals(jar, that.jar) &&
+                Objects.equals(paths, that.paths) &&
+                Objects.equals(profiles, that.profiles) &&
+                Objects.equals(log, that.log) &&
+                Objects.equals(err, that.err) &&
+                Objects.equals(level, that.level);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(jar, paths, profiles, log, err, level);
+    }
+
+    @Override
+    @Generated
     public String toString() {
-        final StringBuilder sb = new StringBuilder("RunnerConfiguration{\n");
-        sb.append("\tjar=").append(jar).append('\n');
-        sb.append("\tpaths=").append(paths).append('\n');
-        sb.append("\tprofiles=").append(profiles).append('\n');
-        sb.append("\tlog=").append(log).append('\n');
-        sb.append("\terr=").append(err).append('\n');
-        sb.append("\tlevel=").append(level).append('\n');
-        sb.append('}');
-        return sb.toString();
+        return new StringJoiner(", ", ServiceConfiguration.class.getSimpleName() + "[", "]")
+                .add("jar='" + jar + "'")
+                .add("paths=" + paths)
+                .add("profiles=" + profiles)
+                .add("log=" + log)
+                .add("err=" + err)
+                .add("level=" + level)
+                .toString();
     }
 }

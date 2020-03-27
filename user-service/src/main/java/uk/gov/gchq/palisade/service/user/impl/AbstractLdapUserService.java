@@ -69,10 +69,8 @@ import static java.util.Objects.requireNonNull;
 public abstract class AbstractLdapUserService implements UserService {
     protected static final String[] ESCAPED_CHARS = new String[]{"\\", "#", "+", "<", ">", ";", "\"", "@", "(", ")", "*", "="};
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLdapUserService.class);
-
-    private final String ldapConfigPath;
-
     protected final LdapContext context;
+    private final String ldapConfigPath;
 
     /**
      * Constructs a {@link AbstractLdapUserService} with a given {@link LdapContext}.

@@ -18,13 +18,14 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -44,9 +45,10 @@ public class SetTypePolicyRequest extends Request {
      * @param type the {@link String} to set the {@link Policy} for
      * @return the {@link SetTypePolicyRequest}
      */
+    @Generated
     public SetTypePolicyRequest type(final String type) {
         requireNonNull(type, "The type cannot be set to null.");
-        this.type = type;
+        this.setType(type);
         return this;
     }
 
@@ -54,33 +56,33 @@ public class SetTypePolicyRequest extends Request {
      * @param policy the {@link Policy} to set for the resource type
      * @return the {@link SetTypePolicyRequest}
      */
+    @Generated
     public SetTypePolicyRequest policy(final Policy policy) {
         requireNonNull(policy, "The policy cannot be set to null.");
-        this.policy = policy;
+        this.setPolicy(policy);
         return this;
     }
 
+    @Generated
     public String getType() {
-        requireNonNull(type, "The type has not been set.");
         return type;
     }
 
+    @Generated
     public void setType(final String type) {
-        type(type);
+        requireNonNull(type);
+        this.type = type;
     }
 
+    @Generated
     public Policy getPolicy() {
-        requireNonNull(policy, "The policy has not been set.");
         return policy;
     }
 
+    @Generated
     public void setPolicy(final Policy policy) {
-        policy(policy);
-    }
-
-    @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call SetTypePolicyRequest.setOriginalRequestId()");
+        requireNonNull(policy);
+        this.policy = policy;
     }
 
     @Override
@@ -89,6 +91,7 @@ public class SetTypePolicyRequest extends Request {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -105,16 +108,17 @@ public class SetTypePolicyRequest extends Request {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), type, policy);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("type", type)
-                .append("policy", policy)
+        return new StringJoiner(", ", SetTypePolicyRequest.class.getSimpleName() + "[", "]")
+                .add("type='" + type + "'")
+                .add("policy=" + policy)
                 .toString();
     }
 }

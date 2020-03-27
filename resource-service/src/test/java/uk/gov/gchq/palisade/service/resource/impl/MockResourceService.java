@@ -41,6 +41,8 @@ public class MockResourceService implements ResourceService {
     private Map<LeafResource, ConnectionDetail> resourcesForSerialisedFormat = Mockito.mock(Map.class);
 
     private Map<Class<? extends Request>, Map<LeafResource, ConnectionDetail>> resourceMap = new HashMap<>();
+    private Function<Request, Supplier<Map<LeafResource, ConnectionDetail>>> resourceSupplier;
+    private Exception serviceThrows;
 
     {
         resourceMap.put(GetResourcesByIdRequest.class, resourcesForIds);
@@ -49,13 +51,6 @@ public class MockResourceService implements ResourceService {
         resourceMap.put(GetResourcesByResourceRequest.class, resourcesForResource);
     }
 
-    public Map<Class<? extends Request>, Map<LeafResource, ConnectionDetail>> getMockingMap() {
-        return resourceMap;
-    }
-
-    private Function<Request, Supplier<Map<LeafResource, ConnectionDetail>>> resourceSupplier;
-    private Exception serviceThrows;
-
     public MockResourceService() {
         resourceSupplier = request -> () -> resourceMap.get(request.getClass());
     }
@@ -63,6 +58,10 @@ public class MockResourceService implements ResourceService {
     public MockResourceService(final Exception ex) {
         super();
         this.willThrow(ex);
+    }
+
+    public Map<Class<? extends Request>, Map<LeafResource, ConnectionDetail>> getMockingMap() {
+        return resourceMap;
     }
 
     public void willThrow(final Exception ex) {

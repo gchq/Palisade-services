@@ -16,14 +16,13 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.Generated;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
@@ -71,6 +70,7 @@ public abstract class ReadResponse {
      * @see ReadResponse#asInputStream()
      * @see ReadResponse#writeTo(OutputStream)
      */
+    @Generated
     public boolean isUsed() {
         return isUsed.get();
     }
@@ -80,53 +80,54 @@ public abstract class ReadResponse {
      *
      * @return the previous value
      */
+    @Generated
     protected boolean setUsed() {
         return isUsed.getAndSet(true);
     }
 
     public ReadResponse message(final String message) {
         requireNonNull(message, "The message cannot be set to null.");
-        this.message = message;
+        this.setMessage(message);
         return this;
     }
 
+    @Generated
     public String getMessage() {
-        requireNonNull(message, "The message has not been set.");
         return message;
     }
 
+    @Generated
     public void setMessage(final String message) {
-        message(message);
+        requireNonNull(message);
+        this.message = message;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReadResponse)) {
             return false;
         }
-
         final ReadResponse that = (ReadResponse) o;
-
-        return new EqualsBuilder()
-                .append(message, that.message)
-                .isEquals();
+        return Objects.equals(message, that.message) &&
+                Objects.equals(isUsed, that.isUsed);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(17, 61)
-                .append(message)
-                .toHashCode();
+        return Objects.hash(message, isUsed);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("message", message)
+        return new StringJoiner(", ", ReadResponse.class.getSimpleName() + "[", "]")
+                .add("message='" + message + "'")
+                .add("isUsed=" + isUsed)
                 .toString();
     }
 }

@@ -18,14 +18,15 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -47,9 +48,10 @@ public class SetResourcePolicyRequest extends Request {
      * @param resource the {@link Resource} to set the {@link Policy} for
      * @return the {@link SetResourcePolicyRequest}
      */
+    @Generated
     public SetResourcePolicyRequest resource(final Resource resource) {
         requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
+        this.setResource(resource);
         return this;
     }
 
@@ -57,34 +59,33 @@ public class SetResourcePolicyRequest extends Request {
      * @param policy the {@link Policy} to set for the {@link Resource}
      * @return the {@link SetResourcePolicyRequest}
      */
+    @Generated
     public SetResourcePolicyRequest policy(final Policy policy) {
         requireNonNull(policy, "The policy cannot be set to null.");
-        this.policy = policy;
+        this.setPolicy(policy);
         return this;
     }
 
+    @Generated
     public Resource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
         return resource;
     }
 
+    @Generated
     public void setResource(final Resource resource) {
-        resource(resource);
+        requireNonNull(resource);
+        this.resource = resource;
     }
 
+    @Generated
     public Policy getPolicy() {
-        requireNonNull(policy, "The policy has not been set.");
         return policy;
     }
 
+    @Generated
     public void setPolicy(final Policy policy) {
-        policy(policy);
-    }
-
-
-    @Override
-    public void setOriginalRequestId(final RequestId originalRequestId) {
-        throw new ForbiddenException("Should not call SetResourcePolicyRequest.setOriginalRequestId()");
+        requireNonNull(policy);
+        this.policy = policy;
     }
 
     @Override
@@ -93,6 +94,12 @@ public class SetResourcePolicyRequest extends Request {
     }
 
     @Override
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call SetResourcePolicyRequest.setOriginalRequestId()");
+    }
+
+    @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -109,16 +116,17 @@ public class SetResourcePolicyRequest extends Request {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), resource, policy);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("resource", resource)
-                .append("policy", policy)
+        return new StringJoiner(", ", SetResourcePolicyRequest.class.getSimpleName() + "[", "]")
+                .add("resource=" + resource)
+                .add("policy=" + policy)
                 .toString();
     }
 }

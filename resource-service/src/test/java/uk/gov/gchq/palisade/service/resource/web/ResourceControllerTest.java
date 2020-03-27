@@ -54,10 +54,39 @@ import java.util.stream.Collectors;
 
 @RunWith(Theories.class)
 public class ResourceControllerTest {
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    @DataPoints("GetRequests")
+    public static List<Request> requests = Arrays.asList(
+            new GetResourcesByIdRequest(),
+            new GetResourcesByResourceRequest(),
+            new GetResourcesBySerialisedFormatRequest(),
+            new GetResourcesByTypeRequest());
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    @DataPoint("AddRequests")
+    public static AddResourceRequest addRequest = new AddResourceRequest();
+    //@DataPoints requires the property to be public
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    @DataPoints
+    public static List<Exception> exceptions = Arrays.asList(
+            new InterruptedException("InterruptedException"),
+            new ExecutionException("ExecutionException", null));
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private ResourceController controller;
     private MockResourceService resourceService;
+    private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
+
+    {
+        requestMethods.put(GetResourcesByIdRequest.class, request -> {
+            request.originalRequestId(new RequestId().id("originalId"));
+            return controller.getResourcesById((GetResourcesByIdRequest) request);
+        });
+        requestMethods.put(GetResourcesByResourceRequest.class, request -> controller.getResourcesByResource((GetResourcesByResourceRequest) request));
+        requestMethods.put(GetResourcesBySerialisedFormatRequest.class, request -> controller.getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request));
+        requestMethods.put(GetResourcesByTypeRequest.class, request -> controller.getResourcesByType((GetResourcesByTypeRequest) request));
+    }
 
     @Before
     public void setUp() {
@@ -80,39 +109,6 @@ public class ResourceControllerTest {
                 .filter(predicate)
                 .map(ILoggingEvent::getFormattedMessage)
                 .collect(Collectors.toList());
-    }
-
-    //@DataPoints requires the property to be public
-    @SuppressWarnings("checkstyle:visibilitymodifier")
-    @DataPoints("GetRequests")
-    public static List<Request> requests = Arrays.asList(
-            new GetResourcesByIdRequest(),
-            new GetResourcesByResourceRequest(),
-            new GetResourcesBySerialisedFormatRequest(),
-            new GetResourcesByTypeRequest());
-
-    //@DataPoints requires the property to be public
-    @SuppressWarnings("checkstyle:visibilitymodifier")
-    @DataPoint("AddRequests")
-    public static AddResourceRequest addRequest = new AddResourceRequest();
-
-    //@DataPoints requires the property to be public
-    @SuppressWarnings("checkstyle:visibilitymodifier")
-    @DataPoints
-    public static List<Exception> exceptions = Arrays.asList(
-            new InterruptedException("InterruptedException"),
-            new ExecutionException("ExecutionException", null));
-
-    private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
-
-    {
-        requestMethods.put(GetResourcesByIdRequest.class, request -> {
-            request.originalRequestId(new RequestId().id("originalId"));
-            return controller.getResourcesById((GetResourcesByIdRequest) request);
-        });
-        requestMethods.put(GetResourcesByResourceRequest.class, request -> controller.getResourcesByResource((GetResourcesByResourceRequest) request));
-        requestMethods.put(GetResourcesBySerialisedFormatRequest.class, request -> controller.getResourcesBySerialisedFormat((GetResourcesBySerialisedFormatRequest) request));
-        requestMethods.put(GetResourcesByTypeRequest.class, request -> controller.getResourcesByType((GetResourcesByTypeRequest) request));
     }
 
     @Theory

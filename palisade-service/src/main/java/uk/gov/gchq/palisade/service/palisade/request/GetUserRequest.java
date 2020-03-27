@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -44,22 +45,26 @@ public class GetUserRequest extends Request {
      * @param userId the id of the {@link uk.gov.gchq.palisade.User} you want
      * @return the {@link GetUserRequest}
      */
+    @Generated
     public GetUserRequest userId(final UserId userId) {
         requireNonNull(userId, "The user id cannot be set to null.");
-        this.userId = userId;
+        this.setUserId(userId);
         return this;
     }
 
+    @Generated
     public UserId getUserId() {
-        requireNonNull(userId, "The user id has not been set.");
         return userId;
     }
 
+    @Generated
     public void setUserId(final UserId userId) {
-        userId(userId);
+        requireNonNull(userId);
+        this.userId = userId;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -70,16 +75,18 @@ public class GetUserRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
-        GetUserRequest that = (GetUserRequest) o;
-        return getUserId().equals(that.getUserId());
+        final GetUserRequest that = (GetUserRequest) o;
+        return Objects.equals(userId, that.userId);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getUserId());
+        return Objects.hash(super.hashCode(), userId);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new StringJoiner(", ", GetUserRequest.class.getSimpleName() + "[", "]")
                 .add("userId=" + userId)
