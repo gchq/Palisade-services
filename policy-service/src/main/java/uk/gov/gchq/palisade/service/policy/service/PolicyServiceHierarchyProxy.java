@@ -64,12 +64,11 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
      * This method is used to recursively go up the resource hierarchy ending with the original
      * data type to extract and merge the policies at each stage of the hierarchy.
      *
-     * @param resource        A {@link Resource} to get the applicable rules for.
-     * @param rulesExtractor  The rule type to extract from each policy
-     * @param <T>             The record tpe for this resource
-     *
+     * @param resource       A {@link Resource} to get the applicable rules for.
+     * @param rulesExtractor The rule type to extract from each policy
+     * @param <T>            The record tpe for this resource
      * @return An optional {@link Rules} object, which contains the list of rules found
-     * that need to be applied to the resource.
+     *         that need to be applied to the resource.
      */
     private <T> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
         LOGGER.debug("Getting the applicable rules: {}", resource);

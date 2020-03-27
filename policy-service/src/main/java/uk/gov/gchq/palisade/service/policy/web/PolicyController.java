@@ -62,10 +62,10 @@ public class PolicyController {
 
     public Collection<LeafResource> canAccess(final User user, final Context context, final Collection<LeafResource> resources) {
         LOGGER.info("Filtering out resources for user {} with context {}", user, context);
-         return resources.stream()
-                 .map(resource -> service.canAccess(user, context, resource))
-                 .flatMap(Optional::stream)
-                 .collect(Collectors.toList());
+        return resources.stream()
+                .map(resource -> service.canAccess(user, context, resource))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
     }
 
     @PostMapping(value = "/getPolicySync", consumes = "application/json", produces = "application/json")

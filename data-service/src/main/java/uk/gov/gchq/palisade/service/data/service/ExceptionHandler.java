@@ -41,7 +41,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Provides handling for errors encountered by the data-service.
-     * @param ex the target exception
+     *
+     * @param ex      the target exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
@@ -73,20 +74,22 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * This method customizes the response for a NoPolicyException error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
     private ResponseEntity<Object> noPolicyExceptionHandler(final NoPolicyException ex, final WebRequest request) {
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getMessage(), ex.getStackTrace());
 
-       LOGGER_DEBUG.error("Error from data service, details: {}, and request {}", details, request);
+        LOGGER_DEBUG.error("Error from data service, details: {}, and request {}", details, request);
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
 
     /**
      * This method customizes the response for a NullPointerException error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
@@ -99,7 +102,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * This method customizes the response for a FileNotFoundException error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
@@ -112,7 +116,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * This method customizes the response for an IOException error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
@@ -125,7 +130,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * This method customizes the response for a RuntimeException error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */
@@ -138,7 +144,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * This method customizes the response for a general Exception error.
-     * @param ex the exception
+     *
+     * @param ex      the exception
      * @param request the current request
      * @return a {@code ResponseEntity} instance
      */

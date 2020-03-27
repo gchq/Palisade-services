@@ -16,10 +16,7 @@
 
 package uk.gov.gchq.palisade.service.data.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.ResponseWriter;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
@@ -27,6 +24,8 @@ import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -78,36 +77,32 @@ public class NoInputReadResponse extends ReadResponse {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof NoInputReadResponse)) {
             return false;
         }
-
-        NoInputReadResponse that = (NoInputReadResponse) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(readerResponse, that.readerResponse)
-                .isEquals();
+        if (!super.equals(o)) {
+            return false;
+        }
+        final NoInputReadResponse that = (NoInputReadResponse) o;
+        return Objects.equals(readerResponse, that.readerResponse);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .appendSuper(super.hashCode())
-                .append(readerResponse)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), readerResponse);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("stream", readerResponse)
+        return new StringJoiner(", ", NoInputReadResponse.class.getSimpleName() + "[", "]")
+                .add("readerResponse=" + readerResponse)
                 .toString();
     }
 }

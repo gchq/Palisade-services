@@ -34,12 +34,10 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 @RequestMapping(path = "/")
 public class PalisadeController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeController.class);
+    private final PalisadeService service;
     @Autowired
     private ObjectMapper mapper;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeController.class);
-
-    private final PalisadeService service;
 
     public PalisadeController(final PalisadeService service, final ObjectMapper mapper) {
         this.service = service;

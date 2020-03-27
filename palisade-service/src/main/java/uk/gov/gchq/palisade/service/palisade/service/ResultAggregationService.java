@@ -97,7 +97,7 @@ public class ResultAggregationService implements Service {
      * Removes all resource mappings in the {@code resources} that do not have defined rules in {@code rules}.
      *
      * @param resources the resources to modify
-     * @param rules    the rules for all resources
+     * @param rules     the rules for all resources
      * @return the {@code resources} map after filtering
      */
     private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final Map<LeafResource, Rules> rules) {

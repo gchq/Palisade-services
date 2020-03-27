@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -90,6 +91,41 @@ public class AuditRequest extends Request {
         LOGGER.debug("AuditRequest instantiated and serverHostname is: {}, and serverIP is {}", serverHostname, serverIp);
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditRequest)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final AuditRequest that = (AuditRequest) o;
+        return Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(serverIp, that.serverIp) &&
+                Objects.equals(serverHostname, that.serverHostname);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), timestamp, serverIp, serverHostname);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditRequest.class.getSimpleName() + "[", "]")
+                .add("timestamp=" + timestamp)
+                .add("serverIp='" + serverIp + "'")
+                .add("serverHostname='" + serverHostname + "'")
+                .add(super.toString())
+                .toString();
+    }
+
     /**
      * This is one of the objects that is passed to the audit-service to be able to store an audit record. This class extends
      * {@link AuditRequest}. This class is used to indicate to the Audit logs that a RegisterDataRequest has been successfully
@@ -108,6 +144,51 @@ public class AuditRequest extends Request {
             this.user = requireNonNull(user);
             this.leafResources = requireNonNull(leafResources);
             this.context = requireNonNull(context);
+        }
+
+        /**
+         * Static factory method.
+         *
+         * @param original the originating request Id
+         * @return the {@link RegisterRequestCompleteAuditRequest}
+         */
+        public static IUser create(final RequestId original) {
+            return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RegisterRequestCompleteAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
+            return Objects.equals(user, that.user) &&
+                    Objects.equals(leafResources, that.leafResources) &&
+                    Objects.equals(context, that.context);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), user, leafResources, context);
+        }
+
+        @Override
+        @Generated
+        public String toString() {
+            return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
+                    .add("user=" + user)
+                    .add("leafResources=" + leafResources)
+                    .add("context=" + context)
+                    .add(super.toString())
+                    .toString();
         }
 
         public interface IUser {
@@ -132,26 +213,6 @@ public class AuditRequest extends Request {
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
             RegisterRequestCompleteAuditRequest withContext(Context context);
-        }
-
-        /**
-         * Static factory method.
-         *
-         * @param original the originating request Id
-         * @return the {@link RegisterRequestCompleteAuditRequest}
-         */
-        public static IUser create(final RequestId original) {
-            return user -> leafResources -> context -> new RegisterRequestCompleteAuditRequest(null, original, user, leafResources, context);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("user=" + user)
-                    .add("leafResources=" + leafResources)
-                    .add("context=" + context)
-                    .toString();
         }
     }
 
@@ -178,6 +239,55 @@ public class AuditRequest extends Request {
             this.context = requireNonNull(context);
             this.exception = requireNonNull(exception);
             this.serviceClass = requireNonNull(serviceClass);
+        }
+
+        /**
+         * Static factory method.
+         *
+         * @param original the original request id
+         * @return the {@link RegisterRequestExceptionAuditRequest}
+         */
+        public static IUserId create(final RequestId original) {
+            return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RegisterRequestExceptionAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
+            return Objects.equals(userId, that.userId) &&
+                    Objects.equals(resourceId, that.resourceId) &&
+                    Objects.equals(context, that.context) &&
+                    Objects.equals(exception, that.exception) &&
+                    Objects.equals(serviceClass, that.serviceClass);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
+        }
+
+        @Override
+        @Generated
+        public String toString() {
+            return new StringJoiner(", ", RegisterRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
+                    .add("userId=" + userId)
+                    .add("resourceId='" + resourceId + "'")
+                    .add("context=" + context)
+                    .add("exception=" + exception)
+                    .add("serviceClass=" + serviceClass)
+                    .add(super.toString())
+                    .toString();
         }
 
         public interface IUserId {
@@ -219,28 +329,6 @@ public class AuditRequest extends Request {
              */
             RegisterRequestExceptionAuditRequest withServiceClass(Class<? extends Service> serviceClass);
         }
-
-        /**
-         * Static factory method.
-         *
-         * @param original the original request id
-         * @return the {@link RegisterRequestExceptionAuditRequest}
-         */
-        public static IUserId create(final RequestId original) {
-            return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", RegisterRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("userId=" + userId)
-                    .add("resourceId='" + resourceId + "'")
-                    .add("context=" + context)
-                    .add("exception=" + exception)
-                    .add("serviceClass=" + serviceClass)
-                    .toString();
-        }
     }
 
     /**
@@ -266,6 +354,57 @@ public class AuditRequest extends Request {
             this.rulesApplied = requireNonNull(rulesApplied);
             this.numberOfRecordsReturned = numberOfRecordsReturned;
             this.numberOfRecordsProcessed = numberOfRecordsProcessed;
+        }
+
+        /**
+         * Static factory method.
+         *
+         * @param original the original request id
+         * @return {@link ReadRequestCompleteAuditRequest}
+         */
+        public static IUser create(final RequestId original) {
+            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ReadRequestCompleteAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
+            return numberOfRecordsReturned == that.numberOfRecordsReturned &&
+                    numberOfRecordsProcessed == that.numberOfRecordsProcessed &&
+                    Objects.equals(user, that.user) &&
+                    Objects.equals(leafResource, that.leafResource) &&
+                    Objects.equals(context, that.context) &&
+                    Objects.equals(rulesApplied, that.rulesApplied);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+        }
+
+        @Override
+        @Generated
+        public String toString() {
+            return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
+                    .add("user=" + user)
+                    .add("leafResource=" + leafResource)
+                    .add("context=" + context)
+                    .add("rulesApplied=" + rulesApplied)
+                    .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
+                    .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
+                    .add(super.toString())
+                    .toString();
         }
 
         public interface IUser {
@@ -315,29 +454,6 @@ public class AuditRequest extends Request {
              */
             ReadRequestCompleteAuditRequest withNumberOfRecordsProcessed(long numberOfRecordsProcessed);
         }
-
-        /**
-         * Static factory method.
-         *
-         * @param original the original request id
-         * @return {@link ReadRequestCompleteAuditRequest}
-         */
-        public static IUser create(final RequestId original) {
-            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("user=" + user)
-                    .add("leafResource=" + leafResource)
-                    .add("context=" + context)
-                    .add("rulesApplied=" + rulesApplied)
-                    .add("numberOfRecordsReturned=" + numberOfRecordsReturned)
-                    .add("numberOfRecordsProcessed=" + numberOfRecordsProcessed)
-                    .toString();
-        }
     }
 
     /**
@@ -357,6 +473,51 @@ public class AuditRequest extends Request {
             this.token = requireNonNull(token);
             this.leafResource = requireNonNull(leafResource);
             this.exception = requireNonNull(exception);
+        }
+
+        /**
+         * Static factory method.
+         *
+         * @param original request id.
+         * @return the {@link ReadRequestExceptionAuditRequest}
+         */
+        public static IToken create(final RequestId original) {
+            return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ReadRequestExceptionAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
+            return Objects.equals(token, that.token) &&
+                    Objects.equals(leafResource, that.leafResource) &&
+                    Objects.equals(exception, that.exception);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), token, leafResource, exception);
+        }
+
+        @Override
+        @Generated
+        public String toString() {
+            return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
+                    .add("token='" + token + "'")
+                    .add("leafResource=" + leafResource)
+                    .add("exception=" + exception)
+                    .add(super.toString())
+                    .toString();
         }
 
         public interface IToken {
@@ -382,57 +543,5 @@ public class AuditRequest extends Request {
              */
             ReadRequestExceptionAuditRequest withException(Throwable exception);
         }
-
-        /**
-         * Static factory method.
-         *
-         * @param original request id.
-         * @return the {@link ReadRequestExceptionAuditRequest}
-         */
-        public static IToken create(final RequestId original) {
-            return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
-        }
-
-        @Override
-        public String toString() {
-            return new StringJoiner(", ", ReadRequestExceptionAuditRequest.class.getSimpleName() + "[", "]")
-                    .add(super.toString())
-                    .add("token='" + token + "'")
-                    .add("leafResource=" + leafResource)
-                    .add("exception=" + exception)
-                    .toString();
-        }
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AuditRequest)) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        AuditRequest that = (AuditRequest) o;
-        return timestamp.equals(that.timestamp) &&
-                serverIp.equals(that.serverIp) &&
-                serverHostname.equals(that.serverHostname);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), timestamp, serverIp, serverHostname);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", AuditRequest.class.getSimpleName() + "[", "]")
-                .add(super.toString())
-                .add("timestamp=" + timestamp)
-                .add("serverIp='" + serverIp + "'")
-                .add("serverHostname='" + serverHostname + "'")
-                .toString();
     }
 }

@@ -59,6 +59,7 @@ public interface DataService extends Service {
 
     /**
      * Used to add a new serialiser to the data reader
+     *
      * @param request a request describing the serialiser to add
      * @return a {@link Boolean} true/false on success/failure
      */

@@ -77,7 +77,6 @@ spec:
         }
         stage('Unit Tests, Checkstyle and Install') {
             x = env.BRANCH_NAME
-
             if (x.substring(0, 2) == "PR") {
                 y = x.substring(3)
                 git url: 'https://github.com/gchq/Palisade-services.git'

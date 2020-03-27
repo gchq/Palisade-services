@@ -42,9 +42,9 @@ public interface PolicyService extends Service {
      * the resource given their purpose. This is where any resource level
      * access controls are enforced.
      *
-     * @param user the {@link User} requesting the data
-     * @param context the query time {@link Context} containing environmental variables
-     *                such as why they want the data
+     * @param user     the {@link User} requesting the data
+     * @param context  the query time {@link Context} containing environmental variables
+     *                 such as why they want the data
      * @param resource the {@link Resource} being queried for access
      * @param <R>      the type of resource (may be a supertype)
      * @return an Optional {@link Resource} which is only present if the resource
@@ -58,7 +58,6 @@ public interface PolicyService extends Service {
      *
      * @param resource a {@link Resource} to get policies for
      * @param <R>      the type of resource (may be a supertype)
-     *
      * @return an Optional {@link Policy} if any policies exist for the resource
      */
     // FIXME: This cannot be typed as <T> Optional<Policy<T>> getPolicy(Resource resource)
@@ -79,9 +78,8 @@ public interface PolicyService extends Service {
      * This method allows for the setting of a policy to a resource.
      *
      * @param resource a {@link Resource} to set a policy for
-     * @param policy the {@link Policy} to apply to this resource
-     * @param <T> the record type for this resource
-     *
+     * @param policy   the {@link Policy} to apply to this resource
+     * @param <T>      the record type for this resource
      * @return the {@link Policy} that was added (may be different to what was requested)
      */
     <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
@@ -89,10 +87,9 @@ public interface PolicyService extends Service {
     /**
      * This method allows for the setting of a policy to a resource type.
      *
-     * @param type a resource type to apply a blanket policy to
+     * @param type   a resource type to apply a blanket policy to
      * @param policy the {@link Policy} to apply to this type
-     * @param <T> the record type for this resource
-     *
+     * @param <T>    the record type for this resource
      * @return the {@link Policy} that was added (may be different to what was requested)
      */
     <T> Policy<T> setTypePolicy(String type, Policy<T> policy);

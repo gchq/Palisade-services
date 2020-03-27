@@ -16,14 +16,14 @@
 
 package uk.gov.gchq.palisade.service.palisade.request;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.ToStringBuilder;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.Request;
+
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,69 +34,71 @@ public class GetDataRequestConfig extends Request {
     private RequestId token;
     private Resource resource;
 
+    @Generated
     public GetDataRequestConfig token(final RequestId requestId) {
         requireNonNull(requestId, "The request id cannot be set to null.");
-        this.token = requestId;
+        this.setToken(requestId);
         return this;
     }
 
+    @Generated
     public GetDataRequestConfig resource(final Resource resource) {
         requireNonNull(resource, "The resource cannot be set to null.");
-        this.resource = resource;
+        this.setResource(resource);
         return this;
     }
 
+    @Generated
     public RequestId getToken() {
-        requireNonNull(token, "The request id has not been set.");
         return token;
     }
 
+    @Generated
+    public void setToken(final RequestId token) {
+        requireNonNull(token);
+        this.token = token;
+    }
+
+    @Generated
     public Resource getResource() {
-        requireNonNull(resource, "The resource has not been set.");
         return resource;
     }
 
-    public void setToken(final RequestId token) {
-        token(token);
-    }
-
+    @Generated
     public void setResource(final Resource resource) {
-        resource(resource);
+        requireNonNull(resource);
+        this.resource = resource;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof GetDataRequestConfig)) {
             return false;
         }
-
+        if (!super.equals(o)) {
+            return false;
+        }
         final GetDataRequestConfig that = (GetDataRequestConfig) o;
-
-        return new EqualsBuilder()
-                .appendSuper(super.equals(o))
-                .append(token, that.token)
-                .append(resource, that.resource)
-                .isEquals();
+        return Objects.equals(token, that.token) &&
+                Objects.equals(resource, that.resource);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(7, 37)
-                .appendSuper(super.hashCode())
-                .append(token)
-                .append(resource)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), token, resource);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("token", token)
-                .append("resource", resource)
+        return new StringJoiner(", ", GetDataRequestConfig.class.getSimpleName() + "[", "]")
+                .add("token=" + token)
+                .add("resource=" + resource)
                 .toString();
     }
 }
