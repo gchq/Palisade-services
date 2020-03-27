@@ -18,56 +18,73 @@ package uk.gov.gchq.palisade.service.user.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
+
+import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties(prefix = "population")
 public class StdUserConfiguration implements UserConfiguration {
 
     private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
 
+    /**
+     * Constructor with 0 arguments for a standard implementation
+     * of the {@link UserConfiguration} interface
+     */
     public StdUserConfiguration() {
     }
 
+    /**
+     * Constructor with 1 argument for a standard implementation
+     * of the {@link UserConfiguration} interface
+     */
     public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
         this.users = users;
     }
 
     @Override
+    @Generated
     public List<StdUserCacheWarmerFactory> getUsers() {
         return users;
     }
 
+    @Generated
     public void setUsers(final List<StdUserCacheWarmerFactory> users) {
+        requireNonNull(users);
         this.users = users;
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof StdUserConfiguration)) {
             return false;
         }
-
         final StdUserConfiguration that = (StdUserConfiguration) o;
         return Objects.equals(users, that.users);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(users);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return "StdUserConfiguration{" +
-                "users=" + users +
-                '}';
+        return new StringJoiner(", ", StdUserConfiguration.class.getSimpleName() + "[", "]")
+                .add("users=" + users)
+                .add(super.toString())
+                .toString();
     }
 }
