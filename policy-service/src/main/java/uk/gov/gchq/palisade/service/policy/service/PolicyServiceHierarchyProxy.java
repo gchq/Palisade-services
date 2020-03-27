@@ -68,7 +68,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
      * @param rulesExtractor The rule type to extract from each policy
      * @param <T>            The record tpe for this resource
      * @return An optional {@link Rules} object, which contains the list of rules found
-     * that need to be applied to the resource.
+     *         that need to be applied to the resource.
      */
     private <T> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
         LOGGER.debug("Getting the applicable rules: {}", resource);

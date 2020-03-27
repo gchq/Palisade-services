@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -44,67 +45,67 @@ public class ServiceConfiguration {
     private Optional<String> err = Optional.empty();
     private Map<String, String> level = Collections.emptyMap();
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public String getJar() {
         return jar;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setJar(final String jar) {
         requireNonNull(jar);
         this.jar = jar;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public List<String> getPaths() {
         return paths;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setPaths(final List<String> paths) {
         requireNonNull(paths);
         this.paths = paths;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public List<String> getProfiles() {
         return profiles;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setProfiles(final List<String> profiles) {
         requireNonNull(profiles);
         this.profiles = profiles;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public Optional<String> getLog() {
         return log;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setLog(final Optional<String> log) {
         requireNonNull(log);
         this.log = log;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public Optional<String> getErr() {
         return err;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setErr(final Optional<String> err) {
         requireNonNull(err);
         this.err = err;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public Map<String, String> getLevel() {
         return level;
     }
 
-    @uk.gov.gchq.palisade.Generated
+    @Generated
     public void setLevel(final Map<String, String> level) {
         requireNonNull(level);
         this.level = level;
@@ -147,6 +148,30 @@ public class ServiceConfiguration {
                     // POST the entity to the actuator, expect a response of OK
                     return new SimpleEntry<>(entry.getKey(), new HttpEntity<>(body, header));
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ServiceConfiguration)) {
+            return false;
+        }
+        final ServiceConfiguration that = (ServiceConfiguration) o;
+        return Objects.equals(jar, that.jar) &&
+                Objects.equals(paths, that.paths) &&
+                Objects.equals(profiles, that.profiles) &&
+                Objects.equals(log, that.log) &&
+                Objects.equals(err, that.err) &&
+                Objects.equals(level, that.level);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(jar, paths, profiles, log, err, level);
     }
 
     @Override

@@ -148,6 +148,30 @@ public class AuditRequest extends Request {
 
         @Override
         @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RegisterRequestCompleteAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final RegisterRequestCompleteAuditRequest that = (RegisterRequestCompleteAuditRequest) o;
+            return Objects.equals(user, that.user) &&
+                    Objects.equals(leafResources, that.leafResources) &&
+                    Objects.equals(context, that.context);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), user, leafResources, context);
+        }
+
+        @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", RegisterRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
                     .add("user=" + user)
@@ -214,6 +238,32 @@ public class AuditRequest extends Request {
          */
         public static IUserId create(final RequestId original) {
             return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof RegisterRequestExceptionAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final RegisterRequestExceptionAuditRequest that = (RegisterRequestExceptionAuditRequest) o;
+            return Objects.equals(userId, that.userId) &&
+                    Objects.equals(resourceId, that.resourceId) &&
+                    Objects.equals(context, that.context) &&
+                    Objects.equals(exception, that.exception) &&
+                    Objects.equals(serviceClass, that.serviceClass);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
         }
 
         @Override

@@ -23,10 +23,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -84,7 +87,29 @@ public class ApplicationConfiguration {
         }
 
         @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ConfigurationMap)) {
+                return false;
+            }
+            final ConfigurationMap that = (ConfigurationMap) o;
+            return Objects.equals(services, that.services);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(services);
+        }
+
+        @Override
+        @Generated
         public String toString() {
+            // A non-standard equals function with some newlines and indents
+            // Let JaCoCo treat it as @Generated anyway
             final StringBuilder sb = new StringBuilder("ConfigurationMap{\n");
             sb.append('\t').append(services.entrySet().stream()
                     .map(entry -> entry.toString().replace("\n", "\n\t"))
@@ -93,5 +118,4 @@ public class ApplicationConfiguration {
             return sb.toString();
         }
     }
-
 }

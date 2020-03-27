@@ -150,6 +150,33 @@ public class AuditRequest extends Request {
 
         @Override
         @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ReadRequestCompleteAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final ReadRequestCompleteAuditRequest that = (ReadRequestCompleteAuditRequest) o;
+            return numberOfRecordsReturned == that.numberOfRecordsReturned &&
+                    numberOfRecordsProcessed == that.numberOfRecordsProcessed &&
+                    Objects.equals(user, that.user) &&
+                    Objects.equals(leafResource, that.leafResource) &&
+                    Objects.equals(context, that.context) &&
+                    Objects.equals(rulesApplied, that.rulesApplied);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+        }
+
+        @Override
+        @Generated
         public String toString() {
             return new StringJoiner(", ", ReadRequestCompleteAuditRequest.class.getSimpleName() + "[", "]")
                     .add("user=" + user)
@@ -237,6 +264,30 @@ public class AuditRequest extends Request {
          */
         public static IToken create(final RequestId original) {
             return token -> leafResource -> exception -> new ReadRequestExceptionAuditRequest(null, original, token, leafResource, exception);
+        }
+
+        @Override
+        @Generated
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof ReadRequestExceptionAuditRequest)) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            final ReadRequestExceptionAuditRequest that = (ReadRequestExceptionAuditRequest) o;
+            return Objects.equals(token, that.token) &&
+                    Objects.equals(leafResource, that.leafResource) &&
+                    Objects.equals(exception, that.exception);
+        }
+
+        @Override
+        @Generated
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), token, leafResource, exception);
         }
 
         @Override
