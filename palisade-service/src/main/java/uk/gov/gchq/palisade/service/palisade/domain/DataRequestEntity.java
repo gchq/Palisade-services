@@ -35,6 +35,7 @@ import javax.persistence.UniqueConstraint;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -113,5 +114,18 @@ public class DataRequestEntity {
     @Generated
     public void setLeafResourceMap(final Map<LeafResource, Rules> leafResourceMap) {
         this.leafResourceMap = Optional.ofNullable(leafResourceMap).orElseGet(Collections::emptyMap);
+    }
+
+    // No hashCode or equals as this is inappropriate for usage ot the class as a db entry
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", DataRequestEntity.class.getSimpleName() + "[", "]")
+                .add("requestId='" + requestId + "'")
+                .add("user=" + user)
+                .add("context=" + context)
+                .add("leafResourceMap=" + leafResourceMap)
+                .add(super.toString())
+                .toString();
     }
 }

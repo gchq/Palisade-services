@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
@@ -106,5 +107,18 @@ public class LeafResourceRulesEntity {
     @Generated
     public void setRules(final Rules<?> rules) {
         this.rules = requireNonNull(rules, "Rules<?>");
+    }
+
+    // No hashCode or equals as this is inappropriate for usage ot the class as a db entry
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", LeafResourceRulesEntity.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("requestId='" + requestId + "'")
+                .add("leafResource=" + leafResource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
     }
 }
