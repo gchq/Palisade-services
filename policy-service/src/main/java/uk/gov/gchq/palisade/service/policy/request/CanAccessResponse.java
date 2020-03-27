@@ -54,6 +54,7 @@ public class CanAccessResponse {
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -66,6 +67,7 @@ public class CanAccessResponse {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(canAccessResources);
     }

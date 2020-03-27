@@ -48,7 +48,7 @@ public interface PolicyService extends Service {
      * @param resource the {@link Resource} being queried for access
      * @param <R>      the type of resource (may be a supertype)
      * @return an Optional {@link Resource} which is only present if the resource
-     * is accessible
+     *         is accessible
      */
     <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource);
 

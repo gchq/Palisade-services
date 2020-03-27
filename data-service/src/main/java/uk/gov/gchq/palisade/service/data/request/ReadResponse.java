@@ -70,6 +70,7 @@ public abstract class ReadResponse {
      * @see ReadResponse#asInputStream()
      * @see ReadResponse#writeTo(OutputStream)
      */
+    @Generated
     public boolean isUsed() {
         return isUsed.get();
     }
