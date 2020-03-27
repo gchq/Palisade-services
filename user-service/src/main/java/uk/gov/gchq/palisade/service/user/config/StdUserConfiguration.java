@@ -43,6 +43,8 @@ public class StdUserConfiguration implements UserConfiguration {
     /**
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
+     *
+     * @param users     a list of objects implementing the {@link uk.gov.gchq.palisade.service.UserCacheWarmerFactory} interface
      */
     public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
         this.users = users;

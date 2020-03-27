@@ -49,6 +49,10 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
     /**
      * Constructor with 3 arguments for a standard implementation
      * of the {@link UserCacheWarmerFactory} interface.
+     *
+     * @param userId    a {@link String} value of a user.
+     * @param roles     a {@link Set} of {@link String} role values for the user.
+     * @param auths     a {@link Set} of {@link String} auth values for the user.
      */
     public StdUserCacheWarmerFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
