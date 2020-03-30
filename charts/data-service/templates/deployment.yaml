@@ -46,7 +46,7 @@ spec:
             protocol: TCP
         volumeMounts:
         - mountPath: "/usr/share/data"
-          name: data-volume
+          name: classjars
         livenessProbe:
           httpGet:
             path: /actuator/health
