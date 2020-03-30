@@ -13,73 +13,28 @@
 # limitations under the License.
 #
 
-# The manager creates a number of commands to execute for each service in manager.services
-# All fields are *technically* optional but some (classpath, launcher, main) are probably required to start the spawned JVM process
-# Extensive use is made of the eureka discovery client to discover services and endpoints - subsequently the "eureka" profile is enabled by default for all services
-# Extract the project version (x.y.z-REVISION etc.)
-app:
-  version: '@project.version@'
-    # While the library happens to be the same version as services, it should be declared here as a static name
-library:
-  version: ${app.version}
-
-eureka:
-  client:
-    enabled: true
-
 manager:
-  # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
-  default:
-    # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
-    example-libs: &libraries
-    - ../Palisade-examples/example-library/target/example-library-${library.version}.jar
-    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}.jar
-
   services:
-
     audit-service:
-      jar: audit-service/target/audit-service-${app.version}-exec.jar
-      paths: *libraries
-      profiles:
-        - eureka
       log: audit-service-example.log
       err: audit-service-example.err
 
     data-service:
-      jar: data-service/target/data-service-${app.version}-exec.jar
-      paths: *libraries
-      profiles:
-        - eureka
       log: data-service-example.log
       err: data-service-example.err
 
     palisade-service:
-      jar: palisade-service/target/palisade-service-${app.version}-exec.jar
-      paths: *libraries
-      profiles:
-        - eureka
       log: palisade-service-example.log
       err: palisade-service-example.err
 
     policy-service:
-      jar: policy-service/target/policy-service-${app.version}-exec.jar
-      paths: *libraries
-      profiles:
-        - example
       log: policy-service-example.log
       err: policy-service-example.err
 
     resource-service:
-      jar: resource-service/target/resource-service-${app.version}-exec.jar
-      profiles:
-        - eureka
       log: resource-service-example.log
       err: resource-service-example.err
 
     user-service:
-      jar: user-service/target/user-service-${app.version}-exec.jar
-      paths: *libraries
-      profiles:
-        - example
       log: user-service-example.log
       err: user-service-example.err

@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=uk.gov.gchq.palisade.example.config.ApplicationConfiguration
