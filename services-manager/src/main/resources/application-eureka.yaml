@@ -17,3 +17,31 @@
 eureka:
   client:
     enabled: true
+
+manager:
+
+  services:
+
+    audit-service:
+      profiles:
+      - eureka
+
+    data-service:
+      profiles:
+      - eureka
+
+    palisade-service:
+      profiles:
+      - eureka
+
+    policy-service:
+      profiles:
+      - eureka
+
+    resource-service:
+      profiles:
+      - eureka
+
+    user-service:
+      profiles:
+      - eureka

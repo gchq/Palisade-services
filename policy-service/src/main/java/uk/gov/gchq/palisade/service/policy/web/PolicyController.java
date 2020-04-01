@@ -31,8 +31,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
@@ -54,10 +54,14 @@ public class PolicyController {
 
     private final PolicyService service;
     private PolicyConfiguration policyConfig;
+    private UserConfiguration userConfig;
 
-    public PolicyController(final @Qualifier("controller") PolicyService service, final @Qualifier("policyConfiguration") PolicyConfiguration configuration) {
+    public PolicyController(final @Qualifier("controller") PolicyService service,
+                            final @Qualifier("policyConfiguration") PolicyConfiguration policyConfig,
+                            final @Qualifier("userConfiguration") UserConfiguration userConfig) {
         this.service = service;
-        this.policyConfig = configuration;
+        this.policyConfig = policyConfig;
+        this.userConfig = userConfig;
     }
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
@@ -106,7 +110,7 @@ public class PolicyController {
         // Add example Policies to the policy-service cache
         Resource resource = policyConfig.createResource();
         policyConfig.getPolicies().stream()
-                .map(PolicyCacheWarmerFactory::policyWarm)
+                .map(cacheWarmer -> cacheWarmer.policyWarm(userConfig.getUsers()))
                 .forEach(policy -> service.setResourcePolicy(resource, policy));
     }
 }

@@ -12,29 +12,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+app:
+  version: '@project.version@'
+# While the library happens to be the same version as services, it should be declared here as a static name
+library:
+  version: ${app.version}
 
 manager:
+  # Defaults used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+  default:
+    # Library includes relative to manager.root above (e.g. ../palisade-examples => palisade-services/../palisade-examples)
+    example-libs: &libraries
+    - ../Palisade-examples/example-library/target/example-library-${library.version}.jar
+    - ../Palisade-examples/hr-data-generator/target/hr-data-generator-${library.version}.jar
+
   services:
     audit-service:
+      jar: audit-service/target/audit-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
       log: audit-service-example.log
       err: audit-service-example.err
 
     data-service:
+      jar: data-service/target/data-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
       log: data-service-example.log
       err: data-service-example.err
 
     palisade-service:
+      jar: palisade-service/target/palisade-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
+      - jvm
       log: palisade-service-example.log
       err: palisade-service-example.err
 
     policy-service:
+      jar: policy-service/target/policy-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
       log: policy-service-example.log
       err: policy-service-example.err
 
     resource-service:
+      jar: resource-service/target/resource-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
       log: resource-service-example.log
       err: resource-service-example.err
 
     user-service:
+      jar: user-service/target/user-service-${app.version}-exec.jar
+      paths: *libraries
+      profiles:
+      - eureka
+      - example
       log: user-service-example.log
       err: user-service-example.err
