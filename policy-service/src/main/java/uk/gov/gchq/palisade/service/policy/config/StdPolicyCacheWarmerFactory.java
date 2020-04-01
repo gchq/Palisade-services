@@ -16,19 +16,23 @@
 
 package uk.gov.gchq.palisade.service.policy.config;
 
+import org.apache.avro.reflect.MapEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -40,6 +44,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyCacheWarmerFactory.class);
 
     private String type;
+    private String resource;
     private String owner;
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
@@ -47,8 +52,10 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     public StdPolicyCacheWarmerFactory() {
     }
 
-    public StdPolicyCacheWarmerFactory(final String type, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+    public StdPolicyCacheWarmerFactory(final String type, final String resource, final String owner,
+                                       final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.type = type;
+        this.resource = resource;
         this.owner = owner;
         this.resourceRules = resourceRules;
         this.recordRules = recordRules;
@@ -63,6 +70,17 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     public void setType(final String type) {
         requireNonNull(type);
         this.type = type;
+    }
+
+    @Generated
+    public String getResource() {
+        return resource;
+    }
+
+    @Generated
+    public void setResource(final String resource) {
+        requireNonNull(resource);
+        this.resource = resource;
     }
 
     @Generated
@@ -98,9 +116,13 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         this.recordRules = recordRules;
     }
 
+    @Override
+    public Resource createResource() {
+        return new FileResource();
+    }
 
     @Override
-    public Policy policyWarm(final List<? extends UserCacheWarmerFactory> users) {
+    public Entry<Resource, Policy> policyWarm(final List<? extends UserCacheWarmerFactory> users) {
         Policy<?> policy = new Policy<>();
         for (StdUserCacheWarmerFactory user : (List<StdUserCacheWarmerFactory>) users) {
             if (user.getUserId().equals(owner)) {
@@ -109,20 +131,51 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         }
         for (String key : resourceRules.keySet()) {
             try {
-                policy.resourceLevelRule(key, (Rule<Resource>) createRule(resourceRules.get(key), "resource"));
+                policy.resourceLevelRule(key, createRule(resourceRules.get(key), "resource"));
             } catch (Exception ex) {
                 LOGGER.error("Error creating resourceLevel Rule: {}", ex.getMessage());
             }
         }
-        return policy;
+        for (String key : recordRules.keySet()) {
+            try {
+                policy.recordLevelRule(key, createRule(recordRules.get(key), "record"));
+            } catch (Exception ex) {
+                LOGGER.error("Error creating recordLevel Rule: {}", ex.getMessage());
+            }
+        }
+        return new MapEntry<>(createResource(), policy);
     }
 
-    private Rule<?> createRule(final String rule, final String ruleType) throws Exception {
-        if ("resource".equals(ruleType)) {
-            return (Rule<Resource>) Class.forName(rule).getConstructor().newInstance();
-        } else {
-            return null;
+    private <T> Rule<T> createRule(final String rule, final String ruleType) {
+        if ("resource".equalsIgnoreCase(ruleType)) {
+            try {
+                LOGGER.debug("Adding rule {} for rule type {}", rule, ruleType);
+                return (Rule<T>) Class.forName(rule).getConstructor().newInstance();
+            } catch (ClassNotFoundException | NoSuchMethodException ex) {
+                LOGGER.error("Error getting class: {}", ex.getMessage());
+            } catch (IllegalAccessException e) {
+                LOGGER.error("Error accessing constructor: {}", e.getMessage());
+            } catch (InstantiationException e) {
+                LOGGER.error("Error instantiating: {}", e.getMessage());
+            } catch (InvocationTargetException e) {
+                LOGGER.error("Invocation Target Exception: {}", e.getMessage());
+            }
         }
+        if ("record".equalsIgnoreCase(ruleType)) {
+            try {
+                LOGGER.debug("Adding rule {} for rule type {}", rule, ruleType);
+                return (Rule<T>) Class.forName(rule).getConstructor().newInstance();
+            } catch (ClassNotFoundException | NoSuchMethodException ex) {
+                LOGGER.error("Error getting class: {}", ex.getMessage());
+            } catch (IllegalAccessException e) {
+                LOGGER.error("Error accessing constructor: {}", e.getMessage());
+            } catch (InstantiationException e) {
+                LOGGER.error("Error instantiating: {}", e.getMessage());
+            } catch (InvocationTargetException e) {
+                LOGGER.error("Invocation Target Exception: {}", e.getMessage());
+            }
+        }
+        return null;
     }
 
     @Override
@@ -136,6 +189,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         }
         final StdPolicyCacheWarmerFactory that = (StdPolicyCacheWarmerFactory) o;
         return Objects.equals(type, that.type) &&
+                Objects.equals(resource, that.resource) &&
                 Objects.equals(owner, that.owner) &&
                 Objects.equals(resourceRules, that.resourceRules) &&
                 Objects.equals(recordRules, that.recordRules);
@@ -144,7 +198,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(type, owner, resourceRules, recordRules);
+        return Objects.hash(type, resource, owner, resourceRules, recordRules);
     }
 
     @Override
@@ -152,6 +206,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     public String toString() {
         return new StringJoiner(", ", StdPolicyCacheWarmerFactory.class.getSimpleName() + "[", "]")
                 .add("type='" + type + "'")
+                .add("resource='" + resource + "'")
                 .add("owner='" + owner + "'")
                 .add("resourceRules=" + resourceRules)
                 .add("recordRules=" + recordRules)

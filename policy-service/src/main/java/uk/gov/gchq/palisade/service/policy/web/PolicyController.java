@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
@@ -108,9 +107,8 @@ public class PolicyController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example Policies to the policy-service cache
-        Resource resource = policyConfig.createResource();
         policyConfig.getPolicies().stream()
                 .map(cacheWarmer -> cacheWarmer.policyWarm(userConfig.getUsers()))
-                .forEach(policy -> service.setResourcePolicy(resource, policy));
+                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
     }
 }

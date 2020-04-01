@@ -19,8 +19,6 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 
 import java.util.ArrayList;
@@ -33,7 +31,6 @@ import static java.util.Objects.requireNonNull;
 @ConfigurationProperties(prefix = "population")
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
-    private String resource;
     private List<StdPolicyCacheWarmerFactory> policies = new ArrayList<>();
     private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
 
@@ -48,26 +45,13 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with 2 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param resource  a {@link String} value of the resource that will have the policies applied to it.
      * @param policies  a {@link List} of objects implementing the {@link uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory} interface
      * @param users  a {@link List} of objects implementing the {@link uk.gov.gchq.palisade.service.UserCacheWarmerFactory} interface
      */
-    public StdPolicyConfiguration(final String resource, final List<StdPolicyCacheWarmerFactory> policies,
+    public StdPolicyConfiguration(final List<StdPolicyCacheWarmerFactory> policies,
                                   final List<StdUserCacheWarmerFactory> users) {
-        this.resource = resource;
         this.policies = policies;
         this.users = users;
-    }
-
-    @Generated
-    public String getResource() {
-        return resource;
-    }
-
-    @Generated
-    public void setResource(final String resource) {
-        requireNonNull(resource);
-        this.resource = resource;
     }
 
     @Generated
@@ -94,11 +78,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     }
 
     @Override
-    public Resource createResource() {
-        return new FileResource();
-    }
-
-    @Override
     @Generated
     public boolean equals(final Object o) {
         if (this == o) {
@@ -108,22 +87,20 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
             return false;
         }
         final StdPolicyConfiguration that = (StdPolicyConfiguration) o;
-        return Objects.equals(resource, that.resource) &&
-                Objects.equals(policies, that.policies) &&
+        return Objects.equals(policies, that.policies) &&
                 Objects.equals(users, that.users);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(resource, policies, users);
+        return Objects.hash(policies, users);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", StdPolicyConfiguration.class.getSimpleName() + "[", "]")
-                .add("resource='" + resource + "'")
                 .add("policies=" + policies)
                 .add("users=" + users)
                 .add(super.toString())
