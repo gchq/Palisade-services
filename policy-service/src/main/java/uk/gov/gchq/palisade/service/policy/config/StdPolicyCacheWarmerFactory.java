@@ -130,7 +130,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         Policy<?> policy = new Policy<>();
         for (StdUserCacheWarmerFactory user : (List<StdUserCacheWarmerFactory>) users) {
             if (user.getUserId().equals(owner)) {
-                policy.owner(user.userWarm());
+                policy.setOwner(user.userWarm());
             }
         }
         for (Entry<String, String> entry : resourceRules.entrySet()) {
