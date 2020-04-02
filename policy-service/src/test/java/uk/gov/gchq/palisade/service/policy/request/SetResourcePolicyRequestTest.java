@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.policy.HasTestingPurpose;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.IOException;
 import java.util.stream.Collectors;

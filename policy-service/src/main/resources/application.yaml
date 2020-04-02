@@ -48,3 +48,7 @@ management:
         - loggers
     loggers:
       enabled: true
+
+population:
+  policy: std
+  user: std
