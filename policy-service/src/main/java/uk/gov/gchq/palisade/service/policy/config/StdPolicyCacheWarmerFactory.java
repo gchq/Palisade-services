@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.util.FileUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
