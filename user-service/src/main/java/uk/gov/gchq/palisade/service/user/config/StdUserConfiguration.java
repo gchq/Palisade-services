@@ -47,7 +47,7 @@ public class StdUserConfiguration implements UserConfiguration {
      * @param users     a list of objects implementing the {@link uk.gov.gchq.palisade.service.UserCacheWarmerFactory} interface
      */
     public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
-        this.users = users;
+        this.setUsers(users);
     }
 
     @Override

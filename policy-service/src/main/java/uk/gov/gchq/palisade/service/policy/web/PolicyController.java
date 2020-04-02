@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
@@ -43,7 +44,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 @RestController
 @RequestMapping(path = "/")
@@ -59,7 +63,34 @@ public class PolicyController {
                             final @Qualifier("policyConfiguration") PolicyConfiguration policyConfig,
                             final @Qualifier("userConfiguration") UserConfiguration userConfig) {
         this.service = service;
+        this.setPolicyConfig(policyConfig);
+        this.setUserConfig(userConfig);
+    }
+
+    @Generated
+    public PolicyService getService() {
+        return service;
+    }
+
+    @Generated
+    public PolicyConfiguration getPolicyConfig() {
+        return policyConfig;
+    }
+
+    @Generated
+    public void setPolicyConfig(final PolicyConfiguration policyConfig) {
+        requireNonNull(policyConfig);
         this.policyConfig = policyConfig;
+    }
+
+    @Generated
+    public UserConfiguration getUserConfig() {
+        return userConfig;
+    }
+
+    @Generated
+    public void setUserConfig(final UserConfiguration userConfig) {
+        requireNonNull(userConfig);
         this.userConfig = userConfig;
     }
 
@@ -110,5 +141,16 @@ public class PolicyController {
         policyConfig.getPolicies().stream()
                 .map(cacheWarmer -> cacheWarmer.policyWarm(userConfig.getUsers()))
                 .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyController.class.getSimpleName() + "[", "]")
+                .add("service=" + service)
+                .add("policyConfig=" + policyConfig)
+                .add("userConfig=" + userConfig)
+                .add(super.toString())
+                .toString();
     }
 }

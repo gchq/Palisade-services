@@ -50,8 +50,8 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      */
     public StdPolicyConfiguration(final List<StdPolicyCacheWarmerFactory> policies,
                                   final List<StdUserCacheWarmerFactory> users) {
-        this.policies = policies;
-        this.users = users;
+        this.setPolicies(policies);
+        this.setUsers(users);
     }
 
     @Generated

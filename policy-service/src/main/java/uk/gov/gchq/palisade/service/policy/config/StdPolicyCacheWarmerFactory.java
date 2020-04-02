@@ -38,6 +38,7 @@ import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,15 +61,20 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     private Map<String, String> recordRules;
 
     public StdPolicyCacheWarmerFactory() {
+        this.setType("");
+        this.setResource("");
+        this.setOwner("");
+        this.setResourceRules(Collections.emptyMap());
+        this.setRecordRules(Collections.emptyMap());
     }
 
     public StdPolicyCacheWarmerFactory(final String type, final String resource, final String owner,
                                        final Map<String, String> resourceRules, final Map<String, String> recordRules) {
-        this.type = type;
-        this.resource = resource;
-        this.owner = owner;
-        this.resourceRules = resourceRules;
-        this.recordRules = recordRules;
+        this.setType(type);
+        this.setResource(resource);
+        this.setOwner(owner);
+        this.setResourceRules(resourceRules);
+        this.setRecordRules(recordRules);
     }
 
     @Generated
@@ -134,19 +140,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
                 policy.owner(user.userWarm());
             }
         }
-        for (String key : resourceRules.keySet()) {
-            try {
-                policy.resourceLevelRule(key, createRule(resourceRules.get(key), "resource"));
-            } catch (Exception ex) {
-                LOGGER.error("Error creating resourceLevel Rule: {}", ex.getMessage());
-            }
+        for (Entry<String, String> entry : resourceRules.entrySet()) {
+            policy.resourceLevelRule(entry.getKey(), createRule(entry.getValue(), "resource"));
         }
-        for (String key : recordRules.keySet()) {
-            try {
-                policy.recordLevelRule(key, createRule(recordRules.get(key), "record"));
-            } catch (Exception ex) {
-                LOGGER.error("Error creating recordLevel Rule: {}", ex.getMessage());
-            }
+        for (Entry<String, String> entry : recordRules.entrySet()) {
+            policy.recordLevelRule(entry.getKey(), createRule(entry.getValue(), "record"));
         }
         return new MapEntry<>(createResource(), policy);
     }
@@ -156,28 +154,16 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
             try {
                 LOGGER.debug("Adding rule {} for rule type {}", rule, ruleType);
                 return (Rule<T>) Class.forName(rule).getConstructor().newInstance();
-            } catch (ClassNotFoundException | NoSuchMethodException ex) {
-                LOGGER.error("Error getting class: {}", ex.getMessage());
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Error accessing constructor: {}", e.getMessage());
-            } catch (InstantiationException e) {
-                LOGGER.error("Error instantiating: {}", e.getMessage());
-            } catch (InvocationTargetException e) {
-                LOGGER.error("Invocation Target Exception: {}", e.getMessage());
+            } catch (Exception ex) {
+                LOGGER.error("Error creating resourceLevel rule: {} - {}", ex.getMessage(), ex.getCause());
             }
         }
         if ("record".equalsIgnoreCase(ruleType)) {
             try {
                 LOGGER.debug("Adding rule {} for rule type {}", rule, ruleType);
                 return (Rule<T>) Class.forName(rule).getConstructor().newInstance();
-            } catch (ClassNotFoundException | NoSuchMethodException ex) {
-                LOGGER.error("Error getting class: {}", ex.getMessage());
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Error accessing constructor: {}", e.getMessage());
-            } catch (InstantiationException e) {
-                LOGGER.error("Error instantiating: {}", e.getMessage());
-            } catch (InvocationTargetException e) {
-                LOGGER.error("Invocation Target Exception: {}", e.getMessage());
+            } catch (Exception ex) {
+                LOGGER.error("Error creating recordLevel rule: {} - {}", ex.getMessage(), ex.getCause());
             }
         }
         return null;
@@ -186,11 +172,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     @Override
     public Resource createResource() {
         URI normalised = FileUtil.convertToFileURI(resource);
-        String resource = normalised.toString();
+        String resourceString = normalised.toString();
         if (resource.endsWith(".avro")) {
-            return new FileResource().id(resource).type(type).serialisedFormat("avro").parent(getParent(resource));
+            return new FileResource().id(resourceString).type(type).serialisedFormat("avro").parent(getParent(resourceString));
         } else {
-            return new DirectoryResource().id(resource).parent(getParent(resource));
+            return new DirectoryResource().id(resourceString).parent(getParent(resourceString));
         }
     }
 
