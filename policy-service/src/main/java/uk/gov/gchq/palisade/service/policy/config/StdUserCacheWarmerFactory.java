@@ -41,9 +41,9 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
      * of the {@link UserCacheWarmerFactory} interface.
      */
     public StdUserCacheWarmerFactory() {
-        this.setUserId("");
-        this.setAuths(Collections.emptySet());
-        this.setRoles(Collections.emptySet());
+        this.userId = "";
+        this.auths = Collections.emptySet();
+        this.roles = Collections.emptySet();
     }
 
     /**
@@ -55,9 +55,9 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
      * @param auths     a {@link Set} of {@link String} auth values for the user.
      */
     public StdUserCacheWarmerFactory(final String userId, final Set<String> roles, final Set<String> auths) {
-        this.setUserId(userId);
-        this.setAuths(auths);
-        this.setRoles(roles);
+        this.userId = userId;
+        this.auths = auths;
+        this.roles = roles;
     }
 
     @Generated

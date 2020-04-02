@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.user.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 
 import java.util.ArrayList;
@@ -44,10 +45,10 @@ public class StdUserConfiguration implements UserConfiguration {
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link uk.gov.gchq.palisade.service.UserCacheWarmerFactory} interface
+     * @param users     a list of objects implementing the {@link UserCacheWarmerFactory} interface
      */
     public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
-        this.setUsers(users);
+        this.users = users;
     }
 
     @Override

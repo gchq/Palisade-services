@@ -37,7 +37,6 @@ import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,20 +59,15 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     private Map<String, String> recordRules;
 
     public StdPolicyCacheWarmerFactory() {
-        this.setType("");
-        this.setResource("");
-        this.setOwner("");
-        this.setResourceRules(Collections.emptyMap());
-        this.setRecordRules(Collections.emptyMap());
     }
 
     public StdPolicyCacheWarmerFactory(final String type, final String resource, final String owner,
                                        final Map<String, String> resourceRules, final Map<String, String> recordRules) {
-        this.setType(type);
-        this.setResource(resource);
-        this.setOwner(owner);
-        this.setResourceRules(resourceRules);
-        this.setRecordRules(recordRules);
+        this.type = type;
+        this.resource = resource;
+        this.owner = owner;
+        this.resourceRules = resourceRules;
+        this.recordRules = recordRules;
     }
 
     @Generated

@@ -61,6 +61,5 @@ feign:
 user-service:
   implementation: null-user-service
 
-cache:
-  userWarmer: stdUserCacheWarmer
-  userConfig: stdUserConfig
+population:
+  user: std

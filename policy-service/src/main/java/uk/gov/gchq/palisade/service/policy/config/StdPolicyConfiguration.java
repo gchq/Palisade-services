@@ -19,7 +19,9 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +47,13 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with 2 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param policies  a {@link List} of objects implementing the {@link uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory} interface
-     * @param users  a {@link List} of objects implementing the {@link uk.gov.gchq.palisade.service.UserCacheWarmerFactory} interface
+     * @param policies  a {@link List} of objects implementing the {@link PolicyCacheWarmerFactory} interface
+     * @param users  a {@link List} of objects implementing the {@link UserCacheWarmerFactory} interface
      */
     public StdPolicyConfiguration(final List<StdPolicyCacheWarmerFactory> policies,
                                   final List<StdUserCacheWarmerFactory> users) {
-        this.setPolicies(policies);
-        this.setUsers(users);
+        this.policies = policies;
+        this.users = users;
     }
 
     @Generated

@@ -49,8 +49,6 @@ management:
     loggers:
       enabled: true
 
-cache:
-  policyWarmer: stdPolicyCacheWarmer
-  policyConfig: stdPolicyConfig
-  userWarmer: stdUserCacheWarmer
-  userConfig: stdUserConfig
+population:
+  policy: std
+  user: std
