@@ -22,20 +22,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.util.FileUtil;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.StreamSupport;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties
@@ -117,11 +127,6 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     }
 
     @Override
-    public Resource createResource() {
-        return new FileResource();
-    }
-
-    @Override
     public Entry<Resource, Policy> policyWarm(final List<? extends UserCacheWarmerFactory> users) {
         Policy<?> policy = new Policy<>();
         for (StdUserCacheWarmerFactory user : (List<StdUserCacheWarmerFactory>) users) {
@@ -176,6 +181,47 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
             }
         }
         return null;
+    }
+
+    @Override
+    public Resource createResource() {
+        URI normalised = FileUtil.convertToFileURI(resource);
+        String resource = normalised.toString();
+        if (resource.endsWith(".avro")) {
+            return new FileResource().id(resource).type(type).serialisedFormat("avro").parent(getParent(resource));
+        } else {
+            return new DirectoryResource().id(resource).parent(getParent(resource));
+        }
+    }
+
+    public ParentResource getParent(final String fileURL) {
+        URI normalised = FileUtil.convertToFileURI(fileURL);
+        //this should only be applied to URLs that start with 'file://' not other types of URL
+        if (normalised.getScheme().equals(FileSystems.getDefault().provider().getScheme())) {
+            Path current = Paths.get(normalised);
+            Path parent = current.getParent();
+            //no parent can be found, must already be a directory tree root
+            if (isNull(parent)) {
+                throw new IllegalArgumentException(fileURL + " is already a directory tree root");
+            } else if (isDirectoryRoot(parent)) {
+                //else if this is a directory tree root
+                return new SystemResource().id(parent.toUri().toString());
+            } else {
+                //else recurse up a level
+                return new DirectoryResource().id(parent.toUri().toString()).parent(getParent(parent.toUri().toString()));
+            }
+        } else {
+            //if this is another scheme then there is no definable parent
+            return new SystemResource().id("");
+        }
+    }
+
+    public boolean isDirectoryRoot(final Path path) {
+        return StreamSupport
+                .stream(FileSystems.getDefault()
+                        .getRootDirectories()
+                        .spliterator(), false)
+                .anyMatch(path::equals);
     }
 
     @Override
