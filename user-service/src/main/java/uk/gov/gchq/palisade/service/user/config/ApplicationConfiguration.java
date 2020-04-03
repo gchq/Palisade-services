@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,14 +35,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableAutoConfiguration
 public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    public StdUserConfiguration userConfiguration() {
+        LOGGER.info("Standard User Configuration Instantiated");
+        return new StdUserConfiguration();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    public StdUserCacheWarmerFactory userCacheWarmerFactory() {
+        LOGGER.info("Standard User Cache Warmer Instantiated");
+        return new StdUserCacheWarmerFactory();
+    }
 
     @Bean
     public UserServiceProxy userService(final Set<UserService> userServices) {

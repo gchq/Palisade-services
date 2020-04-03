@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
