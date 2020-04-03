@@ -36,7 +36,7 @@ public class ManagedServiceFactory {
 
     public ManagedService construct(final String serviceName, final Supplier<URI> uriSupplier) {
         ManagedClient client = clientFactory.construct(serviceName, serviceName);
-        return new ManagedService( client, uriSupplier);
+        return new ManagedService(client, uriSupplier);
     }
 
     static class ManagedClientFactory {

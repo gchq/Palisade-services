@@ -18,9 +18,6 @@ package uk.gov.gchq.palisade.service.manager.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ConfigurationMap;
 

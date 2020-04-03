@@ -16,23 +16,14 @@
 
 package uk.gov.gchq.palisade.service.manager.runner;
 
-import com.netflix.appinfo.InstanceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class LoggingBouncer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);

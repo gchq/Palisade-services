@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
-import feign.Client;
-import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +35,6 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.io.File;
 import java.net.URI;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,7 +110,7 @@ public class ApplicationConfiguration {
     @Bean("loggingBouncer")
     @ConditionalOnProperty(name = "manager.mode", havingValue = "loggingBouncer")
     public ApplicationRunner loggingBouncerRunner(final Map<String, ServiceConfiguration> serviceConfigurationMap,
-                                            final Function<String, ManagedService> serviceProducer) {
+                                                  final Function<String, ManagedService> serviceProducer) {
         LOGGER.info("Constructed LoggingBouncer runner");
         return args -> {
             new LoggingBouncer(serviceConfigurationMap, serviceProducer).run();

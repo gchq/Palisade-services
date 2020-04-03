@@ -15,8 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.manager.service;
 
-import feign.FeignException.FeignClientException;
-import feign.Request;
 import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -46,7 +43,7 @@ public class ManagedService implements Service {
         return this.managedClient.getHealth(clientUri).status() == 200;
     }
 
-    public void setLoggers(String module, String configuredLevel) throws Exception {
+    public void setLoggers(final String module, final String configuredLevel) throws Exception {
         URI clientUri = this.uriSupplier.get();
         LOGGER.debug("Using client uri: {}", clientUri);
         Response response = this.managedClient.setLoggers(clientUri, module, configuredLevel);
