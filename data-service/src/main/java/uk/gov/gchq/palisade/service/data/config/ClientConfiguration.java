@@ -63,7 +63,7 @@ public class ClientConfiguration {
         return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
                 .map(Application::getInstances)
                 .flatMap(List::stream)
-                .filter(instance -> instance.getAppName().equalsIgnoreCase(serviceName))
+                .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
                 .map(EurekaServiceInstance::new)
                 .map(EurekaServiceInstance::getUri)
                 .findAny());

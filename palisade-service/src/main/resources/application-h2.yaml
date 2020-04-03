@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-web:
-  client:
-    audit-service: localhost:8081
-    policy-service: localhost:8085
-    resource-service: localhost:8086
-    user-service: localhost:8087
+
+# Included by eureka and static
+
+# Configure h2 as persistence store (for local examples)
+spring:
+  datasource:
+    url: jdbc:h2:file:./cache-h2
+    username:
+    password:
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true

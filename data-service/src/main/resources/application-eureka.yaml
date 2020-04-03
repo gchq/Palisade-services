@@ -12,7 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Since using eureka, let spring autoconfigure a port
+server:
+  port: 0
+
 eureka:
+  instance:
+    hostname: localhost
+    port: 8083
+    preferIpAddress: false
   client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
     fetchRegistry: true
+
+# Eureka discovery by lookup for registered service by name
+# i.e. map from what-i-call-a-service -> what-that-service-calls-itself
+web:
+  client:
+    audit-service: audit-service
+    palisade-service: palisade-service

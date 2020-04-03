@@ -24,16 +24,6 @@ spring:
 server:
   port: 8086
 
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
-
 management:
   endpoints:
     web:

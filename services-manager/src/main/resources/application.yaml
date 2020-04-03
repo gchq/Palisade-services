@@ -21,15 +21,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
+
 
 # Options at the command line include:
 # --run : Run all known services

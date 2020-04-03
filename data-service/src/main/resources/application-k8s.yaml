@@ -1,5 +1,4 @@
-# Copyright 2020 Crown Copyright
-
+# Copyright 2019 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +13,9 @@
 # limitations under the License.
 #
 
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
+# Kubernetes discovery by DNS for the pod name
+# i.e. map from what-i-call-a-service -> name-of-that-service's-pod
+web:
   client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: true
+    audit-service: audit-service
+    palisade-service: palisade-service

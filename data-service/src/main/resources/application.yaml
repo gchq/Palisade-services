@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 spring:
   application:
     name: data-service
@@ -23,16 +24,6 @@ spring:
 
 server:
   port: 8082
-
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
 
 management:
   endpoint:
@@ -49,10 +40,7 @@ management:
     loggers:
       enabled: true
 
-web:
-  client:
-    audit-service: audit-service
-    palisade-service: palisade-service
+
 
 feign:
   client:
