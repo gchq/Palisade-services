@@ -13,16 +13,10 @@
 # limitations under the License.
 #
 
-# Just start the discovery service, used for configuring all other services
+# Start just the discovery service, used for configuring all other services
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
-
-# Don't ever register with eureka as it isn't up yet (it's being started here)
-# Just in case someone has the profiles confused
-eureka:
-  client:
-    enabled: false
 
 manager:
   services:

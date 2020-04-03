@@ -16,20 +16,36 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
+import feign.Client;
+import feign.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.manager.runner.ConfigChecker;
+import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
+import uk.gov.gchq.palisade.service.manager.runner.ServicesRunner;
+import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.io.File;
+import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -38,6 +54,7 @@ import static java.util.Objects.requireNonNull;
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Value("${manager.root}")
     private String root;
@@ -49,8 +66,30 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    @ConfigurationProperties(prefix = "web")
+    public ClientConfiguration clientConfiguration() {
+        return new ClientConfiguration();
+    }
+
+    @Bean
     Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
         return configurationMap.getServices();
+    }
+
+    @Bean
+    List<TaskConfiguration> taskConfigurations(final ConfigurationMap configurationMap) {
+        return configurationMap.getTasks().stream()
+                .map(taskConfiguration -> {
+                    try {
+                        LOGGER.debug("Processing task :: {}", taskConfiguration);
+                        return new TaskConfiguration(taskConfiguration, configurationMap.getServices());
+                    } catch (Exception e) {
+                        LOGGER.error("An error occurred: ", e);
+                        System.exit(-1);
+                        return null;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     private File getServicesRoot() {
@@ -61,26 +100,92 @@ public class ApplicationConfiguration {
         return parent;
     }
 
-    @Bean("runnerBuilders")
-    public Map<String, ProcessBuilder> runnerBuilders(final Map<String, ServiceConfiguration> runnerConfigs) {
-        return runnerConfigs.entrySet().stream()
-                .map(e -> {
-                    ServiceConfiguration config = e.getValue();
-                    ProcessBuilder builder = config.getProcessBuilder();
-                    builder.directory(getServicesRoot());
-                    return new SimpleEntry<>(e.getKey(), builder);
-                })
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+    @Bean("configChecker")
+    @ConditionalOnProperty(name = "manager.mode", havingValue = "configChecker", matchIfMissing = true)
+    public ApplicationRunner configCheckerRunner(final ConfigurationMap configurationMap) {
+        LOGGER.info("Constructed ConfigChecker runner");
+        return args -> {
+            new ConfigChecker(configurationMap).run();
+            System.exit(0);
+        };
+    }
+
+    @Bean("loggingBouncer")
+    @ConditionalOnProperty(name = "manager.mode", havingValue = "loggingBouncer")
+    public ApplicationRunner loggingBouncerRunner(final Map<String, ServiceConfiguration> serviceConfigurationMap,
+                                            final Function<String, ManagedService> serviceProducer) {
+        LOGGER.info("Constructed LoggingBouncer runner");
+        return args -> {
+            new LoggingBouncer(serviceConfigurationMap, serviceProducer).run();
+            System.exit(0);
+        };
+    }
+
+    @Bean("servicesRunner")
+    @ConditionalOnProperty(name = "manager.mode", havingValue = "servicesRunner")
+    public ApplicationRunner servicesRunner(final List<TaskConfiguration> taskConfigurations,
+                                            final Function<String, ManagedService> serviceProducer) {
+        LOGGER.info("Constructed LoggingBouncer runner");
+        return args -> {
+            taskConfigurations.forEach(task -> {
+                LOGGER.info("Starting task :: {}", task.getTaskName());
+                LOGGER.debug("Will be running services :: {}", task.getSubTasks().keySet());
+                ServicesRunner servicesRunner = new ServicesRunner(task.getProcessBuilders(getServicesRoot()), serviceProducer);
+                Map<String, List<Supplier<Boolean>>> taskCompleteIndicators = servicesRunner.run();
+                LOGGER.info("Waiting for task {} to complete", task.getTaskName());
+                try {
+                    Boolean complete = false;
+                    while (!complete) {
+                        Thread.sleep(5000);
+                        complete = taskCompleteIndicators.entrySet().stream().allMatch(indicators -> {
+                            String serviceName = indicators.getKey();
+                            Boolean serviceComplete = indicators.getValue().stream().anyMatch(Supplier::get);
+                            LOGGER.info("{} :: {}", serviceName, serviceComplete ? "Complete!" : "Waiting...");
+                            return serviceComplete;
+                        });
+                    }
+                } catch (Exception ex) {
+                    LOGGER.error("There was an error: ", ex);
+                    System.exit(-1);
+                }
+            });
+            System.exit(0);
+        };
+    }
+
+    @Bean("managedServiceSupplier")
+    public Function<String, ManagedService> managedServiceProducer(final ClientConfiguration clientConfig) {
+        return serviceName -> {
+            Supplier<URI> uriSupplier = () -> clientConfig
+                    .getClientUri(serviceName)
+                    .orElseThrow(() -> new RuntimeException(String.format("Cannot find any instance of '%s' - see 'web.client' properties or discovery service registration", serviceName)));
+            return new ManagedServiceFactory().construct(serviceName, uriSupplier);
+        };
     }
 
     public static class ConfigurationMap {
 
+        private List<Map<String, List<String>>> tasks = new LinkedList<>();
+
         private Map<String, ServiceConfiguration> services = new HashMap<>();
 
+        @Generated
+        public List<Map<String, List<String>>> getTasks() {
+            return tasks;
+        }
+
+        @Generated
+        public void setTasks(final List<Map<String, List<String>>> tasks) {
+            requireNonNull(tasks);
+            this.tasks = tasks;
+        }
+
+        @Generated
         public Map<String, ServiceConfiguration> getServices() {
             return services;
         }
 
+        @Generated
         public void setServices(final Map<String, ServiceConfiguration> services) {
             requireNonNull(services);
             this.services = services;
@@ -108,14 +213,11 @@ public class ApplicationConfiguration {
         @Override
         @Generated
         public String toString() {
-            // A non-standard equals function with some newlines and indents
-            // Let JaCoCo treat it as @Generated anyway
-            final StringBuilder sb = new StringBuilder("ConfigurationMap{\n");
-            sb.append('\t').append(services.entrySet().stream()
-                    .map(entry -> entry.toString().replace("\n", "\n\t"))
-                    .collect(Collectors.joining("\n\t"))).append('\n');
-            sb.append('}');
-            return sb.toString();
+            return new StringJoiner(", ", ConfigurationMap.class.getSimpleName() + "[", "]")
+                    .add("tasks=" + tasks)
+                    .add("services=" + services)
+                    .add(super.toString())
+                    .toString();
         }
     }
 }

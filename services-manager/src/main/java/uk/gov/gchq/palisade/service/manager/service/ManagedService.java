@@ -15,35 +15,43 @@
  */
 package uk.gov.gchq.palisade.service.manager.service;
 
+import feign.FeignException.FeignClientException;
+import feign.Request;
 import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.manager.web.UserClient;
+import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
-public class UserService implements Service {
+public class ManagedService implements Service {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-    private final UserClient userClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
+    private final ManagedClient managedClient;
     private final Supplier<URI> uriSupplier;
 
-    public UserService(final UserClient userClient, final Supplier<URI> uriSupplier) {
-        this.userClient = userClient;
+    public ManagedService(final ManagedClient managedClient, final Supplier<URI> uriSupplier) {
+        this.managedClient = managedClient;
         this.uriSupplier = uriSupplier;
     }
 
-    public Response getHealth() {
-        try {
-            URI clientUri = this.uriSupplier.get();
-            LOGGER.debug("Using client uri: {}", clientUri);
-            return this.userClient.getHealth(clientUri);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to get health: {}", ex.getMessage());
-            throw new RuntimeException(ex); //rethrow the exception
+    public boolean isHealthy() {
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        return this.managedClient.getHealth(clientUri).status() == 200;
+    }
+
+    public void setLoggers(String module, String configuredLevel) throws Exception {
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        Response response = this.managedClient.setLoggers(clientUri, module, configuredLevel);
+        if (response.status() != 200) {
+            throw new Exception(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", module, configuredLevel, Arrays.toString(response.body().asInputStream().readAllBytes())));
         }
     }
 

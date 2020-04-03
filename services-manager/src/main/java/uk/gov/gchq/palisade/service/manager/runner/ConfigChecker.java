@@ -24,8 +24,7 @@ import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ConfigurationMap;
 
-@Component("config-checker")
-public class ConfigChecker implements ApplicationRunner {
+public class ConfigChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigChecker.class);
 
     // Autowired through constructor
@@ -35,12 +34,7 @@ public class ConfigChecker implements ApplicationRunner {
         this.config = config;
     }
 
-    @Override
-    public void run(final ApplicationArguments args) throws Exception {
-        if (args.containsOption("config")) {
-            LOGGER.info("Loaded config:\n{}", config.toString());
-
-            System.exit(0);
-        }
+    public void run() {
+        LOGGER.info("Loaded config:\n{}", config.toString());
     }
 }

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.manager.service;
+package uk.gov.gchq.palisade.service.manager.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClientBuilder;
+import org.springframework.context.ApplicationContext;
+
+import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
-import uk.gov.gchq.palisade.service.manager.web.ManagedClientFactory;
 
 import java.net.URI;
 import java.util.function.Supplier;
@@ -26,13 +30,27 @@ public class ManagedServiceFactory {
 
     private final ManagedClientFactory clientFactory;
 
-    public ManagedServiceFactory(final ManagedClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
+    public ManagedServiceFactory() {
+        this.clientFactory = new ManagedClientFactory();
     }
 
     public ManagedService construct(final String serviceName, final Supplier<URI> uriSupplier) {
         ManagedClient client = clientFactory.construct(serviceName, serviceName);
         return new ManagedService( client, uriSupplier);
+    }
+
+    static class ManagedClientFactory {
+
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        public ManagedClient construct(final String name, final String defaultUrl) {
+            return new FeignClientBuilder(applicationContext)
+                    .forType(ManagedClient.class, name)
+                    .url(defaultUrl)
+                    .build();
+        }
+
     }
 
 }

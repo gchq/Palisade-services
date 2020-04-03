@@ -14,42 +14,27 @@
 #
 
 # The manager creates a number of commands to execute for each service in manager.services
-# All fields are *technically* optional but some (classpath, launcher, main) are probably required to start the spawned JVM process
-# Extensive use is made of the eureka discovery client to discover services and endpoints - subsequently the "eureka" profile is enabled by default for all services
+# All fields are *technically* optional but the jar is required to actually do anything
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
 
 manager:
-
   services:
-
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
-      log: audit-service.log
-      err: audit-service.err
 
     data-service:
       jar: data-service/target/data-service-${app.version}-exec.jar
-      log: data-service.log
-      err: data-service.err
 
     palisade-service:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
-      log: palisade-service.log
-      err: palisade-service.err
 
     policy-service:
       jar: policy-service/target/policy-service-${app.version}-exec.jar
-      log: policy-service.log
-      err: policy-service.err
 
     resource-service:
       jar: resource-service/target/resource-service-${app.version}-exec.jar
-      log: resource-service.log
-      err: resource-service.err
 
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar
-      log: user-service.log
-      err: user-service.err

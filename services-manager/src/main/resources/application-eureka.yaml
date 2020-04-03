@@ -14,6 +14,27 @@
 # limitations under the License.
 #
 
+# Expect a full set of Palisade services
+spring:
+  profiles:
+    include:
+    - discovery
+    - services
+
+manager:
+  # When doing a --run :: discovery -> services -> done
+  tasks:
+  - discovery:
+    - discovery-service
+  - services:
+    - audit-service
+    - data-service
+    - palisade-service
+    - policy-service
+    - resource-service
+    - user-service
+
+# Eureka config
 eureka:
   instance:
     hostname: localhost
@@ -23,3 +44,16 @@ eureka:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
+    registerWithEureka: false
+
+# Eureka discovery by lookup for registered service by name
+# i.e. map from what-i-call-a-service -> what-that-service-calls-itself
+web:
+  client:
+    audit-service: audit-service
+    data-service: data-service
+    discovery-service: discovery-service
+    palisade-service: palisade-service
+    policy-service: policy-service
+    resource-service: resource-service
+    user-service: user-service

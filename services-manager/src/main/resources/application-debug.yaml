@@ -21,9 +21,7 @@ logging:
     uk: "DEBUG"
 
 manager:
-
   services:
-
     audit-service:
       level: *debug
 

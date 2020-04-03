@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.palisade.config;
+package uk.gov.gchq.palisade.service.manager.config;
 
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;

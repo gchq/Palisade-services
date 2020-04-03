@@ -15,16 +15,21 @@
  */
 package uk.gov.gchq.palisade.service.manager.web;
 
+import feign.Param;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.net.URI;
 
-@FeignClient(name = "user-service", url = "${web.client.user-service}")
-public interface UserClient {
+public interface ManagedClient {
 
     @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
+
+    @PostMapping(path = "/actuator/loggers/{module}", produces = "application/json", consumes = "application/json")
+    Response setLoggers(final URI url, final @Param("module") String module, final @RequestBody String configuredLevel);
 
 }

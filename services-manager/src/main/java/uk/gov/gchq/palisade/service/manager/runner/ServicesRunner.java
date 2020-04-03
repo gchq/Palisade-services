@@ -19,49 +19,31 @@ package uk.gov.gchq.palisade.service.manager.runner;
 import com.netflix.appinfo.InstanceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+
+import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@Component("services-runner")
-public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
+public class ServicesRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServicesRunner.class);
 
     // Autowired through constructor
     private Map<String, ProcessBuilder> processBuilders;
+    private Function<String, ManagedService> serviceProducer;
 
-    public ServicesRunner(final Map<String, ProcessBuilder> processBuilders) {
+    public ServicesRunner(final Map<String, ProcessBuilder> processBuilders, final Function<String, ManagedService> serviceProducer) {
         this.processBuilders = processBuilders;
-    }
-
-    private Set<String> getRunningServiceNames() {
-        return getRunningServices().stream()
-                .map(InstanceInfo::getAppName)
-                .map(String::toLowerCase)
-                .peek(name -> LOGGER.debug("Normalised {}", name))
-                .collect(Collectors.toSet());
-    }
-
-    Map<String, ProcessBuilder> filterRunningServices(final Map<String, ProcessBuilder> processBuilders, final List<InstanceInfo> runningServices) {
-        Set<String> instanceNames = getRunningServiceNames();
-        return processBuilders.entrySet().stream()
-                .filter(entry -> {
-                    boolean exists = instanceNames.contains(entry.getKey());
-                    if (exists) {
-                        LOGGER.warn("Eureka already has registered instance named {} - excluding from run", entry.getKey());
-                    }
-                    return !exists;
-                })
-                .peek(e -> LOGGER.debug("Preparing to run process: {}", e))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.serviceProducer = serviceProducer;
     }
 
     Map<String, Process> runApplications(final Map<String, ProcessBuilder> configurations) {
@@ -81,23 +63,20 @@ public class ServicesRunner extends EurekaUtils implements ApplicationRunner {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    @Override
-    public void run(final ApplicationArguments args) throws Exception {
-        if (args.containsOption("run")) {
-            LOGGER.debug("Loaded ProcessBuilders: {}", processBuilders);
+    public Map<String, List<Supplier<Boolean>>> run() {
+        LOGGER.debug("Loaded ProcessBuilders: {}", processBuilders);
 
-            // Get running services from eureka and warn-don't-start any that are already running
-            List<InstanceInfo> runningServices = getRunningServices();
-            LOGGER.info("Discovered {} running services", runningServices.size());
+        // Start processes for each service configuration
+        Map<String, Process> processes = runApplications(processBuilders);
+        LOGGER.info("Started {} new processes", processes.size());
 
-            Map<String, ProcessBuilder> filteredBuilders = filterRunningServices(processBuilders, runningServices);
-            LOGGER.info("Prepared to run {} new services:", filteredBuilders.size());
-
-            // Start processes for each service configuration
-            Map<String, Process> processes = runApplications(filteredBuilders);
-            LOGGER.info("Started {} new processes", processes.size());
-
-            System.exit(0);
-        }
+        return processes.entrySet().stream()
+                .map(entry -> {
+                    LinkedList<Supplier<Boolean>> indicators = new LinkedList<>();
+                    indicators.addLast(() -> entry.getValue().isAlive());
+                    indicators.addLast(() -> serviceProducer.apply(entry.getKey()).isHealthy());
+                    return new SimpleImmutableEntry<>(entry.getKey(), indicators);
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
