@@ -15,8 +15,8 @@
 FROM openjdk:8-alpine
 
 RUN apk update
-RUN apk add vim
-RUN apk add curl
+RUN apk add vim="8.2.0357-r0"
+RUN apk add curl="7.55.0-r2"
 
 RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
    && tar --strip-components=1 -xvzf kafka_2.12-2.2.1.tgz  && rm kafka_2.12-2.2.1.tgz
