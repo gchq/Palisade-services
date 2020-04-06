@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.function.Supplier;
 
 public class ManagedServiceFactory {
@@ -34,7 +35,7 @@ public class ManagedServiceFactory {
         this.clientFactory = new ManagedClientFactory();
     }
 
-    public ManagedService construct(final String serviceName, final Supplier<URI> uriSupplier) {
+    public ManagedService construct(final String serviceName, final Supplier<Collection<URI>> uriSupplier) {
         ManagedClient client = clientFactory.construct(serviceName, serviceName);
         return new ManagedService(client, uriSupplier);
     }

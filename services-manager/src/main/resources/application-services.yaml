@@ -15,11 +15,21 @@
 
 # The manager creates a number of commands to execute for each service in manager.services
 # All fields are *technically* optional but the jar is required to actually do anything
+
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
 
 manager:
+  tasks:
+  - services:
+    - audit-service
+    - data-service
+    - palisade-service
+    - policy-service
+    - resource-service
+    - user-service
+
   services:
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar

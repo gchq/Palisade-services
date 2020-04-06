@@ -37,10 +37,17 @@ manager:
 # i.e. map from what-i-call-a-service -> service-URI
 web:
   client:
-    audit-service: localhost:8081
-    data-service: localhost:8082
-    discovery-service: localhost:8083
-    palisade-service: localhost:8084
-    policy-service: localhost:8085
-    resource-service: localhost:8086
-    user-service: localhost:8087
+    audit-service:
+    - localhost:8081
+    data-service:
+    - localhost:8082
+    discovery-service:
+    - localhost:8083
+    palisade-service:
+    - localhost:8084
+    policy-service:
+    - localhost:8085
+    resource-service:
+    - localhost:8086
+    user-service:
+    - localhost:8087

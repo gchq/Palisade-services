@@ -24,31 +24,49 @@ import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ManagedService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
     private final ManagedClient managedClient;
-    private final Supplier<URI> uriSupplier;
+    private final Supplier<Collection<URI>> uriSupplier;
 
-    public ManagedService(final ManagedClient managedClient, final Supplier<URI> uriSupplier) {
+    public ManagedService(final ManagedClient managedClient, final Supplier<Collection<URI>> uriSupplier) {
         this.managedClient = managedClient;
         this.uriSupplier = uriSupplier;
     }
 
     public boolean isHealthy() {
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
-        return this.managedClient.getHealth(clientUri).status() == 200;
+        Collection<URI> clientUris = this.uriSupplier.get();
+        return clientUris.stream()
+                .map(clientUri -> {
+                    int status = this.managedClient.getHealth(clientUri).status();
+                    LOGGER.debug("Client uri {} has status {}", clientUri, status);
+                    return status;
+                })
+                // Could be allMatch, but only one healthy service is needed to perform requests
+                .anyMatch(x -> x == 200);
     }
 
     public void setLoggers(final String module, final String configuredLevel) throws Exception {
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
-        Response response = this.managedClient.setLoggers(clientUri, module, configuredLevel);
-        if (response.status() != 200) {
-            throw new Exception(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", module, configuredLevel, Arrays.toString(response.body().asInputStream().readAllBytes())));
+        Collection<URI> clientUris = this.uriSupplier.get();
+        Optional<Response> failures = clientUris.stream()
+                .map(clientUri -> {
+                    Response response = this.managedClient.setLoggers(clientUri, module, configuredLevel);
+                    LOGGER.debug("Client uri {} responded with {}", clientUri, response);
+                    return response;
+                })
+                .filter(x -> x.status() != 200)
+                .findAny();
+        // Need to throw an error, so can't wrap inside an Optional.ifPresent
+        if (failures.isPresent()) {
+            Response response = failures.get();
+            LOGGER.error("An error occurred while setting logging levels: {}", response);
+            String responseBody = Arrays.toString(response.body().asInputStream().readAllBytes());
+            throw new Exception(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", module, configuredLevel, responseBody));
         }
     }
 

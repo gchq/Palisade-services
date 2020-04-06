@@ -24,48 +24,56 @@ import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 import uk.gov.gchq.palisade.Generated;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
 public class ClientConfiguration {
-    private Map<String, URI> client;
+    private Map<String, List<URI>> client;
 
     @Autowired(required = false)
     private EurekaClient eurekaClient;
 
     @Generated
-    public Map<String, URI> getClient() {
+    public Map<String, List<URI>> getClient() {
         return client;
     }
 
     @Generated
-    public void setClient(final Map<String, URI> client) {
+    public void setClient(final Map<String, List<URI>> client) {
         requireNonNull(client);
         this.client = client;
     }
 
-    public Optional<URI> getClientUri(final String serviceName) {
+    public Collection<URI> getClientUri(final String serviceName) {
         requireNonNull(serviceName);
         // If possible, use eureka
         // Otherwise, fall back to config yaml
         return eurekaResolve(serviceName)
-                .or(() -> configResolve(serviceName));
+                .orElseGet(() -> configResolve(serviceName));
     }
 
-    private Optional<URI> configResolve(final String serviceName) {
-        return Optional.ofNullable(client.get(serviceName));
+    private Collection<URI> configResolve(final String serviceName) {
+        return client.get(serviceName);
     }
 
-    private Optional<URI> eurekaResolve(final String serviceName) {
-        return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
-                .map(Application::getInstances)
-                .flatMap(List::stream)
-                .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
-                .map(EurekaServiceInstance::new)
-                .map(EurekaServiceInstance::getUri)
-                .findAny());
+    private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
+        // If eureka is available
+        return Optional.ofNullable(eurekaClient)
+                // Get all registered applications
+                .map(eureka -> eureka.getApplications().getRegisteredApplications().stream()
+                        .map(Application::getInstances)
+                        .flatMap(List::stream)
+                        // If any config values match a service's appName (spring.application.name)
+                        .filter(instance -> client.get(serviceName).stream().anyMatch(uri -> uri.toString().equalsIgnoreCase(instance.getAppName())))
+                        .map(EurekaServiceInstance::new)
+                        // Get the URI for this service
+                        .map(EurekaServiceInstance::getUri)
+                        // Return a collection of URIs that match the serviceName
+                        .collect(Collectors.toList()));
     }
 }

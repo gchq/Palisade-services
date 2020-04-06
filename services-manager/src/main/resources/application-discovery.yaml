@@ -19,6 +19,10 @@ app:
   version: '@project.version@'
 
 manager:
+  tasks:
+  - discovery:
+    - discovery-service
+
   services:
     discovery-service:
       jar: discovery-service/target/discovery-service-${app.version}-exec.jar

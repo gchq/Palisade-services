@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,7 +154,7 @@ public class ApplicationConfiguration {
     @Bean("managedServiceSupplier")
     public Function<String, ManagedService> managedServiceProducer(final ClientConfiguration clientConfig) {
         return serviceName -> {
-            Supplier<URI> uriSupplier = () -> clientConfig
+            Supplier<Collection<URI>> uriSupplier = () -> clientConfig
                     .getClientUri(serviceName)
                     .orElseThrow(() -> new RuntimeException(String.format("Cannot find any instance of '%s' - see 'web.client' properties or discovery service registration", serviceName)));
             return new ManagedServiceFactory().construct(serviceName, uriSupplier);

@@ -50,10 +50,17 @@ eureka:
 # i.e. map from what-i-call-a-service -> what-that-service-calls-itself
 web:
   client:
-    audit-service: audit-service
-    data-service: data-service
-    discovery-service: discovery-service
-    palisade-service: palisade-service
-    policy-service: policy-service
-    resource-service: resource-service
-    user-service: user-service
+    audit-service:
+    - audit-service
+    data-service:
+    - data-service
+    discovery-service:
+    - discovery-service
+    palisade-service:
+    - palisade-service
+    policy-service:
+    - policy-service
+    resource-service:
+    - resource-service
+    user-service:
+    - user-service
