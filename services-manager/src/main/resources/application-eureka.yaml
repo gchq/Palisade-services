@@ -80,6 +80,7 @@ eureka:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
+    fetch-registry: true
 
 # Eureka discovery by lookup for registered service by name
 # i.e. map from what-i-call-a-service -> what-that-service-calls-itself
