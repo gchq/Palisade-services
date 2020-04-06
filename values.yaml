@@ -40,6 +40,10 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
+  zookeeperConnectString:
+  kafkaCreateTopics:
+  - "topic1"
+  - "topic2"
   localMount:
     enabled: true
     volumeHandle: dummy

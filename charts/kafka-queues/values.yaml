@@ -19,7 +19,7 @@ service:
 
 image:
   repository: palisade/kafka-queues
-  tag: ed9f81b-@revision@
+  tag: ed9f81b-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
