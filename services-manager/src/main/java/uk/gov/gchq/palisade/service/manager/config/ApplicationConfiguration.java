@@ -32,6 +32,7 @@ import uk.gov.gchq.palisade.service.manager.runner.ConfigChecker;
 import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
 import uk.gov.gchq.palisade.service.manager.runner.ServicesRunner;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
+import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.io.File;
 import java.net.URI;
@@ -123,7 +124,7 @@ public class ApplicationConfiguration {
     @ConditionalOnProperty(name = "manager.mode", havingValue = "servicesRunner")
     public ApplicationRunner servicesRunner(final List<TaskConfiguration> taskConfigurations,
                                             final Function<String, ManagedService> serviceProducer) {
-        LOGGER.info("Constructed LoggingBouncer runner");
+        LOGGER.info("Constructed ServicesRunner runner");
         return args -> {
             taskConfigurations.forEach(task -> {
                 LOGGER.info("Starting task :: {}", task.getTaskName());
@@ -152,12 +153,14 @@ public class ApplicationConfiguration {
     }
 
     @Bean("managedServiceSupplier")
-    public Function<String, ManagedService> managedServiceProducer(final ClientConfiguration clientConfig) {
+    public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final ClientConfiguration clientConfig) {
         return serviceName -> {
-            Supplier<Collection<URI>> uriSupplier = () -> clientConfig
-                    .getClientUri(serviceName)
-                    .orElseThrow(() -> new RuntimeException(String.format("Cannot find any instance of '%s' - see 'web.client' properties or discovery service registration", serviceName)));
-            return new ManagedServiceFactory().construct(serviceName, uriSupplier);
+            Supplier<Collection<URI>> uriSupplier = () -> {
+                Collection<URI> clientUris = clientConfig.getClientUri(serviceName);
+                LOGGER.debug("Service {} has client uris {}", serviceName, clientUris);
+                return clientUris;
+            };
+            return new ManagedService(client, uriSupplier);
         };
     }
 
@@ -199,22 +202,23 @@ public class ApplicationConfiguration {
                 return false;
             }
             final ConfigurationMap that = (ConfigurationMap) o;
-            return Objects.equals(services, that.services);
+            return Objects.equals(tasks, that.tasks) &&
+                    Objects.equals(services, that.services);
         }
 
         @Override
         @Generated
         public int hashCode() {
-            return Objects.hash(services);
+            return Objects.hash(tasks, services);
         }
 
         @Override
         @Generated
         public String toString() {
-            return new StringJoiner(", ", ConfigurationMap.class.getSimpleName() + "[", "]")
-                    .add("tasks=" + tasks)
-                    .add("services=" + services)
-                    .add(super.toString())
+            return new StringJoiner(", ", ConfigurationMap.class.getSimpleName() + "[", "\n]")
+                    .add("\n\ttasks=" + tasks)
+                    .add("\n\tservices=" + services.toString().replace("\n", "\n\t"))
+                    .add("\n\t" + super.toString())
                     .toString();
         }
     }

@@ -13,11 +13,19 @@
 # limitations under the License.
 #
 
-# The RestExample is intended for a eureka environment, but there's no reason this couldn't be changed
 spring:
   profiles:
     include:
     - eureka
+    - example-config
+
+# Spring profile dependency resolution forces this two-profile setup
+# `example` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
+# So, include `example-config` along with dependencies and force correct override order to happen there
+---
+
+spring:
+  profiles: example-config
 
 manager:
   # Example field used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
@@ -34,6 +42,7 @@ manager:
     - eureka
     - example
 
+  # TODO: Discovery service bootstrap
   # When doing a --run :: discovery -> services -> RestExample -> done
   tasks:
   - discovery:

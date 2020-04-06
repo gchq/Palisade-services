@@ -13,12 +13,20 @@
 # limitations under the License.
 #
 
-# Expect a full set of Palisade services
 spring:
   profiles:
     include:
     - discovery
     - services
+    - static-config
+
+# Spring profile dependency resolution forces this two-profile setup
+# `static` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
+# So, include `static-config` along with dependencies and force correct override order to happen there
+---
+
+spring:
+  profiles: static-config
 
 manager:
   # When doing a --run :: discovery -> services -> done
@@ -38,16 +46,16 @@ manager:
 web:
   client:
     audit-service:
-    - localhost:8081
+    - http://localhost:8081
     data-service:
-    - localhost:8082
+    - http://localhost:8082
     discovery-service:
-    - localhost:8083
+    - http://localhost:8083
     palisade-service:
-    - localhost:8084
+    - http://localhost:8084
     policy-service:
-    - localhost:8085
+    - http://localhost:8085
     resource-service:
-    - localhost:8086
+    - http://localhost:8086
     user-service:
-    - localhost:8087
+    - http://localhost:8087

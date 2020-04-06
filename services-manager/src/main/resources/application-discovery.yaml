@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-# Start just the discovery service, used for configuring all other services
+# Configuration for just the discovery service, used for configuring all other services
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'
@@ -26,3 +26,8 @@ manager:
   services:
     discovery-service:
       jar: discovery-service/target/discovery-service-${app.version}-exec.jar
+
+web:
+  client:
+    discovery-service:
+    - http://localhost:8083

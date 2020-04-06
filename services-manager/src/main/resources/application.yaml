@@ -31,6 +31,9 @@ manager:
   # This allows the services-manager to be less dependant on where it is located and where it was run from
   root: Palisade-services
 
+  # Available modes: servicesRunner, loggingBouncer, [default if empty] configChecker
+  mode: servicesRunner
+
   # Configuration for what happens during a "services-manager --run"
   # List<Map<taskName: String, services: List<ServiceName>>>
   tasks: []
@@ -64,3 +67,16 @@ manager:
     #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}" - same format as spring's standard logging changes, classpath-loglevel map
     #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}" - classpath to change and logging level to change to
     ###
+
+eureka:
+  client:
+    enabled: false
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+    default-config: default

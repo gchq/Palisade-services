@@ -13,6 +13,17 @@
 # limitations under the License.
 #
 
+spring:
+  profiles:
+    include:
+    - caffeine
+    - eureka-config
+
+---
+
+spring:
+  profiles: eureka-config
+
 # Since using eureka, let spring autoconfigure a port
 server:
   port: 0
@@ -27,4 +38,3 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
     fetchRegistry: true
-

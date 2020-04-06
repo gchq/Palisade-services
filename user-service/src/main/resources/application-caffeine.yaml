@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,18 +14,6 @@
 #
 
 spring:
-  profiles:
-    include:
-    - k8s-config
-
----
-
-spring:
-  profiles: k8s-config
-
-# Kubernetes discovery by DNS for the pod name
-# i.e. map from what-i-call-a-service -> name-of-that-service's-pod
-web:
-  client:
-    audit-service: audit-service
-    palisade-service: palisade-service
+  cache:
+    caffeine:
+      spec: expireAfterWrite=60m, maximumSize=500

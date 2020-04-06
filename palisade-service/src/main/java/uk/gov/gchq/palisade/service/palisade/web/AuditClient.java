@@ -25,7 +25,7 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 
 import java.net.URI;
 
-@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
+@FeignClient(name = "audit-service", url = "undefined")
 public interface AuditClient {
 
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")

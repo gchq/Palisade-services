@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.manager.service;
 
 import feign.Response;
+import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,12 @@ public class ManagedService implements Service {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
                 .map(clientUri -> {
-                    int status = this.managedClient.getHealth(clientUri).status();
+                    int status = 404;
+                    try {
+                        status = this.managedClient.getHealth(clientUri).status();
+                    } catch (RetryableException ex) {
+                        // Not up yet
+                    }
                     LOGGER.debug("Client uri {} has status {}", clientUri, status);
                     return status;
                 })

@@ -14,18 +14,22 @@
 # limitations under the License.
 #
 
-# Expect a full set of Palisade services
 spring:
   profiles:
     include:
-    - discovery
     - services
+    - eureka-config
+
+# Spring profile dependency resolution forces this two-profile setup
+# `eureka` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
+# So, include `eureka-config` along with dependencies and force correct override order to happen there
+---
+
+spring:
+  profiles: eureka-config
 
 manager:
-  # When doing a --run :: discovery -> services -> done
   tasks:
-  - discovery:
-    - discovery-service
   - services:
     - audit-service
     - data-service
@@ -33,6 +37,38 @@ manager:
     - policy-service
     - resource-service
     - user-service
+
+  services:
+
+    audit-service:
+      profiles:
+      - eureka
+      err: audit-service.err
+
+    data-service:
+      profiles:
+      - eureka
+      err: data-service.err
+
+    palisade-service:
+      profiles:
+      - eureka
+      err: palisade-service.err
+
+    policy-service:
+      profiles:
+      - eureka
+      err: policy-service.err
+
+    resource-service:
+      profiles:
+      - eureka
+      err: resource-service.err
+
+    user-service:
+      profiles:
+      - eureka
+      err: user-service.err
 
 # Eureka config
 eureka:
@@ -44,7 +80,6 @@ eureka:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
-    registerWithEureka: false
 
 # Eureka discovery by lookup for registered service by name
 # i.e. map from what-i-call-a-service -> what-that-service-calls-itself
@@ -54,8 +89,6 @@ web:
     - audit-service
     data-service:
     - data-service
-    discovery-service:
-    - discovery-service
     palisade-service:
     - palisade-service
     policy-service:

@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 spring:
-  cache:
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
   application:
     name: policy-service
   output:

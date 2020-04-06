@@ -18,6 +18,12 @@ spring:
   profiles:
     include:
     - h2
+    - eureka-config
+
+---
+
+spring:
+  profiles: eureka-config
 
 # Since using eureka, let spring autoconfigure a port
 server:

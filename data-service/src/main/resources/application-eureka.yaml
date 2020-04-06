@@ -13,6 +13,16 @@
 # limitations under the License.
 #
 
+spring:
+  profiles:
+    include:
+    - eureka-config
+
+---
+
+spring:
+  profiles: eureka-config
+
 # Since using eureka, let spring autoconfigure a port
 server:
   port: 0

@@ -18,7 +18,7 @@
 
 logging:
   level: &debug
-    uk: "DEBUG"
+    uk.gov.gchq.palisade: "DEBUG"
 
 manager:
   services:

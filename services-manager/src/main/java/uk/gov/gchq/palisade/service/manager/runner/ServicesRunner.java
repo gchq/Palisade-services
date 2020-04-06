@@ -46,18 +46,17 @@ public class ServicesRunner {
 
     Map<String, Process> runApplications(final Map<String, ProcessBuilder> configurations) {
         return configurations.entrySet().stream()
-                .map(e -> {
+                .map(entry -> {
                     try {
-                        LOGGER.info("Starting service: {}", e.getKey());
-                        return new SimpleEntry<>(e.getKey(), e.getValue().start());
+                        LOGGER.info("Starting service: {}", entry.getKey());
+                        return new SimpleEntry<>(entry.getKey(), entry.getValue().start());
                     } catch (IOException ex) {
-                        LOGGER.error("Error while starting service {}: {}", e.getKey(), ex.getMessage());
-                        ex.printStackTrace();
+                        LOGGER.error("Error while starting service {}: {}", entry.getKey(), ex.getMessage());
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .peek(e -> LOGGER.debug("Running process: {}", e.toString()))
+                .peek(entry -> LOGGER.debug("Running process: {}", entry))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -71,7 +70,7 @@ public class ServicesRunner {
         return processes.entrySet().stream()
                 .map(entry -> {
                     LinkedList<Supplier<Boolean>> indicators = new LinkedList<>();
-                    indicators.addLast(() -> entry.getValue().isAlive());
+                    indicators.addLast(() -> !entry.getValue().isAlive());
                     indicators.addLast(() -> serviceProducer.apply(entry.getKey()).isHealthy());
                     return new SimpleImmutableEntry<>(entry.getKey(), indicators);
                 })

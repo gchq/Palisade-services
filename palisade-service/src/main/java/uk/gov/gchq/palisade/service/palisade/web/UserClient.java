@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
 import java.net.URI;
 
-@FeignClient(name = "user-service", url = "${web.client.user-service}")
+@FeignClient(name = "user-service", url = "undefined")
 public interface UserClient {
 
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")

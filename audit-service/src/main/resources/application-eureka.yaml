@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,16 @@
 # limitations under the License.
 #
 
+spring:
+  profiles:
+    include:
+    - eureka-config
+
+---
+
+spring:
+  profiles: eureka-config
+
 # Since using eureka, let spring autoconfigure a port
 server:
   port: 0
@@ -26,3 +36,4 @@ eureka:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true
+    fetchRegistry: true

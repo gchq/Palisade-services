@@ -13,9 +13,19 @@
 # limitations under the License.
 #
 
+spring:
+  profiles:
+    include:
+    - static-config
+
+---
+
+spring:
+  profiles: static-config
+
 # Discoveryless static configuration (presumably over localhost for integration-tests)
 # i.e. map from what-i-call-a-service -> service-URI
 web:
   client:
-    audit-service: localhost:8081
-    palisade-service: localhost:8084
+    audit-service: http://localhost:8081
+    palisade-service: http://localhost:8084
