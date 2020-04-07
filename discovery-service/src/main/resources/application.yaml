@@ -29,20 +29,20 @@ eureka:
     hostname: localhost
     port: 8083
     preferIpAddress: false
+    lease-renewal-interval-in-seconds: 5
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+    registry-fetch-interval-seconds: 5
   server:
     enable-self-preservation: false
+    response-cache-update-interval-ms: 5000
 
 management:
   endpoints:
     web:
       exposure:
-        include:
-        - health
-        - info
-        - metrics
-        - loggers
-    loggers:
+        include: "*"
+  endpoint:
+    shutdown:
       enabled: true

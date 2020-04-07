@@ -43,10 +43,8 @@ manager:
     - example
 
   # TODO: Discovery service bootstrap
-  # When doing a --run :: discovery -> services -> RestExample -> done
+  # When doing a --run :: services -> RestExample -> done
   tasks:
-  - discovery:
-    - discovery-service
   - services:
     - audit-service
     - data-service

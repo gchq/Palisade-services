@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.manager.runner.ConfigChecker;
 import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
 import uk.gov.gchq.palisade.service.manager.runner.ServicesRunner;
+import uk.gov.gchq.palisade.service.manager.runner.ServicesShutdown;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
@@ -116,6 +117,17 @@ public class ApplicationConfiguration {
         LOGGER.info("Constructed LoggingBouncer runner");
         return args -> {
             new LoggingBouncer(serviceConfigurationMap, serviceProducer).run();
+            System.exit(0);
+        };
+    }
+
+    @Bean("servicesShutdown")
+    @ConditionalOnProperty(name = "manager.mode", havingValue = "servicesShutdown")
+    public ApplicationRunner servicesShutdownRunner(final Map<String, ServiceConfiguration> serviceConfigurationMap,
+                                                  final Function<String, ManagedService> serviceProducer) {
+        LOGGER.info("Constructed ServicesShutdown runner");
+        return args -> {
+            new ServicesShutdown(serviceConfigurationMap, serviceProducer).run();
             System.exit(0);
         };
     }

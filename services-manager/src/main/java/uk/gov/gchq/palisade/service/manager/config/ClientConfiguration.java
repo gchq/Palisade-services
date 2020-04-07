@@ -27,6 +27,7 @@ import uk.gov.gchq.palisade.Generated;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,7 +63,7 @@ public class ClientConfiguration {
     }
 
     private Collection<URI> configResolve(final String serviceName) {
-        return client.get(serviceName);
+        return Optional.ofNullable(client.get(serviceName)).orElse(Collections.emptyList());
     }
 
     private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
@@ -72,9 +73,10 @@ public class ClientConfiguration {
                 .map(eureka -> eureka.getApplications().getRegisteredApplications().stream()
                         .map(Application::getInstances)
                         .flatMap(List::stream)
-                        .peek(instance -> LOGGER.debug("Found instance: {}", instance))
+                        .peek(instance -> LOGGER.debug("Found instance: {}", instance.getAppName()))
                         // If any config values match a service's appName (spring.application.name)
-                        .filter(instance -> client.get(serviceName).stream().anyMatch(uri -> uri.toString().equalsIgnoreCase(instance.getAppName())))
+                        .filter(instance -> Optional.ofNullable(client.get(serviceName)).stream().flatMap(List::stream)
+                                .anyMatch(uri -> uri.toString().equalsIgnoreCase(instance.getAppName())))
                         .map(instance -> {
                             try {
                                 return new URI(String.format("http://%s:%s", instance.getHostName(), instance.getPort()));

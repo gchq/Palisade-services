@@ -33,4 +33,7 @@ public interface ManagedClient {
     @PostMapping(path = "/actuator/loggers/{module}", produces = "application/json", consumes = "application/json")
     Response setLoggers(final URI url, final @PathVariable("module") String module, final @RequestBody String configuredLevel);
 
+    @PostMapping(path = "/actuator/shutdown")
+    void shutdown(final URI url);
+
 }

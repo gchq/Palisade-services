@@ -26,18 +26,14 @@ server:
   port: 8084
 
 management:
-  endpoint:
-    health:
-      show-details: always
   endpoints:
     web:
       exposure:
-        include:
-        - health
-        - info
-        - metrics
-        - loggers
-    loggers:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
       enabled: true
 
 feign:
