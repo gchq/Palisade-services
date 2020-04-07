@@ -29,12 +29,9 @@ management:
   endpoints:
     web:
       exposure:
-        include:
-        - health
-        - info
-        - metrics
-        - loggers
-    loggers:
+        include: "*"
+  endpoint:
+    shutdown:
       enabled: true
 
 feign:

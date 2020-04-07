@@ -18,13 +18,16 @@ package uk.gov.gchq.palisade.service.manager.config;
 
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
 import uk.gov.gchq.palisade.Generated;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 public class ClientConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
+
     private Map<String, List<URI>> client;
 
     @Autowired(required = false)
@@ -58,7 +63,7 @@ public class ClientConfiguration {
     }
 
     private Collection<URI> configResolve(final String serviceName) {
-        return client.get(serviceName);
+        return Optional.ofNullable(client.get(serviceName)).orElse(Collections.emptyList());
     }
 
     private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
@@ -68,11 +73,18 @@ public class ClientConfiguration {
                 .map(eureka -> eureka.getApplications().getRegisteredApplications().stream()
                         .map(Application::getInstances)
                         .flatMap(List::stream)
+                        .peek(instance -> LOGGER.debug("Found instance: {}", instance.getAppName()))
                         // If any config values match a service's appName (spring.application.name)
-                        .filter(instance -> client.get(serviceName).stream().anyMatch(uri -> uri.toString().equalsIgnoreCase(instance.getAppName())))
-                        .map(EurekaServiceInstance::new)
-                        // Get the URI for this service
-                        .map(EurekaServiceInstance::getUri)
+                        .filter(instance -> Optional.ofNullable(client.get(serviceName)).stream().flatMap(List::stream)
+                                .anyMatch(uri -> uri.toString().equalsIgnoreCase(instance.getAppName())))
+                        .map(instance -> {
+                            try {
+                                return new URI(String.format("http://%s:%s", instance.getHostName(), instance.getPort()));
+                            } catch (URISyntaxException e) {
+                                LOGGER.error("There was an error ", e);
+                                return null;
+                            }
+                        })
                         // Return a collection of URIs that match the serviceName
                         .collect(Collectors.toList()));
     }

@@ -31,7 +31,7 @@ manager:
   # This allows the services-manager to be less dependant on where it is located and where it was run from
   root: Palisade-services
 
-  # Available modes: servicesRunner, loggingBouncer, [default if empty] configChecker
+  # Available modes: servicesRunner, servicesShutdown, loggingBouncer, [default if empty] configChecker
   mode: servicesRunner
 
   # Configuration for what happens during a "services-manager --run"

@@ -76,4 +76,9 @@ public class ManagedService implements Service {
         }
     }
 
+    public void shutdown() {
+        Collection<URI> clientUris = this.uriSupplier.get();
+        clientUris.forEach(this.managedClient::shutdown);
+    }
+
 }
