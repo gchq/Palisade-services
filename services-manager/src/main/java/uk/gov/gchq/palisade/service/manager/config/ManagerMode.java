@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.service.manager.config;
 
 public enum ManagerMode {
-    config,
-    run,
-    shutdown,
-    loggers,
+    CONFIG,
+    RUN,
+    SHUTDOWN,
+    LOGGERS,
 }

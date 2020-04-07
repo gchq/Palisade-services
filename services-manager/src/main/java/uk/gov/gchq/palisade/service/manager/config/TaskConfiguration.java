@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TaskConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskConfiguration.class);
     private final Map<String, ServiceConfiguration> services;
 
     public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) throws Exception {

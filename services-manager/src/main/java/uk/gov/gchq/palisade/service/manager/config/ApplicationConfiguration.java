@@ -70,16 +70,16 @@ public class ApplicationConfiguration {
     public ApplicationRunner managerApplicationRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         Runnable runner;
         switch (managerConfiguration.getMode()) {
-            case run:
+            case RUN:
                 runner = new ScheduleRunner(managerConfiguration, serviceProducer);
                 break;
-            case shutdown:
+            case SHUTDOWN:
                 runner = new ScheduleShutdown(managerConfiguration, serviceProducer);
                 break;
-            case loggers:
+            case LOGGERS:
                 runner = new LoggingBouncer(managerConfiguration, serviceProducer);
                 break;
-            case config:
+            case CONFIG:
             default:
                 runner = new ConfigChecker(managerConfiguration);
                 break;
@@ -127,7 +127,7 @@ public class ApplicationConfiguration {
         }
 
         public ManagerMode getMode() {
-            return ManagerMode.valueOf(mode);
+            return ManagerMode.valueOf(mode.toUpperCase());
         }
 
         @Generated
