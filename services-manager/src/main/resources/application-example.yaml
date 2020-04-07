@@ -27,21 +27,21 @@ spring:
 spring:
   profiles: example-config
 
-manager:
-  # Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
-  # example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
-  # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
-  example:
-    version: ${app.version}
-    path: ../Palisade-examples
-    model: ${manager.example.path}/example-model/target/example-model-${manager.example.version}-exec.jar
-    libs: &libraries
-      - ${manager.example.path}/example-library/target/example-library-${manager.example.version}.jar
-      - ${manager.example.path}/hr-data-generator/target/hr-data-generator-${manager.example.version}.jar
-    service-profiles: &profiles
-      - eureka
-      - example
+# Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+# example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
+# While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
+example:
+  version: ${app.version}
+  path: ../Palisade-examples
+  model: ${example.path}/example-model/target/example-model-${example.version}-exec.jar
+  libs: &libraries
+    - ${example.path}/example-library/target/example-library-${example.version}.jar
+    - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
+  service-profiles: &profiles
+    - eureka
+    - example
 
+manager:
   schedule:
     - palisade-task
     - example-task
@@ -52,7 +52,7 @@ manager:
 
   services:
     rest-example:
-      jar: ${manager.example.model}
+      jar: ${example.model}
       profiles:
         - rest
       log: rest-example.log
