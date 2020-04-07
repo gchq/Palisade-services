@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -28,37 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
-import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
-import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
