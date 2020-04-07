@@ -19,27 +19,26 @@ package uk.gov.gchq.palisade.service.manager.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class ServicesShutdown {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServicesShutdown.class);
+public class ScheduleShutdown implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleShutdown.class);
 
     // Autowired through constructor
     private Map<String, ServiceConfiguration> serviceConfiguration;
     private Function<String, ManagedService> serviceProducer;
 
-    public ServicesShutdown(final Map<String, ServiceConfiguration> serviceConfiguration, final Function<String, ManagedService> serviceProducer) {
-        this.serviceConfiguration = serviceConfiguration;
+    public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
+        this.serviceConfiguration = managerConfiguration.getServices();
         this.serviceProducer = serviceProducer;
     }
 
     public void run() {
-        LOGGER.debug("Loaded ServiceConfiguration: {}", serviceConfiguration);
-
         serviceConfiguration.forEach((serviceName, config) -> {
             LOGGER.info("Shutting down {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);

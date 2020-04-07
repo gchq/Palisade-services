@@ -17,8 +17,8 @@
 spring:
   profiles:
     include:
-    - services
-    - eureka-config
+      - palisade
+      - eureka-config
 
 # Spring profile dependency resolution forces this two-profile setup
 # `eureka` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
@@ -29,45 +29,38 @@ spring:
   profiles: eureka-config
 
 manager:
-  tasks:
-  - services:
-    - audit-service
-    - data-service
-    - palisade-service
-    - policy-service
-    - resource-service
-    - user-service
+  schedule:
+    - palisade-task
 
   services:
-
     audit-service:
       profiles:
-      - eureka
+        - eureka
       err: audit-service.err
 
     data-service:
       profiles:
-      - eureka
+        - eureka
       err: data-service.err
 
     palisade-service:
       profiles:
-      - eureka
+        - eureka
       err: palisade-service.err
 
     policy-service:
       profiles:
-      - eureka
+        - eureka
       err: policy-service.err
 
     resource-service:
       profiles:
-      - eureka
+        - eureka
       err: resource-service.err
 
     user-service:
       profiles:
-      - eureka
+        - eureka
       err: user-service.err
 
 # Eureka config
@@ -89,14 +82,14 @@ eureka:
 web:
   client:
     audit-service:
-    - audit-service
+      - audit-service
     data-service:
-    - data-service
+      - data-service
     palisade-service:
-    - palisade-service
+      - palisade-service
     policy-service:
-    - policy-service
+      - policy-service
     resource-service:
-    - resource-service
+      - resource-service
     user-service:
-    - user-service
+      - user-service

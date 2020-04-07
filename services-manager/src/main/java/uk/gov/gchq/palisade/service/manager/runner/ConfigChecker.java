@@ -19,19 +19,19 @@ package uk.gov.gchq.palisade.service.manager.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ConfigurationMap;
+import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 
-public class ConfigChecker {
+public class ConfigChecker implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigChecker.class);
 
     // Autowired through constructor
-    private ConfigurationMap config;
+    private ManagerConfiguration config;
 
-    public ConfigChecker(final ConfigurationMap config) {
+    public ConfigChecker(final ManagerConfiguration config) {
         this.config = config;
     }
 
     public void run() {
-        LOGGER.info("Loaded config:\n{}", config.toString());
+        LOGGER.info("Loaded config...\n{}", config.toString());
     }
 }

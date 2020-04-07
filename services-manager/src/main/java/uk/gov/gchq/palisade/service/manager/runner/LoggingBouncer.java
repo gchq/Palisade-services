@@ -19,27 +19,26 @@ package uk.gov.gchq.palisade.service.manager.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class LoggingBouncer {
+public class LoggingBouncer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);
 
     // Autowired through constructor
     private Map<String, ServiceConfiguration> loggingConfiguration;
     private Function<String, ManagedService> serviceProducer;
 
-    public LoggingBouncer(final Map<String, ServiceConfiguration> loggingConfiguration, final Function<String, ManagedService> serviceProducer) {
-        this.loggingConfiguration = loggingConfiguration;
+    public LoggingBouncer(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
+        this.loggingConfiguration = managerConfiguration.getServices();
         this.serviceProducer = serviceProducer;
     }
 
     public void run() {
-        LOGGER.debug("Loaded LoggerConfiguration: {}", loggingConfiguration);
-
         loggingConfiguration.forEach((serviceName, config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
@@ -48,7 +47,7 @@ public class LoggingBouncer {
                 try {
                     service.setLoggers(module, level);
                 } catch (Exception ex) {
-                    LOGGER.error("There was an error: ", ex);
+                    LOGGER.error("Error while changing logging level: ", ex);
                 }
             });
         });

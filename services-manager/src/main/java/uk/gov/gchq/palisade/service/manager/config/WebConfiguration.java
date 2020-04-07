@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-public class ClientConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
+public class WebConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebConfiguration.class);
 
     private Map<String, List<URI>> client;
 

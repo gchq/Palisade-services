@@ -21,14 +21,17 @@ app:
   version: '@project.version@'
 
 manager:
+  schedule:
+    - palisade-task
+
   tasks:
-  - services:
-    - audit-service
-    - data-service
-    - palisade-service
-    - policy-service
-    - resource-service
-    - user-service
+    palisade-task:
+      - audit-service
+      - data-service
+      - palisade-service
+      - policy-service
+      - resource-service
+      - user-service
 
   services:
     audit-service:

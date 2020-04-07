@@ -18,10 +18,8 @@ package uk.gov.gchq.palisade.service.manager.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,19 +28,19 @@ import org.springframework.context.annotation.Configuration;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.manager.runner.ConfigChecker;
 import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
-import uk.gov.gchq.palisade.service.manager.runner.ServicesRunner;
-import uk.gov.gchq.palisade.service.manager.runner.ServicesShutdown;
+import uk.gov.gchq.palisade.service.manager.runner.ScheduleRunner;
+import uk.gov.gchq.palisade.service.manager.runner.ScheduleShutdown;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
 import java.io.File;
 import java.net.URI;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -56,116 +54,47 @@ import static java.util.Objects.requireNonNull;
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Value("${manager.root}")
-    private String root;
-
     @Bean
     @ConfigurationProperties(prefix = "manager")
-    ConfigurationMap configurationMap() {
-        return new ConfigurationMap();
+    ManagerConfiguration managerConfiguration() {
+        return new ManagerConfiguration();
     }
 
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration();
+    public WebConfiguration webConfiguration() {
+        return new WebConfiguration();
     }
 
     @Bean
-    Map<String, ServiceConfiguration> serviceConfigurations(final ConfigurationMap configurationMap) {
-        return configurationMap.getServices();
-    }
-
-    @Bean
-    List<TaskConfiguration> taskConfigurations(final ConfigurationMap configurationMap) {
-        return configurationMap.getTasks().stream()
-                .map(taskConfiguration -> {
-                    try {
-                        LOGGER.debug("Processing task :: {}", taskConfiguration);
-                        return new TaskConfiguration(taskConfiguration, configurationMap.getServices());
-                    } catch (Exception e) {
-                        LOGGER.error("An error occurred: ", e);
-                        System.exit(-1);
-                        return null;
-                    }
-                })
-                .collect(Collectors.toList());
-    }
-
-    private File getServicesRoot() {
-        File parent = new File(".").getAbsoluteFile();
-        while (parent != null && !root.equals(parent.getName())) {
-            parent = parent.getParentFile();
+    public ApplicationRunner managerApplicationRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
+        Runnable runner;
+        switch (managerConfiguration.getMode()) {
+            case run:
+                runner = new ScheduleRunner(managerConfiguration, serviceProducer);
+                break;
+            case shutdown:
+                runner = new ScheduleShutdown(managerConfiguration, serviceProducer);
+                break;
+            case loggers:
+                runner = new LoggingBouncer(managerConfiguration, serviceProducer);
+                break;
+            case config:
+            default:
+                runner = new ConfigChecker(managerConfiguration);
+                break;
         }
-        return parent;
-    }
+        LOGGER.info("Constructed runner for {} mode: {}", managerConfiguration.getMode(), runner);
 
-    @Bean("configChecker")
-    @ConditionalOnProperty(name = "manager.mode", havingValue = "configChecker", matchIfMissing = true)
-    public ApplicationRunner configCheckerRunner(final ConfigurationMap configurationMap) {
-        LOGGER.info("Constructed ConfigChecker runner");
         return args -> {
-            new ConfigChecker(configurationMap).run();
+            LOGGER.info("Running runner for manager: {}", runner);
+            runner.run();
             System.exit(0);
         };
     }
 
-    @Bean("loggingBouncer")
-    @ConditionalOnProperty(name = "manager.mode", havingValue = "loggingBouncer")
-    public ApplicationRunner loggingBouncerRunner(final Map<String, ServiceConfiguration> serviceConfigurationMap,
-                                                  final Function<String, ManagedService> serviceProducer) {
-        LOGGER.info("Constructed LoggingBouncer runner");
-        return args -> {
-            new LoggingBouncer(serviceConfigurationMap, serviceProducer).run();
-            System.exit(0);
-        };
-    }
-
-    @Bean("servicesShutdown")
-    @ConditionalOnProperty(name = "manager.mode", havingValue = "servicesShutdown")
-    public ApplicationRunner servicesShutdownRunner(final Map<String, ServiceConfiguration> serviceConfigurationMap,
-                                                  final Function<String, ManagedService> serviceProducer) {
-        LOGGER.info("Constructed ServicesShutdown runner");
-        return args -> {
-            new ServicesShutdown(serviceConfigurationMap, serviceProducer).run();
-            System.exit(0);
-        };
-    }
-
-    @Bean("servicesRunner")
-    @ConditionalOnProperty(name = "manager.mode", havingValue = "servicesRunner")
-    public ApplicationRunner servicesRunner(final List<TaskConfiguration> taskConfigurations,
-                                            final Function<String, ManagedService> serviceProducer) {
-        LOGGER.info("Constructed ServicesRunner runner");
-        return args -> {
-            taskConfigurations.forEach(task -> {
-                LOGGER.info("Starting task :: {}", task.getTaskName());
-                LOGGER.debug("Will be running services :: {}", task.getSubTasks().keySet());
-                ServicesRunner servicesRunner = new ServicesRunner(task.getProcessBuilders(getServicesRoot()), serviceProducer);
-                Map<String, List<Supplier<Boolean>>> taskCompleteIndicators = servicesRunner.run();
-                LOGGER.info("Waiting for task {} to complete", task.getTaskName());
-                try {
-                    Boolean complete = false;
-                    while (!complete) {
-                        Thread.sleep(5000);
-                        complete = taskCompleteIndicators.entrySet().stream().allMatch(indicators -> {
-                            String serviceName = indicators.getKey();
-                            Boolean serviceComplete = indicators.getValue().stream().anyMatch(Supplier::get);
-                            LOGGER.info("{} :: {}", serviceName, serviceComplete ? "Complete!" : "Waiting...");
-                            return serviceComplete;
-                        });
-                    }
-                } catch (Exception ex) {
-                    LOGGER.error("There was an error: ", ex);
-                    System.exit(-1);
-                }
-            });
-            System.exit(0);
-        };
-    }
-
-    @Bean("managedServiceSupplier")
-    public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final ClientConfiguration clientConfig) {
+    @Bean("managedServiceProducer")
+    public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final WebConfiguration clientConfig) {
         return serviceName -> {
             Supplier<Collection<URI>> uriSupplier = () -> {
                 Collection<URI> clientUris = clientConfig.getClientUri(serviceName);
@@ -176,19 +105,66 @@ public class ApplicationConfiguration {
         };
     }
 
-    public static class ConfigurationMap {
-
-        private List<Map<String, List<String>>> tasks = new LinkedList<>();
-
+    public static class ManagerConfiguration {
+        private String root;
+        private String mode;
+        private List<String> schedule = new LinkedList<>();
+        private Map<String, List<String>> tasks = new HashMap<>();
         private Map<String, ServiceConfiguration> services = new HashMap<>();
 
-        @Generated
-        public List<Map<String, List<String>>> getTasks() {
-            return tasks;
+        public File getRoot() {
+            File parent = new File(".").getAbsoluteFile();
+            while (parent != null && !root.equals(parent.getName())) {
+                parent = parent.getParentFile();
+            }
+            return parent;
         }
 
         @Generated
-        public void setTasks(final List<Map<String, List<String>>> tasks) {
+        public void setRoot(final String root) {
+            requireNonNull(root);
+            this.root = root;
+        }
+
+        public ManagerMode getMode() {
+            return ManagerMode.valueOf(mode);
+        }
+
+        @Generated
+        public void setMode(final String mode) {
+            requireNonNull(mode);
+            this.mode = mode;
+        }
+
+        public List<Map.Entry<String, TaskConfiguration>> getSchedule() {
+            return schedule.stream()
+                    .map(task -> new SimpleImmutableEntry<>(task, getTasks().get(task)))
+                    .collect(Collectors.toList());
+        }
+
+        @Generated
+        public void setSchedule(final List<String> schedule) {
+            requireNonNull(schedule);
+            this.schedule = schedule;
+        }
+
+        public Map<String, TaskConfiguration> getTasks() {
+            return tasks.entrySet().stream()
+                    .map(taskEntry -> {
+                        try {
+                            LOGGER.debug("Processing task :: {}", taskEntry);
+                            return new SimpleImmutableEntry<>(taskEntry.getKey(), new TaskConfiguration(taskEntry.getValue(), getServices()));
+                        } catch (Exception e) {
+                            LOGGER.error("An error occurred: ", e);
+                            System.exit(-1);
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        @Generated
+        public void setTasks(final Map<String, List<String>> tasks) {
             requireNonNull(tasks);
             this.tasks = tasks;
         }
@@ -206,28 +182,11 @@ public class ApplicationConfiguration {
 
         @Override
         @Generated
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof ConfigurationMap)) {
-                return false;
-            }
-            final ConfigurationMap that = (ConfigurationMap) o;
-            return Objects.equals(tasks, that.tasks) &&
-                    Objects.equals(services, that.services);
-        }
-
-        @Override
-        @Generated
-        public int hashCode() {
-            return Objects.hash(tasks, services);
-        }
-
-        @Override
-        @Generated
         public String toString() {
-            return new StringJoiner(", ", ConfigurationMap.class.getSimpleName() + "[", "\n]")
+            return new StringJoiner(", ", ManagerConfiguration.class.getSimpleName() + "[", "\n]")
+                    .add("\n\troot='" + root + "'")
+                    .add("\n\tmode='" + mode + "'")
+                    .add("\n\tschedule=" + schedule)
                     .add("\n\ttasks=" + tasks)
                     .add("\n\tservices=" + services.toString().replace("\n", "\n\t"))
                     .add("\n\t" + super.toString())

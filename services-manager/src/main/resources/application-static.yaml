@@ -16,9 +16,8 @@
 spring:
   profiles:
     include:
-    - discovery
-    - services
-    - static-config
+      - palisade
+      - static-config
 
 # Spring profile dependency resolution forces this two-profile setup
 # `static` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
@@ -29,33 +28,24 @@ spring:
   profiles: static-config
 
 manager:
-  # When doing a --run :: discovery -> services -> done
-  tasks:
-  - discovery:
-    - discovery-service
-  - services:
-    - audit-service
-    - data-service
-    - palisade-service
-    - policy-service
-    - resource-service
-    - user-service
+  schedule:
+    - palisade-task
 
 # Discoveryless static configuration (presumably over localhost for integration-tests)
 # i.e. map from what-i-call-a-service -> service-URI
 web:
   client:
     audit-service:
-    - http://localhost:8081
+      - http://localhost:8081
     data-service:
-    - http://localhost:8082
+      - http://localhost:8082
     discovery-service:
-    - http://localhost:8083
+      - http://localhost:8083
     palisade-service:
-    - http://localhost:8084
+      - http://localhost:8084
     policy-service:
-    - http://localhost:8085
+      - http://localhost:8085
     resource-service:
-    - http://localhost:8086
+      - http://localhost:8086
     user-service:
-    - http://localhost:8087
+      - http://localhost:8087

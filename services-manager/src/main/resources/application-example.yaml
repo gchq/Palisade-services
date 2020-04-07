@@ -16,8 +16,8 @@
 spring:
   profiles:
     include:
-    - eureka
-    - example-config
+      - eureka
+      - example-config
 
 # Spring profile dependency resolution forces this two-profile setup
 # `example` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
@@ -28,7 +28,7 @@ spring:
   profiles: example-config
 
 manager:
-  # Example field used internally to the yaml ONLY - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
+  # Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
   # example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
   # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
   example:
@@ -36,30 +36,25 @@ manager:
     path: ../Palisade-examples
     model: ${manager.example.path}/example-model/target/example-model-${manager.example.version}-exec.jar
     libs: &libraries
-    - ${manager.example.path}/example-library/target/example-library-${manager.example.version}.jar
-    - ${manager.example.path}/hr-data-generator/target/hr-data-generator-${manager.example.version}.jar
+      - ${manager.example.path}/example-library/target/example-library-${manager.example.version}.jar
+      - ${manager.example.path}/hr-data-generator/target/hr-data-generator-${manager.example.version}.jar
     service-profiles: &profiles
-    - eureka
-    - example
+      - eureka
+      - example
 
-  # TODO: Discovery service bootstrap
-  # When doing a --run :: services -> RestExample -> done
+  schedule:
+    - palisade-task
+    - example-task
+
   tasks:
-  - services:
-    - audit-service
-    - data-service
-    - palisade-service
-    - policy-service
-    - resource-service
-    - user-service
-  - example:
-    - rest-example
+    example-task:
+      - rest-example
 
   services:
     rest-example:
       jar: ${manager.example.model}
       profiles:
-      - rest
+        - rest
       log: rest-example.log
       err: rest-example.err
 

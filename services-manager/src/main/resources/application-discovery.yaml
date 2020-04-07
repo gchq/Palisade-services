@@ -19,9 +19,12 @@ app:
   version: '@project.version@'
 
 manager:
+  schedule:
+    - discovery-task
+
   tasks:
-  - discovery:
-    - discovery-service
+    discovery-task:
+      - discovery-service
 
   services:
     discovery-service:
@@ -30,4 +33,4 @@ manager:
 web:
   client:
     discovery-service:
-    - http://localhost:8083
+      - http://localhost:8083

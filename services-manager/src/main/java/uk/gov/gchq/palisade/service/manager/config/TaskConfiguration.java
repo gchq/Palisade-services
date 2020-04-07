@@ -16,32 +16,34 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.manager.runner.TaskRunner;
+import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
 import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TaskConfiguration {
-    private final String taskName;
-    private final Map<String, ServiceConfiguration> subTasks;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskConfiguration.class);
+    private final Map<String, ServiceConfiguration> services;
 
-    public TaskConfiguration(final Map<String, List<String>> taskConfiguration, final Map<String, ServiceConfiguration> serviceConfigurationMap) throws Exception {
-        Map.Entry<String, List<String>> oneTaskConfiguration = taskConfiguration.entrySet().stream()
-                .findFirst()
-                .orElseThrow(() -> new Exception("Empty task configuration"));
-
-        this.taskName = oneTaskConfiguration.getKey();
-        this.subTasks = serviceConfigurationMap.entrySet().stream()
-                .filter(entry -> oneTaskConfiguration.getValue().contains(entry.getKey()))
+    public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) throws Exception {
+        this.services = serviceConfiguration.entrySet().stream()
+                .filter(entry -> services.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, ProcessBuilder> getProcessBuilders(final File builderDirectory) {
-        return subTasks.entrySet().stream()
+        return services.entrySet().stream()
                 .map(e -> {
                     ServiceConfiguration config = e.getValue();
                     ProcessBuilder builder = config.getProcessBuilder();
@@ -51,25 +53,18 @@ public class TaskConfiguration {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    @Generated
-    public String getTaskName() {
-        return taskName;
+    public Map<String, List<Supplier<Boolean>>> runTask(final File rootDir, final Function<String, ManagedService> serviceProducer) {
+        return new TaskRunner(getProcessBuilders(rootDir), serviceProducer).run();
     }
-
-    @Generated
-    public Map<String, ServiceConfiguration> getSubTasks() {
-        return subTasks;
-    }
-
-    // No hashCode or equals, a duplicated taskConfiguration is unique due to its side-effects/position in taskList
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", TaskConfiguration.class.getSimpleName() + "[", "]")
-                .add("taskName='" + taskName + "'")
-                .add("subTasks=" + subTasks)
+                .add("services=" + services)
                 .add(super.toString())
                 .toString();
     }
+
+
 }
