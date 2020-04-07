@@ -134,7 +134,7 @@ public class ApplicationConfiguration {
                 LOGGER.info("Waiting for task {} to complete", task.getTaskName());
                 try {
                     Boolean complete = false;
-                    while (!complete) {
+                    while (Boolean.FALSE.equals(complete)) {
                         Thread.sleep(5000);
                         complete = taskCompleteIndicators.entrySet().stream().allMatch(indicators -> {
                             String serviceName = indicators.getKey();
