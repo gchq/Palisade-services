@@ -20,26 +20,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
-import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ScheduleShutdown implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleShutdown.class);
 
     // Autowired through constructor
-    private Map<String, ServiceConfiguration> serviceConfiguration;
+    private List<String> serviceNames;
     private Function<String, ManagedService> serviceProducer;
 
     public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
-        this.serviceConfiguration = managerConfiguration.getServices();
+        // Initially not reversed
+        List<String> reversedServiceNames = managerConfiguration.getSchedule().stream()
+                .map(Entry::getValue)
+                .flatMap(task -> task.getServices().keySet().stream())
+                .collect(Collectors.toList());
+        Collections.reverse(reversedServiceNames);
+        // Now reversedServiceNames is actually reversed
+
+        this.serviceNames = reversedServiceNames;
         this.serviceProducer = serviceProducer;
     }
 
     public void run() {
-        serviceConfiguration.forEach((serviceName, config) -> {
+        serviceNames.forEach(serviceName -> {
             LOGGER.info("Shutting down {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
             service.shutdown();

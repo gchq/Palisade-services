@@ -53,6 +53,11 @@ public class TaskConfiguration {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    @Generated
+    public Map<String, ServiceConfiguration> getServices() {
+        return services;
+    }
+
     public Map<String, List<Supplier<Boolean>>> runTask(final File rootDir, final Function<String, ManagedService> serviceProducer) {
         return new TaskRunner(getProcessBuilders(rootDir), serviceProducer).run();
     }

@@ -23,7 +23,8 @@ spring:
     allow-bean-definition-overriding: true
 
 # Options at the command line include:
-# --run : Run all known services
+# --run : Run services according to the schedule
+# --shutdown : Shutdown service according to the schedule (reversed)
 # --logging : Alter the logging level for all known services
 # --config : Print out the loaded configuration (for debugging the manager)
 manager:
