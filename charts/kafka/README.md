@@ -1,4 +1,73 @@
+<!---
+Copyright 2019 Crown Copyright
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/README.md
+--->
+
 # Apache Kafka Helm Chart
+
+This chart was cloned from: https://github.com/helm/charts/tree/master/incubator/kafka
+I have also added a testclient to test operation of the Kafka cluster.
+This particular Helm chart has a dependency on zookeeper. This dependency was resolved
+by running:
+```bash
+helm dependency update
+```
+This pulled in zookeeper-2.1.0.tgz 
+This has been unzipped to ./charts.zookeeper to prevent the need for performing
+a dependency update.
+
+After deployment of the cluster you should see the following:
+
+```bash
+kubectl get all --namespace=dev
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/palisade-kafka-0                    1/1     Running   1          30m
+pod/palisade-kafka-1                    1/1     Running   0          28m
+pod/palisade-kafka-2                    1/1     Running   0          27m
+pod/palisade-kafka-testclient           1/1     Running   0          30m
+pod/palisade-zookeeper-0                1/1     Running   0          30m
+pod/palisade-zookeeper-1                1/1     Running   0          29m
+pod/palisade-zookeeper-2                1/1     Running   0          29m
+
+NAME                                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+service/palisade-kafka                ClusterIP   10.97.189.45     <none>        9092/TCP                     30m
+service/palisade-kafka-headless       ClusterIP   None             <none>        9092/TCP                     30m
+service/palisade-zookeeper            ClusterIP   10.99.212.137    <none>        2181/TCP                     30m
+service/palisade-zookeeper-headless   ClusterIP   None             <none>        2181/TCP,3888/TCP,2888/TCP   30m
+
+NAME                                  READY   AGE
+statefulset.apps/palisade-kafka       3/3     30m
+statefulset.apps/palisade-zookeeper   3/3     30m
+```
+
+To verify that the kafka service is operational perform the following:
+
+```bash
+kubectl  exec -ti palisade-kafka-testclient --namespace=dev -- ./bin/kafka-topics.sh --zookeeper palisade-zookeeper:2181 --list
+```
+
+This should result in the topics being displayed, if no topics have been created then a null output would be been.
+
+Create a topic as follows:
+```bash
+kubectl  exec -ti palisade-kafka-testclient --namespace=dev -- ./bin/kafka-topics.sh --create --replication-factor 1 --partitions 1 --zookeeper palisade-zookeeper:2181 --topic topicName
+Created topic "topicName".
+```
+
+
 
 This is an implementation of Kafka StatefulSet found here:
 

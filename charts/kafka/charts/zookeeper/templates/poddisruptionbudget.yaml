@@ -12,19 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/templates/podisruptionbudget.yaml
+# Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/zookeeper/templates/poddisruptionbudget.yaml
 
-{{- if .Values.podDisruptionBudget }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "kafka.fullname" . }}
+  name: {{ template "zookeeper.fullname" . }}
   labels:
-  {{- include "kafka.broker.labels" . | nindent 4 }}
+    app: {{ template "zookeeper.name" . }}
+    chart: {{ template "zookeeper.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: server
 spec:
   selector:
     matchLabels:
-    {{- include "kafka.broker.matchLabels" . | nindent 6 }}
+      app: {{ template "zookeeper.name" . }}
+      release: {{ .Release.Name }}
+      component: server
 {{ toYaml .Values.podDisruptionBudget | indent 2 }}
-
-{{- end }}
