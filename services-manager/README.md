@@ -56,7 +56,7 @@ If services are already running, using the built-in profiles:
    * First start the discovery-service in a static-like way - `java -jar -Dspring.profiles.active=discovery services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run` 
    * Once the manager is finished running, check the eureka dashboard at `localhost:8083` 
    * Next start all other palisade services using the discovery-service for service discovery - `java -jar -Dspring.profiles.active=eureka services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run` 
-   * These two commands will only exit once all services are ready, so the two `java -jar ...` commandss can be chained together as `java -jar .. && java -jar ...`
+   * These two commands will only exit once all services are ready, so the two `java -jar ...` commands can be chained together as `java -jar .. && java -jar ...`
  * Services using static ports
    * Just a single command - `java -jar -Dspring.profiles.active=static services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run` 
    * No eureka dashboard here, but take a look at the /actuator endpoints for some metadata 
