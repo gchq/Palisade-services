@@ -133,8 +133,7 @@ spec:
             container('maven') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     if (("${env.BRANCH_NAME}" == "develop") ||
-                            ("${env.BRANCH_NAME}" == "master") ||
-                            ("${env.BRANCH_NAME}" == "PAL-416-helm-chart-for-kafka")) {
+                            ("${env.BRANCH_NAME}" == "master")) {
                         sh 'palisade-login'
                         //now extract the public IP addresses that this will be open on
                         sh 'extract-addresses'
