@@ -16,14 +16,9 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
 import uk.gov.gchq.palisade.Generated;
 
 import java.io.File;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -131,23 +125,10 @@ public class ServiceConfiguration {
         command.add(jar);
 
         ProcessBuilder pb = new ProcessBuilder().command(command);
-        log.ifPresent(logged -> pb.redirectOutput(new File(logged)));
-        err.ifPresent(err -> pb.redirectError(new File(err)));
+        log.ifPresent(logFile -> pb.redirectOutput(new File(logFile)));
+        err.ifPresent(errorFile -> pb.redirectError(new File(errorFile)));
 
         return pb;
-    }
-
-    public Map<String, HttpEntity<String>> getLoggingChangeEntities() {
-        return level.entrySet().stream()
-                .map(entry -> {
-                    // Create a JSON object
-                    HttpHeaders header = new HttpHeaders();
-                    header.setContentType(MediaType.APPLICATION_JSON);
-                    // Configure the endpoint to log to the new level
-                    String body = String.format("{\"configuredLevel\":\"%s\"}", entry.getValue());
-                    // POST the entity to the actuator, expect a response of OK
-                    return new SimpleEntry<>(entry.getKey(), new HttpEntity<>(body, header));
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -177,13 +158,13 @@ public class ServiceConfiguration {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ServiceConfiguration.class.getSimpleName() + "[", "]")
-                .add("jar='" + jar + "'")
-                .add("paths=" + paths)
-                .add("profiles=" + profiles)
-                .add("log=" + log)
-                .add("err=" + err)
-                .add("level=" + level)
+        return new StringJoiner(", ", ServiceConfiguration.class.getSimpleName() + "[", "\n]")
+                .add("\n\tjar='" + jar + "'")
+                .add("\n\tpaths=" + paths)
+                .add("\n\tprofiles=" + profiles)
+                .add("\n\tlog=" + log)
+                .add("\n\terr=" + err)
+                .add("\n\tlevel=" + level)
                 .toString();
     }
 }
