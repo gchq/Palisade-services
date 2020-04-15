@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.palisade.request.AddResourceRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
@@ -29,22 +28,21 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 import java.net.URI;
-import java.util.Set;
 
 @FeignClient(name = "resource-service", url = "undefined")
 public interface ResourceClient {
 
-    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    Set<LeafResource> getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
+    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
+    Response getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
 
-    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    Set<LeafResource> getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
+    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
+    Response getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
 
-    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    Set<LeafResource> getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
+    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
+    Response getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
 
-    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    Set<LeafResource> getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
+    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
+    Response getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(final URI url, @RequestBody final AddResourceRequest request);

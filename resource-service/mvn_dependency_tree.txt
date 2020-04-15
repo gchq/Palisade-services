@@ -30,10 +30,14 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.10.0:compile
 |  \- com.fasterxml.jackson.core:jackson-core:jar:2.10.0:compile
 +- com.fasterxml.jackson.core:jackson-databind:jar:2.10.0:compile
++- org.springframework.cloud:spring-cloud-config-client:jar:2.2.0.RELEASE:compile
+|  +- org.springframework.boot:spring-boot-autoconfigure:jar:2.2.0.RELEASE:compile
+|  +- org.springframework.cloud:spring-cloud-context:jar:2.2.0.RELEASE:compile
+|  \- org.springframework:spring-web:jar:5.2.0.RELEASE:compile
+|     \- org.springframework:spring-beans:jar:5.2.0.RELEASE:compile
 +- org.springframework.boot:spring-boot-starter:jar:2.2.0.RELEASE:compile
 |  +- org.springframework.boot:spring-boot:jar:2.2.0.RELEASE:compile
 |  |  \- org.springframework:spring-context:jar:5.2.0.RELEASE:compile
-|  +- org.springframework.boot:spring-boot-autoconfigure:jar:2.2.0.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter-logging:jar:2.2.0.RELEASE:compile
 |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.12.1:compile
 |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.12.1:compile
@@ -58,8 +62,6 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  +- org.springframework.boot:spring-boot-starter-validation:jar:2.2.0.RELEASE:compile
 |  |  +- jakarta.validation:jakarta.validation-api:jar:2.0.1:compile
 |  |  \- org.hibernate.validator:hibernate-validator:jar:6.0.17.Final:compile
-|  +- org.springframework:spring-web:jar:5.2.0.RELEASE:compile
-|  |  \- org.springframework:spring-beans:jar:5.2.0.RELEASE:compile
 |  \- org.springframework:spring-webmvc:jar:5.2.0.RELEASE:compile
 |     +- org.springframework:spring-aop:jar:5.2.0.RELEASE:compile
 |     \- org.springframework:spring-expression:jar:5.2.0.RELEASE:compile

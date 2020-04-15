@@ -28,8 +28,8 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.util.FileUtil;
 
@@ -48,9 +48,9 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties
-public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
+public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyCacheWarmerFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
     private String type;
     private String resource;
@@ -58,11 +58,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
 
-    public StdPolicyCacheWarmerFactory() {
+    public StdPolicyPrepopulationFactory() {
     }
 
-    public StdPolicyCacheWarmerFactory(final String type, final String resource, final String owner,
-                                       final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+    public StdPolicyPrepopulationFactory(final String type, final String resource, final String owner,
+                                         final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.type = type;
         this.resource = resource;
         this.owner = owner;
@@ -126,11 +126,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     }
 
     @Override
-    public Entry<Resource, Policy> policyWarm(final List<? extends UserCacheWarmerFactory> users) {
+    public Entry<Resource, Policy> build(final List<? extends UserPrepopulationFactory> users) {
         Policy<?> policy = new Policy<>();
-        for (StdUserCacheWarmerFactory user : (List<StdUserCacheWarmerFactory>) users) {
+        for (StdUserPrepopulationFactory user : (List<StdUserPrepopulationFactory>) users) {
             if (user.getUserId().equals(owner)) {
-                policy.setOwner(user.userWarm());
+                policy.setOwner(user.build());
             }
         }
         for (Entry<String, String> entry : resourceRules.entrySet()) {
@@ -209,10 +209,10 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StdPolicyCacheWarmerFactory)) {
+        if (!(o instanceof StdPolicyPrepopulationFactory)) {
             return false;
         }
-        final StdPolicyCacheWarmerFactory that = (StdPolicyCacheWarmerFactory) o;
+        final StdPolicyPrepopulationFactory that = (StdPolicyPrepopulationFactory) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(resource, that.resource) &&
                 Objects.equals(owner, that.owner) &&
@@ -229,7 +229,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", StdPolicyCacheWarmerFactory.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", StdPolicyPrepopulationFactory.class.getSimpleName() + "[", "]")
                 .add("type='" + type + "'")
                 .add("resource='" + resource + "'")
                 .add("owner='" + owner + "'")

@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -30,7 +30,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties
-public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
+public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     private String userId;
     private Set<String> auths;
@@ -38,9 +38,9 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
 
     /**
      * Constructor with 0 arguments for a standard implementation
-     * of the {@link UserCacheWarmerFactory} interface.
+     * of the {@link UserPrepopulationFactory} interface.
      */
-    public StdUserCacheWarmerFactory() {
+    public StdUserPrepopulationFactory() {
         this.userId = "";
         this.auths = Collections.emptySet();
         this.roles = Collections.emptySet();
@@ -48,13 +48,13 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
 
     /**
      * Constructor with 3 arguments for a standard implementation
-     * of the {@link UserCacheWarmerFactory} interface.
+     * of the {@link UserPrepopulationFactory} interface.
      *
      * @param userId    a {@link String} value of a user.
      * @param roles     a {@link Set} of {@link String} role values for the user.
      * @param auths     a {@link Set} of {@link String} auth values for the user.
      */
-    public StdUserCacheWarmerFactory(final String userId, final Set<String> roles, final Set<String> auths) {
+    public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
         this.auths = auths;
         this.roles = roles;
@@ -76,7 +76,7 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
     }
 
     @Generated
-    public StdUserCacheWarmerFactory setAuths(final Set<String> auths) {
+    public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
         this.auths = auths;
         return this;
@@ -88,14 +88,14 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
     }
 
     @Generated
-    public StdUserCacheWarmerFactory setRoles(final Set<String> roles) {
+    public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
         this.roles = roles;
         return this;
     }
 
     @Override
-    public User userWarm() {
+    public User build() {
         return new User()
                 .userId(this.getUserId())
                 .roles(this.getRoles())
@@ -108,10 +108,10 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StdUserCacheWarmerFactory)) {
+        if (!(o instanceof StdUserPrepopulationFactory)) {
             return false;
         }
-        final StdUserCacheWarmerFactory that = (StdUserCacheWarmerFactory) o;
+        final StdUserPrepopulationFactory that = (StdUserPrepopulationFactory) o;
         return Objects.equals(userId, that.userId) &&
                 Objects.equals(auths, that.auths) &&
                 Objects.equals(roles, that.roles);
@@ -126,7 +126,7 @@ public class StdUserCacheWarmerFactory implements UserCacheWarmerFactory {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", StdUserCacheWarmerFactory.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", StdUserPrepopulationFactory.class.getSimpleName() + "[", "]")
                 .add("userId='" + userId + "'")
                 .add("auths=" + auths)
                 .add("roles=" + roles)

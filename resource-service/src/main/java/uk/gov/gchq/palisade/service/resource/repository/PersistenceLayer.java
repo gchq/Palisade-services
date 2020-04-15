@@ -36,9 +36,9 @@ public interface PersistenceLayer {
 
     void putResourcesById(String rootResourceId, LeafResource leafResource);
 
-    void putResourcesByType(String type, LeafResource resource);
+    void putResourcesByType(String type, LeafResource leafResource);
 
-    void putResourcesBySerialisedFormat(String serialisedFormat, LeafResource resource);
+    void putResourcesBySerialisedFormat(String serialisedFormat, LeafResource leafResource);
 
 
     void addResource(LeafResource leafResource);

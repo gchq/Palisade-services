@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.resource.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -116,9 +115,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return traverseParentsByEntity(childResource, (parent, child) -> child.setParent(parent), (parent, child) -> !(parent.getId().equals(rootResource.getId()) || child.getId().equals(rootResource.getId())));
     }
 
-    /**
-     * In order for this stream to be managed and closed appropriately, methods querying must be {@link Transactional}
-      */
     @Override
     public Optional<Stream<LeafResource>> getResourcesById(final String resourceId) {
         LOGGER.debug("Getting resources by id {}", resourceId);
@@ -128,9 +124,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                         .map(leafResource -> resolveParentsUpto(leafResource, rootResource)));
     }
 
-    /**
-     * In order for this stream to be managed and closed appropriately, methods querying must be {@link Transactional}
-     */
     @Override
     public Optional<Stream<LeafResource>> getResourcesByType(final String type) {
         LOGGER.debug("Getting resources by type {}", type);
@@ -147,9 +140,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                 : Optional.empty();
     }
 
-    /**
-     * In order for this stream to be managed and closed appropriately, methods querying must be {@link Transactional}
-     */
     @Override
     public Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(final String serialisedFormat) {
         LOGGER.debug("Getting resources by serialised format {}", serialisedFormat);
@@ -166,7 +156,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                 : Optional.empty();
     }
 
-    @Transactional
     @Override
     public void putResourcesById(final String rootResourceId, final LeafResource leafResource) {
         LOGGER.debug("Putting resource and parents up-to {} for resource {}", rootResourceId, leafResource);
@@ -217,7 +206,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         });
     }
 
-    @Transactional
     @Override
     public void putResourcesByType(final String type, final LeafResource leafResource) {
         LOGGER.debug("Putting resource for type {} for resource {}", type, leafResource);
@@ -225,7 +213,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         typeRepository.save(new TypeEntity(type, leafResource.getId()));
     }
 
-    @Transactional
     @Override
     public void putResourcesBySerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
         LOGGER.debug("Putting resource for serialised format {} for resource {}", serialisedFormat, leafResource);
@@ -233,7 +220,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         serialisedFormatRepository.save(new SerialisedFormatEntity(serialisedFormat, leafResource.getId()));
     }
 
-    @Transactional
     @Override
     public void addResource(final LeafResource leafResource) {
         String resourceId = leafResource.getId();

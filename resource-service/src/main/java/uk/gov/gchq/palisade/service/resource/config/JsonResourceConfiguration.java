@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.config;
+package uk.gov.gchq.palisade.service.resource.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
@@ -30,37 +31,37 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties(prefix = "population")
-public class StdUserConfiguration implements UserConfiguration {
+public class JsonResourceConfiguration implements ResourceConfiguration {
 
-    private List<StdUserPrepopulationFactory> users = new ArrayList<>();
+    private List<JsonResourcePrepopulationFactory> resources = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserConfiguration} interface
      */
-    public StdUserConfiguration() {
+    public JsonResourceConfiguration() {
     }
 
     /**
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
+     * @param resources     a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
-        this.users = users;
+    public JsonResourceConfiguration(final List<JsonResourcePrepopulationFactory> resources) {
+        this.resources = resources;
     }
 
     @Override
     @Generated
-    public List<StdUserPrepopulationFactory> getResources() {
-        return users;
+    public List<JsonResourcePrepopulationFactory> getResources() {
+        return resources;
     }
 
     @Generated
-    public void setUsers(final List<StdUserPrepopulationFactory> users) {
-        requireNonNull(users);
-        this.users = users;
+    public void setResources(final List<JsonResourcePrepopulationFactory> resources) {
+        requireNonNull(resources);
+        this.resources = resources;
     }
 
     @Override
@@ -69,24 +70,24 @@ public class StdUserConfiguration implements UserConfiguration {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StdUserConfiguration)) {
+        if (!(o instanceof JsonResourceConfiguration)) {
             return false;
         }
-        final StdUserConfiguration that = (StdUserConfiguration) o;
-        return Objects.equals(users, that.users);
+        final JsonResourceConfiguration that = (JsonResourceConfiguration) o;
+        return Objects.equals(resources, that.resources);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(users);
+        return Objects.hash(resources);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", StdUserConfiguration.class.getSimpleName() + "[", "]")
-                .add("users=" + users)
+        return new StringJoiner(", ", JsonResourceConfiguration.class.getSimpleName() + "[", "]")
+                .add("resources=" + resources)
                 .add(super.toString())
                 .toString();
     }

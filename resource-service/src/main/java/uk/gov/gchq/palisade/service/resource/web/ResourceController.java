@@ -18,22 +18,20 @@ package uk.gov.gchq.palisade.service.resource.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
-
-import java.util.Set;
-import java.util.stream.Collectors;
+import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 @RestController
 @RequestMapping(path = "/")
@@ -41,42 +39,42 @@ public class ResourceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-    private ResourceService service;
+    private final StreamingResourceServiceProxy service;
 
-    public ResourceController(final @Qualifier("controller") ResourceService service) {
+    public ResourceController(final StreamingResourceServiceProxy service) {
         this.service = service;
     }
 
-    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    public Set<LeafResource> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
+    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.info("Invoking getResourceById: {}", request);
-        Set<LeafResource> response = service.getResourcesById(request.getResourceId()).collect(Collectors.toSet());
-        LOGGER.info("Returning response: {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesById(request.getResourceId(), out);
+        LOGGER.info("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    public Set<LeafResource> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
+    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
         LOGGER.info("Invoking getResourcesByResource: {}", request);
-        Set<LeafResource> response = service.getResourcesByResource(request.getResource()).collect(Collectors.toSet());
-        LOGGER.info("Returning response: {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesByResource(request.getResource(), out);
+        LOGGER.info("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    public Set<LeafResource> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
+    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.info("Invoking getResourceByType: {}", request);
-        Set<LeafResource> response = service.getResourcesByType(request.getType()).collect(Collectors.toSet());
-        LOGGER.info("Returning response: {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesByType(request.getType(), out);
+        LOGGER.info("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    public Set<LeafResource> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
+    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
-        Set<LeafResource> response = service.getResourcesBySerialisedFormat(request.getSerialisedFormat()).collect(Collectors.toSet());
-        LOGGER.info("Returning response: {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesBySerialisedFormat(request.getSerialisedFormat(), out);
+        LOGGER.info("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")

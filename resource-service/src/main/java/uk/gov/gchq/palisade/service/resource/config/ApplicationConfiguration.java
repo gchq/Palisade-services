@@ -20,13 +20,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
@@ -37,8 +41,8 @@ import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatReposito
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
 import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.service.ResourceServiceProxy;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
+import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -51,6 +55,20 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "json")
+    public JsonResourceConfiguration resourceConfiguration() {
+        LOGGER.info("Standard Policy Configuration Instantiated");
+        return new JsonResourceConfiguration();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "json")
+    public JsonResourcePrepopulationFactory resourcePrepopulationFactory() {
+        LOGGER.info("Standard Policy Cache Warmer Instantiated");
+        return new JsonResourcePrepopulationFactory();
+    }
+
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository, final @Qualifier("impl") ResourceService delegate) {
         return new JpaPersistenceLayer(resourceRepository, typeRepository, serialisedFormatRepository);
@@ -61,21 +79,25 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ResourceConverter();
     }
 
-    @Bean("persistenceProxy")
-    @Qualifier("controller")
-    public ResourceServiceProxy resourceServiceProxy(final PersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate) {
-        // TODO: refactor and remove after debugging
-        return new ResourceServiceProxy(persistenceLayer, delegate);
+    @Bean
+    public Serialiser<LeafResource> avroSerialiser() {
+        return new AvroSerialiser<>(LeafResource.class);
     }
 
-    @Primary
+    @Bean
+    public StreamingResourceServiceProxy resourceServiceProxy(final PersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final Serialiser<LeafResource> serialiser) {
+        return new StreamingResourceServiceProxy(persistenceLayer, delegate, serialiser);
+    }
+
     @Bean("simpleResourceService")
+    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
     public ResourceService simpleResourceService() {
         return new SimpleResourceService();
     }
 
     @Bean("hadoopResourceService")
+    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
     @Qualifier("impl")
     public HadoopResourceService hadoopResourceService(final org.apache.hadoop.conf.Configuration config) throws IOException {
         return new ConfiguredHadoopResourceService(config);

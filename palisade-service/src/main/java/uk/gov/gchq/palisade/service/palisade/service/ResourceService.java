@@ -19,28 +19,35 @@ import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
     private final ResourceClient client;
     private final Supplier<URI> uriSupplier;
+    private final Serialiser<LeafResource> serialiser;
     private final Executor executor;
 
-    public ResourceService(final ResourceClient resourceClient, final Supplier<URI> uriSupplier, final Executor executor) {
+    public ResourceService(final ResourceClient resourceClient, final Supplier<URI> uriSupplier, final Serialiser<LeafResource> serialiser, final Executor executor) {
         this.client = resourceClient;
         this.uriSupplier = uriSupplier;
+        this.serialiser = serialiser;
         this.executor = executor;
     }
 
@@ -53,9 +60,18 @@ public class ResourceService implements Service {
             resources = CompletableFuture.supplyAsync(() -> {
                 URI clientUri = this.uriSupplier.get();
                 LOGGER.debug("Using client uri: {}", clientUri);
-                Set<LeafResource> response = client.getResourcesById(clientUri, request);
-                LOGGER.info("Got resources: {}", response);
-                return response;
+                InputStream responseStream = null;
+                try {
+                    responseStream = client.getResourcesById(clientUri, request).body().asInputStream();
+                    Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);
+                    Set<LeafResource> response = resourceStream.collect(Collectors.toSet());
+                    LOGGER.info("Got resources: {}", response);
+                    return response;
+                } catch (IOException e) {
+                    LOGGER.error("IOException getting response body input stream");
+                    LOGGER.error("Exception was :: ", e);
+                    throw new RuntimeException(e);
+                }
             }, this.executor);
         } catch (Exception ex) {
             LOGGER.error("Failed to get resources: {}", ex.getMessage());

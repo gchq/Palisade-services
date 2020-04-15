@@ -50,7 +50,7 @@ public class UserServiceTest {
         executor = Executors.newSingleThreadExecutor();
         Supplier<URI> uriSupplier = () -> {
             try {
-                return new URI("audit-service");
+                return new URI("user-service");
             } catch (Exception e) {
                 return null;
             }

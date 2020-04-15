@@ -27,7 +27,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.palisade.domain.ContextConverter;
 import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceConverter;
 import uk.gov.gchq.palisade.service.palisade.domain.RulesConverter;
@@ -70,8 +73,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
-        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, executor);
+    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository) {
+        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, getAsyncExecutor());
     }
 
     @Bean
@@ -127,11 +130,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig) {
+    public Serialiser<LeafResource> avroSerialiser() {
+        return new AvroSerialiser<>(LeafResource.class);
+    }
+
+    @Bean
+    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig, final Serialiser<LeafResource> serialiser) {
         Supplier<URI> resourceUriSupplier = () -> clientConfig
                 .getClientUri("resource-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'resource-service' - see 'web.client' properties or discovery service registration"));
-        return new ResourceService(resourceClient, resourceUriSupplier, getAsyncExecutor());
+        return new ResourceService(resourceClient, resourceUriSupplier, serialiser, getAsyncExecutor());
     }
 
     @Bean

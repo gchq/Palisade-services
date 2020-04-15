@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,6 +50,7 @@ public class JpaPersistenceLayerTest {
     private LeafResource resource;
 
     @Before
+    @Transactional
     public void setUp() {
         // Given
         resource = new FileResource()
@@ -60,6 +59,7 @@ public class JpaPersistenceLayerTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().uri("data-service"))
                 .parent(new SystemResource().id("/"));
+
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
         persistenceLayer.putResourcesById("", resource);
         persistenceLayer.putResourcesByType(resource.getType(), resource);

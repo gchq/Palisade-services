@@ -33,3 +33,10 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+population:
+  resource: json
+
+# Available options: simple, hadoop
+resource:
+  implementation: simple
