@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.repository;
+package uk.gov.gchq.palisade.service.resource.repository;
 
+import org.springframework.data.repository.CrudRepository;
 
-import uk.gov.gchq.palisade.service.request.DataRequestConfig;
+import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
-public interface PersistenceLayer {
+/**
+ * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
+ * for more details
+ */
+public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
-    DataRequestConfig get(String requestId);
+    Stream<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
 
-    CompletableFuture<DataRequestConfig> getAsync(String requestId);
-
-    void put(DataRequestConfig dataRequestConfig);
+    boolean existsBySerialisedFormat(String serialisedFormat);
 
 }

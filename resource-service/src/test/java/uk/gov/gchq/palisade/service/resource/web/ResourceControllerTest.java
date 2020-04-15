@@ -30,53 +30,64 @@ import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
+import uk.gov.gchq.palisade.service.ResourceService;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.request.Request;
-import uk.gov.gchq.palisade.service.resource.impl.MockResourceService;
+import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @RunWith(Theories.class)
 public class ResourceControllerTest {
+
+    private static ResourceService resourceService = Mockito.mock(ResourceService.class);
+    private static ConnectionDetail detail = new SimpleConnectionDetail().uri("data-service");
+    private static LeafResource resource = new FileResource()
+            .id("/system/file")
+            .type("type")
+            .serialisedFormat("format")
+            .connectionDetail(detail)
+            .parent(new SystemResource().id("/system"));
+    private static Set<LeafResource> resourceSet = Collections.singleton(resource);
+
     //@DataPoints requires the property to be public
     @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoints("GetRequests")
     public static List<Request> requests = Arrays.asList(
-            new GetResourcesByIdRequest(),
-            new GetResourcesByResourceRequest(),
-            new GetResourcesBySerialisedFormatRequest(),
-            new GetResourcesByTypeRequest());
+            new GetResourcesByIdRequest().resourceId(resource.getId()),
+            new GetResourcesByResourceRequest().resource(resource),
+            new GetResourcesBySerialisedFormatRequest().serialisedFormat(resource.getSerialisedFormat()),
+            new GetResourcesByTypeRequest().type(resource.getType()));
+
     //@DataPoints requires the property to be public
     @SuppressWarnings("checkstyle:visibilitymodifier")
     @DataPoint("AddRequests")
-    public static AddResourceRequest addRequest = new AddResourceRequest();
-    //@DataPoints requires the property to be public
-    @SuppressWarnings("checkstyle:visibilitymodifier")
-    @DataPoints
-    public static List<Exception> exceptions = Arrays.asList(
-            new InterruptedException("InterruptedException"),
-            new ExecutionException("ExecutionException", null));
+    public static AddResourceRequest addRequest = new AddResourceRequest().resource(resource);
+
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private ResourceController controller;
-    private MockResourceService resourceService;
-    private Map<Class<? extends Request>, Function<Request, Map<LeafResource, ConnectionDetail>>> requestMethods = new HashMap<>();
+    private Map<Class<? extends Request>, Function<Request, Set<LeafResource>>> requestMethods = new HashMap<>();
 
     {
         requestMethods.put(GetResourcesByIdRequest.class, request -> {
@@ -94,8 +105,13 @@ public class ResourceControllerTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        resourceService = new MockResourceService();
         controller = new ResourceController(resourceService);
+
+        Mockito.when(resourceService.getResourcesByResource(resource)).thenReturn(resourceSet.stream());
+        Mockito.when(resourceService.getResourcesById(resource.getId())).thenReturn(resourceSet.stream());
+        Mockito.when(resourceService.getResourcesByType(resource.getType())).thenReturn(resourceSet.stream());
+        Mockito.when(resourceService.getResourcesBySerialisedFormat(resource.getSerialisedFormat())).thenReturn(resourceSet.stream());
+        Mockito.when(resourceService.addResource(resource)).thenReturn(true);
     }
 
     @After
@@ -114,11 +130,11 @@ public class ResourceControllerTest {
     @Theory
     public void infoOnGetResourceRequest(@FromDataPoints("GetRequests") final Request request) {
         // Given
-        Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
-        Map<LeafResource, ConnectionDetail> expectedResponse = resourceService.getMockingMap().get(request.getClass());
+        Function<Request, Set<LeafResource>> method = requestMethods.get(request.getClass());
+        Set<LeafResource> expectedResponse = resourceSet;
 
         // When
-        Map<LeafResource, ConnectionDetail> response = method.apply(request);
+        Set<LeafResource> response = method.apply(request);
 
         // Then
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
@@ -129,25 +145,6 @@ public class ResourceControllerTest {
         ));
 
         MatcherAssert.assertThat(response, Matchers.equalTo(expectedResponse));
-    }
-
-    @Theory
-    public void errorOnRequestException(@FromDataPoints("GetRequests") final Request request, final Exception exception) {
-        // Given
-        Function<Request, Map<LeafResource, ConnectionDetail>> method = requestMethods.get(request.getClass());
-        resourceService.willThrow(exception);
-
-        // When
-        request.setOriginalRequestId(new RequestId().id("originalId"));
-        method.apply(request);
-
-        // Then
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
-
-        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(exception.getMessage())
-        ));
     }
 
     @Theory
@@ -166,22 +163,5 @@ public class ResourceControllerTest {
         ));
 
         MatcherAssert.assertThat(response, Matchers.equalTo(expectedResponse));
-    }
-
-    @Theory
-    public void errorOnAddException(@FromDataPoints("AddRequests") final AddResourceRequest request, final Exception exception) {
-        // Given
-        resourceService.willThrow(exception);
-
-        // When
-        controller.addResource(request);
-
-        // Then
-        List<String> errorMessages = getMessages(event -> event.getLevel() == Level.ERROR);
-
-        MatcherAssert.assertThat(errorMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString()),
-                Matchers.containsString(exception.getMessage())
-        ));
     }
 }

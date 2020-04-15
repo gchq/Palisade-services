@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Optional;
 
-
 /**
  * This acts as a caching layer on top of an implementation of a policy service. This does not have any hierarchy logic
  * as that is handled before it reaches caching. In this way, a hierarchical traversal for policies is more

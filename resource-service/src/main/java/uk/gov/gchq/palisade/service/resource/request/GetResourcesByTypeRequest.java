@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -25,37 +24,36 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to request a list of {@link Resource}'s
- * from the resource-service based on a {@link Resource}.
- * For example getting a list of all {@link Resource}'s
- * contained in the given {@link uk.gov.gchq.palisade.resource.impl.DirectoryResource}, the same as an {@code ls} would in linux.
+ * This class is used to request a list of {@link uk.gov.gchq.palisade.resource.Resource}'s
+ * from the resource-service based on the type of a {@link uk.gov.gchq.palisade.resource.Resource}.
+ * For example getting a list of all {@link uk.gov.gchq.palisade.resource.Resource}'s with the given type.
  */
-public class GetResourcesByResourceRequest extends Request {
-    private Resource resource;
+public class GetResourcesByTypeRequest extends Request {
+    private String type;
 
-    public GetResourcesByResourceRequest() {
+    public GetResourcesByTypeRequest() {
         //no-args constructor needed for serialization only
     }
 
     /**
-     * @param resource the {@link Resource} you want to run an {@code ls} on
-     * @return the {@link GetResourcesByResourceRequest}
+     * @param type the type of the {@link uk.gov.gchq.palisade.resource.Resource}'s that you want to know about
+     * @return the {@link GetResourcesByTypeRequest}
      */
     @Generated
-    public GetResourcesByResourceRequest resource(final Resource resource) {
-        this.setResource(resource);
+    public GetResourcesByTypeRequest type(final String type) {
+        this.setType(type);
         return this;
     }
 
     @Generated
-    public Resource getResource() {
-        return resource;
+    public String getType() {
+        return type;
     }
 
     @Generated
-    public void setResource(final Resource resource) {
-        requireNonNull(resource);
-        this.resource = resource;
+    public void setType(final String type) {
+        requireNonNull(type);
+        this.type = type;
     }
 
     @Override
@@ -64,27 +62,27 @@ public class GetResourcesByResourceRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetResourcesByResourceRequest)) {
+        if (!(o instanceof GetResourcesByTypeRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
-        return resource.equals(that.resource);
+        GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
+        return type.equals(that.type);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource);
+        return Objects.hash(super.hashCode(), type);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
-                .add("resource=" + resource)
+        return new StringJoiner(", ", GetResourcesByTypeRequest.class.getSimpleName() + "[", "]")
+                .add("type='" + type + "'")
                 .add(super.toString())
                 .toString();
     }

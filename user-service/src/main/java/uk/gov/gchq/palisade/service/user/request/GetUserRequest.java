@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -32,9 +33,9 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A {@code GetUserRequest} is a {@link Request} that is passed to the user-service
- * to get an existing {@link uk.gov.gchq.palisade.User}.
+ * to get an existing {@link User}.
  * In order to get the user you must provide a {@link UserId} object to identify
- * the {@link uk.gov.gchq.palisade.User} you want.
+ * the {@link User} you want.
  */
 public class GetUserRequest extends Request {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetUserRequest.class);
@@ -43,7 +44,7 @@ public class GetUserRequest extends Request {
     /**
      * @param id                id
      * @param originalRequestId originalRequestId
-     * @param userId            the id of the {@link uk.gov.gchq.palisade.User} you want
+     * @param userId            the id of the {@link User} you want
      */
     @JsonCreator
     private GetUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId) {

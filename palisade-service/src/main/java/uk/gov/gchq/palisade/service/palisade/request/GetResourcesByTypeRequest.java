@@ -16,8 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -26,42 +25,36 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A {@code GetUserRequest} is a {@link Request} that is passed to the user-service
- * to get an existing {@link User}.
- * In order to get the user you must provide a {@link UserId} object to identify
- * the {@link uk.gov.gchq.palisade.User} you want.
+ * This class is used to request a list of {@link Resource}'s
+ * from the resource-service based on the type of a {@link Resource}.
+ * For example getting a list of all {@link Resource}'s with the given type.
  */
-public class GetUserRequest extends Request {
+public class GetResourcesByTypeRequest extends Request {
+    private String type;
 
-    private UserId userId;
-
-    /**
-     * Constructs a {@link GetUserRequest} without a {@link UserId}.
-     */
-    public GetUserRequest() {
-        // no-args constructor needed for serialization only
+    public GetResourcesByTypeRequest() {
+        //no-args constructor needed for serialization only
     }
 
     /**
-     * @param userId the id of the {@link User} you want
-     * @return the {@link GetUserRequest}
+     * @param type the type of the {@link Resource}'s that you want to know about
+     * @return the {@link GetResourcesByTypeRequest}
      */
     @Generated
-    public GetUserRequest userId(final UserId userId) {
-        requireNonNull(userId, "The user id cannot be set to null.");
-        this.setUserId(userId);
+    public GetResourcesByTypeRequest type(final String type) {
+        this.setType(type);
         return this;
     }
 
     @Generated
-    public UserId getUserId() {
-        return userId;
+    public String getType() {
+        return type;
     }
 
     @Generated
-    public void setUserId(final UserId userId) {
-        requireNonNull(userId);
-        this.userId = userId;
+    public void setType(final String type) {
+        requireNonNull(type);
+        this.type = type;
     }
 
     @Override
@@ -70,27 +63,28 @@ public class GetUserRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetUserRequest)) {
+        if (!(o instanceof GetResourcesByTypeRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final GetUserRequest that = (GetUserRequest) o;
-        return Objects.equals(userId, that.userId);
+        GetResourcesByTypeRequest that = (GetResourcesByTypeRequest) o;
+        return type.equals(that.type);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), userId);
+        return Objects.hash(super.hashCode(), type);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", GetUserRequest.class.getSimpleName() + "[", "]")
-                .add("userId=" + userId)
+        return new StringJoiner(", ", GetResourcesByTypeRequest.class.getSimpleName() + "[", "]")
+                .add("type='" + type + "'")
+                .add(super.toString())
                 .toString();
     }
 }

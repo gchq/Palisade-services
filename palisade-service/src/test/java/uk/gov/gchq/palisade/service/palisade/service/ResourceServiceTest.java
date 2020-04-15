@@ -33,15 +33,15 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,7 +58,7 @@ public class ResourceServiceTest {
     private ListAppender<ILoggingEvent> appender;
     private ResourceClient resourceClient = Mockito.mock(ResourceClient.class);
     private ResourceService resourceService;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private ExecutorService executor;
 
     @Before
@@ -77,9 +77,11 @@ public class ResourceServiceTest {
             }
         };
         resourceService = new ResourceService(resourceClient, uriSupplier, executor);
-        FileResource resource = new FileResource().id("/path/to/bob_file.txt");
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
-        resources.put(resource, connectionDetail);
+        FileResource resource = new FileResource()
+                .id("/path/to/bob_file.txt")
+                .connectionDetail(connectionDetail);
+        resources.add(resource);
     }
 
     @After
@@ -100,8 +102,7 @@ public class ResourceServiceTest {
         // Given
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
         request.setOriginalRequestId(new RequestId().id("Original ID"));
-        Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceClient.getResourcesById(Mockito.any(), Mockito.eq(request))).thenReturn(response);
+        Mockito.when(resourceClient.getResourcesById(Mockito.any(), Mockito.eq(request))).thenReturn(resources);
 
         // When
         resourceService.getResourcesById(request);
@@ -110,10 +111,7 @@ public class ResourceServiceTest {
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.getOriginalRequestId().getId()),
-                Matchers.anyOf(
-                        Matchers.containsString(response.toString()),
-                        Matchers.containsString("Original ID"))
+                Matchers.containsString(request.getOriginalRequestId().getId())
         ));
 
     }
@@ -126,7 +124,7 @@ public class ResourceServiceTest {
         //When
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
         request.setOriginalRequestId(new RequestId().id("Original ID"));
-        CompletableFuture<Map<LeafResource, ConnectionDetail>> actual = resourceService.getResourcesById(request);
+        CompletableFuture<Set<LeafResource>> actual = resourceService.getResourcesById(request);
 
         //Then
         assertEquals(resources, actual.join());

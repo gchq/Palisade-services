@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.gov.gchq.palisade.service.palisade.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -25,33 +28,35 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class ReadRequest extends Request {
-    private String token;
+/**
+ * This class is used to request that details about a resource is added to the resource-service.
+ */
+@JsonIgnoreProperties(value = {"originalRequestId"})
+public class AddResourceRequest extends Request {
     private LeafResource resource;
 
-    @Generated
-    public ReadRequest token(final String token) {
-        requireNonNull(token, "The token cannot be set to null.");
-        this.setToken(token);
-        return this;
+    public AddResourceRequest() {
+        //no-args constructor needed for serialization only
     }
 
+    /**
+     * @param resource The {@link LeafResource} to be added.
+     * @return the {@link AddResourceRequest}
+     */
     @Generated
-    public ReadRequest resource(final LeafResource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
+    public AddResourceRequest resource(final LeafResource resource) {
         this.setResource(resource);
         return this;
     }
 
-    @Generated
-    public String getToken() {
-        return token;
+    @Override
+    public RequestId getOriginalRequestId() {
+        throw new ForbiddenException("Should not call AddResourceRequest.getOriginalRequestId()");
     }
 
-    @Generated
-    public void setToken(final String token) {
-        requireNonNull(token);
-        this.token = token;
+    @Override
+    public void setOriginalRequestId(final RequestId originalRequestId) {
+        throw new ForbiddenException("Should not call AddResourceRequest.setOriginalRequestId()");
     }
 
     @Generated
@@ -71,29 +76,28 @@ public class ReadRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReadRequest)) {
+        if (!(o instanceof AddResourceRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final ReadRequest that = (ReadRequest) o;
-        return Objects.equals(token, that.token) &&
-                Objects.equals(resource, that.resource);
+        final AddResourceRequest that = (AddResourceRequest) o;
+        return Objects.equals(resource, that.resource);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), token, resource);
+        return Objects.hash(super.hashCode(), resource);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ReadRequest.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
+        return new StringJoiner(", ", AddResourceRequest.class.getSimpleName() + "[", "]")
                 .add("resource=" + resource)
+                .add(super.toString())
                 .toString();
     }
 }

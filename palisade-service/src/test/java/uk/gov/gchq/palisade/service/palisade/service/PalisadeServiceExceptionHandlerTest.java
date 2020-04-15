@@ -83,7 +83,7 @@ public class PalisadeServiceExceptionHandlerTest {
     private RequestId originalRequestId = new RequestId().id("Bob");
 
     private User user;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private Map<LeafResource, Rules> rules = new HashMap<>();
     private PalisadeController controller;
     private MockMvc mvc;
@@ -98,13 +98,16 @@ public class PalisadeServiceExceptionHandlerTest {
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource().id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt")
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
+        FileResource resource = new FileResource().id("/path/to/new/bob_file.txt")
+                .type("bob")
+                .serialisedFormat("txt")
+                .connectionDetail(connectionDetail)
                 .parent(new DirectoryResource().id("/path/to/new/")
                         .parent(new DirectoryResource().id("/path/to/")
                                 .parent(new DirectoryResource().id("/path/")
                                         .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
-        resources.put(resource, connectionDetail);
+        resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);

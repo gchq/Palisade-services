@@ -16,8 +16,6 @@
 package uk.gov.gchq.palisade.service.palisade.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -25,43 +23,33 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * A {@code GetUserRequest} is a {@link Request} that is passed to the user-service
- * to get an existing {@link User}.
- * In order to get the user you must provide a {@link UserId} object to identify
- * the {@link uk.gov.gchq.palisade.User} you want.
- */
-public class GetUserRequest extends Request {
+public class GetResourcesByIdRequest extends Request {
 
-    private UserId userId;
+    private String resourceId;
 
-    /**
-     * Constructs a {@link GetUserRequest} without a {@link UserId}.
-     */
-    public GetUserRequest() {
-        // no-args constructor needed for serialization only
+    public GetResourcesByIdRequest() {
+        //no-args constructor needed for serialization only
     }
 
     /**
-     * @param userId the id of the {@link User} you want
-     * @return the {@link GetUserRequest}
+     * @param resourceId the unique identifier of the resource that you want to {@code ls}
+     * @return the {@link GetResourcesByIdRequest}
      */
     @Generated
-    public GetUserRequest userId(final UserId userId) {
-        requireNonNull(userId, "The user id cannot be set to null.");
-        this.setUserId(userId);
+    public GetResourcesByIdRequest resourceId(final String resourceId) {
+        this.setResourceId(resourceId);
         return this;
     }
 
     @Generated
-    public UserId getUserId() {
-        return userId;
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
-    public void setUserId(final UserId userId) {
-        requireNonNull(userId);
-        this.userId = userId;
+    public void setResourceId(final String resourceId) {
+        requireNonNull(resourceId);
+        this.resourceId = resourceId;
     }
 
     @Override
@@ -70,27 +58,28 @@ public class GetUserRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetUserRequest)) {
+        if (!(o instanceof GetResourcesByIdRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final GetUserRequest that = (GetUserRequest) o;
-        return Objects.equals(userId, that.userId);
+        GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
+        return resourceId.equals(that.resourceId);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), userId);
+        return Objects.hash(super.hashCode(), resourceId);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", GetUserRequest.class.getSimpleName() + "[", "]")
-                .add("userId=" + userId)
+        return new StringJoiner(", ", GetResourcesByIdRequest.class.getSimpleName() + "[", "]")
+                .add("resourceId='" + resourceId + "'")
+                .add(super.toString())
                 .toString();
     }
 }

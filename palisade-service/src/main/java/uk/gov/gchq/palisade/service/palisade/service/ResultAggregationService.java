@@ -22,7 +22,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest.RegisterRequestCompleteAuditRequest;
@@ -32,6 +31,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -53,7 +53,7 @@ public class ResultAggregationService implements Service {
     public CompletionStage<DataRequestResponse> aggregateDataRequestResults(
             final RegisterDataRequest request,
             final User user,
-            final Map<LeafResource, ConnectionDetail> resource,
+            final Set<LeafResource> resource,
             final Map<LeafResource, Rules> rules,
             final RequestId requestId,
             final RequestId originalRequestId) {
@@ -70,7 +70,7 @@ public class ResultAggregationService implements Service {
         try {
             // remove any resources from the map that the rules doesn't contain details for -> user should not even be told about
             // resources they don't have permission to see
-            Map<LeafResource, ConnectionDetail> filteredResources = removeDisallowedResources(resource, rules);
+            Set<LeafResource> filteredResources = removeDisallowedResources(resource, rules);
 
             auditRegisterRequestComplete(request, user, rules, auditService);
             final DataRequestConfig dataRequestConfig = new DataRequestConfig()
@@ -98,12 +98,12 @@ public class ResultAggregationService implements Service {
      *
      * @param resources the resources to modify
      * @param rules     the rules for all resources
-     * @return the {@code resources} map after filtering
+     * @return the {@code resources} set after filtering
      */
-    private Map<LeafResource, ConnectionDetail> removeDisallowedResources(final Map<LeafResource, ConnectionDetail> resources, final Map<LeafResource, Rules> rules) {
+    private Set<LeafResource> removeDisallowedResources(final Set<LeafResource> resources, final Map<LeafResource, Rules> rules) {
         LOGGER.debug("removeDisallowedResources({}, {})", resources, rules);
 
-        resources.keySet().retainAll(rules.keySet());
+        resources.retainAll(rules.keySet());
 
         LOGGER.debug("Allowed resources: {}", resources);
         return resources;

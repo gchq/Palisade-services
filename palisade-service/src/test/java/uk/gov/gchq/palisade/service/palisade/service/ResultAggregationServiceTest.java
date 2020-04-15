@@ -42,7 +42,9 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,7 +65,7 @@ public class ResultAggregationServiceTest {
 
     private RegisterDataRequest request;
     private User user;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private Map<LeafResource, Rules> rules = new HashMap<>();
     private RequestId requestId = new RequestId().id(UUID.randomUUID().toString());
     private RequestId originalRequestId = new RequestId().id("OriginalId");
@@ -85,14 +87,17 @@ public class ResultAggregationServiceTest {
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource();
-        resource.id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        FileResource resource = new FileResource()
+                .id("/path/to/new/bob_file.txt")
+                .type("bob")
+                .serialisedFormat("txt")
+                .connectionDetail(connectionDetail);
         resource.parent(new DirectoryResource().id("/path/to/new/")
                 .parent(new DirectoryResource().id("/path/to/")
                         .parent(new DirectoryResource().id("/path/")
                                 .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
-        resources.put(resource, connectionDetail);
+        resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);

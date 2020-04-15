@@ -22,30 +22,29 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
+import uk.gov.gchq.palisade.service.palisade.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.Set;
 
 @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    Map<LeafResource, ConnectionDetail> getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
+    Set<LeafResource> getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    Map<LeafResource, ConnectionDetail> getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
+    Set<LeafResource> getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
 
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    Map<LeafResource, ConnectionDetail> getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
+    Set<LeafResource> getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
 
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
+    Set<LeafResource> getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(final URI url, @RequestBody final AddResourceRequest request);

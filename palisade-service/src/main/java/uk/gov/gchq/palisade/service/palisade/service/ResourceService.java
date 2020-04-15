@@ -20,13 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -45,16 +44,16 @@ public class ResourceService implements Service {
         this.executor = executor;
     }
 
-    public CompletableFuture<Map<LeafResource, ConnectionDetail>> getResourcesById(final GetResourcesByIdRequest request) {
+    public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
         LOGGER.debug("Getting resources from resource service: {}", request);
 
-        CompletionStage<Map<LeafResource, ConnectionDetail>> resources;
+        CompletionStage<Set<LeafResource>> resources;
         try {
             LOGGER.info("Resource request: {}", request);
             resources = CompletableFuture.supplyAsync(() -> {
                 URI clientUri = this.uriSupplier.get();
                 LOGGER.debug("Using client uri: {}", clientUri);
-                Map<LeafResource, ConnectionDetail> response = client.getResourcesById(clientUri, request);
+                Set<LeafResource> response = client.getResourcesById(clientUri, request);
                 LOGGER.info("Got resources: {}", response);
                 return response;
             }, this.executor);

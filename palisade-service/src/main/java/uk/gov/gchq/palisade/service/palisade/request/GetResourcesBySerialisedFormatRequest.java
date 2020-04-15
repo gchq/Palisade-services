@@ -26,36 +26,35 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used to request a list of {@link Resource}'s
- * from the resource-service based on a {@link Resource}.
- * For example getting a list of all {@link Resource}'s
- * contained in the given {@link uk.gov.gchq.palisade.resource.impl.DirectoryResource}, the same as an {@code ls} would in linux.
+ * from the resource-service based on the serialisedFormat of those resources.
+ * For example getting a list of all {@link Resource}'s where the serialisedFormat is CSV.
  */
-public class GetResourcesByResourceRequest extends Request {
-    private Resource resource;
+public class GetResourcesBySerialisedFormatRequest extends Request {
+    private String serialisedFormat;
 
-    public GetResourcesByResourceRequest() {
+    public GetResourcesBySerialisedFormatRequest() {
         //no-args constructor needed for serialization only
     }
 
     /**
-     * @param resource the {@link Resource} you want to run an {@code ls} on
-     * @return the {@link GetResourcesByResourceRequest}
+     * @param serialisedFormat the serialisedFormat of the {@link Resource}'s that you want to know about
+     * @return the {@link GetResourcesBySerialisedFormatRequest}
      */
     @Generated
-    public GetResourcesByResourceRequest resource(final Resource resource) {
-        this.setResource(resource);
+    public GetResourcesBySerialisedFormatRequest serialisedFormat(final String serialisedFormat) {
+        this.setSerialisedFormat(serialisedFormat);
         return this;
     }
 
     @Generated
-    public Resource getResource() {
-        return resource;
+    public String getSerialisedFormat() {
+        return serialisedFormat;
     }
 
     @Generated
-    public void setResource(final Resource resource) {
-        requireNonNull(resource);
-        this.resource = resource;
+    public void setSerialisedFormat(final String serialisedFormat) {
+        requireNonNull(serialisedFormat);
+        this.serialisedFormat = serialisedFormat;
     }
 
     @Override
@@ -64,27 +63,27 @@ public class GetResourcesByResourceRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetResourcesByResourceRequest)) {
+        if (!(o instanceof GetResourcesBySerialisedFormatRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
-        return resource.equals(that.resource);
+        GetResourcesBySerialisedFormatRequest that = (GetResourcesBySerialisedFormatRequest) o;
+        return serialisedFormat.equals(that.serialisedFormat);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource);
+        return Objects.hash(super.hashCode(), serialisedFormat);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
-                .add("resource=" + resource)
+        return new StringJoiner(", ", GetResourcesBySerialisedFormatRequest.class.getSimpleName() + "[", "]")
+                .add("serialisedFormat='" + serialisedFormat + "'")
                 .add(super.toString())
                 .toString();
     }

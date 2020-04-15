@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -24,38 +23,33 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-/**
- * This class is used to request a list of {@link Resource}'s
- * from the resource-service based on a {@link Resource}.
- * For example getting a list of all {@link Resource}'s
- * contained in the given {@link uk.gov.gchq.palisade.resource.impl.DirectoryResource}, the same as an {@code ls} would in linux.
- */
-public class GetResourcesByResourceRequest extends Request {
-    private Resource resource;
+public class GetResourcesByIdRequest extends Request {
 
-    public GetResourcesByResourceRequest() {
+    private String resourceId;
+
+    public GetResourcesByIdRequest() {
         //no-args constructor needed for serialization only
     }
 
     /**
-     * @param resource the {@link Resource} you want to run an {@code ls} on
-     * @return the {@link GetResourcesByResourceRequest}
+     * @param resourceId the unique identifier of the resource that you want to {@code ls}
+     * @return the {@link GetResourcesByIdRequest}
      */
     @Generated
-    public GetResourcesByResourceRequest resource(final Resource resource) {
-        this.setResource(resource);
+    public GetResourcesByIdRequest resourceId(final String resourceId) {
+        this.setResourceId(resourceId);
         return this;
     }
 
     @Generated
-    public Resource getResource() {
-        return resource;
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
-    public void setResource(final Resource resource) {
-        requireNonNull(resource);
-        this.resource = resource;
+    public void setResourceId(final String resourceId) {
+        requireNonNull(resourceId);
+        this.resourceId = resourceId;
     }
 
     @Override
@@ -64,27 +58,27 @@ public class GetResourcesByResourceRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof GetResourcesByResourceRequest)) {
+        if (!(o instanceof GetResourcesByIdRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
-        return resource.equals(that.resource);
+        GetResourcesByIdRequest that = (GetResourcesByIdRequest) o;
+        return resourceId.equals(that.resourceId);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource);
+        return Objects.hash(super.hashCode(), resourceId);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
-                .add("resource=" + resource)
+        return new StringJoiner(", ", GetResourcesByIdRequest.class.getSimpleName() + "[", "]")
+                .add("resourceId='" + resourceId + "'")
                 .add(super.toString())
                 .toString();
     }

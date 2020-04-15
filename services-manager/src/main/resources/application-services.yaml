@@ -46,6 +46,9 @@ manager:
 
     resource-service:
       jar: resource-service/target/resource-service-${app.version}-exec.jar
+      profiles:
+      - eureka
+      - jvm
       log: resource-service.log
       err: resource-service.err
 
