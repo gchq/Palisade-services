@@ -108,11 +108,15 @@ public class ApplicationConfiguration {
     // === Yaml things ===
 
     // Intentionally-used inner-class
-    // Due to the nested type in the yaml (services :: String -> ServiceConfiguration), both the ManagerConfiguration
-    // and ServiceConfiguration must be known to Spring. The easiest way to achieve this is an inner-class in this
-    // @Configuration rather than messing around with @EnableConfigurationProperties({...}) and @ConfigurationProperties
-    // annotations.
-    // Using this approach, all classes can remain unannotated.
+    //
+    // Due to the nested type in the yaml (services :: Map<String, ServiceConfiguration>), both the ManagerConfiguration
+    // and ServiceConfiguration must be known to Spring. Additionally, there isn't a simple one-to-one mapping for
+    // ServiceConfigurations, instead there will be multiple in a collection (a Map). The easiest way to have this yaml
+    // loaded appropriately is with an inner-class in this (spring-aware) @Configuration rather than messing around with
+    // @EnableConfigurationProperties({...}) and @ConfigurationProperties annotations.
+    //
+    // Using this approach, all classes can remain unannotated. This appears to be the favoured approach once yaml
+    // objects start getting more complex and nested.
     public static class ManagerConfiguration {
         private String root;
         private String mode;
