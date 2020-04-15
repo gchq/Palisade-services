@@ -16,15 +16,16 @@
 
 package uk.gov.gchq.palisade.service.resource.impl;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.ToStringBuilder;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.resource.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.resource.request.ReadRequest;
 import uk.gov.gchq.palisade.service.resource.request.ReadResponse;
 import uk.gov.gchq.palisade.service.resource.service.DataService;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 public class MockDataService implements DataService {
@@ -47,23 +48,31 @@ public class MockDataService implements DataService {
     }
 
     @Override
+    @Generated
     public String toString() {
-        return new ToStringBuilder(this)
+        return new StringJoiner(", ", MockDataService.class.getSimpleName() + "[", "]")
                 .toString();
     }
 
     @Override
+    @Generated
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-
-        return o != null && getClass() == o.getClass();
+        if (!(o instanceof MockDataService)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final MockDataService that = (MockDataService) o;
+        return Objects.equals(mock, that.mock);
     }
 
     @Override
+    @Generated
     public int hashCode() {
-        return new HashCodeBuilder(7, 11)
-                .toHashCode();
+        return Objects.hash(super.hashCode(), mock);
     }
 }
