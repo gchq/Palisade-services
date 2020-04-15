@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 spring:
   application:
     name: palisade-service
@@ -20,50 +21,20 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  datasource:
-    url: jdbc:h2:mem:./cache-h2
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
 
 server:
   port: 8084
 
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
-
 management:
-  endpoint:
-    health:
-      show-details: always
   endpoints:
     web:
       exposure:
-        include:
-        - health
-        - info
-        - metrics
-        - loggers
-    loggers:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
       enabled: true
-
-web:
-  client:
-    audit-service: audit-service
-    policy-service: policy-service
-    resource-service: resource-service
-    user-service: user-service
 
 feign:
   client:
