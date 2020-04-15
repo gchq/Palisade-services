@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -28,37 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
-import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
-import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
-import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
-import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -156,89 +134,6 @@ public class SimpleDataServiceTest {
 
         //Then
         assertEquals(test, auditService);
-    }
-
-    @Ignore
-    @Test
-    public void readTest() throws IOException {
-        //given
-        when(readRequest.getToken()).thenReturn(token);
-        when(readRequest.getOriginalRequestId()).thenReturn(requestId);
-        when(readRequest.getResource()).thenReturn(leafResource);
-        DataReaderResponse dataReaderResponse = Mockito.mock(DataReaderResponse.class);
-        when(dataReader.read(any(DataReaderRequest.class), any(), any())).thenReturn(dataReaderResponse);
-        DataRequestConfig dataRequestConfig = Mockito.mock(DataRequestConfig.class);
-        when(dataRequestConfig.getOriginalRequestId()).thenReturn(requestId);
-        User user = Mockito.mock(User.class);
-        when(dataRequestConfig.getUser()).thenReturn(user);
-        Context context = Mockito.mock(Context.class);
-        when(dataRequestConfig.getContext()).thenReturn(context);
-        Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
-        Rules rules = Mockito.mock(Rules.class);
-        leafResourceToRules.put(leafResource, rules);
-        when(dataRequestConfig.getRules()).thenReturn(leafResourceToRules);
-        CompletableFuture<DataRequestConfig> dataRequestConfigCompletableFuture = CompletableFuture.supplyAsync(() -> dataRequestConfig);
-        when(palisadeService.getDataRequestConfig(any(GetDataRequestConfig.class))).thenReturn(dataRequestConfigCompletableFuture);
-        //given
-        PipedInputStream expectedStream = new PipedInputStream();
-        PipedOutputStream expectedInputSinker = new PipedOutputStream(expectedStream);
-        new NoInputReadResponse(dataReaderResponse).writeTo(expectedInputSinker);
-
-        //when
-        Consumer<OutputStream> readCallback = simpleDataService.read(readRequest);
-        PipedInputStream inputStream = new PipedInputStream();
-        PipedOutputStream outputSink = new PipedOutputStream(inputStream);
-        readCallback.accept(outputSink);
-
-        //then
-        assertThat(inputStream.readAllBytes(), equalTo(expectedStream.readAllBytes()));
-    }
-
-    @Ignore
-    @Test
-    public void readExceptionTest() {
-        //given
-        when(readRequest.getToken()).thenReturn(token);
-        when(readRequest.getOriginalRequestId()).thenReturn(requestId);
-        when(readRequest.getResource()).thenReturn(leafResource);
-        DataReaderResponse dataReaderResponse = Mockito.mock(DataReaderResponse.class);
-        when(dataReader.read(any(DataReaderRequest.class), any(), any())).thenReturn(dataReaderResponse);
-        DataRequestConfig dataRequestConfig = Mockito.mock(DataRequestConfig.class);
-        User user = Mockito.mock(User.class);
-        when(dataRequestConfig.getUser()).thenReturn(user);
-        Context context = Mockito.mock(Context.class);
-        when(dataRequestConfig.getContext()).thenReturn(context);
-        Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
-        Rules rules = Mockito.mock(Rules.class);
-        leafResourceToRules.put(leafResource, rules);
-        when(dataRequestConfig.getRules()).thenReturn(leafResourceToRules);
-        when(palisadeService.getDataRequestConfig(any(GetDataRequestConfig.class))).thenThrow(new NoCapacityException("failed"));
-
-        //when
-        try {
-            Consumer<OutputStream> readCallback = simpleDataService.read(readRequest);
-            PipedInputStream inputStream = new PipedInputStream();
-            PipedOutputStream outputSink = new PipedOutputStream(inputStream);
-            readCallback.accept(outputSink);
-            fail();
-        } catch (Exception ex) {
-        }
-
-        //then
-        ArgumentCaptor<ReadRequestExceptionAuditRequest> readRequestExceptionAuditRequestArgumentCaptor = ArgumentCaptor.forClass(ReadRequestExceptionAuditRequest.class);
-        verify(auditService, times(1)).audit(readRequestExceptionAuditRequestArgumentCaptor.capture());
-        ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = readRequestExceptionAuditRequestArgumentCaptor.getValue();
-
-        Field tokenField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
-        ReflectionUtils.makeAccessible(tokenField);
-        String generatedToken = (String) ReflectionUtils.getField(tokenField, readRequestExceptionAuditRequest);
-        assertEquals(token, generatedToken);
-
-        Field leafField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
-        ReflectionUtils.makeAccessible(leafField);
-        LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(leafField, readRequestExceptionAuditRequest);
-        assertEquals(leafResource, generatedLeafResource);
-
     }
 
     private void mockOtherServices() {
