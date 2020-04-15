@@ -31,7 +31,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 import java.net.URI;
 import java.util.Set;
 
-@FeignClient(name = "resource-service", url = "${web.client.resource-service}")
+@FeignClient(name = "resource-service", url = "undefined")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")

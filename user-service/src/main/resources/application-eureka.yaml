@@ -12,6 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+spring:
+  profiles:
+    include:
+    - caffeine
+    - eureka-config
+
+---
+
+spring:
+  profiles: eureka-config
+
+# Since using eureka, let spring autoconfigure a port
+server:
+  port: 0
+
 eureka:
+  instance:
+    hostname: localhost
+    port: 8083
+    preferIpAddress: false
+    lease-renewal-interval-in-seconds: 5
   client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     enabled: true

@@ -14,12 +14,12 @@
 #
 
 spring:
-  datasource:
-    url: jdbc:h2:file:./cache-h2
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+  profiles:
+    include:
+    - caffeine
+    - static-config
+
+---
+
+spring:
+  profiles: static-config

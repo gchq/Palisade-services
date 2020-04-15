@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import java.net.URI;
 import java.util.Map;
 
-@FeignClient(name = "policy-service", url = "${web.client.policy-service}")
+@FeignClient(name = "policy-service", url = "undefined")
 public interface PolicyClient {
 
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
