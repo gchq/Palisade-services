@@ -54,8 +54,9 @@ public class ManagedService implements Service {
                     LOGGER.debug("Client uri {} has status {}", clientUri, status);
                     return status;
                 })
-                // Could be allMatch, but only one healthy service is needed to perform requests
-                .anyMatch(x -> x == 200);
+                // Could be anyMatch, as only one healthy service is needed to perform requests
+                // Open to change if we see "scalable" demos for the (local) eureka example
+                .allMatch(x -> x == 200);
     }
 
     public void setLoggers(final String module, final String configuredLevel) throws Exception {

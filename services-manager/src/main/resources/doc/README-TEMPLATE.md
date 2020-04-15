@@ -51,7 +51,7 @@ The manager is designed to be used by defining a collection of SpringBoot config
 ## Examples
 
 ### Starting Services
-If services are already running, using the built-in profiles:  
+Using the built-in profiles, the services-manager can be used to perform a number of common tasks, starting the services in different environments for different use-cases:  
  * Services using Eureka 
    * First start the discovery-service in a static-like way - `java -jar -Dspring.profiles.active=discovery executable.jar --manager.mode=run` 
    * Once the manager is finished running, check the eureka dashboard at `localhost:8083` 
@@ -61,10 +61,10 @@ If services are already running, using the built-in profiles:
    * Just a single command - `java -jar -Dspring.profiles.active=static executable.jar --manager.mode=run` 
    * No eureka dashboard here, but take a look at the /actuator endpoints for some metadata 
    * By default, palisade-service will be at `localhost:8084` and data-service will be at `localhost:8082` 
- * Begin using Palisade (see [palisade-examples](https://github.com/gchq/Palisade-examples)) 
+ * Pre-populated Palisade example (see [palisade-examples](https://github.com/gchq/Palisade-examples)) 
    * For even more automation, the start-services (above) -> configure-services (example) -> run-example (example) steps can be performed in one go 
      * First start the discovery-service as above - `java -jar -Dspring.profiles.active=discovery executable.jar --manager.mode=run` 
-     * To have the whole process automated, run using the example profile - `java -jar -Dspring.profiles.active=example executable.jar --manager.mode=run`
+     * Start up services with pre-populated example data and run the rest example, run using the example profile - `java -jar -Dspring.profiles.active=example executable.jar --manager.mode=run`
 
 **The choice here between `eureka` or `static` profiles will be referred to unilaterally as the `environment` profile - make sure to substitute as appropriate**  
 
@@ -87,90 +87,15 @@ If services are already running, using the built-in profiles:
 
 
 ### Creating a new Configuration
-Take a look at the default configuration file:
-```yaml
-# Options at the command line include:
-# --run : Run all known services
-# --shutdown : Shutdown service according to the schedule (reversed)
-# --logging : Alter the logging level for all known services
-# --config : Print out the loaded configuration (for debugging the manager)
-manager:
-  # Search up path hierarchy for the root directory by name
-  # This allows the services-manager to be less dependant on where it is located and where it was run from
-  root: Palisade-services
+Take a look at the [default configuration file](/services-manager/src/main/resources/application.yaml)
 
-  # Available modes: run, shutdown, loggers, [default] config
-  #
-  # run: for each task in the schedule, for each service under that task, start the jar file and wait until healthy (GET /actuator/health) or exited
-  # shutdown: for each task in the schedule IN REVERSE, for each service under that task, shutdown the service (POST /actuator/shutdown)
-  # loggers: for each task in teh schedule, for each service under that task, change the logging level of the running service to the configured value (POST /actuator/loggers/*)
-  # config: print out this manager configuration
-  mode: config
-
-  # Configuration for what happens during a "services-manager --manager.mode=run"
-  # List<taskName: String>
-  schedule: []
-    ###
-    # Example configuration for running a setup task, then all other services
-    # nb. all listed task names must be configured under manager.tasks
-    #
-    # - setup
-    # - run-services
-    ###
-
-  # Definitions mapping the above task names to a collection of services
-  # Map<taskName: String, services: List<serviceName: String>>
-  tasks: {}
-    ###
-    # Examples for running "my-setup" under a "setup" task, "my-service" and "my-other-service" in parallel under a "run-services" task
-    # The services-manager moves on to the next task once all services for the current task are either running healthily (/actuator/health) or exited with code 0
-    # Once no tasks are remaining, the manager exits with code 0  -  if a task errors, the manager exits with that code
-    # nb. all listed service names must be configured under manager.services
-    #
-    # setup:
-    #   - my-setup
-    # run-services:
-    #   - my-service
-    #   - my-other-service
-    ###
-
-  # Map<serviceName: String, config: ServiceConfiguration>
-  services: {}
-    ###
-    # Example configuration for a service "my-service", starting a my-service.jar with a runtime-loaded /data/types.jar
-    # Where appropriate, each entry is formatted as "TAG: [EXAMPLE-VALUE] :: IMPLEMENTATION-DETAIL   - DESCRIPTION"
-    #
-    # my-service:                                               :: "spring.application.name=${my-service}"   - tag for the service being managed, should match with the service's web.client key (the value will then be resolved later, see eureka vs static)
-    #   jar: my-service.jar                                     :: "java -jar ${jar}"   - executable jar file with main entry point
-    #   paths:                                                  :: Additional (external) libraries to dynamically load at runtime (e.g. example library)
-    #     - "/data/types.jar"                                   :: "java -Dloader.path=${paths[0]},${paths[1]}"
-    #   profiles:                                               :: Spring Boot profiles to enable, comma-separated list
-    #     - default                                             :: "java -Dspring.profiles.active=${profiles[0]},${profiles[1]}"
-    #   log: my-service.log                                     :: "java [args] > ${log}"   - logging output filepath, singleton filepath
-    #   err: my-service.err                                     :: "java [args] 2> ${err}"   - error output filepath, singleton filepath
-    #   level:                                                  :: "java -Dlogging.level.${level.key}=${level.value}"   - same format as spring's standard logging changes, classpath-loglevel map
-    #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}"   - classpath to change and logging level to change to
-    ###
-```
 When testing your new configuration, you may find the config flag useful:
  1. Write a new configuration `application-mynewprofile.yaml`
  1. See what the services-manager has been given by Spring - `java -jar -Dspring.profiles.active=mynewprofile executable.jar --manager.mode=config` (the Java object representing the configuration should be printed to screen)  
- 1. Need more? Also add the debug profile - `java -jar -Dspring.profiles.active=mynewprofile,debug executable.jar --manager.mode=config`  
+ 1. Need a little more? Also add the `debug` profile - `java -jar -Dspring.profiles.active=mynewprofile,debug executable.jar --manager.mode=config`  
  
  
 
 ## License
 
 Palisade-Services is licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).
-
-
-
-## Contributing
-
-We welcome contributions to the project. Detailed information on our ways of working can be found [here](https://gchq.github.io/Palisade/doc/other/ways_of_working.html).
-
-
-
-## FAQ
-
-What versions of Java are supported? We are currently using Java 11.

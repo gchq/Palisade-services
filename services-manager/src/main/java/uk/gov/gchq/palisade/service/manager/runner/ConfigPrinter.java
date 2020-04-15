@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 
-public class ConfigChecker implements Runnable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigChecker.class);
+public class ConfigPrinter implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPrinter.class);
 
     // Autowired through constructor
     private ManagerConfiguration config;
 
-    public ConfigChecker(final ManagerConfiguration config) {
+    public ConfigPrinter(final ManagerConfiguration config) {
         this.config = config;
     }
 

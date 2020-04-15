@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-# Configuration for just the discovery service, used for configuring all other services
+# Configuration for just the discovery service, which is then used for configuring all other services
 # Extract the project version (x.y.z-REVISION etc.)
 app:
   version: '@project.version@'

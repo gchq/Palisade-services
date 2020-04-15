@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.manager.runner.ConfigChecker;
+import uk.gov.gchq.palisade.service.manager.runner.ConfigPrinter;
 import uk.gov.gchq.palisade.service.manager.runner.LoggingBouncer;
 import uk.gov.gchq.palisade.service.manager.runner.ScheduleRunner;
 import uk.gov.gchq.palisade.service.manager.runner.ScheduleShutdown;
@@ -81,7 +81,7 @@ public class ApplicationConfiguration {
                 break;
             case CONFIG:
             default:
-                runner = new ConfigChecker(managerConfiguration);
+                runner = new ConfigPrinter(managerConfiguration);
                 break;
         }
         LOGGER.info("Constructed runner for {} mode: {}", managerConfiguration.getMode(), runner);
@@ -105,6 +105,14 @@ public class ApplicationConfiguration {
         };
     }
 
+    // === Yaml things ===
+
+    // Intentionally-used inner-class
+    // Due to the nested type in the yaml (services :: String -> ServiceConfiguration), both the ManagerConfiguration
+    // and ServiceConfiguration must be known to Spring. The easiest way to achieve this is an inner-class in this
+    // @Configuration rather than messing around with @EnableConfigurationProperties({...}) and @ConfigurationProperties
+    // annotations.
+    // Using this approach, all classes can remain unannotated.
     public static class ManagerConfiguration {
         private String root;
         private String mode;
