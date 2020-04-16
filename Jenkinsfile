@@ -91,7 +91,6 @@ spec:
                 }
             }
         }
-
         stage('SonarQube analysis') {
             container('docker-cmds') {
                 withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
@@ -113,7 +112,7 @@ spec:
         stage('Integration Tests') {
             git url: 'https://github.com/gchq/Palisade-integration-tests.git'
             sh "git fetch origin develop"
-            sh "git checkout ${env.BRANCH_NAME} || git checkout develop"
+            sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
             container('docker-cmds') {
                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                     sh 'mvn -s $MAVEN_SETTINGS install'
