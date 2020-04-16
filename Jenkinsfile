@@ -110,12 +110,14 @@ spec:
             }
         }
         stage('Integration Tests') {
+            dir ('Palisade-integration-tests') {
             git url: 'https://github.com/gchq/Palisade-integration-tests.git'
             sh "git fetch origin develop"
             sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
-            container('docker-cmds') {
-                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS install'
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn -s $MAVEN_SETTINGS install'
+                    }
                 }
             }
         }
