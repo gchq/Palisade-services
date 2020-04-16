@@ -91,6 +91,7 @@ spec:
                 }
             }
         }
+
         stage('SonarQube analysis') {
             container('docker-cmds') {
                 withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
