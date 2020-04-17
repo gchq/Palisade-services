@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,15 +28,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
-import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
@@ -70,7 +67,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository, final @Qualifier("impl") ResourceService delegate) {
+    public JpaPersistenceLayer persistenceLayer(final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
         return new JpaPersistenceLayer(resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
@@ -80,13 +77,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public Serialiser<LeafResource> avroSerialiser() {
-        return new AvroSerialiser<>(LeafResource.class);
-    }
-
-    @Bean
-    public StreamingResourceServiceProxy resourceServiceProxy(final PersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final Serialiser<LeafResource> serialiser) {
-        return new StreamingResourceServiceProxy(persistenceLayer, delegate, serialiser);
+    public StreamingResourceServiceProxy resourceServiceProxy(final JpaPersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final ObjectMapper objectMapper) {
+        return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper);
     }
 
     @Bean("simpleResourceService")
@@ -110,7 +102,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    public ObjectMapper jacksonObjectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 

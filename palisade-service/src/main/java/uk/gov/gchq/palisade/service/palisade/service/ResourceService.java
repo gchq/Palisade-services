@@ -15,14 +15,21 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.resource.AbstractLeafResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.io.IOException;
@@ -30,7 +37,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -41,44 +47,88 @@ public class ResourceService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
     private final ResourceClient client;
     private final Supplier<URI> uriSupplier;
-    private final Serialiser<LeafResource> serialiser;
+    private final ObjectMapper objectMapper;
     private final Executor executor;
 
-    public ResourceService(final ResourceClient resourceClient, final Supplier<URI> uriSupplier, final Serialiser<LeafResource> serialiser, final Executor executor) {
+    private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
+        @Override
+        public LeafResource deserialiseLine(final String line) {
+            try {
+                return objectMapper.readValue(line, AbstractLeafResource.class);
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Encountered JSONProccessingException while deserialising line {}", line);
+                LOGGER.error("Exception was ", e);
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                LOGGER.error("Encountered IOException while deserialising line {}", line);
+                LOGGER.error("Exception was ", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public String serialiseLine(final LeafResource obj) {
+            LOGGER.warn("No implementation of serialiseLine, ignoring argument {}", obj);
+            return null;
+        }
+    };
+
+
+    public ResourceService(final ResourceClient resourceClient, final Supplier<URI> uriSupplier, final ObjectMapper objectMapper, final Executor executor) {
         this.client = resourceClient;
         this.uriSupplier = uriSupplier;
-        this.serialiser = serialiser;
+        this.objectMapper = objectMapper;
         this.executor = executor;
     }
 
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
-        LOGGER.debug("Getting resources from resource service: {}", request);
+        LOGGER.debug("Getting resources by id from resource service: {}", request);
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        return CompletableFuture.supplyAsync(
+                () -> getResourcesFromFeignResponse(() -> client.getResourcesById(clientUri, request)),
+                this.executor);
+    }
 
-        CompletionStage<Set<LeafResource>> resources;
+    public CompletableFuture<Set<LeafResource>> getResourcesByResource(final GetResourcesByResourceRequest request) {
+        LOGGER.debug("Getting resources by resource from resource service: {}", request);
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        return CompletableFuture.supplyAsync(
+                () -> getResourcesFromFeignResponse(() -> client.getResourcesByResource(clientUri, request)),
+                this.executor);
+    }
+
+    public CompletableFuture<Set<LeafResource>> getResourcesByType(final GetResourcesByTypeRequest request) {
+        LOGGER.debug("Getting resources by type from resource service: {}", request);
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        return CompletableFuture.supplyAsync(
+                () -> getResourcesFromFeignResponse(() -> client.getResourcesByType(clientUri, request)),
+                this.executor);
+    }
+
+    public CompletableFuture<Set<LeafResource>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
+        LOGGER.debug("Getting resources from by serialised format resource service: {}", request);
+        URI clientUri = this.uriSupplier.get();
+        LOGGER.debug("Using client uri: {}", clientUri);
+        return CompletableFuture.supplyAsync(
+                () -> getResourcesFromFeignResponse(() -> client.getResourcesBySerialisedFormat(clientUri, request)),
+                this.executor);
+    }
+
+    private Set<LeafResource> getResourcesFromFeignResponse(final Supplier<Response> feignCall) {
         try {
-            LOGGER.info("Resource request: {}", request);
-            resources = CompletableFuture.supplyAsync(() -> {
-                URI clientUri = this.uriSupplier.get();
-                LOGGER.debug("Using client uri: {}", clientUri);
-                InputStream responseStream = null;
-                try {
-                    responseStream = client.getResourcesById(clientUri, request).body().asInputStream();
-                    Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);
-                    Set<LeafResource> response = resourceStream.collect(Collectors.toSet());
-                    LOGGER.info("Got resources: {}", response);
-                    return response;
-                } catch (IOException e) {
-                    LOGGER.error("IOException getting response body input stream");
-                    LOGGER.error("Exception was :: ", e);
-                    throw new RuntimeException(e);
-                }
-            }, this.executor);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to get resources: {}", ex.getMessage());
-            throw new RuntimeException(ex); //rethrow the exception
+            InputStream responseStream = feignCall.get().body().asInputStream();
+            Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);
+            Set<LeafResource> response = resourceStream.collect(Collectors.toSet());
+            LOGGER.info("Got resources: {}", response);
+            return response;
+        } catch (IOException e) {
+            LOGGER.error("IOException getting response body input stream");
+            LOGGER.error("Exception was ", e);
+            throw new RuntimeException(e); //rethrow the exception
         }
-
-        return resources.toCompletableFuture();
     }
 
     public Response getHealth() {

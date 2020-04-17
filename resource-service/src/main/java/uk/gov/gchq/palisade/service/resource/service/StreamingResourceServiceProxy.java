@@ -16,12 +16,15 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -40,23 +43,42 @@ public class StreamingResourceServiceProxy {
 
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
-    private final Serialiser<LeafResource> serialiser;
+    private final ObjectMapper objectMapper;
     private Optional<ResourceConfiguration> resourceConfiguration;
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final Serialiser<LeafResource> serialiser) {
+    private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
+        @Override
+        public String serialiseLine(final LeafResource obj) {
+            try {
+                return objectMapper.writeValueAsString(obj);
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Encountered JSONProccessingException while serialising object {}", obj);
+                LOGGER.error("Exception was ", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public LeafResource deserialiseLine(final String line) {
+            LOGGER.warn("No implementation of deserialiseLine, ignoring argument {}", line);
+            return null;
+        }
+    };
+
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper) {
         this.persistence = persistence;
         this.delegate = delegate;
-        this.serialiser = serialiser;
+        this.objectMapper = objectMapper;
         this.resourceConfiguration = Optional.empty();
     }
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final Serialiser<LeafResource> serialiser, final ResourceConfiguration resourceConfiguration) {
-        this(persistence, delegate, serialiser);
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final ResourceConfiguration resourceConfiguration) {
+        this(persistence, delegate, objectMapper);
         this.resourceConfiguration = Optional.of(resourceConfiguration);
     }
 
     @Transactional
-    public void getResourcesByResource(final Resource resource, final OutputStream outputStream) throws IOException {
+    public void getResourcesByResource(final Resource resource, final OutputStream outputStream) {
         // Try first from persistence
         Stream<LeafResource> resourceStream = persistence.getResourcesById(resource.getId())
                 // Otherwise call out to resource service
@@ -64,11 +86,11 @@ public class StreamingResourceServiceProxy {
                         // Persist the new resources
                         .peek(leafResource -> persistence.putResourcesById(resource.getId(), leafResource)));
         // Consume the stream, write to the output stream
-        serialiser.serialise(resourceStream, outputStream);
+        serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
 
     @Transactional
-    public void getResourcesById(final String resourceId, final OutputStream outputStream) throws IOException {
+    public void getResourcesById(final String resourceId, final OutputStream outputStream) {
         // Try first from persistence
         Stream<LeafResource> resourceStream = persistence.getResourcesById(resourceId)
                 // Otherwise call out to resource service
@@ -76,11 +98,11 @@ public class StreamingResourceServiceProxy {
                         // Persist the new resources
                         .peek(leafResource -> persistence.putResourcesById(resourceId, leafResource)));
         // Consume the stream, write to the output stream
-        serialiser.serialise(resourceStream, outputStream);
+        serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
 
     @Transactional
-    public void getResourcesByType(final String type, final OutputStream outputStream) throws IOException {
+    public void getResourcesByType(final String type, final OutputStream outputStream) {
         // Try first from persistence
         Stream<LeafResource> resourceStream = persistence.getResourcesByType(type)
                 // Otherwise call out to resource service
@@ -88,11 +110,11 @@ public class StreamingResourceServiceProxy {
                         // Persist the new resources
                         .peek(leafResource -> persistence.putResourcesByType(type, leafResource)));
         // Consume the stream, write to the output stream
-        serialiser.serialise(resourceStream, outputStream);
+        serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
 
     @Transactional
-    public void getResourcesBySerialisedFormat(final String serialisedFormat, final OutputStream outputStream) throws IOException {
+    public void getResourcesBySerialisedFormat(final String serialisedFormat, final OutputStream outputStream) {
         // Try first from persistence
         Stream<LeafResource> resourceStream = persistence.getResourcesByType(serialisedFormat)
                 // Otherwise call out to resource service
@@ -100,7 +122,7 @@ public class StreamingResourceServiceProxy {
                         // Persist the new resources
                         .peek(leafResource -> persistence.putResourcesBySerialisedFormat(serialisedFormat, leafResource)));
         // Consume the stream, write to the output stream
-        serialiser.serialise(resourceStream, outputStream);
+        serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
 
     @Transactional
@@ -123,5 +145,14 @@ public class StreamingResourceServiceProxy {
                                 persistence.putResourcesByType(leafResource.getType(), leafResource);
                                 persistence.putResourcesBySerialisedFormat(leafResource.getSerialisedFormat(), leafResource);
                         }));
+    }
+
+    private void serialiseAndWriteStreamToOutput(final Stream<LeafResource> leafResourceStream, final OutputStream outputStream) {
+        try {
+            serialiser.serialise(leafResourceStream, outputStream);
+        } catch (IOException e) {
+            LOGGER.error("Encountered IOException while serialising line: ", e);
+            throw new RuntimeException(e);
+        }
     }
 }

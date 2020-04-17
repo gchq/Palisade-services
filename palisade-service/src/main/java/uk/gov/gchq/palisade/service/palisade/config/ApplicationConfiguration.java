@@ -27,10 +27,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.palisade.domain.ContextConverter;
 import uk.gov.gchq.palisade.service.palisade.domain.LeafResourceConverter;
 import uk.gov.gchq.palisade.service.palisade.domain.RulesConverter;
@@ -130,16 +127,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public Serialiser<LeafResource> avroSerialiser() {
-        return new AvroSerialiser<>(LeafResource.class);
-    }
-
-    @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig, final Serialiser<LeafResource> serialiser) {
+    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig, final ObjectMapper objectMapper) {
         Supplier<URI> resourceUriSupplier = () -> clientConfig
                 .getClientUri("resource-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'resource-service' - see 'web.client' properties or discovery service registration"));
-        return new ResourceService(resourceClient, resourceUriSupplier, serialiser, getAsyncExecutor());
+        return new ResourceService(resourceClient, resourceUriSupplier, objectMapper, getAsyncExecutor());
     }
 
     @Bean

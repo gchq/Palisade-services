@@ -31,11 +31,11 @@ import javax.persistence.Table;
         })
 public class TypeEntity {
     @Id
-    @Column(name = "type", columnDefinition = "varchar(255)", nullable = false)
-    private String type;
-
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
     private String resourceId;
+
+    @Column(name = "type", columnDefinition = "varchar(255)", nullable = false)
+    private String type;
 
     public TypeEntity() {
     }

@@ -120,6 +120,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         LOGGER.debug("Getting resources by id {}", resourceId);
         return resourceRepository.findByResourceId(resourceId)
                 .map(ResourceEntity::getResource)
+                .map(this::resolveParents)
                 .map(rootResource -> collectLeaves(rootResource)
                         .map(leafResource -> resolveParentsUpto(leafResource, rootResource)));
     }
@@ -187,12 +188,15 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         Optional.ofNullable(rootReference[0]).ifPresent(rootResource -> {
             // Edge-case to persist the root resource of the request/response only if it was not persisted as one of the LeafResource/ConnectionDetail elements of the above
             if (!(rootResource instanceof LeafResource)) {
-                resourceRepository.save(new ResourceEntity(rootResource));
+                ResourceEntity entity = new ResourceEntity(rootResource);
+                LOGGER.debug("Persistence save for entity {}", entity);
+                resourceRepository.save(entity);
             }
 
             Consumer<ParentResource> saveIncomplete = parent -> {
                 ResourceEntity entity = new ResourceEntity(parent);
                 entity.setComplete(false);
+                LOGGER.debug("Persistence save for entity {}", entity);
                 resourceRepository.save(entity);
             };
             Consumer<ParentResource> saveNewIncomplete = parent -> {
@@ -210,14 +214,18 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     public void putResourcesByType(final String type, final LeafResource leafResource) {
         LOGGER.debug("Putting resource for type {} for resource {}", type, leafResource);
         putResourcesById(leafResource.getId(), leafResource);
-        typeRepository.save(new TypeEntity(type, leafResource.getId()));
+        TypeEntity entity = new TypeEntity(type, leafResource.getId());
+        LOGGER.debug("Persistence save for entity {}", entity);
+        typeRepository.save(entity);
     }
 
     @Override
     public void putResourcesBySerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
         LOGGER.debug("Putting resource for serialised format {} for resource {}", serialisedFormat, leafResource);
         putResourcesById(leafResource.getId(), leafResource);
-        serialisedFormatRepository.save(new SerialisedFormatEntity(serialisedFormat, leafResource.getId()));
+        SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
+        LOGGER.debug("Persistence save for entity {}", entity);
+        serialisedFormatRepository.save(entity);
     }
 
     @Override
@@ -232,16 +240,18 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
         // Update type repository (don't use above method, avoid unnecessary double-add)
         if (getResourcesByType(type).isPresent()) {
-            LOGGER.debug("Adding type {} for resource {}", type, leafResource);
-            typeRepository.save(new TypeEntity(type, resourceId));
+            TypeEntity entity = new TypeEntity(type, resourceId);
+            LOGGER.debug("Persistence save for entity {}", entity);
+            typeRepository.save(entity);
         } else {
             LOGGER.debug("Skipping add for type {} as entry not present (partial store would be incomplete)", type);
         }
 
         // Update serialisedFormat repository (don't use above method, avoid unnecessary double-add)
         if (getResourcesBySerialisedFormat(serialisedFormat).isPresent()) {
-            LOGGER.debug("Adding serialised format {} for resource {}", serialisedFormat, leafResource);
-            serialisedFormatRepository.save(new SerialisedFormatEntity(serialisedFormat, resourceId));
+            SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, resourceId);
+            LOGGER.debug("Persistence save for entity {}", entity);
+            serialisedFormatRepository.save(entity);
         } else {
             LOGGER.debug("Skipping add for serialised format {} as entry not present (partial store would be incomplete)", serialisedFormat);
         }

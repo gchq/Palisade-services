@@ -31,11 +31,11 @@ import javax.persistence.Table;
         })
 public class SerialisedFormatEntity {
     @Id
-    @Column(name = "serialised_format", columnDefinition = "varchar(255)", nullable = false)
-    private String serialisedFormat;
-
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
     private String resourceId;
+
+    @Column(name = "serialised_format", columnDefinition = "varchar(255)", nullable = false)
+    private String serialisedFormat;
 
     public SerialisedFormatEntity() {
     }
