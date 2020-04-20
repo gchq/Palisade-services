@@ -22,6 +22,7 @@ import org.junit.runners.JUnit4;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,11 +55,14 @@ public class SimpleResourceServiceTest {
         LeafResource testResourceAvro = service.query("./src/test/resources/test_resource.avro", x -> true).findAny().orElseThrow();
 
         // When
-        Set<LeafResource> resourcesById = service.getResourcesById("./src/test/resources").collect(Collectors.toSet());
-        Set<LeafResource> resourcesByType = service.getResourcesByType("avro").collect(Collectors.toSet());
+        Optional<LeafResource> resourcesById = service.getResourcesById("./src/test/resources").findFirst();
+        Optional<LeafResource> resourcesByType = service.getResourcesByType("avro").findFirst();
 
         // Then
-        assertTrue(resourcesById.contains(testResourceAvro));
-        assertTrue(resourcesByType.contains(testResourceAvro));
+        assertTrue(resourcesById.isPresent());
+        assertThat(resourcesById.get(), equalTo(testResourceAvro));
+
+        assertTrue(resourcesByType.isPresent());
+        assertThat(resourcesByType.get(), equalTo(testResourceAvro));
     }
 }

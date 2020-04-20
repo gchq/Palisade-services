@@ -28,9 +28,11 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -60,8 +62,8 @@ public class AuditRequestTest {
     public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
-                .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
-                .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
+                .withLeafResources(Collections.singleton(ResourceBuilder.fileResource("/usr/share/resource/test_resource").type("standard").serialisedFormat("none")))
+                .withContext(new Context(Collections.singletonMap("a string", String.class)));
 
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;

@@ -34,7 +34,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 public class JpaPersistenceLayer implements PersistenceLayer {
@@ -117,7 +116,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public Optional<Stream<LeafResource>> getResourcesById(final String resourceId) {
-        LOGGER.debug("Getting resources by id {}", resourceId);
+        LOGGER.debug("Getting resources by id '{}'", resourceId);
         return resourceRepository.findByResourceId(resourceId)
                 .map(ResourceEntity::getResource)
                 .map(this::resolveParents)
@@ -127,7 +126,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public Optional<Stream<LeafResource>> getResourcesByType(final String type) {
-        LOGGER.debug("Getting resources by type {}", type);
+        LOGGER.debug("Getting resources by type '{}'", type);
         // Note that there is no differentiation between having a persisted emptySet and having no persisted entries
         // As such, getResourcesByType("some completely made-up type") will always call the real resource-service and will never be persisted
         return typeRepository.existsByType(type)
@@ -143,7 +142,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(final String serialisedFormat) {
-        LOGGER.debug("Getting resources by serialised format {}", serialisedFormat);
+        LOGGER.debug("Getting resources by serialised format '{}'", serialisedFormat);
         // Note that there is no differentiation between having a persisted emptySet and having no persisted entries
         // As such, getResourcesBySerialisedFormat("some completely made-up format") will always call the real resource-service and will never be persisted
         return serialisedFormatRepository.existsBySerialisedFormat(serialisedFormat)
@@ -159,52 +158,65 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public void putResourcesById(final String rootResourceId, final LeafResource leafResource) {
-        LOGGER.debug("Putting resource and parents up-to {} for resource {}", rootResourceId, leafResource);
+        LOGGER.debug("Putting resource and parents up-to '{}' for resource '{}'", rootResourceId, leafResource.getId());
         // Variable reference must be final inside lambda, but value reference intentionally non-final
         // A bit hacky, but seems to be the best way to have mutable 'globals' inside lambdas
         final Resource[] rootReference = new Resource[1];
 
-        Consumer<ChildResource> saveComplete = child -> resourceRepository.save(new ResourceEntity(leafResource));
+        Consumer<ChildResource> saveComplete = child -> {
+            ResourceEntity entity = new ResourceEntity(leafResource);
+            LOGGER.debug("Persistence save for resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId());
+            resourceRepository.save(entity);
+        };
         BiPredicate<ParentResource, ChildResource> recurseToRootId = (parent, child) -> {
+            LOGGER.debug("Looking for root '{}'", rootResourceId);
             if (parent.getId().equals(rootResourceId)) {
-                if (isNull(rootReference[0])) {
-                    rootReference[0] = parent;
-                }
+                rootReference[0] = parent;
+                LOGGER.debug("Stop traverse, parent is root '{}'", rootResourceId);
                 return false;
             } else if (child.getId().equals(rootResourceId)) {
-                if (isNull(rootReference[0])) {
-                    rootReference[0] = child;
-                }
+                rootReference[0] = child;
+                LOGGER.debug("Stop traverse, child is root '{}'", rootResourceId);
                 return false;
             } else {
+                LOGGER.debug("Recurse traverse, child is {} and parent is {}", child.getId(), parent.getId());
                 return true;
             }
         };
-        Predicate<Resource> isPersistedAndComplete = resource -> resourceRepository.findByResourceId(resource.getId()).map(ResourceEntity::isComplete).orElse(false);
+        Predicate<Resource> isPersistedAndComplete = resource -> {
+            boolean persistedAndComplete = resourceRepository.findByResourceId(resource.getId()).map(ResourceEntity::isComplete).orElse(false);
+            LOGGER.debug("Resource {} is {}", resource.getId(), persistedAndComplete ? "persisted and complete" : "either not persisted or not complete");
+            return persistedAndComplete;
+        };
+
         // Persist this leaf and the collection of its parents as a complete set up to the root resource, overwriting existing entries
         traverseParentsByResource(leafResource, (parent, child) -> saveComplete.accept(child), recurseToRootId.or((parent, child) -> isPersistedAndComplete.test(parent)));
 
         // If the root reference was found (ie. if there exist directories above this leaf that have been persisted)
         Optional.ofNullable(rootReference[0]).ifPresent(rootResource -> {
+            LOGGER.debug("Found root reference {}, persisting intermediates", rootReference[0].getId());
+
             // Edge-case to persist the root resource of the request/response only if it was not persisted as one of the LeafResource/ConnectionDetail elements of the above
             if (!(rootResource instanceof LeafResource)) {
                 ResourceEntity entity = new ResourceEntity(rootResource);
-                LOGGER.debug("Persistence save for entity {}", entity);
+                LOGGER.debug("Persistence save for resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId());
                 resourceRepository.save(entity);
             }
 
             Consumer<ParentResource> saveIncomplete = parent -> {
                 ResourceEntity entity = new ResourceEntity(parent);
                 entity.setComplete(false);
-                LOGGER.debug("Persistence save for entity {}", entity);
+                LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId());
                 resourceRepository.save(entity);
             };
             Consumer<ParentResource> saveNewIncomplete = parent -> {
                 if (!isPersistedAndComplete.test(parent)) {
+                    LOGGER.debug("Updating persistence with entity {} - old entity is either not persisted or not complete, new entity is not complete", parent.getId());
                     saveIncomplete.accept(parent);
                 }
             };
             BiPredicate<ParentResource, ChildResource> recurseEverything = (parent, child) -> true;
+
             // Persist higher parents as incomplete once above the root resource, but don't overwrite existing parents that may already be complete
             traverseParentsByResource(rootResource, (parent, child) -> saveNewIncomplete.accept(parent), recurseEverything);
         });
@@ -212,19 +224,17 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public void putResourcesByType(final String type, final LeafResource leafResource) {
-        LOGGER.debug("Putting resource for type {} for resource {}", type, leafResource);
         putResourcesById(leafResource.getId(), leafResource);
         TypeEntity entity = new TypeEntity(type, leafResource.getId());
-        LOGGER.debug("Persistence save for entity {}", entity);
+        LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType());
         typeRepository.save(entity);
     }
 
     @Override
     public void putResourcesBySerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
-        LOGGER.debug("Putting resource for serialised format {} for resource {}", serialisedFormat, leafResource);
         putResourcesById(leafResource.getId(), leafResource);
         SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
-        LOGGER.debug("Persistence save for entity {}", entity);
+        LOGGER.debug("Persistence save for serialised format entity '{}' with serialised format '{}'", entity.getResourceId(), entity.getSerialisedFormat());
         serialisedFormatRepository.save(entity);
     }
 
@@ -235,13 +245,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         String serialisedFormat = leafResource.getSerialisedFormat();
 
         // Update resources repository
-        LOGGER.debug("Adding resourceId {} for resource {}", resourceId, leafResource);
+        LOGGER.debug("Adding resource '{}'", resourceId);
         putResourcesById(resourceId, leafResource);
 
         // Update type repository (don't use above method, avoid unnecessary double-add)
         if (getResourcesByType(type).isPresent()) {
             TypeEntity entity = new TypeEntity(type, resourceId);
-            LOGGER.debug("Persistence save for entity {}", entity);
+            LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType());
             typeRepository.save(entity);
         } else {
             LOGGER.debug("Skipping add for type {} as entry not present (partial store would be incomplete)", type);
@@ -250,7 +260,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         // Update serialisedFormat repository (don't use above method, avoid unnecessary double-add)
         if (getResourcesBySerialisedFormat(serialisedFormat).isPresent()) {
             SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, resourceId);
-            LOGGER.debug("Persistence save for entity {}", entity);
+            LOGGER.debug("Persistence save for serialised format entity '{}' with serialised format '{}'", entity.getResourceId(), entity.getSerialisedFormat());
             serialisedFormatRepository.save(entity);
         } else {
             LOGGER.debug("Skipping add for serialised format {} as entry not present (partial store would be incomplete)", serialisedFormat);

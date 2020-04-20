@@ -27,16 +27,13 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -83,40 +80,8 @@ public class LeafResourceRulesTest {
 
     private FileResource createFileResource(final String id) {
         String path = id.substring(0, id.lastIndexOf("/") + 1);
-        FileResource file = new FileResource().id(id).serialisedFormat("avro").type("employee");
-        file.setParent(createParentResource(path));
+        FileResource file = ResourceBuilder.fileResource(id).serialisedFormat("avro").type("employee");
 
         return file;
     }
-
-    private DirectoryResource createParentResource(final String path) {
-        String str = path;
-        List<DirectoryResource> resourceList = new ArrayList<>();
-        List<String> pathList = new ArrayList<>();
-
-        do {
-            pathList.add(str);
-            str = str.substring(0, str.lastIndexOf("/"));
-        } while (!str.endsWith("//"));
-
-        for (String s : pathList) {
-            DirectoryResource parentResource = addParentResource(s);
-            if (!resourceList.isEmpty()) {
-                resourceList.get(resourceList.size() - 1).setParent(parentResource);
-            }
-            resourceList.add(parentResource);
-        }
-        resourceList.get(resourceList.size() - 1).setParent(createSystemResource(str));
-
-        return resourceList.get(0);
-    }
-
-    private DirectoryResource addParentResource(final String path) {
-        return new DirectoryResource().id(path);
-    }
-
-    private SystemResource createSystemResource(final String path) {
-        return new SystemResource().id(path);
-    }
-
 }

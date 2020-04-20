@@ -27,10 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.HasTestingPurpose;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -94,20 +93,8 @@ public class SetResourcePolicyRequestTest {
                 is(equalTo(new User().userId("TestUser"))));
     }
 
-    private static SystemResource createTestSystemResource() {
-        return new SystemResource().id("File");
-    }
-
-    private static DirectoryResource createTestDirectoryResource() {
-        DirectoryResource directoryResource = new DirectoryResource().id("File://temp");
-        directoryResource.setParent(createTestSystemResource());
-        return directoryResource;
-    }
-
     private static FileResource createTestFileResource(final int i) {
-        FileResource fileResource = new FileResource().id("File://temp/TestObj_00" + i + ".txt").type("TestObj" + i).serialisedFormat("txt");
-        fileResource.setParent(createTestDirectoryResource());
-        return fileResource;
+        return ResourceBuilder.fileResource("/temp/TestObj_00" + i + ".txt").type("TestObj" + i).serialisedFormat("txt");
     }
 }
 

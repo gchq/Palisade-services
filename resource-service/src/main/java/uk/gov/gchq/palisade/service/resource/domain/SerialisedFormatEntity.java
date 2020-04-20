@@ -24,6 +24,8 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import java.util.StringJoiner;
+
 @Entity
 @Table(name = "serialised_formats",
         indexes = {
@@ -55,4 +57,13 @@ public class SerialisedFormatEntity {
         return resourceId;
     }
 
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", SerialisedFormatEntity.class.getSimpleName() + "[", "]")
+                .add("resourceId='" + resourceId + "'")
+                .add("serialisedFormat='" + serialisedFormat + "'")
+                .add(super.toString())
+                .toString();
+    }
 }

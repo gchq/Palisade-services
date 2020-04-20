@@ -20,18 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -41,8 +39,21 @@ public class SimpleResourceService implements ResourceService {
     private Stream<File> filesOf(final Path path) {
         try {
             return Files.walk(path)
+                    .peek(x -> {
+                        if (x.toFile().isFile()) {
+                            LOGGER.info("{}", x);
+                        }
+                    })
                     .map(Path::toAbsolutePath)
                     .map(Path::toFile)
+                    .map(file -> {
+                        try {
+                            return file.getCanonicalFile();
+                        } catch (IOException e) {
+                            LOGGER.error("Failed to get canonical file", e);
+                            return file;
+                        }
+                    })
                     .filter(File::isFile);
         } catch (Exception ex) {
             LOGGER.error("Could not walk {}", path);
@@ -51,32 +62,21 @@ public class SimpleResourceService implements ResourceService {
         }
     }
 
-    private ParentResource asDirectoryResource(final Path directory) {
-        if (Objects.isNull(directory.getParent())) {
-            return new SystemResource().id(directory.toString());
-        } else {
-            return new DirectoryResource().id(directory.toString()).parent(asDirectoryResource(directory.getParent()));
-        }
-    }
-
-    private LeafResource asLeafResource(final File file) {
+    private LeafResource asFileResource(final File file) {
         String extension = "";
         int i = file.getName().lastIndexOf('.');
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
-        Path path = file.toPath();
-        return new FileResource()
-                .id(path.toString())
+        return ResourceBuilder.fileResource(file.getAbsolutePath())
                 .type(extension)
                 .serialisedFormat("txt")
-                .connectionDetail(new SimpleConnectionDetail().uri("localhost"))
-                .parent(asDirectoryResource(path.getParent()));
+                .connectionDetail(new SimpleConnectionDetail().uri("localhost"));
     }
 
-    Stream<LeafResource> query(final String path, final Predicate<LeafResource> pred) {
+    protected Stream<LeafResource> query(final String path, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(path))
-                .map(this::asLeafResource)
+                .map(this::asFileResource)
                 .filter(pred);
     }
 
@@ -92,12 +92,12 @@ public class SimpleResourceService implements ResourceService {
 
     @Override
     public Stream<LeafResource> getResourcesByType(final String type) {
-        return query(".", leafResource -> leafResource.getType().equals(type));
+        return query(System.getProperty("user.dir"), leafResource -> leafResource.getType().equals(type));
     }
 
     @Override
     public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
-        return query(".", leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
+        return query(System.getProperty("user.dir"), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 
     @Override

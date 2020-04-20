@@ -21,14 +21,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -41,9 +42,10 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("dbtest")
 public class JpaPersistenceLayerTest {
-    // No DirtiesContext as a restart is slow
+    // No DirtiesContext between methods as a restart is slow
 
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
@@ -53,15 +55,13 @@ public class JpaPersistenceLayerTest {
     @Transactional
     public void setUp() {
         // Given
-        resource = new FileResource()
-                .id("/test-file-id")
+        resource = ResourceBuilder.fileResource("/test-file-id")
                 .type("type")
                 .serialisedFormat("format")
-                .connectionDetail(new SimpleConnectionDetail().uri("data-service"))
-                .parent(new SystemResource().id("/"));
+                .connectionDetail(new SimpleConnectionDetail().uri("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.putResourcesById("", resource);
+        persistenceLayer.putResourcesById(resource.getParent().getId(), resource);
         persistenceLayer.putResourcesByType(resource.getType(), resource);
         persistenceLayer.putResourcesBySerialisedFormat(resource.getSerialisedFormat(), resource);
     }

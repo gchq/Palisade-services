@@ -38,9 +38,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
@@ -49,6 +47,7 @@ import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,14 +98,10 @@ public class PalisadeServiceExceptionHandlerTest {
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
-        FileResource resource = new FileResource().id("/path/to/new/bob_file.txt")
+        FileResource resource = ResourceBuilder.fileResource("/path/to/new/bob_file.txt")
                 .type("bob")
                 .serialisedFormat("txt")
-                .connectionDetail(connectionDetail)
-                .parent(new DirectoryResource().id("/path/to/new/")
-                        .parent(new DirectoryResource().id("/path/to/")
-                                .parent(new DirectoryResource().id("/path/")
-                                        .parent(new SystemResource().id("/")))));
+                .connectionDetail(connectionDetail);
         resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());

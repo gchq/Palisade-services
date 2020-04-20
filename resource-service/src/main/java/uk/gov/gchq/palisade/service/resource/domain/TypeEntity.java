@@ -24,6 +24,8 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import java.util.StringJoiner;
+
 @Entity
 @Table(name = "types",
         indexes = {
@@ -55,4 +57,13 @@ public class TypeEntity {
         return resourceId;
     }
 
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", TypeEntity.class.getSimpleName() + "[", "]")
+                .add("resourceId='" + resourceId + "'")
+                .add("type='" + type + "'")
+                .add(super.toString())
+                .toString();
+    }
 }
