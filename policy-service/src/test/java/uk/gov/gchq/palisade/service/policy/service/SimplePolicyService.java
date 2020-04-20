@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.service.policy.request.Policy;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.Util;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.request.Policy;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.ArrayList;
 import java.util.Optional;

@@ -18,29 +18,20 @@ package uk.gov.gchq.palisade.service.manager.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ConfigurationMap;
+import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 
-@Component("config-checker")
-public class ConfigChecker implements ApplicationRunner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigChecker.class);
+public class ConfigPrinter implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPrinter.class);
 
     // Autowired through constructor
-    private ConfigurationMap config;
+    private ManagerConfiguration config;
 
-    public ConfigChecker(final ConfigurationMap config) {
+    public ConfigPrinter(final ManagerConfiguration config) {
         this.config = config;
     }
 
-    @Override
-    public void run(final ApplicationArguments args) throws Exception {
-        if (args.containsOption("config")) {
-            LOGGER.info("Loaded config:\n{}", config.toString());
-
-            System.exit(0);
-        }
+    public void run() {
+        LOGGER.info("Loaded config...\n{}", config.toString());
     }
 }

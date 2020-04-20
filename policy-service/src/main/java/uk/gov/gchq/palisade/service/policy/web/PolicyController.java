@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.policy.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +27,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
@@ -39,7 +44,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 @RestController
 @RequestMapping(path = "/")
@@ -48,9 +56,42 @@ public class PolicyController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyController.class);
 
     private final PolicyService service;
+    private PolicyConfiguration policyConfig;
+    private UserConfiguration userConfig;
 
-    public PolicyController(final @Qualifier("controller") PolicyService service) {
+    public PolicyController(final @Qualifier("controller") PolicyService service,
+                            final @Qualifier("policyConfiguration") PolicyConfiguration policyConfig,
+                            final @Qualifier("userConfiguration") UserConfiguration userConfig) {
         this.service = service;
+        this.setPolicyConfig(policyConfig);
+        this.setUserConfig(userConfig);
+    }
+
+    @Generated
+    public PolicyService getService() {
+        return service;
+    }
+
+    @Generated
+    public PolicyConfiguration getPolicyConfig() {
+        return policyConfig;
+    }
+
+    @Generated
+    public void setPolicyConfig(final PolicyConfiguration policyConfig) {
+        requireNonNull(policyConfig);
+        this.policyConfig = policyConfig;
+    }
+
+    @Generated
+    public UserConfiguration getUserConfig() {
+        return userConfig;
+    }
+
+    @Generated
+    public void setUserConfig(final UserConfiguration userConfig) {
+        requireNonNull(userConfig);
+        this.userConfig = userConfig;
     }
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
@@ -92,5 +133,24 @@ public class PolicyController {
     public void setTypePolicyAsync(@RequestBody final SetTypePolicyRequest request) {
         LOGGER.info("Invoking setTypePolicyAsync: {}", request);
         service.setTypePolicy(request.getType(), request.getPolicy());
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPostConstruct() {
+        // Add example Policies to the policy-service cache
+        policyConfig.getPolicies().stream()
+                .map(cacheWarmer -> cacheWarmer.policyWarm(userConfig.getUsers()))
+                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyController.class.getSimpleName() + "[", "]")
+                .add("service=" + service)
+                .add("policyConfig=" + policyConfig)
+                .add("userConfig=" + userConfig)
+                .add(super.toString())
+                .toString();
     }
 }

@@ -13,9 +13,7 @@
 # limitations under the License.
 #
 spring:
-  cache:
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
+
   application:
     name: user-service
   output:
@@ -27,26 +25,13 @@ spring:
 server:
   port: 8087
 
-eureka:
-  instance:
-    hostname: localhost
-    port: 8083
-    preferIpAddress: false
-  client:
-    serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
-    enabled: false
-
 management:
   endpoints:
     web:
       exposure:
-        include:
-        - health
-        - info
-        - metrics
-        - loggers
-    loggers:
+        include: "*"
+  endpoint:
+    shutdown:
       enabled: true
 
 feign:
@@ -60,3 +45,6 @@ feign:
 
 user-service:
   implementation: null-user-service
+
+population:
+  user: std
