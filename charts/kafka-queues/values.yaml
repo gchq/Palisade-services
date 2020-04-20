@@ -18,7 +18,7 @@ service:
   port: 80
 
 image:
-  repository: palisade/kafka-queues
+  name: kafka-queues
   tag: ed9f81b-SNAPSHOT
   pullPolicy: IfNotPresent
 

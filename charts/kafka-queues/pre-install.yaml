@@ -23,7 +23,7 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "-5"
 spec:
@@ -37,6 +37,11 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: pre-install-job
+      - name: post-install-job
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         command: ["/bin/sh", "bin/kafka-topics.sh", "--create --zookeeper", {{ .Values.global.zookeperConnectString | quote }}, "--replication-factor 3", "--partitions 1", "--topic testTopic" ]
+        env:
+  {{- range $key, $val := .Values.master.scriptApproval }}
+  <string>{{ $val }}</string>
+  {{- end }}
+ 
