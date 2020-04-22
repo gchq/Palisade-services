@@ -16,6 +16,14 @@ replicaCount: 1
 
 service:
   port: 80
+kafkaCreateTopics:
+  - palisade-to-user
+  - user-to-resource
+  - resource-to-policy
+  - policy-to-query-scope
+  - query-scope-to-results
+  - results-controller-to-results
+
 
 image:
   name: kafka-queues

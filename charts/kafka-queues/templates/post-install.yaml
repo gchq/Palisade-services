@@ -16,20 +16,20 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Release.Name }}"
+  name: {{ include "kafka-queues.name" . }}
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
-    app.kubernetes.io/instance: {{ .Release.Name | quote }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app.kubernetes.io/name: {{ include "kafka-queues.name" . }}
+    helm.sh/chart: {{ include "kafka-queues.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": post-install
-    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook-weight": "-5"
 spec:
   template:
     metadata:
-      name: "{{.Release.Name}}"
+      name: {{ include "kafka-queues.name" . }}
       labels:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -37,11 +37,14 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: post-install-job
+      - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        command: ["/bin/sh", "bin/kafka-topics.sh", "--create --zookeeper", {{ .Values.global.zookeperConnectString | quote }}, "--replication-factor 3", "--partitions 1", "--topic testTopic" ]
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/bin/sh", "bin/create-topics.sh" ]
         env:
-  {{- range $key, $val := .Values.master.scriptApproval }}
-  <string>{{ $val }}</string>
+        - name: ZOOKEEPER
+          value: {{ .Values.global.zookeeperConnectString | quote }}
+  {{- range $key, $val := .Values.kafkaCreateTopics }}
+        - name: {{ printf "TOPIC%d" $key }}
+          value: {{ $val | quote }}
   {{- end }}
- 

@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
@@ -71,7 +73,7 @@ Return the appropriate apiVersion for deployment.
 {{- end -}}
 
 {{/*
-Determine ingress root url
+Determine queues root url
 */}}
 {{- define "kafka-queues.root" -}}
 {{- $ns := include "palisade.namespace" . -}}

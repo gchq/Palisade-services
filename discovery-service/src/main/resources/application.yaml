@@ -31,6 +31,7 @@ eureka:
     preferIpAddress: false
     lease-renewal-interval-in-seconds: 5
   client:
+    enabled: false
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
     registry-fetch-interval-seconds: 5
