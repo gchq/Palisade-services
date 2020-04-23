@@ -22,7 +22,7 @@ spec:
   containers:
   - name: docker-cmds
     image: jnlp-did:jdk11
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     command:
     - sleep
     args:
@@ -53,7 +53,7 @@ spec:
 
   - name: maven
     image: jnlp-slave-palisade:jdk11
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
     env:
