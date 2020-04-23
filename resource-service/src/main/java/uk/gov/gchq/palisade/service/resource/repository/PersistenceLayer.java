@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 /**
  * High-level requirement for persistence - approximately mirrors the external
  * interface with the {@link ResourceController}.
+ *
+ * Get/Put  byResource excluded here as it would still require a persistence lookup
+ * to check completeness, making it equivalent to byId.
  */
 public interface PersistenceLayer {
 
@@ -34,11 +37,11 @@ public interface PersistenceLayer {
     Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
 
 
-    void putResourcesById(String rootResourceId, LeafResource leafResource);
+    Stream<LeafResource> withPersistenceById(String rootResourceId, Stream<LeafResource> resources);
 
-    void putResourcesByType(String type, LeafResource leafResource);
+    Stream<LeafResource> withPersistenceByType(String type, Stream<LeafResource> resources);
 
-    void putResourcesBySerialisedFormat(String serialisedFormat, LeafResource leafResource);
+    Stream<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, Stream<LeafResource> resources);
 
 
     void addResource(LeafResource leafResource);

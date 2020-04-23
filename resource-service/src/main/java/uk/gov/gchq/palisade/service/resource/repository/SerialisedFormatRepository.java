@@ -29,6 +29,4 @@ public interface SerialisedFormatRepository extends CrudRepository<SerialisedFor
 
     Stream<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
 
-    boolean existsBySerialisedFormat(String serialisedFormat);
-
 }

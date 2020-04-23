@@ -28,6 +28,8 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
@@ -39,12 +41,6 @@ public class SimpleResourceService implements ResourceService {
     private Stream<File> filesOf(final Path path) {
         try {
             return Files.walk(path)
-                    .peek(x -> {
-                        if (x.toFile().isFile()) {
-                            LOGGER.info("{}", x);
-                        }
-                    })
-                    .map(Path::toAbsolutePath)
                     .map(Path::toFile)
                     .map(file -> {
                         try {
@@ -68,36 +64,52 @@ public class SimpleResourceService implements ResourceService {
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
-        return ResourceBuilder.fileResource(file.getAbsolutePath())
+        return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .type(extension)
                 .serialisedFormat("txt")
                 .connectionDetail(new SimpleConnectionDetail().uri("localhost"));
     }
 
-    protected Stream<LeafResource> query(final String path, final Predicate<LeafResource> pred) {
-        return filesOf(Path.of(path))
+    protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
+        return filesOf(Path.of(uri))
                 .map(this::asFileResource)
                 .filter(pred);
     }
 
+    private URI stringToURI(final String uriString) {
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException("URISyntaxException converting '" + uriString + "' to URI", ex);
+        }
+    }
+
+    private URI filesystemURI(final String fileString) {
+        try {
+            return new File(fileString).getCanonicalFile().toURI();
+        } catch (IOException ex) {
+            return new File(fileString).getAbsoluteFile().toURI();
+        }
+    }
+
     @Override
     public Stream<LeafResource> getResourcesByResource(final Resource resource) {
-        return query(resource.getId(), x -> true);
+        return query(stringToURI(resource.getId()), x -> true);
     }
 
     @Override
     public Stream<LeafResource> getResourcesById(final String resourceId) {
-        return query(resourceId, x -> true);
+        return query(stringToURI(resourceId), x -> true);
     }
 
     @Override
     public Stream<LeafResource> getResourcesByType(final String type) {
-        return query(System.getProperty("user.dir"), leafResource -> leafResource.getType().equals(type));
+        return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getType().equals(type));
     }
 
     @Override
     public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
-        return query(System.getProperty("user.dir"), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
+        return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 
     @Override

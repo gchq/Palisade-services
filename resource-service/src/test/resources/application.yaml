@@ -13,13 +13,9 @@
 # limitations under the License.
 #
 
-spring:
-  datasource:
-    url: jdbc:h2:file:./cache-h2
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+logging:
+  level:
+    root: WARN
+
+resource:
+  implementation: simple

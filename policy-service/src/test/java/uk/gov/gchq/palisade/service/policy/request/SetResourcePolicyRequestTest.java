@@ -94,7 +94,7 @@ public class SetResourcePolicyRequestTest {
     }
 
     private static FileResource createTestFileResource(final int i) {
-        return ResourceBuilder.fileResource("/temp/TestObj_00" + i + ".txt").type("TestObj" + i).serialisedFormat("txt");
+        return ((FileResource) ResourceBuilder.create("file:/temp/TestObj_00" + i + ".txt")).type("TestObj" + i).serialisedFormat("txt");
     }
 }
 

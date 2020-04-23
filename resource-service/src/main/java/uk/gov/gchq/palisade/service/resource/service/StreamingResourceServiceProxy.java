@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 
@@ -80,11 +79,14 @@ public class StreamingResourceServiceProxy {
     @Transactional
     public void getResourcesByResource(final Resource resource, final OutputStream outputStream) {
         // Try first from persistence
+        LOGGER.info("Trying from persistence store");
         Stream<LeafResource> resourceStream = persistence.getResourcesById(resource.getId())
                 // Otherwise call out to resource service
-                .orElseGet(() -> delegate.getResourcesById(resource.getId())
-                        // Persist the new resources
-                        .peek(leafResource -> persistence.putResourcesById(resource.getId(), leafResource)));
+                .orElseGet(() -> {
+                    LOGGER.info("Persistence empty, delegating to resource-service");
+                    // Persist returned resources as the stream is consumed
+                    return persistence.withPersistenceById(resource.getId(), delegate.getResourcesById(resource.getId()));
+                });
         // Consume the stream, write to the output stream
         serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
@@ -92,11 +94,14 @@ public class StreamingResourceServiceProxy {
     @Transactional
     public void getResourcesById(final String resourceId, final OutputStream outputStream) {
         // Try first from persistence
+        LOGGER.info("Trying from persistence store");
         Stream<LeafResource> resourceStream = persistence.getResourcesById(resourceId)
                 // Otherwise call out to resource service
-                .orElseGet(() -> delegate.getResourcesById(resourceId)
-                        // Persist the new resources
-                        .peek(leafResource -> persistence.putResourcesById(resourceId, leafResource)));
+                .orElseGet(() -> {
+                    LOGGER.info("Persistence empty, delegating to resource-service");
+                    // Persist returned resources as the stream is consumed
+                    return persistence.withPersistenceById(resourceId, delegate.getResourcesById(resourceId));
+                });
         // Consume the stream, write to the output stream
         serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
@@ -104,11 +109,14 @@ public class StreamingResourceServiceProxy {
     @Transactional
     public void getResourcesByType(final String type, final OutputStream outputStream) {
         // Try first from persistence
+        LOGGER.info("Trying from persistence store");
         Stream<LeafResource> resourceStream = persistence.getResourcesByType(type)
                 // Otherwise call out to resource service
-                .orElseGet(() -> delegate.getResourcesByType(type)
-                        // Persist the new resources
-                        .peek(leafResource -> persistence.putResourcesByType(type, leafResource)));
+                .orElseGet(() -> {
+                    LOGGER.info("Persistence empty, delegating to resource-service");
+                    // Persist returned resources as the stream is consumed
+                    return persistence.withPersistenceByType(type, delegate.getResourcesByType(type));
+                });
         // Consume the stream, write to the output stream
         serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
@@ -116,11 +124,14 @@ public class StreamingResourceServiceProxy {
     @Transactional
     public void getResourcesBySerialisedFormat(final String serialisedFormat, final OutputStream outputStream) {
         // Try first from persistence
+        LOGGER.info("Trying from persistence store");
         Stream<LeafResource> resourceStream = persistence.getResourcesByType(serialisedFormat)
                 // Otherwise call out to resource service
-                .orElseGet(() -> delegate.getResourcesBySerialisedFormat(serialisedFormat)
-                        // Persist the new resources
-                        .peek(leafResource -> persistence.putResourcesBySerialisedFormat(serialisedFormat, leafResource)));
+                .orElseGet(() -> {
+                    LOGGER.info("Persistence empty, delegating to resource-service");
+                    // Persist returned resources as the stream is consumed
+                    return persistence.withPersistenceBySerialisedFormat(serialisedFormat, delegate.getResourcesBySerialisedFormat(serialisedFormat));
+                });
         // Consume the stream, write to the output stream
         serialiseAndWriteStreamToOutput(resourceStream, outputStream);
     }
@@ -137,14 +148,14 @@ public class StreamingResourceServiceProxy {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add resources to persistence
-        resourceConfiguration.ifPresent(config ->
-                config.getResources().stream()
-                        .map(ResourcePrepopulationFactory::build)
-                        .forEach(leafResource -> {
-                                persistence.putResourcesById(leafResource.getId(), leafResource);
-                                persistence.putResourcesByType(leafResource.getType(), leafResource);
-                                persistence.putResourcesBySerialisedFormat(leafResource.getSerialisedFormat(), leafResource);
-                        }));
+        // resourceConfiguration.ifPresent(config ->
+        //         config.getResources().stream()
+        //                 .map(ResourcePrepopulationFactory::build)
+        //                 .forEach(leafResource -> {
+        //                         persistence.withPersistenceById(leafResource.getId(), leafResource);
+        //                         persistence.withPersistenceByType(leafResource.getType(), leafResource);
+        //                         persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), leafResource);
+        //                 }));
     }
 
     private void serialiseAndWriteStreamToOutput(final Stream<LeafResource> leafResourceStream, final OutputStream outputStream) {

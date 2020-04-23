@@ -25,9 +25,11 @@ import org.junit.runners.JUnit4;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
@@ -60,9 +62,10 @@ public class AuditRequestTest {
 
     @Test
     public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
+        final LeafResource leafResource = (LeafResource) ResourceBuilder.create("file:/usr/share/resource/test_resource");
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
-                .withLeafResources(Collections.singleton(ResourceBuilder.fileResource("/usr/share/resource/test_resource").type("standard").serialisedFormat("none")))
+                .withLeafResources(Collections.singleton(leafResource.type("standard").serialisedFormat("none").connectionDetail(new SimpleConnectionDetail().uri("uri"))))
                 .withContext(new Context(Collections.singletonMap("a string", String.class)));
 
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -29,7 +28,6 @@ import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties
 public class JsonResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonResourcePrepopulationFactory.class);
 

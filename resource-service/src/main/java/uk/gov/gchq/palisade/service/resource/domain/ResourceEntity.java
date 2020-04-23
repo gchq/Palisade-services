@@ -30,8 +30,6 @@ import javax.persistence.UniqueConstraint;
 
 import java.util.StringJoiner;
 
-import static java.util.Objects.requireNonNull;
-
 @Entity
 @Table(name = "resources",
         uniqueConstraints = {
@@ -49,9 +47,6 @@ public class ResourceEntity {
     @Column(name = "parent_id", columnDefinition = "varchar(255)")
     private String parentId;
 
-    @Column(name = "complete", columnDefinition = "boolean", nullable = false)
-    private boolean complete;
-
     @Column(name = "resource", columnDefinition = "clob", nullable = false)
     @Convert(converter = ResourceConverter.class)
     private Resource resource;
@@ -59,10 +54,9 @@ public class ResourceEntity {
     public ResourceEntity() {
     }
 
-    private ResourceEntity(final String resourceId, final String parentId, final boolean complete, final Resource resource) {
+    private ResourceEntity(final String resourceId, final String parentId, final Resource resource) {
         this.resourceId = resourceId;
         this.parentId = parentId;
-        this.complete = complete;
         this.resource = resource;
     }
 
@@ -70,7 +64,6 @@ public class ResourceEntity {
         this(
                 resource.getId(),
                 resource instanceof ChildResource ? ((ChildResource) resource).getParent().getId() : null,
-                true,
                 resource
         );
     }
@@ -83,17 +76,6 @@ public class ResourceEntity {
     @Generated
     public String getParentId() {
         return parentId;
-    }
-
-    @Generated
-    public boolean isComplete() {
-        return complete;
-    }
-
-    @Generated
-    public void setComplete(final boolean complete) {
-        requireNonNull(complete);
-        this.complete = complete;
     }
 
     @Generated

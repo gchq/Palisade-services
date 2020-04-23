@@ -93,7 +93,7 @@ public class SimplePalisadeServiceTest {
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
-        FileResource resource = ResourceBuilder.fileResource("/path/to/new/bob_file.txt")
+        FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
                 .type("bob")
                 .serialisedFormat("txt")
                 .connectionDetail(connectionDetail);
@@ -102,7 +102,7 @@ public class SimplePalisadeServiceTest {
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
 
-        dataRequest.userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
+        dataRequest.userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("file:/path/to/new/bob_file.txt");
         dataRequestConfig.user(user).context(dataRequest.getContext()).rules(rules);
         dataRequestConfig.setOriginalRequestId(originalRequestId);
         expectedResponse.resources(resources);
@@ -124,7 +124,7 @@ public class SimplePalisadeServiceTest {
         RegisterDataRequest request = new RegisterDataRequest()
                 .userId(new UserId().id("Bob"))
                 .context(new Context().purpose("Testing"))
-                .resourceId("/path/to/new/bob_file.txt");
+                .resourceId("file:/path/to/new/bob_file.txt");
 
         when(auditService.audit(any(AuditRequest.class))).thenReturn(true);
         when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);

@@ -21,7 +21,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,13 +42,15 @@ public class SimpleResourceServiceTest {
     private final SimpleResourceService service = new SimpleResourceService();
 
     @Test
-    public void javaFilesInSrcAndTest() {
+    public void javaFilesInSrcAndTest() throws IOException {
         // Given
         Set<LeafResource> javaFiles = service.getResourcesByType("java").collect(Collectors.toSet());
+        DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
+        DirectoryResource srcTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/test/java").getCanonicalFile().toURI());
 
         // When
-        Stream<LeafResource> sourceFiles = service.getResourcesById("./src/main/java");
-        Stream<LeafResource> testFiles = service.getResourcesById("./src/test/java");
+        Stream<LeafResource> sourceFiles = service.getResourcesById(srcMainJava.getId());
+        Stream<LeafResource> testFiles = service.getResourcesById(srcTestJava.getId());
         Set<LeafResource> srcAndTestJavaFiles = Stream.concat(sourceFiles, testFiles).collect(Collectors.toSet());
 
         // Then
@@ -50,19 +58,24 @@ public class SimpleResourceServiceTest {
     }
 
     @Test
-    public void canFindTestResourceAvro() {
+    public void canFindTestResourceAvro() throws IOException {
         // Given
-        LeafResource testResourceAvro = service.query("./src/test/resources/test_resource.avro", x -> true).findAny().orElseThrow();
+        URI avroFileURI = new File("./src/test/resources/test_resource.avro").getCanonicalFile().toURI();
+        FileResource testResourceAvro = (FileResource) ResourceBuilder.create(avroFileURI);
+        DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
+
+        // Given
+        LeafResource expectedAvroResource = service.query(avroFileURI, x -> true).findFirst().orElseThrow();
 
         // When
-        Optional<LeafResource> resourcesById = service.getResourcesById("./src/test/resources").findFirst();
-        Optional<LeafResource> resourcesByType = service.getResourcesByType("avro").findFirst();
+        Optional<LeafResource> resourcesById = service.getResourcesById(expectedAvroResource.getId()).findFirst();
+        Optional<LeafResource> resourcesByType = service.getResourcesByType(expectedAvroResource.getType()).findFirst();
 
         // Then
         assertTrue(resourcesById.isPresent());
-        assertThat(resourcesById.get(), equalTo(testResourceAvro));
+        assertThat(resourcesById.get(), equalTo(expectedAvroResource));
 
         assertTrue(resourcesByType.isPresent());
-        assertThat(resourcesByType.get(), equalTo(testResourceAvro));
+        assertThat(resourcesByType.get(), equalTo(expectedAvroResource));
     }
 }

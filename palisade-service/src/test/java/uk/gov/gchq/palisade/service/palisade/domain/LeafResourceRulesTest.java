@@ -33,6 +33,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -63,8 +64,8 @@ public class LeafResourceRulesTest {
     private LeafResourceRulesRepository leafResourceRulesRepository;
 
     @Test
-    public void storeAndRetrieveTest() {
-        final FileResource fileResource = createFileResource("file:///organisation/dept/team/employee/john");
+    public void storeAndRetrieveTest() throws URISyntaxException {
+        final FileResource fileResource = (FileResource) ResourceBuilder.create("file:/organisation/dept/team/employee/john");
         final Rule<Employee> rule = new PhoneRule();
         Rules<Employee> resourceRules = new Rules<>();
         resourceRules.rule("phone-rule", rule);
@@ -78,10 +79,4 @@ public class LeafResourceRulesTest {
         assertThat("The rule type is not preserved through persistence", subject.getValue().getRules().values().stream().findFirst().filter(r -> r instanceof PhoneRule).isPresent(), is(true));
     }
 
-    private FileResource createFileResource(final String id) {
-        String path = id.substring(0, id.lastIndexOf("/") + 1);
-        FileResource file = ResourceBuilder.fileResource(id).serialisedFormat("avro").type("employee");
-
-        return file;
-    }
 }

@@ -32,6 +32,7 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
@@ -67,8 +68,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
-        return new JpaPersistenceLayer(resourceRepository, typeRepository, serialisedFormatRepository);
+    public JpaPersistenceLayer persistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
+        return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
     @Bean

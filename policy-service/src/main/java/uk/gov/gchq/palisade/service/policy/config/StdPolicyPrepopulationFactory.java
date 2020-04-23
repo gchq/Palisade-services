@@ -19,16 +19,17 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.apache.avro.reflect.MapEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,7 +38,6 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
@@ -154,10 +154,11 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
     @Override
     public Resource createResource() {
-        if (resource.endsWith(".avro")) {
-            return ResourceBuilder.fileResource(resource).type(type).serialisedFormat("avro");
+        File resourceFile = new File(resource);
+        if (new File(resource).isFile()) {
+            return ((FileResource) ResourceBuilder.create(resourceFile.toURI())).type(type).serialisedFormat("avro");
         } else {
-            return ResourceBuilder.directoryResource(resource);
+            return ResourceBuilder.create(resourceFile.toURI());
         }
     }
 

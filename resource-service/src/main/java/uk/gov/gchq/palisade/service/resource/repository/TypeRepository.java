@@ -29,6 +29,4 @@ public interface TypeRepository extends CrudRepository<TypeEntity, String> {
 
     Stream<TypeEntity> findAllByType(String type);
 
-    boolean existsByType(String type);
-
 }

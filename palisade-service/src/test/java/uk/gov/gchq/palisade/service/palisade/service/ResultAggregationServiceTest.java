@@ -87,7 +87,7 @@ public class ResultAggregationServiceTest {
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
-        FileResource resource = ResourceBuilder.fileResource("/path/to/new/bob_file.txt")
+        FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
                 .type("bob")
                 .serialisedFormat("txt")
                 .connectionDetail(connectionDetail);

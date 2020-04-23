@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
@@ -55,15 +56,15 @@ public class JpaPersistenceLayerTest {
     @Transactional
     public void setUp() {
         // Given
-        resource = ResourceBuilder.fileResource("/test-file-id")
+        resource = ((FileResource) ResourceBuilder.create("file:/root/test-file-id"))
                 .type("type")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().uri("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.putResourcesById(resource.getParent().getId(), resource);
-        persistenceLayer.putResourcesByType(resource.getType(), resource);
-        persistenceLayer.putResourcesBySerialisedFormat(resource.getSerialisedFormat(), resource);
+        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> { });
+        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> { });
+        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> { });
     }
 
     @Test
@@ -77,7 +78,7 @@ public class JpaPersistenceLayerTest {
     @Transactional
     public void emptyGetReturnsEmptyTest() {
         // When
-        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("NON_EXISTENT_RESOURCE_ID");
+        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
         // Then
         assertThat(persistenceResponse, equalTo(Optional.empty()));
 
