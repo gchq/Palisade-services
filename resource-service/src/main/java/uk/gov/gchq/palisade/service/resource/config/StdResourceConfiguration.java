@@ -20,8 +20,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,35 +30,35 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties(prefix = "population")
-public class JsonResourceConfiguration implements ResourceConfiguration {
+public class StdResourceConfiguration implements ResourceConfiguration {
 
-    private List<JsonResourcePrepopulationFactory> resources = new ArrayList<>();
+    private List<StdResourcePrepopulationFactory> resources = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
-     * of the {@link UserConfiguration} interface
+     * of the {@link ResourceConfiguration} interface
      */
-    public JsonResourceConfiguration() {
+    public StdResourceConfiguration() {
     }
 
     /**
      * Constructor with 1 argument for a standard implementation
-     * of the {@link UserConfiguration} interface
+     * of the {@link ResourceConfiguration} interface
      *
-     * @param resources     a list of objects implementing the {@link UserPrepopulationFactory} interface
+     * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
-    public JsonResourceConfiguration(final List<JsonResourcePrepopulationFactory> resources) {
+    public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
         this.resources = resources;
     }
 
     @Override
     @Generated
-    public List<JsonResourcePrepopulationFactory> getResources() {
+    public List<StdResourcePrepopulationFactory> getResources() {
         return resources;
     }
 
     @Generated
-    public void setResources(final List<JsonResourcePrepopulationFactory> resources) {
+    public void setResources(final List<StdResourcePrepopulationFactory> resources) {
         requireNonNull(resources);
         this.resources = resources;
     }
@@ -70,10 +69,10 @@ public class JsonResourceConfiguration implements ResourceConfiguration {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof JsonResourceConfiguration)) {
+        if (!(o instanceof StdResourceConfiguration)) {
             return false;
         }
-        final JsonResourceConfiguration that = (JsonResourceConfiguration) o;
+        final StdResourceConfiguration that = (StdResourceConfiguration) o;
         return Objects.equals(resources, that.resources);
     }
 
@@ -86,7 +85,7 @@ public class JsonResourceConfiguration implements ResourceConfiguration {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", JsonResourceConfiguration.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", StdResourceConfiguration.class.getSimpleName() + "[", "]")
                 .add("resources=" + resources)
                 .add(super.toString())
                 .toString();

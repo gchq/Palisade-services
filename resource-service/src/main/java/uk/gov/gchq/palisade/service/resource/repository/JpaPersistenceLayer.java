@@ -297,6 +297,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         LOGGER.debug("Getting resources by id '{}'", resourceId);
         // Only return info on complete sets of information
         if (isResourceIdComplete(resourceId)) {
+            LOGGER.info("Persistence hit for resourceId {}", resourceId);
             // Get resource entity from db
             return Optional.of(resourceRepository.findByResourceId(resourceId)
                     // Get resource from db entity
@@ -310,6 +311,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     // If we never found a resource for this id, we have needed persist an empty stream, so return that here
                     .orElse(Stream.empty()));
         } else {
+            LOGGER.info("Persistence miss for resourceId {}", resourceId);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
             return Optional.empty();
         }
@@ -321,6 +323,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         LOGGER.debug("Getting resources by type '{}'", type);
         // Only return info on complete sets of information
         if (isTypeComplete(type)) {
+            LOGGER.info("Persistence hit for type {}", type);
             // Get type entity from db
             return Optional.of(typeRepository.findAllByType(type)
                     // Get resource id for each entity (pair of resourceId - type)
@@ -333,6 +336,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     .map(resource -> (LeafResource) resource
                             .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource while traversing type " + type))));
         } else {
+            LOGGER.info("Persistence miss for type {}", type);
             return Optional.empty();
         }
     }
@@ -344,6 +348,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         // Note that there is no differentiation between having a persisted emptySet and having no persisted entries
         // As such, getResourcesBySerialisedFormat("some completely made-up format") will always call the real resource-service and will never be persisted
         if (isSerialisedFormatComplete(serialisedFormat)) {
+            LOGGER.info("Persistence hit for serialisedFormat {}", serialisedFormat);
             // Get serialisedFormat entity from db
             return Optional.of(serialisedFormatRepository.findAllBySerialisedFormat(serialisedFormat)
                     // Get resource id for each entity (pair of resourceId - serialisedFormat)
@@ -356,6 +361,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     .map(resource -> (LeafResource) resource
                             .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource while traversing serialised format " + serialisedFormat))));
         } else {
+            LOGGER.info("Persistence miss for serialisedFormat {}", serialisedFormat);
             return Optional.empty();
         }
     }
@@ -364,7 +370,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource and mark it and its parents as complete up to a given root resource id
     @Override
     public Stream<LeafResource> withPersistenceById(final String rootResourceId, final Stream<LeafResource> resources) {
-        LOGGER.debug("Persisting resources by id '{}'", rootResourceId);
+        LOGGER.info("Persistence add for resources by id '{}'", rootResourceId);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.Resource, rootResourceId);
@@ -395,7 +401,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given type
     @Override
     public Stream<LeafResource> withPersistenceByType(final String type, final Stream<LeafResource> resources) {
-        LOGGER.debug("Persisting resources by type '{}'", type);
+        LOGGER.info("Persistence add for resources by type '{}'", type);
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.Type, type);
@@ -410,7 +416,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given serialisedFormat
     @Override
     public Stream<LeafResource> withPersistenceBySerialisedFormat(final String serialisedFormat, final Stream<LeafResource> resources) {
-        LOGGER.debug("Persisting resources by serialisedFormat '{}'", serialisedFormat);
+        LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.SerialisedFormat, serialisedFormat);
@@ -431,13 +437,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // As long as this is called for every new resource created and added to the resource-service, this guarantees consistency between persistence and resource-service
     @Override
     public void addResource(final LeafResource leafResource) {
+        LOGGER.info("Persistence update for new leafResource with resourceId {}", leafResource.getId());
         // Update resources repository
         Optional<Resource> firstCompleteAncestor = Optional.empty();
         // Find the first direct ancestor (grand*parent) that is persisted and complete
         // This informs us how much of the tree needs updating
         for (Resource ancestor = leafResource; ancestor instanceof ChildResource; ancestor = ((ChildResource) ancestor).getParent()) {
-            // TODO: SOME EDGE-CASE HERE
-            if (isResourceIdComplete(ancestor.getId())) {
+            if (isResourceIdComplete(ancestor.getId()) && isResourceIdPersisted(ancestor.getId())) {
                 firstCompleteAncestor = Optional.of(ancestor);
                 break;
             }

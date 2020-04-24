@@ -47,14 +47,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
     public StdUserConfiguration userConfiguration() {
-        LOGGER.info("Standard User Configuration Instantiated");
         return new StdUserConfiguration();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
     public StdUserPrepopulationFactory userCacheWarmerFactory() {
-        LOGGER.info("Standard User Cache Warmer Instantiated");
         return new StdUserPrepopulationFactory();
     }
 

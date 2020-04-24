@@ -54,17 +54,15 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "json")
-    public JsonResourceConfiguration resourceConfiguration() {
-        LOGGER.info("Standard Policy Configuration Instantiated");
-        return new JsonResourceConfiguration();
+    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
+    public StdResourceConfiguration resourceConfiguration() {
+        return new StdResourceConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "json")
-    public JsonResourcePrepopulationFactory resourcePrepopulationFactory() {
-        LOGGER.info("Standard Policy Cache Warmer Instantiated");
-        return new JsonResourcePrepopulationFactory();
+    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
+    public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
+        return new StdResourcePrepopulationFactory();
     }
 
     @Bean(name = "jpa-persistence")

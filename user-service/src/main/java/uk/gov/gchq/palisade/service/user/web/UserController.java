@@ -59,6 +59,7 @@ public class UserController {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
+        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
         // Add example users to the user-service cache
         userConfig.getUsers().stream()
                 .map(UserPrepopulationFactory::build)

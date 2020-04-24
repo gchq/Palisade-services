@@ -52,14 +52,15 @@ public class PolicyServiceCachingProxy implements PolicyService {
     @Cacheable(value = "accessPolicy", key = "''.concat(#resource.getId()).concat('-').concat(#context.hashCode()).concat('-').concat(#user.hashCode())")
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
         LOGGER.debug("Key triplet {}-{}-{} not found in cache", user.hashCode(), context.hashCode(), resource.hashCode());
+        LOGGER.info("Cache miss for canAccess user {}, resource {}, context {}", user.getUserId(), resource.getId(), context);
         return service.canAccess(user, context, resource);
     }
 
     @Override
     @Cacheable(value = "resourcePolicy", key = "#resource.id")
     public Optional<Policy> getPolicy(final Resource resource) {
-        LOGGER.debug("ResourceId for {} not found in cache", resource);
-        LOGGER.info("ResourceId {} not found in cache", resource.getId());
+        LOGGER.debug("ResourceId for resource {} not found in cache", resource);
+        LOGGER.info("Cache miss for resourceId {}", resource.getId());
         return service.getPolicy(resource);
     }
 
@@ -68,7 +69,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
     @CacheEvict(value = "accessPolicy")
     public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, policy);
-        LOGGER.info("ResourceId {} with PolicyMessage {} added to cache", resource.getId(), policy.getMessage());
+        LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), policy.getMessage());
         return service.setResourcePolicy(resource, policy);
     }
 
@@ -77,6 +78,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
     @CacheEvict(value = "accessPolicy")
     public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         LOGGER.debug("Type {} with policy {} added to cache", type, policy);
+        LOGGER.info("Cache add for type {} with policy message {}", type, policy.getMessage());
         return service.setTypePolicy(type, policy);
     }
 }
