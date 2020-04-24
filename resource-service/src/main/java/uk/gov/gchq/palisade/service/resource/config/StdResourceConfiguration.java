@@ -22,8 +22,10 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 
-import java.util.ArrayList;
+import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -31,8 +33,7 @@ import static java.util.Objects.requireNonNull;
 
 @ConfigurationProperties(prefix = "population")
 public class StdResourceConfiguration implements ResourceConfiguration {
-
-    private List<StdResourcePrepopulationFactory> resources = new ArrayList<>();
+    private Map<URI, List<StdResourcePrepopulationFactory>> resources = new HashMap<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
@@ -47,18 +48,18 @@ public class StdResourceConfiguration implements ResourceConfiguration {
      *
      * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
-    public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
+    public StdResourceConfiguration(final Map<URI, List<StdResourcePrepopulationFactory>> resources) {
         this.resources = resources;
     }
 
     @Override
     @Generated
-    public List<StdResourcePrepopulationFactory> getResources() {
+    public Map<URI, List<StdResourcePrepopulationFactory>> getResources() {
         return resources;
     }
 
     @Generated
-    public void setResources(final List<StdResourcePrepopulationFactory> resources) {
+    public void setResources(final Map<URI, List<StdResourcePrepopulationFactory>> resources) {
         requireNonNull(resources);
         this.resources = resources;
     }

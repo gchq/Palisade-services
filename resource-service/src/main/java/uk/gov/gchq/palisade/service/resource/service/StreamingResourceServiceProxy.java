@@ -29,8 +29,10 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
+import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -148,14 +150,19 @@ public class StreamingResourceServiceProxy {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add resources to persistence
-        // resourceConfiguration.ifPresent(config ->
-        //         config.getResources().stream()
-        //                 .map(ResourcePrepopulationFactory::build)
-        //                 .forEach(leafResource -> {
-        //                         persistence.withPersistenceById(leafResource.getId(), leafResource);
-        //                         persistence.withPersistenceByType(leafResource.getType(), leafResource);
-        //                         persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), leafResource);
-        //                 }));
+        resourceConfiguration.ifPresent(config ->
+                config.getResources().forEach((rootResourceId, prepopulationFactoryList) -> {
+                            Resource rootResource = ResourceBuilder.create(rootResourceId);
+                            prepopulationFactoryList.stream()
+                                .map(ResourcePrepopulationFactory::build)
+                                .forEach(leafResource -> {
+                                    Stream<LeafResource> resources = Stream.of(leafResource);
+                                    resources = persistence.withPersistenceById(rootResource.getId(), resources);
+                                    resources = persistence.withPersistenceByType(leafResource.getType(), resources);
+                                    resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
+                                    resources.forEach(x -> { });
+                                });
+                        }));
     }
 
     private void serialiseAndWriteStreamToOutput(final Stream<LeafResource> leafResourceStream, final OutputStream outputStream) {

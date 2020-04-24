@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -54,6 +55,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
+    @ConfigurationProperties(prefix = "web")
+    public ClientConfiguration clientConfiguration() {
+        return new ClientConfiguration();
+    }
+
+    @Bean
     @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
     public StdResourceConfiguration resourceConfiguration() {
         return new StdResourceConfiguration();
@@ -61,8 +68,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
-    public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
-        return new StdResourcePrepopulationFactory();
+    public StdResourcePrepopulationFactory resourcePrepopulationFactory(final ClientConfiguration clientConfig) {
+        return new StdResourcePrepopulationFactory(clientConfig);
     }
 
     @Bean(name = "jpa-persistence")

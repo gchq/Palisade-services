@@ -68,12 +68,18 @@ public class SimpleResourceServiceTest {
         LeafResource expectedAvroResource = service.query(avroFileURI, x -> true).findFirst().orElseThrow();
 
         // When
-        Optional<LeafResource> resourcesById = service.getResourcesById(expectedAvroResource.getId()).findFirst();
-        Optional<LeafResource> resourcesByType = service.getResourcesByType(expectedAvroResource.getType()).findFirst();
+        Optional<LeafResource> resourcesById = service.getResourcesById(testResourceDir.getId())
+                .filter(expectedAvroResource::equals)
+                .findFirst();
 
         // Then
         assertTrue(resourcesById.isPresent());
         assertThat(resourcesById.get(), equalTo(expectedAvroResource));
+
+        // When
+        Optional<LeafResource> resourcesByType = service.getResourcesByType(expectedAvroResource.getType())
+                .filter(expectedAvroResource::equals)
+                .findFirst();
 
         assertTrue(resourcesByType.isPresent());
         assertThat(resourcesByType.get(), equalTo(expectedAvroResource));

@@ -16,13 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
@@ -31,18 +27,19 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
 public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StdResourcePrepopulationFactory.class);
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
+    private final ClientConfiguration clientConfig;
     private URI resourceId;
     private String connectionDetail;
     private Map<String, String> attributes = new HashMap<>();
+
+    public StdResourcePrepopulationFactory(final ClientConfiguration clientConfig) {
+        this.clientConfig = clientConfig;
+    }
 
     @Generated
     public URI getResourceId() {
@@ -81,7 +78,11 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
     public LeafResource build() {
         String type = requireNonNull(attributes.get("type"), "Attribute 'type' cannot be null");
         String serialisedfFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
-        return ResourceBuilder.create(resourceId, new SimpleConnectionDetail().uri(connectionDetail), type, serialisedfFormat, attributes);
+        Supplier<URI> connectionDetailUriSupplier = () -> clientConfig
+                .getClientUri(connectionDetail)
+                .orElseThrow(() -> new RuntimeException(String.format("Cannot find any instance of '%s' - see 'web.client' properties or discovery service registration", connectionDetail)));
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri(connectionDetailUriSupplier.get().toString());
+        return ResourceBuilder.create(resourceId, connectionDetail, type, serialisedfFormat, attributes);
     }
 
     @Override
