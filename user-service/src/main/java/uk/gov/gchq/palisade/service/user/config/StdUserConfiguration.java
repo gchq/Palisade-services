@@ -53,7 +53,7 @@ public class StdUserConfiguration implements UserConfiguration {
 
     @Override
     @Generated
-    public List<StdUserPrepopulationFactory> getResources() {
+    public List<StdUserPrepopulationFactory> getUsers() {
         return users;
     }
 

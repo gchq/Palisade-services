@@ -139,7 +139,7 @@ public class PolicyController {
     public void initPostConstruct() {
         // Add example Policies to the policy-service cache
         policyConfig.getPolicies().stream()
-                .map(cacheWarmer -> cacheWarmer.build(userConfig.getResources()))
+                .map(cacheWarmer -> cacheWarmer.build(userConfig.getUsers()))
                 .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
     }
 

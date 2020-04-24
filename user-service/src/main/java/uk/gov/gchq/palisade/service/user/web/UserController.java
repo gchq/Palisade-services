@@ -60,7 +60,7 @@ public class UserController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example users to the user-service cache
-        userConfig.getResources().stream()
+        userConfig.getUsers().stream()
                 .map(UserPrepopulationFactory::build)
                 .forEach(user -> service.addUser(user));
     }
