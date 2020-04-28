@@ -21,7 +21,7 @@ kind: Pod
 spec:
   containers:
   - name: docker-cmds
-    image: jnlp-did:jdk11
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:INFRA
     imagePullPolicy: IfNotPresent
     command:
     - sleep
