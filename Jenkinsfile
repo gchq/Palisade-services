@@ -41,8 +41,8 @@ spec:
     - 99d
     env:
       - name: DOCKER_HOST
-        value: host
-        
+        value: tcp://localhost:2375
+
   - name: hadolint
     image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
     imagePullPolicy: Always
@@ -64,7 +64,7 @@ spec:
                 sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -s $MAVEN_SETTINGS install'
+                        sh 'mvn -s $MAVEN_SETTINGS install dockerfile.buildArgs --network=host'
                     }
                 }
             }
