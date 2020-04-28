@@ -19,6 +19,18 @@ podTemplate(yaml: '''
 apiVersion: v1
 kind: Pod
 spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: palisade-node-name
+            operator: In
+            values: 
+            - node1
+            - node2
+            - node3
   containers:
   - name: docker-cmds
     image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:INFRA
@@ -30,46 +42,13 @@ spec:
     env:
       - name: DOCKER_HOST
         value: tcp://localhost:2375
+        
   - name: hadolint
     image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
     imagePullPolicy: Always
     command:
-        - cat
+    - cat
     tty: true
-  - name: docker-daemon
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
-    securityContext:
-      privileged: true
-    resources:
-      requests:
-        cpu: 20m
-        memory: 512Mi
-    volumeMounts:
-      - name: docker-graph-storage
-        mountPath: /var/lib/docker
-    env:
-      - name: DOCKER_TLS_CERTDIR
-        value: ""
-
-  - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
-    imagePullPolicy: IfNotPresent
-    command: ['cat']
-    tty: true
-    env:
-    - name: TILLER_NAMESPACE
-      value: tiller
-    - name: HELM_HOST
-      value: :44134
-    volumeMounts:
-      - mountPath: /var/run
-        name: docker-sock
-  volumes:
-    - name: docker-graph-storage
-      emptyDir: {}
-    - name: docker-sock
-      hostPath:
-         path: /var/run
 ''') {
     node(POD_LABEL) {
         stage('Bootstrap') {
@@ -127,30 +106,30 @@ spec:
             }
         }
 
-        stage('Maven deploy') {
-            dir ('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git fetch origin develop"
-                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
-                container('maven') {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        if (("${env.BRANCH_NAME}" == "develop") ||
-                                ("${env.BRANCH_NAME}" == "master")) {
-                            sh 'palisade-login'
-                            //now extract the public IP addresses that this will be open on
-                            sh 'extract-addresses'
-                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
-                        } else {
-                            sh "echo - no deploy"
-                        }
-                    }
-                }
-            }
-        }
-    }
+//        stage('Maven deploy') {
+//            dir ('Palisade-services') {
+//                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+//                sh "git fetch origin develop"
+//                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
+//                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
+//                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
+//                container('maven') {
+//                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                        if (("${env.BRANCH_NAME}" == "develop") ||
+//                                ("${env.BRANCH_NAME}" == "master")) {
+//                            sh 'palisade-login'
+//                            //now extract the public IP addresses that this will be open on
+//                            sh 'extract-addresses'
+//                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+//                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+//                        } else {
+//                            sh "echo - no deploy"
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     // No need to occupy a node
     stage("SonarQube Quality Gate") {
         timeout(time: 1, unit: 'HOURS') {
