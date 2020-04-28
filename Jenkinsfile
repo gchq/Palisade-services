@@ -129,7 +129,7 @@ spec:
 //                }
 //            }
 //        }
-//    }
+    }
     // No need to occupy a node
     stage("SonarQube Quality Gate") {
         timeout(time: 1, unit: 'HOURS') {
