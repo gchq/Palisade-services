@@ -20,6 +20,7 @@ metadata:
   labels:
   {{- include "kafka.config.labels" . | nindent 4 }}
   name: {{ template "kafka.fullname" . }}-config
+  namespace: {{ include "palisade.namespace" . }}
 data:
   runtimeConfig.sh: |
     #!/bin/bash

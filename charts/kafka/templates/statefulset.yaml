@@ -17,6 +17,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "kafka.fullname" . }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
   {{- include "kafka.broker.labels" . | nindent 4 }}
 spec:
@@ -258,12 +259,12 @@ spec:
       {{- if .Values.securityContext }}
       securityContext:
 {{ toYaml .Values.securityContext | indent 8 }}
-      {{- end }}
       {{- range .Values.secrets }}
       {{- if .mountPath }}
       - name: {{ include "kafka.fullname" $ }}-{{ .name }}
         secret:
           secretName: {{ .name }}
+      {{- end }}
       {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
