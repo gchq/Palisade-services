@@ -37,7 +37,7 @@ spec:
         - cat
     tty: true
   - name: docker-daemon
-    image: docker:19.03.1-dind
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
     securityContext:
       privileged: true
     resources:
@@ -52,7 +52,7 @@ spec:
         value: ""
 
   - name: maven
-    image: jnlp-slave-palisade:jdk11
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
     imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
