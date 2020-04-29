@@ -126,11 +126,11 @@ public class StreamingResourceServiceProxy {
     @Transactional
     public void getResourcesBySerialisedFormat(final String serialisedFormat, final OutputStream outputStream) {
         // Try first from persistence
-        LOGGER.info("Trying from persistence store");
+        LOGGER.debug("Trying from persistence store");
         Stream<LeafResource> resourceStream = persistence.getResourcesByType(serialisedFormat)
                 // Otherwise call out to resource service
                 .orElseGet(() -> {
-                    LOGGER.info("Persistence empty, delegating to resource-service");
+                    LOGGER.debug("Persistence empty, delegating to resource-service");
                     // Persist returned resources as the stream is consumed
                     return persistence.withPersistenceBySerialisedFormat(serialisedFormat, delegate.getResourcesBySerialisedFormat(serialisedFormat));
                 });

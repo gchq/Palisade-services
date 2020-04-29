@@ -55,10 +55,16 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     // ~~~ A large number of helper methods for safely manipulating the various repositories ~~~ //
 
-    // Predicate factory for binding the root resource id and root reference to the lambda BiPredicate
-    // The root reference is a one-element list, which upon the predicate returning 'false' will contain (a reference to) the root resource as specified by id
-    // This saves doing a lot of unnecessary db lookups for an entity we just recursed over
-    // This is exclusively used as something passed to the traverseParents methods
+    /**
+     * Predicate factory for binding the root resource id and root reference to the lambda BiPredicate
+     * The root reference is a one-element list, which upon the predicate returning 'false' will contain (a reference to) the root resource as specified by id
+     * This saves doing a lot of unnecessary db lookups for an entity we just recursed over
+     * This is exclusively used as something passed to the traverseParents methods
+     *
+     * @param rootResourceId resourceId for end-of-recursion
+     * @param rootReference an {@link AtomicReference} to set to the root resource if found by this method
+     * @return a {@link BiPredicate} that returns false if either argument matches the rootResourceId
+     */
     private BiPredicate<ParentResource, ChildResource> recurseToRootId(final String rootResourceId, final AtomicReference<Resource> rootReference) {
         // Return a predicate with the method arguments bound to the lambda
         return (parent, child) -> {
@@ -83,9 +89,14 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         };
     }
 
-    // Predicate to determine whether or not a resource is complete
-    // Note that complete resource does not necessarily imply a persisted resource, in the case of empty streams for directories by id
-    // Since only returned leaf resources can give info on parents, parent resources with no leaf resource children may be complete but not persisted (what type of ParentResource is it?)
+    /**
+     * Predicate to determine whether or not a resource is complete
+     * Note that complete resource does not necessarily imply a persisted resource, in the case of empty streams for directories by id
+     * Since only returned leaf resources can give info on parents, parent resources with no leaf resource children may be complete but not persisted (what type of ParentResource is it?)
+     *
+     * @param resourceId the resource to get from the completeness repository
+     * @return true if the resource was in the repository
+     */
     private boolean isResourceIdComplete(final String resourceId) {
         // Check details with completeness db
         boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.Resource, resourceId);
@@ -93,7 +104,12 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return complete;
     }
 
-    // Predicate to determine whether or not a type is complete
+    /**
+     * Predicate to determine whether or not a type is complete
+     *
+     * @param type the resource type to get from the completeness repository
+     * @return true if the type was in the repository
+     */
     private boolean isTypeComplete(final String type) {
         // Check details with completeness db
         boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.Type, type);
@@ -101,7 +117,12 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return complete;
     }
 
-    // Predicate to determine whether or not a serialisedFormat is complete
+    /**
+     * Predicate to determine whether or not a serialisedFormat is complete
+     *
+     * @param serialisedFormat the resource serialised format to get from the completeness repository
+     * @return true if the serialised format was in the repository
+     */
     private boolean isSerialisedFormatComplete(final String serialisedFormat) {
         // Check details with completeness db
         boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.SerialisedFormat, serialisedFormat);
@@ -109,7 +130,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return complete;
     }
 
-    // Predicate to determine whether or not a resource is persisted (ie. is present in persistence)
+    /**
+     * Predicate to determine whether or not a resource is persisted
+     * ie. It is present in persistence, regardless of completeness
+     *
+     * @param resourceId the resource to get from the resources repository
+     * @return true if the resource was in the repository
+     */
     private boolean isResourceIdPersisted(final String resourceId) {
         // Get entity from db
         boolean persisted = resourceRepository.findByResourceId(resourceId)
@@ -119,9 +146,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return persisted;
     }
 
-    // Iterate over each parent-child pair in persistence, apply the callback to each pair, stop if the predicate is not satisfied or if no further parents exist
-    // Test on recursionPredicate applied after callback consume
-    // Simply prepend predicate to callback to change to opposite behaviour
+    /**
+     * Iterate over each parent-child pair in persistence, apply the callback to each pair, stop if the predicate is not satisfied or if no further parents exist
+     * Test on recursionPredicate applied after callback consume
+     * Simply prepend predicate to callback to change to opposite behaviour
+     *
+     * @param resource the initial resource to begin
+     */
     private <T extends Resource> T traverseParentsByEntity(final T resource, final BiConsumer<ParentResource, ChildResource> callback, final BiPredicate<ParentResource, ChildResource> recursionPredicate) {
         if (resource instanceof ChildResource) {
             // Treat resource as a ChildResource
