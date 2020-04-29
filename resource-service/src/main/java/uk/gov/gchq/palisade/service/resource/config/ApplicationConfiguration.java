@@ -60,18 +60,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ClientConfiguration();
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
-    public StdResourceConfiguration resourceConfiguration() {
-        return new StdResourceConfiguration();
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resource", havingValue = "std")
-    public StdResourcePrepopulationFactory resourcePrepopulationFactory(final ClientConfiguration clientConfig) {
-        return new StdResourcePrepopulationFactory(clientConfig);
-    }
-
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
