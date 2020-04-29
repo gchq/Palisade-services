@@ -42,6 +42,8 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
+  localMountKafka:
+    enabled: true
   localMount:
     enabled: true
     volumeHandle: dummy
