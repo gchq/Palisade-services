@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 podTemplate(yaml: '''
 apiVersion: v1
 kind: Pod
@@ -72,17 +71,47 @@ spec:
          path: /var/run
 ''') {
     node(POD_LABEL) {
+        def GIT_BRANCH_NAME
+
         stage('Bootstrap') {
-            echo sh(script: 'env|sort', returnStdout: true)
+            if (env.CHANGE_BRANCH) {
+                GIT_BRANCH_NAME=env.CHANGE_BRANCH
+            } else {
+                GIT_BRANCH_NAME=env.BRANCH_NAME
+            }
+            echo sh(script: 'env | sort', returnStdout: true)
         }
-        stage('Unit Tests, Checkstyle and Install') {
-            //Repositories must get built in their own directory, they can be 'cd' back into later on
-            dir ('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+
+        stage('Prerequisites') {
+            dir ('Palisade-common') {
+                git url: 'https://github.com/gchq/Palisade-common.git'
                 sh "git fetch origin develop"
-                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
+                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                    container('docker-cmds') {
+                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                            sh 'mvn -s $MAVEN_SETTINGS install'
+                        }
+                    }
+                }
+            }
+            dir ('Palisade-readers') {
+                git url: 'https://github.com/gchq/Palisade-readers.git'
+                sh "git fetch origin develop"
+                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                    container('docker-cmds') {
+                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                            sh 'mvn -s $MAVEN_SETTINGS install'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Install, Unit Tests, Checkstyle') {
+            dir ('Palisade-services') {
+                git url: 'https://github.com/gchq/Palisade-services.git'
+                sh "git fetch origin develop"
+                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
@@ -90,13 +119,12 @@ spec:
                 }
             }
         }
+
         stage('Integration Tests') {
             dir ('Palisade-integration-tests') {
-            git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            sh "git fetch origin develop"
-            // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-            // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-            sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
+                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                sh "git fetch origin develop"
+                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
@@ -104,7 +132,8 @@ spec:
                 }
             }
         }
-        stage('SonarQube analysis') {
+
+        stage('SonarQube Analysis') {
             dir ('Palisade-services') {
                 container('docker-cmds') {
                     withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
@@ -112,13 +141,14 @@ spec:
                                      file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                             withSonarQubeEnv(installationName: 'sonar') {
-                                sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                                sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services-${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
                             }
                         }
                     }
                 }
             }
         }
+
         stage('Hadolinting') {
             dir ('Palisade-services') {
                 container('hadolint') {
@@ -129,11 +159,6 @@ spec:
 
         stage('Maven deploy') {
             dir ('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git fetch origin develop"
-                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
                 container('maven') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         if (("${env.BRANCH_NAME}" == "develop") ||
@@ -142,7 +167,7 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true --set global.repository=${ECR_REGISTRY} --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false --set global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
                         } else {
                             sh "echo - no deploy"
                         }
