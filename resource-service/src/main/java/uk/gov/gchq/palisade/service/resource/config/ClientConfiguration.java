@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.resource.config;
 
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
@@ -31,6 +33,8 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 
 public class ClientConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
+
     private Map<String, URI> client;
 
     @Autowired(required = false)
@@ -56,16 +60,19 @@ public class ClientConfiguration {
     }
 
     private Optional<URI> configResolve(final String serviceName) {
+        LOGGER.info("Eureka resolve for service: {}", serviceName);
         return Optional.ofNullable(client.get(serviceName));
     }
 
     private Optional<URI> eurekaResolve(final String serviceName) {
+        LOGGER.info("Eureka resolve for service: {}", serviceName);
         return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
                 .map(Application::getInstances)
                 .flatMap(List::stream)
                 .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
                 .map(EurekaServiceInstance::new)
                 .map(EurekaServiceInstance::getUri)
+                .peek(x -> LOGGER.info("URI for {}: {}", serviceName, x))
                 .findAny());
     }
 }

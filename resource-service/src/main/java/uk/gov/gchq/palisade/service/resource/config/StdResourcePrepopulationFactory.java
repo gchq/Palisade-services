@@ -18,38 +18,60 @@ package uk.gov.gchq.palisade.service.resource.config;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
 public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
-    private final ClientConfiguration clientConfig;
-    private URI resourceId;
-    private String connectionDetail;
-    private Map<String, String> attributes = new HashMap<>();
 
-    public StdResourcePrepopulationFactory(final ClientConfiguration clientConfig) {
-        this.clientConfig = clientConfig;
+    private String resourceId = "";
+    private String rootId = "";
+    private String connectionDetail = "";
+    private Map<String, String> attributes = Collections.emptyMap();
+
+    public StdResourcePrepopulationFactory() {
+        // empty constructor
+    }
+
+    public StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
+        this.resourceId = resourceId;
+        this.rootId = rootId;
+        this.connectionDetail = connectionDetail;
+        this.attributes = attributes;
     }
 
     @Generated
-    public URI getResourceId() {
+    public String getResourceId() {
         return resourceId;
     }
 
     @Generated
-    public void setResourceId(final URI resourceId) {
+    public void setResourceId(final String resourceId) {
         requireNonNull(resourceId);
         this.resourceId = resourceId;
+    }
+
+    @Generated
+    public String getRootId() {
+        return rootId;
+    }
+
+    @Generated
+    public void setRootId(final String rootId) {
+        requireNonNull(rootId);
+        this.rootId = rootId;
     }
 
     @Generated
@@ -75,14 +97,14 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
     }
 
     @Override
-    public LeafResource build() {
+    public Entry<Resource, LeafResource> build(final Function<String, ConnectionDetail> connectionDetailMapper) {
         String type = requireNonNull(attributes.get("type"), "Attribute 'type' cannot be null");
-        String serialisedfFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
-        Supplier<URI> connectionDetailUriSupplier = () -> clientConfig
-                .getClientUri(connectionDetail)
-                .orElseThrow(() -> new RuntimeException(String.format("Cannot find any instance of '%s' - see 'web.client' properties or discovery service registration", connectionDetail)));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri(connectionDetailUriSupplier.get().toString());
-        return ResourceBuilder.create(resourceId, connectionDetail, type, serialisedfFormat, attributes);
+        String serialisedFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
+        ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
+        Resource rootResource = ResourceBuilder.create(rootId);
+        URI resourceURI = new File(resourceId).toURI();
+        Entry<Resource, LeafResource> ret = new SimpleImmutableEntry<>(rootResource, ResourceBuilder.create(resourceURI, simpleConnectionDetail, type, serialisedFormat, attributes));
+        return ret;
     }
 
     @Override
@@ -95,14 +117,15 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
             return false;
         }
         final StdResourcePrepopulationFactory that = (StdResourcePrepopulationFactory) o;
-        return resourceId.equals(that.resourceId) &&
-                connectionDetail.equals(that.connectionDetail) &&
-                attributes.equals(that.attributes);
+        return Objects.equals(resourceId, that.resourceId) &&
+                Objects.equals(rootId, that.rootId) &&
+                Objects.equals(connectionDetail, that.connectionDetail) &&
+                Objects.equals(attributes, that.attributes);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(resourceId, connectionDetail, attributes);
+        return Objects.hash(resourceId, rootId, connectionDetail, attributes);
     }
 }

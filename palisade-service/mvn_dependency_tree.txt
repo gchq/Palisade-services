@@ -30,7 +30,7 @@ uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
 |  |  \- aopalliance:aopalliance:jar:1.0:runtime
 |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.10.0:compile
 |  \- com.fasterxml.jackson.core:jackson-core:jar:2.10.0:compile
-+- com.fasterxml.jackson.core:jackson-databind:jar:2.9.10.3:compile
++- com.fasterxml.jackson.core:jackson-databind:jar:2.9.10.4:compile
 +- org.apache.commons:commons-compress:jar:1.19:compile
 +- org.springframework.boot:spring-boot-configuration-processor:jar:2.2.0.RELEASE:compile (optional) 
 +- org.springframework.boot:spring-boot-starter:jar:2.2.0.RELEASE:compile

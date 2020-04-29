@@ -16,30 +16,27 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 
-import java.net.URI;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties(prefix = "population")
 public class StdResourceConfiguration implements ResourceConfiguration {
-    private Map<URI, List<StdResourcePrepopulationFactory>> resources = new HashMap<>();
+
+    private List<StdResourcePrepopulationFactory> resources;
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link ResourceConfiguration} interface
      */
     public StdResourceConfiguration() {
+        resources = Collections.emptyList();
     }
 
     /**
@@ -48,18 +45,18 @@ public class StdResourceConfiguration implements ResourceConfiguration {
      *
      * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
-    public StdResourceConfiguration(final Map<URI, List<StdResourcePrepopulationFactory>> resources) {
+    public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
         this.resources = resources;
     }
 
     @Override
     @Generated
-    public Map<URI, List<StdResourcePrepopulationFactory>> getResources() {
+    public List<StdResourcePrepopulationFactory> getResources() {
         return resources;
     }
 
     @Generated
-    public void setResources(final Map<URI, List<StdResourcePrepopulationFactory>> resources) {
+    public void setResources(final List<StdResourcePrepopulationFactory> resources) {
         requireNonNull(resources);
         this.resources = resources;
     }

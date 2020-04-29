@@ -28,15 +28,16 @@ import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class StreamingResourceServiceProxy {
@@ -45,7 +46,7 @@ public class StreamingResourceServiceProxy {
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
     private final ObjectMapper objectMapper;
-    private Optional<ResourceConfiguration> resourceConfiguration;
+    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
 
     private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
         @Override
@@ -70,12 +71,11 @@ public class StreamingResourceServiceProxy {
         this.persistence = persistence;
         this.delegate = delegate;
         this.objectMapper = objectMapper;
-        this.resourceConfiguration = Optional.empty();
     }
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final ResourceConfiguration resourceConfiguration) {
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         this(persistence, delegate, objectMapper);
-        this.resourceConfiguration = Optional.of(resourceConfiguration);
+        this.resourceBuilder = resourceBuilder;
     }
 
     @Transactional
@@ -95,14 +95,17 @@ public class StreamingResourceServiceProxy {
 
     @Transactional
     public void getResourcesById(final String resourceId, final OutputStream outputStream) {
+        // Validate resourceId is a valid and normalised URI
+        Resource normalisedResourceWithId = ResourceBuilder.create(resourceId);
+        String normalisedId = normalisedResourceWithId.getId();
         // Try first from persistence
         LOGGER.info("Trying from persistence store");
-        Stream<LeafResource> resourceStream = persistence.getResourcesById(resourceId)
+        Stream<LeafResource> resourceStream = persistence.getResourcesById(normalisedId)
                 // Otherwise call out to resource service
                 .orElseGet(() -> {
                     LOGGER.info("Persistence empty, delegating to resource-service");
                     // Persist returned resources as the stream is consumed
-                    return persistence.withPersistenceById(resourceId, delegate.getResourcesById(resourceId));
+                    return persistence.withPersistenceById(normalisedId, delegate.getResourcesById(normalisedId));
                 });
         // Consume the stream, write to the output stream
         serialiseAndWriteStreamToOutput(resourceStream, outputStream);
@@ -150,19 +153,20 @@ public class StreamingResourceServiceProxy {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add resources to persistence
-        resourceConfiguration.ifPresent(config ->
-                config.getResources().forEach((rootResourceId, prepopulationFactoryList) -> {
-                            Resource rootResource = ResourceBuilder.create(rootResourceId);
-                            prepopulationFactoryList.stream()
-                                .map(ResourcePrepopulationFactory::build)
-                                .forEach(leafResource -> {
-                                    Stream<LeafResource> resources = Stream.of(leafResource);
-                                    resources = persistence.withPersistenceById(rootResource.getId(), resources);
-                                    resources = persistence.withPersistenceByType(leafResource.getType(), resources);
-                                    resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
-                                    resources.forEach(x -> { });
-                                });
-                        }));
+        Optional.ofNullable(resourceBuilder).ifPresentOrElse(builder -> {
+            LOGGER.info("Prepopulating using resource builder: {}", builder);
+            builder.get().stream()
+                    .peek(entry -> LOGGER.debug(entry.toString()))
+                    .forEach(entry -> {
+                        Resource rootResource = entry.getKey();
+                        LeafResource leafResource = entry.getValue();
+                        Stream<LeafResource> resources = Stream.of(leafResource);
+                        resources = persistence.withPersistenceById(rootResource.getId(), resources);
+                        resources = persistence.withPersistenceByType(leafResource.getType(), resources);
+                        resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
+                        resources.forEach(x -> { });
+                    });
+        }, () -> LOGGER.info("No resource configuration, not prepopulating"));
     }
 
     private void serialiseAndWriteStreamToOutput(final Stream<LeafResource> leafResourceStream, final OutputStream outputStream) {
