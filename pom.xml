@@ -78,7 +78,7 @@
         <module>services-manager</module>
     </modules>
 
-    <:qwprofiles>
+    <profiles>
         <profile>
             <id>quick</id>
             <properties>
@@ -87,7 +87,7 @@
                 <dockerfile.skip>true</dockerfile.skip>
             </properties>
         </profile>
-    </:qwprofiles>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
