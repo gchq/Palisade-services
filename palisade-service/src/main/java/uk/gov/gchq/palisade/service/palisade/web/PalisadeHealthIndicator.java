@@ -34,7 +34,6 @@ import java.util.Scanner;
 
 @EnableFeignClients
 @Component
-@Profile("eureka")
 public class PalisadeHealthIndicator extends AbstractHealthIndicator {
     private final AuditService auditService;
     private final PolicyService policyService;

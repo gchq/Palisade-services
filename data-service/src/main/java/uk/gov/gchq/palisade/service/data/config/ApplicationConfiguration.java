@@ -77,7 +77,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    @Profile("eureka")
     public DataHealthIndicator dataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
         return new DataHealthIndicator(palisadeService, auditService);
     }

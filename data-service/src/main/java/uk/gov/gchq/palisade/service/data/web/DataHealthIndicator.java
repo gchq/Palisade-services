@@ -32,7 +32,6 @@ import java.util.Scanner;
 
 @EnableFeignClients
 @Component
-@Profile("eureka")
 public class DataHealthIndicator extends AbstractHealthIndicator {
     private final PalisadeService palisadeService;
     private final AuditService auditService;
