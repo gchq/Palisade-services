@@ -75,9 +75,9 @@ spec:
 
         stage('Bootstrap') {
             if (env.CHANGE_BRANCH) {
-                GIT_BRANCH_NAME=CHANGE_BRANCH
+                GIT_BRANCH_NAME=env.CHANGE_BRANCH
             } else {
-                GIT_BRANCH_NAME=BRANCH_NAME
+                GIT_BRANCH_NAME=env.BRANCH_NAME
             }
             echo sh(script: 'env | sort', returnStdout: true)
         }
@@ -89,7 +89,7 @@ spec:
                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                     container('docker-cmds') {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh 'mvn -s $MAVEN_SETTINGS install'
+                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
                         }
                     }
                 }
@@ -100,7 +100,7 @@ spec:
                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                     container('docker-cmds') {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh 'mvn -s $MAVEN_SETTINGS install'
+                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
                         }
                     }
                 }
@@ -119,7 +119,7 @@ spec:
                 }
             }
         }
-      
+
         stage('Integration Tests') {
             dir ('Palisade-integration-tests') {
                 git url: 'https://github.com/gchq/Palisade-integration-tests.git'
@@ -132,7 +132,7 @@ spec:
                 }
             }
         }
-      
+
         stage('SonarQube Analysis') {
             dir ('Palisade-services') {
                 container('docker-cmds') {
@@ -148,7 +148,7 @@ spec:
                 }
             }
         }
-      
+
         stage('Hadolinting') {
             dir ('Palisade-services') {
                 container('hadolint') {
