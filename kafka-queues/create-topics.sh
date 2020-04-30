@@ -26,9 +26,11 @@
 #NAME PARTITION REPLICATIONFACTOR
 #e.g palisade 1 1
 write_to_kafka () {
-    IFS=' '
-    read -r NAME PARTITION REPLICATION <<< $1
-    until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION  --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
+    read -r NAME <<< $1
+    read -r PARTITION <<< $2
+    read -r REPLICATION <<< $3
+    echo ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME
+    until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
         echo Retrying creation of topic $NAME $PARTITION $REPLICATION
         sleep 10
     done

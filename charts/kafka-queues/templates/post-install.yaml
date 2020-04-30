@@ -43,7 +43,7 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["/bin/sh", "bin/create-topics.sh" ]
+        command: ["/bin/bash", "bin/create-topics.sh" ]
         env:
         - name: ZOOKEEPER
           value: {{ .Values.global.zookeeperConnectString | quote }}

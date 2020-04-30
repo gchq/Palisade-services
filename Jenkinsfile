@@ -77,7 +77,7 @@ spec:
         stage('Unit Tests, Checkstyle and Install') {
             //Repositories must get built in their own directory, they can be 'cd' back into later on
             dir ('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                git url: 'https://github.com/gchq/Palisade-services.git'
                 sh "git fetch origin develop"
                 // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
                 // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
@@ -111,7 +111,7 @@ spec:
                                      file(credentialsId: '91d1a511-491e-4fac-9da5-a61b7933f4f6', variable: 'KEYSTORE')]) {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                             withSonarQubeEnv(installationName: 'sonar') {
-                                sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services/${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services/${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+                                sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services-${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
                             }
                         }
                     }
