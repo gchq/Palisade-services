@@ -101,7 +101,7 @@ public class ResourceServiceTest {
         GetResourcesByIdRequest request = new GetResourcesByIdRequest().resourceId("/path/to/bob_file.txt");
         request.setOriginalRequestId(new RequestId().id("Original ID"));
         Map<LeafResource, ConnectionDetail> response = Mockito.mock(Map.class);
-        Mockito.when(resourceClient.getResourcesById(Mockito.any(), Mockito.eq(request))).thenReturn(response);
+//        Mockito.when(resourceClient.getResourcesById(Mockito.any(), Mockito.eq(request))).thenReturn(response);
 
         // When
         resourceService.getResourcesById(request);

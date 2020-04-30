@@ -20,7 +20,6 @@ import feign.Response.Body;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.palisade.service.AuditService;
