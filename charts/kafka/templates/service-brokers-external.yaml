@@ -30,6 +30,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: {{ include "palisade.namespace" . }}
   annotations:
     {{- if $root.Values.external.distinct }}
       {{- if $root.Values.external.dns.useInternal }}

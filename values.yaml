@@ -29,6 +29,8 @@ metricsServer:
   install: false
 dashboard:
   install: false
+kafka:
+  install: true
 namespaces:
   default: default
   dev: dev
@@ -41,6 +43,8 @@ global:
   uniqueNamespace: false
   repository: palisade
   zookeeperConnectString: palisade-zookeeper:2181
+  localMountKafka:
+    enabled: true
   localMount:
     enabled: true
     volumeHandle: dummy

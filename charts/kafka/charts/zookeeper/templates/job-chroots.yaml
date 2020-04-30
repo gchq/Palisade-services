@@ -19,6 +19,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "zookeeper.chroots" . }}
+  namespace: {{ include "palisade.namespace" . }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-5"

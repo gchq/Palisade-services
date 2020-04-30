@@ -17,7 +17,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "kafka.fullname" . }}
-  namespace: {{ include "serviceMonitor.namespace" . }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
   {{- include "kafka.monitor.labels" . | nindent 4 }}
   {{- toYaml .Values.prometheus.operator.serviceMonitor.selector | nindent 4 }}

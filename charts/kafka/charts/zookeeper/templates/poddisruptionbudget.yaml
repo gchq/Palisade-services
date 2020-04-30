@@ -16,6 +16,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: {{ template "zookeeper.fullname" . }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
     app: {{ template "zookeeper.name" . }}
     chart: {{ template "zookeeper.chart" . }}

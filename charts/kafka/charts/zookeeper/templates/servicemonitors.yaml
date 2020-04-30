@@ -17,9 +17,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "zookeeper.fullname" . }}
-  {{- if .Values.prometheus.serviceMonitor.namespace }}
-  namespace: {{ .Values.prometheus.serviceMonitor.namespace }}
-  {{- end }}
+  namespace: {{ include "palisade.namespace" . }}
   labels:
 {{ toYaml .Values.prometheus.serviceMonitor.selector | indent 4 }}
 spec:

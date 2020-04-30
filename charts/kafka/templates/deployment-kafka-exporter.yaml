@@ -17,6 +17,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "kafka.fullname" . }}-exporter
+  namespace: {{ include "palisade.namespace" . }}
   labels:
   {{- include "kafka.monitor.labels" . | nindent 4 }}
 spec:
