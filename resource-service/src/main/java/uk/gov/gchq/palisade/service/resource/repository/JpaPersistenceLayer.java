@@ -489,7 +489,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public Stream<LeafResource> withPersistenceById(final String rootResourceId, final Stream<LeafResource> resources) {
-        LOGGER.info("Persistence add for resources by id '{}'", rootResourceId);
+        LOGGER.debug("Persistence add for resources by id '{}'", rootResourceId);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.Resource, rootResourceId);
@@ -520,7 +520,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public Stream<LeafResource> withPersistenceByType(final String type, final Stream<LeafResource> resources) {
-        LOGGER.info("Persistence add for resources by type '{}'", type);
+        LOGGER.debug("Persistence add for resources by type '{}'", type);
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.Type, type);
@@ -535,7 +535,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public Stream<LeafResource> withPersistenceBySerialisedFormat(final String serialisedFormat, final Stream<LeafResource> resources) {
-        LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
+        LOGGER.debug("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.SerialisedFormat, serialisedFormat);
@@ -559,7 +559,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // this guarantees consistency between persistence and resource-service
     @Override
     public void addResource(final LeafResource leafResource) {
-        LOGGER.info("Persistence update for new leafResource with resourceId {}", leafResource.getId());
+        LOGGER.debug("Persistence update for new leafResource with resourceId {}", leafResource.getId());
         // Update resources repository
         Optional<Resource> firstCompleteAncestor = Optional.empty();
         // Find the first direct ancestor (grand*parent) that is persisted and complete
