@@ -83,6 +83,8 @@ spec:
         }
 
         stage('Prerequisites') {
+            // If this branch name exists in the repo for a mvn dependency
+            // Install that version, rather than pulling from nexus
             dir ('Palisade-common') {
                 git url: 'https://github.com/gchq/Palisade-common.git'
                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
@@ -118,9 +120,13 @@ spec:
         }
 
         stage('Integration Tests') {
+            // Always run some sort of integration test
+            // If this branch name exists in integration-tests, use that
+            // Otherwise, default to integration-tests/develop
             dir ('Palisade-integration-tests') {
                 git url: 'https://github.com/gchq/Palisade-integration-tests.git'
                 sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+                // Print out the branch name in use for clarity
                 echo sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true)
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
