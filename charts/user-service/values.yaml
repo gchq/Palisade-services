@@ -20,16 +20,16 @@ service:
 
 image:
   name: user-service
-  tag: bb57986-SNAPSHOT
+  tag: 9b3defb-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
   limits:
     cpu: 750m
-    memory: 2.5Gi
+    memory: 1Gi
   requests:
     cpu: 250m
-    memory: 1Gi
+    memory: 512Mi
 
 nodeSelector: {}
 tolerations: []
