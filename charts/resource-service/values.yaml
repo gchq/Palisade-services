@@ -20,16 +20,16 @@ service:
 
 image:
   name: resource-service
-  tag: a310f31-SNAPSHOT
+  tag: bb57986-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
   limits:
     cpu: 750m
-    memory: 1Gi
+    memory: 2.5Gi
   requests:
     cpu: 250m
-    memory: 512Mi
+    memory: 1Gi
 
 nodeSelector: {}
 tolerations: []

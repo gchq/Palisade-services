@@ -55,7 +55,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std")
-    public StdPolicyPrepopulationFactory policyCacheWarmerFactory() {
+    public StdPolicyPrepopulationFactory policyPrepopulationFactory() {
         return new StdPolicyPrepopulationFactory();
     }
 
@@ -67,7 +67,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
-    public StdUserPrepopulationFactory userCacheWarmerFactory() {
+    public StdUserPrepopulationFactory userPrepopulationFactory() {
         return new StdUserPrepopulationFactory();
     }
 

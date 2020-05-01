@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.resource.config;
 
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
 import uk.gov.gchq.palisade.Generated;
@@ -33,8 +32,11 @@ import static java.util.Objects.requireNonNull;
 public class ClientConfiguration {
     private Map<String, URI> client;
 
-    @Autowired(required = false)
-    private EurekaClient eurekaClient;
+    private final Optional<EurekaClient> eurekaClient;
+
+    public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
+        this.eurekaClient = eurekaClient;
+    }
 
     @Generated
     public Map<String, URI> getClient() {
@@ -60,12 +62,13 @@ public class ClientConfiguration {
     }
 
     private Optional<URI> eurekaResolve(final String serviceName) {
-        return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
-                .map(Application::getInstances)
-                .flatMap(List::stream)
-                .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
-                .map(EurekaServiceInstance::new)
-                .map(EurekaServiceInstance::getUri)
-                .findAny());
+        return eurekaClient
+                .flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
+                        .map(Application::getInstances)
+                        .flatMap(List::stream)
+                        .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
+                        .map(EurekaServiceInstance::new)
+                        .map(EurekaServiceInstance::getUri)
+                        .findAny());
     }
 }
