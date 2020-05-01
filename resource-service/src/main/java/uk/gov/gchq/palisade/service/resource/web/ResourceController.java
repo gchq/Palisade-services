@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.info("Invoking getResourceById: {}", request);
         StreamingResponseBody stream = out -> service.getResourcesById(request.getResourceId(), out);
-        LOGGER.info("Streaming response: {}", stream);
+        LOGGER.debug("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
@@ -57,7 +57,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
         LOGGER.info("Invoking getResourcesByResource: {}", request);
         StreamingResponseBody stream = out -> service.getResourcesByResource(request.getResource(), out);
-        LOGGER.info("Streaming response: {}", stream);
+        LOGGER.debug("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
@@ -65,7 +65,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.info("Invoking getResourceByType: {}", request);
         StreamingResponseBody stream = out -> service.getResourcesByType(request.getType(), out);
-        LOGGER.info("Streaming response: {}", stream);
+        LOGGER.debug("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
@@ -73,7 +73,7 @@ public class ResourceController {
     public ResponseEntity<StreamingResponseBody> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
         StreamingResponseBody stream = out -> service.getResourcesBySerialisedFormat(request.getSerialisedFormat(), out);
-        LOGGER.info("Streaming response: {}", stream);
+        LOGGER.debug("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
@@ -81,7 +81,7 @@ public class ResourceController {
     public Boolean addResource(@RequestBody final AddResourceRequest request) {
         LOGGER.info("Invoking addResource: {}", request);
         Boolean response = service.addResource(request.getResource());
-        LOGGER.info("Returning response: {}", response);
+        LOGGER.debug("Streaming response: {}", response);
         return response;
     }
 }
