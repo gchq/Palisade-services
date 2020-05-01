@@ -71,7 +71,7 @@ public class SimpleResourceService implements ResourceService {
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
-        URI dataServiceUri = clientConfiguration.getClientUri("data-service");
+        URI dataServiceUri = clientConfiguration.getClientUri("data-service").orElseThrow(() -> new RuntimeException("Failed to find any instance of 'data-service'"));
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .type(extension)
                 .serialisedFormat("txt")
