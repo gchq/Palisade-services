@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.config.ClientConfiguration;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -37,6 +38,12 @@ import java.util.stream.Stream;
 
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
+
+    private final ClientConfiguration clientConfiguration;
+
+    public SimpleResourceService(final ClientConfiguration clientConfiguration) {
+        this.clientConfiguration = clientConfiguration;
+    }
 
     private Stream<File> filesOf(final Path path) {
         try {
@@ -64,10 +71,11 @@ public class SimpleResourceService implements ResourceService {
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
+        URI dataServiceUri = clientConfiguration.getClientUri("data-service");
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .type(extension)
                 .serialisedFormat("txt")
-                .connectionDetail(new SimpleConnectionDetail().uri("localhost"));
+                .connectionDetail(new SimpleConnectionDetail().uri(dataServiceUri.toString()));
     }
 
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {

@@ -79,8 +79,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
-    public ResourceService simpleResourceService() {
-        return new SimpleResourceService();
+    public ResourceService simpleResourceService(final ClientConfiguration clientConfiguration) {
+        return new SimpleResourceService(clientConfiguration);
     }
 
     @Bean("hadoopResourceService")
