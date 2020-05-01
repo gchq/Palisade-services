@@ -121,7 +121,7 @@ spec:
             dir ('Palisade-integration-tests') {
                 git url: 'https://github.com/gchq/Palisade-integration-tests.git'
                 sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
-                echo sh(script: 'git branch --show-current', returnStdout: true)
+                echo sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true)
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
