@@ -123,20 +123,20 @@ spec:
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
-        stage('Integration Tests') {
-            // Always run some sort of integration test
-            // If this branch name exists in integration-tests, use that
-            // Otherwise, default to integration-tests/develop
-            dir ('Palisade-integration-tests') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
-                container('docker-cmds') {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -s $MAVEN_SETTINGS install'
-                    }
-                }
-            }
-        }
+//        stage('Integration Tests') {
+//            // Always run some sort of integration test
+//            // If this branch name exists in integration-tests, use that
+//            // Otherwise, default to integration-tests/develop
+//            dir ('Palisade-integration-tests') {
+//                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+//                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+//                container('docker-cmds') {
+//                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                        sh 'mvn -s $MAVEN_SETTINGS install'
+//                    }
+//                }
+//            }
+//        }
 
         stage('SonarQube Analysis') {
             dir ('Palisade-services') {
