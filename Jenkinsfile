@@ -72,7 +72,7 @@ spec:
 
   - name: maven
     image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-slave-palisade:jdk11
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
     env:
