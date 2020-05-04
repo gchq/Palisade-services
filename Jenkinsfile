@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 podTemplate(yaml: '''
 apiVersion: v1
 kind: Pod
@@ -72,17 +71,46 @@ spec:
          path: /var/run
 ''') {
     node(POD_LABEL) {
+        def GIT_BRANCH_NAME
+
         stage('Bootstrap') {
-            echo sh(script: 'env|sort', returnStdout: true)
+            if (env.CHANGE_BRANCH) {
+                GIT_BRANCH_NAME=env.CHANGE_BRANCH
+            } else {
+                GIT_BRANCH_NAME=env.BRANCH_NAME
+            }
+            echo sh(script: 'env | sort', returnStdout: true)
         }
-        stage('Unit Tests, Checkstyle and Install') {
-            //Repositories must get built in their own directory, they can be 'cd' back into later on
+
+        stage('Prerequisites') {
+            // If this branch name exists in the repo for a mvn dependency
+            // Install that version, rather than pulling from nexus
+            dir ('Palisade-common') {
+                git url: 'https://github.com/gchq/Palisade-common.git'
+                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                    container('docker-cmds') {
+                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+                        }
+                    }
+                }
+            }
+            dir ('Palisade-readers') {
+                git url: 'https://github.com/gchq/Palisade-readers.git'
+                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                    container('docker-cmds') {
+                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Install, Unit Tests, Checkstyle') {
             dir ('Palisade-services') {
                 git url: 'https://github.com/gchq/Palisade-services.git'
-                sh "git fetch origin develop"
-                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
+                sh "git checkout ${GIT_BRANCH_NAME}"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
@@ -90,13 +118,14 @@ spec:
                 }
             }
         }
+
         stage('Integration Tests') {
+            // Always run some sort of integration test
+            // If this branch name exists in integration-tests, use that
+            // Otherwise, default to integration-tests/develop
             dir ('Palisade-integration-tests') {
-            git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-            sh "git fetch origin develop"
-            // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-            // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-            sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
+                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
@@ -104,7 +133,8 @@ spec:
                 }
             }
         }
-        stage('SonarQube analysis') {
+
+        stage('SonarQube Analysis') {
             dir ('Palisade-services') {
                 container('docker-cmds') {
                     withCredentials([string(credentialsId: '3dc8e0fb-23de-471d-8009-ed1d5890333a', variable: 'SONARQUBE_WEBHOOK'),
@@ -119,6 +149,20 @@ spec:
                 }
             }
         }
+
+        stage("SonarQube Quality Gate") {
+            // Wait for SonarQube to prepare the report
+            sleep(time: 10, unit: 'SECONDS')
+            // Just in case something goes wrong, pipeline will be killed after a timeout
+            timeout(time: 5, unit: 'MINUTES') {
+                // Reuse taskId previously collected by withSonarQubeEnv
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                    error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                }
+            }
+        }
+
         stage('Hadolinting') {
             dir ('Palisade-services') {
                 container('hadolint') {
@@ -129,11 +173,6 @@ spec:
 
         stage('Maven deploy') {
             dir ('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git fetch origin develop"
-                // CHANGE_BRANCH will be null unless you are building a PR, in which case it'll become your original branch name, i.e pal-xxx
-                // If CHANGE_BRANCH is null, git will then try to build BRANCH_NAME which is pal-xxx, and if the branch doesnt exist it will default back to develop
-                sh "git checkout ${env.CHANGE_BRANCH} || git checkout ${env.BRANCH_NAME} || git checkout develop"
                 container('maven') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         if (("${env.BRANCH_NAME}" == "develop") ||
@@ -142,23 +181,12 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true   --set global.repository=${ECR_REGISTRY}  --set global.hostname=${EGRESS_ELB} --set global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
                         } else {
                             sh "echo - no deploy"
                         }
                     }
                 }
-            }
-        }
-    }
-    // No need to occupy a node
-    stage("SonarQube Quality Gate") {
-        timeout(time: 1, unit: 'HOURS') {
-            // Just in case something goes wrong, pipeline will be killed after a timeout
-            def qg = waitForQualityGate()
-            // Reuse taskId previously collected by withSonarQubeEnv
-            if (qg.status != 'OK') {
-                error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
             }
         }
     }
