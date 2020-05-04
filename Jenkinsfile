@@ -69,6 +69,21 @@ spec:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
 
+
+  - name: maven
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-slave-palisade:jdk11
+    imagePullPolicy: Never
+    command: ['cat']
+    tty: true
+    env:
+    - name: TILLER_NAMESPACE
+      value: tiller
+    - name: HELM_HOST
+      value: :44134
+    volumeMounts:
+      - mountPath: /var/run
+        name: docker-sock
+
   volumes:
     - name: docker-graph-storage
       emptyDir: {}
@@ -78,9 +93,9 @@ spec:
 
         stage('Bootstrap') {
             if (env.CHANGE_BRANCH) {
-                GIT_BRANCH_NAME=env.CHANGE_BRANCH
+                GIT_BRANCH_NAME = env.CHANGE_BRANCH
             } else {
-                GIT_BRANCH_NAME=env.BRANCH_NAME
+                GIT_BRANCH_NAME = env.BRANCH_NAME
             }
             echo sh(script: 'env | sort', returnStdout: true)
         }
@@ -88,7 +103,7 @@ spec:
         stage('Prerequisites') {
             // If this branch name exists in the repo for a mvn dependency
             // Install that version, rather than pulling from nexus
-            dir ('Palisade-common') {
+            dir('Palisade-common') {
                 git url: 'https://github.com/gchq/Palisade-common.git'
                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                     container('docker-cmds') {
@@ -98,7 +113,7 @@ spec:
                     }
                 }
             }
-            dir ('Palisade-readers') {
+            dir('Palisade-readers') {
                 git url: 'https://github.com/gchq/Palisade-readers.git'
                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                     container('docker-cmds') {
@@ -111,7 +126,7 @@ spec:
         }
 
         stage('Install, Unit Tests, Checkstyle') {
-            dir ('Palisade-services') {
+            dir('Palisade-services') {
                 git url: 'https://github.com/gchq/Palisade-services.git'
                 sh "git checkout ${GIT_BRANCH_NAME}"
                 container('docker-cmds') {
@@ -139,7 +154,7 @@ spec:
 //        }
 
         stage('SonarQube Analysis') {
-            dir ('Palisade-services') {
+            dir('Palisade-services') {
                 container('docker-cmds') {
                     withCredentials([string(credentialsId: "${env.SQ_WEB_HOOK}", variable: 'SONARQUBE_WEBHOOK'),
                                      string(credentialsId: "${env.SQ_KEY_STORE_PASS}", variable: 'KEYSTORE_PASS'),
@@ -155,9 +170,29 @@ spec:
         }
 
         stage('Hadolinting') {
-            dir ('Palisade-services') {
+            dir('Palisade-services') {
                 container('hadolint') {
                     sh 'hadolint */Dockerfile'
+                }
+            }
+        }
+
+
+        stage('Maven deploy') {
+            dir('Palisade-services') {
+                container('maven') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        if (("${env.BRANCH_NAME}" == "develop") ||
+                                ("${env.BRANCH_NAME}" == "master")) {
+                            sh 'palisade-login'
+                            //now extract the public IP addresses that this will be open on
+                            sh 'extract-addresses'
+                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                        } else {
+                            sh "echo - no deploy"
+                        }
+                    }
                 }
             }
         }
