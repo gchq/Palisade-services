@@ -91,7 +91,25 @@ It is possible to let helm generate the deployment name and let the chart create
 
 #### Kubernetes dashboard ingress
 
-```helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true```
+```helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.localMount.enabled=true --timeout 3000s```
+
+
+The arguments are as follows:
+
+|  Argument   |    Definition   |
+|:------------|:----------------|
+|traefik.install | Informs helm to install the traefik ingress controller, default=false|
+|dashboard.install| Informs helm to install the kubernetes dashboard, default=false|
+|kafka.install|Informs helm to install the Kafka and Zookeeper charts locally, default=true|
+|global.localMount.enabled|True:Informs helm that the local volume should be mounted - default volume is global.localMount.volumeHandle, False: Indicate that EFS volumes should me mounted, default=True|
+|global.localMount.volumeHandle|AWS EFS volume to be mounted. The volume will be mounted at root|
+|global.hostPath|Informs helms of the local mount point for all volumes, default=/tmp/Palisade|
+|--timeout|The helm charts install a post install job to create the kafa queues and topics, default is 60s, recommendation is 3000s| 
+
+
+
+
+
 
 If the [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) is required it must be installed separately as a
 prerequisite, the chart switch installs ingress definitions into traefik for access at ```https://localhost/kubernetes```. Access to the dashboard should be by
