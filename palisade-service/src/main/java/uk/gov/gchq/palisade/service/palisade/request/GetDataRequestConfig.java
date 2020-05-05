@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to request the {@link DataRequestConfig}
+ * This class is used to request the {@link uk.gov.gchq.palisade.service.request.DataRequestConfig}
  */
 public class GetDataRequestConfig extends Request {
     private RequestId token;

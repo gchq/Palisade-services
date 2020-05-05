@@ -67,7 +67,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
         this.policies = policies;
     }
 
-    @Override
     @Generated
     public List<StdUserPrepopulationFactory> getUsers() {
         return users;

@@ -35,7 +35,6 @@ public class ConfiguredHadoopResourceService extends HadoopResourceService {
     public Boolean addResource(final LeafResource leafResource) {
         LOGGER.info("Adding connectionDetail {} for leafResource {}", leafResource.getConnectionDetail(), leafResource);
         this.addDataService(leafResource.getConnectionDetail());
-
         return true;
     }
 }

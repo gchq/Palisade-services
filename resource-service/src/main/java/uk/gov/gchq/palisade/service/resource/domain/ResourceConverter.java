@@ -35,6 +35,8 @@ public class ResourceConverter implements AttributeConverter<Resource, String> {
     private final ObjectMapper resourceMapper;
 
     public ResourceConverter() {
+        // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin
+        // This allows resources to be stored without parents, which would otherwise be needlessly duplicated
         this.resourceMapper = JsonMapper.builder()
                 .addMixIn(ChildResource.class, OrphanedChildJsonMixin.class)
                 .build();

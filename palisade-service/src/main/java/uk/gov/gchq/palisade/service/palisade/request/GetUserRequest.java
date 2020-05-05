@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.palisade.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.request.Request;
 
@@ -43,7 +42,7 @@ public class GetUserRequest extends Request {
     }
 
     /**
-     * @param userId the id of the {@link User} you want
+     * @param userId the id of the {@link uk.gov.gchq.palisade.User} you want
      * @return the {@link GetUserRequest}
      */
     @Generated
