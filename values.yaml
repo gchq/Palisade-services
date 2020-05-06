@@ -29,6 +29,8 @@ metricsServer:
   install: false
 dashboard:
   install: false
+kafka:
+  install: true
 namespaces:
   default: default
   dev: dev
@@ -40,6 +42,8 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
+  localMountKafka:
+    enabled: true
   localMount:
     enabled: true
     volumeHandle: dummy
