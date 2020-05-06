@@ -28,7 +28,7 @@ spec:
   podManagementPolicy: {{ .Values.podManagementPolicy }}
   updateStrategy:
 {{ toYaml .Values.updateStrategy | indent 4 }}
-  replicas: {{ default 3 .Values.replicas }}
+  replicas: {{ default 1 .Values.replicas }}
   template:
     metadata:
 {{- if or .Values.podAnnotations (and .Values.prometheus.jmx.enabled (not .Values.prometheus.operator.enabled)) }}

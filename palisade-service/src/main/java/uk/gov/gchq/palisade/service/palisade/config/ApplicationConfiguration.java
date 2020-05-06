@@ -24,7 +24,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -144,7 +143,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    @Profile("eureka")
     public PalisadeHealthIndicator palisadeHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
         return new PalisadeHealthIndicator(auditService, policyService, resourceService, userService);
     }
