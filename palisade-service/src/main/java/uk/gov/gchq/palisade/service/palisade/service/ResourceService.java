@@ -117,7 +117,7 @@ public class ResourceService implements Service {
                 this.executor);
     }
 
-    private Set<LeafResource> getResourcesFromFeignResponse(final Supplier<Response> feignCall) {
+    protected Set<LeafResource> getResourcesFromFeignResponse(final Supplier<Response> feignCall) {
         try {
             InputStream responseStream = feignCall.get().body().asInputStream();
             Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);

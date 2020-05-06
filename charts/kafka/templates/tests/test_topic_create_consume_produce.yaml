@@ -1,0 +1,39 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/templates/tests/test_topic_create_consume_produce.yaml
+
+  {{- if .Values.testsEnabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-test-topic-create-consume-produce"
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+  - name: {{ .Release.Name }}-test-consume
+    image: {{ .Values.image }}:{{ .Values.imageTag }}
+    command:
+    - sh
+    - -c
+    - |
+      # Create the topic
+      kafka-topics --zookeeper {{ include "zookeeper.url" . }} --topic helm-test-topic-create-consume-produce --create --partitions 1 --replication-factor 1 --if-not-exists && \
+      # Create a message
+      MESSAGE="`date -u`" && \
+      # Produce a test message to the topic
+      echo "$MESSAGE" | kafka-console-producer --broker-list {{ include "kafka.fullname" . }}:9092 --topic helm-test-topic-create-consume-produce && \
+      # Consume a test message from the topic
+      kafka-console-consumer --bootstrap-server {{ include "kafka.fullname" . }}-headless:9092 --topic helm-test-topic-create-consume-produce --from-beginning --timeout-ms 2000 --max-messages 1 | grep "$MESSAGE"
+  restartPolicy: Never
+{{- end }}
