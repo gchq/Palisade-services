@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
@@ -94,7 +95,7 @@ public class StroomAuditService implements AuditService {
         LOGGER.debug("StroomAuditService called and the defaultEventLoggingService is: {}", eventLoggingService);
     }
 
-    private static void addUserToEvent(final Event event, final uk.gov.gchq.palisade.UserId user) {
+    private static void addUserToEvent(final Event event, final UserId user) {
         Event.EventSource eventSource = event.getEventSource();
         User stroomUser = EventLoggingUtil.createUser(user.getId());
         eventSource.setUser(stroomUser);

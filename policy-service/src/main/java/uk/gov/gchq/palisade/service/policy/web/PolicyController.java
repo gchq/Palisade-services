@@ -138,8 +138,10 @@ public class PolicyController {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add example Policies to the policy-service cache
+        LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
+        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
         policyConfig.getPolicies().stream()
-                .map(cacheWarmer -> cacheWarmer.policyWarm(userConfig.getUsers()))
+                .map(prepopulation -> prepopulation.build(userConfig.getUsers()))
                 .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
     }
 

@@ -38,9 +38,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
@@ -49,6 +47,7 @@ import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeController;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +82,7 @@ public class PalisadeServiceExceptionHandlerTest {
     private RequestId originalRequestId = new RequestId().id("Bob");
 
     private User user;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private Map<LeafResource, Rules> rules = new HashMap<>();
     private PalisadeController controller;
     private MockMvc mvc;
@@ -98,13 +97,12 @@ public class PalisadeServiceExceptionHandlerTest {
         createExpectedDataConfig();
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource().id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt")
-                .parent(new DirectoryResource().id("/path/to/new/")
-                        .parent(new DirectoryResource().id("/path/to/")
-                                .parent(new DirectoryResource().id("/path/")
-                                        .parent(new SystemResource().id("/")))));
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
-        resources.put(resource, connectionDetail);
+        FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
+                .type("bob")
+                .serialisedFormat("txt")
+                .connectionDetail(connectionDetail);
+        resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
