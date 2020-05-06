@@ -82,36 +82,36 @@ public class ResourceService implements Service {
     }
 
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
-        LOGGER.debug("Getting resources by id from resource service: {}", request);
+        LOGGER.info("Getting resources by id from resource service: {}", request);
         URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
+        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
                 () -> getResourcesFromFeignResponse(() -> client.getResourcesById(clientUri, request)),
                 this.executor);
     }
 
     public CompletableFuture<Set<LeafResource>> getResourcesByResource(final GetResourcesByResourceRequest request) {
-        LOGGER.debug("Getting resources by resource from resource service: {}", request);
+        LOGGER.info("Getting resources by resource from resource service: {}", request);
         URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
+        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
                 () -> getResourcesFromFeignResponse(() -> client.getResourcesByResource(clientUri, request)),
                 this.executor);
     }
 
     public CompletableFuture<Set<LeafResource>> getResourcesByType(final GetResourcesByTypeRequest request) {
-        LOGGER.debug("Getting resources by type from resource service: {}", request);
+        LOGGER.info("Getting resources by type from resource service: {}", request);
         URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
+        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
                 () -> getResourcesFromFeignResponse(() -> client.getResourcesByType(clientUri, request)),
                 this.executor);
     }
 
     public CompletableFuture<Set<LeafResource>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
-        LOGGER.debug("Getting resources from by serialised format resource service: {}", request);
+        LOGGER.info("Getting resources from by serialised format resource service: {}", request);
         URI clientUri = this.uriSupplier.get();
-        LOGGER.debug("Using client uri: {}", clientUri);
+        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
                 () -> getResourcesFromFeignResponse(() -> client.getResourcesBySerialisedFormat(clientUri, request)),
                 this.executor);
@@ -134,7 +134,7 @@ public class ResourceService implements Service {
     public Response getHealth() {
         try {
             URI clientUri = this.uriSupplier.get();
-            LOGGER.debug("Using client uri: {}", clientUri);
+            LOGGER.info("Using client uri: {}", clientUri);
             return this.client.getHealth(clientUri);
         } catch (Exception ex) {
             LOGGER.error("Failed to get health: {}", ex.getMessage());

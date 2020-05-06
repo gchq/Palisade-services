@@ -105,7 +105,7 @@ public class ResourceServiceTest {
         resourceService.getResourcesById(request);
 
         // Then
-        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
                 Matchers.containsString(request.getOriginalRequestId().getId()),

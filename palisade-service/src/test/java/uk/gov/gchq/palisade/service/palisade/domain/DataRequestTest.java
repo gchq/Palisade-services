@@ -42,7 +42,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD) //reset db after each test
 @ActiveProfiles("dbtest")
 public class DataRequestTest {
 
