@@ -51,7 +51,7 @@ spec:
         value: ""
   - name: maven
     image: jnlp-slave-palisade:jdk11
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
     env:

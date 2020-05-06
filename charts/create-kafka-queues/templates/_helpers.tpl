@@ -83,3 +83,4 @@ Determine queues root url
 {{- printf "/%s" $ns -}}
 {{- end -}}
 {{- end -}}
+

@@ -479,6 +479,11 @@ topics: []
 ## test your own chart.
 testsEnabled: true
 
+## Determine if the kafka test client is enabled, this test client can be used
+## to interrogate the kafka infrastructure
+## It should be deployed in production
+testClientEnabled: true
+
 # ------------------------------------------------------------------------------
 # Zookeeper:
 # ------------------------------------------------------------------------------

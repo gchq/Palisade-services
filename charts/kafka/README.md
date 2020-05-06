@@ -19,7 +19,7 @@ Originally copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd1
 # Apache Kafka Helm Chart
 
 This chart was cloned from: https://github.com/helm/charts/tree/master/incubator/kafka
-I have also added a testclient to test operation of the Kafka cluster.
+I have also added a testclient pod to test operation of the Kafka cluster.
 This particular Helm chart has a dependency on zookeeper. This dependency was resolved
 by running:
 ```bash

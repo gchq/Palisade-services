@@ -56,46 +56,11 @@ else
         sleep 20
     done
 
-    if [ -n "$TOPIC0" ]; then
-        echo $TOPIC0
-        write_to_kafka $TOPIC0
-    fi
-    if [ -n "$TOPIC1" ]; then
-        echo $TOPIC1
-        write_to_kafka $TOPIC1
-    fi
-    if [ -n "$TOPIC2" ]; then
-        echo $TOPIC2
-        write_to_kafka $TOPIC2
-    fi
-    if [ -n "$TOPIC3" ]; then
-        echo $TOPIC3
-        write_to_kafka $TOPIC3
-    fi
-    if [ -n "$TOPIC4" ]; then
-        echo $TOPIC4
-        write_to_kafka $TOPIC4
-    fi
-    if [ -n "$TOPIC5" ]; then
-        echo $TOPIC5
-        write_to_kafka $TOPIC5
-    fi
-    if [ -n "$TOPIC6" ]; then
-        echo $TOPIC6
-        write_to_kafka $TOPIC6
-    fi
-    if [ -n "$TOPIC7" ]; then
-        echo $TOPIC7
-        write_to_kafka $TOPIC7
-    fi
-    if [ -n "$TOPIC8" ]; then
-        echo $TOPIC8
-        write_to_kafka $TOPIC8
-    fi
-    if [ -n "$TOPIC9" ]; then
-        echo $TOPIC9
-        write_to_kafka $TOPIC9
-    fi
+#Search for all environmental variables starting with the word: TOPIC
+    for topic in "${!TOPIC@}"; do
+# Use variable indirection to get the contents of TOPICX e.g palisade 1 1
+       write_to_kafka "${!topic}"
+    done
     echo "topics created as follows - "
     ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi
