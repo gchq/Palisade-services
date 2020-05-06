@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.resource.repository;
 
-package uk.gov.gchq.palisade.service.resource.service;
+import org.springframework.data.repository.CrudRepository;
 
-import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.resource.exception.NoCapacityException;
-import uk.gov.gchq.palisade.service.resource.request.ReadRequest;
-import uk.gov.gchq.palisade.service.resource.request.ReadResponse;
+import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
-public interface DataService extends Service {
+/**
+ * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
+ * for more details
+ */
+public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
-    CompletableFuture<ReadResponse> read(final ReadRequest request) throws NoCapacityException;
+    Stream<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
 
 }

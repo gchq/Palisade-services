@@ -70,8 +70,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
-        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, executor);
+    public JpaPersistenceLayer persistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository) {
+        return new JpaPersistenceLayer(dataRequestRepository, leafResourceRulesRepository, getAsyncExecutor());
     }
 
     @Bean
@@ -127,11 +127,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig) {
+    public ResourceService resourceService(final ResourceClient resourceClient, final ClientConfiguration clientConfig, final ObjectMapper objectMapper) {
         Supplier<URI> resourceUriSupplier = () -> clientConfig
                 .getClientUri("resource-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'resource-service' - see 'web.client' properties or discovery service registration"));
-        return new ResourceService(resourceClient, resourceUriSupplier, getAsyncExecutor());
+        return new ResourceService(resourceClient, resourceUriSupplier, objectMapper, getAsyncExecutor());
     }
 
     @Bean

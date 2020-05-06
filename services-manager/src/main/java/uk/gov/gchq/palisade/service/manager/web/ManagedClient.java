@@ -27,7 +27,6 @@ import java.net.URI;
 
 @FeignClient(name = "managed-client", url = "undefined")
 public interface ManagedClient {
-
     @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
 
@@ -36,5 +35,4 @@ public interface ManagedClient {
 
     @PostMapping(path = "/actuator/shutdown")
     void shutdown(final URI url);
-
 }

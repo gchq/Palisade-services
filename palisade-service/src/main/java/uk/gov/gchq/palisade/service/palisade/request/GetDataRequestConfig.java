@@ -19,7 +19,6 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -28,7 +27,7 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to request the {@link DataRequestConfig}
+ * This class is used to request the {@link uk.gov.gchq.palisade.service.request.DataRequestConfig}
  */
 public class GetDataRequestConfig extends Request {
     private RequestId token;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,20 @@ package uk.gov.gchq.palisade.service.resource.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.AddResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByResourceRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesBySerialisedFormatRequest;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByTypeRequest;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.ResourceService;
-
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import uk.gov.gchq.palisade.service.resource.request.AddResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByIdRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByResourceRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesBySerialisedFormatRequest;
+import uk.gov.gchq.palisade.service.resource.request.GetResourcesByTypeRequest;
+import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 @RestController
 @RequestMapping(path = "/")
@@ -41,94 +39,49 @@ public class ResourceController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-    private ResourceService service;
+    private final StreamingResourceServiceProxy service;
 
-    public ResourceController(final ResourceService service) {
+    public ResourceController(final StreamingResourceServiceProxy service) {
         this.service = service;
     }
 
-    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
+    @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesById(@RequestBody final GetResourcesByIdRequest request) {
         LOGGER.info("Invoking getResourceById: {}", request);
-        Map<LeafResource, ConnectionDetail> response = getResourcesByIdRequest(request);
-        LOGGER.info("Returning response {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesById(request.getResourceId(), out);
+        LOGGER.debug("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
+    @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request) {
         LOGGER.info("Invoking getResourcesByResource: {}", request);
-        Map<LeafResource, ConnectionDetail> response = getResourceByResourceRequest(request);
-        LOGGER.info("Returning response {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesByResource(request.getResource(), out);
+        LOGGER.debug("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
+    @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesByType(@RequestBody final GetResourcesByTypeRequest request) {
         LOGGER.info("Invoking getResourceByType: {}", request);
-        Map<LeafResource, ConnectionDetail> response = getResourceByTypeRequest(request);
-        LOGGER.info("Returning response {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesByType(request.getType(), out);
+        LOGGER.debug("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/json")
-    public Map<LeafResource, ConnectionDetail> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
+    @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
+    public ResponseEntity<StreamingResponseBody> getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Invoking getResourcesBySerialisedFormatRequest: {}", request);
-        Map<LeafResource, ConnectionDetail> response = getResourceBySerialisedFormat(request);
-        LOGGER.info("Returning response {}", response);
-        return response;
+        StreamingResponseBody stream = out -> service.getResourcesBySerialisedFormat(request.getSerialisedFormat(), out);
+        LOGGER.debug("Streaming response: {}", stream);
+        return new ResponseEntity<>(stream, HttpStatus.OK);
     }
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     public Boolean addResource(@RequestBody final AddResourceRequest request) {
         LOGGER.info("Invoking addResource: {}", request);
-        Boolean response = addResourceRequest(request);
-        LOGGER.info("Returning response {}", response);
+        Boolean response = service.addResource(request.getResource());
+        LOGGER.debug("Streaming response: {}", response);
         return response;
-    }
-
-    private Map<LeafResource, ConnectionDetail> getResourcesByIdRequest(final GetResourcesByIdRequest request) {
-        try {
-            return service.getResourcesById(request).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return null;
-        }
-    }
-
-    private Map<LeafResource, ConnectionDetail> getResourceByResourceRequest(final GetResourcesByResourceRequest request) {
-        try {
-            return service.getResourcesByResource(request).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return null;
-        }
-    }
-
-    private Map<LeafResource, ConnectionDetail> getResourceByTypeRequest(final GetResourcesByTypeRequest request) {
-        try {
-            return service.getResourcesByType(request).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return null;
-        }
-    }
-
-    private Map<LeafResource, ConnectionDetail> getResourceBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
-        try {
-            return service.getResourcesBySerialisedFormat(request).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return null;
-        }
-    }
-
-    private Boolean addResourceRequest(final AddResourceRequest request) {
-        try {
-            return service.addResource(request).get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while handling request {}: encountered {} {}", request, e.getClass(), e.getMessage());
-            return null;
-        }
     }
 }

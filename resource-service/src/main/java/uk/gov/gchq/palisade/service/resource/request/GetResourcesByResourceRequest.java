@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
@@ -25,42 +24,36 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class ReadRequest extends Request {
-    private String token;
-    private LeafResource resource;
+/**
+ * This class is used to request a list of {@link Resource}'s
+ * from the resource-service based on a {@link Resource}.
+ * For example getting a list of all {@link Resource}'s
+ * contained in the given {@link uk.gov.gchq.palisade.resource.impl.DirectoryResource}, the same as an {@code ls} would in linux.
+ */
+public class GetResourcesByResourceRequest extends Request {
+    private Resource resource;
 
-    @Generated
-    public ReadRequest token(final String token) {
-        requireNonNull(token, "The token cannot be set to null.");
-        this.setToken(token);
-        return this;
+    public GetResourcesByResourceRequest() {
+        //no-args constructor needed for serialization only
     }
 
+    /**
+     * @param resource the {@link Resource} you want to run an {@code ls} on
+     * @return the {@link GetResourcesByResourceRequest}
+     */
     @Generated
-    public ReadRequest resource(final LeafResource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
+    public GetResourcesByResourceRequest resource(final Resource resource) {
         this.setResource(resource);
         return this;
     }
 
     @Generated
-    public String getToken() {
-        return token;
-    }
-
-    @Generated
-    public void setToken(final String token) {
-        requireNonNull(token);
-        this.token = token;
-    }
-
-    @Generated
-    public LeafResource getResource() {
+    public Resource getResource() {
         return resource;
     }
 
     @Generated
-    public void setResource(final LeafResource resource) {
+    public void setResource(final Resource resource) {
         requireNonNull(resource);
         this.resource = resource;
     }
@@ -71,29 +64,28 @@ public class ReadRequest extends Request {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReadRequest)) {
+        if (!(o instanceof GetResourcesByResourceRequest)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        final ReadRequest that = (ReadRequest) o;
-        return Objects.equals(token, that.token) &&
-                Objects.equals(resource, that.resource);
+        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
+        return resource.equals(that.resource);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), token, resource);
+        return Objects.hash(super.hashCode(), resource);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ReadRequest.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
+        return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
                 .add("resource=" + resource)
+                .add(super.toString())
                 .toString();
     }
 }

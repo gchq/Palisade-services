@@ -20,7 +20,7 @@ service:
 
 image:
   name: resource-service
-  tag: a310f31-SNAPSHOT
+  tag: 9b3defb-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:

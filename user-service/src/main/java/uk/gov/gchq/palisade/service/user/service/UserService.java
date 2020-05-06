@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
@@ -30,13 +31,13 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
  */
 public interface UserService extends Service {
     /**
-     * Look up a user by their ID. The request contains the {@link uk.gov.gchq.palisade.UserId} to lookup from the
-     * {@link UserService}. If the requested {@link uk.gov.gchq.palisade.UserId} doesn't exist in this {@link
+     * Look up a user by their ID. The request contains the {@link UserId} to lookup from the
+     * {@link UserService}. If the requested {@link UserId} doesn't exist in this {@link
      * UserService} then an exception will be thrown.
      *
      * @param userId the user ID to look up
      * @return a {@link User} with the user details
-     * @throws NoSuchUserIdException if the {@link uk.gov.gchq.palisade.UserId} could not be found
+     * @throws NoSuchUserIdException if the {@link UserId} could not be found
      */
     User getUser(final UserId userId);
 

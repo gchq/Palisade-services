@@ -25,6 +25,10 @@ spring:
 server:
   port: 8086
 
+eureka:
+  client:
+    enabled: false
+
 management:
   endpoints:
     web:
@@ -33,3 +37,10 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+population:
+  resource: std
+
+# Available options: simple, hadoop
+resource:
+  implementation: simple
