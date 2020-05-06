@@ -22,9 +22,11 @@
 # This is for compatability reasons, N.B some of the kafka client commands
 # make use of bash.
 
-#Arg 1 is the TOPIC details in the format:
-#NAME PARTITION REPLICATIONFACTOR
-#e.g palisade 1 1
+#write_to_kafka(NAME PARTITION REPLICATIONFACTOR)
+#NAME: The name of the topic to create
+#PARTITION: The number of partitions to associate with this topic
+#REPLICATION: The replication-factor to associate with this topic
+#e.g write_to_kafka palisade 1 1
 write_to_kafka () {
     read -r NAME <<< $1
     read -r PARTITION <<< $2
@@ -53,8 +55,11 @@ else
         echo "Waiting for zookeeper, retrying in 20 seconds"
         sleep 20
     done
-    IFS=' '
 
+    if [ -n "$TOPIC0" ]; then
+        echo $TOPIC0
+        write_to_kafka $TOPIC0
+    fi
     if [ -n "$TOPIC1" ]; then
         echo $TOPIC1
         write_to_kafka $TOPIC1
@@ -87,5 +92,10 @@ else
         echo $TOPIC8
         write_to_kafka $TOPIC8
     fi
+    if [ -n "$TOPIC9" ]; then
+        echo $TOPIC9
+        write_to_kafka $TOPIC9
+    fi
+    echo "topics created as follows - "
     ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi
