@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.repository;
 
+
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.util.concurrent.CompletableFuture;

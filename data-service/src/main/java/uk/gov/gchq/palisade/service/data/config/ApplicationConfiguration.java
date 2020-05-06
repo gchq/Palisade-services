@@ -39,7 +39,6 @@ import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
-import uk.gov.gchq.palisade.service.data.web.DataHealthIndicator;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
@@ -73,11 +72,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
-    }
-
-    @Bean
-    public DataHealthIndicator dataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
-        return new DataHealthIndicator(palisadeService, auditService);
     }
 
     @Bean

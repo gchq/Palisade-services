@@ -22,6 +22,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -48,25 +49,27 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std", matchIfMissing = true)
+    @ConfigurationProperties(prefix = "population")
     public StdPolicyConfiguration policyConfiguration() {
         return new StdPolicyConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std", matchIfMissing = true)
     public StdPolicyPrepopulationFactory policyPrepopulationFactory() {
         return new StdPolicyPrepopulationFactory();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std", matchIfMissing = true)
+    @ConfigurationProperties(prefix = "population")
     public StdUserConfiguration userConfiguration() {
         return new StdUserConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std", matchIfMissing = true)
     public StdUserPrepopulationFactory userPrepopulationFactory() {
         return new StdUserPrepopulationFactory();
     }

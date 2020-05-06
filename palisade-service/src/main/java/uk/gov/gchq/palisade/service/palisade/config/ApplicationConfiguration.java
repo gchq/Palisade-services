@@ -45,7 +45,6 @@ import uk.gov.gchq.palisade.service.palisade.service.ResultAggregationService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
-import uk.gov.gchq.palisade.service.palisade.web.PalisadeHealthIndicator;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
@@ -140,11 +139,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 .getClientUri("policy-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'policy-service' - see 'web.client' properties or discovery service registration"));
         return new PolicyService(policyClient, policyUriSupplier, getAsyncExecutor());
-    }
-
-    @Bean
-    public PalisadeHealthIndicator palisadeHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
-        return new PalisadeHealthIndicator(auditService, policyService, resourceService, userService);
     }
 
     @Bean

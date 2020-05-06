@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.user.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
@@ -29,7 +27,6 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties(prefix = "population")
 public class StdUserConfiguration implements UserConfiguration {
 
     private List<StdUserPrepopulationFactory> users = new ArrayList<>();

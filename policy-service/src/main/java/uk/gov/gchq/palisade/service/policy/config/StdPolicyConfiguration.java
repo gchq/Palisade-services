@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.service.policy.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
@@ -30,11 +28,9 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties(prefix = "population")
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
     private List<StdPolicyPrepopulationFactory> policies = new ArrayList<>();
-    private List<StdUserPrepopulationFactory> users = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
@@ -53,7 +49,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies,
                                   final List<StdUserPrepopulationFactory> users) {
         this.policies = policies;
-        this.users = users;
     }
 
     @Generated
@@ -67,17 +62,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
         this.policies = policies;
     }
 
-    @Generated
-    public List<StdUserPrepopulationFactory> getUsers() {
-        return users;
-    }
-
-    @Generated
-    public void setUsers(final List<StdUserPrepopulationFactory> users) {
-        requireNonNull(users);
-        this.users = users;
-    }
-
     @Override
     @Generated
     public boolean equals(final Object o) {
@@ -88,14 +72,13 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
             return false;
         }
         final StdPolicyConfiguration that = (StdPolicyConfiguration) o;
-        return Objects.equals(policies, that.policies) &&
-                Objects.equals(users, that.users);
+        return Objects.equals(policies, that.policies);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(policies, users);
+        return Objects.hash(policies);
     }
 
     @Override
@@ -103,7 +86,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     public String toString() {
         return new StringJoiner(", ", StdPolicyConfiguration.class.getSimpleName() + "[", "]")
                 .add("policies=" + policies)
-                .add("users=" + users)
                 .add(super.toString())
                 .toString();
     }

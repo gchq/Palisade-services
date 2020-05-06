@@ -35,6 +35,9 @@
     </properties>
 
     <dependencies>
+        <!-- Spring automatically picks up either gson or jackson
+           ~ Hadoop already bundles gson, but an out-of-date version
+           ~ Import something that will work with spring -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
