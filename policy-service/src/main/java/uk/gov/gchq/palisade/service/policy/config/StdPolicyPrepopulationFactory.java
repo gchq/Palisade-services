@@ -19,38 +19,28 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.apache.avro.reflect.MapEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
-import uk.gov.gchq.palisade.util.FileUtil;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URI;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.StreamSupport;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties
-public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
+public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyCacheWarmerFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
     private String type;
     private String resource;
@@ -58,11 +48,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
 
-    public StdPolicyCacheWarmerFactory() {
+    public StdPolicyPrepopulationFactory() {
     }
 
-    public StdPolicyCacheWarmerFactory(final String type, final String resource, final String owner,
-                                       final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+    public StdPolicyPrepopulationFactory(final String type, final String resource, final String owner,
+                                         final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.type = type;
         this.resource = resource;
         this.owner = owner;
@@ -126,11 +116,11 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     }
 
     @Override
-    public Entry<Resource, Policy> policyWarm(final List<? extends UserCacheWarmerFactory> users) {
+    public Entry<Resource, Policy> build(final List<? extends UserPrepopulationFactory> users) {
         Policy<?> policy = new Policy<>();
-        for (StdUserCacheWarmerFactory user : (List<StdUserCacheWarmerFactory>) users) {
+        for (StdUserPrepopulationFactory user : (List<StdUserPrepopulationFactory>) users) {
             if (user.getUserId().equals(owner)) {
-                policy.setOwner(user.userWarm());
+                policy.setOwner(user.build());
             }
         }
         for (Entry<String, String> entry : resourceRules.entrySet()) {
@@ -164,43 +154,12 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
 
     @Override
     public Resource createResource() {
-        URI normalised = FileUtil.convertToFileURI(resource);
-        String resourceString = normalised.toString();
-        if (resource.endsWith(".avro")) {
-            return new FileResource().id(resourceString).type(type).serialisedFormat("avro").parent(getParent(resourceString));
+        File resourceFile = new File(resource);
+        if (new File(resource).isFile()) {
+            return ((FileResource) ResourceBuilder.create(resourceFile.toURI())).type(type).serialisedFormat("avro");
         } else {
-            return new DirectoryResource().id(resourceString).parent(getParent(resourceString));
+            return ResourceBuilder.create(resourceFile.toURI());
         }
-    }
-
-    private ParentResource getParent(final String fileURL) {
-        URI normalised = FileUtil.convertToFileURI(fileURL);
-        //this should only be applied to URLs that start with 'file://' not other types of URL
-        if (normalised.getScheme().equals(FileSystems.getDefault().provider().getScheme())) {
-            Path current = Paths.get(normalised);
-            Path parent = current.getParent();
-            //no parent can be found, must already be a directory tree root
-            if (isNull(parent)) {
-                throw new IllegalArgumentException(fileURL + " is already a directory tree root");
-            } else if (isDirectoryRoot(parent)) {
-                //else if this is a directory tree root
-                return new SystemResource().id(parent.toUri().toString());
-            } else {
-                //else recurse up a level
-                return new DirectoryResource().id(parent.toUri().toString()).parent(getParent(parent.toUri().toString()));
-            }
-        } else {
-            //if this is another scheme then there is no definable parent
-            return new SystemResource().id("");
-        }
-    }
-
-    private boolean isDirectoryRoot(final Path path) {
-        return StreamSupport
-                .stream(FileSystems.getDefault()
-                        .getRootDirectories()
-                        .spliterator(), false)
-                .anyMatch(path::equals);
     }
 
     @Override
@@ -209,10 +168,10 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof StdPolicyCacheWarmerFactory)) {
+        if (!(o instanceof StdPolicyPrepopulationFactory)) {
             return false;
         }
-        final StdPolicyCacheWarmerFactory that = (StdPolicyCacheWarmerFactory) o;
+        final StdPolicyPrepopulationFactory that = (StdPolicyPrepopulationFactory) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(resource, that.resource) &&
                 Objects.equals(owner, that.owner) &&
@@ -229,7 +188,7 @@ public class StdPolicyCacheWarmerFactory implements PolicyCacheWarmerFactory {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", StdPolicyCacheWarmerFactory.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", StdPolicyPrepopulationFactory.class.getSimpleName() + "[", "]")
                 .add("type='" + type + "'")
                 .add("resource='" + resource + "'")
                 .add("owner='" + owner + "'")

@@ -71,7 +71,7 @@ public class PolicyServiceTest {
 
         Supplier<URI> uriSupplier = () -> {
             try {
-                return new URI("audit-service");
+                return new URI("policy-service");
             } catch (Exception e) {
                 return null;
             }

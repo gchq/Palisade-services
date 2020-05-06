@@ -19,8 +19,8 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
 @ConfigurationProperties(prefix = "population")
 public class StdUserConfiguration implements UserConfiguration {
 
-    private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
+    private List<StdUserPrepopulationFactory> users = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
@@ -45,20 +45,20 @@ public class StdUserConfiguration implements UserConfiguration {
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link UserCacheWarmerFactory} interface
+     * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
+    public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
         this.users = users;
     }
 
     @Override
     @Generated
-    public List<StdUserCacheWarmerFactory> getUsers() {
+    public List<StdUserPrepopulationFactory> getUsers() {
         return users;
     }
 
     @Generated
-    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
+    public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
         this.users = users;
     }

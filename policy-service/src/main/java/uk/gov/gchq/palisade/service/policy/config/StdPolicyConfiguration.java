@@ -19,9 +19,9 @@ package uk.gov.gchq.palisade.service.policy.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +33,8 @@ import static java.util.Objects.requireNonNull;
 @ConfigurationProperties(prefix = "population")
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
-    private List<StdPolicyCacheWarmerFactory> policies = new ArrayList<>();
-    private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
+    private List<StdPolicyPrepopulationFactory> policies = new ArrayList<>();
+    private List<StdUserPrepopulationFactory> users = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
@@ -47,34 +47,33 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with 2 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param policies  a {@link List} of objects implementing the {@link PolicyCacheWarmerFactory} interface
-     * @param users  a {@link List} of objects implementing the {@link UserCacheWarmerFactory} interface
+     * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
+     * @param users  a {@link List} of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdPolicyConfiguration(final List<StdPolicyCacheWarmerFactory> policies,
-                                  final List<StdUserCacheWarmerFactory> users) {
+    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies,
+                                  final List<StdUserPrepopulationFactory> users) {
         this.policies = policies;
         this.users = users;
     }
 
     @Generated
-    public List<StdPolicyCacheWarmerFactory> getPolicies() {
+    public List<StdPolicyPrepopulationFactory> getPolicies() {
         return policies;
     }
 
     @Generated
-    public void setPolicies(final List<StdPolicyCacheWarmerFactory> policies) {
+    public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
         requireNonNull(policies);
         this.policies = policies;
     }
 
-    @Override
     @Generated
-    public List<StdUserCacheWarmerFactory> getUsers() {
+    public List<StdUserPrepopulationFactory> getUsers() {
         return users;
     }
 
     @Generated
-    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
+    public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
         this.users = users;
     }
