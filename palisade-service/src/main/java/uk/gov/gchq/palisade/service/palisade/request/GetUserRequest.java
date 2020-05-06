@@ -26,7 +26,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A {@code GetUserRequest} is a {@link Request} that is passed to the user-service
- * to get an existing {@link User}.
+ * to get an existing {@link uk.gov.gchq.palisade.User}.
  * In order to get the user you must provide a {@link UserId} object to identify
  * the {@link uk.gov.gchq.palisade.User} you want.
  */
