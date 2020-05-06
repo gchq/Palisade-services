@@ -68,8 +68,8 @@ public class ResourceService implements Service {
 
         @Override
         public String serialiseLine(final LeafResource obj) {
-            LOGGER.warn("No implementation of serialiseLine, ignoring argument {}", obj);
-            return null;
+            LOGGER.error("No implementation of serialiseLine for {}, throwing exception", this);
+            throw new NoSuchMethodError("No implementation of serialiseLine for " + this);
         }
     };
 
