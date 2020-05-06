@@ -38,7 +38,6 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
@@ -110,9 +109,7 @@ public class ResourceServiceTest {
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
                 Matchers.containsString(request.getOriginalRequestId().getId()),
-                Matchers.anyOf(
-                        Matchers.containsString(connectionDetail.createConnection()),
-                        Matchers.containsString("Original ID"))
+                Matchers.containsString(uriSupplier.get().toString())
         ));
 
     }
