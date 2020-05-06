@@ -34,7 +34,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import static org.hamcrest.Matchers.equalTo;
