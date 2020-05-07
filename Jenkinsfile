@@ -49,7 +49,6 @@ spec:
     env:
       - name: DOCKER_TLS_CERTDIR
         value: ""
-
   - name: maven
     image: jnlp-slave-palisade:jdk11
     imagePullPolicy: IfNotPresent

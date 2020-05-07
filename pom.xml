@@ -76,6 +76,7 @@
         <module>resource-service</module>
         <module>user-service</module>
         <module>services-manager</module>
+        <module>create-kafka-queues</module>
     </modules>
 
     <profiles>

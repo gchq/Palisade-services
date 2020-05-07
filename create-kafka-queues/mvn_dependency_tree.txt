@@ -1,0 +1,1 @@
+uk.gov.gchq.palisade:create-kafka-queues:jar:0.4.0-SNAPSHOT
