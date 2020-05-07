@@ -46,7 +46,7 @@ public class StreamingResourceServiceProxy {
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
     private final ObjectMapper objectMapper;
-    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
+    private Optional<Supplier<List<Entry<Resource, LeafResource>>>> resourceBuilder = Optional.empty();
 
     private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
         @Override
@@ -73,7 +73,7 @@ public class StreamingResourceServiceProxy {
         this.objectMapper = objectMapper;
     }
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Optional<Supplier<List<Entry<Resource, LeafResource>>>> resourceBuilder) {
         this(persistence, delegate, objectMapper);
         this.resourceBuilder = resourceBuilder;
     }
@@ -153,7 +153,7 @@ public class StreamingResourceServiceProxy {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add resources to persistence
-        Optional.ofNullable(resourceBuilder).ifPresentOrElse(builder -> {
+        resourceBuilder.ifPresentOrElse(builder -> {
             LOGGER.info("Prepopulating using resource builder: {}", builder);
             builder.get().stream()
                     .peek(entry -> LOGGER.debug(entry.toString()))

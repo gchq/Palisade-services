@@ -87,7 +87,7 @@ public class SimpleResourceServiceTest {
         assertThat(resourcesById.get(), equalTo(expectedAvroResource));
 
         // When
-        Optional<LeafResource> resourcesByType = service.getResourcesByType(expectedAvroResource.getType())
+        Optional<LeafResource> resourcesByType = service.getResourcesBySerialisedFormat(expectedAvroResource.getSerialisedFormat())
                 .filter(expectedAvroResource::equals)
                 .findFirst();
 
