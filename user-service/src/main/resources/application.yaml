@@ -51,4 +51,4 @@ user-service:
   implementation: null-user-service
 
 population:
-  user: std
+  userProvider: std

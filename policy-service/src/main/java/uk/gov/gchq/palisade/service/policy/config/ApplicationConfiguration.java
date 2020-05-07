@@ -49,27 +49,27 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
     public StdPolicyConfiguration policyConfiguration() {
         return new StdPolicyConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "policy", havingValue = "std", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
     public StdPolicyPrepopulationFactory policyPrepopulationFactory() {
         return new StdPolicyPrepopulationFactory();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
     public StdUserConfiguration userConfiguration() {
         return new StdUserConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
     public StdUserPrepopulationFactory userPrepopulationFactory() {
         return new StdUserPrepopulationFactory();
     }

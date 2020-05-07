@@ -46,14 +46,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
     public StdUserConfiguration userConfiguration() {
         return new StdUserConfiguration();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")
     public StdUserPrepopulationFactory userPrepopulationFactory() {
         return new StdUserPrepopulationFactory();
     }
