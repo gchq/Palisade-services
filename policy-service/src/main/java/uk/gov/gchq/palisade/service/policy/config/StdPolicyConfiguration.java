@@ -38,7 +38,7 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     }
 
     /**
-     * Constructor with three arguments for a standard implementation
+     * Constructor with one argument for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
      * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface

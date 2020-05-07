@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/")
 public class PolicyController {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyController.class);
 
     private final PolicyService service;
@@ -120,6 +119,7 @@ public class PolicyController {
         // Add example Policies to the policy-service cache
         LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
+        LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
                 .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
                 .peek(entry -> LOGGER.debug(entry.toString()))

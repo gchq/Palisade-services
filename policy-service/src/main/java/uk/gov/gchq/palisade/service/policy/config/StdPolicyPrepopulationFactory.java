@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
@@ -109,7 +110,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         recordRules.forEach((message, rule) -> policy.recordLevelRule(message, createRule(rule)));
 
         Resource policyResource = resources.stream()
-                .map(factory -> (Resource) factory.build(x -> null).getValue())
+                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().uri("")).getValue())
                 .filter(builtResource -> builtResource.getId().equals(this.resource))
                 .findFirst()
                 .orElse(ResourceBuilder.create(this.resource));
