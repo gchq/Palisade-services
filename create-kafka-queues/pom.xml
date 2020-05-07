@@ -125,9 +125,6 @@
                     <!--suppress UnresolvedMavenProperty -->
                     <tag>${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
-                    <!--<buildArgs>-->
-                        <!--<JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>-->
-                    <!--</buildArgs>-->
                 </configuration>
             </plugin>
             <plugin>
