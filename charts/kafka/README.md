@@ -19,8 +19,8 @@ Originally copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd1
 # Palisade Apache Kafka Helm Chart
 These charts were originally copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka
 
-##Overview of changes
-1) A testclient pod to test operation of the Kafka cluster has been added controlled by operation of the parameter: testClientEnabled (see below)
+## Overview of changes
+1) A testclient pod to test operation of the Kafka cluster has been added, controlled by operation of the parameter: testClientEnabled (see below)
 2) This particular Helm chart has a dependency on zookeeper. This dependency was resolved
 by running:```helm dependency update ``` This pulled in zookeeper-2.1.0.tgz. This has been unzipped to ./charts.zookeeper to prevent the need for performing
 a dependency update.
@@ -47,10 +47,10 @@ The arguments defined in addition to those from the source repo are as follows:
 
 |  Argument   |    Definition   |
 |:------------|:----------------|
-|testClientEnabled | Informs helm to install the kafka test client, which can be used to interrogate the cluster **default=true**|
-|global.localMountKafka.enabled| Informs helm that a remote AWS mounted EFS volume should be used for the kafka queue storage area, In this case: global.localMount.volumeHandle will be used for the volume definition|
+|testClientEnabled | Informs helm to install the kafka test client, which can be used to interrogate the cluster. Recommend disabling for production deployment, **default=true**|
+|global.localMountKafka.enabled| Informs helm that a remote AWS mounted EFS volume should be used for the kafka queue storage area, In this case: global.localMount.volumeHandle will be used for the volume definition, **default=true**|
 |global.localMount.volumeHandle| Only used when global.localMountKafka.enabled == true, see above|
-|kafka.install|***Default=true***, determine whether the kafka and zookeeper charts should be installed|
+|kafka.install|Determine whether the kafka and zookeeper charts should be installed ***Default=true***|
 
 This is an implementation of Kafka StatefulSet found here:
 
@@ -108,10 +108,6 @@ following configurable parameters:
 
 | Parameter                                      | Description                                                                                                                                                              | Default                                                            |
 |------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
-|`testClientEnabled` | Informs helm to install the kafka test client, which can be used to interrogate the cluster **default=true**|
-|`global.localMountKafka.enabled`| Informs helm that a remote AWS mounted EFS volume should be used for the kafka queue storage area, In this case: global.localMount.volumeHandle will be used for the volume definition|
-|`global.localMount.volumeHandle`| Only used when global.localMountKafka.enabled == true, see above|
-|`kafka.install`|***Default=true***, determine whether the kafka and zookeeper charts should be installed|
 | `image`                                               | Kafka Container image name                                                                                                                                               | `confluentinc/cp-kafka`                                            |
 | `imageTag`                                            | Kafka Container image tag                                                                                                                                                | `5.0.1`                                                            |
 | `imagePullPolicy`                                     | Kafka Container pull policy                                                                                                                                              | `IfNotPresent`                                                     |
