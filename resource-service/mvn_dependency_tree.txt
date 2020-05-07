@@ -35,6 +35,7 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  +- org.springframework.cloud:spring-cloud-context:jar:2.2.0.RELEASE:compile
 |  \- org.springframework:spring-web:jar:5.2.0.RELEASE:compile
 |     \- org.springframework:spring-beans:jar:5.2.0.RELEASE:compile
++- org.springframework.boot:spring-boot-configuration-processor:jar:2.2.0.RELEASE:compile (optional) 
 +- org.springframework.boot:spring-boot-starter:jar:2.2.0.RELEASE:compile
 |  +- org.springframework.boot:spring-boot:jar:2.2.0.RELEASE:compile
 |  |  \- org.springframework:spring-context:jar:5.2.0.RELEASE:compile
@@ -131,6 +132,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  |  +- com.sun.jersey:jersey-servlet:jar:1.19:compile
 |  |  +- com.sun.jersey:jersey-json:jar:1.19:compile
 |  |  |  +- com.sun.xml.bind:jaxb-impl:jar:2.2.3-1:compile
+|  |  |  |  \- javax.xml.bind:jaxb-api:jar:2.3.1:compile
+|  |  |  |     \- javax.activation:javax.activation-api:jar:1.2.0:compile
 |  |  |  +- org.codehaus.jackson:jackson-jaxrs:jar:1.9.2:compile
 |  |  |  \- org.codehaus.jackson:jackson-xc:jar:1.9.2:compile
 |  |  +- com.sun.jersey:jersey-server:jar:1.19:compile
@@ -152,7 +155,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  |  +- org.apache.htrace:htrace-core4:jar:4.1.0-incubating:compile
 |  |  +- org.apache.zookeeper:zookeeper:jar:3.4.13:compile
 |  |  |  +- jline:jline:jar:0.9.94:compile
-|  |  |  \- org.apache.yetus:audience-annotations:jar:0.5.0:compile
+|  |  |  +- org.apache.yetus:audience-annotations:jar:0.5.0:compile
+|  |  |  \- io.netty:netty:jar:3.10.6.Final:compile
 |  |  +- org.apache.kerby:kerb-simplekdc:jar:1.0.1:compile
 |  |  |  +- org.apache.kerby:kerb-client:jar:1.0.1:compile
 |  |  |  |  +- org.apache.kerby:kerby-config:jar:1.0.1:compile
@@ -173,54 +177,6 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  |  \- dnsjava:dnsjava:jar:2.1.7:compile
 |  +- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  \- ch.qos.logback:logback-classic:jar:1.2.3:compile
-+- org.apache.hadoop:hadoop-minicluster:jar:3.2.0:test
-|  +- org.apache.hadoop:hadoop-common:test-jar:tests:3.2.0:test
-|  |  +- log4j:log4j:jar:1.2.17:test
-|  |  \- org.slf4j:slf4j-log4j12:jar:1.7.28:test
-|  +- org.apache.hadoop:hadoop-hdfs:test-jar:tests:3.2.0:test
-|  |  +- org.eclipse.jetty:jetty-util-ajax:jar:9.4.20.v20190813:test
-|  |  +- commons-daemon:commons-daemon:jar:1.0.13:test
-|  |  +- io.netty:netty:jar:3.10.5.Final:compile
-|  |  +- io.netty:netty-all:jar:4.1.42.Final:test
-|  |  \- org.fusesource.leveldbjni:leveldbjni-all:jar:1.8:test
-|  +- org.apache.hadoop:hadoop-yarn-server-tests:test-jar:tests:3.2.0:test
-|  |  +- org.apache.hadoop:hadoop-yarn-server-common:jar:3.2.0:test
-|  |  |  +- org.apache.hadoop:hadoop-yarn-registry:jar:3.2.0:test
-|  |  |  +- org.apache.geronimo.specs:geronimo-jcache_1.0_spec:jar:1.0-alpha-1:test
-|  |  |  +- org.ehcache:ehcache:jar:3.8.1:test
-|  |  |  +- com.zaxxer:HikariCP-java7:jar:2.4.12:test
-|  |  |  \- com.microsoft.sqlserver:mssql-jdbc:jar:7.4.1.jre8:test
-|  |  +- org.apache.hadoop:hadoop-yarn-server-nodemanager:jar:3.2.0:test
-|  |  |  +- io.dropwizard.metrics:metrics-core:jar:4.1.0:test
-|  |  |  \- com.sun.jersey.contribs:jersey-guice:jar:1.19:test
-|  |  +- org.apache.hadoop:hadoop-yarn-server-resourcemanager:jar:3.2.0:test
-|  |  |  \- org.apache.hadoop:hadoop-yarn-server-applicationhistoryservice:jar:3.2.0:test
-|  |  |     \- de.ruedigermoeller:fst:jar:2.50:test
-|  |  |        \- com.cedarsoftware:java-util:jar:1.9.0:test
-|  |  |           \- com.cedarsoftware:json-io:jar:2.5.1:test
-|  |  +- org.apache.hadoop:hadoop-yarn-server-timelineservice:jar:3.2.0:test
-|  |  |  \- org.apache.commons:commons-csv:jar:1.0:test
-|  |  \- org.apache.hadoop:hadoop-yarn-common:jar:3.2.0:test
-|  |     +- com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:2.10.0:test
-|  |     \- com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:jar:2.10.0:test
-|  |        \- com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:jar:2.10.0:test
-|  +- org.apache.hadoop:hadoop-mapreduce-client-jobclient:test-jar:tests:3.2.0:test
-|  |  +- org.apache.hadoop:hadoop-mapreduce-client-common:jar:3.2.0:test
-|  |  \- com.google.inject.extensions:guice-servlet:jar:4.0:test
-|  +- org.apache.hadoop:hadoop-hdfs:jar:3.2.0:test
-|  +- org.apache.hadoop:hadoop-mapreduce-client-app:jar:3.2.0:test
-|  |  +- org.apache.hadoop:hadoop-yarn-server-web-proxy:jar:3.2.0:test
-|  |  \- org.apache.hadoop:hadoop-mapreduce-client-shuffle:jar:3.2.0:test
-|  +- org.apache.hadoop:hadoop-yarn-api:jar:3.2.0:test
-|  |  \- javax.xml.bind:jaxb-api:jar:2.3.1:compile
-|  |     \- javax.activation:javax.activation-api:jar:1.2.0:compile
-|  +- org.apache.hadoop:hadoop-mapreduce-client-core:jar:3.2.0:test
-|  |  +- org.apache.hadoop:hadoop-yarn-client:jar:3.2.0:test
-|  |  \- org.apache.hadoop:hadoop-hdfs-client:jar:3.2.0:test
-|  |     \- com.squareup.okhttp:okhttp:jar:2.7.5:test
-|  |        \- com.squareup.okio:okio:jar:1.6.0:test
-|  +- org.apache.hadoop:hadoop-mapreduce-client-jobclient:jar:3.2.0:test
-|  \- org.apache.hadoop:hadoop-mapreduce-client-hs:jar:3.2.0:test
 \- org.springframework.boot:spring-boot-starter-test:jar:2.2.0.RELEASE:test
    +- org.springframework.boot:spring-boot-test:jar:2.2.0.RELEASE:test
    +- org.springframework.boot:spring-boot-test-autoconfigure:jar:2.2.0.RELEASE:test
