@@ -41,3 +41,4 @@ management:
 population:
   policyProvider: std
   userProvider: std
+  resourceProvider: std

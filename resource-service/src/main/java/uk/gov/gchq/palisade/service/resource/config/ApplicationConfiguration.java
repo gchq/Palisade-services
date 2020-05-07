@@ -115,7 +115,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public StreamingResourceServiceProxy resourceServiceProxy(final JpaPersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final ObjectMapper objectMapper, final Optional<Supplier<List<Entry<Resource, LeafResource>>>> resourceBuilder) {
+    public StreamingResourceServiceProxy resourceServiceProxy(final JpaPersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
 

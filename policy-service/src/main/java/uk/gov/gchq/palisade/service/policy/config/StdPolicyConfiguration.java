@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.policy.config;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
+import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
 import java.util.ArrayList;
@@ -40,17 +41,16 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     }
 
     /**
-     * Constructor with 2 arguments for a standard implementation
+     * Constructor with three arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
      * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
-     * @param users  a {@link List} of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies,
-                                  final List<StdUserPrepopulationFactory> users) {
+    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
         this.policies = policies;
     }
 
+    @Override
     @Generated
     public List<StdPolicyPrepopulationFactory> getPolicies() {
         return policies;
@@ -60,25 +60,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
         requireNonNull(policies);
         this.policies = policies;
-    }
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof StdPolicyConfiguration)) {
-            return false;
-        }
-        final StdPolicyConfiguration that = (StdPolicyConfiguration) o;
-        return Objects.equals(policies, that.policies);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(policies);
     }
 
     @Override

@@ -74,6 +74,19 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserPrepopulationFactory();
     }
 
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
+    @ConfigurationProperties(prefix = "population")
+    public StdResourceConfiguration resourceConfiguration() {
+        return new StdResourceConfiguration();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
+    public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
+        return new StdResourcePrepopulationFactory();
+    }
+
     @Bean("nullService")
     @Qualifier("impl")
     public PolicyService nullPolicyService() {

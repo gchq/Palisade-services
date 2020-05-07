@@ -46,7 +46,7 @@ public class StreamingResourceServiceProxy {
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
     private final ObjectMapper objectMapper;
-    private Optional<Supplier<List<Entry<Resource, LeafResource>>>> resourceBuilder = Optional.empty();
+    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
 
     private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
         @Override
@@ -73,7 +73,7 @@ public class StreamingResourceServiceProxy {
         this.objectMapper = objectMapper;
     }
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Optional<Supplier<List<Entry<Resource, LeafResource>>>> resourceBuilder) {
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         this(persistence, delegate, objectMapper);
         this.resourceBuilder = resourceBuilder;
     }
@@ -153,20 +153,18 @@ public class StreamingResourceServiceProxy {
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add resources to persistence
-        resourceBuilder.ifPresentOrElse(builder -> {
-            LOGGER.info("Prepopulating using resource builder: {}", builder);
-            builder.get().stream()
-                    .peek(entry -> LOGGER.debug(entry.toString()))
-                    .forEach(entry -> {
-                        Resource rootResource = entry.getKey();
-                        LeafResource leafResource = entry.getValue();
-                        Stream<LeafResource> resources = Stream.of(leafResource);
-                        resources = persistence.withPersistenceById(rootResource.getId(), resources);
-                        resources = persistence.withPersistenceByType(leafResource.getType(), resources);
-                        resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
-                        resources.forEach(x -> { });
-                    });
-        }, () -> LOGGER.info("No resource configuration, not prepopulating"));
+        LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
+        resourceBuilder.get().stream()
+                .peek(entry -> LOGGER.debug(entry.toString()))
+                .forEach(entry -> {
+                    Resource rootResource = entry.getKey();
+                    LeafResource leafResource = entry.getValue();
+                    Stream<LeafResource> resources = Stream.of(leafResource);
+                    resources = persistence.withPersistenceById(rootResource.getId(), resources);
+                    resources = persistence.withPersistenceByType(leafResource.getType(), resources);
+                    resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
+                    resources.forEach(x -> { });
+                });
     }
 
     private void serialiseAndWriteStreamToOutput(final Stream<LeafResource> leafResourceStream, final OutputStream outputStream) {

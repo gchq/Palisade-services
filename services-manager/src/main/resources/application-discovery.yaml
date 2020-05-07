@@ -29,6 +29,7 @@ manager:
   services:
     discovery-service:
       jar: discovery-service/target/discovery-service-${app.version}-exec.jar
+      log: discovery-service.log
 
 web:
   client:
