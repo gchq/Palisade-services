@@ -19,7 +19,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "kafka-queues.name" -}}
+{{- define "create-kafka-queues.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -28,7 +28,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "kafka-queues.fullname" -}}
+{{- define "create-kafka-queues.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -44,16 +44,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "kafka-queues.chart" -}}
+{{- define "create-kafka-queues.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "kafka-queues.labels" -}}
-app.kubernetes.io/name: {{ include "kafka-queues.name" . }}
-helm.sh/chart: {{ include "kafka-queues.chart" . }}
+{{- define "create-kafka-queues.labels" -}}
+app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
+helm.sh/chart: {{ include "create-kafka-queues.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -75,7 +75,7 @@ Return the appropriate apiVersion for deployment.
 {{/*
 Determine queues root url
 */}}
-{{- define "kafka-queues.root" -}}
+{{- define "create-kafka-queues.root" -}}
 {{- $ns := include "palisade.namespace" . -}}
 {{- if eq "default" $ns -}}
 {{- printf "" -}}

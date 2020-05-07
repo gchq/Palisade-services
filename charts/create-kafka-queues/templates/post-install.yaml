@@ -17,12 +17,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "kafka-queues.name" . }}
+  name: {{ include "create-kafka-queues.name" . }}
   namespace: {{ include "palisade.namespace" . }}
 
   labels:
-    app.kubernetes.io/name: {{ include "kafka-queues.name" . }}
-    helm.sh/chart: {{ include "kafka-queues.chart" . }}
+    app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
+    helm.sh/chart: {{ include "create-kafka-queues.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
@@ -32,7 +32,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ include "kafka-queues.name" . }}
+      name: {{ include "create-kafka-queues.name" . }}
       labels:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
