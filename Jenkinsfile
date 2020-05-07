@@ -21,7 +21,7 @@ spec:
   containers:
   - name: docker-cmds
     image: jnlp-did:jdk11
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     command:
     - sleep
     args:
