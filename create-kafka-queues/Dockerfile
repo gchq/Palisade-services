@@ -1,3 +1,5 @@
+# Copyright 2020 Crown Copyright
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,20 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/templates/testclient.yaml
+FROM openjdk:8-alpine
 
-{{ if .Values.testClientEnabled }}
-apiVersion: v1
-kind: Pod
-metadata:
-  name: "{{ template "kafka.fullname" . }}-testclient"
-  namespace: {{ include "palisade.namespace" . }}
-spec:
-  containers:
-  - name: kafka
-    image: solsson/kafka:0.11.0.0
-    command:
-    - sh
-    - -c
-    - "exec tail -f /dev/null"
-{{- end }}
+#RUN apk update
+#Search for a particular version of curl
+#RUN apk search -v 'curl*'
+RUN apk --no-cache add vim=8.1.1365-r0
+RUN apk --no-cache add curl=7.64.0-r3
+RUN apk --no-cache add bash=4.4.19-r1
+
+RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
+   && tar --strip-components=1 -xvzf kafka_2.12-2.2.1.tgz  && rm kafka_2.12-2.2.1.tgz
+COPY create-topics.sh /bin/create-topics.sh
+
