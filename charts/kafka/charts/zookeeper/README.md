@@ -14,6 +14,22 @@
 # Copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/zookeeper/README.md
 --->
 
+##Overview of changes
+This chart was copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/zookeeper
+The following changes have been made to those charts:
+1) Addition of namespace - the charts are now namespaced to the top level defined namespace
+2) Support for AWS EFS mounted volumes - see parameter: ```global.localMountKafka.enabled``` below
+3) Default cluster sizes set to 1 (previously 3)
+After deployment of the cluster you should see the following:
+
+The arguments defined in addition to those from the source repo are as follows:
+
+|  Argument   |    Definition   |
+|:------------|:----------------|
+|global.localMountKafka.enabled| Informs helm that a remote AWS mounted EFS volume should be used for the kafka queue storage area, In this case: global.localMount.volumeHandle will be used for the volume definition|
+|global.localMount.volumeHandle| Only used when global.localMountKafka.enabled == true, see above|
+
+
 # incubator/zookeeper
 
 This helm chart provides an implementation of the ZooKeeper [StatefulSet](http://kubernetes.io/docs/concepts/abstractions/controllers/statefulsets/) found in Kubernetes Contrib [Zookeeper StatefulSet](https://github.com/kubernetes/contrib/tree/master/statefulsets/zookeeper).

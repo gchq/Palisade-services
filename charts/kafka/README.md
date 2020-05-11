@@ -16,42 +16,18 @@ limitations under the License.
 Originally copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/README.md
 --->
 
-# Apache Kafka Helm Chart
+# Palisade Apache Kafka Helm Chart
+These charts were originally copied from: https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka
 
-This chart was cloned from: https://github.com/helm/charts/tree/master/incubator/kafka
-I have also added a testclient to test operation of the Kafka cluster.
-This particular Helm chart has a dependency on zookeeper. This dependency was resolved
-by running:
-```bash
-helm dependency update
-```
-This pulled in zookeeper-2.1.0.tgz 
-This has been unzipped to ./charts.zookeeper to prevent the need for performing
+## Overview of changes
+1) A testclient pod to test operation of the Kafka cluster has been added, controlled by operation of the parameter: testClientEnabled (see below)
+2) This particular Helm chart has a dependency on zookeeper. This dependency was resolved
+by running:```helm dependency update ``` This pulled in zookeeper-2.1.0.tgz. This has been unzipped to ./charts.zookeeper to prevent the need for performing
 a dependency update.
-
+3) Addition of namespace - the charts are now namespaced to the top level defined namespace
+4) Support for AWS EFS mounted volumes - see parameter: ```global.localMountKafka.enabled``` below
+5) Default cluster sizes set to 1 (previously 3)
 After deployment of the cluster you should see the following:
-
-```bash
-kubectl get all --namespace=dev
-NAME                                    READY   STATUS    RESTARTS   AGE
-pod/palisade-kafka-0                    1/1     Running   1          30m
-pod/palisade-kafka-1                    1/1     Running   0          28m
-pod/palisade-kafka-2                    1/1     Running   0          27m
-pod/palisade-kafka-testclient           1/1     Running   0          30m
-pod/palisade-zookeeper-0                1/1     Running   0          30m
-pod/palisade-zookeeper-1                1/1     Running   0          29m
-pod/palisade-zookeeper-2                1/1     Running   0          29m
-
-NAME                                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
-service/palisade-kafka                ClusterIP   10.97.189.45     <none>        9092/TCP                     30m
-service/palisade-kafka-headless       ClusterIP   None             <none>        9092/TCP                     30m
-service/palisade-zookeeper            ClusterIP   10.99.212.137    <none>        2181/TCP                     30m
-service/palisade-zookeeper-headless   ClusterIP   None             <none>        2181/TCP,3888/TCP,2888/TCP   30m
-
-NAME                                  READY   AGE
-statefulset.apps/palisade-kafka       3/3     30m
-statefulset.apps/palisade-zookeeper   3/3     30m
-```
 
 To verify that the kafka service is operational perform the following:
 
@@ -67,7 +43,14 @@ kubectl  exec -ti palisade-kafka-testclient --namespace=dev -- ./bin/kafka-topic
 Created topic "topicName".
 ```
 
+The arguments defined in addition to those from the source repo are as follows:
 
+|  Argument   |    Definition   |
+|:------------|:----------------|
+|testClientEnabled | Informs helm to install the kafka test client, which can be used to interrogate the cluster. Recommend disabling for production deployment, **default=true**|
+|global.localMountKafka.enabled| Informs helm that a remote AWS mounted EFS volume should be used for the kafka queue storage area, In this case: global.localMount.volumeHandle will be used for the volume definition, **default=true**|
+|global.localMount.volumeHandle| Only used when global.localMountKafka.enabled == true, see above|
+|kafka.install|Determine whether the kafka and zookeeper charts should be installed ***Default=true***|
 
 This is an implementation of Kafka StatefulSet found here:
 

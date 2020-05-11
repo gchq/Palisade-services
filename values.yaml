@@ -42,6 +42,7 @@ global:
   namespace: default
   uniqueNamespace: false
   repository: palisade
+  zookeeperConnectString: palisade-zookeeper:2181
   localMountKafka:
     enabled: true
   localMount:
