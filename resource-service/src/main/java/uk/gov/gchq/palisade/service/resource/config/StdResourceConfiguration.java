@@ -27,6 +27,12 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Implementation of a {@link ResourceConfiguration} that uses Spring to configure a list of resources from a yaml file
+ * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
+ * These resources will be attached to {@link uk.gov.gchq.palisade.service.request.Policy}s from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
+ * These policies will be used for prepopulating the {@link uk.gov.gchq.palisade.service.policy.service.PolicyService}
+ */
 public class StdResourceConfiguration implements ResourceConfiguration {
     private List<StdResourcePrepopulationFactory> resources;
 

@@ -41,6 +41,14 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * A factory for {@link uk.gov.gchq.palisade.service.request.Policy} objects, using:
+ * - a {@link uk.gov.gchq.palisade.resource.Resource} resource
+ * - a {@link uk.gov.gchq.palisade.User} owner
+ * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
+ * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
+ */
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 

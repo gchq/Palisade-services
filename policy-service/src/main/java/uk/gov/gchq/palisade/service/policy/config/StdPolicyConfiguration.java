@@ -20,21 +20,28 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Implementation of a {@link PolicyConfiguration} that uses Spring to configure a list of policies from a yaml file
+ * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.service.request.Policy}s
+ * These wil be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
+ * These policies will be used for prepopulating the {@link uk.gov.gchq.palisade.service.policy.service.PolicyService}
+ */
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
-    private List<StdPolicyPrepopulationFactory> policies = new ArrayList<>();
+    private List<StdPolicyPrepopulationFactory> policies;
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      */
     public StdPolicyConfiguration() {
+        this.policies = Collections.emptyList();
     }
 
     /**

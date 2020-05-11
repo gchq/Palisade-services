@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -58,8 +59,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration();
+    public ClientConfiguration clientConfiguration(final Optional<EurekaClient> eurekaClient) {
+        return new ClientConfiguration(eurekaClient);
     }
 
     @Bean

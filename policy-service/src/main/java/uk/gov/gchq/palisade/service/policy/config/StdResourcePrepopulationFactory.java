@@ -34,6 +34,10 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Implementation of a {@link ResourcePrepopulationFactory} that uses Spring to configure a resource from a yaml file
+ * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
+ */
 public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     private String resourceId = "";
     private String rootId = "";

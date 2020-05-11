@@ -51,10 +51,11 @@ public class ClientConfiguration {
 
     public Optional<URI> getClientUri(final String serviceName) {
         requireNonNull(serviceName);
-        // If possible, use eureka
-        // Otherwise, fall back to config yaml
-        return eurekaResolve(serviceName)
-                .or(() -> configResolve(serviceName));
+        return eurekaClient
+                // If possible, use eureka
+                .map(x -> eurekaResolve(serviceName))
+                // Otherwise, fall back to config yaml
+                .orElseGet(() -> configResolve(serviceName));
     }
 
     private Optional<URI> configResolve(final String serviceName) {

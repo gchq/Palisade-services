@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.data.config;
 
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
 
 import uk.gov.gchq.palisade.Generated;
@@ -33,8 +32,11 @@ import static java.util.Objects.requireNonNull;
 public class ClientConfiguration {
     private Map<String, URI> client;
 
-    @Autowired(required = false)
-    private EurekaClient eurekaClient;
+    private final Optional<EurekaClient> eurekaClient;
+
+    public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
+        this.eurekaClient = eurekaClient;
+    }
 
     @Generated
     public Map<String, URI> getClient() {
@@ -49,10 +51,11 @@ public class ClientConfiguration {
 
     public Optional<URI> getClientUri(final String serviceName) {
         requireNonNull(serviceName);
-        // If possible, use eureka
-        // Otherwise, fall back to config yaml
-        return eurekaResolve(serviceName)
-                .or(() -> configResolve(serviceName));
+        return eurekaClient
+                // If possible, use eureka
+                .map(x -> eurekaResolve(serviceName))
+                // Otherwise, fall back to config yaml
+                .orElseGet(() -> configResolve(serviceName));
     }
 
     private Optional<URI> configResolve(final String serviceName) {
@@ -60,12 +63,13 @@ public class ClientConfiguration {
     }
 
     private Optional<URI> eurekaResolve(final String serviceName) {
-        return Optional.ofNullable(eurekaClient).flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
-                .map(Application::getInstances)
-                .flatMap(List::stream)
-                .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
-                .map(EurekaServiceInstance::new)
-                .map(EurekaServiceInstance::getUri)
-                .findAny());
+        return eurekaClient
+                .flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
+                        .map(Application::getInstances)
+                        .flatMap(List::stream)
+                        .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
+                        .map(EurekaServiceInstance::new)
+                        .map(EurekaServiceInstance::getUri)
+                        .findAny());
     }
 }

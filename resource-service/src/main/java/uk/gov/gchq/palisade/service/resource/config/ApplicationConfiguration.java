@@ -81,13 +81,28 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ClientConfiguration(eurekaClient);
     }
 
+    /**
+     * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail} using the {@link ClientConfiguration}
+     *
+     * @param resourceConfig the {@link ResourceConfiguration} to use to build resource
+     * @param clientConfig the {@link ClientConfiguration} to use to resolve the {@link java.net.URI} of a data-service at runtime
+     * @return
+     */
     @Bean
-    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfiguration, final ClientConfiguration clientConfig) {
+    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig, final ClientConfiguration clientConfig) {
         Function<String, ConnectionDetail> connectionDetailMapper = serviceName -> new SimpleConnectionDetail()
                 .uri(clientConfig.getClientUri(serviceName)
+                        .or(() -> {
+                            LOGGER.warn("No service found with name: {} - will retry one time in 5 seconds", serviceName);
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            return clientConfig.getClientUri(serviceName);
+                        })
                         .orElseThrow(() -> new IllegalArgumentException("No service found with name: " + serviceName))
                         .toString());
-        return () -> resourceConfiguration.getResources().stream()
+        return () -> resourceConfig.getResources().stream()
                 .map(factory -> factory.build(connectionDetailMapper))
                 .collect(Collectors.toList());
     }
@@ -107,6 +122,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
+     * Note that this does not include resolving an appropriate {@link ConnectionDetail}, this is handled elsewhere
      *
      * @return a standard {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.resource.Resource} from configuration
      */
@@ -116,6 +132,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdResourcePrepopulationFactory();
     }
 
+    /**
+     * An implementation of the {@link PersistenceLayer} interface to be used by the {@link ResourceService} as if it were a cache
+     * See the {@link JpaPersistenceLayer} for an in-depth description of how and why each part is used
+     * While code introspection may suggest no beans found for these types, they will be created by Spring
+     *
+     * @param completenessRepository the completeness repository to use, storing whether persistence will return a response for any given request
+     * @param resourceRepository the resource repository to use, a store of each available {@link LeafResource} and its parents
+     * @param typeRepository the type repository to use, a one-to-many relation of types to resource ids
+     * @param serialisedFormatRepository the serialisedFormat repository to use, a one-to-many relation of serialisedFormats to resource ids
+     * @return a {@link JpaPersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
+     */
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(
             final CompletenessRepository completenessRepository,
