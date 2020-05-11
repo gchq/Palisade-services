@@ -56,6 +56,7 @@ import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -76,6 +77,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Integer RETRY_AFTER = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * A generic resolver from service names to {@link URI}s, using Spring yaml configuration
+     * Uses Eureka if aavailable, otherwise uses the yaml value directly as a URI (useful for k8s)
+     *
+     * @param eurekaClient an {@link Optional} {@link EurekaClient} for resolving service names
+     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
+     */
     @Bean
     @ConfigurationProperties(prefix = "web")
     public ClientConfiguration clientConfiguration(final Optional<EurekaClient> eurekaClient) {

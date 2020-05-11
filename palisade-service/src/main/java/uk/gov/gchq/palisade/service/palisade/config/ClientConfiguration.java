@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A generic resolver from service names to {@link URI}s, using Spring yaml configuration
- * Uses Eureka if aavailable, otherwise
+ * Uses Eureka if available, otherwise uses the yaml value directly as a URI (useful for k8s)
  */
 public class ClientConfiguration {
     private Map<String, URI> client;
