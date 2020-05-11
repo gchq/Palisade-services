@@ -73,6 +73,7 @@ import java.util.stream.Collectors;
 @EnableAsync
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
+    private static final Integer RETRY_AFTER = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
@@ -93,10 +94,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         Function<String, ConnectionDetail> connectionDetailMapper = serviceName -> new SimpleConnectionDetail()
                 .uri(clientConfig.getClientUri(serviceName)
                         .or(() -> {
-                            LOGGER.warn("No service found with name: {} - will retry one time in 5 seconds", serviceName);
+                            LOGGER.warn("No service found with name: {} - will retry once more in {}ms", serviceName, RETRY_AFTER);
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(RETRY_AFTER);
                             } catch (InterruptedException ignored) {
+                                // do nothing
                             }
                             return clientConfig.getClientUri(serviceName);
                         })

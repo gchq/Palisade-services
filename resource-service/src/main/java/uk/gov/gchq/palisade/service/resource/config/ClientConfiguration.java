@@ -29,11 +29,21 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A generic resolver from service names to {@link URI}s, using Spring yaml configuration
+ * Uses Eureka if aavailable, otherwise
+ */
 public class ClientConfiguration {
     private Map<String, URI> client;
 
     private final Optional<EurekaClient> eurekaClient;
 
+    /**
+     * Default constructor with an {@link Optional} {@link EurekaClient} depending on whether this is
+     * an eureka-enabled environment or not.
+     *
+     * @param eurekaClient the eureka client to (maybe) use to resolve {@link URI}s for service names
+     */
     public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
         this.eurekaClient = eurekaClient;
     }
