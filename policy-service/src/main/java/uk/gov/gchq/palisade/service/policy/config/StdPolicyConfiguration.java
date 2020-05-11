@@ -34,7 +34,7 @@ class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      */
-    public StdPolicyConfiguration() {
+    StdPolicyConfiguration() {
     }
 
     /**
@@ -43,7 +43,7 @@ class StdPolicyConfiguration implements PolicyConfiguration {
      *
      * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
-    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
+    StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
         this.policies = policies;
     }
 

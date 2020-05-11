@@ -52,7 +52,7 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     /**
      * Empty constructor
      */
-    public StdPolicyPrepopulationFactory() {
+    StdPolicyPrepopulationFactory() {
         resource = "";
         owner = "";
         resourceRules = Collections.emptyMap();
@@ -67,7 +67,7 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
      * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
      * @param recordRules the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
      */
-    public StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+    StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.resource = resource;
         this.owner = owner;
         this.resourceRules = resourceRules;
@@ -75,45 +75,45 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     }
 
     @Generated
-    public String getResource() {
+    String getResource() {
         return resource;
     }
 
     @Generated
-    public void setResource(final String resource) {
+    void setResource(final String resource) {
         requireNonNull(resource);
         this.resource = resource;
     }
 
     @Generated
-    public String getOwner() {
+    String getOwner() {
         return owner;
     }
 
     @Generated
-    public void setOwner(final String owner) {
+    void setOwner(final String owner) {
         requireNonNull(owner);
         this.owner = owner;
     }
 
     @Generated
-    public Map<String, String> getResourceRules() {
+    Map<String, String> getResourceRules() {
         return resourceRules;
     }
 
     @Generated
-    public void setResourceRules(final Map<String, String> resourceRules) {
+    void setResourceRules(final Map<String, String> resourceRules) {
         requireNonNull(resourceRules);
         this.resourceRules = resourceRules;
     }
 
     @Generated
-    public Map<String, String> getRecordRules() {
+    Map<String, String> getRecordRules() {
         return recordRules;
     }
 
     @Generated
-    public void setRecordRules(final Map<String, String> recordRules) {
+    void setRecordRules(final Map<String, String> recordRules) {
         requireNonNull(recordRules);
         this.recordRules = recordRules;
     }

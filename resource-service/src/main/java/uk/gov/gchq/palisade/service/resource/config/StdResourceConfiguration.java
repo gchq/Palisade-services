@@ -34,7 +34,7 @@ class StdResourceConfiguration implements ResourceConfiguration {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link ResourceConfiguration} interface
      */
-    public StdResourceConfiguration() {
+    StdResourceConfiguration() {
         resources = Collections.emptyList();
     }
 
@@ -44,7 +44,7 @@ class StdResourceConfiguration implements ResourceConfiguration {
      *
      * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
-    public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
+    StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
         this.resources = resources;
     }
 
@@ -55,7 +55,7 @@ class StdResourceConfiguration implements ResourceConfiguration {
     }
 
     @Generated
-    public void setResources(final List<StdResourcePrepopulationFactory> resources) {
+    void setResources(final List<StdResourcePrepopulationFactory> resources) {
         requireNonNull(resources);
         this.resources = resources;
     }

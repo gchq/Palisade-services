@@ -43,7 +43,7 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     /**
      * Empty constructor
      */
-    public StdResourcePrepopulationFactory() {
+    StdResourcePrepopulationFactory() {
     }
 
     /**
@@ -55,7 +55,7 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
      * @param connectionDetail the {@link URI} of a data-service where this resource may be found
      * @param attributes a @{@link Map} of other attributes this resource may have, in particular a type and serialisedFormat
      */
-    public StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
+    StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
         this.resourceId = resourceId;
         this.rootId = rootId;
         this.connectionDetail = connectionDetail;
@@ -63,45 +63,45 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     }
 
     @Generated
-    public String getResourceId() {
+    String getResourceId() {
         return resourceId;
     }
 
     @Generated
-    public void setResourceId(final String resourceId) {
+    void setResourceId(final String resourceId) {
         requireNonNull(resourceId);
         this.resourceId = resourceId;
     }
 
     @Generated
-    public String getRootId() {
+    String getRootId() {
         return rootId;
     }
 
     @Generated
-    public void setRootId(final String rootId) {
+    void setRootId(final String rootId) {
         requireNonNull(rootId);
         this.rootId = rootId;
     }
 
     @Generated
-    public String getConnectionDetail() {
+    String getConnectionDetail() {
         return connectionDetail;
     }
 
     @Generated
-    public void setConnectionDetail(final String connectionDetail) {
+    void setConnectionDetail(final String connectionDetail) {
         requireNonNull(connectionDetail);
         this.connectionDetail = connectionDetail;
     }
 
     @Generated
-    public Map<String, String> getAttributes() {
+    Map<String, String> getAttributes() {
         return attributes;
     }
 
     @Generated
-    public void setAttributes(final Map<String, String> attributes) {
+    void setAttributes(final Map<String, String> attributes) {
         requireNonNull(attributes);
         this.attributes = attributes;
     }

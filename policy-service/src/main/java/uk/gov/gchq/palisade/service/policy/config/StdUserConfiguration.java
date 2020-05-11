@@ -34,7 +34,7 @@ class StdUserConfiguration implements UserConfiguration {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserConfiguration} interface
      */
-    public StdUserConfiguration() {
+    StdUserConfiguration() {
     }
 
     /**
@@ -43,7 +43,7 @@ class StdUserConfiguration implements UserConfiguration {
      *
      * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
+    StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
         this.users = users;
     }
 
@@ -54,7 +54,7 @@ class StdUserConfiguration implements UserConfiguration {
     }
 
     @Generated
-    public void setUsers(final List<StdUserPrepopulationFactory> users) {
+    void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
         this.users = users;
     }

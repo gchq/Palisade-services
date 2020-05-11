@@ -37,7 +37,7 @@ class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserPrepopulationFactory} interface.
      */
-    public StdUserPrepopulationFactory() {
+    StdUserPrepopulationFactory() {
         this.userId = "";
         this.auths = Collections.emptySet();
         this.roles = Collections.emptySet();
@@ -51,41 +51,41 @@ class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * @param roles     a {@link Set} of {@link String} role values for the user.
      * @param auths     a {@link Set} of {@link String} auth values for the user.
      */
-    public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
+    StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
         this.auths = auths;
         this.roles = roles;
     }
 
     @Generated
-    public String getUserId() {
+    String getUserId() {
         return userId;
     }
 
     @Generated
-    public void setUserId(final String userId) {
+    void setUserId(final String userId) {
         this.userId = userId;
     }
 
     @Generated
-    public Set<String> getAuths() {
+    Set<String> getAuths() {
         return auths;
     }
 
     @Generated
-    public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
+    StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
         this.auths = auths;
         return this;
     }
 
     @Generated
-    public Set<String> getRoles() {
+    Set<String> getRoles() {
         return roles;
     }
 
     @Generated
-    public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
+    StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
         this.roles = roles;
         return this;
