@@ -86,7 +86,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      *
      * @param resourceConfig the {@link ResourceConfiguration} to use to build resource
      * @param clientConfig the {@link ClientConfiguration} to use to resolve the {@link java.net.URI} of a data-service at runtime
-     * @return
+     * @return a getter for a list of {@link Resource}s, each paired with an associated {@link LeafResource}, see {@link ResourceConfiguration} for more info
      */
     @Bean
     public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig, final ClientConfiguration clientConfig) {
