@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
+class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     private String userId;
     private Set<String> auths;

@@ -26,7 +26,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdPolicyConfiguration implements PolicyConfiguration {
+class StdPolicyConfiguration implements PolicyConfiguration {
 
     private List<StdPolicyPrepopulationFactory> policies = new ArrayList<>();
 

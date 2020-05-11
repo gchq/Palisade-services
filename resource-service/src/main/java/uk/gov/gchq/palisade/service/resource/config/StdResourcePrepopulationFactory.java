@@ -34,16 +34,27 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
+class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     private String resourceId = "";
     private String rootId = "";
     private String connectionDetail = "";
     private Map<String, String> attributes = Collections.emptyMap();
 
+    /**
+     * Empty constructor
+     */
     public StdResourcePrepopulationFactory() {
-        // empty constructor
     }
 
+    /**
+     * Create a StdResourcePrepopulationFactory, passing each member as an argument.
+     *
+     * @param resourceId the {@link URI} of a {@link LeafResource} to add as a child of the rootId
+     * @param rootId the {@link URI} of a {@link uk.gov.gchq.palisade.resource.ParentResource} which is the parent of this
+     *               (and potentially other configured) {@link LeafResource} - needed to define what makes up a 'complete' set of resources
+     * @param connectionDetail the {@link URI} of a data-service where this resource may be found
+     * @param attributes a @{@link Map} of other attributes this resource may have, in particular a type and serialisedFormat
+     */
     public StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
         this.resourceId = resourceId;
         this.rootId = rootId;
@@ -102,8 +113,7 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
         Resource rootResource = ResourceBuilder.create(rootId);
         URI resourceURI = new File(resourceId).toURI();
-        Entry<Resource, LeafResource> ret = new SimpleImmutableEntry<>(rootResource, ResourceBuilder.create(resourceURI, simpleConnectionDetail, type, serialisedFormat, attributes));
-        return ret;
+        return new SimpleImmutableEntry<>(rootResource, ResourceBuilder.create(resourceURI, simpleConnectionDetail, type, serialisedFormat, attributes));
     }
 
     @Override

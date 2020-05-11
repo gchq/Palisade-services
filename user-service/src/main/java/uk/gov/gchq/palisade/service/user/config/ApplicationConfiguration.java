@@ -45,6 +45,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+     * These users will be used for prepopulating the {@link UserService}
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
+     */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
@@ -52,6 +58,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserConfiguration();
     }
 
+    /**
+     * A factory for {@link uk.gov.gchq.palisade.User} objects, using a userId, a list of authorisations and a list of roles
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.User} from configuration
+     */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")
     public StdUserPrepopulationFactory userPrepopulationFactory() {

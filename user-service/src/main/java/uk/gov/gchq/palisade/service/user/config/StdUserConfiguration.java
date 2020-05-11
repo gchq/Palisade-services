@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdUserConfiguration implements UserConfiguration {
+class StdUserConfiguration implements UserConfiguration {
 
     private List<StdUserPrepopulationFactory> users = new ArrayList<>();
 

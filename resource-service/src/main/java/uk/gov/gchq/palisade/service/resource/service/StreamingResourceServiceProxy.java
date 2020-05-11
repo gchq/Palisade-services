@@ -34,6 +34,7 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -66,12 +67,29 @@ public class StreamingResourceServiceProxy {
         }
     };
 
+    /**
+     * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
+     *
+     * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
+     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
+     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     */
+
     public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper) {
         this.persistence = persistence;
         this.delegate = delegate;
         this.objectMapper = objectMapper;
+        this.resourceBuilder = Collections::emptyList;
     }
 
+    /**
+     * Construct a StreamingResourceServiceProxy, passing each member as an argument
+     *
+     * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
+     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
+     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
+     */
     public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         this(persistence, delegate, objectMapper);
         this.resourceBuilder = resourceBuilder;

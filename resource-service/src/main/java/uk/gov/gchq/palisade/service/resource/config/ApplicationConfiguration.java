@@ -46,6 +46,7 @@ import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
@@ -91,6 +92,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
+     * These resources will be used for prepopulating the {@link ResourceService}
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.ResourceConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}s
+     */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
     @ConfigurationProperties(prefix = "population")
@@ -98,6 +105,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdResourceConfiguration();
     }
 
+    /**
+     * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.resource.Resource} from configuration
+     */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
     public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
@@ -105,7 +117,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
+    public JpaPersistenceLayer persistenceLayer(
+            final CompletenessRepository completenessRepository,
+            final ResourceRepository resourceRepository,
+            final TypeRepository typeRepository,
+            final SerialisedFormatRepository serialisedFormatRepository) {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
@@ -114,8 +130,23 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ResourceConverter();
     }
 
+    /**
+     * A proxy-like object for a {@link ResourceService} using {@link java.util.stream.Stream}s to communicate with a {@link org.springframework.web.bind.annotation.RestController}
+     * This includes writing the {@link java.util.stream.Stream} of {@link Resource}s to the {@link java.io.OutputStream} of a {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
+     *
+     * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
+     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
+     *                 This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
+     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
+     * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
+     */
     @Bean
-    public StreamingResourceServiceProxy resourceServiceProxy(final JpaPersistenceLayer persistenceLayer, final @Qualifier("impl") ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
+    public StreamingResourceServiceProxy resourceServiceProxy(
+            final PersistenceLayer persistenceLayer,
+            final @Qualifier("impl") ResourceService delegate,
+            final ObjectMapper objectMapper,
+            final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
 

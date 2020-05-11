@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdResourceConfiguration implements ResourceConfiguration {
+class StdResourceConfiguration implements ResourceConfiguration {
     private List<StdResourcePrepopulationFactory> resources;
 
     /**

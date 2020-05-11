@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +41,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
+class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
     private String resource;
@@ -48,9 +49,24 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
 
+    /**
+     * Empty constructor
+     */
     public StdPolicyPrepopulationFactory() {
+        resource = "";
+        owner = "";
+        resourceRules = Collections.emptyMap();
+        recordRules = Collections.emptyMap();
     }
 
+    /**
+     * Create a StdPolicyPrepopulationFactory, passing each member as an argument
+     *
+     * @param resource the {@link Resource} to attach a {@link Policy} to
+     * @param owner the {@link User} of this {@link Policy}
+     * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
+     * @param recordRules the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
+     */
     public StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.resource = resource;
         this.owner = owner;
@@ -124,7 +140,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         return new SimpleImmutableEntry<>(policyResource, policy.owner(policyOwner));
     }
 
-    private Rule createRule(final String rule) {
+    private static Rule createRule(final String rule) {
         try {
             LOGGER.debug("Adding rule {}", rule);
             return (Rule<?>) Class.forName(rule).getConstructor().newInstance();
