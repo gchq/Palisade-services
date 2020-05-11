@@ -27,14 +27,14 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-class StdUserConfiguration implements UserConfiguration {
+public class StdUserConfiguration implements UserConfiguration {
     private List<StdUserPrepopulationFactory> users = new ArrayList<>();
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserConfiguration} interface
      */
-    StdUserConfiguration() {
+    public StdUserConfiguration() {
     }
 
     /**
@@ -43,7 +43,7 @@ class StdUserConfiguration implements UserConfiguration {
      *
      * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
+    public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
         this.users = users;
     }
 
@@ -54,7 +54,7 @@ class StdUserConfiguration implements UserConfiguration {
     }
 
     @Generated
-    void setUsers(final List<StdUserPrepopulationFactory> users) {
+    public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
         this.users = users;
     }

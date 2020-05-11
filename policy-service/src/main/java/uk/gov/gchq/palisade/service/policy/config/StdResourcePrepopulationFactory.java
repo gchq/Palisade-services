@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
-class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
+public class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     private String resourceId = "";
     private String rootId = "";
     private String connectionDetail = "";
@@ -43,7 +43,7 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     /**
      * Empty constructor
      */
-    StdResourcePrepopulationFactory() {
+    public StdResourcePrepopulationFactory() {
     }
 
     /**
@@ -55,7 +55,7 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
      * @param connectionDetail the {@link URI} of a data-service where this resource may be found
      * @param attributes a @{@link Map} of other attributes this resource may have, in particular a type and serialisedFormat
      */
-    StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
+    public StdResourcePrepopulationFactory(final String resourceId, final String rootId, final String connectionDetail, final Map<String, String> attributes) {
         this.resourceId = resourceId;
         this.rootId = rootId;
         this.connectionDetail = connectionDetail;
@@ -63,45 +63,45 @@ class StdResourcePrepopulationFactory implements ResourcePrepopulationFactory {
     }
 
     @Generated
-    String getResourceId() {
+    public String getResourceId() {
         return resourceId;
     }
 
     @Generated
-    void setResourceId(final String resourceId) {
+    public void setResourceId(final String resourceId) {
         requireNonNull(resourceId);
         this.resourceId = resourceId;
     }
 
     @Generated
-    String getRootId() {
+    public String getRootId() {
         return rootId;
     }
 
     @Generated
-    void setRootId(final String rootId) {
+    public void setRootId(final String rootId) {
         requireNonNull(rootId);
         this.rootId = rootId;
     }
 
     @Generated
-    String getConnectionDetail() {
+    public String getConnectionDetail() {
         return connectionDetail;
     }
 
     @Generated
-    void setConnectionDetail(final String connectionDetail) {
+    public void setConnectionDetail(final String connectionDetail) {
         requireNonNull(connectionDetail);
         this.connectionDetail = connectionDetail;
     }
 
     @Generated
-    Map<String, String> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
     @Generated
-    void setAttributes(final Map<String, String> attributes) {
+    public void setAttributes(final Map<String, String> attributes) {
         requireNonNull(attributes);
         this.attributes = attributes;
     }

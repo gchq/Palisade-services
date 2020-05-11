@@ -26,7 +26,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-class StdPolicyConfiguration implements PolicyConfiguration {
+public class StdPolicyConfiguration implements PolicyConfiguration {
 
     private List<StdPolicyPrepopulationFactory> policies = new ArrayList<>();
 
@@ -34,7 +34,7 @@ class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      */
-    StdPolicyConfiguration() {
+    public StdPolicyConfiguration() {
     }
 
     /**
@@ -43,7 +43,7 @@ class StdPolicyConfiguration implements PolicyConfiguration {
      *
      * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
-    StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
+    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
         this.policies = policies;
     }
 

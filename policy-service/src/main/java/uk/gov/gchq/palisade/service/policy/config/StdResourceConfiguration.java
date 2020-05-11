@@ -27,14 +27,14 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-class StdResourceConfiguration implements ResourceConfiguration {
+public class StdResourceConfiguration implements ResourceConfiguration {
     private List<StdResourcePrepopulationFactory> resources;
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link ResourceConfiguration} interface
      */
-    StdResourceConfiguration() {
+    public StdResourceConfiguration() {
         resources = Collections.emptyList();
     }
 
@@ -44,7 +44,7 @@ class StdResourceConfiguration implements ResourceConfiguration {
      *
      * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
-    StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
+    public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
         this.resources = resources;
     }
 
@@ -55,7 +55,7 @@ class StdResourceConfiguration implements ResourceConfiguration {
     }
 
     @Generated
-    void setResources(final List<StdResourcePrepopulationFactory> resources) {
+    public void setResources(final List<StdResourcePrepopulationFactory> resources) {
         requireNonNull(resources);
         this.resources = resources;
     }

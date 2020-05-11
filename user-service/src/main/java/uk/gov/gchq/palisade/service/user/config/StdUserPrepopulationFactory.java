@@ -27,7 +27,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-class StdUserPrepopulationFactory implements UserPrepopulationFactory {
+public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     private String userId;
     private Set<String> auths;
@@ -37,7 +37,7 @@ class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserPrepopulationFactory} interface.
      */
-    StdUserPrepopulationFactory() {
+    public StdUserPrepopulationFactory() {
         this.userId = "";
         this.auths = Collections.emptySet();
         this.roles = Collections.emptySet();
@@ -51,41 +51,41 @@ class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * @param roles     a {@link Set} of {@link String} role values for the user.
      * @param auths     a {@link Set} of {@link String} auth values for the user.
      */
-    StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
+    public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;
         this.auths = auths;
         this.roles = roles;
     }
 
     @Generated
-    String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
     @Generated
-    void setUserId(final String userId) {
+    public void setUserId(final String userId) {
         this.userId = userId;
     }
 
     @Generated
-    Set<String> getAuths() {
+    public Set<String> getAuths() {
         return auths;
     }
 
     @Generated
-    StdUserPrepopulationFactory setAuths(final Set<String> auths) {
+    public StdUserPrepopulationFactory setAuths(final Set<String> auths) {
         requireNonNull(auths, "Cannot add null auths.");
         this.auths = auths;
         return this;
     }
 
     @Generated
-    Set<String> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
     @Generated
-    StdUserPrepopulationFactory setRoles(final Set<String> roles) {
+    public StdUserPrepopulationFactory setRoles(final Set<String> roles) {
         requireNonNull(roles, "Cannot add null roles.");
         this.roles = roles;
         return this;

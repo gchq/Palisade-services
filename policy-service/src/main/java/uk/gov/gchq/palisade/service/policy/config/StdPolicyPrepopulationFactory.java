@@ -41,7 +41,7 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
+public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
     private String resource;
@@ -52,7 +52,7 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     /**
      * Empty constructor
      */
-    StdPolicyPrepopulationFactory() {
+    public StdPolicyPrepopulationFactory() {
         resource = "";
         owner = "";
         resourceRules = Collections.emptyMap();
@@ -67,7 +67,7 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
      * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
      * @param recordRules the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
      */
-    StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+    public StdPolicyPrepopulationFactory(final String resource, final String owner, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
         this.resource = resource;
         this.owner = owner;
         this.resourceRules = resourceRules;
@@ -75,45 +75,45 @@ class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     }
 
     @Generated
-    String getResource() {
+    public String getResource() {
         return resource;
     }
 
     @Generated
-    void setResource(final String resource) {
+    public void setResource(final String resource) {
         requireNonNull(resource);
         this.resource = resource;
     }
 
     @Generated
-    String getOwner() {
+    public String getOwner() {
         return owner;
     }
 
     @Generated
-    void setOwner(final String owner) {
+    public void setOwner(final String owner) {
         requireNonNull(owner);
         this.owner = owner;
     }
 
     @Generated
-    Map<String, String> getResourceRules() {
+    public Map<String, String> getResourceRules() {
         return resourceRules;
     }
 
     @Generated
-    void setResourceRules(final Map<String, String> resourceRules) {
+    public void setResourceRules(final Map<String, String> resourceRules) {
         requireNonNull(resourceRules);
         this.resourceRules = resourceRules;
     }
 
     @Generated
-    Map<String, String> getRecordRules() {
+    public Map<String, String> getRecordRules() {
         return recordRules;
     }
 
     @Generated
-    void setRecordRules(final Map<String, String> recordRules) {
+    public void setRecordRules(final Map<String, String> recordRules) {
         requireNonNull(recordRules);
         this.recordRules = recordRules;
     }
