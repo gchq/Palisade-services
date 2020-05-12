@@ -133,11 +133,12 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         resourceRules.forEach((message, rule) -> policy.resourceLevelRule(message, createRule(rule)));
         recordRules.forEach((message, rule) -> policy.recordLevelRule(message, createRule(rule)));
 
+        Resource unconfiguredResource = ResourceBuilder.create(this.resource);
         Resource policyResource = resources.stream()
                 .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().uri("")).getValue())
-                .filter(builtResource -> builtResource.getId().equals(this.resource))
+                .filter(builtResource -> builtResource.getId().equals(unconfiguredResource.getId()))
                 .findFirst()
-                .orElse(ResourceBuilder.create(this.resource));
+                .orElse(unconfiguredResource);
 
         User policyOwner = users.stream()
                 .map(UserPrepopulationFactory::build)

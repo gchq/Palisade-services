@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -140,5 +141,17 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
     @Generated
     public int hashCode() {
         return Objects.hash(resourceId, rootId, connectionDetail, attributes);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", StdResourcePrepopulationFactory.class.getSimpleName() + "[", "]")
+                .add("resourceId='" + resourceId + "'")
+                .add("rootId='" + rootId + "'")
+                .add("connectionDetail='" + connectionDetail + "'")
+                .add("attributes=" + attributes)
+                .add(super.toString())
+                .toString();
     }
 }
