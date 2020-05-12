@@ -58,8 +58,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     /**
-     * A generic resolver from service names to {@link URI}s, using Spring yaml configuration
-     * Uses Eureka if aavailable, otherwise uses the yaml value directly as a URI (useful for k8s)
+     * A generic resolver from service names to {@link URI}s
+     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
      *
      * @param eurekaClient an {@link Optional} {@link EurekaClient} for resolving service names
      * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
