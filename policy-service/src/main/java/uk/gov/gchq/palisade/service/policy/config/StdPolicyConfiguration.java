@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -64,6 +65,25 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
         requireNonNull(policies);
         this.policies = policies;
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof StdPolicyConfiguration)) {
+            return false;
+        }
+        final StdPolicyConfiguration that = (StdPolicyConfiguration) o;
+        return Objects.equals(policies, that.policies);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(policies);
     }
 
     @Override
