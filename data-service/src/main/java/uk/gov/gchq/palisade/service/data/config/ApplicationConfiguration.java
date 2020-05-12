@@ -20,8 +20,6 @@ import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,24 +62,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * A generic resolver from service names to {@link URI}s
      * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
      *
-     * @param eurekaClient an {@link Optional} {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in a eureka environment
+     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
+     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
      */
-    @ConditionalOnBean(EurekaClient.class)
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfigWithEureka(final EurekaClient eurekaClient) {
-        return new ClientConfiguration(eurekaClient);
-    }
-
-    /**
-     * @return a {@link ClientConfiguration} capable of resolving service names in a non-eureka environment
-     */
-    @ConditionalOnMissingBean(EurekaClient.class)
-    @Bean
-    @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfigWithoutEureka() {
-        return new ClientConfiguration(null);
+    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
+        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
     }
 
     @Bean
