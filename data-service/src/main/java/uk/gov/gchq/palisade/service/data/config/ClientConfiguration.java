@@ -30,8 +30,8 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 
 /**
-* A generic resolver from service names to {@link URI}s
-* Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
+ * A generic resolver from service names to {@link URI}s
+ * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
  */
 public class ClientConfiguration {
     private Map<String, URI> client;
@@ -44,8 +44,8 @@ public class ClientConfiguration {
      *
      * @param eurekaClient the eureka client to (maybe) use to resolve {@link URI}s for service names
      */
-    public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
-        this.eurekaClient = eurekaClient;
+    public ClientConfiguration(final EurekaClient eurekaClient) {
+        this.eurekaClient = Optional.ofNullable(eurekaClient);
     }
 
     @Generated

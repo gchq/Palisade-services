@@ -44,8 +44,8 @@ public class ClientConfiguration {
      *
      * @param eurekaClient the eureka client to (maybe) use to resolve {@link URI}s for service names
      */
-    public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
-        this.eurekaClient = eurekaClient;
+    public ClientConfiguration(final EurekaClient eurekaClient) {
+        this.eurekaClient = Optional.ofNullable(eurekaClient);
     }
 
     @Generated

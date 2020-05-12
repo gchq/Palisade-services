@@ -51,19 +51,19 @@ public class StdResourceConfiguration implements ResourceConfiguration {
      * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
     public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
-        this.resources = resources;
+        this.resources = List.copyOf(resources);
     }
 
     @Override
     @Generated
     public List<StdResourcePrepopulationFactory> getResources() {
-        return resources;
+        return List.copyOf(this.resources);
     }
 
     @Generated
     public void setResources(final List<StdResourcePrepopulationFactory> resources) {
         requireNonNull(resources);
-        this.resources = resources;
+        this.resources = List.copyOf(resources);
     }
 
     @Override

@@ -62,12 +62,23 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
      *
      * @param eurekaClient an {@link Optional} {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
+     * @return a {@link ClientConfiguration} capable of resolving service names in a eureka environment
      */
+    @ConditionalOnBean(EurekaClient.class)
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final Optional<EurekaClient> eurekaClient) {
+    public ClientConfiguration clientConfigWithEureka(final EurekaClient eurekaClient) {
         return new ClientConfiguration(eurekaClient);
+    }
+
+    /**
+     * @return a {@link ClientConfiguration} capable of resolving service names in a non-eureka environment
+     */
+    @ConditionalOnMissingBean(EurekaClient.class)
+    @Bean
+    @ConfigurationProperties(prefix = "web")
+    public ClientConfiguration clientConfigWithoutEureka() {
+        return new ClientConfiguration(null);
     }
 
     @Bean

@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -82,12 +84,23 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
      *
      * @param eurekaClient an {@link Optional} {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
+     * @return a {@link ClientConfiguration} capable of resolving service names in a eureka environment
      */
+    @ConditionalOnBean(EurekaClient.class)
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final Optional<EurekaClient> eurekaClient) {
+    public ClientConfiguration clientConfigWithEureka(final EurekaClient eurekaClient) {
         return new ClientConfiguration(eurekaClient);
+    }
+
+    /**
+     * @return a {@link ClientConfiguration} capable of resolving service names in a non-eureka environment
+     */
+    @ConditionalOnMissingBean(EurekaClient.class)
+    @Bean
+    @ConfigurationProperties(prefix = "web")
+    public ClientConfiguration clientConfigWithoutEureka() {
+        return new ClientConfiguration(null);
     }
 
     /**
@@ -106,7 +119,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                             try {
                                 Thread.sleep(RETRY_AFTER);
                             } catch (InterruptedException ignored) {
-                                // do nothing
+                                Thread.currentThread().interrupt();
                             }
                             return clientConfig.getClientUri(serviceName);
                         })
