@@ -39,5 +39,6 @@ management:
       enabled: true
 
 population:
-  policy: std
-  user: std
+  policyProvider: std
+  userProvider: std
+  resourceProvider: std

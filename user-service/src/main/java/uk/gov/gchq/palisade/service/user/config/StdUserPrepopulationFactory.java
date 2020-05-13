@@ -27,6 +27,10 @@ import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Implementation of a {@link UserPrepopulationFactory} that uses Spring to configure a user from a yaml file
+ * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles
+ */
 public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
     private String userId;

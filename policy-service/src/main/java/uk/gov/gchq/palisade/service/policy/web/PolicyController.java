@@ -32,6 +32,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
@@ -47,51 +48,29 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
-
 @RestController
 @RequestMapping(path = "/")
 public class PolicyController {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyController.class);
 
     private final PolicyService service;
-    private PolicyConfiguration policyConfig;
-    private UserConfiguration userConfig;
+    private final PolicyConfiguration policyConfig;
+    private final UserConfiguration userConfig;
+    private final ResourceConfiguration resourceConfig;
 
     public PolicyController(final @Qualifier("controller") PolicyService service,
-                            final @Qualifier("policyConfiguration") PolicyConfiguration policyConfig,
-                            final @Qualifier("userConfiguration") UserConfiguration userConfig) {
+                            final PolicyConfiguration policyConfig,
+                            final UserConfiguration userConfig,
+                            final ResourceConfiguration resourceConfig) {
         this.service = service;
-        this.setPolicyConfig(policyConfig);
-        this.setUserConfig(userConfig);
+        this.policyConfig = policyConfig;
+        this.userConfig = userConfig;
+        this.resourceConfig = resourceConfig;
     }
 
     @Generated
     public PolicyService getService() {
         return service;
-    }
-
-    @Generated
-    public PolicyConfiguration getPolicyConfig() {
-        return policyConfig;
-    }
-
-    @Generated
-    public void setPolicyConfig(final PolicyConfiguration policyConfig) {
-        requireNonNull(policyConfig);
-        this.policyConfig = policyConfig;
-    }
-
-    @Generated
-    public UserConfiguration getUserConfig() {
-        return userConfig;
-    }
-
-    @Generated
-    public void setUserConfig(final UserConfiguration userConfig) {
-        requireNonNull(userConfig);
-        this.userConfig = userConfig;
     }
 
     @PostMapping(value = "/canAccess", consumes = "application/json", produces = "application/json")
@@ -140,8 +119,10 @@ public class PolicyController {
         // Add example Policies to the policy-service cache
         LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
+        LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
-                .map(prepopulation -> prepopulation.build(userConfig.getUsers()))
+                .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
+                .peek(entry -> LOGGER.debug(entry.toString()))
                 .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
     }
 

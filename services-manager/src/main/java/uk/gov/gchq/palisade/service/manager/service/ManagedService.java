@@ -55,8 +55,9 @@ public class ManagedService implements Service {
                     return status;
                 })
                 // Could be anyMatch, as only one healthy service is needed to perform requests
-                // Open to change if we see "scalable" demos for the (local) eureka example
-                .allMatch(x -> x == 200);
+                // Could be allMatch, as it should be expected that all services are healthy
+                // Note that in the case of an empty list, this should always return false
+                .anyMatch(x -> x == 200);
     }
 
     public void setLoggers(final String module, final String configuredLevel) throws Exception {

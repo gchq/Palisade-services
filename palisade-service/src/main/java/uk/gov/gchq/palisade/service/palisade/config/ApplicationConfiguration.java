@@ -17,9 +17,11 @@
 package uk.gov.gchq.palisade.service.palisade.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +47,6 @@ import uk.gov.gchq.palisade.service.palisade.service.ResultAggregationService;
 import uk.gov.gchq.palisade.service.palisade.service.SimplePalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UserService;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
-import uk.gov.gchq.palisade.service.palisade.web.PalisadeHealthIndicator;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
@@ -63,10 +64,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * A generic resolver from service names to {@link URI}s
+     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
+     *
+     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
+     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
+     */
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration();
+    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
+        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
     }
 
     @Bean(name = "jpa-persistence")
@@ -140,11 +148,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 .getClientUri("policy-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'policy-service' - see 'web.client' properties or discovery service registration"));
         return new PolicyService(policyClient, policyUriSupplier, getAsyncExecutor());
-    }
-
-    @Bean
-    public PalisadeHealthIndicator palisadeHealthIndicator(final AuditService auditService, final PolicyService policyService, final ResourceService resourceService, final UserService userService) {
-        return new PalisadeHealthIndicator(auditService, policyService, resourceService, userService);
     }
 
     @Bean
