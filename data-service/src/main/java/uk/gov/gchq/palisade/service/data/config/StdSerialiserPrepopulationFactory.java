@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Map;
@@ -104,14 +103,8 @@ public class StdSerialiserPrepopulationFactory {
                 serialiser = (Serialiser<?>) Class.forName(entry.getKey())
                         .getConstructor(Class.class)
                         .newInstance(Class.forName(entry.getValue()));
-            } catch (ClassNotFoundException ex) {
-                LOGGER.error("Error getting the serialiser {} class and the domain {} class: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                throw new RuntimeException(ex);
-            } catch (NoSuchMethodException ex) {
-                LOGGER.error("Error getting the constructor method for class {}: {}", entry.getKey(), ex.getMessage());
-                throw new RuntimeException(ex);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                LOGGER.error("Error creating an instance of {} with parameter {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
+            } catch (Exception ex) {
+                LOGGER.error("Error creating serialiser {} with domain {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
                 throw new RuntimeException(ex);
             }
         }
