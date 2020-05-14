@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
@@ -47,7 +45,6 @@ import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -60,34 +57,6 @@ import java.util.function.Supplier;
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-    /**
-     * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of policies from a yaml file
-     * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s
-     * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
-     *
-     * @return a {@link StdSerialiserConfiguration} containing a list of {@link StdSerialiserPrepopulationFactory}s
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdSerialiserConfiguration serialiserConfiguration() {
-        return new StdSerialiserConfiguration();
-    }
-
-    /**
-     * Implementation of a {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
-     * A factory for {@link Serialiser} objects, using:
-     * - a {@link Map} of the type and format required for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
-     * - a {@link Map} of the serialiser class and the domain class needed to create a {@link Serialiser}
-     *
-     * @return a standard {@link StdSerialiserPrepopulationFactory} capable of building a {@link Serialiser} and {@link uk.gov.gchq.palisade.reader.common.DataFlavour} from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "serialiserProvider", havingValue = "std", matchIfMissing = true)
-    public StdSerialiserPrepopulationFactory serialiserPrepopulationFactory() {
-        return new StdSerialiserPrepopulationFactory();
-    }
 
     /**
      * A generic resolver from service names to {@link URI}s
