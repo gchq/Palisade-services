@@ -23,13 +23,10 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 
-import java.lang.reflect.Constructor;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
@@ -59,7 +56,7 @@ public class StdSerialiserPrepopulationFactory {
      *
      * @param dataFlavour   A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
      *                      for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
-     * @param serialiser    A {@link Map} containing a {@link String} value opf the serialiser class and a {@link String} value of the domain
+     * @param serialiser    A {@link Map} containing a {@link String} value of the serialiser class and a {@link String} value of the domain
      *                      class for a {@link Serialiser}
      */
     public StdSerialiserPrepopulationFactory(final Map<String, String> dataFlavour,
