@@ -145,6 +145,7 @@ uk.gov.gchq.palisade:data-service:jar:0.4.0-SNAPSHOT
 |  |  +- org.apache.commons:commons-configuration2:jar:2.1.1:compile
 |  |  +- org.apache.commons:commons-lang3:jar:3.9:compile
 |  |  +- org.apache.commons:commons-text:jar:1.4:compile
+|  |  +- org.slf4j:slf4j-log4j12:jar:1.7.28:compile
 |  |  +- org.apache.avro:avro:jar:1.7.7:compile
 |  |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
 |  |  |  \- org.xerial.snappy:snappy-java:jar:1.0.5:compile

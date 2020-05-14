@@ -21,11 +21,12 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
-import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
@@ -133,10 +134,10 @@ public class SimpleDataService implements DataService {
     }
 
     @Override
-    public Boolean addSerialiser(final AddSerialiserRequest request) {
-        LOGGER.info("Processing AddSerialiserRequest: {}", request);
+    public Boolean addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser) {
+        LOGGER.info("Adding serialiser {} for DataFlavour {}", serialiser._getClass(), flavour);
 
-        getDataReader().addSerialiser(request.getDataFlavour(), request.getSerialiser());
+        getDataReader().addSerialiser(flavour, serialiser);
 
         return true;
     }

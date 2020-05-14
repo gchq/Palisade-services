@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.data.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
+import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
@@ -36,9 +40,12 @@ public class DataController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
     private final DataService service;
+    private final StdSerialiserConfiguration serialiserConfig;
 
-    public DataController(final DataService service) {
+    public DataController(final DataService service,
+                          final StdSerialiserConfiguration serialiserConfiguration) {
         this.service = service;
+        this.serialiserConfig = serialiserConfiguration;
     }
 
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
@@ -53,10 +60,20 @@ public class DataController {
     @PostMapping(value = "/addSerialiser", consumes = "application/json", produces = "application/json")
     public Boolean addSerialiser(@RequestBody final AddSerialiserRequest request) {
         LOGGER.info("Invoking addSerialiser: {}", request);
-        Boolean response = service.addSerialiser(request);
+        Boolean response = service.addSerialiser(request.getDataFlavour(), request.getSerialiser());
 
         LOGGER.info("Request processed. Result: {}", response);
         return response;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPostConstruct() {
+        // Add serialiser to the data-service
+        LOGGER.info("Prepopulating using serialiser config: {}", serialiserConfig.getClass());
+        serialiserConfig.getSerialisers().stream()
+                .map(StdSerialiserPrepopulationFactory::build)
+                .peek(entry -> LOGGER.debug(entry.toString()))
+                .forEach(entry -> service.addSerialiser(entry.getKey(), entry.getValue()));
     }
 
 }
