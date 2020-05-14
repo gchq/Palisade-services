@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.data.config;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -46,18 +47,18 @@ public class StdSerialiserConfiguration {
      * @param serialisers   a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
      */
     public StdSerialiserConfiguration(final List<StdSerialiserPrepopulationFactory> serialisers) {
-        this.serialisers = serialisers;
+        this.serialisers = Collections.unmodifiableList(serialisers);
     }
 
     @Generated
     public List<StdSerialiserPrepopulationFactory> getSerialisers() {
-        return serialisers;
+        return Collections.unmodifiableList(serialisers);
     }
 
     @Generated
     public void setSerialisers(final List<StdSerialiserPrepopulationFactory> serialisers) {
         requireNonNull(serialisers);
-        this.serialisers = serialisers;
+        this.serialisers = Collections.unmodifiableList(serialisers);
     }
 
     @Override

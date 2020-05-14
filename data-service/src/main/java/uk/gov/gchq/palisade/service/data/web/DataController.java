@@ -42,6 +42,13 @@ public class DataController {
     private final DataService service;
     private final StdSerialiserConfiguration serialiserConfig;
 
+    /**
+     * Constructor for a {@link DataController} instance.
+     *
+     * @param service                   a {@link DataService} instance that will process the requests.
+     * @param serialiserConfiguration   a {@link StdSerialiserConfiguration} that can be used to Pre-populate the {@link DataService}
+     *                                  with a {@link uk.gov.gchq.palisade.data.serialise.Serialiser}
+     */
     public DataController(final DataService service,
                           final StdSerialiserConfiguration serialiserConfiguration) {
         this.service = service;
@@ -66,6 +73,10 @@ public class DataController {
         return response;
     }
 
+    /**
+     * This method will add a {@link uk.gov.gchq.palisade.data.serialise.Serialiser} to the
+     * {@link DataService} using the details provided in a yaml file.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         // Add serialiser to the data-service

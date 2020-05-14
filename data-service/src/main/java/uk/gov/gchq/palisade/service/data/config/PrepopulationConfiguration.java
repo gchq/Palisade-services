@@ -25,6 +25,9 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 
 import java.util.Map;
 
+/**
+ * Bean configuration and dependency injection graph
+ */
 @Configuration
 public class PrepopulationConfiguration {
 
