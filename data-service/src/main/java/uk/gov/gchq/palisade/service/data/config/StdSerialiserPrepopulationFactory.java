@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Map;
@@ -87,6 +88,11 @@ public class StdSerialiserPrepopulationFactory {
         this.serialiserMap = serialiser;
     }
 
+    /**
+     * Creates a {@link DataFlavour} and a {@link Serialiser} using the data within a {@link StdSerialiserPrepopulationFactory}
+     *
+     * @return  an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
+     */
     public Entry<DataFlavour, Serialiser<?>> build() {
         DataFlavour flavour = null;
         Serialiser<?> serialiser = null;
@@ -98,8 +104,14 @@ public class StdSerialiserPrepopulationFactory {
                 serialiser = (Serialiser<?>) Class.forName(entry.getKey())
                         .getConstructor(Class.class)
                         .newInstance(Class.forName(entry.getValue()));
-            } catch (Exception ex) {
+            } catch (ClassNotFoundException ex) {
                 LOGGER.error("Error getting the serialiser {} class and the domain {} class: {}", entry.getKey(), entry.getValue(), ex.getMessage());
+                throw new RuntimeException(ex);
+            } catch (NoSuchMethodException ex) {
+                LOGGER.error("Error getting the constructor method for class {}: {}", entry.getKey(), ex.getMessage());
+                throw new RuntimeException(ex);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                LOGGER.error("Error creating an instance of {} with parameter {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
                 throw new RuntimeException(ex);
             }
         }

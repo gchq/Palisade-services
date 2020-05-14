@@ -135,7 +135,7 @@ public class SimpleDataService implements DataService {
 
     @Override
     public Boolean addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser) {
-        LOGGER.info("Adding serialiser {} for DataFlavour {}", serialiser._getClass(), flavour);
+        LOGGER.info("Adding serialiser {} for DataFlavour {}", serialiser, flavour);
 
         getDataReader().addSerialiser(flavour, serialiser);
 
