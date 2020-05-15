@@ -15,23 +15,16 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
-import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 
-import java.net.URI;
-
-@FeignClient(name = "audit-service", url = "undefined")
+@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {
 
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
-    Boolean audit(final URI url, @RequestBody final AuditRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
+    Boolean audit(@RequestBody final AuditRequest request);
 
 }

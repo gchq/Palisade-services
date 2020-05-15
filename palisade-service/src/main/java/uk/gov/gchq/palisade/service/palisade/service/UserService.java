@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,22 +23,18 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
-import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 public class UserService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserClient userClient;
-    private final Supplier<URI> uriSupplier;
     private final Executor executor;
 
-    public UserService(final UserClient userClient, final Supplier<URI> uriSupplier, final Executor executor) {
+    public UserService(final UserClient userClient, final Executor executor) {
         this.userClient = userClient;
-        this.uriSupplier = uriSupplier;
         this.executor = executor;
     }
 
@@ -50,9 +45,7 @@ public class UserService implements Service {
         try {
             LOGGER.info("User request: {}", request);
             user = CompletableFuture.supplyAsync(() -> {
-                URI clientUri = this.uriSupplier.get();
-                LOGGER.debug("Using client uri: {}", clientUri);
-                User response = userClient.getUser(clientUri, request);
+                User response = userClient.getUser(request);
                 LOGGER.info("Got user: {}", response);
                 return response;
             }, this.executor);
@@ -62,17 +55,6 @@ public class UserService implements Service {
         }
 
         return user.toCompletableFuture();
-    }
-
-    public Response getHealth() {
-        try {
-            URI clientUri = this.uriSupplier.get();
-            LOGGER.debug("Using client uri: {}", clientUri);
-            return this.userClient.getHealth(clientUri);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to get health: {}", ex.getMessage());
-            throw new RuntimeException(ex); //rethrow the exception
-        }
     }
 
 }

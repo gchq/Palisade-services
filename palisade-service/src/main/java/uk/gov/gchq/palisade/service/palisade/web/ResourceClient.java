@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.web;
 
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -27,27 +26,22 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
-import java.net.URI;
-
-@FeignClient(name = "resource-service", url = "undefined")
+@FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
+    Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
 
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
+    Response getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request);
 
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
+    Response getResourcesByType(@RequestBody final GetResourcesByTypeRequest request);
 
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
+    Response getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request);
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
-    Boolean addResource(final URI url, @RequestBody final AddResourceRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
+    Boolean addResource(@RequestBody final AddResourceRequest request);
 
 }

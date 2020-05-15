@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,21 +22,13 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
-import java.net.URI;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
-
 public class AuditService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
     private final AuditClient client;
-    private final Supplier<URI> uriSupplier;
-    private final Executor executor;
 
-    public AuditService(final AuditClient auditClient, final Supplier<URI> uriSupplier, final Executor executor) {
+    public AuditService(final AuditClient auditClient) {
         this.client = auditClient;
-        this.uriSupplier = uriSupplier;
-        this.executor = executor;
     }
 
     public Boolean audit(final AuditRequest request) {
@@ -46,9 +37,7 @@ public class AuditService implements Service {
         Boolean response;
         try {
             LOGGER.info("Audit request: {}", request);
-            URI clientUri = this.uriSupplier.get();
-            LOGGER.debug("Using client uri: {}", clientUri);
-            response = this.client.audit(clientUri, request);
+            response = this.client.audit(request);
             LOGGER.info("Audit response: {}", response);
         } catch (Exception ex) {
             LOGGER.error("Failed to log audit request: {}", ex.getMessage());
@@ -56,17 +45,6 @@ public class AuditService implements Service {
         }
 
         return response;
-    }
-
-    public Response getHealth() {
-        try {
-            URI clientUri = this.uriSupplier.get();
-            LOGGER.debug("Using client uri: {}", clientUri);
-            return this.client.getHealth(clientUri);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to get health: {}", ex.getMessage());
-            throw new RuntimeException(ex); //rethrow the exception
-        }
     }
 
 }

@@ -31,6 +31,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
@@ -38,7 +39,6 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +46,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -59,13 +58,6 @@ public class ResourceServiceTest {
     private ResourceService resourceService;
     private Set<LeafResource> resources = new HashSet<>();
     private ExecutorService executor;
-    private Supplier<URI> uriSupplier = () -> {
-        try {
-            return new URI("resource-service");
-        } catch (Exception e) {
-            return null;
-        }
-    };
     private FileResource resource = new FileResource().id("/path/to/bob_file.txt");
     private ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
 
@@ -78,8 +70,8 @@ public class ResourceServiceTest {
         logger.addAppender(appender);
 
         resources.add(resource.connectionDetail(connectionDetail));
-        resourceService = Mockito.spy(new ResourceService(resourceClient, uriSupplier, null, executor));
-        Mockito.doReturn(resources).when(resourceService).getResourcesFromFeignResponse(Mockito.any());
+        resourceService = Mockito.spy(new ResourceService(resourceClient, JSONSerialiser.createDefaultMapper(), executor));
+        Mockito.doReturn(resources).when(resourceService).getResourcesFromResponse(Mockito.any());
     }
 
     @After
@@ -108,10 +100,7 @@ public class ResourceServiceTest {
         List<String> infoMessages = getMessages(event -> event.getLevel() == Level.INFO);
 
         MatcherAssert.assertThat(infoMessages, Matchers.hasItems(
-                Matchers.containsString(request.getOriginalRequestId().getId()),
-                Matchers.containsString(uriSupplier.get().toString())
-        ));
-
+                Matchers.containsString(request.getOriginalRequestId().getId())));
     }
 
     @Test
