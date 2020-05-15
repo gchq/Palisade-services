@@ -43,8 +43,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class StdSerialiserPrepopulationFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StdSerialiserPrepopulationFactory.class);
-
     private String flavourFormat;
     private String flavourType;
     private String serialiserClass;
@@ -110,7 +108,6 @@ public class StdSerialiserPrepopulationFactory {
      * @return  an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */
     public Entry<DataFlavour, Serialiser<Object>> build() {
-        DataFlavour flavour = DataFlavour.of(flavourType, flavourFormat);
         Serialiser<Object> serialiser;
         try {
             serialiser = (Serialiser<Object>) Class.forName(serialiserClass)
@@ -123,7 +120,7 @@ public class StdSerialiserPrepopulationFactory {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException ex) {
             throw new SerialiserInitialisationException("Error initialising the serialiser", ex);
         }
-        return new SimpleImmutableEntry<>(flavour, serialiser);
+        return new SimpleImmutableEntry<>(DataFlavour.of(flavourType, flavourFormat), serialiser);
     }
 
     @Override
