@@ -30,10 +30,3 @@ public interface PolicyClient {
     Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request);
 }
 
-@FeignClient(name = "policy-service", fallback = ConfiguredAuditClient.class)
-interface EurekaPolicyClient extends PolicyClient {
-}
-
-@FeignClient(name = "policy-service", url = "${web.client.policy-service}")
-interface ConfiguredPolicyClient extends PolicyClient {
-}

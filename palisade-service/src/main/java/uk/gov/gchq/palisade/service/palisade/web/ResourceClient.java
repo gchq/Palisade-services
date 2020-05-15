@@ -26,7 +26,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
-@FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
@@ -45,3 +44,4 @@ public interface ResourceClient {
     Boolean addResource(@RequestBody final AddResourceRequest request);
 
 }
+

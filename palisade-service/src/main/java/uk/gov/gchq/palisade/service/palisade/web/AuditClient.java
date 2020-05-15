@@ -31,10 +31,3 @@ public interface AuditClient {
     Response getHealth();
 }
 
-@FeignClient(name = "audit-service", fallback = ConfiguredAuditClient.class)
-interface EurekaAuditClient extends AuditClient {
-}
-
-@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
-interface ConfiguredAuditClient extends AuditClient {
-}
