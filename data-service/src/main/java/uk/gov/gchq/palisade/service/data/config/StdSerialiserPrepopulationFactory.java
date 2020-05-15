@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.data.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
