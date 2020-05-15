@@ -105,7 +105,7 @@ public class StdSerialiserPrepopulationFactory {
                         .newInstance(Class.forName(entry.getValue()));
             } catch (Exception ex) {
                 LOGGER.error("Error creating serialiser {} with domain {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                throw new RuntimeException(ex);
+                throw new RuntimeException("Error creating the serialiser", ex);
             }
         }
         return new SimpleImmutableEntry<>(flavour, serialiser);
