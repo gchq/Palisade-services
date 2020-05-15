@@ -33,47 +33,49 @@ import static java.util.Objects.requireNonNull;
 /**
  * A {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
  * A factory for {@link Serialiser} objects, using:
- * - a {@link Map} of the type and format required for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
- * - a {@link Map} of the serialiser class and the domain class needed to create a {@link Serialiser}
+ * - A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
+ *      for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
+ * - A {@link Map} containing a {@link String} value of the serialiser class and a {@link String} value of the domain
+ *      class for a {@link Serialiser}
  */
 public class StdSerialiserPrepopulationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StdSerialiserPrepopulationFactory.class);
 
-    private Map<String, String> dataFlavour;
+    private Map<String, String> flavourMap;
     private Map<String, String> serialiserMap;
 
     /**
      * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object
      */
     public StdSerialiserPrepopulationFactory() {
-        dataFlavour = Collections.emptyMap();
+        flavourMap = Collections.emptyMap();
         serialiserMap = Collections.emptyMap();
     }
 
     /**
      * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument
      *
-     * @param dataFlavour   A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
+     * @param flavourMap   A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
      *                      for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
      * @param serialiser    A {@link Map} containing a {@link String} value of the serialiser class and a {@link String} value of the domain
      *                      class for a {@link Serialiser}
      */
-    public StdSerialiserPrepopulationFactory(final Map<String, String> dataFlavour,
+    public StdSerialiserPrepopulationFactory(final Map<String, String> flavourMap,
                                              final Map<String, String> serialiser) {
-        this.dataFlavour = dataFlavour;
+        this.flavourMap = flavourMap;
         this.serialiserMap = serialiser;
     }
 
     @Generated
-    public Map<String, String> getDataFlavour() {
-        return dataFlavour;
+    public Map<String, String> getFlavourMap() {
+        return flavourMap;
     }
 
     @Generated
-    public void setDataFlavour(final Map<String, String> dataFlavour) {
-        requireNonNull(dataFlavour);
-        this.dataFlavour = dataFlavour;
+    public void setFlavourMap(final Map<String, String> flavourMap) {
+        requireNonNull(flavourMap);
+        this.flavourMap = flavourMap;
     }
 
     @Generated
@@ -95,7 +97,7 @@ public class StdSerialiserPrepopulationFactory {
     public Entry<DataFlavour, Serialiser<?>> build() {
         DataFlavour flavour = null;
         Serialiser<?> serialiser = null;
-        for (Entry<String, String> entry : dataFlavour.entrySet()) {
+        for (Entry<String, String> entry : flavourMap.entrySet()) {
             flavour = DataFlavour.of(entry.getKey(), entry.getValue());
         }
         for (Entry<String, String> entry : serialiserMap.entrySet()) {
@@ -103,9 +105,9 @@ public class StdSerialiserPrepopulationFactory {
                 serialiser = (Serialiser<?>) Class.forName(entry.getKey())
                         .getConstructor(Class.class)
                         .newInstance(Class.forName(entry.getValue()));
-            } catch (Exception ex) {
+            } catch (ReflectiveOperationException ex) {
                 LOGGER.error("Error creating serialiser {} with domain {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                throw new RuntimeException("Error creating the serialiser", ex);
+                throw new RuntimeException(ex);
             }
         }
         return new SimpleImmutableEntry<>(flavour, serialiser);
