@@ -16,12 +16,9 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,10 +41,8 @@ import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 /**
  * Bean configuration and dependency injection graph
@@ -57,19 +52,6 @@ import java.util.function.Supplier;
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-    /**
-     * A generic resolver from service names to {@link URI}s
-     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
-     *
-     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
-     */
-    @Bean
-    @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
-        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
-    }
 
     @Bean
     public SimpleDataService simpleDataService(final AuditService auditService,
@@ -84,19 +66,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final ClientConfiguration clientConfig) {
-        Supplier<URI> palisadeUriSupplier = () -> clientConfig
-                .getClientUri("palisade-service")
-                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'palisade-service' - see 'web.client' properties or discovery service registration"));
-        return new PalisadeService(palisadeClient, palisadeUriSupplier, getAsyncExecutor());
+    public PalisadeService palisadeService(final PalisadeClient palisadeClient) {
+        return new PalisadeService(palisadeClient, getAsyncExecutor());
     }
 
     @Bean
-    public AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
-        Supplier<URI> auditUriSupplier = () -> clientConfig
-                .getClientUri("audit-service")
-                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'audit-service' - see 'web.client' properties or discovery service registration"));
-        return new AuditService(auditClient, auditUriSupplier, getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient) {
+        return new AuditService(auditClient);
     }
 
     @Bean

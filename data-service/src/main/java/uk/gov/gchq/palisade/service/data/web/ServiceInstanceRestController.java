@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.data.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +30,11 @@ import java.util.List;
 public class ServiceInstanceRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInstanceRestController.class);
 
-    @Autowired
     private DiscoveryClient discoveryClient;
+
+    public ServiceInstanceRestController(final DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
+    }
 
     @GetMapping(value = "/service-instances/{applicationName}")
     public List<ServiceInstance> serviceInstancesByApplicationName(@PathVariable final String applicationName) {
