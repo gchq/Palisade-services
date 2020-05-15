@@ -49,9 +49,10 @@ feign:
         loggerLevel: basic
     default-config: default
 
+# Not needed as you'll either be running eureka, k8s or static
 web:
   client:
-    audit-service: audit-service
-    policy-service: policy-service
-    resource-service: resource-service
-    user-service: user-service
+    audit-service: audit-service-not-found
+    policy-service: policy-service-not-found
+    resource-service: resource-service-not-found
+    user-service: user-service-not-found
