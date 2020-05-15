@@ -33,6 +33,7 @@ public class UserService implements Service {
     private final UserClient userClient;
     private final Executor executor;
 
+
     public UserService(final UserClient userClient, final Executor executor) {
         this.userClient = userClient;
         this.executor = executor;
