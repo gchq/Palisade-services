@@ -22,94 +22,139 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
+import uk.gov.gchq.palisade.service.data.exception.SerialiserConstructorNotFoundException;
+import uk.gov.gchq.palisade.service.data.exception.SerialiserInitialisationException;
+import uk.gov.gchq.palisade.service.data.exception.SerialiserNotFoundException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
  * A factory for {@link Serialiser} objects, using:
- * - A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
- *      for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
- * - A {@link Map} containing a {@link String} value of the serialiser class and a {@link String} value of the domain
- *      class for a {@link Serialiser}
+ * - A {@link String} value to determine the serialised format of a file
+ * - A {@link String} value of the fully qualified class that will be the file type
+ * - A {@link String} value of the fully qualified class of the serialiser that will be created.
  */
 public class StdSerialiserPrepopulationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StdSerialiserPrepopulationFactory.class);
 
-    private Map<String, String> flavourMap;
-    private Map<String, String> serialiserMap;
+    private String flavourFormat;
+    private String flavourType;
+    private String serialiserClass;
 
     /**
      * Constructor with 0 arguments for a {@link StdSerialiserPrepopulationFactory} object
      */
     public StdSerialiserPrepopulationFactory() {
-        flavourMap = Collections.emptyMap();
-        serialiserMap = Collections.emptyMap();
+        flavourFormat = "";
+        flavourType = "";
+        serialiserClass = "";
     }
 
     /**
      * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument
      *
-     * @param flavourMap   A {@link Map} containing a {@link String} value of the data type and a {@link String} value of the data format
-     *                      for a {@link uk.gov.gchq.palisade.reader.common.DataFlavour}
-     * @param serialiser    A {@link Map} containing a {@link String} value of the serialiser class and a {@link String} value of the domain
-     *                      class for a {@link Serialiser}
+     * @param flavourFormat     a {@link String} value of the serialised format for a {@link DataFlavour}
+     * @param flavourType       a {@link String} value of the fully qualified type for a {@link DataFlavour}
+     * @param serialiserClass   a {@link String} value of the fully qualified class to create a {@link Serialiser}
      */
-    public StdSerialiserPrepopulationFactory(final Map<String, String> flavourMap,
-                                             final Map<String, String> serialiser) {
-        this.flavourMap = flavourMap;
-        this.serialiserMap = serialiser;
+    public StdSerialiserPrepopulationFactory(final String flavourFormat, final String flavourType, final String serialiserClass) {
+        this.flavourFormat = flavourFormat;
+        this.flavourType = flavourType;
+        this.serialiserClass = serialiserClass;
     }
 
     @Generated
-    public Map<String, String> getFlavourMap() {
-        return flavourMap;
+    public String getFlavourFormat() {
+        return flavourFormat;
     }
 
     @Generated
-    public void setFlavourMap(final Map<String, String> flavourMap) {
-        requireNonNull(flavourMap);
-        this.flavourMap = flavourMap;
+    public void setFlavourFormat(final String flavourFormat) {
+        requireNonNull(flavourFormat);
+        this.flavourFormat = flavourFormat;
     }
 
     @Generated
-    public Map<String, String> getSerialiser() {
-        return serialiserMap;
+    public String getFlavourType() {
+        return flavourType;
     }
 
     @Generated
-    public void setSerialiser(final Map<String, String> serialiser) {
-        requireNonNull(serialiser);
-        this.serialiserMap = serialiser;
+    public void setFlavourType(final String flavourType) {
+        requireNonNull(flavourType);
+        this.flavourType = flavourType;
+    }
+
+    @Generated
+    public String getSerialiserClass() {
+        return serialiserClass;
+    }
+
+    @Generated
+    public void setSerialiserClass(final String serialiserClass) {
+        requireNonNull(serialiserClass);
+        this.serialiserClass = serialiserClass;
     }
 
     /**
-     * Creates a {@link DataFlavour} and a {@link Serialiser} using the data within a {@link StdSerialiserPrepopulationFactory}
+     * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a {@link StdSerialiserPrepopulationFactory}
      *
      * @return  an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */
-    public Entry<DataFlavour, Serialiser<?>> build() {
-        DataFlavour flavour = null;
-        Serialiser<?> serialiser = null;
-        for (Entry<String, String> entry : flavourMap.entrySet()) {
-            flavour = DataFlavour.of(entry.getKey(), entry.getValue());
-        }
-        for (Entry<String, String> entry : serialiserMap.entrySet()) {
-            try {
-                serialiser = (Serialiser<?>) Class.forName(entry.getKey())
-                        .getConstructor(Class.class)
-                        .newInstance(Class.forName(entry.getValue()));
-            } catch (ReflectiveOperationException ex) {
-                LOGGER.error("Error creating serialiser {} with domain {}: {}", entry.getKey(), entry.getValue(), ex.getMessage());
-                throw new RuntimeException(ex);
-            }
+    public Entry<DataFlavour, Serialiser<Object>> build() {
+        DataFlavour flavour = DataFlavour.of(flavourType, flavourFormat);
+        Serialiser<Object> serialiser;
+        try {
+            serialiser = (Serialiser<Object>) Class.forName(serialiserClass)
+                    .getConstructor(Class.class)
+                    .newInstance(Class.forName(flavourType));
+        } catch (ClassNotFoundException ex) {
+            throw new SerialiserNotFoundException("Error getting the serialiser class", ex);
+        } catch (NoSuchMethodException ex) {
+            throw new SerialiserConstructorNotFoundException("Error getting the serialiser constructor method", ex);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException ex) {
+            throw new SerialiserInitialisationException("Error initialising the serialiser", ex);
         }
         return new SimpleImmutableEntry<>(flavour, serialiser);
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof StdSerialiserPrepopulationFactory)) {
+            return false;
+        }
+        final StdSerialiserPrepopulationFactory that = (StdSerialiserPrepopulationFactory) o;
+        return Objects.equals(flavourFormat, that.flavourFormat) &&
+                Objects.equals(flavourType, that.flavourType) &&
+                Objects.equals(serialiserClass, that.serialiserClass);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(flavourFormat, flavourType, serialiserClass);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", StdSerialiserPrepopulationFactory.class.getSimpleName() + "[", "]")
+                .add("flavourFormat='" + flavourFormat + "'")
+                .add("flavourType='" + flavourType + "'")
+                .add("serialiser='" + serialiserClass + "'")
+                .add(super.toString())
+                .toString();
     }
 }
