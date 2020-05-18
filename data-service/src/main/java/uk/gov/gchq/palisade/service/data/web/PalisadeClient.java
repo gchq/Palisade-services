@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.net.URI;
 
-@FeignClient(name = "palisade-service", url = "undefined")
+@FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
 public interface PalisadeClient {
 
     @PostMapping(path = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")

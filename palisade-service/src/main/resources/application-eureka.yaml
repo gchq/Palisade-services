@@ -47,7 +47,7 @@ eureka:
 # i.e. map from what-i-call-a-service -> what-that-service-calls-itself
 web:
   client:
-    audit-service: audit-service-not-found
-    policy-service: policy-service-not-found
-    resource-service: resource-service-not-found
-    user-service: user-service-not-found
+    audit-service: audit-service
+    policy-service: policy-service
+    resource-service: resource-service
+    user-service: user-service
