@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A {@link StdSerialiserPrepopulationFactory} that uses Spring to configure a resource from a yaml file
  * A factory for {@link Serialiser} objects, using:
- * - A {@link String} value to determine the serialised format of a file
+ * - A {@link String} value of the serialised format of a file
  * - A {@link String} value of the fully qualified class that will be the file type
  * - A {@link String} value of the fully qualified class of the serialiser that will be created.
  */
