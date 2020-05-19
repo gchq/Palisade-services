@@ -29,7 +29,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
@@ -62,15 +61,6 @@ public class DataController {
 
         LOGGER.info("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/addSerialiser", consumes = "application/json", produces = "application/json")
-    public Boolean addSerialiser(@RequestBody final AddSerialiserRequest request) {
-        LOGGER.info("Invoking addSerialiser: {}", request);
-        Boolean response = service.addSerialiser(request.getDataFlavour(), request.getSerialiser());
-
-        LOGGER.info("Request processed. Result: {}", response);
-        return response;
     }
 
     /**

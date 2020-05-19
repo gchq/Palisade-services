@@ -22,7 +22,7 @@ package uk.gov.gchq.palisade.service.data.exception;
 public class SerialiserInitialisationException extends RuntimeException {
 
     /**
-     * Constructs a new {@link SerialiserInitialisationException} with the specified detail message and cause.
+     * Constructs a new {@link SerialiserInitialisationException} with the cause.
      *
      * @param cause     a {@link Throwable} that caused the error
      */
@@ -31,7 +31,7 @@ public class SerialiserInitialisationException extends RuntimeException {
     }
 
     /**
-     * Constructs a new {@link SerialiserInitialisationException} with the specified detail message and cause.
+     * Constructs a new {@link SerialiserInitialisationException} with the specified detail message.
      *
      * @param message   a {@link String} value detailing the error
      */
