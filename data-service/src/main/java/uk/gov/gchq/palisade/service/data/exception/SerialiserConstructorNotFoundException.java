@@ -24,8 +24,26 @@ public class SerialiserConstructorNotFoundException extends RuntimeException {
     /**
      * Constructs a new {@link SerialiserConstructorNotFoundException} with the specified detail message and cause.
      *
+     * @param cause     a {@link Throwable} that caused the error
+     */
+    public SerialiserConstructorNotFoundException(final Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Constructs a new {@link SerialiserConstructorNotFoundException} with the specified detail message and cause.
+     *
      * @param message   a {@link String} value detailing the error
-     * @param cause     a {@link Throwable} that caused the iss
+     */
+    public SerialiserConstructorNotFoundException(final String message) {
+        super(message);
+    }
+
+    /**
+     * Constructs a new {@link SerialiserConstructorNotFoundException} with the specified detail message and cause.
+     *
+     * @param message   a {@link String} value detailing the error
+     * @param cause     a {@link Throwable} that caused the error
      */
     public SerialiserConstructorNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
