@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
+import org.springframework.cloud.netflix.ribbon.RibbonClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
-@FeignClient(name = "user-service", url = "${web.client.user-service}")
+@FeignClient(name = "user-service")
+@RibbonClient(name = "user-service")
 public interface UserClient {
 
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")

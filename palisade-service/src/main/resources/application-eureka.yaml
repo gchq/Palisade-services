@@ -28,6 +28,10 @@ spring:
 # Since using eureka, let spring autoconfigure a port
 server:
   port: 0
+  ribbon:
+    eureka:
+      enabled: true
+    ServerListRefreshInterval: 1000
 
 # Eureka config
 eureka:
@@ -42,6 +46,8 @@ eureka:
     enabled: true
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
+
+
 
 # Eureka discovery by lookup for registered service by name
 # i.e. map from what-i-call-a-service -> what-that-service-calls-itself
