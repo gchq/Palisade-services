@@ -74,7 +74,7 @@ public class SimpleResourceService implements ResourceService {
         URI dataServiceUri = clientConfiguration.getClientUri("data-service").orElseThrow(() -> new RuntimeException("Failed to find any instance of 'data-service'"));
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
-                .type("txt")
+                .type("java.lang.String")
                 .connectionDetail(new SimpleConnectionDetail().uri(dataServiceUri.toString()));
     }
 
