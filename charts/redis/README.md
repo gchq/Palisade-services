@@ -32,7 +32,6 @@ The main features of each chart are the following:
 |-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | Supports multiple databases                   | Supports only one database. Better if you have a big dataset                                                                                        |
 | Single write point (single master)            | Multiple write points (multiple masters)                                                                                                            |
-| ![Redis Topology](img/redis-topology.png)     | ![Redis Cluster Topology](img/redis-cluster-topology.png)                                                                                           |
 
 ## Prerequisites
 
