@@ -68,25 +68,6 @@ spec:
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
-
-
-  - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-slave-palisade:jdk11
-    imagePullPolicy: IfNotPresent
-    command: ['cat']
-    tty: true
-    env:
-    - name: TILLER_NAMESPACE
-      value: tiller
-    - name: HELM_HOST
-      value: :44134
-    volumeMounts:
-      - mountPath: /var/run
-        name: docker-sock
-
-  volumes:
-    - name: docker-graph-storage
-      emptyDir: {}
 ''') {
     node(POD_LABEL) {
         def GIT_BRANCH_NAME
@@ -199,3 +180,21 @@ spec:
         }
     }
 }
+
+//- name: maven
+//image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-slave-palisade:jdk11
+//imagePullPolicy: IfNotPresent
+//command: ['cat']
+//tty: true
+//env:
+//- name: TILLER_NAMESPACE
+//value: tiller
+//- name: HELM_HOST
+//value: :44134
+//volumeMounts:
+//- mountPath: /var/run
+//name: docker-sock
+//
+//volumes:
+//- name: docker-graph-storage
+//emptyDir: {}

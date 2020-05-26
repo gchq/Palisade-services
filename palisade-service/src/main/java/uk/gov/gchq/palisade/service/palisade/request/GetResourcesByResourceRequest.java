@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class is used to request a list of {@link uk.gov.gchq.palisade.resource.Resource}'s
- * from the resource-service based on a {@link uk.gov.gchq.palisade.resource.Resource}.
- * For example getting a list of all {@link uk.gov.gchq.palisade.resource.Resource}'s
+ * This class is used to request a list of {@link Resource}'s
+ * from the resource-service based on a {@link Resource}.
+ * For example getting a list of all {@link Resource}'s
  * contained in the given {@link uk.gov.gchq.palisade.resource.impl.DirectoryResource}, the same as an {@code ls} would in linux.
  */
 public class GetResourcesByResourceRequest extends Request {
     private Resource resource;
 
     public GetResourcesByResourceRequest() {
-        // no-args constructor needed for serialization only
+        //no-args constructor needed for serialization only
     }
 
     /**
@@ -43,7 +43,6 @@ public class GetResourcesByResourceRequest extends Request {
      */
     @Generated
     public GetResourcesByResourceRequest resource(final Resource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
         this.setResource(resource);
         return this;
     }
@@ -71,8 +70,8 @@ public class GetResourcesByResourceRequest extends Request {
         if (!super.equals(o)) {
             return false;
         }
-        final GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
-        return Objects.equals(resource, that.resource);
+        GetResourcesByResourceRequest that = (GetResourcesByResourceRequest) o;
+        return resource.equals(that.resource);
     }
 
     @Override
@@ -86,6 +85,7 @@ public class GetResourcesByResourceRequest extends Request {
     public String toString() {
         return new StringJoiner(", ", GetResourcesByResourceRequest.class.getSimpleName() + "[", "]")
                 .add("resource=" + resource)
+                .add(super.toString())
                 .toString();
     }
 }

@@ -36,18 +36,24 @@ manager:
   services:
     audit-service:
       jar: audit-service/target/audit-service-${app.version}-exec.jar
+      log: audit-service.log
 
     data-service:
       jar: data-service/target/data-service-${app.version}-exec.jar
+      log: data-service.log
 
     palisade-service:
       jar: palisade-service/target/palisade-service-${app.version}-exec.jar
+      log: palisade-service.log
 
     policy-service:
       jar: policy-service/target/policy-service-${app.version}-exec.jar
+      log: policy-service.log
 
     resource-service:
       jar: resource-service/target/resource-service-${app.version}-exec.jar
+      log: resource-service.log
 
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar
+      log: user-service.log

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -44,18 +45,28 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+     * These users will be used for prepopulating the {@link UserService}
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
+     */
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
+    @ConfigurationProperties(prefix = "population")
     public StdUserConfiguration userConfiguration() {
-        LOGGER.info("Standard User Configuration Instantiated");
         return new StdUserConfiguration();
     }
 
+    /**
+     * A factory for {@link uk.gov.gchq.palisade.User} objects, using a userId, a list of authorisations and a list of roles
+     *
+     * @return a standard {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.User} from configuration
+     */
     @Bean
-    @ConditionalOnProperty(prefix = "population", name = "user", havingValue = "std")
-    public StdUserCacheWarmerFactory userCacheWarmerFactory() {
-        LOGGER.info("Standard User Cache Warmer Instantiated");
-        return new StdUserCacheWarmerFactory();
+    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")
+    public StdUserPrepopulationFactory userPrepopulationFactory() {
+        return new StdUserPrepopulationFactory();
     }
 
     @Bean

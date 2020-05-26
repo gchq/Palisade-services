@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class TaskConfiguration {
     private final Map<String, ServiceConfiguration> services;
 
-    public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) throws Exception {
+    public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) {
         this.services = serviceConfiguration.entrySet().stream()
                 .filter(entry -> services.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

@@ -28,9 +28,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
@@ -39,10 +37,13 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,7 +64,7 @@ public class ResultAggregationServiceTest {
 
     private RegisterDataRequest request;
     private User user;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private Map<LeafResource, Rules> rules = new HashMap<>();
     private RequestId requestId = new RequestId().id(UUID.randomUUID().toString());
     private RequestId originalRequestId = new RequestId().id("OriginalId");
@@ -85,14 +86,12 @@ public class ResultAggregationServiceTest {
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource();
-        resource.id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt");
-        resource.parent(new DirectoryResource().id("/path/to/new/")
-                .parent(new DirectoryResource().id("/path/to/")
-                        .parent(new DirectoryResource().id("/path/")
-                                .parent(new SystemResource().id("/")))));
         ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
-        resources.put(resource, connectionDetail);
+        FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
+                .type("bob")
+                .serialisedFormat("txt")
+                .connectionDetail(connectionDetail);
+        resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);

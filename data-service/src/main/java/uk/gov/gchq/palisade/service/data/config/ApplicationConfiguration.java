@@ -16,9 +16,11 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +41,6 @@ import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
-import uk.gov.gchq.palisade.service.data.web.DataHealthIndicator;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
@@ -57,10 +58,17 @@ import java.util.function.Supplier;
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * A generic resolver from service names to {@link URI}s
+     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
+     *
+     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
+     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
+     */
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration();
+    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
+        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
     }
 
     @Bean
@@ -73,11 +81,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     public DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
-    }
-
-    @Bean
-    public DataHealthIndicator dataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
-        return new DataHealthIndicator(palisadeService, auditService);
     }
 
     @Bean

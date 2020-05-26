@@ -21,18 +21,18 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
+import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -89,9 +89,9 @@ public class SimplePalisadeService implements PalisadeService {
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         resourceRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final CompletableFuture<Map<LeafResource, ConnectionDetail>> resources = resourceService.getResourcesById(resourceRequest);
+        final CompletableFuture<Set<LeafResource>> resources = resourceService.getResourcesById(resourceRequest);
 
-        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join().keySet());
+        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join());
         policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting rules from policyService: {}", request);
         CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest);
@@ -103,8 +103,7 @@ public class SimplePalisadeService implements PalisadeService {
     }
 
     @Override
-    public CompletableFuture<DataRequestConfig> getDataRequestConfig(
-            final GetDataRequestConfig request) {
+    public CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
