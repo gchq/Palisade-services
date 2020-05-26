@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.palisade.web;
 
 import feign.Response;
-import org.springframework.cloud.netflix.ribbon.RibbonClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +27,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 @FeignClient(name = "resource-service")
-@RibbonClient(name = "resource-service")
 public interface ResourceClient {
 
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")

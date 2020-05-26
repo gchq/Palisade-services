@@ -28,10 +28,6 @@ spring:
 # Since using eureka, let spring autoconfigure a port
 server:
   port: 0
-  ribbon:
-    eureka:
-      enabled: true
-    ServerListRefreshInterval: 1000
 
 # Eureka config
 eureka:
@@ -40,6 +36,8 @@ eureka:
     port: 8083
     preferIpAddress: false
     lease-renewal-interval-in-seconds: 5
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/

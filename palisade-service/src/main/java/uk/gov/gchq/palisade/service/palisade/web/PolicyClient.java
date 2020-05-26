@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
-import org.springframework.cloud.netflix.ribbon.RibbonClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +26,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import java.util.Map;
 
 @FeignClient(name = "policy-service")
-@RibbonClient(name = "policy-service")
 public interface PolicyClient {
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
     Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request);

@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.palisade.web;
 
 import feign.Response;
-import org.springframework.cloud.netflix.ribbon.RibbonClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 
 @FeignClient(name = "audit-service")
-@RibbonClient(name = "audit-service")
 public interface AuditClient {
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
     Boolean audit(@RequestBody final AuditRequest request);
