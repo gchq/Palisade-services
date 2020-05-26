@@ -53,53 +53,6 @@ spec:
     
     
     
-//  - name: docker-daemon
-//    image: docker:19.03.1-dind
-//    securityContext:
-//      privileged: true
-//    resources:
-//      requests:
-//        cpu: 20m
-//        memory: 512Mi
-//    volumeMounts:
-//      - name: docker-graph-storage
-//        mountPath: /var/lib/docker
-//    env:
-//      - name: DOCKER_TLS_CERTDIR
-//        value: ""
-//        
-//  - name: maven
-//    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
-//    imagePullPolicy: IfNotPresent
-//    command: ['cat']
-//    tty: true
-//    env:
-//    - name: TILLER_NAMESPACE
-//      value: tiller
-//    - name: HELM_HOST
-//      value: :44134
-//    volumeMounts:
-//      - mountPath: /var/run
-//        name: docker-sock
-//            
-//  - name: dind-daemon
-//    image: docker:1.12.6-dind
-//    resources:
-//      requests:
-//        cpu: 20m
-//        memory: 512Mi
-//    securityContext:
-//      privileged: true
-//    volumeMounts:
-//      - name: docker-graph-storage
-//        mountPath: /var/lib/docker
-//
-//  volumes:
-//    - name: docker-graph-storage
-//      emptyDir: {}
-//    - name: docker-sock
-//      hostPath:
-//         path: /var/run
         
 ''') {
     node(POD_LABEL) {
@@ -231,3 +184,52 @@ spec:
 //volumes:
 //- name: docker-graph-storage
 //emptyDir: {}
+
+
+//  - name: docker-daemon
+//    image: docker:19.03.1-dind
+//    securityContext:
+//      privileged: true
+//    resources:
+//      requests:
+//        cpu: 20m
+//        memory: 512Mi
+//    volumeMounts:
+//      - name: docker-graph-storage
+//        mountPath: /var/lib/docker
+//    env:
+//      - name: DOCKER_TLS_CERTDIR
+//        value: ""
+//
+//  - name: maven
+//    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
+//    imagePullPolicy: IfNotPresent
+//    command: ['cat']
+//    tty: true
+//    env:
+//    - name: TILLER_NAMESPACE
+//      value: tiller
+//    - name: HELM_HOST
+//      value: :44134
+//    volumeMounts:
+//      - mountPath: /var/run
+//        name: docker-sock
+//
+//  - name: dind-daemon
+//    image: docker:1.12.6-dind
+//    resources:
+//      requests:
+//        cpu: 20m
+//        memory: 512Mi
+//    securityContext:
+//      privileged: true
+//    volumeMounts:
+//      - name: docker-graph-storage
+//        mountPath: /var/lib/docker
+//
+//  volumes:
+//    - name: docker-graph-storage
+//      emptyDir: {}
+//    - name: docker-sock
+//      hostPath:
+//         path: /var/run
