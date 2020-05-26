@@ -81,7 +81,7 @@ spec:
   - name: maven
     image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
     imagePullPolicy: IfNotPresent
-    command: ['cat']
+    command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
     volumeMounts:
       - mountPath: /var/run
