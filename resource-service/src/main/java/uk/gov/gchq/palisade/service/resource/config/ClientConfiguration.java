@@ -29,13 +29,23 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A generic resolver from service names to {@link URI}s
+ * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
+ */
 public class ClientConfiguration {
     private Map<String, URI> client;
 
     private final Optional<EurekaClient> eurekaClient;
 
-    public ClientConfiguration(final Optional<EurekaClient> eurekaClient) {
-        this.eurekaClient = eurekaClient;
+    /**
+     * Default constructor with an {@link Optional} {@link EurekaClient} depending on whether this is
+     * an eureka-enabled environment or not.
+     *
+     * @param eurekaClient the eureka client to (maybe) use to resolve {@link URI}s for service names
+     */
+    public ClientConfiguration(final EurekaClient eurekaClient) {
+        this.eurekaClient = Optional.ofNullable(eurekaClient);
     }
 
     @Generated
@@ -51,10 +61,11 @@ public class ClientConfiguration {
 
     public Optional<URI> getClientUri(final String serviceName) {
         requireNonNull(serviceName);
-        // If possible, use eureka
-        // Otherwise, fall back to config yaml
-        return eurekaResolve(serviceName)
-                .or(() -> configResolve(serviceName));
+        return eurekaClient
+                // If possible, use eureka
+                .map(x -> eurekaResolve(serviceName))
+                // Otherwise, fall back to config yaml
+                .orElseGet(() -> configResolve(serviceName));
     }
 
     private Optional<URI> configResolve(final String serviceName) {

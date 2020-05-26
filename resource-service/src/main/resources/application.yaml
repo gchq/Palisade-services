@@ -39,7 +39,7 @@ management:
       enabled: true
 
 population:
-  resource: std
+  resourceProvider: std
 
 # Available options: simple, hadoop
 resource:

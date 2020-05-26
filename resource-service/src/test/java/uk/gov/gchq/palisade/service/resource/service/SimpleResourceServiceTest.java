@@ -54,7 +54,7 @@ public class SimpleResourceServiceTest {
     @Test
     public void javaFilesInSrcAndTest() throws IOException {
         // Given
-        Set<LeafResource> javaFiles = service.getResourcesByType("java").collect(Collectors.toSet());
+        Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
         DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
         DirectoryResource srcTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/test/java").getCanonicalFile().toURI());
 
@@ -87,7 +87,7 @@ public class SimpleResourceServiceTest {
         assertThat(resourcesById.get(), equalTo(expectedAvroResource));
 
         // When
-        Optional<LeafResource> resourcesByType = service.getResourcesByType(expectedAvroResource.getType())
+        Optional<LeafResource> resourcesByType = service.getResourcesBySerialisedFormat(expectedAvroResource.getSerialisedFormat())
                 .filter(expectedAvroResource::equals)
                 .findFirst();
 
