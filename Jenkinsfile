@@ -81,14 +81,7 @@ spec:
     volumeMounts:
       - mountPath: /var/run
         name: docker-sock
-  volumes:
-    - name: docker-graph-storage
-      emptyDir: {}
-    - name: docker-sock
-      hostPath:
-         path: /var/run
-        
-    
+            
   - name: dind-daemon
     image: docker:1.12.6-dind
     resources:
@@ -100,6 +93,14 @@ spec:
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
+
+  volumes:
+    - name: docker-graph-storage
+      emptyDir: {}
+    - name: docker-sock
+      hostPath:
+         path: /var/run
+        
 ''') {
     node(POD_LABEL) {
         def GIT_BRANCH_NAME
