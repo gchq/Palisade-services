@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+
+//node-affinity
+//nodes 1..3 are reserved for Jenkins slave pods.
+//node 0 is used for the Jenkins master
+//node 4 is used for SQ and Nexus
+//dind-daemon
+//dind-daemon below is the sidecar creation pattern for the docker in docker entity
+//it allows the creation and build of docker images
+//but more importantly allows the use of testcontainers
+//Be careful with upgrading the version number for the dind-daemon
+//in experiments carried out, the security priviledges seemed to prevent
+//connection to the docker sock for much later versions
+
+
 podTemplate(yaml: '''
 apiVersion: v1
 kind: Pod
@@ -53,6 +67,7 @@ spec:
 
   - name: dind-daemon
     image: docker:1.12.6-dind
+    imagePullPolicy: IfNotPresent
     resources:
       requests:
         cpu: 20m
@@ -62,6 +77,16 @@ spec:
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
+
+  - name: maven
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:INFRA
+    imagePullPolicy: IfNotPresent
+    command: ['cat']
+    tty: true
+    volumeMounts:
+      - mountPath: /var/run
+        name: docker-sock
+
 
   volumes:
     - name: docker-graph-storage
@@ -161,25 +186,25 @@ spec:
         }
 
 
-//        stage('Maven deploy') {
-//            dir('Palisade-services') {
-//                container('maven') {
-//                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                        if (("${env.BRANCH_NAME}" == "develop") ||
-//                                ("${env.BRANCH_NAME}" == "master") ||
-//                                ("${env.BRANCH_NAME}" == "PAL-324-new-infrastructure-changes")) {
-//                            sh 'palisade-login'
-//                            //now extract the public IP addresses that this will be open on
-//                            sh 'extract-addresses'
-//                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+        stage('Maven deploy') {
+            dir('Palisade-services') {
+                container('maven') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        if (("${env.BRANCH_NAME}" == "develop") ||
+                                ("${env.BRANCH_NAME}" == "master") ||
+                                ("${env.BRANCH_NAME}" == "PAL-324-new-infrastructure-changes")) {
+                            sh 'palisade-login'
+                            //now extract the public IP addresses that this will be open on
+                            sh 'extract-addresses'
+                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
 //                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
-//                        } else {
-//                            sh "echo - no deploy"
-//                        }
-//                    }
-//                }
-//            }
-//        }
+                        } else {
+                            sh "echo - no deploy"
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
