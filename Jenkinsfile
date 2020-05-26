@@ -34,7 +34,7 @@ spec:
             - node3
   containers:
   - name: docker-cmds
-    image: jnlp-did:jdk11
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:jdk11
     imagePullPolicy: IfNotPresent
     command:
     - sleep
@@ -69,7 +69,7 @@ spec:
         value: ""
         
   - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-slave-palisade:jdk11
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/docker-jnlp-slave-image:jdk11
     imagePullPolicy: IfNotPresent
     command: ['cat']
     tty: true
