@@ -216,7 +216,7 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-//                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace nigel'
                         } else {
                             sh "echo - no deploy"
                         }
