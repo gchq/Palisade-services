@@ -25,7 +25,7 @@ dashboard:
 kafka:
   install: true
 redis:
-  install: false
+  install: true
 redis-cluster:
   install: false
 
