@@ -13,8 +13,7 @@
 # limitations under the License.
 
 fullnameOverride: palisade-services
-# hosting: local, metal or cloud and defines configuration parameter choices for some child charts according to deployment environment
-hosting: local
+
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
   install: false

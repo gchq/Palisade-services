@@ -36,7 +36,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       volumes:
-      - name: "classjars"
+      - name: "classpathjars"
         persistentVolumeClaim:
           claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
       containers:
@@ -65,7 +65,7 @@ spec:
           timeoutSeconds: 5
         volumeMounts:
         - mountPath: "/usr/share/classpath"
-          name: "classjars"
+          name: "classpathjars"
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

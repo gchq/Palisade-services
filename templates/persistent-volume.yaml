@@ -18,7 +18,7 @@ spec:
   hostPath:
     # Directory location on host
     path: {{ required "need to define the policy directory by using --set global.persistence.hostpath=localpath location" .Values.global.persistence.hostpath  | quote }}
-    type: Directory
+    type: DirectoryOrCreate
   {{- else }}
   accessModes:
   - ReadWriteMany

@@ -11,14 +11,10 @@ metadata:
     "app.kubernetes.io/component": {{ (index .Values.global.persistence.storageTierName 0) | quote }}
 spec:
   storageClassName: {{ .Values.global.persistence.storageClass | default "" | quote }}
+  accessModes:
+  - ReadOnlyMany
   {{- if .Values.global.localMount.enabled }}
-  accessModes:
-    {{- range .Values.global.persistence.accessMode }}
-  - {{ . | quote }}
-    {{- end }}
   {{ else }}
-  accessModes:
-  - ReadWriteMany
   storageClassName: efs-sc
   {{ end }}
   resources:
