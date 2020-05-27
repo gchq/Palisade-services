@@ -59,9 +59,9 @@ spec:
         value: tcp://localhost:2375
     resources:
       requests:
-        ephemeral-storage: "2Gi"
-      limits:
         ephemeral-storage: "4Gi"
+      limits:
+        ephemeral-storage: "8Gi"
   
   - name: hadolint
     image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
@@ -69,6 +69,11 @@ spec:
     command:
         - cat
     tty: true  
+    resources:
+      requests:
+        ephemeral-storage: "1Gi"
+      limits:
+        ephemeral-storage: "2Gi"
 
   - name: dind-daemon
     image: docker:1.12.6-dind
@@ -82,6 +87,11 @@ spec:
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
+    resources:
+      requests:
+        ephemeral-storage: "1Gi"
+      limits:
+        ephemeral-storage: "2Gi"
 
   - name: maven
     image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:INFRA
@@ -93,9 +103,9 @@ spec:
         name: docker-sock
     resources:
       requests:
-        ephemeral-storage: "2Gi"
-      limits:
         ephemeral-storage: "4Gi"
+      limits:
+        ephemeral-storage: "8Gi"
 
   volumes:
     - name: docker-graph-storage
@@ -103,10 +113,7 @@ spec:
     - name: docker-sock
       hostPath:
          path: /var/run
-    
-    
-    
-        
+            
 ''') {
     node(POD_LABEL) {
         def GIT_BRANCH_NAME
