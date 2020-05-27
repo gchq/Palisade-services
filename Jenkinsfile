@@ -177,20 +177,20 @@ spec:
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
-//        stage('Integration Tests') {
-//            // Always run some sort of integration test
-//            // If this branch name exists in integration-tests, use that
-//            // Otherwise, default to integration-tests/develop
-//            dir ('Palisade-integration-tests') {
-//                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-//                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
-//                container('docker-cmds') {
-//                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                        sh 'mvn -s $MAVEN_SETTINGS install'
-//                    }
-//                }
-//            }
-//        }
+        stage('Integration Tests') {
+            // Always run some sort of integration test
+            // If this branch name exists in integration-tests, use that
+            // Otherwise, default to integration-tests/develop
+            dir ('Palisade-integration-tests') {
+                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn -s $MAVEN_SETTINGS install'
+                    }
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             dir('Palisade-services') {
@@ -228,7 +228,7 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace nigel'
+                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
                         } else {
                             sh "echo - no deploy"
                         }
