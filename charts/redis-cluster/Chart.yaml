@@ -10,11 +10,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis
+# Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis-cluster
 
 apiVersion: v1
-name: redis
-version: 10.6.15
+name: redis-cluster
+version: 2.1.1
 appVersion: 6.0.3
 description: Open source, advanced key-value store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets and sorted sets.
 keywords:

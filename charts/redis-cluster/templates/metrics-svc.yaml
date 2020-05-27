@@ -10,36 +10,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis
+# Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis-cluster
 
 {{- if .Values.metrics.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "redis.fullname" . }}-metrics
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ template "redis.name" . }}
-    chart: {{ template "redis.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  name: {{ template "redis-cluster.fullname" . }}-metrics
+  labels: {{- include "redis-cluster.labels" . | nindent 4 }}
+    {{- if .Values.metrics.service.labels }}
+    {{ include "common.tplvalues.render" ( dict "value" .Values.metrics.service.labels "context" $ ) | indent 4 }}
+    {{- end }}
     app.kubernetes.io/component: "metrics"
-    {{- if .Values.metrics.service.labels -}}
-    {{- toYaml .Values.metrics.service.labels | nindent 4 }}
-    {{- end -}}
   {{- if .Values.metrics.service.annotations }}
-  annotations: {{- toYaml .Values.metrics.service.annotations | nindent 4 }}
+  annotations: {{ include "common.tplvalues.render" ( dict "value" .Values.metrics.service.annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.metrics.service.type }}
-  {{ if and (eq .Values.metrics.service.type "LoadBalancer") .Values.metrics.service.loadBalancerIP }}
+  {{- if and (eq .Values.metrics.service.type "LoadBalancer") .Values.metrics.service.loadBalancerIP }}
   loadBalancerIP: {{ .Values.metrics.service.loadBalancerIP }}
   {{- end }}
   ports:
     - name: metrics
       port: 9121
-      targetPort: metrics
-  selector:
-    app: {{ template "redis.name" . }}
-    release: {{ .Release.Name }}
+      targetPort: http-metrics
+  selector: {{- include "redis-cluster.matchLabels" $ | nindent 4 }}
 {{- end }}
