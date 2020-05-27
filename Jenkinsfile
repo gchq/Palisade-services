@@ -48,7 +48,7 @@ spec:
             - node3
   containers:
   - name: jnlp
-    image: jenkinscli/jnlp-slave:alpine
+    image: jenkins/jnlp-slave
     imagePullPolicy: Always
     args: 
     - $(JENKINS_SECRET)
