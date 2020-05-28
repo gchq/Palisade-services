@@ -27,6 +27,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
+@FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
@@ -42,13 +43,4 @@ public interface ResourceClient {
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(@RequestBody final AddResourceRequest request);
-
-
-    @Profile("eureka")
-    @FeignClient(name = "resource-service")
-    interface EurekaResourceClient extends ResourceClient { }
-
-    @Profile("!eureka")
-    @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
-    interface SimpleResourceClient extends ResourceClient { }
 }

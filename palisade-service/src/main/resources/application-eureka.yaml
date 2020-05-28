@@ -44,3 +44,11 @@ eureka:
     enabled: true
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
+
+# Explicitly provide default url to use Feign w/ Eureka
+web:
+  client:
+    audit-service: ""
+    policy-service: ""
+    resource-service: ""
+    user-service: ""
