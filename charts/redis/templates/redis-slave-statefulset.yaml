@@ -12,7 +12,7 @@
 #
 # Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis
 
-{{- if .Values.cluster.enabled }}
+{{ if .Values.cluster.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

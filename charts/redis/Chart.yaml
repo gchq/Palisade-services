@@ -30,4 +30,3 @@ maintainers:
     email: containers@bitnami.com
   - name: desaintmartin
     email: cedric@desaintmartin.fr
-engine: gotpl

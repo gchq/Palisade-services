@@ -12,7 +12,7 @@
 #
 # Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis-cluster
 
-{{- if .Values.metrics.enabled }}
+{{ if .Values.metrics.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

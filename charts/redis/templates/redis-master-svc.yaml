@@ -12,7 +12,7 @@
 #
 # Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis
 
-{{- if not .Values.sentinel.enabled }}
+{{ if not .Values.sentinel.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
