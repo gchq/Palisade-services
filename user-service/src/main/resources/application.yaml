@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 spring:
-
   application:
     name: user-service
   output:
@@ -37,15 +36,6 @@ management:
   endpoint:
     shutdown:
       enabled: true
-
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-    default-config: default
 
 user-service:
   implementation: null-user-service

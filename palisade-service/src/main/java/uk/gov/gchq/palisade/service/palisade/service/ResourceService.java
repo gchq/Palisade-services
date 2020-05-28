@@ -45,6 +45,10 @@ import java.util.stream.Stream;
 public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
+
+    @Autowired
+    private ResourceClient client;
+
     private final ObjectMapper objectMapper;
     private final Executor executor;
 
@@ -71,14 +75,11 @@ public class ResourceService implements Service {
         }
     };
 
-
     public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
+        this.client = resourceClient;
         this.objectMapper = objectMapper;
         this.executor = executor;
     }
-
-    @Autowired
-    private ResourceClient client;
 
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
         LOGGER.info("Getting resources by id from resource service: {}", request);

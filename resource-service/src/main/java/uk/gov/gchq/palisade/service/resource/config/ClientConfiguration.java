@@ -16,14 +16,11 @@
 
 package uk.gov.gchq.palisade.service.resource.config;
 
-import com.netflix.discovery.EurekaClient;
-import com.netflix.discovery.shared.Application;
-import org.springframework.cloud.netflix.eureka.EurekaServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 import uk.gov.gchq.palisade.Generated;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,16 +33,16 @@ import static java.util.Objects.requireNonNull;
 public class ClientConfiguration {
     private Map<String, URI> client;
 
-    private final Optional<EurekaClient> eurekaClient;
+    private final Optional<DiscoveryClient> discoveryClient;
 
     /**
-     * Default constructor with an {@link Optional} {@link EurekaClient} depending on whether this is
+     * Default constructor with an {@link Optional} {@link DiscoveryClient} depending on whether this is
      * an eureka-enabled environment or not.
      *
-     * @param eurekaClient the eureka client to (maybe) use to resolve {@link URI}s for service names
+     * @param discoveryClient the discovery client to (maybe) use to resolve {@link URI}s for service names
      */
-    public ClientConfiguration(final EurekaClient eurekaClient) {
-        this.eurekaClient = Optional.ofNullable(eurekaClient);
+    public ClientConfiguration(final DiscoveryClient discoveryClient) {
+        this.discoveryClient = Optional.ofNullable(discoveryClient);
     }
 
     @Generated
@@ -61,7 +58,7 @@ public class ClientConfiguration {
 
     public Optional<URI> getClientUri(final String serviceName) {
         requireNonNull(serviceName);
-        return eurekaClient
+        return discoveryClient
                 // If possible, use eureka
                 .map(x -> eurekaResolve(serviceName))
                 // Otherwise, fall back to config yaml
@@ -73,13 +70,6 @@ public class ClientConfiguration {
     }
 
     private Optional<URI> eurekaResolve(final String serviceName) {
-        return eurekaClient
-                .flatMap(eureka -> eureka.getApplications().getRegisteredApplications().stream()
-                        .map(Application::getInstances)
-                        .flatMap(List::stream)
-                        .filter(instance -> instance.getAppName().equalsIgnoreCase(client.get(serviceName).toString()))
-                        .map(EurekaServiceInstance::new)
-                        .map(EurekaServiceInstance::getUri)
-                        .findAny());
+        return Optional.of(URI.create(serviceName));
     }
 }

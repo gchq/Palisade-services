@@ -29,28 +29,26 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 public class UserService implements Service {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    private UserClient userClient;
+    private UserClient client;
 
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final Executor executor;
 
-
     public UserService(final UserClient userClient, final Executor executor) {
+        this.client = userClient;
         this.executor = executor;
-        LOGGER.info("UserClient is: {}", userClient);
     }
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.debug("Getting user from user service: {}", request);
-        LOGGER.info("UserClient now is: {}", userClient);
+        LOGGER.info("UserClient now is: {}", client);
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);
             user = CompletableFuture.supplyAsync(() -> {
-                User response = userClient.getUser(request);
+                User response = client.getUser(request);
                 LOGGER.info("Got user: {}", response);
                 return response;
             }, this.executor);

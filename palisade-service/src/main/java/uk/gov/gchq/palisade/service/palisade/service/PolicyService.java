@@ -31,14 +31,15 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 public class PolicyService implements Service {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
 
     @Autowired
     private PolicyClient client;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
     private final Executor executor;
 
     public PolicyService(final PolicyClient policyClient, final Executor executor) {
+        this.client = policyClient;
         this.executor = executor;
     }
 

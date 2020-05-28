@@ -24,13 +24,13 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
 public class AuditService implements Service {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
 
     @Autowired
     private AuditClient client;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
-
     public AuditService(final AuditClient auditClient) {
+        this.client = auditClient;
     }
 
     public Boolean audit(final AuditRequest request) {
