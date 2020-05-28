@@ -16,16 +16,23 @@
 package uk.gov.gchq.palisade.service.data.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
-@FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
 public interface PalisadeClient {
-
     @PostMapping(path = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
     DataRequestConfig getDataRequestConfig(@RequestBody final GetDataRequestConfig request);
 
+
+    @Profile("eureka")
+    @FeignClient(name = "palisade-service")
+    interface EurekaAuditClient extends AuditClient { }
+
+    @Profile("!eureka")
+    @FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
+    interface SimpleAuditClient extends AuditClient { }
 }

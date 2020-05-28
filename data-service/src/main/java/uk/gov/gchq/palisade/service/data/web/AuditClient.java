@@ -16,15 +16,22 @@
 package uk.gov.gchq.palisade.service.data.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 
-@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {
-
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
     Boolean audit(@RequestBody final AuditRequest request);
 
+
+    @Profile("eureka")
+    @FeignClient(name = "audit-service")
+    interface EurekaAuditClient extends AuditClient { }
+
+    @Profile("!eureka")
+    @FeignClient(name = "audit-service", url = "${web.client.audit-service}")
+    interface SimpleAuditClient extends AuditClient { }
 }
