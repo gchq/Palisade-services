@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -25,9 +26,16 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
 import java.util.Map;
 
-@FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
     Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request);
-}
 
+
+    @Profile("eureka")
+    @FeignClient(name = "policy-service")
+    interface EurekaPolicyClient extends PolicyClient { }
+
+    @Profile("!eureka")
+    @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
+    interface SimplePolicyClient extends PolicyClient { }
+}
