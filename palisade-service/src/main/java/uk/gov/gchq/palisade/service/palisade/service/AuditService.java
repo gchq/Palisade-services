@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
@@ -24,11 +25,12 @@ import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
 public class AuditService implements Service {
 
+    @Autowired
+    private AuditClient client;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
-    private final AuditClient client;
 
     public AuditService(final AuditClient auditClient) {
-        this.client = auditClient;
     }
 
     public Boolean audit(final AuditRequest request) {

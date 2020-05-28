@@ -28,5 +28,6 @@ public interface UserClient {
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
     User getUser(@RequestBody final GetUserRequest request);
 
+
 }
 

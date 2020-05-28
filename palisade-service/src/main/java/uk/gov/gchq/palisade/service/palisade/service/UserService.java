@@ -18,17 +18,12 @@ package uk.gov.gchq.palisade.service.palisade.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -36,27 +31,21 @@ import java.util.concurrent.Executor;
 public class UserService implements Service {
 
     @Autowired
-    DiscoveryClient client;
+    private UserClient userClient;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-    private UserClient userClient;
     private final Executor executor;
 
 
     public UserService(final UserClient userClient, final Executor executor) {
-        this.userClient = userClient;
         this.executor = executor;
-
+        LOGGER.info("UserClient is: {}", userClient);
     }
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
-        List<ServiceInstance> instances = client.getInstances("user-service");
-        ServiceInstance selectedInstance = instances
-                .get(new Random().nextInt(instances.size()));
-        this.userClient = (UserClient) selectedInstance;
-
         LOGGER.debug("Getting user from user service: {}", request);
-
+        LOGGER.info("UserClient now is: {}", userClient);
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);

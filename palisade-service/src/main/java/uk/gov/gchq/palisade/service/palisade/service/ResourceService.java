@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
@@ -44,7 +45,6 @@ import java.util.stream.Stream;
 public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
-    private final ResourceClient client;
     private final ObjectMapper objectMapper;
     private final Executor executor;
 
@@ -73,10 +73,12 @@ public class ResourceService implements Service {
 
 
     public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
-        this.client = resourceClient;
         this.objectMapper = objectMapper;
         this.executor = executor;
     }
+
+    @Autowired
+    private ResourceClient client;
 
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
         LOGGER.info("Getting resources by id from resource service: {}", request);
