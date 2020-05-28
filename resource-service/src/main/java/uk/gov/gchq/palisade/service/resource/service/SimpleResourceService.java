@@ -53,12 +53,12 @@ public class SimpleResourceService implements ResourceService {
                         try {
                             return file.getCanonicalFile();
                         } catch (IOException e) {
-                            LOGGER.error("Failed to get canonical file", e);
-                            return file;
+                            LOGGER.warn("Failed to get canonical file", e);
+                            return file.getAbsoluteFile();
                         }
                     })
                     .filter(File::isFile);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             LOGGER.error("Could not walk {}", path);
             LOGGER.error("Error was: ", ex);
             return Stream.empty();
