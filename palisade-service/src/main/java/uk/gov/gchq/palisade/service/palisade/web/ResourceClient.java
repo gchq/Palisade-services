@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.web;
 
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -28,7 +29,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
-
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
 
@@ -43,5 +43,4 @@ public interface ResourceClient {
 
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(@RequestBody final AddResourceRequest request);
-
 }

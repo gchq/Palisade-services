@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.web;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -24,8 +25,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
 @FeignClient(name = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
-
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
     User getUser(@RequestBody final GetUserRequest request);
-
 }

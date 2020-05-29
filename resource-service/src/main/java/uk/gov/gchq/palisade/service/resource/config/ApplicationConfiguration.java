@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -27,6 +26,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -82,13 +82,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * A generic resolver from service names to {@link URI}s
      * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
      *
-     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
+     * @param discoveryClient an optional {@link DiscoveryClient} for resolving service names
      * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
      */
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
-        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
+    public ClientConfiguration clientConfiguration(final ObjectProvider<DiscoveryClient> discoveryClient) {
+        return new ClientConfiguration(discoveryClient.getIfAvailable(() -> null));
     }
 
     /**
