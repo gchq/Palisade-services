@@ -49,10 +49,10 @@ feign:
         loggerLevel: basic
     default-config: default
 
-# Not needed as you'll either be running eureka, k8s or static
+# Default development & testing static config, not suitable for production
 web:
   client:
-    audit-service: audit-service-not-found
-    policy-service: policy-service-not-found
-    resource-service: resource-service-not-found
-    user-service: user-service-not-found
+    audit-service: http://localhost:8081
+    policy-service: http://localhost:8085
+    resource-service: http://localhost:8086
+    user-service: http://localhost:8087

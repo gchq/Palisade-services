@@ -45,7 +45,7 @@ eureka:
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
 
-# Explicitly provide default url to use Feign w/ Eureka
+# Discovery by spring.application.name
 web:
   client:
     audit-service: ""

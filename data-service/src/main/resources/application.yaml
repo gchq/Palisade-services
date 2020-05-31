@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ feign:
         loggerLevel: basic
     default-config: default
 
+# Default development & testing static config, not suitable for production
 web:
   client:
-    audit-service: audit-service
-    palisade-service: palisade-service
+    audit-service: http://localhost:8081
+    palisade-service: http://localhost:8084
