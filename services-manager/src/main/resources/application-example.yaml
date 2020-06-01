@@ -44,20 +44,8 @@ example:
 manager:
   schedule:
     - palisade-task
-    - example-task
-
-  tasks:
-    example-task:
-      - rest-example
 
   services:
-    rest-example:
-      jar: ${example.model}
-      profiles:
-        - rest
-      log: rest-example.log
-      err: rest-example.err
-
     audit-service:
       paths: *libraries
       profiles: *profiles
