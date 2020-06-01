@@ -1,0 +1,111 @@
+# Copyright 2019 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+fullnameOverride: palisade-services
+
+# hosting: [local | aws | metal] the target environment to deploy to
+hosting: local
+
+traefik:
+  # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
+  install: false
+metrics-server:
+  # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
+  install: false
+dashboard:
+  # install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+  install: false
+kafka:
+  # install: install kafka streaming platform
+  install: true
+redis:
+  # install: install redis persistence and caching data storage platform
+  install: true
+redis-cluster:
+  # install: install clustered redis persistence and caching data storage platform
+  install: false
+
+namespaces:
+  default: default
+  dev: dev
+  uat: uat
+  prod: prod
+
+global:
+  # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
+  hostname: localhost
+
+  # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
+  nodes: 1
+
+  # namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
+  namespace: default
+
+  # uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
+  uniqueNamespace: false
+
+  # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
+  repository: palisade
+
+  # see charts/kafka/charts/zookeeper
+  zookeeperConnectString: palisade-zookeeper:2181
+
+  # persistent-volume and associated claims configurations
+  persistence:
+    # classpath-jars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
+    classpathJars:
+      name: classpath-jars
+      # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
+      mountPath: "/usr/share/classpath-jars"
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # volumeHandle: aws handle for the volume to mount
+      volumeHandle: null
+      # aws host directory to mount
+      volumePath: "/"
+
+    # data-store: Store used by data-service and associated data-readers to read resources and return to a client
+    dataStore:
+      name: data-store
+      # mountPath: internal mountpoint for data directory, will be referenced by all client resource requests
+      mountPath: "/data"
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # volumeHandle: aws handle for the volume to mount
+      volumeHandle: null
+      # aws host directory to mount
+      volumePath: "/"
+
+    # kafka: Store used by kafka for persisting stream logs
+    kafka:
+      name: kafka-persistence
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # volumeHandle: aws handle for the volume to mount
+      volumeHandle: null
+      # aws host directory to mount
+      volumePath: "/"
+
+    # redis: Store used by redis and redis-cluster for persistence and caching
+    redis:
+      name: redis-persistence
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # volumeHandle: aws handle for the volume to mount
+      volumeHandle: null
+      # aws host directory to mount
+      volumePath: "/"
+
+  globalIPAddresses:

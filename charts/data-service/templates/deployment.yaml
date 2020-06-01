@@ -35,7 +35,6 @@ spec:
         app.kubernetes.io/name: {{ include "data-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      #init-path will mkdir on the mount point
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
@@ -44,9 +43,6 @@ spec:
           - name: web
             containerPort: 8082
             protocol: TCP
-        volumeMounts:
-        - mountPath: "/usr/share/data"
-          name: classjars
         livenessProbe:
           httpGet:
             path: /actuator/health
@@ -64,21 +60,30 @@ spec:
           periodSeconds: 20
           timeoutSeconds: 5
         resources:
-        {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}
+          name: {{ .Values.global.persistence.classpathJars.name }}
+        - mountPath: {{ .Values.global.persistence.dataStore.mountPath }}
+          name: {{ .Values.global.persistence.dataStore.name }}
       volumes:
-      - name: classjars
+      - name: {{ .Values.global.persistence.classpathJars.name }}
         persistentVolumeClaim:
-          claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+          claimName: {{ .Values.global.persistence.classpathJars.name }}
+          readOnly: true
+      - name: {{ .Values.global.persistence.dataStore.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.global.persistence.dataStore.name }}
           readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}

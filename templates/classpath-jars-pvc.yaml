@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.global.persistence.classpathJars.name }}
+  labels:
+    "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
+    "app.kubernetes.io/instance": "{{ .Release.Name }}"
+    "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.global.persistence.classpathJars.storage }}
+  storageClassName: {{ .Values.global.persistence.classpathJars.name }}

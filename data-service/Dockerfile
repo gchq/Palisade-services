@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-COPY $JAR_FILE /usr/share/palisade-service/data-service.jar
+COPY $JAR_FILE /usr/share/data-service/data-service.jar
 
 LABEL service="data" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-classpath", "/usr/share/data", "-jar", "/usr/share/palisade-service/data-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-Dloader.path=/usr/share/classpath/", "-jar", "/usr/share/data-service/data-service.jar"]

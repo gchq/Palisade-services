@@ -23,4 +23,4 @@ COPY src/main/resources/log_level.sh /usr/share/palisade-service/log-level
 
 LABEL service="palisade" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-Dloader.path=/usr/share/classpath/", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
