@@ -66,8 +66,7 @@ global:
   persistence:
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
-      # name: metadata name used to refer to this pv and pvc through the storageClassName label
-      name: classpath-jars
+      name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share/classpath-jars"
       # storage: storage size for this volume and its claims
@@ -75,12 +74,11 @@ global:
       # hostPath: external host directory to be mounted
       hostPath: "."
 
-    # data-store: Store used by data-service and associated data-readers to read resources and return to a client
-    dataStore:
-      # name: metadata name used to refer to this pv and pvc through the storageClassName label
-      name: data-store
+    # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
+    dataStores:
+    - name: palisade-local-data-store
       # mountPath: internal mountpoint for data directory, will be referenced by all client resource requests
-      mountPath: "/data"
+      mountPath: "/data/local-data-store"
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # hostPath: external host directory to be mounted
@@ -88,7 +86,6 @@ global:
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
-      # name: metadata name used to refer to this pv and pvc through the storageClassName label
       name: kafka-persistence
       # storage: storage size for this volume and its claims
       storage: 1Gi
@@ -97,7 +94,6 @@ global:
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redis:
-      # name: metadata name used to refer to this pv and pvc through the storageClassName label
       name: redis-persistence
       # storage: storage size for this volume and its claims
       storage: 1Gi

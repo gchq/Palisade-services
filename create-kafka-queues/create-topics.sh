@@ -28,39 +28,37 @@
 #REPLICATION: The replication-factor to associate with this topic
 #e.g write_to_kafka palisade 1 1
 write_to_kafka () {
-    read -r NAME <<< $1
-    read -r PARTITION <<< $2
-    read -r REPLICATION <<< $3
-    echo ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME
-    until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
-        echo Retrying creation of topic $NAME $PARTITION $REPLICATION
-        sleep 10
-    done
+  read -r NAME <<< $1
+  read -r PARTITION <<< $2
+  read -r REPLICATION <<< $3
+  echo ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME
+  until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
+    echo Retrying creation of topic $NAME $PARTITION $REPLICATION
+    sleep 10
+  done
 }
 
 if [ $# -eq 1 ]; then
-
-    echo "1 argument passed, assumed that this is a docker test"
-	# if `docker run` only has one arguments, we assume user is running alternate command like `bash` to inspect the image
-	exec "$@"
+  echo "1 argument passed, assumed that this is a docker test"
+  # if `docker run` only has one arguments, we assume user is running alternate command like `bash` to inspect the image
+  exec "$@"
 else
-    printenv
+  printenv
 
-    if [ -z ${ZOOKEEPER+palisade-zookeeper:2181} ]; then
-        ZOOKEEPER="palisade-zookeeper:2181"
-    fi
+  if [ -z ${ZOOKEEPER+palisade-zookeeper:2181} ]; then
+    ZOOKEEPER="palisade-zookeeper:2181"
+  fi
 
+  until ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list; do
+    echo "Waiting for zookeeper, retrying in 20 seconds"
+    sleep 20
+  done
 
-    until ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list; do
-        echo "Waiting for zookeeper, retrying in 20 seconds"
-        sleep 20
-    done
-
-#Search for all environmental variables starting with the word: TOPIC
-    for topic in "${!TOPIC@}"; do
-# Use variable indirection to get the contents of TOPICX e.g palisade 1 1
-       write_to_kafka "${!topic}"
-    done
-    echo "topics created as follows - "
-    ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
+  #Search for all environmental variables starting with the word: TOPIC
+  for topic in "${!TOPIC@}"; do
+    # Use variable indirection to get the contents of TOPICX e.g palisade 1 1
+    write_to_kafka ${!topic}
+  done
+  echo "topics created as follows - "
+  ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi

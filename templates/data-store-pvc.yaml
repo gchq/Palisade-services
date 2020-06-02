@@ -1,15 +1,22 @@
+# Keep track of the root . inside control structures
+{{- $root := . }}
+# Create a number of persistent volumes for each configured data-store
+{{- range $store := .Values.global.persistence.dataStores }}
+# New PVC for each dataStores entry
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.global.persistence.dataStore.name }}
+  name: {{ $store.name }}
   labels:
-    "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
-    "app.kubernetes.io/instance": "{{ .Release.Name }}"
-    "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    "app.kubernetes.io/managed-by": "{{ $root.Release.Service }}"
+    "app.kubernetes.io/instance": "{{ $root.Release.Name }}"
+    "helm.sh/chart": "{{ $root.Chart.Name }}-{{ $root.Chart.Version }}"
 spec:
   accessModes:
   - ReadOnlyMany
   resources:
     requests:
-      storage: {{ .Values.global.persistence.dataStore.storage }}
-  storageClassName: {{ .Values.global.persistence.dataStore.name }}
+      storage: {{ $store.storage }}
+  storageClassName: {{ $store.name }}
+{{- end }}

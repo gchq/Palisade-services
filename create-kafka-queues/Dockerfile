@@ -24,4 +24,3 @@ RUN apk --no-cache add bash=4.4.19-r1
 RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
    && tar --strip-components=1 -xvzf kafka_2.12-2.2.1.tgz  && rm kafka_2.12-2.2.1.tgz
 COPY create-topics.sh /bin/create-topics.sh
-

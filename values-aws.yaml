@@ -16,7 +16,7 @@
 fullnameOverride: palisade-services
 
 # hosting: [local | aws | metal] the target environment to deploy to
-hosting: local
+hosting: aws
 
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
@@ -66,7 +66,7 @@ global:
   persistence:
     # classpath-jars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
-      name: classpath-jars
+      name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share/classpath-jars"
       # storage: storage size for this volume and its claims
@@ -76,11 +76,11 @@ global:
       # aws host directory to mount
       volumePath: "/"
 
-    # data-store: Store used by data-service and associated data-readers to read resources and return to a client
-    dataStore:
-      name: data-store
+    # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
+    dataStores:
+    - name: palisade-aws-data-store
       # mountPath: internal mountpoint for data directory, will be referenced by all client resource requests
-      mountPath: "/data"
+      mountPath: "/data/aws-data-store"
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # volumeHandle: aws handle for the volume to mount

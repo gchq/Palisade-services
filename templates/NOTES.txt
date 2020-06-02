@@ -13,12 +13,14 @@
 # limitations under the License.
 #
 ================================
-You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }}
+You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }} hosting on {{ .Values.hosting }}
 ================================
 
-The ingress is located on path {{ include "palisade-service.root" . }}/palisade and the ingress controller dashboard at :{{ .Values.traefik.admin.port }}/dashboard/#/
-{{- if .Values.dashboard.install -}}
-{{- if .Release.IsInstall -}}
-    {{- println -}}Routing to the kubernetes dashboard is provided at (https:/) /kubernetes/#/
-{{- end -}}
-{{- end -}}
+{{- if .Values.traefik.install }}
+    {{- println }}The ingress is located on path {{ include "palisade-service.root" . }}/palisade and the ingress controller dashboard at :{{ .Values.traefik.admin.port }}/dashboard/#/
+{{- end }}
+{{- if .Values.dashboard.install }}
+{{- if .Release.IsInstall }}
+    {{- println }}Routing to the kubernetes dashboard is provided at (https:/) /kubernetes/#/
+{{- end }}
+{{- end }}

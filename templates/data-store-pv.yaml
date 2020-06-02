@@ -1,8 +1,15 @@
+# Keep track of the root . inside control structures
+{{- $root := . }}
+# Create a number of persistent volumes for each configured data-store
+{{- range $store := .Values.global.persistence.dataStores }}
+# New PV for each dataStores entry
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.dataStore.name }}
-  {{- if eq .Values.hosting "aws" }}
+  # This range item is referenced $store and the root item referenced $root
+  name: {{ $store.name }}
+  {{- if eq $root.Values.hosting "aws" }}
   labels:
     type: amazonEBS
   {{- end }}
@@ -10,20 +17,21 @@ spec:
   accessModes:
   - ReadOnlyMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.global.persistence.dataStore.name }}
+  storageClassName: {{ $store.name }}
   capacity:
-    storage: {{ .Values.global.persistence.dataStore.storage }}
-  {{- if eq .Values.hosting "local" }}
+    storage: {{ $store.storage }}
+  {{- if eq $root.Values.hosting "local" }}
   hostPath:
     # Directory location on host
-    path: {{ .Values.global.persistence.dataStore.hostPath }}
+    path: {{ $store.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.hosting "aws" }}
+  {{- else if eq $root.Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.global.persistence.dataStore.volumeHandle }}
+    volumeHandle: {{ $store.volumeHandle }}
     # The path has to be created before hand - see here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/63
     # Only safe mount point is root as it currently stands
     volumeAttributes:
-      path: {{ .Values.global.persistence.dataStore.volumePath }}
+      path: {{ $store.volumePath }}
   {{- end }}
+{{- end }}

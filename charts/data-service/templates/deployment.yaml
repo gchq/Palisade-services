@@ -64,17 +64,21 @@ spec:
         volumeMounts:
         - mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}
           name: {{ .Values.global.persistence.classpathJars.name }}
-        - mountPath: {{ .Values.global.persistence.dataStore.mountPath }}
-          name: {{ .Values.global.persistence.dataStore.name }}
+        {{- range .Values.global.persistence.dataStores }}
+        - mountPath: {{ .mountPath }}
+          name: {{ .name }}
+        {{- end }}
       volumes:
       - name: {{ .Values.global.persistence.classpathJars.name }}
         persistentVolumeClaim:
           claimName: {{ .Values.global.persistence.classpathJars.name }}
           readOnly: true
-      - name: {{ .Values.global.persistence.dataStore.name }}
+      {{- range .Values.global.persistence.dataStores }}
+      - name: {{ .name }}
         persistentVolumeClaim:
-          claimName: {{ .Values.global.persistence.dataStore.name }}
+          claimName: {{ .name }}
           readOnly: true
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{ toYaml . }}
