@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kerby.kerberos.kerb.client.preauth.pkinit.ClientConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -78,7 +77,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
 
     /**
-     * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail} using the {@link ClientConfiguration}
+     * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
      *
      * @param resourceConfig the {@link ResourceConfiguration} to use to build resource
      * @return a getter for a list of {@link Resource}s, each paired with an associated {@link LeafResource}, see {@link ResourceConfiguration} for more info
@@ -122,9 +121,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * See the {@link JpaPersistenceLayer} for an in-depth description of how and why each part is used
      * While code introspection may suggest no beans found for these types, they will be created by Spring
      *
-     * @param completenessRepository the completeness repository to use, storing whether persistence will return a response for any given request
-     * @param resourceRepository the resource repository to use, a store of each available {@link LeafResource} and its parents
-     * @param typeRepository the type repository to use, a one-to-many relation of types to resource ids
+     * @param completenessRepository     the completeness repository to use, storing whether persistence will return a response for any given request
+     * @param resourceRepository         the resource repository to use, a store of each available {@link LeafResource} and its parents
+     * @param typeRepository             the type repository to use, a one-to-many relation of types to resource ids
      * @param serialisedFormatRepository the serialisedFormat repository to use, a one-to-many relation of serialisedFormats to resource ids
      * @return a {@link JpaPersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
      */
@@ -147,10 +146,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * This includes writing the {@link java.util.stream.Stream} of {@link Resource}s to the {@link java.io.OutputStream} of a {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
      *
      * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
-     *                 This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
-     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
+     * @param delegate         a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
+     *                         This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
+     * @param objectMapper     a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     * @param resourceBuilder  a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
      * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
      */
     @Bean

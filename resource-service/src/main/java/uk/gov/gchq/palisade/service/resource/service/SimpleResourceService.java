@@ -70,11 +70,10 @@ public class SimpleResourceService implements ResourceService {
             extension = file.getName().substring(i + 1);
         }
 
-        String dataServiceName = "data-service";
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type("java.lang.String")
-                .connectionDetail(new SimpleConnectionDetail().serviceName(dataServiceName));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME));
     }
 
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
