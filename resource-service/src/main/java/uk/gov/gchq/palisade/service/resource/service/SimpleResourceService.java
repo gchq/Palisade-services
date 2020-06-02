@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.config.ClientConfiguration;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -39,10 +38,9 @@ import java.util.stream.Stream;
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
-    private final ClientConfiguration clientConfiguration;
+    private static final String DATA_SERVICE_NAME = "data-service";
 
-    public SimpleResourceService(final ClientConfiguration clientConfiguration) {
-        this.clientConfiguration = clientConfiguration;
+    public SimpleResourceService() {
     }
 
     private Stream<File> filesOf(final Path path) {
@@ -71,11 +69,12 @@ public class SimpleResourceService implements ResourceService {
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
-        URI dataServiceUri = clientConfiguration.getClientUri("data-service").orElseThrow(() -> new RuntimeException("Failed to find any instance of 'data-service'"));
+
+        String dataServiceName = "data-service";
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type("java.lang.String")
-                .connectionDetail(new SimpleConnectionDetail().uri(dataServiceUri.toString()));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(dataServiceName));
     }
 
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {

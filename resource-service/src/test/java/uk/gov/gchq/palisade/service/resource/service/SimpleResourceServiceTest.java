@@ -20,12 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.resource.config.ClientConfiguration;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -43,12 +41,10 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
-    private final ClientConfiguration clientConfiguration = Mockito.mock(ClientConfiguration.class);
-    private final SimpleResourceService service = new SimpleResourceService(clientConfiguration);
+    private final SimpleResourceService service = new SimpleResourceService();
 
     @Before
     public void setUp() throws URISyntaxException {
-        Mockito.when(clientConfiguration.getClientUri(Mockito.anyString())).thenReturn(Optional.of(new URI("http://data-service-uri")));
     }
 
     @Test

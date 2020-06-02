@@ -17,11 +17,10 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.EurekaClient;
+import org.apache.kerby.kerberos.kerb.client.preauth.pkinit.ClientConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -57,7 +56,6 @@ import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -78,41 +76,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Integer RETRY_AFTER = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    /**
-     * A generic resolver from service names to {@link URI}s
-     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
-     *
-     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
-     */
-    @Bean
-    @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
-        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
-    }
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail} using the {@link ClientConfiguration}
      *
      * @param resourceConfig the {@link ResourceConfiguration} to use to build resource
-     * @param clientConfig the {@link ClientConfiguration} to use to resolve the {@link java.net.URI} of a data-service at runtime
      * @return a getter for a list of {@link Resource}s, each paired with an associated {@link LeafResource}, see {@link ResourceConfiguration} for more info
      */
     @Bean
-    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig, final ClientConfiguration clientConfig) {
+    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig) {
         Function<String, ConnectionDetail> connectionDetailMapper = serviceName -> new SimpleConnectionDetail()
-                .uri(clientConfig.getClientUri(serviceName)
-                        .or(() -> {
-                            LOGGER.warn("No service found with name: {} - will retry once more in {}ms", serviceName, RETRY_AFTER);
-                            try {
-                                Thread.sleep(RETRY_AFTER);
-                            } catch (InterruptedException ignored) {
-                                Thread.currentThread().interrupt();
-                            }
-                            return clientConfig.getClientUri(serviceName);
-                        })
-                        .orElseThrow(() -> new IllegalArgumentException("No service found with name: " + serviceName))
-                        .toString());
+                .serviceName(serviceName);
         return () -> resourceConfig.getResources().stream()
                 .map(factory -> factory.build(connectionDetailMapper))
                 .collect(Collectors.toList());
@@ -191,8 +165,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
-    public ResourceService simpleResourceService(final ClientConfiguration clientConfiguration) {
-        return new SimpleResourceService(clientConfiguration);
+    public ResourceService simpleResourceService() {
+        return new SimpleResourceService();
     }
 
     @Bean("hadoopResourceService")

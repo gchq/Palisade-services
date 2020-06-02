@@ -67,7 +67,7 @@ public class ResourceServiceTest {
         }
     };
     private FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-    private ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
+    private ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service");
 
     @Before
     public void setUp() {
