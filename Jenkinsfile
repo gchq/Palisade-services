@@ -18,7 +18,6 @@
 //node-affinity
 //nodes 1..3 are reserved for Jenkins slave pods.
 //node 0 is used for the Jenkins master
-//node 4 is used for SQ and Nexus
 //dind-daemon
 //dind-daemon below is the sidecar creation pattern for the docker in docker entity
 //it allows the creation and build of docker images
