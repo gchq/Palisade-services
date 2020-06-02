@@ -59,7 +59,7 @@ spec:
         ephemeral-storage: "8Gi"
 
   - name: docker-cmds
-    image: $(DOCKER_IMAGE)
+    image: ${params.DOCKER_IMAGE}
     imagePullPolicy: IfNotPresent
     command:
     - sleep
@@ -105,7 +105,7 @@ spec:
         ephemeral-storage: "2Gi"
 
   - name: maven
-    image: $(INFRA_IMAGE)
+    image: ${params.INFRA_IMAGE}
     imagePullPolicy: IfNotPresent
     command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
