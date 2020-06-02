@@ -54,3 +54,6 @@ web:
   client:
     audit-service: http://localhost:8081
     palisade-service: http://localhost:8084
+
+population:
+  serialiserProvder: std
