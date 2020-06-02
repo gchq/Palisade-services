@@ -59,7 +59,7 @@ spec:
         ephemeral-storage: "8Gi"
 
   - name: docker-cmds
-    image: '\$(env.DOCKER_IMAGE)'
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:INFRA
     imagePullPolicy: IfNotPresent
     command:
     - sleep
@@ -105,7 +105,7 @@ spec:
         ephemeral-storage: "2Gi"
 
   - name: maven
-    image: '\$(env.INFRA_IMAGE)'
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:INFRA
     imagePullPolicy: IfNotPresent
     command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
