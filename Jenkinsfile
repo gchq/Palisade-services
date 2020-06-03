@@ -124,7 +124,7 @@ spec:
             // Otherwise, default to integration-tests/develop
             dir ('Palisade-integration-tests') {
                 git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+                sh "git checkout PAL-652-remove-eureka-beans || git checkout develop"
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
