@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
@@ -46,7 +45,6 @@ public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
 
-    @Autowired
     private ResourceClient client;
 
     private final ObjectMapper objectMapper;

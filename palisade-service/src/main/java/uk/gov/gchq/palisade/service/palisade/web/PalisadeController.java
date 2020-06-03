@@ -19,14 +19,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
@@ -53,15 +50,6 @@ public class PalisadeController {
         DataRequestResponse response = this.service.registerDataRequest(request).join();
         LOGGER.info("Returning response: {}", response);
         return response;
-    }
-
-    @PostMapping(value = "/registerDataRequest/{userId}/{resourceId}", consumes = "application/json", produces = "application/json")
-    public DataRequestResponse registerDataRequestSyncRestful(@PathVariable final String userId, @PathVariable final String resourceId) {
-        RegisterDataRequest request = new RegisterDataRequest()
-                .userId(new UserId().id(userId))
-                .resourceId(resourceId)
-                .context(new Context().purpose(""));
-        return registerDataRequestSync(request);
     }
 
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")

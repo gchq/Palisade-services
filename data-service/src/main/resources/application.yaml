@@ -52,7 +52,7 @@ feign:
 # Default development & testing static config, not suitable for production
 web:
   client:
-    audit-service: http://localhost:8081
+    audit-service: http://localhost:8089
     palisade-service: http://localhost:8084
 
 population:
