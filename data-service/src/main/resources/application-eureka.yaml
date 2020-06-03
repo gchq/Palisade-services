@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ eureka:
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
 
-# Explicitly provide default url to use Feign w/ Eureka
+# Discovery by spring.application.name
 web:
   client:
     audit-service: ""

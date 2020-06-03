@@ -16,10 +16,11 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.request.AddSerialiserRequest;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 
 import java.io.OutputStream;
@@ -60,9 +61,10 @@ public interface DataService extends Service {
     /**
      * Used to add a new serialiser to the data reader
      *
-     * @param request a request describing the serialiser to add
+     * @param dataFlavour   the {@link DataFlavour} to be added
+     * @param serialiser    the {@link Serialiser} to be added
      * @return a {@link Boolean} true/false on success/failure
      */
-    Boolean addSerialiser(final AddSerialiserRequest request);
+    Boolean addSerialiser(final DataFlavour dataFlavour, final Serialiser<?> serialiser);
 
 }

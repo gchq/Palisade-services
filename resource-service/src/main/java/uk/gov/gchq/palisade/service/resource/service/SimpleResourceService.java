@@ -80,7 +80,7 @@ public class SimpleResourceService implements ResourceService {
 
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
-                .type("txt")
+                .type("java.lang.String")
                 .connectionDetail(new SimpleConnectionDetail().uri(dataServiceUri.toString()));
     }
 
