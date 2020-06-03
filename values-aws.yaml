@@ -32,10 +32,10 @@ kafka:
   install: true
 redis:
   # install: install redis persistence and caching data storage platform
-  install: true
+  install: false
 redis-cluster:
   # install: install clustered redis persistence and caching data storage platform
-  install: false
+  install: true
 
 namespaces:
   default: default
@@ -108,4 +108,5 @@ global:
       # aws host directory to mount
       volumePath: "/"
 
+  # must be last for file to be appended with addresses
   globalIPAddresses:

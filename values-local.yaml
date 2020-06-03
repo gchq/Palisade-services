@@ -100,4 +100,5 @@ global:
       # hostPath: external host directory to be mounted
       hostPath: "."
 
+  # must be last for file to be appended with addresses
   globalIPAddresses:
