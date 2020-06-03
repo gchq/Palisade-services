@@ -27,19 +27,10 @@
 
     <artifactId>user-service</artifactId>
 
-    <properties>
-        <swagger.version>1.5.21</swagger.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

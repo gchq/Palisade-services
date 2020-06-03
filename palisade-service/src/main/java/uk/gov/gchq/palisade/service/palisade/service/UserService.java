@@ -41,7 +41,7 @@ public class UserService implements Service {
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.debug("Getting user from user service: {}", request);
-        LOGGER.info("UserClient now is: {}", client);
+
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);
