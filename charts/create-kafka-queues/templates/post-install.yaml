@@ -45,7 +45,7 @@ spec:
         env:
         - name: ZOOKEEPER
           value: {{ .Values.global.zookeeperConnectString | quote }}
-  {{- range $key, $val := .Values.kafkaCreateTopics }}
+        {{- range $key, $val := .Values.kafkaCreateTopics }}
         - name: {{ printf "TOPIC%d" $key }}
           value: {{ printf "%s %s %s" $val.name ($val.partitions | toString) ($val.replicationFactor | toString)  }}
-  {{- end }}
+        {{- end }}

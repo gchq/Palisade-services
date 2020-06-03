@@ -72,7 +72,7 @@ global:
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # hostPath: external host directory to be mounted
-      hostPath: "."
+      hostPath: "/"
 
     # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
     dataStores:
@@ -82,7 +82,7 @@ global:
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # hostPath: external host directory to be mounted
-      hostPath: "."
+      hostPath: "/"
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
@@ -90,7 +90,7 @@ global:
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # hostPath: external host directory to be mounted
-      hostPath: "."
+      hostPath: "/"
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redis:
@@ -98,7 +98,7 @@ global:
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # hostPath: external host directory to be mounted
-      hostPath: "."
+      hostPath: "/"
 
   # must be last for file to be appended with addresses
   globalIPAddresses:

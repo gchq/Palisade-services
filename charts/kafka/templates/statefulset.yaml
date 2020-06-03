@@ -223,7 +223,7 @@ spec:
           {{- end }}
           exec /etc/confluent/docker/run
         volumeMounts:
-        - name: datadir
+        - name: {{ .Values.global.persistence.kafka.name }}
           mountPath: {{ .Values.persistence.mountPath | quote }}
           {{- range $secret := .Values.secrets }}
           {{- if $secret.mountPath }}
@@ -243,7 +243,7 @@ spec:
       {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
-      - name: datadir
+      - name: {{ .Values.global.persistence.kafka.name }}
         emptyDir: {}
         {{- end }}
         {{- if .Values.prometheus.jmx.enabled }}
