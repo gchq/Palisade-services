@@ -18,13 +18,14 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.config.ClientConfiguration;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -33,16 +34,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
-    private final ClientConfiguration clientConfiguration;
+    private final DiscoveryClient discoveryClient;
 
-    public SimpleResourceService(final ClientConfiguration clientConfiguration) {
-        this.clientConfiguration = clientConfiguration;
+    public SimpleResourceService(final DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
     }
 
     private Stream<File> filesOf(final Path path) {
@@ -71,7 +74,10 @@ public class SimpleResourceService implements ResourceService {
         if (i > 0) {
             extension = file.getName().substring(i + 1);
         }
-        URI dataServiceUri = clientConfiguration.getClientUri("data-service").orElseThrow(() -> new RuntimeException("Failed to find any instance of 'data-service'"));
+
+        List<ServiceInstance> instances = discoveryClient.getInstances("data-service");
+        URI dataServiceUri = instances.get(new Random().nextInt(instances.size())).getUri();
+
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type("txt")

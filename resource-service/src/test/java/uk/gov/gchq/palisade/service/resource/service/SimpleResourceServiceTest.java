@@ -21,17 +21,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.service.resource.config.ClientConfiguration;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,15 +43,23 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.service.resource.service.SimpleResourceServiceTestUtil.listTestServiceInstance;
 
 @RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
-    private final ClientConfiguration clientConfiguration = Mockito.mock(ClientConfiguration.class);
-    private final SimpleResourceService service = new SimpleResourceService(clientConfiguration);
+    private final DiscoveryClient discoveryClient = Mockito.mock(DiscoveryClient.class);
+    private final SimpleResourceService service = new SimpleResourceService(discoveryClient);
 
     @Before
     public void setUp() throws URISyntaxException {
-        Mockito.when(clientConfiguration.getClientUri(Mockito.anyString())).thenReturn(Optional.of(new URI("http://data-service-uri")));
+        ServiceInstance mock = Mockito.mock(ServiceInstance.class);
+        List list = Arrays.asList(mock);
+        Mockito.when(discoveryClient.getInstances(Mockito.anyString())).thenReturn(list);
+        String[] services = {"data-service"};
+        // When
+        when(discoveryClient.getInstances(anyString())).thenReturn(listTestServiceInstance(services));
     }
 
     @Test

@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.Service;
@@ -31,8 +30,7 @@ import java.util.concurrent.Executor;
 public class UserService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    private UserClient client;
+    private final UserClient client;
 
     private final Executor executor;
 
@@ -43,7 +41,6 @@ public class UserService implements Service {
 
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.debug("Getting user from user service: {}", request);
-        LOGGER.info("UserClient now is: {}", client);
         CompletionStage<User> user;
         try {
             LOGGER.info("User request: {}", request);
