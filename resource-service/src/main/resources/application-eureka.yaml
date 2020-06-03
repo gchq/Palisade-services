@@ -41,8 +41,6 @@ eureka:
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
 
-# Eureka discovery by lookup for registered service by name
-# i.e. map from what-i-call-a-service -> what-that-service-calls-itself
 web:
   client:
     data-service: data-service

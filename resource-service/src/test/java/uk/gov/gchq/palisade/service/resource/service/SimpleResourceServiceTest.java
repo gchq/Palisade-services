@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
-    private final SimpleResourceService service = new SimpleResourceService();
+    private final SimpleResourceService service = new SimpleResourceService("data-service");
 
     @Before
     public void setUp() throws URISyntaxException {

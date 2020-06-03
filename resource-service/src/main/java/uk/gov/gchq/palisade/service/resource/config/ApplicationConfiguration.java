@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -93,7 +94,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
-     * These resources will be used for prepopulating the {@link ResourceService}
+     * These resources will be u fsed for prepopulating the {@link ResourceService}
      *
      * @return a standard {@link uk.gov.gchq.palisade.service.ResourceConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}s
      */
@@ -103,6 +104,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public StdResourceConfiguration resourceConfiguration() {
         return new StdResourceConfiguration();
     }
+
+    @Value("${web.client.data-service:data-service}")
+    private String dataServiceName;
 
     /**
      * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
@@ -165,7 +169,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
     public ResourceService simpleResourceService() {
-        return new SimpleResourceService();
+        return new SimpleResourceService(dataServiceName);
     }
 
     @Bean("hadoopResourceService")

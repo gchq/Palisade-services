@@ -44,3 +44,4 @@ population:
 # Available options: simple, hadoop
 resource:
   implementation: simple
+

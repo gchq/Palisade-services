@@ -38,9 +38,10 @@ import java.util.stream.Stream;
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
-    private static final String DATA_SERVICE_NAME = "data-service";
+    private final String dataServiceName;
 
-    public SimpleResourceService() {
+    public SimpleResourceService(final String dataServiceName) {
+        this.dataServiceName = dataServiceName;
     }
 
     private Stream<File> filesOf(final Path path) {
@@ -73,7 +74,7 @@ public class SimpleResourceService implements ResourceService {
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type("java.lang.String")
-                .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
     }
 
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
