@@ -86,11 +86,11 @@ public class SimpleResourceService implements ResourceService {
     }
 
     /**
-     * Query stream.
+     * Query returns a stream of {@link LeafResource} after walking the path of the uri passed in using a filter on the predicate.
      *
-     * @param uri  the uri
-     * @param pred the pred
-     * @return the stream
+     * @param uri  the uri converted from a String
+     * @param pred the predicate of {@link LeafResource}
+     * @return the stream of {@link LeafResource}
      */
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
