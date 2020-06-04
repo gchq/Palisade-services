@@ -33,9 +33,11 @@ List of third-party dependencies grouped by their license type
 ### [CDDL and GNU GPL 2 w/ Classpath Exception](./licenses/cddl_gplv2_ce.html):
 * JavaBeans Activation Framework API jar ([javax.activation:javax.activation-api:1.2.0](http://java.net/all/javax.activation-api/))
 
-### [Common Development and Distribution License (CDDL) 1.1](./licenses/cddl_gpl_1.1.txt):
+### [CDDL and GPL License](./licenses/cddl+gpl_1.1.html):
 * Old JAXB Core ([com.sun.xml.bind:jaxb-core:2.3.0](http://jaxb.java.net/jaxb-bundles/jaxb-core))
 * Old JAXB Runtime ([com.sun.xml.bind:jaxb-impl:2.3.0](http://jaxb.java.net/jaxb-bundles/jaxb-impl))
+
+### [Common Development and Distribution License (CDDL) 1.1](./licenses/cddl_gpl_1.1.txt):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
 
 ### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
