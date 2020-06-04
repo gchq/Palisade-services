@@ -173,7 +173,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
 
     /**
-     * Simple resource service resource service.
+     * Simple resource service.
      *
      * @return the resource service
      */
@@ -185,7 +185,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Hadoop resource service hadoop resource service.
+     * Hadoop resource service.
      *
      * @param config the config
      * @return the hadoop resource service
@@ -199,9 +199,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Hadoop configuration org . apache . hadoop . conf . configuration.
+     * Hadoop configuration.
      *
-     * @return the org . apache . hadoop . conf . configuration
+     * @return the org.apache.hadoop.conf.configuration
      */
     @Bean
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
@@ -209,7 +209,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Jackson object mapper object mapper.
+     * Jackson object mapper.
      *
      * @return the object mapper
      */
