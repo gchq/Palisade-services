@@ -45,7 +45,7 @@ List of third-party dependencies grouped by their license type
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
 
-### [MIT License](./licenses/mit_license.html):
+### [MIT License](./licenses/mit_license.txt):
 * mockito-core ([org.mockito:mockito-core:3.1.0](https://github.com/mockito/mockito))
 * SLF4J Test ([uk.org.lidalia:slf4j-test:1.1.0](http://projects.lidalia.org.uk/slf4j-test))
 
