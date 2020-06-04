@@ -94,7 +94,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
-     * These resources will be u fsed for prepopulating the {@link ResourceService}
+     * These resources will be used for prepopulating the {@link ResourceService}
      *
      * @return a standard {@link uk.gov.gchq.palisade.service.ResourceConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}s
      */
@@ -105,8 +105,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdResourceConfiguration();
     }
 
-    @Value("${web.client.data-service:data-service}")
-    private String dataServiceName;
 
     /**
      * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
@@ -164,6 +162,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
+
+    @Value("${web.client.data-service:data-service}")
+    private String dataServiceName;
 
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")

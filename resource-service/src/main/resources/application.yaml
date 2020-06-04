@@ -45,3 +45,6 @@ population:
 resource:
   implementation: simple
 
+web:
+  client:
+    data-service: "http://localhost:8082"
