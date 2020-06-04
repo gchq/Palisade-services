@@ -28,4 +28,4 @@ spring:
 # i.e. map from what-i-call-a-service -> service-URI
 web:
   client:
-    data-service: http://localhost:8082
+    data-service: "http://localhost:8082"

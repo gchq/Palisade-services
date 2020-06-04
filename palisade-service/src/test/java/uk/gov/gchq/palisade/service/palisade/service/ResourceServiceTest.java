@@ -59,7 +59,7 @@ public class ResourceServiceTest {
     private Set<LeafResource> resources = new HashSet<>();
     private ExecutorService executor;
     private FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-    private ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("data-service");
+    private ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service");
 
     @Before
     public void setUp() {

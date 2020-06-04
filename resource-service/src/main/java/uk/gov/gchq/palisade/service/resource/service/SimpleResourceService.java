@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.resource.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -34,18 +32,24 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+ */
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
-    private final DiscoveryClient discoveryClient;
+    private final String dataServiceName;
 
-    public SimpleResourceService(final DiscoveryClient discoveryClient) {
-        this.discoveryClient = discoveryClient;
+    /**
+     * Instantiates a new Simple resource service.
+     *
+     * @param dataServiceName the data service name
+     */
+    public SimpleResourceService(final String dataServiceName) {
+        this.dataServiceName = dataServiceName;
     }
 
     private Stream<File> filesOf(final Path path) {
@@ -75,15 +79,19 @@ public class SimpleResourceService implements ResourceService {
             extension = file.getName().substring(i + 1);
         }
 
-        List<ServiceInstance> instances = discoveryClient.getInstances("data-service");
-        URI dataServiceUri = instances.get(new Random().nextInt(instances.size())).getUri();
-
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type("java.lang.String")
-                .connectionDetail(new SimpleConnectionDetail().uri(dataServiceUri.toString()));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
     }
 
+    /**
+     * Query returns a stream of {@link LeafResource} after walking the path of the uri passed in using a filter on the predicate.
+     *
+     * @param uri  the uri converted from a String
+     * @param pred the predicate of {@link LeafResource}
+     * @return the stream of {@link LeafResource}
+     */
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
