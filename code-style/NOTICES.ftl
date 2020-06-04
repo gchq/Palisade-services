@@ -45,7 +45,7 @@ List of third-party dependencies grouped by their license type
 <#assign projects = e.getValue()/>
 <#if projects?size &gt; 0>
 
-### [${license[0]}](./licenses/${license[1]}):
+### [${license[0]}](./licenses/${(license[1])!"not recognised"}):
 <#list projects as project>
 * ${artifactFormat(project)}
 </#list>

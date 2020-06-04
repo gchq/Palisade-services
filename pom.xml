@@ -230,57 +230,64 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!--<fileTemplate>${project.basedir}/code-style/NOTICES.ftl</fileTemplate>-->
+                    <fileTemplate>${project.basedir}/code-style/NOTICES.ftl</fileTemplate>
                     <outputDirectory>${project.basedir}</outputDirectory>
                     <thirdPartyFilename>NOTICES.md</thirdPartyFilename>
                     <licensesOutputDirectory>${project.basedir}/licenses</licensesOutputDirectory>
                     <includeTransitiveDependencies>false</includeTransitiveDependencies>
                     <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                    <!--
+                     Normalise equivalent license names (see also NOTICES.ftl)
+                     Format is "<preferred license name> :: <file name>|<license name>|<license name>|..."
+                    -->
                     <licenseMerges>
-                        <!-- Normalise equivalent license names, append filename after :: (split in NOTICES.ftl) -->
                         <licenseMerge>Apache Software License 2.0 :: apache_software_license_2.0.txt|Apache Software License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache 2|Apache 2.0</licenseMerge>
                         <licenseMerge>MIT License :: mit_license.html|MIT License|The MIT License|MIT X11 License</licenseMerge>
-                        <licenseMerge>Eclipse Public License 1.0 :: eclipse_public_license_1.0.html|Eclipse Public License 1.0|The Eclipse Public License 1.0|Eclipse Public License - v 1.0</licenseMerge>
-                        <licenseMerge>Eclipse Distribution License - v 1.0 :: eclipse_public_license_1.0.html|Eclipse Distribution License - v 1.0</licenseMerge>
+                        <licenseMerge>Eclipse Public License 1.0 :: eclipse_public_license_1.0.html|Eclipse Public License 1.0|The Eclipse Public License 1.0|Eclipse Public License - v 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
                         <licenseMerge>BSD License 3 :: bsd_license_3.html|BSD Licence 3</licenseMerge>
                         <licenseMerge>GNU Lesser General Public License 2.1 :: gnu_lgpl_2.1.html|GNU Lesser General Public License</licenseMerge>
-                        <licenseMerge>MPL 2.0 or EPL 1.0 :: mpl 2.0 or epl 1.0 - license.html|MPL 2.0 or EPL 1.0</licenseMerge>
-                        <licenseMerge>CDDL 1.1 :: cddl 1.1 - cddl+gpl-1.1.txt|CDDL 1.1|CDDL+GPL License</licenseMerge>
-                        <licenseMerge>CDDL/GPLv2+CE :: cddl_gplv2+ce - license.html|CDDL/GPLv2+CE</licenseMerge>
+                        <licenseMerge>Mozilla Public License 2.0 or Eclipse Public License 1.0 :: mpl_2.0_or_epl_1.0.html|MPL 2.0 or EPL 1.0</licenseMerge>
+                        <licenseMerge>Common Development and Distribution License (CDDL) 1.1 :: cddl_gpl_1.1.txt|CDDL 1.1|CDDL+GPL License</licenseMerge>
+                        <licenseMerge>CDDL and GNU GPL 2 w/ Classpath Exception :: cddl_gplv2_ce.html|CDDL/GPLv2+CE</licenseMerge>
+                        <licenseMerge>GNU General Public License 2 w/ Classpath Exception :: missing|GPL2 w/ CPE</licenseMerge>
                     </licenseMerges>
+                    <!--
+                     Normalise equivalent license filenames, unfortunately cannot match or change filetype
+                     Must match the above equivalent <file name> field
+                     Must be a valid URL (ie must not contain spaces, pluses (+), etc...)
+                    -->
                     <licenseUrlFileNameSanitizers>
-                        <!-- Normalise equivalent license filenames, cannot change filetype, but stated here for clarity -->
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*apache.*license.*2.*</regexp>
-                            <replacement>apache_software_license_2.0.txt</replacement>
+                            <replacement>apache_software_license_2.0</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*mit.*license.*</regexp>
-                            <replacement>mit_license.html</replacement>
+                            <replacement>mit_license</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*eclipse.*license.*1.0.*</regexp>
-                            <replacement>eclipse_public_license_1.0.html</replacement>
+                            <replacement>eclipse_public_license_1.0</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*bsd.*licence.*3.*</regexp>
-                            <replacement>bsd_license_3.html</replacement>
+                            <replacement>bsd_license_3</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*gnu.*lesser.*license.*</regexp>
-                            <replacement>gnu_lgpl_2.1.html</replacement>
+                            <replacement>gnu_lgpl_2.1</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*mpl.*epl.*</regexp>
-                            <replacement>mpl 2.0 or epl 1.0 - license.html</replacement>
+                            <replacement>mpl_2.0_or_epl_1.0</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
-                            <regexp>.*cddl.*1.1.*</regexp>
-                            <replacement>cddl 1.1 - cddl+gpl-1.1.txt</replacement>
+                            <regexp>.*cddl.*gpl.*1.*</regexp>
+                            <replacement>cddl_gpl_1.1</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
-                            <regexp>.*cddl.*gpl.*ce.*</regexp>
-                            <replacement>cddl_gplv2+ce - license.html</replacement>
+                            <regexp>.*cddl.*gpl.*2.*ce.*</regexp>
+                            <replacement>cddl_gplv2_ce</replacement>
                         </licenseUrlFileNameSanitizer>
                     </licenseUrlFileNameSanitizers>
                 </configuration>

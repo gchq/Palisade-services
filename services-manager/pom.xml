@@ -127,7 +127,7 @@
                 <executions>
                     <execution>
                         <id>banner-replacer</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
