@@ -127,7 +127,7 @@
                 <executions>
                     <execution>
                         <id>banner-replacer</id>
-                        <phase>generate-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
@@ -144,7 +144,7 @@
                     </execution>
                     <execution>
                         <id>readme-replacer</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
