@@ -35,11 +35,19 @@ import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+ */
 public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
     private final String dataServiceName;
 
+    /**
+     * Instantiates a new Simple resource service.
+     *
+     * @param dataServiceName the data service name
+     */
     public SimpleResourceService(final String dataServiceName) {
         this.dataServiceName = dataServiceName;
     }
@@ -77,6 +85,13 @@ public class SimpleResourceService implements ResourceService {
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
     }
 
+    /**
+     * Query stream.
+     *
+     * @param uri  the uri
+     * @param pred the pred
+     * @return the stream
+     */
     protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
