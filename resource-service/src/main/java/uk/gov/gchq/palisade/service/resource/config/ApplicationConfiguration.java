@@ -73,9 +73,12 @@ import java.util.stream.Collectors;
 @EnableAsync
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
-    private static final Integer RETRY_AFTER = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    public static final Integer CORE_POOL_SIZE = 6;
 
+
+    @Value("${web.client.data-service:data-service}")
+    private String dataServiceName;
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
@@ -138,6 +141,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
+    /**
+     * Resource converter.
+     *
+     * @return the resource converter
+     */
     @Bean
     public ResourceConverter resourceConverter() {
         return new ResourceConverter();
@@ -163,9 +171,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
 
-    @Value("${web.client.data-service:data-service}")
-    private String dataServiceName;
 
+    /**
+     * Simple resource service resource service.
+     *
+     * @return the resource service
+     */
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
@@ -173,6 +184,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleResourceService(dataServiceName);
     }
 
+    /**
+     * Hadoop resource service hadoop resource service.
+     *
+     * @param config the config
+     * @return the hadoop resource service
+     * @throws IOException the io exception
+     */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
     @Qualifier("impl")
@@ -180,11 +198,21 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ConfiguredHadoopResourceService(config);
     }
 
+    /**
+     * Hadoop configuration org . apache . hadoop . conf . configuration.
+     *
+     * @return the org . apache . hadoop . conf . configuration
+     */
     @Bean
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
         return new org.apache.hadoop.conf.Configuration();
     }
 
+    /**
+     * Jackson object mapper object mapper.
+     *
+     * @return the object mapper
+     */
     @Bean
     @Primary
     public ObjectMapper jacksonObjectMapper() {
@@ -196,11 +224,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
+            ex.setCorePoolSize(CORE_POOL_SIZE);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }
 
+    /**
+     * Gets task executor.
+     *
+     * @return the task executor
+     */
     @Bean(name = "concurrentTaskExecutor")
     public ConcurrentTaskExecutor getTaskExecutor() {
         return new ConcurrentTaskExecutor(this.getAsyncExecutor());
