@@ -108,7 +108,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdResourceConfiguration();
     }
 
-
     /**
      * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
      * Note that this does not include resolving an appropriate {@link ConnectionDetail}, this is handled elsewhere
