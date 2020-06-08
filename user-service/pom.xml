@@ -25,8 +25,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>user-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/user-service</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>

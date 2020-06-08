@@ -26,8 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>data-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
