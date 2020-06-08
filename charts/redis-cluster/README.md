@@ -1,3 +1,18 @@
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copied from: https://github.com/bitnami/charts/tree/780db91641bf4e1f98c6e020e1fd971e4d2abc90/bitnami/redis-cluster
+-->
 
 # Redis Cluster
 
@@ -99,10 +114,6 @@ The following table lists the configurable parameters of the Redis chart and the
 | `password`                                      | Redis password (ignored if existingSecret set)                 | Randomly generated |
 | `configmap`                                     | Additional common Redis node configuration (this value is evaluated as a template) | See values.yaml   |
 | `clusterDomain`                                 | Kubernetes DNS Domain name to use                              | `cluster.local`   |
-| `networkPolicy.enabled`                         | Enable NetworkPolicy                                           | `false`           |
-| `networkPolicy.allowExternal`                   | Don't require client label for connections                     | `true`            |
-| `networkPolicy.ingressNSMatchLabels`            | Allow connections from other namespaces                        | `{}`              |
-| `networkPolicy.ingressNSPodMatchLabels`         | For other namespaces match by pod labels and namespace labels  | `{}`              |
 | `podSecurityContext.enabled`                    | Enable pods' security context                                  | `true`            |
 | `podSecurityContext.fsGroup`                    | Group ID for the pods.                                         | `1001`            |
 | `podSecurityContext.runAsUser`                  | User ID for the pods.                                          | `1001`            |
@@ -261,12 +272,6 @@ Bitnami will release a new chart updating its containers if a new version of the
 ### Production configuration
 
 This chart includes a `values-production.yaml` file where you can find some parameters oriented to production configuration in comparison to the regular `values.yaml`. You can use this file instead of the default one.
-
-- Enable NetworkPolicy:
-```diff
-- networkPolicy.enabled: false
-+ networkPolicy.enabled: true
-```
 
 - Start a side-car prometheus exporter:
 ```diff
@@ -433,32 +438,6 @@ Note that this will not disable transparent huge tables.
 ## Persistence
 
 By default, the chart mounts a [Persistent Volume](http://kubernetes.io/docs/user-guide/persistent-volumes/) at the `/bitnami` path. The volume is created using dynamic volume provisioning. If a Persistent Volume Claim already exists, specify it during installation.
-
-## NetworkPolicy
-
-To enable network policy for Redis, install
-[a networking plugin that implements the Kubernetes NetworkPolicy spec](https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy#before-you-begin),
-and set `networkPolicy.enabled` to `true`.
-
-For Kubernetes v1.5 & v1.6, you must also turn on NetworkPolicy by setting
-the DefaultDeny namespace annotation. Note: this will enforce policy for _all_ pods in the namespace:
-
-    kubectl annotate namespace default "net.beta.kubernetes.io/network-policy={\"ingress\":{\"isolation\":\"DefaultDeny\"}}"
-
-With NetworkPolicy enabled, only pods with the generated client label will be
-able to connect to Redis. This label will be displayed in the output
-after a successful install.
-
-With `networkPolicy.ingressNSMatchLabels` pods from other namespaces can connect to redis. Set `networkPolicy.ingressNSPodMatchLabels` to match pod labels in matched namespace. For example, for a namespace labeled `redis=external` and pods in that namespace labeled `redis-client=true` the fields should be set:
-
-```
-networkPolicy:
-  enabled: true
-  ingressNSMatchLabels:
-    redis: external
-  ingressNSPodMatchLabels:
-    redis-client: true
-```
 
 ## Notable changes
 

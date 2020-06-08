@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/bitnami/charts/tree/master/bitnami/redis-cluster
+# Copied from: https://github.com/bitnami/charts/tree/780db91641bf4e1f98c6e020e1fd971e4d2abc90/bitnami/redis-cluster
 
 {{ if .Values.metrics.enabled }}
 apiVersion: v1
