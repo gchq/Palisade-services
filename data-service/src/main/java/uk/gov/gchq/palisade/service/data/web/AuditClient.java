@@ -28,10 +28,10 @@ import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 public interface AuditClient {
 
     /**
-     * Audit boolean.
+     * The post of AuditRequest request to the audit service which returns a boolean value.
      *
-     * @param request the request
-     * @return the boolean
+     * @param request the AuditRequest
+     * @return A boolean
      */
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
     Boolean audit(@RequestBody final AuditRequest request);

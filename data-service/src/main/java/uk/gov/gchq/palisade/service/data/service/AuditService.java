@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
 /**
- * The type Audit service which implemets {@link Service}
+ * The type Audit service which implements {@link Service}
  */
 public class AuditService implements Service {
 
