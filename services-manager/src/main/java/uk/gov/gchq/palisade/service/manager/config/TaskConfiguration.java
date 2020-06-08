@@ -29,15 +29,30 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * The type Task configuration.
+ */
 public class TaskConfiguration {
     private final Map<String, ServiceConfiguration> services;
 
+    /**
+     * Instantiates a new Task configuration.
+     *
+     * @param services             the services
+     * @param serviceConfiguration the service configuration
+     */
     public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) {
         this.services = serviceConfiguration.entrySet().stream()
                 .filter(entry -> services.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Gets process builders.
+     *
+     * @param builderDirectory the builder directory
+     * @return the process builders
+     */
     public Map<String, ProcessBuilder> getProcessBuilders(final File builderDirectory) {
         return services.entrySet().stream()
                 .map(e -> {
@@ -49,11 +64,23 @@ public class TaskConfiguration {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Gets services.
+     *
+     * @return the services
+     */
     @Generated
     public Map<String, ServiceConfiguration> getServices() {
         return services;
     }
 
+    /**
+     * Run task map.
+     *
+     * @param rootDir         the root dir
+     * @param serviceProducer the service producer
+     * @return the map
+     */
     public Map<String, List<Supplier<Boolean>>> runTask(final File rootDir, final Function<String, ManagedService> serviceProducer) {
         return new TaskRunner(getProcessBuilders(rootDir), serviceProducer).run();
     }

@@ -26,20 +26,53 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
+/**
+ * The interface Resource client which uses Feign to resolve services called resource-service or falls back to values set in the relevant profiles yaml
+ */
 @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
+    /**
+     * Gets resources by id.
+     *
+     * @param request the request
+     * @return the resources by id
+     */
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
 
+    /**
+     * Gets resources by resource.
+     *
+     * @param request the request
+     * @return the resources by resource
+     */
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request);
 
+    /**
+     * Gets resources by type.
+     *
+     * @param request the request
+     * @return the resources by type
+     */
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesByType(@RequestBody final GetResourcesByTypeRequest request);
 
+    /**
+     * Gets resources by serialised format.
+     *
+     * @param request the request
+     * @return the resources by serialised format
+     */
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
     Response getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request);
 
+    /**
+     * Add resource boolean.
+     *
+     * @param request the request
+     * @return the boolean
+     */
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(@RequestBody final AddResourceRequest request);
 }

@@ -22,8 +22,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
+/**
+ * The interface User client which uses Feign to resolve services called user-service or falls back to values set in the relevant profiles yaml
+ */
 @FeignClient(name = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
+    /**
+     * Gets user.
+     *
+     * @param request the request
+     * @return the user
+     */
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
     User getUser(@RequestBody final GetUserRequest request);
 }

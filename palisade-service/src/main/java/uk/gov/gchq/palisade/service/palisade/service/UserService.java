@@ -27,6 +27,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+/**
+ * The type User service which implements {@link Service}
+ */
 public class UserService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
@@ -34,11 +37,23 @@ public class UserService implements Service {
 
     private final Executor executor;
 
+    /**
+     * Instantiates a new User service.
+     *
+     * @param userClient the user client
+     * @param executor   the executor
+     */
     public UserService(final UserClient userClient, final Executor executor) {
         this.client = userClient;
         this.executor = executor;
     }
 
+    /**
+     * Makes a call to userClient and gets the user by request.
+     *
+     * @param request the request
+     * @return the user
+     */
     public CompletableFuture<User> getUser(final GetUserRequest request) {
         LOGGER.debug("Getting user from user service: {}", request);
 

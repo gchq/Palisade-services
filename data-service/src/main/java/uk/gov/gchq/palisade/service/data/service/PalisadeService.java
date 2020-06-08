@@ -27,17 +27,32 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+/**
+ * The type Palisade service which implements {@link Service}
+ */
 public class PalisadeService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
     private final PalisadeClient client;
     private final Executor executor;
 
+    /**
+     * Instantiates a new Palisade service.
+     *
+     * @param palisadeClient the palisade client
+     * @param executor       the executor
+     */
     public PalisadeService(final PalisadeClient palisadeClient, final Executor executor) {
         this.client = palisadeClient;
         this.executor = executor;
     }
 
+    /**
+     * Gets data request config which calls the PalisadeClient and via feign returns a CompletableFuture of DataRequestConfigs by request.
+     *
+     * @param request the request
+     * @return the data request config
+     */
     CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
         LOGGER.debug("Getting config from palisade service for data request: {}", request);
 

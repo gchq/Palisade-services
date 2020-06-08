@@ -29,6 +29,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+/**
+ * The type Policy service which implements {@link Service}
+ */
 public class PolicyService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
 
@@ -36,11 +39,23 @@ public class PolicyService implements Service {
 
     private final Executor executor;
 
+    /**
+     * Instantiates a new Policy service.
+     *
+     * @param policyClient the policy client
+     * @param executor     the executor
+     */
     public PolicyService(final PolicyClient policyClient, final Executor executor) {
         this.client = policyClient;
         this.executor = executor;
     }
 
+    /**
+     * Calls the policy client and returns a Completable future of LeafResources and rules by request
+     *
+     * @param request the request
+     * @return the policy
+     */
     public CompletableFuture<Map<LeafResource, Rules>> getPolicy(final GetPolicyRequest request) {
         LOGGER.debug("Getting policy from policy service: {}", request);
 

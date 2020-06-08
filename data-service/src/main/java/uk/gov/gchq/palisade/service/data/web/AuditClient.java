@@ -21,9 +21,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 
+/**
+ * The interface Audit client which uses Feign to either resolve services called audit-service or looks up a url specified in the relevant profiles yaml.
+ */
 @FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {
 
+    /**
+     * Audit boolean.
+     *
+     * @param request the request
+     * @return the boolean
+     */
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
     Boolean audit(@RequestBody final AuditRequest request);
 }

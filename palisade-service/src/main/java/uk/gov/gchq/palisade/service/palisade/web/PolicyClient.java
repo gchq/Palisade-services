@@ -25,8 +25,17 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
 import java.util.Map;
 
+/**
+ * The interface Policy client which uses Feign to resolve services called policy-service or falls back to values set in the relevant profiles yaml.
+ */
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
+    /**
+     * Gets policy sync.
+     *
+     * @param request the request
+     * @return the policy sync
+     */
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
     Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request);
 }

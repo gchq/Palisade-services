@@ -53,6 +53,14 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * Simple data service simple data service.
+     *
+     * @param auditService    the audit service
+     * @param palisadeService the palisade service
+     * @param dataReader      the data reader
+     * @return the simple data service
+     */
     @Bean
     public SimpleDataService simpleDataService(final AuditService auditService,
                                                final PalisadeService palisadeService,
@@ -65,11 +73,23 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new HadoopDataReader();
     }
 
+    /**
+     * Palisade service bean created with a palisadeClient
+     *
+     * @param palisadeClient the palisade client
+     * @return the palisade service
+     */
     @Bean
     public PalisadeService palisadeService(final PalisadeClient palisadeClient) {
         return new PalisadeService(palisadeClient, getAsyncExecutor());
     }
 
+    /**
+     * Audit service bean created with an auditClient
+     *
+     * @param auditClient the audit client
+     * @return the audit service
+     */
     @Bean
     public AuditService auditService(final AuditClient auditClient) {
         return new AuditService(auditClient);

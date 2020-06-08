@@ -41,6 +41,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The type Resource service which implements {@link Service}
+ */
 public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
@@ -73,12 +76,25 @@ public class ResourceService implements Service {
         }
     };
 
+    /**
+     * Instantiates a new Resource service.
+     *
+     * @param resourceClient the resource client
+     * @param objectMapper   the object mapper
+     * @param executor       the executor
+     */
     public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
         this.client = resourceClient;
         this.objectMapper = objectMapper;
         this.executor = executor;
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Id
+     *
+     * @param request the request
+     * @return the resources by id
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
         LOGGER.info("Getting resources by id from resource service: {}", request);
         return CompletableFuture.supplyAsync(
@@ -86,6 +102,12 @@ public class ResourceService implements Service {
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Resource
+     *
+     * @param request the request
+     * @return the resources by resource
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesByResource(final GetResourcesByResourceRequest request) {
         LOGGER.info("Getting resources by resource from resource service: {}", request);
         return CompletableFuture.supplyAsync(
@@ -93,6 +115,12 @@ public class ResourceService implements Service {
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Type
+     *
+     * @param request the request
+     * @return the resources by type
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesByType(final GetResourcesByTypeRequest request) {
         LOGGER.info("Getting resources by type from resource service: {}", request);
         return CompletableFuture.supplyAsync(
@@ -100,6 +128,12 @@ public class ResourceService implements Service {
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Format
+     *
+     * @param request the request
+     * @return the resources by serialised format
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Getting resources from by serialised format resource service: {}", request);
         return CompletableFuture.supplyAsync(
@@ -107,6 +141,12 @@ public class ResourceService implements Service {
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Response
+     *
+     * @param feignCall the feign call
+     * @return the resources from response
+     */
     protected Set<LeafResource> getResourcesFromResponse(final Supplier<Response> feignCall) {
         try {
             InputStream responseStream = feignCall.get().body().asInputStream();

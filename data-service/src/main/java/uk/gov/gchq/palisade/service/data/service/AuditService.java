@@ -22,15 +22,29 @@ import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
+/**
+ * The type Audit service which implemets {@link Service}
+ */
 public class AuditService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
     private final AuditClient client;
 
+    /**
+     * Instantiates a new Audit service.
+     *
+     * @param auditClient the audit client
+     */
     public AuditService(final AuditClient auditClient) {
         this.client = auditClient;
     }
 
+    /**
+     * Audit boolean which calls the Audit Client and via feign sends audit requests to the Audit service
+     *
+     * @param request the request
+     * @return the boolean
+     */
     public Boolean audit(final AuditRequest request) {
         LOGGER.debug("Submitting audit to audit service: {}", request);
 

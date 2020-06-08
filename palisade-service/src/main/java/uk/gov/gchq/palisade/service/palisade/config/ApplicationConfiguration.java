@@ -100,21 +100,46 @@ public class ApplicationConfiguration implements AsyncConfigurer {
                 resultAggregationService);
     }
 
+    /**
+     * User service bean created with userClient
+     *
+     * @param userClient the user client
+     * @return the user service
+     */
     @Bean
     public UserService userService(final UserClient userClient) {
         return new UserService(userClient, getAsyncExecutor());
     }
 
+    /**
+     * Audit service bean created with auditClient
+     *
+     * @param auditClient the audit client
+     * @return the audit service
+     */
     @Bean
     public AuditService auditService(final AuditClient auditClient) {
         return new AuditService(auditClient);
     }
 
+    /**
+     * Resource service bean created with resourceClient
+     *
+     * @param resourceClient the resource client
+     * @param objectMapper   the object mapper
+     * @return the resource service
+     */
     @Bean
     public ResourceService resourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper) {
         return new ResourceService(resourceClient, objectMapper, getAsyncExecutor());
     }
 
+    /**
+     * Policy service bean created with policyClient
+     *
+     * @param policyClient the policy client
+     * @return the policy service
+     */
     @Bean
     public PolicyService policyService(final PolicyClient policyClient) {
         return new PolicyService(policyClient, getAsyncExecutor());
