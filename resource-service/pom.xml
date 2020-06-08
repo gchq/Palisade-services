@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>resource-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/resource-service</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>

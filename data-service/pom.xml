@@ -27,10 +27,10 @@
     </parent>
 
     <artifactId>data-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
-        <databind.version>2.9.8</databind.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
     </properties>
 

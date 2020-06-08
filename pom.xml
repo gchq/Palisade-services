@@ -29,6 +29,7 @@
     <version>0.4.0-${revision}</version>
     <name>palisade</name>
     <description>Service layer for palisade</description>
+    <url>https://github.com/gchq/Palisade-services</url>
     <packaging>pom</packaging>
 
     <developers>
@@ -60,7 +61,7 @@
         <javadoc.plugin.version>3.2.0</javadoc.plugin.version>
         <checkstyle.plugin.version>3.1.0</checkstyle.plugin.version>
         <checkstyle.phase>verify</checkstyle.phase>
-        <depends.phase>validate</depends.phase>
+        <depends.phase>prepare-package</depends.phase>
         <depends.maven.version>3.1.1</depends.maven.version>
 
         <!-- Sonar -->

@@ -26,10 +26,12 @@
     </parent>
 
     <artifactId>user-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/user-service</url>
 
     <properties>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <swagger.version>1.5.21</swagger.version>
+        <eureka.version>1.9.16</eureka.version>
     </properties>
 
     <dependencies>
@@ -75,6 +77,7 @@
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
+            <version>${eureka.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

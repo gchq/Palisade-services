@@ -33,6 +33,7 @@
         </repository>
     </repositories>
     <artifactId>audit-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>

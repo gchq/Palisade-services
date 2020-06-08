@@ -26,6 +26,7 @@
     </parent>
 
     <artifactId>discovery-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/discovery-service</url>
 
     <dependencies>
         <dependency>

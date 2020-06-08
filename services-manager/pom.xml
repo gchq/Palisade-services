@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>services-manager</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>

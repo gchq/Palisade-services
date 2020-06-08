@@ -27,10 +27,11 @@
     </parent>
 
     <artifactId>palisade-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/palisade-service</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
-        <databind.version>2.9.10.4</databind.version>
+        <databind.version>2.10.0</databind.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <apache.commons.version>1.19</apache.commons.version>
     </properties>
