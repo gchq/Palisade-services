@@ -20,6 +20,7 @@ import feign.Response;
 import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
@@ -36,9 +37,6 @@ public class ManagedService implements Service {
     private final ManagedClient managedClient;
     private final Supplier<Collection<URI>> uriSupplier;
 
-    public static final int VALID_RESPONSE = 200;
-    public static final int ERROR_RESPONSE = 404;
-
     public ManagedService(final ManagedClient managedClient, final Supplier<Collection<URI>> uriSupplier) {
         this.managedClient = managedClient;
         this.uriSupplier = uriSupplier;
@@ -48,7 +46,7 @@ public class ManagedService implements Service {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
                 .map(clientUri -> {
-                    int status = ERROR_RESPONSE;
+                    int status = HttpStatus.NOT_FOUND.value();
                     try {
                         status = this.managedClient.getHealth(clientUri).status();
                     } catch (RetryableException ex) {
@@ -60,7 +58,7 @@ public class ManagedService implements Service {
                 // Could be anyMatch, as only one healthy service is needed to perform requests
                 // Could be allMatch, as it should be expected that all services are healthy
                 // Note that in the case of an empty list, this should always return false
-                .anyMatch(x -> x == VALID_RESPONSE);
+                .anyMatch(x -> x == HttpStatus.OK.value());
     }
 
     public void setLoggers(final String module, final String configuredLevel) throws Exception {
@@ -71,7 +69,7 @@ public class ManagedService implements Service {
                     LOGGER.debug("Client uri {} responded with {}", clientUri, response);
                     return response;
                 })
-                .filter(x -> x.status() != VALID_RESPONSE)
+                .filter(x -> x.status() != HttpStatus.OK.value())
                 .findAny();
         // Need to throw an error, so can't wrap inside an Optional.ifPresent
         if (failures.isPresent()) {

@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 /**
- * The interface Palisade client which uses Feign to either resolve services called palisade-service or looks up a url specified in the relevant profiles yaml.
+ * The interface Palisade client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka.
  */
 @FeignClient(name = "palisade-service", url = "${web.client.palisade-service}")
 public interface PalisadeClient {

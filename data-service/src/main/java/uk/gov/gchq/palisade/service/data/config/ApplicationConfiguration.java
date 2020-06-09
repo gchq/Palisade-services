@@ -54,7 +54,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     /**
-     * Simple data service simple data service.
+     * Simple data service bean created with instances of auditService, palisadeService and dataReader
      *
      * @param auditService    the audit service
      * @param palisadeService the palisade service

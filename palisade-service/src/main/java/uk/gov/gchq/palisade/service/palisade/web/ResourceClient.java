@@ -27,7 +27,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFor
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
 /**
- * The interface Resource client which uses Feign to resolve services called resource-service or falls back to values set in the relevant profiles yaml
+ * The interface Resource client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka
  */
 @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {

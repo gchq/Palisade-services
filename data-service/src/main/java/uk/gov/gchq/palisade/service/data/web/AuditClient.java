@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 
 /**
- * The interface Audit client which uses Feign to either resolve services called audit-service or looks up a url specified in the relevant profiles yaml.
+ * The interface Audit client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka.
  */
 @FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {

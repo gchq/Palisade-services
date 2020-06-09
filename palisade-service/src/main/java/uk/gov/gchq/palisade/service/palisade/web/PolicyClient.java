@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import java.util.Map;
 
 /**
- * The interface Policy client which uses Feign to resolve services called policy-service or falls back to values set in the relevant profiles yaml.
+ * The interface Policy client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka
  */
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
