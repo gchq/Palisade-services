@@ -20,7 +20,7 @@ service:
 
 image:
   name: data-service
-  tag: a310f31-SNAPSHOT
+  tag: a9f62f8-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
@@ -30,12 +30,6 @@ resources:
   requests:
     cpu: 250m
     memory: 512Mi
-
-autoscaling:
-  targetCPUUtilizationPercentage: 50
-  targetMemoryUtilizationPercentage: 50
-  minReplicas: 1
-  maxReplicas: 3
 
 nodeSelector: {}
 tolerations: []
