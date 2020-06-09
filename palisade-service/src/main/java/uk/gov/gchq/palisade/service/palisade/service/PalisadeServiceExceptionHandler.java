@@ -48,7 +48,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(NoPolicyException.class)
     private ResponseEntity<Object> noPolicyExceptionHandler(final NoPolicyException ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
@@ -62,7 +62,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(NullPointerException.class)
     private ResponseEntity<Object> nullPointerExceptionHandler(final NullPointerException ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
@@ -76,7 +76,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(FileNotFoundException.class)
     private ResponseEntity<Object> fileNotFoundExceptionHandler(final FileNotFoundException ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
@@ -90,7 +90,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(IOException.class)
     private ResponseEntity<Object> ioExceptionHandler(final IOException ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -104,7 +104,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(RuntimeException.class)
     private ResponseEntity<Object> runtimeExceptionHandler(final RuntimeException ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -118,7 +118,7 @@ public class PalisadeServiceExceptionHandler extends ResponseEntityExceptionHand
      */
     @ExceptionHandler(Exception.class)
     private ResponseEntity<Object> globalExceptionHandler(final Exception ex) {
-        DEBUG_LOGGER.error("Handling exception: {}", ex);
+        DEBUG_LOGGER.error("Handling exception", ex);
         ErrorDetails details = new ErrorDetails(ZonedDateTime.now(), MESSAGE, ex.getClass().toString(), ex.getStackTrace());
 
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);

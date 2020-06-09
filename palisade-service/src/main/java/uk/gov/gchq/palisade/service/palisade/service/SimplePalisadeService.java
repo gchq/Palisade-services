@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
@@ -81,20 +82,41 @@ public class SimplePalisadeService implements PalisadeService {
         final RequestId originalRequestId = request.getId();
         LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
 
+        AuditRequest.RegisterRequestExceptionAuditRequest.IException auditException = AuditRequest.RegisterRequestExceptionAuditRequest
+                .create(originalRequestId)
+                .withUserId(request.getUserId())
+                .withResourceId(request.getResourceId())
+                .withContext(request.getContext());
+
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
         userRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting user from userService: {}", userRequest);
-        final CompletableFuture<User> user = userService.getUser(userRequest);
+        final CompletableFuture<User> user = userService.getUser(userRequest)
+                .exceptionally(ex -> {
+                    LOGGER.error("Auditing exception from UserService", ex);
+                    auditService.audit(auditException.withException(ex).withServiceClass(UserService.class));
+                    throw new RuntimeException(ex);
+                });
 
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
         resourceRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final CompletableFuture<Set<LeafResource>> resources = resourceService.getResourcesById(resourceRequest);
+        final CompletableFuture<Set<LeafResource>> resources = resourceService.getResourcesById(resourceRequest)
+                .exceptionally(ex -> {
+                    LOGGER.error("Auditing exception from ResourceService", ex);
+                    auditService.audit(auditException.withException(ex).withServiceClass(ResourceService.class));
+                    throw new RuntimeException(ex);
+                });
 
         final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join());
         policyRequest.setOriginalRequestId(originalRequestId);
         LOGGER.debug("Getting rules from policyService: {}", request);
-        CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest);
+        CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest)
+                .exceptionally(ex -> {
+                    LOGGER.error("Auditing exception from PolicyService", ex);
+                    auditService.audit(auditException.withException(ex).withServiceClass(PolicyService.class));
+                    throw new RuntimeException(ex);
+                });
 
         final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
         LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \nrules:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), rules.join(), requestId, originalRequestId);

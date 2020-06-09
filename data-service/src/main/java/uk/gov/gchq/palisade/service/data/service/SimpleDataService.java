@@ -94,7 +94,8 @@ public class SimpleDataService implements DataService {
         getConfig.setOriginalRequestId(request.getOriginalRequestId());
         LOGGER.info("Calling palisade service with: {}", getConfig);
 
-        final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
+        // If this throws an exception connecting to the palisade-service, then it will be caught and audited
+        final DataRequestConfig config = palisadeService.getDataRequestConfig(getConfig).join();
         LOGGER.info("Palisade service returned: {}", config);
 
         final DataReaderRequest readerRequest = new DataReaderRequest()
@@ -108,7 +109,7 @@ public class SimpleDataService implements DataService {
     }
 
     @Override
-    public Consumer<OutputStream> read(final ReadRequest dataRequest) throws NoCapacityException {
+    public Consumer<OutputStream> read(final ReadRequest dataRequest) {
         return out -> {
             try {
                 final AtomicLong recordsProcessed = new AtomicLong(0);
