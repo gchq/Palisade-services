@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
 /**
- * The type Audit service which implements {@link Service}
+ * Wraps a feign client to provide an implementation of {@link Service}
  */
 public class AuditService implements Service {
 

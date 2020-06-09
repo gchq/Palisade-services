@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * The type Resource service which implements {@link Service}
+ * Wraps a feign client to provide an implementation of {@link Service}
  */
 public class ResourceService implements Service {
 

@@ -30,7 +30,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
- * The type Policy service which implements {@link Service}
+ * Wraps a feign client to provide an implementation of {@link Service}
  */
 public class PolicyService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);

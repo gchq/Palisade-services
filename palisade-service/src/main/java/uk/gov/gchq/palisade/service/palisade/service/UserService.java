@@ -28,7 +28,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
- * The type User service which implements {@link Service}
+ * Wraps a feign client to provide an implementation of {@link Service}
  */
 public class UserService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);

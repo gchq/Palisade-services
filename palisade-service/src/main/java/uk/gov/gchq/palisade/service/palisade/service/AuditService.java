@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 
 /**
- * The type Audit service which implements {@link Service}
+ * Wraps a feign client to provide an implementation of {@link Service}
  */
 public class AuditService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
