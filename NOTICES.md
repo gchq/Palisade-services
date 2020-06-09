@@ -5,6 +5,7 @@ List of third-party dependencies grouped by their license type
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * project ':json-path' ([com.jayway.jsonpath:json-path:2.4.0](https://github.com/jayway/JsonPath))
+* eureka-client ([com.netflix.eureka:eureka-client:1.9.13](https://github.com/Netflix/eureka))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
 * event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
 * swagger-annotations ([io.swagger:swagger-annotations:1.5.21](https://github.com/swagger-api/swagger-core/modules/swagger-annotations))
