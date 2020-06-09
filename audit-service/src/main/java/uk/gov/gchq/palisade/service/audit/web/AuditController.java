@@ -28,8 +28,6 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
