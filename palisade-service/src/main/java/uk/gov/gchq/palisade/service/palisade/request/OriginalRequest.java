@@ -10,10 +10,9 @@ import java.util.Map;
  */
 public class OriginalRequest {
 
-    private String requestId; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
-    // RequestId  represents the  Token shown in the diagram Logical view of Palisade.  Should we change the name to Token
+    private String token; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
     // This information will also be in the header.  This might be removed later if not required in services.
-    //the concept of a unique identifier for each transaction is to pulled from the header
+    //the concept of a unique identifier for each transaction is to pulled from the header when needed
 
     private String userID;  //unique identifier for the user
     private String resourceID;  //the resource that that is being asked to access

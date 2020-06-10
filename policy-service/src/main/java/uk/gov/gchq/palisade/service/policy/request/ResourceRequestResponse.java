@@ -1,22 +1,19 @@
-package uk.gov.gchq.palisade.service.policy.requestResponse;
+package uk.gov.gchq.palisade.service.policy.request;
 
-//This is the message that will be sent from the PolicyService to the QueryScopeService
-//It is, therefore a Response from the PolicyService and a Request into the QueryScopeService
-
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.policy.requestResponse.common.ResourceMetadata;
-import uk.gov.gchq.palisade.service.policy.requestResponse.common.Rule;
+import uk.gov.gchq.palisade.service.policy.requestResponse.common.domain.User;
 
 import java.util.Map;
 
+
 /**
- * This is the message that will be sent from the PolicyService to the QueryScopeService
- * It is, therefore a Response from the PolicyService and a Request into the QueryScopeService
+ * This is the message that will be sent from the ResourceService to the PolicyService
+ * It is, therefore a Response from the ResourceService and a Request into the PolicyService
  * Note there are two classes of this type:
- * uk.gov.gchq.palisade.service.policy.requestResponse.PolicyRequestResponse
+ * uk.gov.gchq.palisade.service.resource.requestResponse.ResourceRequestResponse
  * uk.gov.gchq.palisade.service.policy.request.ResourceRequestResponse
  */
-public class PolicyRequestResponse {
+public class ResourceRequestResponse {
 
 
     private String token; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
@@ -26,9 +23,8 @@ public class PolicyRequestResponse {
 
     private User user;  //User replaces the user id from the original request.  This is also an indication that the User is in the system.
     private String resourceID;  //the resource that that is being asked to access
+    private Map<String, ResourceMetadata> metadata;
     private Map<String, String> context;    // relevant  information about the request.  Was a Context object now a Map.
-
-    private Map<String, ResourceMetadata> metadata;  //this is a filtered set as there can be resources that have been removed
-    // from the map in the ResourceRequestResponse by the policy service
-    private Map<String, Rule> rules; //
 }
+
+

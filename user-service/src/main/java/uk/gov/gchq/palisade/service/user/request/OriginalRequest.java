@@ -4,14 +4,15 @@ import java.util.Map;
 
 /**
  * Represents the original data that has been sent from the client for a request.
- * Note there is another class of the same type in the user service
+ * Note there are two classes of the same type:
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest
+ * uk.gov.gchq.palisade.service.user.request.OriginalRequest
  * This is the request message than is sent from PalisadeEntryPointService to UserService
  */
 public class OriginalRequest {
 
-    private String requestId; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
-    // RequestId  represents the  Token shown in the diagram Logical view of Palisade.  Should we change the name to Token
+    private String token; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
+    // RequestId  represents the  Token shown in the diagram Logical view of Palisade.
     // This information will also be in the header.  This might be removed later if not required in services.
     //the concept of a unique identifier for each transaction is to pulled from the header
 
