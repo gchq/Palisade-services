@@ -1,17 +1,15 @@
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.resource.request;
 
-import uk.gov.gchq.palisade.resource.ParentResource;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.palisade.request.common.domain.User;
+import uk.gov.gchq.palisade.service.resource.request.common.domain.User;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains the request with the User, and the resource metadata.  This is only created if the resource meta data could be found.
+ * Contains the information for a request where the User has been identified in the system.  This will only be created if the user does exists.
+ * Note there is another class of the same type in the user service
+ * uk.gov.gchq.palisade.service.user.request.UserRequest
  */
-public class ResourceRequest {
+public class UserRequest {
 
     private String requestId; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
     // RequestId  represents the  Token shown in the diagram Logical view of Palisade.  Should we change the name to Token
@@ -22,14 +20,5 @@ public class ResourceRequest {
     private String resourceID;  //the resource that that is being asked to access
     private Map<String, String> context;    // relevant  information about the request.  Was a Context object now a Map.
 
-
-//new stuff
-    private String type;
-    private String serialisedFormat;
-    private ConnectionDetail connectionDetail;
-    //sorted collection of parent resource id
-    Collection<String> parent;  //represents the hiearchy of resources relevant to the this
-    private Map<String, Object> attributes = new HashMap();
-
-
 }
+

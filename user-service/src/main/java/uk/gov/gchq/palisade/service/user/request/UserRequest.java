@@ -1,6 +1,7 @@
 package uk.gov.gchq.palisade.service.user.request;
 
-import uk.gov.gchq.palisade.service.user.common.domain.User;
+
+import uk.gov.gchq.palisade.service.user.request.common.domain.User;
 
 import java.util.Map;
 

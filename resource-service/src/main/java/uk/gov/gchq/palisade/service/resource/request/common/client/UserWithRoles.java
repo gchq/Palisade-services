@@ -1,12 +1,12 @@
-package uk.gov.gchq.palisade.service.user.common.client;
+package uk.gov.gchq.palisade.service.resource.request.common.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.gchq.palisade.service.user.common.domain.IUser;
-import uk.gov.gchq.palisade.service.user.common.domain.User;
+import uk.gov.gchq.palisade.service.resource.request.common.domain.IUser;
+import uk.gov.gchq.palisade.service.resource.request.common.domain.User;
 
 import java.io.IOException;
 import java.util.AbstractMap;
