@@ -42,8 +42,8 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This is the abstract class that is passed to the audit-service to be able to store an audit record. The default information is
- * when was the audit record created and by what server.
+ * This is the abstract class that is passed to the audit-service to be able to store an audit record. The default information consists of
+ * when the audit record was created and which server created it.
  *
  * The four immutable data subclasses below can be instantiated by static {@code create(RequestId orig)} factory methods which chain
  * construction by fluid interface definitions.
@@ -557,7 +557,7 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * Used for the indication to the Audit logs that an exception has been received.
+     * Used to indicate to the Audit logs that the data-service encountered an exception while processing the ReadRequest.
      */
     public static final class ReadRequestExceptionAuditRequest extends AuditRequest {
 
