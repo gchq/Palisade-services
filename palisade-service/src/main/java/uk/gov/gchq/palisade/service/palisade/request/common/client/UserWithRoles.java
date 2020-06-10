@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.gchq.palisade.service.palisade.request.common.domain.IUser;
 import uk.gov.gchq.palisade.service.palisade.request.common.domain.User;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +78,8 @@ public class UserWithRoles implements IUser {
             try {
                 return mapper.readValue(val, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
+                return new ArrayList<String>();
+            } catch (IOException e) {
                 return new ArrayList<String>();
             }
         }).orElseGet(ArrayList::new);
