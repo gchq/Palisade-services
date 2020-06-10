@@ -16,12 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mockito;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
@@ -31,7 +28,6 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,12 +39,8 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
-    private final DiscoveryClient discoveryClient = Mockito.mock(DiscoveryClient.class);
     private final SimpleResourceService service = new SimpleResourceService("data-service");
 
-    @Before
-    public void setUp() throws URISyntaxException {
-    }
 
     @Test
     public void javaFilesInSrcAndTest() throws IOException {

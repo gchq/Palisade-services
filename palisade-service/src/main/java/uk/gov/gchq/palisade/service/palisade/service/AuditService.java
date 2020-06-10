@@ -21,9 +21,10 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
+import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 /**
- * Wraps a feign client to provide an implementation of {@link Service}
+ * AuditService which implements {@link Service} and uses Feign within {@link AuditClient} to send audit requests via rest to the Audit Service
  */
 public class AuditService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);

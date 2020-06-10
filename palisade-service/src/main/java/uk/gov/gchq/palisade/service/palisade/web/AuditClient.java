@@ -15,9 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
-import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -37,11 +35,4 @@ public interface AuditClient {
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
     Boolean audit(@RequestBody final AuditRequest request);
 
-    /**
-     * Gets health.
-     *
-     * @return the health
-     */
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth();
 }

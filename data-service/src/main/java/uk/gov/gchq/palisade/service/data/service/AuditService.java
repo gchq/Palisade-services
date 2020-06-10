@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
 /**
- * Wraps a feign client to provide an implementation of {@link Service}
+ * AuditService which implements {@link Service} and uses Feign within {@link AuditClient} to log audit requests
  */
 public class AuditService implements Service {
 

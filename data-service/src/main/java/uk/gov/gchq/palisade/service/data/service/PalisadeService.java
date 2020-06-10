@@ -28,7 +28,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
- * Wraps a feign client to provide an implementation of {@link Service}
+ * PalisadeService which implements {@link Service} and uses Feign within {@link PalisadeClient} to send requests to the Palisade Service
  */
 public class PalisadeService implements Service {
 

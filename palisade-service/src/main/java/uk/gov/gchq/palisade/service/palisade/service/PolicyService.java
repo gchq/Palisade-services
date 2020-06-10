@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
+import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +31,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
- * Wraps a feign client to provide an implementation of {@link Service}
+ * PolicyService which implements {@link Service} and uses Feign within {@link PolicyClient} to send rest requests to the Policy Service
  */
 public class PolicyService implements Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
