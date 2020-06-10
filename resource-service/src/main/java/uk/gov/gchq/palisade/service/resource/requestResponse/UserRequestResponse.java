@@ -1,6 +1,6 @@
-package uk.gov.gchq.palisade.service.resource.request;
+package uk.gov.gchq.palisade.service.resource.requestResponse;
 
-import uk.gov.gchq.palisade.service.resource.request.common.domain.User;
+import uk.gov.gchq.palisade.service.resource.requestResponse.common.domain.User;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import java.util.Map;
  * Note there is another class of the same type in the user service
  * uk.gov.gchq.palisade.service.user.request.UserRequest
  */
-public class UserRequest {
+public class UserRequestResponse {
 
     private String requestId; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
     // RequestId  represents the  Token shown in the diagram Logical view of Palisade.  Should we change the name to Token
