@@ -102,7 +102,7 @@ global:
     redis:
       name: redis-persistence
       # storage: storage size for this volume and its claims
-      storage: 1Gi
+      storage: 8Gi
       # volumeHandle: aws handle for the volume to mount
       volumeHandle: null
       # aws host directory to mount

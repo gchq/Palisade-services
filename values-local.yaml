@@ -96,7 +96,7 @@ global:
     redis:
       name: redis-persistence
       # storage: storage size for this volume and its claims
-      storage: 1Gi
+      storage: 8Gi
       # hostPath: external host directory to be mounted
       hostPath: "/"
 
