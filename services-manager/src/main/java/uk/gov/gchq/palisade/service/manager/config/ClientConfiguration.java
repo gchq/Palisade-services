@@ -35,6 +35,10 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Client Configuration is used to resolve services from eureka or via the relevant application-yaml
+ * for classes such as {@link uk.gov.gchq.palisade.service.manager.service.ManagedService} so that metrics such as health can be observed.
+ */
 public class ClientConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
 
@@ -78,7 +82,7 @@ public class ClientConfiguration {
      *
      * @param serviceName the service name to query with eureka
      * @return if eureka is enabled, Optional.of a collection of URIs for that service name
-     *         otherwise, Optional.empty
+     * otherwise, Optional.empty
      */
     private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
         // If eureka is available
