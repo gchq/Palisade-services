@@ -26,6 +26,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.util.Arrays;
 
+/**
+ * SpringBoot application class entry-point
+ */
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication

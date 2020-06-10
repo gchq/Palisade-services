@@ -58,33 +58,26 @@ import java.util.function.Supplier;
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    /**
-     * A generic resolver from service names to {@link URI}s
-     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
-     *
-     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
-     */
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
+    ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
         return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
     }
 
     @Bean
-    public SimpleDataService simpleDataService(final AuditService auditService,
+    SimpleDataService simpleDataService(final AuditService auditService,
                                                final PalisadeService palisadeService,
                                                final DataReader dataReader) {
         return new SimpleDataService(auditService, palisadeService, dataReader);
     }
 
     @Bean
-    public DataReader hadoopDataReader() throws IOException {
+    DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
     }
 
     @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final ClientConfiguration clientConfig) {
+    PalisadeService palisadeService(final PalisadeClient palisadeClient, final ClientConfiguration clientConfig) {
         Supplier<URI> palisadeUriSupplier = () -> clientConfig
                 .getClientUri("palisade-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'palisade-service' - see 'web.client' properties or discovery service registration"));
@@ -92,7 +85,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
+    AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
         Supplier<URI> auditUriSupplier = () -> clientConfig
                 .getClientUri("audit-service")
                 .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'audit-service' - see 'web.client' properties or discovery service registration"));
@@ -101,7 +94,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 
@@ -121,7 +114,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public WebMvcConfigurer webMvcConfigurer() {
+    WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
@@ -131,7 +124,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean(name = "concurrentTaskExecutor")
-    public ConcurrentTaskExecutor getTaskExecutor() {
+    ConcurrentTaskExecutor getTaskExecutor() {
         return new ConcurrentTaskExecutor(this.getAsyncExecutor());
     }
 }
