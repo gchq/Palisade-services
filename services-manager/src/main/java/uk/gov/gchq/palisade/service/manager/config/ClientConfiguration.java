@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-public class WebConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebConfiguration.class);
+public class ClientConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
 
     private Map<String, List<URI>> client;
 
@@ -62,6 +62,11 @@ public class WebConfiguration {
                 .orElseGet(() -> configResolve(serviceName));
     }
 
+    /**
+     * Map a service name to a collection of URIs using eureka or yaml
+     * @param serviceName the name of the service
+     * @return a collection of URIs, each pointing to an instance of that named service
+     */
     private Collection<URI> configResolve(final String serviceName) {
         return Optional.ofNullable(client.get(serviceName)).orElse(Collections.emptyList());
     }

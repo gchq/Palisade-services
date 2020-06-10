@@ -105,6 +105,11 @@ public class ServiceConfiguration {
         this.level = level;
     }
 
+    /**
+     * Given a yaml configuration for a service, produce a ProcessBuilder for running this service
+     *
+     * @return a ProcessBuilder which may be .start()ed to spawn a new JVM
+     */
     public ProcessBuilder getProcessBuilder() {
         ArrayList<String> command = new ArrayList<>();
         // java (JVM)
