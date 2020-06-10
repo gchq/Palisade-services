@@ -53,19 +53,6 @@ public class ResourceService implements Service {
     private final ObjectMapper objectMapper;
     private final Executor executor;
 
-    /**
-     * Instantiates a new Resource service.
-     *
-     * @param resourceClient the resource client rest interface for the Resource Service
-     * @param objectMapper   the object mapper
-     * @param executor       the executor
-     */
-    public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
-        this.client = resourceClient;
-        this.objectMapper = objectMapper;
-        this.executor = executor;
-    }
-
     private final Serialiser<LeafResource> serialiser = new LineSerialiser<>() {
         @Override
         public LeafResource deserialiseLine(final String line) {
@@ -88,6 +75,20 @@ public class ResourceService implements Service {
             throw new NoSuchMethodError("No implementation of serialiseLine for " + this);
         }
     };
+
+    /**
+     * Instantiates a new Resource service.
+     *
+     * @param resourceClient the resource client rest interface for the Resource Service
+     * @param objectMapper   the object mapper
+     * @param executor       the executor
+     */
+    public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
+        this.client = resourceClient;
+        this.objectMapper = objectMapper;
+        this.executor = executor;
+    }
+
 
     /**
      * Calls the resource client and async returns a Completable future of LeafResources by Id
