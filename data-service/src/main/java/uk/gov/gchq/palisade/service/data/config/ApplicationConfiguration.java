@@ -33,6 +33,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
@@ -70,6 +71,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleDataService(auditService, palisadeService, dataReader);
     }
 
+    /**
+     * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
+     *
+     * @return a new instance of {@link HadoopDataReader}
+     * @throws IOException ioException
+     */
     @Bean
     public DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
