@@ -135,7 +135,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
 
         Resource unconfiguredResource = ResourceBuilder.create(this.resource);
         Resource policyResource = resources.stream()
-                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().uri("")).getValue())
+                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().serviceName("")).getValue())
                 .filter(builtResource -> builtResource.getId().equals(unconfiguredResource.getId()))
                 .findFirst()
                 .orElse(unconfiguredResource);

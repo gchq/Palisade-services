@@ -35,8 +35,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
-public class WebConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebConfiguration.class);
+/**
+ * Client Configuration is used to resolve services from eureka or via the relevant application-yaml
+ * for classes such as {@link uk.gov.gchq.palisade.service.manager.service.ManagedService} so that metrics such as health can be observed.
+ */
+public class ClientConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientConfiguration.class);
 
     private Map<String, List<URI>> client;
 
@@ -62,10 +66,24 @@ public class WebConfiguration {
                 .orElseGet(() -> configResolve(serviceName));
     }
 
+    /**
+     * Map a service name to a collection of URIs using eureka or yaml
+     *
+     * @param serviceName the name of the service
+     * @return a collection of URIs, each pointing to an instance of that named service
+     */
     private Collection<URI> configResolve(final String serviceName) {
         return Optional.ofNullable(client.get(serviceName)).orElse(Collections.emptyList());
     }
 
+    /**
+     * If using eureka, get a collection of all URIs registered with eureka as the given service name.
+     * This is a bit messy, but seems to be the best way to go about this (Feign is not really designed for this)
+     *
+     * @param serviceName the service name to query with eureka
+     * @return if eureka is enabled, Optional.of a collection of URIs for that service name
+     * otherwise, Optional.empty
+     */
     private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
         // If eureka is available
         return Optional.ofNullable(eurekaClient)

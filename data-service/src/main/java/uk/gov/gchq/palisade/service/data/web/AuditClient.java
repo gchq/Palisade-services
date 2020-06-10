@@ -15,23 +15,24 @@
  */
 package uk.gov.gchq.palisade.service.data.web;
 
-import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 
-import java.net.URI;
-
-@FeignClient(name = "audit-service", url = "undefined")
+/**
+ * The interface Audit client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka.
+ */
+@FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {
 
+    /**
+     * The post of AuditRequest request to the audit service which returns a boolean value if the request has been logged successfully or not
+     *
+     * @param request the AuditRequest
+     * @return A boolean
+     */
     @PostMapping(path = "/audit", consumes = "application/json", produces = "application/json")
-    Boolean audit(final URI url, @RequestBody final AuditRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
-
+    Boolean audit(@RequestBody final AuditRequest request);
 }

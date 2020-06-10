@@ -34,11 +34,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
 
-import java.net.URI;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,8 +46,6 @@ public class AuditServiceTest {
 
     @Mock
     AuditClient auditClient;
-    @Mock
-    Executor executor;
 
     @Before
     public void setUp() {
@@ -58,14 +53,7 @@ public class AuditServiceTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        Supplier<URI> uriSupplier = () -> {
-            try {
-                return new URI("audit-service");
-            } catch (Exception e) {
-                return null;
-            }
-        };
-        auditService = new AuditService(auditClient, uriSupplier, executor);
+        auditService = new AuditService(auditClient);
     }
 
     @After
@@ -86,7 +74,7 @@ public class AuditServiceTest {
         // Given
         AuditRequest request = Mockito.mock(AuditRequest.class);
         Boolean response = true;
-        Mockito.when(auditClient.audit(Mockito.any(), Mockito.eq(request))).thenReturn(response);
+        Mockito.when(auditClient.audit(Mockito.eq(request))).thenReturn(response);
 
         // When
         auditService.audit(request);
