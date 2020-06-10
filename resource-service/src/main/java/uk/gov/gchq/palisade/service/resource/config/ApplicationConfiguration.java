@@ -189,7 +189,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      *
      * @param config hadoop configuration
      * @return a {@link ConfiguredHadoopResourceService} used for adding connection details to leaf resources
-     * @throws IOException
+     * @throws IOException ioexception
      */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
