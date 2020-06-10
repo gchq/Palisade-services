@@ -40,7 +40,7 @@ public class AuditService implements Service {
     }
 
     /**
-     * Calls the Audit Client and via feign sends audit requests to the Audit service returning TRUE if the audit message was received successfully. 
+     * Calls the Audit Client and via feign sends audit requests to the Audit service returning TRUE if the audit message was received successfully.
      * Audit service implementations may have different definitions of 'received successfully'.
      *
      * @param request the request
