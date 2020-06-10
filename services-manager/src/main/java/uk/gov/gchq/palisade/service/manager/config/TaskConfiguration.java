@@ -44,6 +44,13 @@ public class TaskConfiguration {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Map the loaded ServiceName <-> ServiceConfiguration collection to ServiceName <-> ProcessBuilder
+     * Each ProcessBuilder may be .start()ed to start a new JVM running the given service as configured
+     *
+     * @param builderDirectory the working directory for the spawned processes
+     * @return a map from serviceName to a ProcessBuilder for the configured service
+     */
     public Map<String, ProcessBuilder> getProcessBuilders(final File builderDirectory) {
         return services.entrySet().stream()
                 .map(e -> {
@@ -60,6 +67,12 @@ public class TaskConfiguration {
         return services;
     }
 
+    /**
+     * Run this TaskConfiguration as a TaskRunner, simply .start()ing all configured services and waiting until healthy or halted
+     * @param rootDir the working directory for the spawned processes
+     * @param serviceProducer a mapping from service names to REST clients for the given service name
+     * @return a map of service names paired with a collection of indicators as to whether the service is 'done' for some metric (healthy, halted, etc)
+     */
     public Map<String, List<Supplier<Boolean>>> runTask(final File rootDir, final Function<String, ManagedService> serviceProducer) {
         return new TaskRunner(getProcessBuilders(rootDir), serviceProducer).run();
     }

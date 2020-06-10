@@ -64,6 +64,7 @@ public class ClientConfiguration {
 
     /**
      * Map a service name to a collection of URIs using eureka or yaml
+     *
      * @param serviceName the name of the service
      * @return a collection of URIs, each pointing to an instance of that named service
      */
@@ -71,6 +72,14 @@ public class ClientConfiguration {
         return Optional.ofNullable(client.get(serviceName)).orElse(Collections.emptyList());
     }
 
+    /**
+     * If using eureka, get a collection of all URIs registered with eureka as the given service name.
+     * This is a bit messy, but seems to be the best way to go about this (Feign is not really designed for this)
+     *
+     * @param serviceName the service name to query with eureka
+     * @return if eureka is enabled, Optional.of a collection of URIs for that service name
+     *         otherwise, Optional.empty
+     */
     private Optional<Collection<URI>> eurekaResolve(final String serviceName) {
         // If eureka is available
         return Optional.ofNullable(eurekaClient)

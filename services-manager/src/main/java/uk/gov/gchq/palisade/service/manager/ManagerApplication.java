@@ -36,7 +36,7 @@ public class ManagerApplication {
     /**
      * Application entry-point method
      * Will later call out to the configured runner to run for the rest of the lifetime of the application
-     * @param args
+     * @param args additional command-line arguments passed in
      */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ManagerApplication.class).run(args);

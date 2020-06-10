@@ -45,10 +45,10 @@ public class LoggingBouncer implements Runnable {
         loggingConfiguration.forEach((serviceName, config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
-            config.getLevel().forEach((module, level) -> {
-                LOGGER.debug("Configuring service {} with module {} as {}", serviceName, module, level);
+            config.getLevel().forEach((packageName, level) -> {
+                LOGGER.debug("Configuring service {} with package {} as {}", serviceName, packageName, level);
                 try {
-                    service.setLoggers(module, level);
+                    service.setLoggers(packageName, level);
                 } catch (Exception ex) {
                     LOGGER.error("Error while changing logging level: ", ex);
                 }
