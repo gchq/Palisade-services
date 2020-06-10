@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.palisade.web.PolicyClient;
-import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
