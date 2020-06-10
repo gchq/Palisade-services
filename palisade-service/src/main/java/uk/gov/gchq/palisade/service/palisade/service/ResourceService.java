@@ -56,7 +56,7 @@ public class ResourceService implements Service {
     /**
      * Instantiates a new Resource service.
      *
-     * @param resourceClient the resource client
+     * @param resourceClient the resource client rest interface for the Resource Service
      * @param objectMapper   the object mapper
      * @param executor       the executor
      */
@@ -90,7 +90,8 @@ public class ResourceService implements Service {
     };
 
     /**
-     * Calls the resource client and returns a Completable future of LeafResources by Id
+     * Calls the resource client and async returns a Completable future of LeafResources by Id
+     * Returns resource and connection details by resource ID
      *
      * @param request the request
      * @return the resources by id
@@ -103,7 +104,8 @@ public class ResourceService implements Service {
     }
 
     /**
-     * Calls the resource client and returns a Completable future of LeafResources by Resource
+     * Calls the resource client and async returns a Completable future of LeafResources by a specific Resource
+     * Returns resource and connection details by resource
      *
      * @param request the request
      * @return the resources by resource
@@ -116,7 +118,8 @@ public class ResourceService implements Service {
     }
 
     /**
-     * Calls the resource client and returns a Completable future of LeafResources by Type
+     * Calls the resource client and async returns a Completable future of LeafResources by a specific resource type
+     * Returns resource and connection details by type
      *
      * @param request the request
      * @return the resources by type
@@ -129,7 +132,8 @@ public class ResourceService implements Service {
     }
 
     /**
-     * Calls the resource client and returns a Completable future of LeafResources by Format
+     * Calls the resource client and returns a Completable future of LeafResources by a specific date format.
+     * Resources of a particular data format may not share a type, e.g. not all CSV format records will contain employee contact details.
      *
      * @param request the request
      * @return the resources by serialised format

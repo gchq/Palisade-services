@@ -28,7 +28,8 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 @FeignClient(name = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
     /**
-     * Gets user.
+     * Post request to the UserService to retrieve the user by userId contained in the request.
+     * If the requested UserId doesn't exist in this UserService then an exception will be thrown.
      *
      * @param request the request
      * @return the user

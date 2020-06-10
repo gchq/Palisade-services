@@ -43,7 +43,7 @@ public class PolicyService implements Service {
     /**
      * Instantiates a new Policy service.
      *
-     * @param policyClient the policy client
+     * @param policyClient the policy client rest interface for the Policy Service
      * @param executor     the executor
      */
     public PolicyService(final PolicyClient policyClient, final Executor executor) {
@@ -52,7 +52,7 @@ public class PolicyService implements Service {
     }
 
     /**
-     * Calls the policy client and returns a Completable future of LeafResources and rules by request
+     * Calls the policy client and async returns a Completable future of LeafResources and rules by request
      *
      * @param request the request
      * @return the policy

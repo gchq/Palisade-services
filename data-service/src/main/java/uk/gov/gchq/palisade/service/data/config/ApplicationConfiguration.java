@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
+import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
@@ -55,6 +56,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * Simple data service bean created with instances of auditService, palisadeService and dataReader
+     * which is a simple implementation of {@link DataService} used for examples and demos
      *
      * @param auditService    the audit service
      * @param palisadeService the palisade service
@@ -74,7 +76,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Palisade service bean created with a palisadeClient
+     * Palisade service bean created with a palisadeClient which uses Feign to send rest requests to the Palisade Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param palisadeClient the palisade client
      * @return the palisade service
@@ -85,7 +88,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Audit service bean created with an auditClient
+     * Audit service bean created with an auditClient which uses Feign to send rest requests to the Audit Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param auditClient the audit client
      * @return the audit service

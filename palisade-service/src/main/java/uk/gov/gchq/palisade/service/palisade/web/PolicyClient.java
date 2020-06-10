@@ -31,7 +31,7 @@ import java.util.Map;
 @FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
     /**
-     * Gets policy sync.
+     * Sends a post rest request to the PolicyService and returns a Completable future of LeafResources and rules
      *
      * @param request the request
      * @return the policy sync

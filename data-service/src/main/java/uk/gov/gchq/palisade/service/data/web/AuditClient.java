@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 public interface AuditClient {
 
     /**
-     * The post of AuditRequest request to the audit service which returns a boolean value.
+     * The post of AuditRequest request to the audit service which returns a boolean value if the request has been logged successfully or not
      *
      * @param request the AuditRequest
      * @return A boolean

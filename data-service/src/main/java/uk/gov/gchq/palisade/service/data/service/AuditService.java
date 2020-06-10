@@ -33,7 +33,7 @@ public class AuditService implements Service {
     /**
      * Instantiates a new Audit service.
      *
-     * @param auditClient the audit client
+     * @param auditClient the audit client rest interface for the Audit Service
      */
     public AuditService(final AuditClient auditClient) {
         this.client = auditClient;

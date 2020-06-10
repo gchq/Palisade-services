@@ -46,7 +46,8 @@ public class SimpleResourceService implements ResourceService {
     /**
      * Instantiates a new Simple resource service.
      *
-     * @param dataServiceName the data service name
+     * @param dataServiceName the data service name used in the connection detail to contain the location,
+     *                        either URL or hostname for the data service associated with this resource
      */
     public SimpleResourceService(final String dataServiceName) {
         this.dataServiceName = dataServiceName;

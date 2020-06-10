@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
@@ -40,7 +41,7 @@ public class UserService implements Service {
     /**
      * Instantiates a new User service.
      *
-     * @param userClient the user client
+     * @param userClient the user client interface for the User Service
      * @param executor   the executor
      */
     public UserService(final UserClient userClient, final Executor executor) {
@@ -49,7 +50,8 @@ public class UserService implements Service {
     }
 
     /**
-     * Makes a call to userClient and gets the user by request.
+     * Makes a call to userClient and gets the user by userId contained in the request.
+     * If the requested {@link UserId} doesn't exist in this {@link UserService} then an exception will be thrown.
      *
      * @param request the request
      * @return the user

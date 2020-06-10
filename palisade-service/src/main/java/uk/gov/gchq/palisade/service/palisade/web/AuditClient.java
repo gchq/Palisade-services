@@ -27,7 +27,7 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 @FeignClient(name = "audit-service", url = "${web.client.audit-service}")
 public interface AuditClient {
     /**
-     * Audit boolean.
+     * Sends a post to the AuditService which will return a True or False if it has been logged successfully
      *
      * @param request the request
      * @return the boolean

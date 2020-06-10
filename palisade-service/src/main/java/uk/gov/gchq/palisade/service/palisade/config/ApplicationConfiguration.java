@@ -101,7 +101,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * User service bean created with userClient
+     * User service bean created with an userClient which uses Feign to send rest requests to the User Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param userClient the user client
      * @return the user service
@@ -112,7 +113,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Audit service bean created with auditClient
+     * Audit service bean created with an auditClient which uses Feign to send rest requests to the Audit Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param auditClient the audit client
      * @return the audit service
@@ -123,7 +125,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Resource service bean created with resourceClient
+     * Resource service bean created with an resourceClient which uses Feign to send rest requests to the Resource Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param resourceClient the resource client
      * @param objectMapper   the object mapper
@@ -135,7 +138,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * Policy service bean created with policyClient
+     * Policy service bean created with an policyClient which uses Feign to send rest requests to the Policy Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
      * @param policyClient the policy client
      * @return the policy service

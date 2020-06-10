@@ -140,11 +140,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
-    /**
-     * Resource converter.
-     *
-     * @return the resource converter
-     */
     @Bean
     public ResourceConverter resourceConverter() {
         return new ResourceConverter();
@@ -171,11 +166,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
 
-    /**
-     * Simple resource service.
-     *
-     * @return the resource service
-     */
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
@@ -183,13 +173,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleResourceService(dataServiceName);
     }
 
-    /**
-     * Hadoop resource service.
-     *
-     * @param config the config
-     * @return the hadoop resource service
-     * @throws IOException the io exception
-     */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
     @Qualifier("impl")
@@ -197,21 +180,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ConfiguredHadoopResourceService(config);
     }
 
-    /**
-     * Hadoop configuration.
-     *
-     * @return the org.apache.hadoop.conf.configuration
-     */
     @Bean
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
         return new org.apache.hadoop.conf.Configuration();
     }
 
-    /**
-     * Jackson object mapper.
-     *
-     * @return the object mapper
-     */
     @Bean
     @Primary
     public ObjectMapper jacksonObjectMapper() {
@@ -228,11 +201,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         }).findFirst().orElse(null);
     }
 
-    /**
-     * Gets task executor.
-     *
-     * @return the task executor
-     */
     @Bean(name = "concurrentTaskExecutor")
     public ConcurrentTaskExecutor getTaskExecutor() {
         return new ConcurrentTaskExecutor(this.getAsyncExecutor());

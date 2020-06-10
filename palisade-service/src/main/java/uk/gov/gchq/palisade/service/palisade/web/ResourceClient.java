@@ -32,7 +32,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 @FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
     /**
-     * Gets resources by id.
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by resourceID
      *
      * @param request the request
      * @return the resources by id
@@ -41,7 +41,7 @@ public interface ResourceClient {
     Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
 
     /**
-     * Gets resources by resource.
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by resource
      *
      * @param request the request
      * @return the resources by resource
@@ -50,7 +50,7 @@ public interface ResourceClient {
     Response getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request);
 
     /**
-     * Gets resources by type.
+     * Post rest request to the Resource Service and returns a response containing connection details and resources by a specific resource type
      *
      * @param request the request
      * @return the resources by type
@@ -59,7 +59,8 @@ public interface ResourceClient {
     Response getResourcesByType(@RequestBody final GetResourcesByTypeRequest request);
 
     /**
-     * Gets resources by serialised format.
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by a specific date format
+     * Resources of a particular data format may not share a type, e.g. not all CSV format records will contain employee contact details.
      *
      * @param request the request
      * @return the resources by serialised format
@@ -68,10 +69,12 @@ public interface ResourceClient {
     Response getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request);
 
     /**
-     * Add resource boolean.
+     * Post request to the Resource Service which informs Palisade about a specific resource that it may return to users.
+     * This lets Palisade clients request access to that resource and allows Palisade to provide policy controlled access
+     * to it via the other methods in this interface.
      *
-     * @param request the request
-     * @return the boolean
+     * @param request the resource that Palisade can manage access to
+     * @return whether or not the addResource call completed successfully
      */
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
     Boolean addResource(@RequestBody final AddResourceRequest request);

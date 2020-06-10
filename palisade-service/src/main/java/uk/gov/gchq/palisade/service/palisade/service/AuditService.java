@@ -32,16 +32,16 @@ public class AuditService implements Service {
     private final AuditClient client;
 
     /**
-     * Instantiates a new Audit service.
+     * Instantiates a new Audit service
      *
-     * @param auditClient the audit client
+     * @param auditClient the audit client rest interface for the Audit Service
      */
     public AuditService(final AuditClient auditClient) {
         this.client = auditClient;
     }
 
     /**
-     * Audit boolean which calls the Audit Client to audit values by request and returns a boolean
+     * Audit boolean which calls the Audit Client to audit values by request and returns a boolean if the request has been successfully logged.
      *
      * @param request the request
      * @return the boolean

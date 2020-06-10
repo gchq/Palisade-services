@@ -39,7 +39,7 @@ public class PalisadeService implements Service {
     /**
      * Instantiates a new Palisade service.
      *
-     * @param palisadeClient the palisade client
+     * @param palisadeClient the palisade client rest interface for the Palisade Service
      * @param executor       the executor
      */
     public PalisadeService(final PalisadeClient palisadeClient, final Executor executor) {
@@ -49,6 +49,7 @@ public class PalisadeService implements Service {
 
     /**
      * Gets data request config which calls the PalisadeClient and via feign returns a CompletableFuture of DataRequestConfigs by request.
+     * the GetDataRequestConfig method in the Palisade Service extracts resources from request and check they are a subset of the original RegisterDataRequest resources
      *
      * @param request the request
      * @return the data request config
