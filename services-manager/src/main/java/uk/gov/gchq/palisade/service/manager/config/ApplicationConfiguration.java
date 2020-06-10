@@ -136,7 +136,7 @@ public class ApplicationConfiguration {
     /**
      * Intentionally-used inner-class
      *
-     * Due to the nested type in the yaml (services :: Map<String, ServiceConfiguration>), both the ManagerConfiguration
+     * Due to the nested type in the yaml (services: Map<String, ServiceConfiguration>), both the ManagerConfiguration
      * and ServiceConfiguration must be known to Spring. Additionally, there isn't a simple one-to-one mapping for
      * ServiceConfigurations, instead there will be multiple in a collection (a Map). The easiest way to have this yaml
      * loaded appropriately is with an inner-class in this (spring-aware) @Configuration rather than messing around with

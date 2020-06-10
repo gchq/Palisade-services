@@ -45,7 +45,7 @@ public class TaskConfiguration {
     }
 
     /**
-     * Map the loaded ServiceName <-> ServiceConfiguration collection to ServiceName <-> ProcessBuilder
+     * Map the loaded ServiceName - ServiceConfiguration collection to ServiceName - ProcessBuilder
      * Each ProcessBuilder may be .start()ed to start a new JVM running the given service as configured
      *
      * @param builderDirectory the working directory for the spawned processes
