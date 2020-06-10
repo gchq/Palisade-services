@@ -26,6 +26,9 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * An ApplicationRunner to change the logging level of *all* available services
+ */
 public class LoggingBouncer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);
 

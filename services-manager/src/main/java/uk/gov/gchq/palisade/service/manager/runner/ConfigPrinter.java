@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.ManagerConfiguration;
 
+/**
+ * An ApplicationRunner to print out the loaded config for debugging purposes
+ */
 public class ConfigPrinter implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPrinter.class);
 

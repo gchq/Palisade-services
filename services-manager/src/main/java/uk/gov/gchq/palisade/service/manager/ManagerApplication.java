@@ -21,6 +21,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+/**
+ * SpringBoot application entry-point class
+ */
 @EnableEurekaClient
 @EnableFeignClients
 @SpringBootApplication
@@ -30,6 +33,11 @@ public class ManagerApplication {
         // no-args constructor needed for serialization only
     }
 
+    /**
+     * Application entry-point method
+     * Will later call out to the configured runner to run for the rest of the lifetime of the application
+     * @param args
+     */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ManagerApplication.class).run(args);
     }

@@ -29,6 +29,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * A task is a collection of services.
+ * Given a number of services to all start up under one task, collect them and provide methods to work with them
+ *
+ * Mostly just a spring yaml 'boilerplate' with some helper methods
+ */
 public class TaskConfiguration {
     private final Map<String, ServiceConfiguration> services;
 

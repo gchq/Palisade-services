@@ -31,6 +31,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Wrapper around a Feign client to call out to a collection of URIs rather than a single REST service
+ * Allows multiple instances of a service to be running and all of them to be effected by shutdown, logging changes, etc.
+ */
 public class ManagedService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);

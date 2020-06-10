@@ -54,18 +54,37 @@ import static java.util.Objects.requireNonNull;
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    /**
+     * Manager Configuration bean loading config from application.yaml
+     *
+     * @return A ManagerConfiguration with all appropriate configurations applied
+     */
     @Bean
     @ConfigurationProperties(prefix = "manager")
     ManagerConfiguration managerConfiguration() {
         return new ManagerConfiguration();
     }
 
+    /**
+     * Used for resolving *all* service URIs with eureka or through yaml
+     * This behaviour seems to be a little beyond feign's capabilities
+     *
+     * @return A WebConfiguration capable of resolving a service name to a *collection* of URIs
+     */
     @Bean
     @ConfigurationProperties(prefix = "web")
-    public WebConfiguration webConfiguration() {
-        return new WebConfiguration();
+    public ClientConfiguration webConfiguration() {
+        return new ClientConfiguration();
     }
 
+    /**
+     * Return the appropriate Spring ApplicationRunner depending upon the configuration specified in the ManagerConfiguration
+     * This determines the behaviour of the application and is specified through --manager.mode=...
+     *
+     * @param managerConfiguration dependency-injected ManagerConfiguration loaded from the yaml
+     * @param serviceProducer a mapping from service names to ManagedServices, providing a REST client abstraction
+     * @return the ApplicationRunner to use as an entry-point for this spring application
+     */
     @Bean
     public ApplicationRunner managerApplicationRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         Runnable runner;
@@ -93,8 +112,15 @@ public class ApplicationConfiguration {
         };
     }
 
+    /**
+     * A mapping from service names to ManagedServices, providing a REST client abstraction
+     *
+     * @param client a feign client with all available RESTful interfaces (health, logging changes, etc)
+     * @param clientConfig a mapping from service names to URIs through either eureka or static yaml config
+     * @return a ManagedService factory requiring a service name and producing a REST client for a number of service instances
+     */
     @Bean("managedServiceProducer")
-    public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final WebConfiguration clientConfig) {
+    public Function<String, ManagedService> managedServiceProducer(final ManagedClient client, final ClientConfiguration clientConfig) {
         return serviceName -> {
             Supplier<Collection<URI>> uriSupplier = () -> {
                 Collection<URI> clientUris = clientConfig.getClientUri(serviceName);
@@ -107,16 +133,18 @@ public class ApplicationConfiguration {
 
     // === Yaml things ===
 
-    // Intentionally-used inner-class
-    //
-    // Due to the nested type in the yaml (services :: Map<String, ServiceConfiguration>), both the ManagerConfiguration
-    // and ServiceConfiguration must be known to Spring. Additionally, there isn't a simple one-to-one mapping for
-    // ServiceConfigurations, instead there will be multiple in a collection (a Map). The easiest way to have this yaml
-    // loaded appropriately is with an inner-class in this (spring-aware) @Configuration rather than messing around with
-    // @EnableConfigurationProperties({...}) and @ConfigurationProperties annotations.
-    //
-    // Using this approach, all classes can remain unannotated. This appears to be the favoured approach once yaml
-    // objects start getting more complex and nested.
+    /**
+     * Intentionally-used inner-class
+     *
+     * Due to the nested type in the yaml (services :: Map<String, ServiceConfiguration>), both the ManagerConfiguration
+     * and ServiceConfiguration must be known to Spring. Additionally, there isn't a simple one-to-one mapping for
+     * ServiceConfigurations, instead there will be multiple in a collection (a Map). The easiest way to have this yaml
+     * loaded appropriately is with an inner-class in this (spring-aware) @Configuration rather than messing around with
+     * EnableConfigurationProperties({...}) and ConfigurationProperties annotations.
+     *
+     * Using this approach, all classes can remain unannotated. This appears to be the favoured approach once yaml
+     * objects start getting more complex and nested.
+     */
     public static class ManagerConfiguration {
         private String root;
         private String mode;
