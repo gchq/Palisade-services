@@ -56,7 +56,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * Simple data service bean created with instances of auditService, palisadeService and dataReader
-     * which is a simple implementation of {@link DataService} used for examples and demos
+     * which is used by a simple implementation of {@link DataService} to connect to different data storage technologies and deserialise the data
      *
      * @param auditService    the audit service
      * @param palisadeService the palisade service

@@ -48,8 +48,7 @@ public class PalisadeService implements Service {
     }
 
     /**
-     * Gets data request config which calls the PalisadeClient and via feign returns a CompletableFuture of DataRequestConfigs by request.
-     * the GetDataRequestConfig method in the Palisade Service extracts resources from request and check they are a subset of the original RegisterDataRequest resources
+     * Gets a @{link DataRequestConfig} by calling the PalisadeClient via feign. It then validates that the resources from the request are a subset of the original RegisterDataRequest resources
      *
      * @param request the request
      * @return the data request config
