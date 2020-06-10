@@ -32,12 +32,17 @@ import java.util.stream.Collectors;
 /**
  * A task is a collection of services.
  * Given a number of services to all start up under one task, collect them and provide methods to work with them
- *
  * Mostly just a spring yaml 'boilerplate' with some helper methods
  */
 public class TaskConfiguration {
     private final Map<String, ServiceConfiguration> services;
 
+    /**
+     * Task Configuration constructor that populates the services map with a stream of services and serviceConfigurations
+     *
+     * @param services             a list of services that will get started under a task
+     * @param serviceConfiguration a Map of Strings and ServiceConfigurations containing information related to each service
+     */
     public TaskConfiguration(final List<String> services, final Map<String, ServiceConfiguration> serviceConfiguration) {
         this.services = serviceConfiguration.entrySet().stream()
                 .filter(entry -> services.contains(entry.getKey()))
@@ -69,7 +74,8 @@ public class TaskConfiguration {
 
     /**
      * Run this TaskConfiguration as a TaskRunner, simply .start()ing all configured services and waiting until healthy or halted
-     * @param rootDir the working directory for the spawned processes
+     *
+     * @param rootDir         the working directory for the spawned processes
      * @param serviceProducer a mapping from service names to REST clients for the given service name
      * @return a map of service names paired with a collection of indicators as to whether the service is 'done' for some metric (healthy, halted, etc)
      */
