@@ -140,6 +140,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
+    /**
+     * Bean of ResourceConverter which is used to convert database objects such as columns to json
+     *
+     * @return a new instance of ResourceConverter
+     */
+
     @Bean
     public ResourceConverter resourceConverter() {
         return new ResourceConverter();
@@ -165,7 +171,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
 
-
+    /**
+     * A bean for the implementation of the SimpleResourceService which is a simple implementation of
+     * {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+     *
+     * @return a new instance of SimpleResourceService with a string value dataServiceName retrieved from the relevant profiles yaml
+     */
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
@@ -173,6 +184,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleResourceService(dataServiceName);
     }
 
+    /**
+     * A bean for the implementation of the HadoopResourceService which implements {@link ResourceService} used for retrieving resources from Hadoop
+     *
+     * @param config hadoop configuration
+     * @return a {@link ConfiguredHadoopResourceService} used for adding connection details to leaf resources
+     * @throws IOException
+     */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
     @Qualifier("impl")
@@ -180,11 +198,21 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ConfiguredHadoopResourceService(config);
     }
 
+    /**
+     * a bean for the HadoopConfiguration used when creating the hadoopResourceService
+     *
+     * @return a {@link org.apache.hadoop.conf.Configuration}
+     */
     @Bean
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
         return new org.apache.hadoop.conf.Configuration();
     }
 
+    /**
+     * Used so that you can create custom mapper by starting with the default and then modifying if needed
+     *
+     * @return a default JSONSerialiser ObjectMapper
+     */
     @Bean
     @Primary
     public ObjectMapper jacksonObjectMapper() {
