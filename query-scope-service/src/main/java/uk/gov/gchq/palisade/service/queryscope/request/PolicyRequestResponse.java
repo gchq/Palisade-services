@@ -5,7 +5,6 @@ package uk.gov.gchq.palisade.service.queryscope.request;
 
 
 
-import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.ResourceMetadata;
 import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.Rule;
 import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.User;
 

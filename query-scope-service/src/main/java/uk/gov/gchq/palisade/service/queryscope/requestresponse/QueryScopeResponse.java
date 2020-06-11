@@ -1,6 +1,6 @@
 package uk.gov.gchq.palisade.service.queryscope.requestresponse;
 
-import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.Rule;
+import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.ResourceMetadata;
 import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.User;
 
 import java.util.Map;
@@ -23,7 +23,5 @@ public class QueryScopeResponse {
     private String resourceID;  //the resource that that is being asked to access
     private Map<String, String> context;    // relevant  information about the request.  Was a Context object now a Map.
 
-   // private Map<String, ResourceMetadata> metadata;  //this is a filtered set as there can be resources that may have been removed from the orignal set
-    // from the map in the ResourceRequestResponse by the policy service
-    private Map<String, Rule> rules; // holds all of the rules applicable to this request
+    private Map<String, ResourceMetadata> metadata;  //this is a redacted list of metadata
 }
