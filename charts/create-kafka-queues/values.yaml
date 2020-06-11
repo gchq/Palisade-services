@@ -16,6 +16,7 @@ replicaCount: 1
 
 service:
   port: 80
+
 kafkaCreateTopics:
 - name: palisade
   replicationFactor: 1
@@ -36,10 +37,9 @@ kafkaCreateTopics:
   replicationFactor: 1
   partitions: 1
 
-
 image:
   name: create-kafka-queues
-  tag: ed9f81b-SNAPSHOT
+  tag: a9f62f8-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:

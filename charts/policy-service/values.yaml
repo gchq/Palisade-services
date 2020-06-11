@@ -20,7 +20,7 @@ service:
 
 image:
   name: policy-service
-  tag: 9b3defb-SNAPSHOT
+  tag: a9f62f8-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:

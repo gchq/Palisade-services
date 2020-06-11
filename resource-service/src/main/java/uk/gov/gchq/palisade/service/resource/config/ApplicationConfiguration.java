@@ -17,12 +17,11 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.EurekaClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -57,7 +56,6 @@ import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -75,44 +73,23 @@ import java.util.stream.Collectors;
 @EnableAsync
 @EnableScheduling
 public class ApplicationConfiguration implements AsyncConfigurer {
-    private static final Integer RETRY_AFTER = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    public static final Integer CORE_POOL_SIZE = 6;
+
+
+    @Value("${web.client.data-service:data-service}")
+    private String dataServiceName;
 
     /**
-     * A generic resolver from service names to {@link URI}s
-     * Uses Eureka if available, otherwise uses the Spring yaml configuration value directly as a URI (useful for k8s)
-     *
-     * @param eurekaClient an optional {@link EurekaClient} for resolving service names
-     * @return a {@link ClientConfiguration} capable of resolving service names in multiple environments
-     */
-    @Bean
-    @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration(final ObjectProvider<EurekaClient> eurekaClient) {
-        return new ClientConfiguration(eurekaClient.getIfAvailable(() -> null));
-    }
-
-    /**
-     * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail} using the {@link ClientConfiguration}
+     * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
      *
      * @param resourceConfig the {@link ResourceConfiguration} to use to build resource
-     * @param clientConfig the {@link ClientConfiguration} to use to resolve the {@link java.net.URI} of a data-service at runtime
      * @return a getter for a list of {@link Resource}s, each paired with an associated {@link LeafResource}, see {@link ResourceConfiguration} for more info
      */
     @Bean
-    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig, final ClientConfiguration clientConfig) {
+    public Supplier<List<Entry<Resource, LeafResource>>> configuredResourceBuilder(final ResourceConfiguration resourceConfig) {
         Function<String, ConnectionDetail> connectionDetailMapper = serviceName -> new SimpleConnectionDetail()
-                .uri(clientConfig.getClientUri(serviceName)
-                        .or(() -> {
-                            LOGGER.warn("No service found with name: {} - will retry once more in {}ms", serviceName, RETRY_AFTER);
-                            try {
-                                Thread.sleep(RETRY_AFTER);
-                            } catch (InterruptedException ignored) {
-                                Thread.currentThread().interrupt();
-                            }
-                            return clientConfig.getClientUri(serviceName);
-                        })
-                        .orElseThrow(() -> new IllegalArgumentException("No service found with name: " + serviceName))
-                        .toString());
+                .serviceName(serviceName);
         return () -> resourceConfig.getResources().stream()
                 .map(factory -> factory.build(connectionDetailMapper))
                 .collect(Collectors.toList());
@@ -148,9 +125,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * See the {@link JpaPersistenceLayer} for an in-depth description of how and why each part is used
      * While code introspection may suggest no beans found for these types, they will be created by Spring
      *
-     * @param completenessRepository the completeness repository to use, storing whether persistence will return a response for any given request
-     * @param resourceRepository the resource repository to use, a store of each available {@link LeafResource} and its parents
-     * @param typeRepository the type repository to use, a one-to-many relation of types to resource ids
+     * @param completenessRepository     the completeness repository to use, storing whether persistence will return a response for any given request
+     * @param resourceRepository         the resource repository to use, a store of each available {@link LeafResource} and its parents
+     * @param typeRepository             the type repository to use, a one-to-many relation of types to resource ids
      * @param serialisedFormatRepository the serialisedFormat repository to use, a one-to-many relation of serialisedFormats to resource ids
      * @return a {@link JpaPersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
      */
@@ -163,6 +140,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
+    /**
+     * Bean of ResourceConverter which is used to convert database objects such as columns to json
+     *
+     * @return a new instance of ResourceConverter
+     */
+
     @Bean
     public ResourceConverter resourceConverter() {
         return new ResourceConverter();
@@ -173,10 +156,10 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * This includes writing the {@link java.util.stream.Stream} of {@link Resource}s to the {@link java.io.OutputStream} of a {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
      *
      * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
-     *                 This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
-     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
+     * @param delegate         a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
+     *                         This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
+     * @param objectMapper     a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     * @param resourceBuilder  a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
      * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
      */
     @Bean
@@ -188,13 +171,26 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
     }
 
+    /**
+     * A bean for the implementation of the SimpleResourceService which is a simple implementation of
+     * {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
+     *
+     * @return a new instance of SimpleResourceService with a string value dataServiceName retrieved from the relevant profiles yaml
+     */
     @Bean("simpleResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
-    public ResourceService simpleResourceService(final ClientConfiguration clientConfiguration) {
-        return new SimpleResourceService(clientConfiguration);
+    public ResourceService simpleResourceService() {
+        return new SimpleResourceService(dataServiceName);
     }
 
+    /**
+     * A bean for the implementation of the HadoopResourceService which implements {@link ResourceService} used for retrieving resources from Hadoop
+     *
+     * @param config hadoop configuration
+     * @return a {@link ConfiguredHadoopResourceService} used for adding connection details to leaf resources
+     * @throws IOException ioexception
+     */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
     @Qualifier("impl")
@@ -202,11 +198,21 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ConfiguredHadoopResourceService(config);
     }
 
+    /**
+     * a bean for the HadoopConfiguration used when creating the hadoopResourceService
+     *
+     * @return a {@link org.apache.hadoop.conf.Configuration}
+     */
     @Bean
     public org.apache.hadoop.conf.Configuration hadoopConfiguration() {
         return new org.apache.hadoop.conf.Configuration();
     }
 
+    /**
+     * Used so that you can create custom mapper by starting with the default and then modifying if needed
+     *
+     * @return a default JSONSerialiser ObjectMapper
+     */
     @Bean
     @Primary
     public ObjectMapper jacksonObjectMapper() {
@@ -218,7 +224,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
+            ex.setCorePoolSize(CORE_POOL_SIZE);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
     }

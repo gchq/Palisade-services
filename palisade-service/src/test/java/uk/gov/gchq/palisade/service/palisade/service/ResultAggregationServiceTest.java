@@ -80,13 +80,13 @@ public class ResultAggregationServiceTest {
                 return null;
             }
         };
-        auditService = new AuditService(auditClient, uriSupplier, executor);
+        auditService = new AuditService(auditClient);
         service = new ResultAggregationService(auditService, persistenceLayer);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service");
         FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
                 .type("bob")
                 .serialisedFormat("txt")
@@ -104,7 +104,7 @@ public class ResultAggregationServiceTest {
     public void aggregateDataRequestResultsTest() throws Exception {
 
         //Given
-        when(auditClient.audit(any(), any(AuditRequest.class))).thenReturn(true);
+        when(auditClient.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
         DataRequestResponse actual = service.aggregateDataRequestResults(request, user, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
@@ -117,7 +117,7 @@ public class ResultAggregationServiceTest {
     public void aggregateDataRequestResultsWithErrorTest() throws Exception {
 
         //Given
-        when(auditClient.audit(any(), any(AuditRequest.class))).thenReturn(true);
+        when(auditClient.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
         DataRequestResponse actual = service.aggregateDataRequestResults(request, null, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
