@@ -20,16 +20,22 @@ import feign.Response;
 import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.manager.web.ManagedClient;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Wrapper around a Feign client to call out to a collection of URIs rather than a single REST service
+ * Allows multiple instances of a service to be running and all of them to be effected by shutdown, logging changes, etc.
+ */
 public class ManagedService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManagedService.class);
@@ -41,11 +47,16 @@ public class ManagedService implements Service {
         this.uriSupplier = uriSupplier;
     }
 
+    /**
+     * Get whether a single service in the possible collection is healthy
+     *
+     * @return whether there exists a healthy service
+     */
     public boolean isHealthy() {
         Collection<URI> clientUris = this.uriSupplier.get();
         return clientUris.stream()
                 .map(clientUri -> {
-                    int status = 404;
+                    int status = HttpStatus.NOT_FOUND.value();
                     try {
                         status = this.managedClient.getHealth(clientUri).status();
                     } catch (RetryableException ex) {
@@ -57,28 +68,40 @@ public class ManagedService implements Service {
                 // Could be anyMatch, as only one healthy service is needed to perform requests
                 // Could be allMatch, as it should be expected that all services are healthy
                 // Note that in the case of an empty list, this should always return false
-                .anyMatch(x -> x == 200);
+                .anyMatch(x -> x == HttpStatus.OK.value());
     }
 
-    public void setLoggers(final String module, final String configuredLevel) throws Exception {
+    /**
+     * Set the logging level for a given java package
+     *
+     * @param packageName the name of the package (eg. uk.gov, root, java.util)
+     * @param configuredLevel the level to log to stdout for the named package (TRACE, DEBUG, INFO, WARN, ERROR)
+     * @throws IOException if any service did not report 200-OK after the REST POST request
+     */
+    public void setLoggers(final String packageName, final String configuredLevel) throws IOException {
         Collection<URI> clientUris = this.uriSupplier.get();
         Optional<Response> failures = clientUris.stream()
                 .map(clientUri -> {
-                    Response response = this.managedClient.setLoggers(clientUri, module, configuredLevel);
+                    Response response = this.managedClient.setLoggers(clientUri, packageName, configuredLevel);
                     LOGGER.debug("Client uri {} responded with {}", clientUri, response);
                     return response;
                 })
-                .filter(x -> x.status() != 200)
+                .filter(x -> x.status() != HttpStatus.OK.value())
                 .findAny();
         // Need to throw an error, so can't wrap inside an Optional.ifPresent
+        // Could be avoided by throwing a RuntimeException
         if (failures.isPresent()) {
             Response response = failures.get();
             LOGGER.error("An error occurred while setting logging levels: {}", response);
             String responseBody = Arrays.toString(response.body().asInputStream().readAllBytes());
-            throw new Exception(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", module, configuredLevel, responseBody));
+            throw new IOException(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", packageName, configuredLevel, responseBody));
         }
     }
 
+    /**
+     * Requests a shutdown all running instances of the service
+     * Does not verify that services have actually stopped
+     */
     public void shutdown() {
         Collection<URI> clientUris = this.uriSupplier.get();
         clientUris.forEach(this.managedClient::shutdown);
