@@ -176,20 +176,20 @@ spec:
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
-//        stage('Integration Tests') {
-//            // Always run some sort of integration test
-//            // If this branch name exists in integration-tests, use that
-//            // Otherwise, default to integration-tests/develop
-//            dir ('Palisade-integration-tests') {
-//                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-//                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
-//                container('docker-cmds') {
-//                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                        sh 'mvn -s $MAVEN_SETTINGS install'
-//                    }
-//                }
-//            }
-//        }
+        stage('Integration Tests') {
+            // Always run some sort of integration test
+            // If this branch name exists in integration-tests, use that
+            // Otherwise, default to integration-tests/develop
+            dir ('Palisade-integration-tests') {
+                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                        sh 'mvn -s $MAVEN_SETTINGS install'
+                    }
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             dir('Palisade-services') {
@@ -203,6 +203,19 @@ spec:
                             }
                         }
                     }
+                }
+            }
+        }
+
+        stage("SonarQube Quality Gate") {
+            // Wait for SonarQube to prepare the report
+            sleep(time: 10, unit: 'SECONDS')
+            // Just in case something goes wrong, pipeline will be killed after a timeout
+            timeout(time: 5, unit: 'MINUTES') {
+                // Reuse taskId previously collected by withSonarQubeEnv
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                    error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
                 }
             }
         }
