@@ -1,7 +1,7 @@
 package uk.gov.gchq.palisade.service.results.request;
 
-import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.ResourceMetadata;
-import uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain.User;
+import uk.gov.gchq.palisade.service.queryscope.response.common.domain.ResourceMetadata;
+import uk.gov.gchq.palisade.service.queryscope.response.common.domain.User;
 
 import java.util.Map;
 
