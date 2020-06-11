@@ -3,10 +3,11 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import java.util.Map;
 
 /**
- * Represents the original data that has been sent from the client for a request.
- * Note there is another class of the same type in the user service
- * uk.gov.gchq.palisade.service.user.request.OriginalRequest
- * This is the request message than is sent from PalisadeEntryPointService to UserService
+ * Represents the original data that has been sent from the client to access data.
+ * Note there is another class in the user service that represents the same data where each has a different purpose.
+ * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
+ * uk.gov.gchq.palisade.service.user.request.OriginalRequest is the input for the User Service
+ *
  */
 public class OriginalRequest {
 

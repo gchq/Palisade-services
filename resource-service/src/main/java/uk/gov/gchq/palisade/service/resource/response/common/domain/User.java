@@ -1,4 +1,4 @@
-package uk.gov.gchq.palisade.service.user.requestResponse.common.domain;
+package uk.gov.gchq.palisade.service.resource.response.common.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

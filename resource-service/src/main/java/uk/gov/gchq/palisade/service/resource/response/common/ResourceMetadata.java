@@ -1,11 +1,6 @@
-package uk.gov.gchq.palisade.service.resource.requestResponse.common;
-
-import uk.gov.gchq.palisade.service.ConnectionDetail;
+package uk.gov.gchq.palisade.service.resource.response.common;
 
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedSet;
 
 /**
