@@ -5,7 +5,7 @@ package uk.gov.gchq.palisade.service.policy.requestResponse;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.policy.requestResponse.common.ResourceMetadata;
-import uk.gov.gchq.palisade.service.policy.requestResponse.common.Rule;
+import uk.gov.gchq.palisade.service.policy.requestResponse.common.domain.Rule;
 
 import java.util.Map;
 
@@ -28,7 +28,7 @@ public class PolicyRequestResponse {
     private String resourceID;  //the resource that that is being asked to access
     private Map<String, String> context;    // relevant  information about the request.  Was a Context object now a Map.
 
-    private Map<String, ResourceMetadata> metadata;  //this is a filtered set as there can be resources that have been removed
+    private Map<String, ResourceMetadata> metadata;  //this is a filtered set as there can be resources that may have been removed from the orignal set
     // from the map in the ResourceRequestResponse by the policy service
-    private Map<String, Rule> rules; //
+    private Map<String, Rule> rules; // holds all of the rules applicable to this request  
 }
