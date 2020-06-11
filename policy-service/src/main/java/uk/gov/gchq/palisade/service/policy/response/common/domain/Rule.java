@@ -1,4 +1,4 @@
-package uk.gov.gchq.palisade.service.policy.requestResponse.common.domain;
+package uk.gov.gchq.palisade.service.policy.response.common.domain;
 
 
 /**

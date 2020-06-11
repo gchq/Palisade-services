@@ -1,7 +1,4 @@
-package uk.gov.gchq.palisade.service.queryscope.requestresponse.common.domain;
-
-import java.net.URL;
-import java.util.SortedSet;
+package uk.gov.gchq.palisade.service.queryscope.response.common.domain;
 
 /**
  * Contains the relevant information about a resource after the policy have been implemented

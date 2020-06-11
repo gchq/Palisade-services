@@ -1,4 +1,4 @@
-package uk.gov.gchq.palisade.service.policy.requestResponse.common;
+package uk.gov.gchq.palisade.service.policy.response.common;
 
 import java.net.URL;
 import java.util.SortedSet;
