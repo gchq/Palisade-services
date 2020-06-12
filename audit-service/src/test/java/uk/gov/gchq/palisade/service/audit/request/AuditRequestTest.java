@@ -65,7 +65,7 @@ public class AuditRequestTest {
         final LeafResource leafResource = (LeafResource) ResourceBuilder.create("file:/usr/share/resource/test_resource");
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
-                .withLeafResources(Collections.singleton(leafResource.type("standard").serialisedFormat("none").connectionDetail(new SimpleConnectionDetail().uri("uri"))))
+                .withLeafResources(Collections.singleton(leafResource.type("standard").serialisedFormat("none").connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))))
                 .withContext(new Context(Collections.singletonMap("a string", String.class)));
 
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));

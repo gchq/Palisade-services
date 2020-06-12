@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/data-service/data-service.jar
 
 LABEL service="data" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-Dloader.path=/usr/share/classpath/", "-jar", "/usr/share/data-service/data-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/data-service/data-service.jar"]

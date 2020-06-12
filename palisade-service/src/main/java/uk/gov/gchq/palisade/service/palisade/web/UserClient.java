@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,25 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
-import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 
-import java.net.URI;
-
-@FeignClient(name = "user-service", url = "undefined")
+/**
+ * The interface User client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka
+ */
+@FeignClient(name = "user-service", url = "${web.client.user-service}")
 public interface UserClient {
-
+    /**
+     * Post request to the UserService to retrieve the user by userId contained in the request.
+     * If the requested UserId doesn't exist in this UserService then an exception will be thrown.
+     *
+     * @param request the request
+     * @return the user
+     */
     @PostMapping(path = "/getUser", consumes = "application/json", produces = "application/json")
-    User getUser(final URI url, @RequestBody final GetUserRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
-
+    User getUser(@RequestBody final GetUserRequest request);
 }

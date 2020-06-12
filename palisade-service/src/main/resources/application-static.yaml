@@ -25,11 +25,10 @@ spring:
 spring:
   profiles: static-config
 
-# Discoveryless static configuration (presumably over localhost for integration-tests)
-# i.e. map from what-i-call-a-service -> service-URI
+# No Discovery static configuration
 web:
   client:
-    audit-service: http://localhost:8081
+    audit-service: http://localhost:8089
     policy-service: http://localhost:8085
     resource-service: http://localhost:8086
     user-service: http://localhost:8087

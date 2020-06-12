@@ -44,3 +44,7 @@ population:
 # Available options: simple, hadoop
 resource:
   implementation: simple
+
+web:
+  client:
+    data-service: "http://localhost:8082"

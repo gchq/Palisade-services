@@ -60,6 +60,9 @@ spec:
           timeoutSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: "LOADER_PATH"
+          value: {{ .Values.global.persistence.classpathJars.mountPath }}
         volumeMounts:
         - mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}
           name: {{ .Values.global.persistence.classpathJars.name }}
