@@ -26,7 +26,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>services-manager</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
@@ -144,7 +147,7 @@
                     </execution>
                     <execution>
                         <id>readme-replacer</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
@@ -197,6 +200,7 @@
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
+                    <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>
                     <execution>

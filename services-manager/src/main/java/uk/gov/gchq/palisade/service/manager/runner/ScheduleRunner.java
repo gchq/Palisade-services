@@ -29,6 +29,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * An ApplicationRunner to run through a start-up schedule.
+ *
+ * A schedule is an ordered collection of tasks
+ * A task is an unordered collection of services
+ * Every service in a task must complete before the next task is started
+ * All tasks must complete successfully for the schedule to complete successfully
+ */
 public class ScheduleRunner implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleRunner.class);
 

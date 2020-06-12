@@ -34,7 +34,6 @@ import uk.gov.gchq.palisade.service.palisade.web.ResourceClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -42,11 +41,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * ResourceService which implements {@link Service} and uses Feign within {@link ResourceClient} to send rest requests to the Resource Service
+ */
 public class ResourceService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
+
     private final ResourceClient client;
-    private final Supplier<URI> uriSupplier;
+
     private final ObjectMapper objectMapper;
     private final Executor executor;
 
@@ -73,51 +76,83 @@ public class ResourceService implements Service {
         }
     };
 
-
-    public ResourceService(final ResourceClient resourceClient, final Supplier<URI> uriSupplier, final ObjectMapper objectMapper, final Executor executor) {
+    /**
+     * Instantiates a new Resource service.
+     *
+     * @param resourceClient the resource client rest interface for the Resource Service
+     * @param objectMapper   the object mapper
+     * @param executor       the executor
+     */
+    public ResourceService(final ResourceClient resourceClient, final ObjectMapper objectMapper, final Executor executor) {
         this.client = resourceClient;
-        this.uriSupplier = uriSupplier;
         this.objectMapper = objectMapper;
         this.executor = executor;
     }
 
+
+    /**
+     * Calls the resource client and async returns a Completable future of LeafResources by Id
+     * Returns resource and connection details by resource ID
+     *
+     * @param request the request
+     * @return the resources by id
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesById(final GetResourcesByIdRequest request) {
         LOGGER.info("Getting resources by id from resource service: {}", request);
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
-                () -> getResourcesFromFeignResponse(() -> client.getResourcesById(clientUri, request)),
+                () -> getResourcesFromResponse(() -> client.getResourcesById(request)),
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and async returns a Completable future of LeafResources by a specific Resource
+     * Returns resource and connection details by resource
+     *
+     * @param request the request
+     * @return the resources by resource
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesByResource(final GetResourcesByResourceRequest request) {
         LOGGER.info("Getting resources by resource from resource service: {}", request);
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
-                () -> getResourcesFromFeignResponse(() -> client.getResourcesByResource(clientUri, request)),
+                () -> getResourcesFromResponse(() -> client.getResourcesByResource(request)),
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and async returns a Completable future of LeafResources by a specific resource type
+     * Returns resource and connection details by type
+     *
+     * @param request the request
+     * @return the resources by type
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesByType(final GetResourcesByTypeRequest request) {
         LOGGER.info("Getting resources by type from resource service: {}", request);
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
-                () -> getResourcesFromFeignResponse(() -> client.getResourcesByType(clientUri, request)),
+                () -> getResourcesFromResponse(() -> client.getResourcesByType(request)),
                 this.executor);
     }
 
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by a specific date format.
+     * Resources of a particular data format may not share a type, e.g. not all CSV format records will contain employee contact details.
+     *
+     * @param request the request
+     * @return the resources by serialised format
+     */
     public CompletableFuture<Set<LeafResource>> getResourcesBySerialisedFormat(final GetResourcesBySerialisedFormatRequest request) {
         LOGGER.info("Getting resources from by serialised format resource service: {}", request);
-        URI clientUri = this.uriSupplier.get();
-        LOGGER.info("Using client uri: {}", clientUri);
         return CompletableFuture.supplyAsync(
-                () -> getResourcesFromFeignResponse(() -> client.getResourcesBySerialisedFormat(clientUri, request)),
+                () -> getResourcesFromResponse(() -> client.getResourcesBySerialisedFormat(request)),
                 this.executor);
     }
 
-    protected Set<LeafResource> getResourcesFromFeignResponse(final Supplier<Response> feignCall) {
+    /**
+     * Calls the resource client and returns a Completable future of LeafResources by Response
+     *
+     * @param feignCall the feign call
+     * @return the resources from response
+     */
+    protected Set<LeafResource> getResourcesFromResponse(final Supplier<Response> feignCall) {
         try {
             InputStream responseStream = feignCall.get().body().asInputStream();
             Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);
@@ -131,14 +166,4 @@ public class ResourceService implements Service {
         }
     }
 
-    public Response getHealth() {
-        try {
-            URI clientUri = this.uriSupplier.get();
-            LOGGER.info("Using client uri: {}", clientUri);
-            return this.client.getHealth(clientUri);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to get health: {}", ex.getMessage());
-            throw new RuntimeException(ex); //rethrow the exception
-        }
-    }
 }
