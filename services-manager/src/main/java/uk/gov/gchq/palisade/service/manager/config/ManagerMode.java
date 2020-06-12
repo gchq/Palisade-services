@@ -16,9 +16,12 @@
 
 package uk.gov.gchq.palisade.service.manager.config;
 
+/**
+ * Possible modes to run the service manager, see each entry for equivalent ApplicationRunner
+ */
 public enum ManagerMode {
-    CONFIG,
-    RUN,
-    SHUTDOWN,
-    LOGGERS,
+    CONFIG, // runner.ConfigPrinter
+    RUN, // runner.ScheduleRunner (which further uses runner.TaskRunner)
+    SHUTDOWN, // runner.ScheduleShutdown
+    LOGGERS, // runner.LoggingBouncer
 }
