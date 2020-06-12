@@ -32,7 +32,11 @@
             <url>https://dl.bintray.com/stroom/event-logging</url>
         </repository>
     </repositories>
+
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>audit-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
@@ -283,6 +287,7 @@
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
+                    <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>
                     <execution>

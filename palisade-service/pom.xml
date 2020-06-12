@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>palisade-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/palisade-service</url>
 
     <properties>
         <apache.commons.version>1.19</apache.commons.version>
