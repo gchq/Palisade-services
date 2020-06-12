@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.IUser;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
+import uk.gov.gchq.palisade.service.results.request.common.domain.IUser;
+import uk.gov.gchq.palisade.service.results.request.common.domain.User;
 
 import java.io.IOException;
 import java.util.AbstractMap;

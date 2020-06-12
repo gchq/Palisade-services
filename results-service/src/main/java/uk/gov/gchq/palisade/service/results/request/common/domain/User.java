@@ -1,5 +1,7 @@
 package uk.gov.gchq.palisade.service.results.request.common.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.HashMap;
