@@ -133,7 +133,7 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * Used to indicate to the Audit logs that a RegisterDataRequest has been successfully
+     * Used to indicate to the Audit service that a RegisterDataRequest has been successfully
      * processed and these are the resources that this user is approved to read for this data access request.
      */
     public static final class RegisterRequestCompleteAuditRequest extends AuditRequest {
@@ -243,7 +243,7 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * Used to indicate to the Audit logs that an exception has been received while processing the RegisterDataRequest
+     * Used to indicate to the Audit service that an exception has been received while processing the RegisterDataRequest
      * and which service triggered the exception.
      */
     public static final class RegisterRequestExceptionAuditRequest extends AuditRequest {
@@ -391,7 +391,7 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * Used to indicate to the Audit logs that the data-service has successfully completed a ReadRequest and returned data to a client.
+     * Used to indicate to the Audit service that the data-service has successfully completed a ReadRequest and returned data to a client.
      */
     public static final class ReadRequestCompleteAuditRequest extends AuditRequest {
 
@@ -557,7 +557,7 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * Used to indicate to the Audit logs that the data-service encountered an exception while processing the ReadRequest.
+     * Used to indicate to the Audit service that the data-service encountered an exception while processing the ReadRequest.
      */
     public static final class ReadRequestExceptionAuditRequest extends AuditRequest {
 
