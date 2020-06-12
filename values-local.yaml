@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 
+# Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
 
 # hosting: [local | aws | metal] the target environment to deploy to
