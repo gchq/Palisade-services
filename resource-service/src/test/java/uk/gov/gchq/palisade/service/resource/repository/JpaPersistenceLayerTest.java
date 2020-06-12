@@ -59,7 +59,7 @@ public class JpaPersistenceLayerTest {
         resource = ((FileResource) ResourceBuilder.create("file:/root/test-file-id"))
                 .type("type")
                 .serialisedFormat("format")
-                .connectionDetail(new SimpleConnectionDetail().uri("data-service"));
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
         persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> { });

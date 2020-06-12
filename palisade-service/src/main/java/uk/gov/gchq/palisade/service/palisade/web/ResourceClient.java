@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.web;
 
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -27,27 +26,56 @@ import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceReque
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesBySerialisedFormatRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByTypeRequest;
 
-import java.net.URI;
-
-@FeignClient(name = "resource-service", url = "undefined")
+/**
+ * The interface Resource client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka
+ */
+@FeignClient(name = "resource-service", url = "${web.client.resource-service}")
 public interface ResourceClient {
-
+    /**
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by resourceID
+     *
+     * @param request the request
+     * @return the resources by id
+     */
     @PostMapping(path = "/getResourcesById", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesById(final URI url, @RequestBody final GetResourcesByIdRequest request);
+    Response getResourcesById(@RequestBody final GetResourcesByIdRequest request);
 
+    /**
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by resource
+     *
+     * @param request the request
+     * @return the resources by resource
+     */
     @PostMapping(path = "/getResourcesByResource", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesByResource(final URI url, @RequestBody final GetResourcesByResourceRequest request);
+    Response getResourcesByResource(@RequestBody final GetResourcesByResourceRequest request);
 
+    /**
+     * Post rest request to the Resource Service and returns a response containing connection details and resources by a specific resource type
+     *
+     * @param request the request
+     * @return the resources by type
+     */
     @PostMapping(path = "/getResourcesByType", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesByType(final URI url, @RequestBody final GetResourcesByTypeRequest request);
+    Response getResourcesByType(@RequestBody final GetResourcesByTypeRequest request);
 
+    /**
+     * Post rest request to the Resource Service and returns a response containing resources and connection details by a specific date format
+     * Resources of a particular data format may not share a type, e.g. not all CSV format records will contain employee contact details.
+     *
+     * @param request the request
+     * @return the resources by serialised format
+     */
     @PostMapping(path = "/getResourcesBySerialisedFormat", consumes = "application/json", produces = "application/octet-stream")
-    Response getResourcesBySerialisedFormat(final URI url, @RequestBody final GetResourcesBySerialisedFormatRequest request);
+    Response getResourcesBySerialisedFormat(@RequestBody final GetResourcesBySerialisedFormatRequest request);
 
+    /**
+     * Post request to the Resource Service which informs Palisade about a specific resource that it may return to users.
+     * This lets Palisade clients request access to that resource and allows Palisade to provide policy controlled access
+     * to it via the other methods in this interface.
+     *
+     * @param request the resource that Palisade can manage access to
+     * @return whether or not the addResource call completed successfully
+     */
     @PostMapping(path = "/addResource", consumes = "application/json", produces = "application/json")
-    Boolean addResource(final URI url, @RequestBody final AddResourceRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
-
+    Boolean addResource(@RequestBody final AddResourceRequest request);
 }

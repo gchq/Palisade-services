@@ -34,6 +34,8 @@ eureka:
     port: 8083
     preferIpAddress: false
     lease-renewal-interval-in-seconds: 5
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
   client:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
@@ -41,8 +43,7 @@ eureka:
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
 
-# Eureka discovery by lookup for registered service by name
-# i.e. map from what-i-call-a-service -> what-that-service-calls-itself
+
 web:
   client:
     data-service: data-service
