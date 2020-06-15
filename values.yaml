@@ -69,7 +69,7 @@ global:
     classpathJars:
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
-      mountPath: "/usr/share/classpath-jars"
+      mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
       storage: 1Gi
       # environment-specific tags
