@@ -10,8 +10,11 @@
         <version>0.4.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>create-kafka-queues</artifactId>
 
+    <!--  *********** Aritfact ID ***********    -->
+    <artifactId>create-kafka-queues</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/create-kafka-queues</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <profiles>
         <profile>
@@ -133,6 +136,7 @@
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
+                    <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>
                     <execution>
