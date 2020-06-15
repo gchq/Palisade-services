@@ -72,34 +72,49 @@ global:
       mountPath: "/usr/share/classpath-jars"
       # storage: storage size for this volume and its claims
       storage: 1Gi
-      # hostPath: external host directory to be mounted
-      hostPath: "/"
+      # environment-specific tags
+      local:
+        # hostPath: external host directory to be mounted
+        hostPath: "/"
+      aws:
+        # volumeHandle: aws handle for the volume to mount
+        volumeHandle: null
+        # aws host directory to mount
+        # The path has to be created before hand - see here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/63
+        # Only safe mount point is root as it currently stands
+        volumePath: "/"
 
     # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
+    # nb. the mountPath here will be referenced by all client resource requests
     dataStores:
     - name: palisade-local-data-store
-      # mountPath: internal mountpoint for data directory, will be referenced by all client resource requests
       mountPath: "/data/local-data-store"
-      # storage: storage size for this volume and its claims
       storage: 1Gi
-      # hostPath: external host directory to be mounted
-      hostPath: "/"
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
       name: kafka-persistence
-      # storage: storage size for this volume and its claims
       storage: 1Gi
-      # hostPath: external host directory to be mounted
-      hostPath: "/"
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redis:
       name: redis-persistence
-      # storage: storage size for this volume and its claims
       storage: 8Gi
-      # hostPath: external host directory to be mounted
-      hostPath: "/"
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
 
   # must be last for file to be appended with addresses
   globalIPAddresses:

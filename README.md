@@ -67,12 +67,10 @@ kubectl config get-contexts
 kubectl config use-context <name>
 ```
 
-All deployment parameters are defined in the various top-level ```values-xxx.yaml``` files (xxx for each deployment environment, eg. AWS, local, etc, see inline comments for details).
-
 Example first deployment to a local cluster (from the project root directory):
 ```
-helm install -f values-local.yaml palisade . \
-  --set global.persistence.classpathJars.hostPath=$(pwd),global.persistence.dataStores[0].hostPath=$(pwd),global.persistence.kafka.hostPath=$(pwd) \
+helm install palisade . \
+  --set global.persistence.classpathJars.local.hostPath=$(pwd),global.persistence.local.dataStores[0].hostPath=$(pwd),global.persistence.kafka.local.hostPath=$(pwd) \
   --set traefik.install=true \
   --timeout=200s
 ```

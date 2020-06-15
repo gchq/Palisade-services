@@ -17,57 +17,59 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "palisade.name" -}}
-{{- default .Chart.Name .Values.nameOverride | lower | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- define "palisade.name" }}
+{{- default .Chart.Name .Values.nameOverride | lower | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "palisade.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
+{{- define "palisade.fullname" }}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "palisade.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- define "palisade.chart" }}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
 Modify the namespace if required
  */}}
-{{- define "palisade.namespace" -}}
-{{- if .Values.global.uniqueNamespace -}}
-{{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- if .Release.Namespace -}}
-{{- printf "%s" .Release.Namespace -}}
-{{- else -}}
-{{- printf "%s" .Values.global.namespace | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
+{{- define "palisade.namespace" }}
+{{- if .Values.global.uniqueNamespace }}
+{{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- if .Release.Namespace }}
+{{- printf "%s" .Release.Namespace }}
+{{- else }}
+{{- printf "%s" .Values.global.namespace | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "palisade.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{- default (include "palisade.fullname" .) .Values.serviceAccount.name -}}
-{{- else -}}
-    {{- default "default" .Values.serviceAccount.name -}}
-{{- end -}}
-{{- end -}}
+{{- define "palisade.serviceAccountName" }}
+{{- if .Values.serviceAccount.create }}
+    {{- default (include "palisade.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+    {{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{- define "hostPathPV" }}

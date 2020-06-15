@@ -62,10 +62,10 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
         - name: "LOADER_PATH"
-          value: {{ .Values.global.persistence.classpathJars.mountPath }}
+          value: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ include "policy-service.name" }}}{{ .Chart.Version }}
         volumeMounts:
-        - mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}
-          name: {{ .Values.global.persistence.classpathJars.name }}
+        - name: {{ .Values.global.persistence.classpathJars.name }}
+          mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ include "policy-service.name" }}/{{ .Chart.Version }}
       volumes:
       - name: {{ .Values.global.persistence.classpathJars.name }}
         persistentVolumeClaim:
