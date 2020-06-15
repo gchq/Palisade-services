@@ -18,10 +18,10 @@ package uk.gov.gchq.palisade.service.palisade.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.palisade.exception.RegisterRequestException;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 import static java.util.Objects.requireNonNull;
@@ -76,62 +77,120 @@ public class SimplePalisadeService implements PalisadeService {
         this.aggregationService = resultAggregationService;
     }
 
-    @Override
-    public CompletableFuture<DataRequestResponse> registerDataRequest(final RegisterDataRequest request) {
-        requireNonNull(request, "request");
-        final RequestId originalRequestId = request.getId();
-        LOGGER.debug("Registering data request: {}, {}", request, originalRequestId);
-
-        AuditRequest.RegisterRequestExceptionAuditRequest.IException auditException = AuditRequest.RegisterRequestExceptionAuditRequest
-                .create(originalRequestId)
+    private AuditRequest.RegisterRequestExceptionAuditRequest.IException getAuditException(final RegisterDataRequest request) {
+        return AuditRequest.RegisterRequestExceptionAuditRequest
+                .create(request.getId())
                 .withUserId(request.getUserId())
                 .withResourceId(request.getResourceId())
                 .withContext(request.getContext());
+    }
 
+    private CompletableFuture<User> getFutureUser(final RegisterDataRequest request) {
         final GetUserRequest userRequest = new GetUserRequest().userId(request.getUserId());
-        userRequest.setOriginalRequestId(originalRequestId);
-        LOGGER.debug("Getting user from userService: {}", userRequest);
-        final CompletableFuture<User> user = userService.getUser(userRequest)
+        userRequest.setOriginalRequestId(request.getId());
+        return userService
+                .getUser(userRequest)
                 .exceptionally(ex -> {
-                    LOGGER.error("Auditing exception from UserService", ex);
-                    auditService.audit(auditException.withException(ex).withServiceClass(UserService.class));
-                    throw new RuntimeException(ex);
+                    LOGGER.error("Auditing exception from userService", ex);
+                    auditService.audit(getAuditException(request)
+                            .withException(ex)
+                            .withServiceClass(UserService.class));
+                    throw new RegisterRequestException("Exception from userService", ex);
                 });
+    }
 
+    private CompletableFuture<Set<LeafResource>> getFutureResources(final RegisterDataRequest request) {
         final GetResourcesByIdRequest resourceRequest = new GetResourcesByIdRequest().resourceId(request.getResourceId());
-        resourceRequest.setOriginalRequestId(originalRequestId);
-        LOGGER.debug("Getting resources from resourceService: {}", resourceRequest);
-        final CompletableFuture<Set<LeafResource>> resources = resourceService.getResourcesById(resourceRequest)
+        resourceRequest.setOriginalRequestId(request.getId());
+        return resourceService
+                .getResourcesById(resourceRequest)
                 .exceptionally(ex -> {
-                    LOGGER.error("Auditing exception from ResourceService", ex);
-                    auditService.audit(auditException.withException(ex).withServiceClass(ResourceService.class));
-                    throw new RuntimeException(ex);
+                    LOGGER.error("Auditing exception from resourceService", ex);
+                    auditService.audit(getAuditException(request)
+                            .withException(ex)
+                            .withServiceClass(ResourceService.class));
+                    throw new RegisterRequestException("Exception from resourceService", ex);
                 });
+    }
 
-        final GetPolicyRequest policyRequest = new GetPolicyRequest().user(user.join()).context(request.getContext()).resources(resources.join());
-        policyRequest.setOriginalRequestId(originalRequestId);
-        LOGGER.debug("Getting rules from policyService: {}", request);
-        CompletableFuture<Map<LeafResource, Rules>> rules = policyService.getPolicy(policyRequest)
-                .exceptionally(ex -> {
-                    LOGGER.error("Auditing exception from PolicyService", ex);
-                    auditService.audit(auditException.withException(ex).withServiceClass(PolicyService.class));
-                    throw new RuntimeException(ex);
-                });
+    private CompletableFuture<Map<LeafResource, Rules>> getFutureResourceRules(
+            final RegisterDataRequest request,
+            final CompletableFuture<User> futureUser,
+            final CompletableFuture<Set<LeafResource>> futureResources) {
 
-        final RequestId requestId = new RequestId().id(request.getUserId().getId() + "-" + UUID.randomUUID().toString());
-        LOGGER.debug("Aggregating results for \nrequest: {}, \nuser: {}, \nresources: {}, \nrules:{}, \nrequestID: {}, \noriginal requestID: {}", request, user.join(), resources.join(), rules.join(), requestId, originalRequestId);
-        return aggregationService.aggregateDataRequestResults(
-                request, user.join(), resources.join(), rules.join(), requestId, originalRequestId).toCompletableFuture();
+        return futureUser.thenCombine(futureResources, (user, resources) -> {
+            final GetPolicyRequest policyRequest = new GetPolicyRequest()
+                    .user(user)
+                    .context(request.getContext())
+                    .resources(resources);
+            policyRequest.setOriginalRequestId(request.getId());
+            return policyService.getPolicy(policyRequest).join();
+        }).exceptionally(ex -> {
+            LOGGER.error("Auditing exception from policyService", ex);
+            auditService.audit(getAuditException(request)
+                    .withException(ex)
+                    .withServiceClass(PolicyService.class));
+            throw new RegisterRequestException("Exception from policyService", ex);
+        });
     }
 
     @Override
-    public CompletableFuture<DataRequestConfig> getDataRequestConfig(final GetDataRequestConfig request) {
+    public DataRequestResponse registerDataRequest(final RegisterDataRequest request) {
+        requireNonNull(request, "request");
+        try {
+            LOGGER.debug("Registering data request: {}", request);
+            LOGGER.info("Registering data request: {}", request.getId());
+
+            CompletableFuture<User> futureUser = getFutureUser(request);
+            CompletableFuture<Set<LeafResource>> futureResources = getFutureResources(request);
+            CompletableFuture<Map<LeafResource, Rules>> futureRules = getFutureResourceRules(request, futureUser, futureResources);
+
+            final String token = request.getUserId().getId() + "-" + UUID.randomUUID().toString();
+            LOGGER.info("Assigned token {} for request {}", token, request.getId());
+            CompletableFuture<DataRequestResponse> futureResponse = CompletableFuture.supplyAsync(
+                    () -> aggregationService.aggregateDataRequestResults(
+                            request,
+                            futureUser,
+                            futureResources,
+                            futureRules,
+                            token),
+                    executor);
+
+            DataRequestResponse response = futureResponse.join();
+            auditService.audit(AuditRequest.RegisterRequestCompleteAuditRequest.create(request.getId())
+                    .withUser(futureUser.join())
+                    .withLeafResources(futureResources.join())
+                    .withContext(request.getContext()));
+
+            return response;
+        } catch (RuntimeException ex) {
+            LOGGER.error("Exception thrown while completing data request, auditing exception", ex);
+            AuditRequest auditException = getAuditException(request)
+                    .withException(ex)
+                    .withServiceClass(SimplePalisadeService.class);
+            auditService.audit(auditException);
+            throw new RegisterRequestException(ex);
+        } catch (Error err) {
+            // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
+            // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
+            LOGGER.error("Error thrown while completing data request, attempting auditing error", err);
+            AuditRequest auditException = getAuditException(request)
+                    .withException(err)
+                    .withServiceClass(SimplePalisadeService.class);
+            auditService.audit(auditException);
+            // Rethrow this Error, don't wrap it in the RegisterRequestException
+            throw err;
+        }
+    }
+
+    @Override
+    public DataRequestConfig getDataRequestConfig(final GetDataRequestConfig request) {
         requireNonNull(request);
         requireNonNull(request.getToken());
         // extract resources from request and check they are a subset of the original RegisterDataRequest resources
         LOGGER.debug("Getting cached data: {}", request);
 
-        return this.persistenceLayer.getAsync(request.getOriginalRequestId().getId());
+        return this.persistenceLayer.get(request.getOriginalRequestId().getId());
     }
 
 }

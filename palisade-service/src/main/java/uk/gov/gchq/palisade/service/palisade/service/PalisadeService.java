@@ -15,12 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * The core API for the palisade service. The responsibility of the palisade service is to send off the required
@@ -29,8 +28,7 @@ import java.util.concurrent.CompletableFuture;
  * to have multiple Palisade services, the data that the data server will require, needs to be stored in a shared cache
  * (Cache service).
  */
-public interface PalisadeService {
-
+public interface PalisadeService extends Service {
     String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     /**
@@ -45,7 +43,7 @@ public interface PalisadeService {
      * @return details of all the resources linked to the initial request (if they asked for a data set) and how to
      * connect to the relevant data service to get that data.
      */
-    CompletableFuture<DataRequestResponse> registerDataRequest(RegisterDataRequest request);
+    DataRequestResponse registerDataRequest(RegisterDataRequest request);
 
     /**
      * This method is used by the data service's to request the trusted details that it requires to apply the necessary
@@ -55,6 +53,6 @@ public interface PalisadeService {
      * @return a {@link DataRequestConfig} containing the information that the data service requires to apply the
      * necessary filtering/transformations to the data.
      */
-    CompletableFuture<DataRequestConfig> getDataRequestConfig(GetDataRequestConfig request);
+    DataRequestConfig getDataRequestConfig(GetDataRequestConfig request);
 
 }

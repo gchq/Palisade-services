@@ -40,57 +40,43 @@ import static java.util.Objects.requireNonNull;
 public class ResultAggregationService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
-    private AuditService auditService;
     private PersistenceLayer persistenceLayer;
 
-    public ResultAggregationService(final AuditService auditService, final PersistenceLayer persistenceLayer) {
-        requireNonNull(auditService, "Audit Service");
+    public ResultAggregationService(final PersistenceLayer persistenceLayer) {
         requireNonNull(persistenceLayer, "Persistence Layer");
-        this.auditService = auditService;
         this.persistenceLayer = persistenceLayer;
     }
 
-    public CompletionStage<DataRequestResponse> aggregateDataRequestResults(
+    public DataRequestResponse aggregateDataRequestResults(
             final RegisterDataRequest request,
-            final User user,
-            final Set<LeafResource> resource,
-            final Map<LeafResource, Rules> rules,
-            final RequestId requestId,
-            final RequestId originalRequestId) {
-
-        LOGGER.debug("aggregateDataRequestResults({}, {}, {}, {}, {}, {})",
-                request, user, resource, rules, request, originalRequestId);
+            final CompletableFuture<User> user,
+            final CompletableFuture<Set<LeafResource>> resource,
+            final CompletableFuture<Map<LeafResource, Rules>> rules,
+            final String token) {
         requireNonNull(request, "request");
         requireNonNull(user, "user");
         requireNonNull(resource, "resource");
         requireNonNull(rules, "rules");
-        requireNonNull(requestId, "request ID");
-        requireNonNull(originalRequestId, "original request ID");
+        requireNonNull(token, "token");
 
-        try {
-            // remove any resources from the map that the rules doesn't contain details for -> user should not even be told about
-            // resources they don't have permission to see
-            Set<LeafResource> filteredResources = removeDisallowedResources(resource, rules);
+        // remove any resources from the map that the rules doesn't contain details for -> user should not even be told about
+        // resources they don't have permission to see
+        Set<LeafResource> filteredResources = removeDisallowedResources(resource.join(), rules.join());
 
-            auditRegisterRequestComplete(request, user, rules, auditService);
-            final DataRequestConfig dataRequestConfig = new DataRequestConfig()
-                    .user(user)
-                    .context(request.getContext())
-                    .rules(rules);
-            dataRequestConfig.setOriginalRequestId(originalRequestId);
-            this.persistenceLayer.put(dataRequestConfig);
+        final DataRequestConfig dataRequestConfig = new DataRequestConfig()
+                .user(user.join())
+                .context(request.getContext())
+                .rules(rules.join());
+        dataRequestConfig.setOriginalRequestId(request.getId());
+        this.persistenceLayer.put(dataRequestConfig);
 
-            final DataRequestResponse response = new DataRequestResponse().resources(filteredResources).token(requestId.getId());
-            response.setOriginalRequestId(originalRequestId);
-            LOGGER.debug("Aggregated request with response: {}", response);
+        final DataRequestResponse response = new DataRequestResponse()
+                .resources(filteredResources)
+                .token(token);
+        response.setOriginalRequestId(request.getId());
+        LOGGER.debug("Aggregated request with response: {}", response);
 
-            return CompletableFuture.completedStage(response);
-        } catch (Exception ex) {
-            LOGGER.error("Error handling: {}", ex.getMessage());
-
-            auditRequestReceivedException(request, ex, PolicyService.class, auditService);
-            throw new RuntimeException(ex); //rethrow the exception
-        }
+        return response;
     }
 
     /**
@@ -107,26 +93,5 @@ public class ResultAggregationService implements Service {
 
         LOGGER.debug("Allowed resources: {}", resources);
         return resources;
-    }
-
-    private void auditRegisterRequestComplete(final RegisterDataRequest request, final User user, final Map<LeafResource, Rules> rules, final AuditService auditService) {
-        RegisterRequestCompleteAuditRequest registerRequestCompleteAuditRequest = RegisterRequestCompleteAuditRequest.create(request.getId())
-                .withUser(user)
-                .withLeafResources(rules.keySet())
-                .withContext(request.getContext());
-        LOGGER.debug("Auditing completed request: \n\t{}\n\t{}\n\t{}", request, user, rules);
-        auditService.audit(registerRequestCompleteAuditRequest);
-    }
-
-    private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass, final AuditService auditService) {
-        final RegisterRequestExceptionAuditRequest auditRequestWithException =
-                RegisterRequestExceptionAuditRequest.create(request.getId())
-                        .withUserId(request.getUserId())
-                        .withResourceId(request.getResourceId())
-                        .withContext(request.getContext())
-                        .withException(ex)
-                        .withServiceClass(serviceClass);
-        LOGGER.error("Auditing request exception: \n\t{}\n\t{}", request, ex);
-        auditService.audit(auditRequestWithException);
     }
 }
