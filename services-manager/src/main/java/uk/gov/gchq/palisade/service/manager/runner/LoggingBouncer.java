@@ -23,9 +23,13 @@ import uk.gov.gchq.palisade.service.manager.config.ApplicationConfiguration.Mana
 import uk.gov.gchq.palisade.service.manager.config.ServiceConfiguration;
 import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * An ApplicationRunner to change the logging level of *all* available services
+ */
 public class LoggingBouncer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);
 
@@ -42,11 +46,11 @@ public class LoggingBouncer implements Runnable {
         loggingConfiguration.forEach((serviceName, config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
-            config.getLevel().forEach((module, level) -> {
-                LOGGER.debug("Configuring service {} with module {} as {}", serviceName, module, level);
+            config.getLevel().forEach((String packageName, String level) -> {
+                LOGGER.debug("Configuring service {} with package {} as {}", serviceName, packageName, level);
                 try {
-                    service.setLoggers(module, level);
-                } catch (Exception ex) {
+                    service.setLoggers(packageName, level);
+                } catch (IOException ex) {
                     LOGGER.error("Error while changing logging level: ", ex);
                 }
             });
