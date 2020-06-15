@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
@@ -37,7 +36,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
