@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.user.request;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -27,27 +32,35 @@ import java.util.StringJoiner;
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the original request.  Next in the sequence is User Service where this data will be the
- * input (or in other words a request) for a User.
- * Note there are two class that represent effectively the same data where each represents a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
+ * This version represents the original request, but is to be used as the request for finding the User associated with
+ * this request.
+ * The next in the sequence will the response from the User Service which will include the information about the user.
+ * Note there are two class that represent effectively the same data where each has a different purpose.
+ * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that came into Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service
+ * Note the context was converted to a String for sending from Palisade Service to User Service, but has not been
+ * converted back as it is not being used in User Service.
  */
-
-@JsonDeserialize(builder = OriginalRequest.Builder.class)
-public final class OriginalRequest {
+@JsonDeserialize(builder = UserRequest.Builder.class)
+public final class UserRequest {
 
     private final String token; // Unique identifier for this specific request end-to-end
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource that that is being asked to access
-    private final Map<String, String> context; //Relevant information about the request.
+    private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
 
-    private OriginalRequest(String token, String userId, String resourceId, Map<String, String> context) {
+   //?? should we have this
+    @JsonIgnore
+    private Map<String, String> context = null;
+
+
+    private UserRequest(String token, String userId, String resourceId, String contextJson) {
         this.token = token;
         this.userId = userId;
         this.resourceId = resourceId;
-        this.context = context;
+        this.contextJson = contextJson;
     }
+
 
     @Generated
     public String getToken() {
@@ -60,14 +73,25 @@ public final class OriginalRequest {
     }
 
     @Generated
-    public String getResourceID() {
+    public String getResourceId() {
         return resourceId;
     }
 
+    //??? In theory never going to use this. Why have a getter and a JSON string converter?
     @Generated
-    public Map<String, String> getContext() {
+    public String getContextJson() {
+        return contextJson;
+    }
+
+    public Map<String, String> getContext() throws JsonProcessingException {
+        if (context == null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            //???assuming it is a HashMap but treating it as a Map
+            context = objectMapper.readValue(contextJson, HashMap.class);
+        }
         return context;
     }
+
 
     @Override
     @Generated
@@ -75,38 +99,39 @@ public final class OriginalRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof OriginalRequest)) {
+        if (!(o instanceof UserRequest)) {
             return false;
         }
-        OriginalRequest that = (OriginalRequest) o;
+        UserRequest that = (UserRequest) o;
         return token.equals(that.token) &&
                 userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
+                contextJson.equals(that.contextJson) &&
                 context.equals(that.context);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, userId, resourceId, context);
+        return Objects.hash(token, userId, resourceId, contextJson, context);
     }
+
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", UserRequest.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
+                .add("contextJson='" + contextJson + "'")
                 .add("context=" + context)
                 .add(super.toString())
                 .toString();
     }
 
-
-
     /**
-     * Builder class for the creation of instances of the OriginalRequest.  The variant of the Builder Pattern is
+     * Builder class for the creation of instances of the UserRequest.  The variant of the Builder Pattern is
      * meant to be used by first populating the Builder class and then us this to create the UserRequest class.
      */
     @JsonPOJOBuilder
@@ -114,8 +139,7 @@ public final class OriginalRequest {
         private String token;
         private String userId;
         private String resourceId;
-        private Map<String, String> context;
-
+        private String contextJson;
 
 
         public Builder token(String token) {
@@ -133,19 +157,17 @@ public final class OriginalRequest {
             return this;
         }
 
-        public Builder context(Map<String, String> context) {
-            this.context = context;
+        public Builder context(String contextJson) {
+            this.contextJson = contextJson;
             return this;
         }
 
-        public OriginalRequest build() {
+        public UserRequest build() {
             Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(userId, "User Id cannot be null");
+            Assert.notNull(userId, "User cannot be null");
             Assert.notNull(resourceId, "Resource Id cannot be null");
-            Assert.notNull(context, "Context  cannot be null");
-            Assert.notEmpty(context, "Context  cannot be empty");
-            return new OriginalRequest(token, userId, resourceId, context);
+            Assert.notNull(contextJson, "Context  cannot be null");
+            return new UserRequest(token, userId, resourceId, contextJson);
         }
     }
-
 }
