@@ -18,9 +18,11 @@ package uk.gov.gchq.palisade.service.palisade.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.exception.RegisterRequestException;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
@@ -31,6 +33,7 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Map;
 import java.util.Set;
@@ -90,10 +93,7 @@ public class SimplePalisadeService implements PalisadeService {
         return userService
                 .getUser(userRequest)
                 .exceptionally(ex -> {
-                    LOGGER.error("Auditing exception from userService", ex);
-                    auditService.audit(getAuditException(request)
-                            .withException(ex)
-                            .withServiceClass(UserService.class));
+                    auditRequestReceivedException(request, ex, UserService.class);
                     throw new RegisterRequestException("Exception from userService", ex);
                 });
     }
@@ -104,10 +104,7 @@ public class SimplePalisadeService implements PalisadeService {
         return resourceService
                 .getResourcesById(resourceRequest)
                 .exceptionally(ex -> {
-                    LOGGER.error("Auditing exception from resourceService", ex);
-                    auditService.audit(getAuditException(request)
-                            .withException(ex)
-                            .withServiceClass(ResourceService.class));
+                    auditRequestReceivedException(request, ex, ResourceService.class);
                     throw new RegisterRequestException("Exception from resourceService", ex);
                 });
     }
@@ -125,10 +122,7 @@ public class SimplePalisadeService implements PalisadeService {
             policyRequest.setOriginalRequestId(request.getId());
             return policyService.getPolicy(policyRequest).join();
         }).exceptionally(ex -> {
-            LOGGER.error("Auditing exception from policyService", ex);
-            auditService.audit(getAuditException(request)
-                    .withException(ex)
-                    .withServiceClass(PolicyService.class));
+            auditRequestReceivedException(request, ex, PolicyService.class);
             throw new RegisterRequestException("Exception from policyService", ex);
         });
     }
@@ -156,30 +150,37 @@ public class SimplePalisadeService implements PalisadeService {
                     executor);
 
             DataRequestResponse response = futureResponse.join();
-            auditService.audit(AuditRequest.RegisterRequestCompleteAuditRequest.create(request.getId())
-                    .withUser(futureUser.join())
-                    .withLeafResources(futureResources.join())
-                    .withContext(request.getContext()));
+            auditRequestComplete(request, futureUser.join(), futureResources.join(), request.getContext());
 
             return response;
         } catch (RuntimeException ex) {
-            LOGGER.error("Exception thrown while completing data request, auditing exception", ex);
-            AuditRequest auditException = getAuditException(request)
-                    .withException(ex)
-                    .withServiceClass(SimplePalisadeService.class);
-            auditService.audit(auditException);
+            auditRequestReceivedException(request, ex, SimplePalisadeService.class);
             throw new RegisterRequestException(ex);
         } catch (Error err) {
             // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
             // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
-            LOGGER.error("Error thrown while completing data request, attempting auditing error", err);
-            AuditRequest auditException = getAuditException(request)
-                    .withException(err)
-                    .withServiceClass(SimplePalisadeService.class);
-            auditService.audit(auditException);
+            auditRequestReceivedException(request, err, SimplePalisadeService.class);
             // Rethrow this Error, don't wrap it in the RegisterRequestException
             throw err;
         }
+    }
+
+    private void auditRequestComplete(final RegisterDataRequest request, final User user, final Set<LeafResource> resources, final Context context) {
+        LOGGER.info("Auditing completed register request with audit service");
+        auditService.audit(AuditRequest.RegisterRequestCompleteAuditRequest.create(request.getId())
+                .withUser(user)
+                .withLeafResources(resources)
+                .withContext(context));
+    }
+
+    private void auditRequestReceivedException(final RegisterDataRequest request, final Throwable ex, final Class<? extends Service> serviceClass) {
+        LOGGER.error("Error while handling request: {}", request);
+        LOGGER.error("Exception was", ex);
+        LOGGER.info("Auditing error with audit service");
+        AuditRequest auditException = getAuditException(request)
+                .withException(ex)
+                .withServiceClass(serviceClass);
+        auditService.audit(auditException);
     }
 
     @Override
