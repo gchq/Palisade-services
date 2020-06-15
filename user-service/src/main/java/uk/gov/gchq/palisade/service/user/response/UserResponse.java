@@ -16,8 +16,11 @@ package uk.gov.gchq.palisade.service.user.response;
  * limitations under the License.
  */
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.user.request.UserRequest;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
 import java.util.Objects;
@@ -33,6 +36,7 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the client request that came into Palisade Service.
  * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the User Service
  */
+@JsonDeserialize(builder = UserResponse.Builder.class)
 public final class  UserResponse {
 
     private final String token; // Unique identifier for this specific request end-to-end
@@ -97,6 +101,18 @@ public final class  UserResponse {
         return Objects.hash(token, user, resourceId, contextJson);
     }
 
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", UserResponse.class.getSimpleName() + "[", "]")
+                .add("token='" + token + "'")
+                .add("user=" + user)
+                .add("resourceId='" + resourceId + "'")
+                .add("contextJson='" + contextJson + "'")
+                .add(super.toString())
+                .toString();
+    }
+
     /**
      * Builder class for the creation of instances of the UserResponse.  The variant of the Builder Pattern is
      * meant to be used by first populating the Builder class and then us this to create the UserRequest class.
@@ -108,25 +124,23 @@ public final class  UserResponse {
         private String contextJson;
 
 
-        public Builder() {
-        }
 
-        public UserResponse.Builder token(String token) {
+        public Builder token(String token) {
             this.token = token;
             return this;
         }
 
-        public UserResponse.Builder userJson(User user) {
+        public Builder userJson(User user) {
             this.user = user;
             return this;
         }
 
-        public UserResponse.Builder resourceId(String resourceId) {
+        public Builder resourceId(String resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public UserResponse.Builder context(String contextJson) {
+        public Builder context(String contextJson) {
             this.contextJson = contextJson;
             return this;
         }

@@ -13,40 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.response;
+package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.resource.response.common.ResourceMetadata;
+import uk.gov.gchq.palisade.service.policy.response.common.ResourceMetadata;
+import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response from the Resource Service which will add the resources to data set
- * The next in the sequence will the request for Policy Service.
+ * This class represents the request for the Policy Service
+ * The next in the sequence will the response from the Policy Service.
  * Note there are two class that represents the same data where each has a different purpose.
  * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the Resource Service
  * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the Policy Service
+ * The key difference in the representation of the attributes.  In this class the all of the objects are needed to
+ * process the request.
  */
-@JsonDeserialize(builder = ResourceResponse.Builder.class)
-public final class ResourceResponse {
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final String userJson;  //JSon string for the User object
-    private final Map<String, ResourceMetadata> resources; //map of resources related to this query
-    private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
+@JsonDeserialize(builder = PolicyRequest.Builder.class)
+public final class PolicyRequest {
 
-    private ResourceResponse(String token, String userJson, Map<String, ResourceMetadata> resources, String contextJson) {
+    private final String token; // Unique identifier for this specific request end-to-end
+    private final User user;  //
+    private final Map<String, ResourceMetadata> resources; //map of resources related to this query
+    private final Map<String, String> context;  // represents the context information
+
+    private PolicyRequest(String token, User user, Map<String, ResourceMetadata> resources, Map<String, String> context) {
         this.token = token;
-        this.userJson = userJson;
+        this.user = user;
         this.resources = resources;
-        this.contextJson = contextJson;
+        this.context = context;
     }
 
     @Generated
@@ -55,8 +58,8 @@ public final class ResourceResponse {
     }
 
     @Generated
-    public String getUserJson() {
-        return userJson;
+    public User getUser() {
+        return user;
     }
 
     @Generated
@@ -65,8 +68,8 @@ public final class ResourceResponse {
     }
 
     @Generated
-    public String getContextJson() {
-        return contextJson;
+    public Map<String, String> getContext() {
+        return  context;
     }
 
     @Override
@@ -75,52 +78,52 @@ public final class ResourceResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ResourceResponse)) {
+        if (!(o instanceof PolicyRequest)) {
             return false;
         }
-        ResourceResponse that = (ResourceResponse) o;
+        PolicyRequest that = (PolicyRequest) o;
         return token.equals(that.token) &&
-                userJson.equals(that.userJson) &&
+                user.equals(that.user) &&
                 resources.equals(that.resources) &&
-                contextJson.equals(that.contextJson);
+                context.equals(that.context);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, userJson, resources, contextJson);
+        return Objects.hash(token, user, resources, context);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ResourceResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
-                .add("userJson='" + userJson + "'")
+                .add("user=" + user)
                 .add("resources=" + resources)
-                .add("contextJson='" + contextJson + "'")
+                .add("context=" + context)
                 .add(super.toString())
                 .toString();
     }
 
     /**
-     * Builder class for the creation of instances of the ResourceResponse.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the ResourceResponse class.
+     * Builder class for the creation of instances of the PolicyRequest.  The variant of the Builder Pattern is
+     * meant to be used by first populating the Builder class and then us this to create the PolicyRequest class.
      */
     @JsonPOJOBuilder
     public static class Builder {
         private String token;
-        private String userJson;
+        private User user;
         private Map<String, ResourceMetadata> resources;
-        private String contextJson;
+        private Map<String, String> context;
 
         public Builder token(String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(String userJson) {
-            this.userJson = userJson;
+        public Builder userJson(User user) {
+            this.user = user;
             return this;
         }
 
@@ -129,19 +132,20 @@ public final class ResourceResponse {
             return this;
         }
 
-        public Builder context(String contextJson) {
-            this.contextJson = contextJson;
+        public Builder context(Map<String, String> context) {
+            this.context = context;
             return this;
         }
 
-        public ResourceResponse build() {
+        public PolicyRequest build() {
             Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(userJson, "User cannot be null");
+            Assert.notNull(user, "User cannot be null");
             Assert.notNull(resources, "Resource Id cannot be null");
-            Assert.notNull(contextJson, "Context  cannot be null");
-            return new ResourceResponse(token, userJson, resources, contextJson);
+            Assert.notNull(context, "Context  cannot be null");
+            return new PolicyRequest(token, user, resources, context);
         }
     }
 
-
 }
+
+
