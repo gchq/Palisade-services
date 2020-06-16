@@ -13,33 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.results.response;
+package uk.gov.gchq.palisade.service.results.request;
 
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.results.request.common.domain.ResourceMetadata;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+
 
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
  * The data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response frm the Results Service
- * This message will be sent back to the client.
- * From the client's perspective, this is the response to their initial request sent to the Palisade Service
- * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest.
- * This will provide the necessary information for them to query the data service.
+ * This class represents the request for the Results Service
+ * The next in the sequence will the ResultsResponse which is the message that is sent back to the client.
+ * Note there are two class that represents the same data where each has a different purpose.
+ * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the Query Scope Service
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Response Service
  */
-public final class ResultsResponse {
+@JsonDeserialize(builder = ResultsRequest.Builder.class)
+public class ResultsRequest {
 
     private final String token; // Unique identifier for this specific request end-to-end
-    private final String queuePointer; //reference to where the data is located
+    private final Map<String, ResourceMetadata> resources; //masked resources related to this query
 
-    private ResultsResponse(String token, String queuePointer) {
+    private ResultsRequest(String token,  Map<String, ResourceMetadata> resources ) {
         this.token = token;
-        this.queuePointer = queuePointer;
+        this.resources = resources;
     }
 
     @Generated
@@ -48,8 +52,8 @@ public final class ResultsResponse {
     }
 
     @Generated
-    public String getQueuePointer() {
-        return queuePointer;
+    public Map<String, ResourceMetadata> getResources() {
+        return resources;
     }
 
     @Override
@@ -58,26 +62,26 @@ public final class ResultsResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ResultsResponse)) {
+        if (!(o instanceof ResultsRequest)) {
             return false;
         }
-        ResultsResponse that = (ResultsResponse) o;
+        ResultsRequest that = (ResultsRequest) o;
         return token.equals(that.token) &&
-                queuePointer.equals(that.queuePointer);
+                resources.equals(that.resources);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, queuePointer);
+        return Objects.hash(token, resources);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ResultsResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ResultsRequest.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
-                .add("queuePointer='" + queuePointer + "'")
+                .add("resources=" + resources)
                 .add(super.toString())
                 .toString();
     }
@@ -86,24 +90,27 @@ public final class ResultsResponse {
      * Builder class for the creation of instances of the ResultsRequest.  The variant of the Builder Pattern is
      * meant to be used by first populating the Builder class and then us this to create the ResultsRequest class.
      */
+    @JsonPOJOBuilder
     public static class Builder {
         private String token;
-        private String queuePointer;
+        private Map<String, ResourceMetadata> resources;
 
         public Builder token(String token) {
             this.token = token;
             return this;
         }
 
-        public Builder queuePointer(String queuePointer) {
-            this.queuePointer = queuePointer;
+        public Builder resource(Map<String, ResourceMetadata> resources) {
+            this.resources = resources;
             return this;
         }
 
-        public ResultsResponse build() {
+        public ResultsRequest build() {
             Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(queuePointer, "Resources cannot be null");
-            return new ResultsResponse(token, queuePointer);
+            Assert.notNull(resources, "Resources cannot be null");
+            Assert.notNull(resources, "Resources cannot be empty");
+            return new ResultsRequest(token, resources);
         }
     }
+
 }
