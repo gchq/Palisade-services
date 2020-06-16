@@ -150,7 +150,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public ResultAggregationService resultAggregationService(final AuditService auditService, final PersistenceLayer persistenceLayer) {
+    public ResultAggregationService resultAggregationService(final PersistenceLayer persistenceLayer) {
         return new ResultAggregationService(persistenceLayer);
     }
 
