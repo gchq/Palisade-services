@@ -149,6 +149,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new PolicyService(policyClient, getAsyncExecutor());
     }
 
+    /**
+     * The bean creation for the resultAggregationService using {@link PersistenceLayer} used by the {@link SimplePalisadeService}
+     *
+     * @param persistenceLayer jpaPersistence Layer
+     * @return a new instance of {@link ResultAggregationService}
+     */
     @Bean
     public ResultAggregationService resultAggregationService(final PersistenceLayer persistenceLayer) {
         return new ResultAggregationService(persistenceLayer);

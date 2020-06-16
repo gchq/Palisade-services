@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,61 +12,109 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# hosting: local, metal or cloud and defines configuration parameter choices for some child charts according to deployment environment
-# install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
-# install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
-# hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
-# nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
-# namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
-# uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
-# repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
 
+# Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
+
+# hosting: [local | aws | metal] the target environment to deploy to
 hosting: local
+
 traefik:
+  # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
   install: false
-metricsServer:
+metrics-server:
+  # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
 dashboard:
+  # install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
   install: false
 kafka:
+  # install: install kafka streaming platform
   install: true
+redis:
+  # install: install redis persistence and caching data storage platform
+  install: true
+redis-cluster:
+  # install: install clustered redis persistence and caching data storage platform
+  install: false
+
 namespaces:
   default: default
   dev: dev
   uat: uat
   prod: prod
+
 global:
+  # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
+
+  # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
+
+  # namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
   namespace: default
+
+  # uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
   uniqueNamespace: false
+
+  # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
   repository: palisade
+
+  # see charts/kafka/charts/zookeeper
   zookeeperConnectString: palisade-zookeeper:2181
-  localMountKafka:
-    enabled: true
-  localMount:
-    enabled: true
-    volumeHandle: dummy
-  classpathjars:
-    directory: /tmp/Palisade/classpathjars
+
+  # persistent-volume and associated claims configurations
   persistence:
-    storageClass:
-    annotations: {}
-    accessMode:
-    - "ReadWriteOnce"
-    persistentVolumeReclaimPolicy: "Retain"
-    persistenceVolumeAccessModes:
-    - "ReadWriteOnce"
-    - "ReadOnlyMany"
-    enabled: true
-    hostpath: /tmp/Palisade
-    storageTierName:
-    - "classpath"
-    selectors:
-      classpath: "classpathjars"
-    size: 2Gi
-    pvcSizes:
-      policy:
-        size: 1Gi
+    # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
+    classpathJars:
+      name: palisade-classpath-jars
+      # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
+      mountPath: "/usr/share"
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # environment-specific tags
+      local:
+        # hostPath: external host directory to be mounted
+        hostPath: "/"
+      aws:
+        # volumeHandle: aws handle for the volume to mount
+        volumeHandle: null
+        # aws host directory to mount
+        # The path has to be created before hand - see here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/63
+        # Only safe mount point is root as it currently stands
+        volumePath: "/"
+
+    # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
+    # nb. the mountPath here will be referenced by all client resource requests
+    dataStores:
+    - name: palisade-local-data-store
+      mountPath: "/data/local-data-store"
+      storage: 1Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # kafka: Store used by kafka for persisting stream logs
+    kafka:
+      name: kafka-persistence
+      storage: 1Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # redis: Store used by redis and redis-cluster for persistence and caching
+    redis:
+      name: redis-persistence
+      storage: 8Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+  # must be last for file to be appended with addresses
   globalIPAddresses:
