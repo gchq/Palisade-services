@@ -26,7 +26,6 @@ metadata:
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook-weight": "0"
 spec:
   template:
     metadata:

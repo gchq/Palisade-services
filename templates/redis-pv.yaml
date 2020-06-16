@@ -23,7 +23,6 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-  - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.global.persistence.redis.name }}
   capacity:
