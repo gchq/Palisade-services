@@ -39,7 +39,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -80,7 +79,7 @@ public class PalisadeControllerTest {
         // Given
         RegisterDataRequest request = Mockito.mock(RegisterDataRequest.class);
         DataRequestResponse response = Mockito.mock(DataRequestResponse.class);
-        Mockito.when(palisadeService.registerDataRequest(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        Mockito.when(palisadeService.registerDataRequest(request)).thenReturn(response);
 
         // When
         controller.registerDataRequestSync(request);
@@ -99,7 +98,7 @@ public class PalisadeControllerTest {
         // Given
         GetDataRequestConfig request = Mockito.mock(GetDataRequestConfig.class);
         DataRequestConfig response = Mockito.mock(DataRequestConfig.class);
-        Mockito.when(palisadeService.getDataRequestConfig(request)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        Mockito.when(palisadeService.getDataRequestConfig(request)).thenReturn(response);
 
         // When
         controller.getDataRequestConfigSync(request);

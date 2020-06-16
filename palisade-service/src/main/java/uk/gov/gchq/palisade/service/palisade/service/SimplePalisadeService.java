@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Map;
 import java.util.Set;
