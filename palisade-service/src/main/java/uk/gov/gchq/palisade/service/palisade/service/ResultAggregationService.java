@@ -55,10 +55,10 @@ public class ResultAggregationService implements Service {
      * Aggregates data from users, rules and requests into a {@link DataRequestConfig} and does a put on the JPA persistenceLayer.
      * Finally it returns to the {@link SimplePalisadeService} a DataRequestResponse of the filtered resources for which the rules doesnt apply to with a token and originalRequestId from the {@link RegisterDataRequest} id
      *
-     * @param request  {@link RegisterDataRequest } request
-     * @param user     {@link CompletableFuture<User> } user
-     * @param resource {@link CompletableFuture<Set<LeafResource>> } resource
-     * @param rules    {@link CompletableFuture<Map<LeafResource, Rules>> } rules
+     * @param request  {@link RegisterDataRequest} request
+     * @param user     {@link CompletableFuture} of {@link User} users
+     * @param resource {@link CompletableFuture} of a {@link Set} of {@link LeafResource} resources
+     * @param rules    {@link CompletableFuture} of a {@link Map} of {@link LeafResource} and {@link Rules } rules
      * @param token    {@link String } token
      * @return {@link DataRequestResponse } data request response returned to {@link SimplePalisadeService}
      */
