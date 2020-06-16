@@ -24,6 +24,12 @@ import uk.gov.gchq.palisade.service.data.service.DataService;
  */
 public class ReadException extends RuntimeException {
 
+    /**
+     * Instantiates a new Read exception with a {@link Throwable} cause
+     * which will call super and throw a {@link RuntimeException}
+     *
+     * @param cause the reason for throwing the exception
+     */
     public ReadException(final Throwable cause) {
         super(cause);
     }

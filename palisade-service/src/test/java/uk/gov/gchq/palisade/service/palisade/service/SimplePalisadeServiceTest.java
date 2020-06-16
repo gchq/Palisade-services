@@ -140,7 +140,7 @@ public class SimplePalisadeServiceTest {
         DataRequestResponse response = service.registerDataRequest(request);
 
         //Then
-        assertEquals(expectedResponse.getResources(), response.getResources());
+        assertEquals("The returned DataRequestResponse did not match the original object", expectedResponse.getResources(), response.getResources());
     }
 
     @Test(expected = CompletionException.class)
@@ -156,7 +156,6 @@ public class SimplePalisadeServiceTest {
 
         //When
         service.getDataRequestConfig(requestConfig);
-        LOGGER.info("here");
     }
 
     private void createExpectedDataConfig() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -78,7 +79,7 @@ public class SimplePalisadeService implements PalisadeService {
         this.aggregationService = resultAggregationService;
     }
 
-    private AuditRequest.RegisterRequestExceptionAuditRequest.IException getAuditException(final RegisterDataRequest request) {
+    private static AuditRequest.RegisterRequestExceptionAuditRequest.IException getAuditException(final RegisterDataRequest request) {
         return AuditRequest.RegisterRequestExceptionAuditRequest
                 .create(request.getId())
                 .withUserId(request.getUserId())
@@ -91,7 +92,7 @@ public class SimplePalisadeService implements PalisadeService {
         userRequest.setOriginalRequestId(request.getId());
         return userService
                 .getUser(userRequest)
-                .exceptionally(ex -> {
+                .exceptionally((Throwable ex) -> {
                     auditRequestReceivedException(request, ex, UserService.class);
                     throw new RegisterRequestException("Exception from userService", ex);
                 });
@@ -102,7 +103,7 @@ public class SimplePalisadeService implements PalisadeService {
         resourceRequest.setOriginalRequestId(request.getId());
         return resourceService
                 .getResourcesById(resourceRequest)
-                .exceptionally(ex -> {
+                .exceptionally((Throwable ex) -> {
                     auditRequestReceivedException(request, ex, ResourceService.class);
                     throw new RegisterRequestException("Exception from resourceService", ex);
                 });
@@ -113,14 +114,14 @@ public class SimplePalisadeService implements PalisadeService {
             final CompletableFuture<User> futureUser,
             final CompletableFuture<Set<LeafResource>> futureResources) {
 
-        return futureUser.thenCombine(futureResources, (user, resources) -> {
+        return futureUser.thenCombine(futureResources, (User user, Collection<LeafResource> resources) -> {
             final GetPolicyRequest policyRequest = new GetPolicyRequest()
                     .user(user)
                     .context(request.getContext())
                     .resources(resources);
             policyRequest.setOriginalRequestId(request.getId());
             return policyService.getPolicy(policyRequest).join();
-        }).exceptionally(ex -> {
+        }).exceptionally((Throwable ex) -> {
             auditRequestReceivedException(request, ex, PolicyService.class);
             throw new RegisterRequestException("Exception from policyService", ex);
         });

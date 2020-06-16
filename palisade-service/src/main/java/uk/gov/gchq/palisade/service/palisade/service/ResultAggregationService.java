@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,35 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * ResultAggregationService implements {@link Service} and is used by the {@link SimplePalisadeService}
+ */
 public class ResultAggregationService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultAggregationService.class);
     private PersistenceLayer persistenceLayer;
 
+    /**
+     * Instantiates a new Result aggregation service with {@link PersistenceLayer} used to persist {@code DataRequestConfig}
+     *
+     * @param persistenceLayer the JPA persistence layer created in {@link uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration}
+     */
     public ResultAggregationService(final PersistenceLayer persistenceLayer) {
         requireNonNull(persistenceLayer, "Persistence Layer");
         this.persistenceLayer = persistenceLayer;
     }
 
+    /**
+     * Aggregates data from users, rules and requests into a {@link DataRequestConfig} and does a put on the JPA persistenceLayer.
+     * Finally it returns to the {@link SimplePalisadeService} a DataRequestResponse of the filtered resources for which the rules doesnt apply to with a token and originalRequestId from the {@link RegisterDataRequest} id
+     *
+     * @param request  {@link RegisterDataRequest } request
+     * @param user     {@link CompletableFuture<User> } user
+     * @param resource {@link CompletableFuture<Set<LeafResource>> } resource
+     * @param rules    {@link CompletableFuture<Map<LeafResource, Rules>> } rules
+     * @param token    {@link String } token
+     * @return {@link DataRequestResponse } data request response returned to {@link SimplePalisadeService}
+     */
     public DataRequestResponse aggregateDataRequestResults(
             final RegisterDataRequest request,
             final CompletableFuture<User> user,
@@ -82,7 +101,7 @@ public class ResultAggregationService implements Service {
      * @param rules     the rules for all resources
      * @return the {@code resources} set after filtering
      */
-    private Set<LeafResource> removeDisallowedResources(final Set<LeafResource> resources, final Map<LeafResource, Rules> rules) {
+    private static Set<LeafResource> removeDisallowedResources(final Set<LeafResource> resources, final Map<LeafResource, Rules> rules) {
         LOGGER.debug("removeDisallowedResources({}, {})", resources, rules);
 
         resources.retainAll(rules.keySet());

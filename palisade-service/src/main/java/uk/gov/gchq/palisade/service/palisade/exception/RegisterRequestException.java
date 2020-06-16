@@ -24,10 +24,21 @@ import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
  */
 public class RegisterRequestException extends RuntimeException {
 
+    /**
+     * Instantiates a new Register request exception with a {@link String} message and a {@link Throwable} cause which will then call super and throw a {@link RuntimeException} with a message and an Exception
+     *
+     * @param message the message displayed in the console
+     * @param cause   the reason for throwing the Exception
+     */
     public RegisterRequestException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Instantiates a new Register request exception with a {@link Throwable} cause which will then call super and throw a {@link RuntimeException} with an Exception
+     *
+     * @param cause the reason for throwing the Exception
+     */
     public RegisterRequestException(final Throwable cause) {
         super(cause);
     }
