@@ -47,7 +47,7 @@ public class PalisadeController {
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")
     public DataRequestResponse registerDataRequestSync(@RequestBody final RegisterDataRequest request) {
         LOGGER.info("Invoking registerDataRequest: {}", request);
-        DataRequestResponse response = this.service.registerDataRequest(request).join();
+        DataRequestResponse response = this.service.registerDataRequest(request);
         LOGGER.info("Returning response: {}", response);
         return response;
     }
@@ -55,7 +55,7 @@ public class PalisadeController {
     @PostMapping(value = "/getDataRequestConfig", consumes = "application/json", produces = "application/json")
     public DataRequestConfig getDataRequestConfigSync(@RequestBody final GetDataRequestConfig request) {
         LOGGER.info("Invoking getDataRequestConfig: {}", request);
-        DataRequestConfig response = this.service.getDataRequestConfig(request).join();
+        DataRequestConfig response = this.service.getDataRequestConfig(request);
         LOGGER.info("Returning response: {}", response);
         return response;
     }
