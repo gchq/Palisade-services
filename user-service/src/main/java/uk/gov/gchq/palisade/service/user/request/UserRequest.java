@@ -51,6 +51,7 @@ public final class UserRequest {
     private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
 
    //?? should we have this
+    //My take on this is no.  If we need it make it part of the constructor.
     @JsonIgnore
     private Map<String, String> context = null;
 
@@ -78,7 +79,6 @@ public final class UserRequest {
         return resourceId;
     }
 
-    //??? In theory never going to use this. Why have a getter and a JSON string converter?
     @Generated
     public String getContextJson() {
         return contextJson;

@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.response;
+package uk.gov.gchq.palisade.service.results.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
@@ -27,16 +30,20 @@ import java.util.StringJoiner;
  * Service skipping any services that have not processed the request.  The Results Services will forward this
  * message back to the client.  This should be enough information to explain the issue and possibly suggest
  * what is needed before tying again.
- * This message will be sent to the Results Service where it will be de-seralised into a
- * uk.gov.gchq.palisade.service.results.request.ErrorRequest.  This will then be the starting point for sending an
- * error message back to the client as the response to their request.
+ * This message can come from any of the services including the Results Service.  If it is from any service other
+ * than Results Service it will be send to the Results Service where it will be de-seralized into this message.
+ * If the error occurred on the Results Service, the message will created directly constructed directly on this
+ * microservice.  Either way this information will be use to construct an error response that will be sent back to the
+ * client as the response to the initial request.
  **/
-public class ErrorResponse {
+@JsonDeserialize(builder = ErrorRequest.Builder.class)
+public class ErrorRequest {
 
     private final String token; // Unique identifier for this specific request end-to-end
+
     private final String errorMessage;  //Detailed description of the error in English
 
-    public ErrorResponse(final String token, final String errorMessage) {
+    public ErrorRequest(final String token, final String errorMessage) {
         this.token = token;
         this.errorMessage = errorMessage;
     }
@@ -58,10 +65,10 @@ public class ErrorResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ErrorResponse)) {
+        if (!(o instanceof ErrorRequest)) {
             return false;
         }
-        ErrorResponse that = (ErrorResponse) o;
+        ErrorRequest that = (ErrorRequest) o;
         return token.equals(that.token) &&
                 errorMessage.equals(that.errorMessage);
     }
@@ -75,7 +82,7 @@ public class ErrorResponse {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", ErrorResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ErrorRequest.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .add("errorMessage='" + errorMessage + "'")
                 .add(super.toString())
@@ -83,6 +90,7 @@ public class ErrorResponse {
     }
 
 
+    @JsonPOJOBuilder
     public static class Builder {
         private String token;
         private String errorMessage;
@@ -97,11 +105,11 @@ public class ErrorResponse {
             return this;
         }
 
-        public ErrorResponse build() {
+        public ErrorRequest build() {
             Assert.notNull(token, "Token Id cannot be null");
             Assert.notNull(errorMessage, "Resources cannot be null");
 
-            return new ErrorResponse(token, errorMessage);
+            return new ErrorRequest(token, errorMessage);
         }
     }
 

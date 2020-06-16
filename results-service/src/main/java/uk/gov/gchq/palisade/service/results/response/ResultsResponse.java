@@ -25,8 +25,8 @@ import java.util.StringJoiner;
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
  * The data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response frm the Results Service
- * This message will be sent back to the client.
+ * This class represents the response from the Results Service that is to be sent to the client as a response
+ * to their initial request.
  * From the client's perspective, this is the response to their initial request sent to the Palisade Service
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest.
  * This will provide the necessary information for them to query the data service.
