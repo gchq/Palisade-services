@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.results.request;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.results.request.common.domain.ResourceMetadata;
 
@@ -41,7 +42,7 @@ public class ResultsRequest {
     private final String token; // Unique identifier for this specific request end-to-end
     private final Map<String, ResourceMetadata> resources; //masked resources related to this query
 
-    private ResultsRequest(String token,  Map<String, ResourceMetadata> resources ) {
+    private ResultsRequest(final String token, final Map<String, ResourceMetadata> resources) {
         this.token = token;
         this.resources = resources;
     }
@@ -58,7 +59,7 @@ public class ResultsRequest {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -95,12 +96,12 @@ public class ResultsRequest {
         private String token;
         private Map<String, ResourceMetadata> resources;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder resource(Map<String, ResourceMetadata> resources) {
+        public Builder resource(final Map<String, ResourceMetadata> resources) {
             this.resources = resources;
             return this;
         }

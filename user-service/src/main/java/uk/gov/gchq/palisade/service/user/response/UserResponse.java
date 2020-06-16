@@ -1,5 +1,3 @@
-package uk.gov.gchq.palisade.service.user.response;
-
 /*
  * Copyright 2020 Crown Copyright
  *
@@ -15,12 +13,11 @@ package uk.gov.gchq.palisade.service.user.response;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gov.gchq.palisade.service.user.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.user.request.UserRequest;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
 import java.util.Objects;
@@ -36,7 +33,6 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the client request that came into Palisade Service.
  * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the User Service
  */
-@JsonDeserialize(builder = UserResponse.Builder.class)
 public final class  UserResponse {
 
     private final String token; // Unique identifier for this specific request end-to-end
@@ -45,7 +41,7 @@ public final class  UserResponse {
     private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
 
 
-    private UserResponse(String token, User user, String resourceId, String contextJson) {
+    private UserResponse(final String token, final User user, final String resourceId, final String contextJson) {
         this.token = token;
         this.user = user;
         this.resourceId = resourceId;
@@ -57,7 +53,7 @@ public final class  UserResponse {
         return token;
     }
 
-    //??
+
     @Generated
     public User user() {
         return user;
@@ -68,7 +64,7 @@ public final class  UserResponse {
         return resourceId;
     }
 
-    //??
+
     @Generated
     public String getContextJson() {
         return contextJson;
@@ -81,7 +77,7 @@ public final class  UserResponse {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -125,22 +121,22 @@ public final class  UserResponse {
 
 
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(User user) {
+        public Builder user(final User user) {
             this.user = user;
             return this;
         }
 
-        public Builder resourceId(String resourceId) {
+        public Builder resourceId(final String resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public Builder context(String contextJson) {
+        public Builder context(final String contextJson) {
             this.contextJson = contextJson;
             return this;
         }

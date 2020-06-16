@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.gov.gchq.palisade.service.resource.response.common.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -5,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.gchq.palisade.service.resource.response.common.domain.IUser;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
 
@@ -22,9 +38,9 @@ import static java.util.stream.Collectors.toMap;
 
 public class UserWithRoles implements IUser {
 
-    private static final List<String> allowed = Stream.of("USER", "DEV", "ADMIN").collect(toList());
+    private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
 
     @JsonProperty("userWithRoles")
@@ -39,15 +55,15 @@ public class UserWithRoles implements IUser {
      * This {@link Proxy} Class grants local access to protected elements within the {@link User} instance
      */
     private static class Proxy extends User {
-        public Proxy(final String userId, final Map<String, String> attributes) {
+        Proxy(final String userId, final Map<String, String> attributes) {
             super(userId, attributes);
         }
 
-        public Proxy(final User user) {
+        Proxy(final User user) {
             super(user);
         }
 
-        public Map<String, String> getAttributes() {
+        Map<String, String> getAttributes() {
             return super.attributes;
         }
     }
@@ -70,13 +86,11 @@ public class UserWithRoles implements IUser {
         return this.userWithRoles;
     }
 
-    /**
-     * Utility function
-     */
+
     private static List<String> roleGen(final Map<String, String> attributes) {
         return Optional.ofNullable(attributes.get(ROLE_KEY)).map(val -> {
             try {
-                return mapper.readValue(val, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+                return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
                 return new ArrayList<String>();
             } catch (IOException e) {
@@ -85,20 +99,16 @@ public class UserWithRoles implements IUser {
         }).orElseGet(ArrayList::new);
     }
 
-    /**
-     * Static factory method
-     */
+
     public static IRoles create(final String userId) {
         return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<>(ROLE_KEY,
-                mapper.writeValueAsString(Stream.of(roles)
-                        .peek(role -> Optional.of(allowed.contains(role)).filter(val -> val).orElseThrow(() -> new RuntimeException("Invalid Role supplied")))
+                MAPPER.writeValueAsString(Stream.of(roles)
+                        .peek(role -> Optional.of(ALLOWED.contains(role)).filter(val -> val).orElseThrow(() -> new RuntimeException("Invalid Role supplied")))
                         .collect(toList()))
         )).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue)));
     }
 
-    /**
-     * Conversion utility method
-     */
+
     public static UserWithRoles create(final User user) {
         return new UserWithRoles(user);
     }

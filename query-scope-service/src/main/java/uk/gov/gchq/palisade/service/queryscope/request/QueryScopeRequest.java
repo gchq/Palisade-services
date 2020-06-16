@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.queryscope.request;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.queryscope.response.common.domain.ResourceMetadata;
 import uk.gov.gchq.palisade.service.queryscope.response.common.domain.Rule;
@@ -46,7 +47,7 @@ public final class QueryScopeRequest {
     private final Map<String, Rule> rules; // holds all of the rules applicable to this request
 
 
-    private QueryScopeRequest(String token, User user, Map<String, ResourceMetadata> resources, Map<String, String> context, Map<String, Rule> rules ) {
+    private QueryScopeRequest(final String token, final User user, final Map<String, ResourceMetadata> resources, final Map<String, String> context, final Map<String, Rule> rules) {
         this.token = token;
         this.user = user;
         this.resources = resources;
@@ -81,7 +82,7 @@ public final class QueryScopeRequest {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -127,27 +128,27 @@ public final class QueryScopeRequest {
         private Map<String, String> context;
         private Map<String, Rule> rules;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(User user) {
+        public Builder userJson(final User user) {
             this.user = user;
             return this;
         }
 
-        public Builder resource(Map<String, ResourceMetadata> resources) {
+        public Builder resource(final Map<String, ResourceMetadata> resources) {
             this.resources = resources;
             return this;
         }
 
-        public Builder context(Map<String, String> context) {
+        public Builder context(final Map<String, String> context) {
             this.context = context;
             return this;
         }
 
-        public Builder rules(  Map<String, Rule> rules){
+        public Builder rules(final Map<String, Rule> rules) {
             this.rules = rules;
             return this;
         }

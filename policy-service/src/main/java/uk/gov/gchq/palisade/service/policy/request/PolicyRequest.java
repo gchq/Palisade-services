@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.policy.request;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.policy.response.common.ResourceMetadata;
 import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
@@ -45,7 +46,7 @@ public final class PolicyRequest {
     private final Map<String, ResourceMetadata> resources; //map of resources related to this query
     private final Map<String, String> context;  // represents the context information
 
-    private PolicyRequest(String token, User user, Map<String, ResourceMetadata> resources, Map<String, String> context) {
+    private PolicyRequest(final String token, final User user, final Map<String, ResourceMetadata> resources, final Map<String, String> context) {
         this.token = token;
         this.user = user;
         this.resources = resources;
@@ -74,7 +75,7 @@ public final class PolicyRequest {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -117,22 +118,22 @@ public final class PolicyRequest {
         private Map<String, ResourceMetadata> resources;
         private Map<String, String> context;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(User user) {
+        public Builder userJson(final User user) {
             this.user = user;
             return this;
         }
 
-        public Builder resource(Map<String, ResourceMetadata> resources) {
+        public Builder resource(final Map<String, ResourceMetadata> resources) {
             this.resources = resources;
             return this;
         }
 
-        public Builder context(Map<String, String> context) {
+        public Builder context(final Map<String, String> context) {
             this.context = context;
             return this;
         }

@@ -1,20 +1,29 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.gov.gchq.palisade.service.results.response;
 
 /**
  * Error message in human readable form.  This can be generated in any of the services.  Once an error occurs
  * in a service,  processing of the requests stops.  This messaging is constructed and forwarded to the Results
- * Service skipping any services that have not been preformed.  Results services will forward this message back
+ * Service skipping any services that have not procesed the request.  Results services will forward this message back
  * to client who should be given enough information to correct the problem before tying again.
  */
 public class ErrorResponse {
 
-    //This version of the message is sanitised.  It will have a reference that can correlate an entry in the logs,
-    // but  all technical information and any sensitive information is removed.
+   // private final String token; // Unique identifier for this specific request end-to-end
 
-    private String token; // unique identifier for this specific request end-to-end.  Was a RequestId object now a String.
-    // RequestId  represents the  Token shown in the diagram Logical view of Palisade.
-    // This information will also be in the header.  This might be removed later if not required in services.
-    //the concept of a unique identifier for each transaction is to pulled from the header
-
-    private String errorMessage;  //Detailed description of the error in english
+  //  private String errorMessage;  //Detailed description of the error in english
 }

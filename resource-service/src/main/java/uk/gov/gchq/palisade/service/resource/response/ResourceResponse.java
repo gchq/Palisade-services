@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.resource.response;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.resource.response.common.ResourceMetadata;
 
@@ -42,7 +43,7 @@ public final class ResourceResponse {
     private final Map<String, ResourceMetadata> resources; //map of resources related to this query
     private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
 
-    private ResourceResponse(String token, String userJson, Map<String, ResourceMetadata> resources, String contextJson) {
+    private ResourceResponse(final String token, final String userJson, final Map<String, ResourceMetadata> resources, final String contextJson) {
         this.token = token;
         this.userJson = userJson;
         this.resources = resources;
@@ -71,7 +72,7 @@ public final class ResourceResponse {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -114,22 +115,22 @@ public final class ResourceResponse {
         private Map<String, ResourceMetadata> resources;
         private String contextJson;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(String userJson) {
+        public Builder userJson(final String userJson) {
             this.userJson = userJson;
             return this;
         }
 
-        public Builder resource(Map<String, ResourceMetadata> resources) {
+        public Builder resource(final Map<String, ResourceMetadata> resources) {
             this.resources = resources;
             return this;
         }
 
-        public Builder context(String contextJson) {
+        public Builder context(final String contextJson) {
             this.contextJson = contextJson;
             return this;
         }
@@ -142,6 +143,4 @@ public final class ResourceResponse {
             return new ResourceResponse(token, userJson, resources, contextJson);
         }
     }
-
-
 }

@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.resource.request;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
@@ -38,7 +39,7 @@ public final class ResourceRequest {
     private final String resourceId;  //Resource that that is being asked to access
     private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
 
-    private ResourceRequest(String token, String userJson, String resourceId, String contextJson) {
+    private ResourceRequest(final  String token, final String userJson, final String resourceId, final String contextJson) {
         this.token = token;
         this.userJson = userJson;
         this.resourceId = resourceId;
@@ -68,7 +69,7 @@ public final class ResourceRequest {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -115,22 +116,22 @@ public final class ResourceRequest {
         public Builder() {
         }
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userJson(String userJson) {
+        public Builder userJson(final String userJson) {
             this.userJson = userJson;
             return this;
         }
 
-        public Builder resourceId(String resourceId) {
+        public Builder resourceId(final String resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public Builder context(String contextJson) {
+        public Builder context(final String contextJson) {
             this.contextJson = contextJson;
             return this;
         }

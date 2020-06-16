@@ -15,9 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.queryscope.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.service.queryscope.response.common.domain.ResourceMetadata;
 
@@ -39,13 +38,12 @@ import java.util.StringJoiner;
  */
 
 
-@JsonDeserialize(builder = QueryScopeResponse.Builder.class)
 public class QueryScopeResponse {
 
     private final String token; // Unique identifier for this specific request end-to-end
     private final Map<String, ResourceMetadata> resources; //masked resources related to this query
 
-    private QueryScopeResponse(String token,  Map<String, ResourceMetadata> resources ) {
+    private QueryScopeResponse(final String token, final Map<String, ResourceMetadata> resources) {
         this.token = token;
         this.resources = resources;
     }
@@ -62,7 +60,7 @@ public class QueryScopeResponse {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -94,17 +92,16 @@ public class QueryScopeResponse {
      * Builder class for the creation of instances of the QueryScopeResponse.  The variant of the Builder Pattern is
      * meant to be used by first populating the Builder class and then us this to create the QueryScopeResponse class.
      */
-    @JsonPOJOBuilder
     public static class Builder {
         private String token;
         private Map<String, ResourceMetadata> resources;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder resource(Map<String, ResourceMetadata> resources) {
+        public Builder resource(final Map<String, ResourceMetadata> resources) {
             this.resources = resources;
             return this;
         }

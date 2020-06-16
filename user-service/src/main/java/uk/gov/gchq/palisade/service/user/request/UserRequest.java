@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public final class UserRequest {
     private Map<String, String> context = null;
 
 
-    private UserRequest(String token, String userId, String resourceId, String contextJson) {
+    private UserRequest(final String token, final String userId, final String resourceId, final String contextJson) {
         this.token = token;
         this.userId = userId;
         this.resourceId = resourceId;
@@ -95,7 +96,7 @@ public final class UserRequest {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -142,22 +143,22 @@ public final class UserRequest {
         private String contextJson;
 
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder userId(String userId) {
+        public Builder userId(final String userId) {
             this.userId = userId;
             return this;
         }
 
-        public Builder resourceId(String resourceId) {
+        public Builder resourceId(final String resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public Builder context(String contextJson) {
+        public Builder context(final String contextJson) {
             this.contextJson = contextJson;
             return this;
         }

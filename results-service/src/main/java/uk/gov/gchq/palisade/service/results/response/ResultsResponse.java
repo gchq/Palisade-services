@@ -15,9 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.results.response;
 
-
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
@@ -37,7 +36,7 @@ public final class ResultsResponse {
     private final String token; // Unique identifier for this specific request end-to-end
     private final String queuePointer; //reference to where the data is located
 
-    private ResultsResponse(String token, String queuePointer) {
+    private ResultsResponse(final String token, final String queuePointer) {
         this.token = token;
         this.queuePointer = queuePointer;
     }
@@ -54,7 +53,7 @@ public final class ResultsResponse {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -90,12 +89,12 @@ public final class ResultsResponse {
         private String token;
         private String queuePointer;
 
-        public Builder token(String token) {
+        public Builder token(final String token) {
             this.token = token;
             return this;
         }
 
-        public Builder queuePointer(String queuePointer) {
+        public Builder queuePointer(final String queuePointer) {
             this.queuePointer = queuePointer;
             return this;
         }
