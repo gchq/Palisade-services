@@ -34,7 +34,7 @@ spec:
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.global.persistence.kafka.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
     volumeAttributes:
       path: {{ .Values.global.persistence.kafka.aws.volumePath }}
   {{- end }}

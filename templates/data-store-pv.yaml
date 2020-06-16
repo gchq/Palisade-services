@@ -41,7 +41,7 @@ spec:
   {{- else if eq $root.Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ $store.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $store.aws.volumeHandle }}
     volumeAttributes:
       path: {{ $store.aws.volumePath }}
   {{- end }}

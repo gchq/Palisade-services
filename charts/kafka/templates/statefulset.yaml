@@ -14,7 +14,7 @@
 #
 # Originally based on https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/templates/statefulset.yaml
 
-  {{- $advertisedListenersOverride := first (pluck "advertised.listeners" .Values.configurationOverrides) }}
+{{- $advertisedListenersOverride := first (pluck "advertised.listeners" .Values.configurationOverrides) }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
