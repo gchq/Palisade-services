@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.palisade.response;
 
 import org.springframework.util.Assert;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
