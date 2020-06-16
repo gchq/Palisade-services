@@ -1,0 +1,144 @@
+14:45:10.211 [main] DEBUG uk.gov.gchq.palisade.service.data.DataApplication - DataApplication started with: []
+[34m             -/                         :-           -`            /.          `-                          `.
+[34m             ys`                       `ho`       `:-             .d/        ./`                         -/
+[34m             -dh:                       /dh-     -//`              sdy.    `:/-                        `:/.
+[34m              sdds`                      hdd+  `://-               .ddh/  .///`                       -//:
+[34m              -dddh:                     /dddy:////`                oddds////-                      `:///.
+[34m               sdddds`                    hdddds//-                 .dddddo//`                     -////:
+[34m               .dddddh:                   /dddddh+`                  odddddy:                    `://///.
+[34m                oddddddo`                 .hdddddd+                  -ddddddh:                  -//////:
+[34m                .dddddddh:               -/odddddddy.              `:/sddddddds`              `:///////.
+[34m                 oddddddddo`           `:///hdddddddd+            .////ddddddddh:            -////////:
+[34m                 .dddddddddh:         -/////odddddddddy.        `://///sddddddddds`        `://///////.
+[34m                  oddddddddddo`     `:///////hdddddddddd+      .////////ddddddddddh:      -//////////:
+[34m                  `dddddddddddh:   -/////////+dddddddddddy.  `-/////////sddddddddddds`  `:///////////`
+[34m                   +ddddddddddddo.:///////////ydddddddddddd/.////////////hdddddddddddh:-////////////:
+[34m                   `dddddddddddddho///////////+dddddddddddddy+///////////odddddddddddddy////////////`
+[34m                    +dddddddddddddds//////////`sdddddddddddddds/////////:`hdddddddddddddho/////////-
+[34m                    `hddddddddddddddh+///////- -dddddddddddddddy+///////. /dddddddddddddddy////////`
+[34m                     /dddddddddddddddh+//////`  sdddddddddddddddh//////:  `hdddddddddddddddy//////-
+[34m                     `hdddddddddddddddh/////-   .ddddddddddddddddy/////.   /dddddddddddddddds/////`
+[34m                      :ddddddddddddddddy///:     +dddddddddddddddds///:     sddddddddddddddddo///-
+[34m                       +ddddddddddddddddy//`     `sddddddddddddddddo/:      `hdddddddddddddddd+/:
+[34m                        sdddddddddddddddds.       `yddddddddddddddddo`       .hdddddddddddddddh/
+[34m                        :hdddddddddddddddd/       `/hdddddddddddddddh-       `+ddddddddddddddddh`
+[34m                       -/+hdddddddddddddddd-      :/+ddddddddddddddddh.     `//oddddddddddddddddy`
+[34m                      -///oddddddddddddddddh.    -///oddddddddddddddddy`   `:///sddddddddddddddddo
+[34m                     ./////sddddddddddddddddy`  -/////sdddddddddddddddds   ://///ydddddddddddddddd+
+[34m                    `///////ydddddddddddddddds`.///////yddddddddddddddddo -//////+hdddddddddddddddd/
+[34m                   `/////////yddddddddddddddddo////////+hdddddddddddddddd/////////+ddddddddddddddddd:
+[34m                  `://///////+hddddddddddddddh+/////////+dddddddddddddddy//////////oddddddddddddddddh.
+[34m                  :///////////+dddddddddddddd+///////////odddddddddddddh////////////sddddddddddddddddy`
+[34m                 -/////////////oddddddddddddo/////////////sdddddddddddh+/////////////yddddddddddddddddy`
+[34m                -///////////////sddddddddddo///////////////ydddddddddd+///////////////hddddddddddddddddo
+[34m               ./////////////////sdddddddds/////////////////yddddddddo/////////////////hdddddddddddddddd+
+[34m              `/////////////////-`yddddddy/////////////////..hdddddds/////////////////`:ddddddddddddddddd/
+[34m             `/////////////////-  .hddddy/////////////////.  :ddddds/////////////////.  +ddddddddddddddddd:
+[34m            `:////////////////:    :dddh+////////////////-    +dddy/////////////////.    sddddddddddddddddh.
+[34m            ://///////////////`     /dh+////////////////:      sdh/////////////////-     `yddddddddddddddddy`
+[34m           -/////////////////`       oo/////////////////`      `s+////////////////:       .hddddddddddddddddy`
+[34m          -/////////////////.        ://///////////////y.      `/////////////////+y`       -dddddddddddddddddo
+[34m         ./////////////////-        -/////////////////ydh`     ://///////////////hds`       /ddddddddddddddddd+
+[34m        ./////////////////:        ./////////////////sdddy`   -/////////////////ydddo        oddddddddddddddddd/
+[34m       `/////////////////:`       ./////////////////odddddo  -/////////////////sddddd/       `sddddddddddddddddd:
+[34m      `://///////////////`       `/////////////////+ddddddd+./////////////////oddddddd:       `hddddddddddddddddh.
+[34m      ://///////////////.       `:////////////////+hdddddddh/////////////////+ddddddddd-       -dddddddddddddddddh`
+[34m     -/////////////////-        ://///////////////ydddddddh+////////////////+hdddddddddh.       :dddddddddddddddddy`
+[34m    -/////////////////-        ://///////////////ydddddddd+/////////////////hdddddddddddy`       +ddddddddddddddddds
+[34m   ./////////////////:        -/////////////////sddddddddo/////////////////yddddddddddddds`       sddddddddddddddddd+
+[34m  .//////////////////`       ./////////////////odddddddds/////////////////sdddddddddddddddo       `yddddddddddddddddd/
+[34m `//////////////////`       .//////////////////hddddddds/////////////////+ddddddddddddddddd+       .hddddddddddddddddd:
+[34m`://///////////////.       `//////////////////.yddddddy/////////////////:.hddddddddddddddddd:       -dddddddddddddddddh.
+[34m://///////////////-        ://///////////////. .hddddh//////////////////` -dddddddddddddddddd.       /dddddddddddddddddh
+[34m-////////////////:         :////////////////-   -ddddh/////////////////.   /ddddddddddddddddd.        oddddddddddddddddh
+[34m ://////////////:`         `://////////////:     /ddddy+//////////////-     oddddddddddddddh:         `yddddddddddddddy.
+[34m  .:////////////`            .:///////////:`      +ddddds+///////////:       sdddddddddddy/`           `yddddddddddhy:
+[34m    `.-::///::-`               `.-::///::.         -oyhhhhs/-::///:-.         :shhhhhyo/-               `/shhhhhyo/.
+
+[32m-::////::-`         -::::        `::-          `::-     `-:/++//:-`       .::::`        ::://///:-.`       ::::::::::::-
+[32mdddssssyyddy+`     -ddhddo       :dds          -ddy   .sddhsssssyh-      `hdhhdy`       dddyyyyyhddhs:     dddyyyyyyyyy+
+[32mddh      `+dds    .hdh`odd/      :dds          -ddy   ydd+               ydd-:dds       ddh       -sddy`   ddd`
+[32mddh       `ddd   `ydd.  ydd-     :dds          -ddy   sdds-`            odd/  +dd+      ddh         oddo   ddd`
+[32mddh      `+dds   sdd:   `hdh.    :dds          -ddy   `+ydddyyo+:`     /ddo    odd:     ddh         :dds   dddyyyyyyyyy
+[32mdddysssyyddy/   +ddy+++++sddy`   :dds          -ddy      `.:/+shddo   -ddd++++++ddd-    ddh         :dds   ddd:--------
+[32mddh////:-.`    /ddyssssssssdds   :dds          -ddy            `hdd- .hdhsssssssshdh.   ddh        `ydd:   ddd`
+[32mddh           -ddy`        +dd+  :ddy........` -ddy  `/:-..``.-oddh``hdd-        -ddy`  ddd-..`.-:oddh:    ddd-.........
+[32mhhy          `yhh.          shh: -hhhhhhhhhhh/ -hhs  `syhhddddhys/` ohh/          /hh+  yhdddddhhys+-      hhhhhhhhhhhhh
+[33m :: data-service ::[36m:: (v0.4.0-SNAPSHOT) ::[31m:: a9f62f8-SNAPSHOT ::[39m
+[2m2020-06-16 14:45:22.332[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.service.data.DataApplication    [0;39m [2m:[0;39m The following profiles are active: eureka,eureka-config,example
+[2m2020-06-16 14:45:28.717[0;39m [33m WARN[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.boot.actuate.endpoint.EndpointId    [0;39m [2m:[0;39m Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+[2m2020-06-16 14:45:29.827[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.cloud.context.scope.GenericScope    [0;39m [2m:[0;39m BeanFactory id=434cad3e-c38e-3d99-94d7-94a20923f6ae
+[2m2020-06-16 14:45:30.857[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mtrationDelegate$BeanPostProcessorChecker[0;39m [2m:[0;39m Bean 'applicationConfiguration' of type [uk.gov.gchq.palisade.service.data.config.ApplicationConfiguration$$EnhancerBySpringCGLIB$$ce1d5d21] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+[2m2020-06-16 14:45:32.744[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.b.w.embedded.tomcat.TomcatWebServer [0;39m [2m:[0;39m Tomcat initialized with port(s): 0 (http)
+[2m2020-06-16 14:45:32.793[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.apache.catalina.core.StandardService  [0;39m [2m:[0;39m Starting service [Tomcat]
+[2m2020-06-16 14:45:32.793[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36morg.apache.catalina.core.StandardEngine [0;39m [2m:[0;39m Starting Servlet engine: [Apache Tomcat/9.0.27]
+[2m2020-06-16 14:45:33.065[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.a.c.c.C.[Tomcat].[localhost].[/]      [0;39m [2m:[0;39m Initializing Spring embedded WebApplicationContext
+[2m2020-06-16 14:45:33.065[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.web.context.ContextLoader           [0;39m [2m:[0;39m Root WebApplicationContext: initialization completed in 10478 ms
+[2m2020-06-16 14:45:33.658[0;39m [33m WARN[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.c.sources.URLConfigurationSource    [0;39m [2m:[0;39m No URLs will be polled as dynamic configuration sources.
+[2m2020-06-16 14:45:33.658[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.c.sources.URLConfigurationSource    [0;39m [2m:[0;39m To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+[2m2020-06-16 14:45:33.704[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.netflix.config.DynamicPropertyFactory [0;39m [2m:[0;39m DynamicPropertyFactory is initialized with configuration sources: com.netflix.config.ConcurrentCompositeConfiguration@12365c88
+[2m2020-06-16 14:45:36.873[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.s.d.c.ApplicationConfiguration  [0;39m [2m:[0;39m Starting ThreadPoolTaskExecutor with core = [6] max = [2147483647]
+[2m2020-06-16 14:45:36.876[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.s.concurrent.ThreadPoolTaskExecutor [0;39m [2m:[0;39m Initializing ExecutorService 'threadPoolTaskExecutor'
+[2m2020-06-16 14:45:38.471[0;39m [33m WARN[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36morg.apache.hadoop.util.NativeCodeLoader [0;39m [2m:[0;39m Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[2m2020-06-16 14:45:41.348[0;39m [33m WARN[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.c.sources.URLConfigurationSource    [0;39m [2m:[0;39m No URLs will be polled as dynamic configuration sources.
+[2m2020-06-16 14:45:41.348[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.c.sources.URLConfigurationSource    [0;39m [2m:[0;39m To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+[2m2020-06-16 14:45:44.234[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.s.c.ThreadPoolTaskScheduler         [0;39m [2m:[0;39m Initializing ExecutorService 'taskScheduler'
+[2m2020-06-16 14:45:44.452[0;39m [33m WARN[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mockingLoadBalancerClientRibbonWarnLogger[0;39m [2m:[0;39m You already have RibbonLoadBalancerClient on your classpath. It will be used by default. As Spring Cloud Ribbon is in maintenance mode. We recommend switching to BlockingLoadBalancerClient instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or remove spring-cloud-starter-netflix-ribbon from your project.
+[2m2020-06-16 14:45:44.737[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.b.a.e.web.EndpointLinksResolver     [0;39m [2m:[0;39m Exposing 18 endpoint(s) beneath base path '/actuator'
+[2m2020-06-16 14:45:45.099[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.b.w.embedded.tomcat.TomcatWebServer [0;39m [2m:[0;39m Tomcat started on port(s): 61758 (http) with context path ''
+[2m2020-06-16 14:45:45.100[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36m.s.c.n.e.s.EurekaAutoServiceRegistration[0;39m [2m:[0;39m Updating port to 61758
+[2m2020-06-16 14:45:45.113[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.c.n.eureka.InstanceInfoFactory      [0;39m [2m:[0;39m Setting initial instance status as: STARTING
+[2m2020-06-16 14:45:45.486[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Initializing Eureka in region us-east-1
+[2m2020-06-16 14:45:46.289[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.d.provider.DiscoveryJerseyProvider  [0;39m [2m:[0;39m Using JSON encoding codec LegacyJacksonJson
+[2m2020-06-16 14:45:46.289[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.d.provider.DiscoveryJerseyProvider  [0;39m [2m:[0;39m Using JSON decoding codec LegacyJacksonJson
+[2m2020-06-16 14:45:46.951[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.d.provider.DiscoveryJerseyProvider  [0;39m [2m:[0;39m Using XML encoding codec XStreamXml
+[2m2020-06-16 14:45:46.951[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.d.provider.DiscoveryJerseyProvider  [0;39m [2m:[0;39m Using XML decoding codec XStreamXml
+[2m2020-06-16 14:45:47.895[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 14:45:47.994[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Disable delta property : false
+[2m2020-06-16 14:45:47.994[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Single vip registry refresh property : null
+[2m2020-06-16 14:45:47.994[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Force full registry fetch : false
+[2m2020-06-16 14:45:47.994[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Application is null : false
+[2m2020-06-16 14:45:47.995[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Registered Applications size is zero : true
+[2m2020-06-16 14:45:47.995[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Application version is -1: true
+[2m2020-06-16 14:45:47.995[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Getting all instance registry info from the eureka server
+[2m2020-06-16 14:45:48.617[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m The response status is 200
+[2m2020-06-16 14:45:48.626[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Starting heartbeat executor: renew interval is: 5
+[2m2020-06-16 14:45:48.632[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mc.n.discovery.InstanceInfoReplicator    [0;39m [2m:[0;39m InstanceInfoReplicator onDemand update allowed rate per min is 4
+[2m2020-06-16 14:45:48.637[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Discovery Client initialized at timestamp 1592315148636 with initial instances count: 5
+[2m2020-06-16 14:45:48.644[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mo.s.c.n.e.s.EurekaServiceRegistry       [0;39m [2m:[0;39m Registering application DATA-SERVICE with eureka with status UP
+[2m2020-06-16 14:45:48.646[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m Saw local status change event StatusChangeEvent [timestamp=1592315148645, current=UP, previous=STARTING]
+[2m2020-06-16 14:45:48.649[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[nfoReplicator-0][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m DiscoveryClient_DATA-SERVICE/192.168.1.96:data-service:0: registering service...
+[2m2020-06-16 14:45:48.703[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[nfoReplicator-0][0;39m [36mcom.netflix.discovery.DiscoveryClient   [0;39m [2m:[0;39m DiscoveryClient_DATA-SERVICE/192.168.1.96:data-service:0 - registration status: 204
+[2m2020-06-16 14:45:48.703[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.service.data.DataApplication    [0;39m [2m:[0;39m Started DataApplication in 37.686 seconds (JVM running for 41.704)
+[2m2020-06-16 14:45:48.719[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.service.data.web.DataController [0;39m [2m:[0;39m Prepopulating using serialiser config: class uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration
+[2m2020-06-16 14:45:48.860[0;39m [32mDEBUG[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.service.data.web.DataController [0;39m [2m:[0;39m DataFlavour[flavour.left=uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee, flavour.right=avro]=uk.gov.gchq.palisade.data.serialise.AvroSerialiser@7ae0cc89
+[2m2020-06-16 14:45:48.860[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[           main][0;39m [36mu.g.g.p.s.d.service.SimpleDataService   [0;39m [2m:[0;39m Adding serialiser uk.gov.gchq.palisade.data.serialise.AvroSerialiser@7ae0cc89 for DataFlavour DataFlavour[flavour.left=uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee, flavour.right=avro]
+[2m2020-06-16 14:45:58.241[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[o-auto-1-exec-1][0;39m [36mo.a.c.c.C.[Tomcat].[localhost].[/]      [0;39m [2m:[0;39m Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2m2020-06-16 14:45:58.241[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[o-auto-1-exec-1][0;39m [36mo.s.web.servlet.DispatcherServlet       [0;39m [2m:[0;39m Initializing Servlet 'dispatcherServlet'
+[2m2020-06-16 14:45:58.253[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[o-auto-1-exec-1][0;39m [36mo.s.web.servlet.DispatcherServlet       [0;39m [2m:[0;39m Completed initialization in 12 ms
+[2m2020-06-16 14:50:48.004[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 14:55:48.012[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:00:48.021[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:05:48.034[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:10:48.046[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:15:48.056[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:20:48.064[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:25:48.074[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:30:48.084[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:35:48.098[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:40:48.109[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:45:48.119[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:50:48.129[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 15:55:48.138[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:00:48.146[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:05:48.157[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:10:48.167[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:15:48.175[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:20:48.182[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:25:48.194[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:30:48.204[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:35:48.213[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:40:48.221[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:45:48.231[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:50:48.241[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration
+[2m2020-06-16 16:55:48.248[0;39m [32m INFO[0;39m [35m73983[0;39m [2m---[0;39m [2m[trap-executor-0][0;39m [36mc.n.d.s.r.aws.ConfigClusterResolver     [0;39m [2m:[0;39m Resolving eureka endpoints via configuration

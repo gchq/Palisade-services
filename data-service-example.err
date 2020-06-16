@@ -1,0 +1,14 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/Users/nigel/development/Palisade-services/data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/logback-classic-1.2.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/nigel/development/Palisade-services/data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/shade-hadoop-client-0.4.0-SNAPSHOT.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/Users/nigel/development/Palisade-services/data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/slf4j-log4j12-1.7.28.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [ch.qos.logback.classic.util.ContextSelectorStaticBinder]
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.apache.hadoop.security.authentication.util.KerberosUtil (jar:file:/Users/nigel/development/Palisade-services/data-service/target/data-service-0.4.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/shade-hadoop-client-0.4.0-SNAPSHOT.jar!/) to method sun.security.krb5.Config.getInstance()
+WARNING: Please consider reporting this to the maintainers of org.apache.hadoop.security.authentication.util.KerberosUtil
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+log4j:WARN No appenders could be found for logger (org.apache.htrace.core.Tracer).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
