@@ -15,9 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.policy.response;
 
-
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Generated;
@@ -30,32 +27,24 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * This is the message that will be sent from the PolicyService to the QueryScopeService
- * It is, therefore a Response from the PolicyService and a Request into the QueryScopeService
- * Note there are two classes of this type:
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse
- * uk.gov.gchq.palisade.service.queryscope.request.PolicyResponse
- */
-/**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
- * The data will be forwarded to a set of services with each contributing to the processing of this request.
+ * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This class represents the response from the Policy Service
  * The next in the sequence will the request for the Query Scope Service.
  * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Resource Service
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the Query Scope Service
+ * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the Resource Service
+ * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRewquest is the input for the Query Scope Service
+ * The key difference in the representation of the attributes.  In this class the all of the objects are needed to
+ * process the request.
  */
-@JsonDeserialize(builder = PolicyResponse.Builder.class)
-public final class PolicyResponse {
-
+public class PolicyResponse {
     private final String token; // Unique identifier for this specific request end-to-end
     private final User user;  //
     private final Map<String, ResourceMetadata> resources; //map of resources related to this query
     private final Map<String, String> context;  // represents the context information
     private final Map<String, Rule> rules; // holds all of the rules applicable to this request
 
-
-    private PolicyResponse(String token, User user, Map<String, ResourceMetadata> resources, Map<String, String> context,  Map<String, Rule> rules ) {
+    private PolicyResponse(String token, User user, Map<String, ResourceMetadata> resources, Map<String, String> context, Map<String, Rule> rules ) {
         this.token = token;
         this.user = user;
         this.resources = resources;
@@ -125,8 +114,8 @@ public final class PolicyResponse {
     }
 
     /**
-     * Builder class for the creation of instances of the PolicyRequest.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the PolicyRequest class.
+     * Builder class for the creation of instances of the PolicyResponse.  The variant of the Builder Pattern is
+     * meant to be used by first populating the Builder class and then us this to create the PolicyResponse class.
      */
     @JsonPOJOBuilder
     public static class Builder {
@@ -156,7 +145,7 @@ public final class PolicyResponse {
             return this;
         }
 
-        public Builder rules(  Map<String, Rule> rules){
+        public Builder rules(Map<String, Rule> rules){
             this.rules = rules;
             return this;
         }
@@ -165,13 +154,16 @@ public final class PolicyResponse {
         public PolicyResponse build() {
             Assert.notNull(token, "Token Id cannot be null");
             Assert.notNull(user, "User cannot be null");
-            Assert.notNull(resources, "Resource Id cannot be null");
-            Assert.notNull(context, "Context  cannot be null");
-            Assert.notEmpty(context, "Context  cannot be empty");
-            Assert.notNull(rules, "Context  cannot be null");
-            Assert.notEmpty(rules, "Context  cannot be empty");
+            Assert.notNull(resources, "Resources cannot be null");
+            Assert.notNull(resources, "Resources cannot be empty");
+            Assert.notNull(context, "Context cannot be null");
+            Assert.notEmpty(context, "Context cannot be empty");
+            Assert.notNull(rules, "Context cannot be null");
+            Assert.notEmpty(rules, "Context cannot be empty");
             return new PolicyResponse(token, user, resources, context, rules);
         }
     }
 
 }
+
+
