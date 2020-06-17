@@ -243,7 +243,7 @@ spec:
                               --set hosting=aws  \
                               --set traefik.install=true,dashboard.install=true \
                               --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
-                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores[0].aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
+                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
                               --namespace dev'
                         } else {
                             sh "echo - no deploy"
