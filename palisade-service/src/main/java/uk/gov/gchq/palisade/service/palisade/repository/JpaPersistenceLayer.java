@@ -32,7 +32,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
-import static uk.gov.gchq.palisade.service.palisade.service.PalisadeService.TOKEN_NOT_FOUND_MESSAGE;
 
 public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
@@ -40,6 +39,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private final DataRequestRepository dataRequestRepository;
     private final LeafResourceRulesRepository leafResourceRulesRepository;
     private final Executor executor;
+
+    public static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     public JpaPersistenceLayer(final DataRequestRepository dataRequestRepository, final LeafResourceRulesRepository leafResourceRulesRepository, final Executor executor) {
         this.dataRequestRepository = requireNonNull(dataRequestRepository, "DataRequestRepository");

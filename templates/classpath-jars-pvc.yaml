@@ -11,18 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-{{/*
-Should a new namespace be created
-*/}}
-{{- if .Values.global.uniqueNamespace -}}
-{{- if .Release.IsInstall -}}
 apiVersion: v1
-kind: Namespace
+kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "palisade.namespace" . }}
-  annotations:
-    "helm.sh/hook": pre-install
-{{- end -}}
-{{- end -}}
+  name: {{ .Values.global.persistence.classpathJars.name }}
+  labels:
+    "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
+    "app.kubernetes.io/instance": "{{ .Release.Name }}"
+    "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.global.persistence.classpathJars.storage }}
+  storageClassName: {{ .Values.global.persistence.classpathJars.name }}

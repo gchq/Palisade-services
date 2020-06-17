@@ -13,13 +13,11 @@
 # limitations under the License.
 #
 
-
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "create-kafka-queues.name" . }}
   namespace: {{ include "palisade.namespace" . }}
-
   labels:
     app.kubernetes.io/name: {{ include "create-kafka-queues.name" . }}
     helm.sh/chart: {{ include "create-kafka-queues.chart" . }}
@@ -28,7 +26,6 @@ metadata:
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook-weight": "-5"
 spec:
   template:
     metadata:
@@ -43,11 +40,11 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{.Values.global.repository}}/{{.Values.image.name}}:{{.Values.image.tag}}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["/bin/bash", "bin/create-topics.sh" ]
+        command: ["/bin/bash", "/bin/create-topics.sh" ]
         env:
         - name: ZOOKEEPER
           value: {{ .Values.global.zookeeperConnectString | quote }}
-  {{- range $key, $val := .Values.kafkaCreateTopics }}
+        {{- range $key, $val := .Values.kafkaCreateTopics }}
         - name: {{ printf "TOPIC%d" $key }}
           value: {{ printf "%s %s %s" $val.name ($val.partitions | toString) ($val.replicationFactor | toString)  }}
-  {{- end }}
+        {{- end }}
