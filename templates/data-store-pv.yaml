@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Keep track of the 'hosting' tag inside control structures, as '.' is overridden and '.Values' is inaccessible
-{{- $hosting := .Values.hosting }}
 # Create a number of persistent volumes for each configured data-store
 # New PV for each dataStores entry
-# This range item is referenced as $name: $value and the root item is referenced $root
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}
-  {{- if eq $hosting "aws" }}
+  {{- if eq $.Values.hosting "aws" }}
   labels:
     type: amazonEBS
   {{- end }}
@@ -33,11 +30,11 @@ spec:
   storageClassName: {{ $name }}
   capacity:
     storage: {{ $value.storage }}
-  {{- if eq $hosting "local" }}
+  {{- if eq $.Values.hosting "local" }}
   hostPath:
     path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq $hosting "aws" }}
+  {{- else if eq $.Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
