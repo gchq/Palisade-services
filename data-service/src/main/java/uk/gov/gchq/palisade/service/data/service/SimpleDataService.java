@@ -24,9 +24,9 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
+import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.request.AuditRequest;
 import uk.gov.gchq.palisade.service.data.request.GetDataRequestConfig;
 import uk.gov.gchq.palisade.service.data.request.NoInputReadResponse;
@@ -94,7 +94,8 @@ public class SimpleDataService implements DataService {
         getConfig.setOriginalRequestId(request.getOriginalRequestId());
         LOGGER.info("Calling palisade service with: {}", getConfig);
 
-        final DataRequestConfig config = getPalisadeService().getDataRequestConfig(getConfig).join();
+        // If this throws an exception connecting to the palisade-service, then it must be caught and audited
+        final DataRequestConfig config = palisadeService.getDataRequestConfig(getConfig).join();
         LOGGER.info("Palisade service returned: {}", config);
 
         final DataReaderRequest readerRequest = new DataReaderRequest()
@@ -108,13 +109,14 @@ public class SimpleDataService implements DataService {
     }
 
     @Override
-    public Consumer<OutputStream> read(final ReadRequest dataRequest) throws NoCapacityException {
+    public Consumer<OutputStream> read(final ReadRequest dataRequest) {
         return out -> {
             try {
                 final AtomicLong recordsProcessed = new AtomicLong(0);
                 final AtomicLong recordsReturned = new AtomicLong(0);
 
                 LOGGER.debug("Querying palisade service for token {} and resource {}", dataRequest.getToken(), dataRequest.getResource());
+                // This realistically may throw a RuntimeException, ensure that it is caught for auditing
                 DataReaderRequest readerRequest = constructReaderRequest(dataRequest);
 
                 LOGGER.debug("Reading from reader with request {}", readerRequest);
@@ -127,8 +129,15 @@ public class SimpleDataService implements DataService {
 
                 LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
                 auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
-            } catch (IOException | NoCapacityException ex) {
+            } catch (IOException | RuntimeException ex) {
                 auditRequestReceivedException(dataRequest, ex);
+                throw new ReadException(ex);
+            } catch (Error err) {
+                // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
+                // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
+                auditRequestReceivedException(dataRequest, err);
+                // Rethrow this Error, don't wrap it in the ReadException
+                throw err;
             }
         };
     }
@@ -144,7 +153,7 @@ public class SimpleDataService implements DataService {
 
     private void auditRequestReceivedException(final ReadRequest request, final Throwable ex) {
         LOGGER.error("Error while handling request: {}", request);
-        LOGGER.error("{} was: {}", ex.getClass(), ex.getMessage());
+        LOGGER.error("Exception was", ex);
         LOGGER.info("Auditing error with audit service");
         auditService.audit(AuditRequest.ReadRequestExceptionAuditRequest.create(request.getOriginalRequestId())
                 .withToken(request.getToken())
