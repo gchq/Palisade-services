@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Keep track of the root . inside control structures
-{{- $root := . }}
+# Keep track of the 'hosting' tag inside control structures, as '.' is overridden and '.Values' is inaccessible
+{{- $hosting := .Values.hosting }}
 # Create a number of persistent volumes for each configured data-store
-{{- range $store := .Values.global.persistence.dataStores }}
 # New PV for each dataStores entry
----
+# This range item is referenced as $name: $value and the root item is referenced $root
+{{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  # This range item is referenced $store and the root item referenced $root
-  name: {{ $store.name }}
-  {{- if eq $root.Values.hosting "aws" }}
+  name: {{ $name }}
+  {{- if eq $hosting "aws" }}
   labels:
     type: amazonEBS
   {{- end }}
@@ -31,18 +30,19 @@ spec:
   accessModes:
   - ReadOnlyMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ $store.name }}
+  storageClassName: {{ $name }}
   capacity:
-    storage: {{ $store.storage }}
-  {{- if eq $root.Values.hosting "local" }}
+    storage: {{ $value.storage }}
+  {{- if eq $hosting "local" }}
   hostPath:
-    path: {{ $store.local.hostPath }}
+    path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq $root.Values.hosting "aws" }}
+  {{- else if eq $hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $store.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $store.aws.volumePath }}
+      path: {{ $value.aws.volumePath }}
   {{- end }}
+---
 {{- end }}

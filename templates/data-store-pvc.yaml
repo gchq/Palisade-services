@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Keep track of the root . inside control structures
+# Keep track of the root '.' inside control structures, as '.' is overridden
 {{- $root := . }}
 # Create a number of persistent volumes for each configured data-store
-{{- range $store := .Values.global.persistence.dataStores }}
 # New PVC for each dataStores entry
----
+{{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $store.name }}
+  name: {{ $name }}
   labels:
     "app.kubernetes.io/managed-by": "{{ $root.Release.Service }}"
     "app.kubernetes.io/instance": "{{ $root.Release.Name }}"
@@ -31,6 +30,7 @@ spec:
   - ReadOnlyMany
   resources:
     requests:
-      storage: {{ $store.storage }}
-  storageClassName: {{ $store.name }}
+      storage: {{ $value.storage }}
+  storageClassName: {{ $name }}
+---
 {{- end }}
