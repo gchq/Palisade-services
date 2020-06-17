@@ -20,9 +20,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.message.PolicyResponse.Builder.IRules;
+
+import java.util.StringJoiner;
 
 public class PolicyRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -92,5 +95,18 @@ public class PolicyRequest {
 
             PolicyRequest withSerialisedResource(String resource);
         }
+    }
+
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
+                .add("context='" + context + "'")
+                .add("token='" + token + "'")
+                .add("user='" + user + "'")
+                .add("resource='" + resource + "'")
+                .add(super.toString())
+                .toString();
     }
 }
