@@ -39,6 +39,26 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{- define "palisade.deployment.path" }}
+{{- if eq .Values.deployment "codeRelease" }}
+{{- if eq .Values.hosting "local" }}
+{{- $path := .Chart.Version | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
+{{- else if eq .Values.hosting "aws" }}
+{{- $path := .Chart.Version | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
+{{- end }}
+{{- else }}
+{{- if eq .Values.hosting "local" }}
+{{- $path := .Values.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
+{{- else if eq .Values.hosting "aws" }}
+{{- $path := .Values.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}

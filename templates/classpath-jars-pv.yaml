@@ -29,12 +29,12 @@ spec:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.classpathJars.local.hostPath }}
+    path: {{ include "palisade.deployment.path" . }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.classpathJars.aws.volumePath }}
+      path: {{ include "palisade.deployment.path" . }}
   {{- end }}
