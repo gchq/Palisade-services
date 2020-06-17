@@ -35,7 +35,6 @@ spec:
         app.kubernetes.io/name: {{ include "data-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      #init-path will mkdir on the mount point
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
@@ -44,9 +43,6 @@ spec:
           - name: web
             containerPort: 8082
             protocol: TCP
-        volumeMounts:
-        - mountPath: "/usr/share/data"
-          name: "classpathjars"
         livenessProbe:
           httpGet:
             path: /actuator/health
@@ -64,21 +60,37 @@ spec:
           periodSeconds: 20
           timeoutSeconds: 5
         resources:
-        {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: "LOADER_PATH"
+          value: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+        volumeMounts:
+        - name: {{ .Values.global.persistence.classpathJars.name }}
+          mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+        {{- range .Values.global.persistence.dataStores }}
+        - name: {{ .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
       volumes:
-      - name: "classpathjars"
+      - name: {{ .Values.global.persistence.classpathJars.name }}
         persistentVolumeClaim:
-          claimName: {{ (index .Values.global.persistence.storageTierName 0) | quote }}
+          claimName: {{ .Values.global.persistence.classpathJars.name }}
           readOnly: true
+      {{- range .Values.global.persistence.dataStores }}
+      - name: {{ .name }}
+        persistentVolumeClaim:
+          claimName: {{ .name }}
+          readOnly: true
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . }}
       {{- end }}

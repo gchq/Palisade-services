@@ -34,13 +34,12 @@ import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
  */
 @Configuration
 public class ApplicationConfiguration {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Primary
     @Bean(name = "simple")
     @ConditionalOnProperty(prefix = "audit.implementations", name = SimpleAuditService.CONFIG_KEY)
-    public SimpleAuditService auditService() {
+    SimpleAuditService auditService() {
         SimpleAuditService simpleUserService = new SimpleAuditService();
         LOGGER.info("Instantiated SimpleAuditService");
         return simpleUserService;
@@ -48,21 +47,21 @@ public class ApplicationConfiguration {
 
     @Bean(name = "stroom")
     @ConditionalOnProperty(prefix = "audit.implementations", name = StroomAuditService.CONFIG_KEY)
-    public StroomAuditService stroomAuditService() {
+    StroomAuditService stroomAuditService() {
         LOGGER.info("Instantiated StroomAuditService");
         return new StroomAuditService(new DefaultEventLoggingService());
     }
 
     @Bean(name = "logger")
     @ConditionalOnProperty(prefix = "audit.implementations", name = LoggerAuditService.CONFIG_KEY)
-    public LoggerAuditService loggerAuditService() {
+    LoggerAuditService loggerAuditService() {
         LOGGER.info("Instantiated LoggerAuditService");
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
     }
 
     @Primary
     @Bean
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 }

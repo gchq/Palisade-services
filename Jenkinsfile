@@ -180,7 +180,12 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            sh 'helm upgrade --install palisade . --set traefik.install=true,dashboard.install=true,global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB},global.localMount.enabled=false,global.localMount.volumeHandle=${VOLUME_HANDLE} --namespace dev'
+                            sh 'helm upgrade --install palisade . \
+                              --set hosting=aws  \
+                              --set traefik.install=true,dashboard.install=true \
+                              --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
+                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores[0].aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
+                              --namespace dev'
                         } else {
                             sh "echo - no deploy"
                         }

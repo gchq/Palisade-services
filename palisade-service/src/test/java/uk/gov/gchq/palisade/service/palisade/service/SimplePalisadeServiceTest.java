@@ -55,8 +55,6 @@ import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -130,16 +128,19 @@ public class SimplePalisadeServiceTest {
         when(userService.getUser(any(GetUserRequest.class))).thenReturn(futureUser);
         when(resourceService.getResourcesById(any(GetResourcesByIdRequest.class))).thenReturn(futureResource);
         when(policyService.getPolicy(any(GetPolicyRequest.class))).thenReturn(futurePolicy);
-        when(aggregationService.aggregateDataRequestResults(any(RegisterDataRequest.class), any(User.class), anySet(), anyMap(), any(RequestId.class), any(RequestId.class)))
-                .thenReturn(futureResponse);
+        when(aggregationService.aggregateDataRequestResults(
+                any(RegisterDataRequest.class),
+                any(),
+                any(),
+                any(),
+                anyString()))
+                .thenReturn(expectedResponse);
 
         //When
-        CompletableFuture<DataRequestResponse> response = service.registerDataRequest(request);
-        DataRequestResponse actualResponse = response.join();
-        actualResponse.originalRequestId(request.getId());
+        DataRequestResponse response = service.registerDataRequest(request);
 
         //Then
-        assertEquals(expectedResponse.getResources(), actualResponse.getResources());
+        assertEquals("The returned DataRequestResponse did not match the original object", expectedResponse.getResources(), response.getResources());
     }
 
     @Test(expected = CompletionException.class)
@@ -151,11 +152,10 @@ public class SimplePalisadeServiceTest {
         requestConfig.resource(new FileResource().id("resourceId"));
         requestConfig.setOriginalRequestId(new RequestId().id("original-request-id"));
         LOGGER.info("Get Data Request Config: {}", requestConfig);
-        when(persistenceLayer.getAsync(anyString())).thenReturn(CompletableFuture.failedFuture(new CompletionException(new RuntimeException())));
+        when(persistenceLayer.get(anyString())).thenThrow(new CompletionException(new RuntimeException()));
 
         //When
-        CompletableFuture<DataRequestConfig> cacheConfig = service.getDataRequestConfig(requestConfig);
-        cacheConfig.toCompletableFuture().join();
+        service.getDataRequestConfig(requestConfig);
     }
 
     private void createExpectedDataConfig() {

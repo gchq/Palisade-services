@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,4 +23,4 @@ COPY src/main/resources/log_level.sh /usr/share/palisade-service/log-level
 
 LABEL service="palisade" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/palisade-service/palisade-service.jar"]
