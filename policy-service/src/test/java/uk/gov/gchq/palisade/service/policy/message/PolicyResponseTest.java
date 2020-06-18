@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 public class PolicyResponseTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyResponseTest.class);
+    //private static final Logger //LOGGER = LoggerFactory.getLogger(PolicyResponseTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final Context context = new Context().purpose("test-purpose");
@@ -81,24 +81,24 @@ public class PolicyResponseTest {
     public void fromComponentsEqualsFromRequest() throws JsonProcessingException {
         // Given fromComponents and fromRequest are constructed from the same bits
         // When they are compared
-        LOGGER.info("Response from components: {}", fromComponents);
-        LOGGER.info("Response from request: {}", fromRequest);
+        //LOGGER.info("Response from components: {}", fromComponents);
+        //LOGGER.info("Response from request: {}", fromRequest);
         // Then they are equal
         assertThat(fromComponents, equalTo(fromRequest));
 
         // When they are serialised
         String fromComponentsSerialised = MAPPER.writeValueAsString(fromComponents);
         String fromRequestSerialised = MAPPER.writeValueAsString(fromRequest);
-        LOGGER.info("Serialised response from components: {}", fromComponentsSerialised);
-        LOGGER.info("Serialised response from request: {}", fromRequestSerialised);
+        //LOGGER.info("Serialised response from components: {}", fromComponentsSerialised);
+        //LOGGER.info("Serialised response from request: {}", fromRequestSerialised);
         // Then they are equal
         assertThat(fromComponentsSerialised, equalTo(fromRequestSerialised));
 
         // When they are deserialised
         PolicyResponse fromComponentsDeserialised = MAPPER.readValue(fromComponentsSerialised, PolicyResponse.class);
         PolicyResponse fromRequestDeserialised = MAPPER.readValue(fromRequestSerialised, PolicyResponse.class);
-        LOGGER.info("Deserialised response from components: {}", fromComponentsDeserialised);
-        LOGGER.info("Deserialised response from request: {}", fromRequestDeserialised);
+        //LOGGER.info("Deserialised response from components: {}", fromComponentsDeserialised);
+        //LOGGER.info("Deserialised response from request: {}", fromRequestDeserialised);
         // Then they are equal
         assertThat(fromComponentsDeserialised, equalTo(fromRequestDeserialised));
 
@@ -115,7 +115,7 @@ public class PolicyResponseTest {
 
         // When it is serialised
         String serialised = MAPPER.writeValueAsString(fromComponents);
-        LOGGER.info("Serialised response is: {}", serialised);
+        //LOGGER.info("Serialised response is: {}", serialised);
 
         // Then the serialised string contains the serialised strings of all component objects
         components.stream()
@@ -127,7 +127,7 @@ public class PolicyResponseTest {
                     }
                 })
                 .forEach(serialisedComponent -> {
-                    LOGGER.info("Searching for component: {}", serialisedComponent);
+                    //LOGGER.info("Searching for component: {}", serialisedComponent);
                     assertThat(serialised, containsString(serialisedComponent));
                 });
     }

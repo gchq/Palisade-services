@@ -19,7 +19,9 @@ package uk.gov.gchq.palisade.service.policy.message;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,6 +34,19 @@ import uk.gov.gchq.palisade.rule.Rules;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+// Some optimisations to consider:
+//
+// Jackson Smile (or CBOR): claims of up to 50% faster
+// <dependency>
+//   <groupId>com.fasterxml.jackson.dataformat</groupId>
+//   <artifactId>jackson-dataformat-smile</artifactId>
+//   <version>2.9.9</version>
+// </dependency>
+//
+// Removing field names: 1.89s -> 1.60s = ~15% faster for the test dataset and 1000 repeats
+// Can be further applied to nested types (Context, User, LeafResource, Rules)
+// @JsonFormat(shape=JsonFormat.Shape.ARRAY)
+// @JsonPropertyOrder(alphabetic=true)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class PolicyResponse {
     private static final ObjectMapper MAPPER = new ObjectMapper();

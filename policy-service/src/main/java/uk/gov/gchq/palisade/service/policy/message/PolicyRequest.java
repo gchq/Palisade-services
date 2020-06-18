@@ -19,7 +19,9 @@ package uk.gov.gchq.palisade.service.policy.message;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +35,8 @@ import uk.gov.gchq.palisade.service.policy.message.PolicyResponse.Builder.IRules
 import java.util.Objects;
 import java.util.StringJoiner;
 
+@JsonFormat(shape= JsonFormat.Shape.ARRAY)
+@JsonPropertyOrder(alphabetic=true)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class PolicyRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
