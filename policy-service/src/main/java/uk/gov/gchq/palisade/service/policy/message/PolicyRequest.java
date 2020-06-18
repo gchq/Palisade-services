@@ -16,7 +16,12 @@
 
 package uk.gov.gchq.palisade.service.policy.message;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
@@ -25,17 +30,24 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.message.PolicyResponse.Builder.IRules;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class PolicyRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String context;
+    private final JsonNode context;
     public final String token;
-    private final String user;
-    private final String resource;
+    private final JsonNode user;
+    private final JsonNode resource;
 
-    private PolicyRequest(final String context, final String token, final String user, final String resource) {
+    @JsonCreator
+    private PolicyRequest(
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("token") String token,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resource") JsonNode resource) {
         this.context = context;
         this.token = token;
         this.user = user;
@@ -43,15 +55,15 @@ public class PolicyRequest {
     }
 
     public Context getContext() throws JsonProcessingException {
-        return MAPPER.readValue(this.context, Context.class);
+        return MAPPER.treeToValue(this.context, Context.class);
     }
 
     public User getUser() throws JsonProcessingException {
-        return MAPPER.readValue(this.user, User.class);
+        return MAPPER.treeToValue(this.user, User.class);
     }
 
     public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.readValue(this.resource, LeafResource.class);
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
     public static class Builder {
@@ -62,18 +74,18 @@ public class PolicyRequest {
 
         public static IRules createResponse(PolicyRequest request) {
             return PolicyResponse.Builder.create()
-                    .withSerialisedContext(request.context)
+                    .withContextNode(request.context)
                     .withToken(request.token)
-                    .withSerialisedUser(request.user)
-                    .withSerialisedResource(request.resource);
+                    .withUserNode(request.user)
+                    .withResourceNode(request.resource);
         }
 
         interface IContext {
-            default IToken withContext(Context context) throws JsonProcessingException {
-                return withSerialisedContext(MAPPER.writeValueAsString(context));
+            default IToken withContext(Context context) {
+                return withContextNode(MAPPER.valueToTree(context));
             }
 
-            IToken withSerialisedContext(String context);
+            IToken withContextNode(JsonNode context);
         }
 
         interface IToken {
@@ -81,22 +93,43 @@ public class PolicyRequest {
         }
 
         interface IUser {
-            default IResource withUser(User user) throws JsonProcessingException {
-                return withSerialisedUser(MAPPER.writeValueAsString(user));
+            default IResource withUser(User user) {
+                return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withSerialisedUser(String user);
+            IResource withUserNode(JsonNode user);
         }
 
         interface IResource {
-            default PolicyRequest withResource(LeafResource resource) throws JsonProcessingException {
-                return withSerialisedResource(MAPPER.writeValueAsString(resource));
+            default PolicyRequest withResource(LeafResource resource) {
+                return withResourceNode(MAPPER.valueToTree(resource));
             }
 
-            PolicyRequest withSerialisedResource(String resource);
+            PolicyRequest withResourceNode(JsonNode resource);
         }
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyRequest)) {
+            return false;
+        }
+        final PolicyRequest that = (PolicyRequest) o;
+        return Objects.equals(context, that.context) &&
+                Objects.equals(token, that.token) &&
+                Objects.equals(user, that.user) &&
+                Objects.equals(resource, that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(context, token, user, resource);
+    }
 
     @Override
     @Generated

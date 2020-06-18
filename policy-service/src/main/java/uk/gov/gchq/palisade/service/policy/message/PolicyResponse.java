@@ -16,7 +16,11 @@
 
 package uk.gov.gchq.palisade.service.policy.message;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
@@ -25,18 +29,26 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class PolicyResponse {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String context;
+    private final JsonNode context;
     public final String token;
-    private final String user;
-    private final String resource;
+    private final JsonNode user;
+    private final JsonNode resource;
     public final Rules rules;
 
-    private PolicyResponse(final String context, final String token, final String user, final String resource, final Rules rules) {
+    @JsonCreator
+    private PolicyResponse(
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("token") String token,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resource") JsonNode resource,
+            final @JsonProperty("rules") Rules rules) {
         this.context = context;
         this.token = token;
         this.user = user;
@@ -55,11 +67,11 @@ public class PolicyResponse {
         }
 
         interface IContext {
-            default IToken withContext(Context context) throws JsonProcessingException {
-                return withSerialisedContext(MAPPER.writeValueAsString(context));
+            default IToken withContext(Context context) {
+                return withContextNode(MAPPER.valueToTree(context));
             }
 
-            IToken withSerialisedContext(String context);
+            IToken withContextNode(JsonNode context);
         }
 
         interface IToken {
@@ -67,24 +79,47 @@ public class PolicyResponse {
         }
 
         interface IUser {
-            default IResource withUser(User user) throws JsonProcessingException {
-                return withSerialisedUser(MAPPER.writeValueAsString(user));
+            default IResource withUser(User user) {
+                return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withSerialisedUser(String user);
+            IResource withUserNode(JsonNode user);
         }
 
         interface IResource {
-            default IRules withResource(LeafResource resource) throws JsonProcessingException {
-                return withSerialisedResource(MAPPER.writeValueAsString(resource));
+            default IRules withResource(LeafResource resource) {
+                return withResourceNode(MAPPER.valueToTree(resource));
             }
 
-            IRules withSerialisedResource(String resource);
+            IRules withResourceNode(JsonNode resource);
         }
 
         interface IRules {
             PolicyResponse withRules(Rules rules);
         }
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyResponse)) {
+            return false;
+        }
+        final PolicyResponse response = (PolicyResponse) o;
+        return Objects.equals(context, response.context) &&
+                Objects.equals(token, response.token) &&
+                Objects.equals(user, response.user) &&
+                Objects.equals(resource, response.resource) &&
+                Objects.equals(rules, response.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(context, token, user, resource, rules);
     }
 
     @Override
