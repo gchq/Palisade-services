@@ -84,12 +84,12 @@ public class PolicyRequestTest {
 
     @Test
     public void jsonContainsAllComponents() throws JsonProcessingException {
-        // Given fromComponents is built from some number of component objects
+        // Given the request is built from some number of component objects
         Set<Object> components = new HashSet<>(Arrays.asList(context, token, user, resource));
 
         // When it is serialised
         String serialised = MAPPER.writeValueAsString(request);
-        LOGGER.info("Serialised response is: {}", serialised);
+        LOGGER.info("Serialised request is: {}", serialised);
 
         // Then the serialised string contains the serialised strings of all component objects
         components.stream()
