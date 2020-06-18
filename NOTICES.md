@@ -14,6 +14,7 @@ List of third-party dependencies grouped by their license type
 * Spring Boot Actuator Starter ([org.springframework.boot:spring-boot-starter-actuator:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-actuator))
 * Spring Boot Cache Starter ([org.springframework.boot:spring-boot-starter-cache:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-cache))
 * Spring Boot Data JPA Starter ([org.springframework.boot:spring-boot-starter-data-jpa:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-data-jpa))
+* Spring Boot Data Redis Starter ([org.springframework.boot:spring-boot-starter-data-redis:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-data-redis))
 * Spring Boot Test Starter ([org.springframework.boot:spring-boot-starter-test:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-test))
 * Spring Boot Web Starter ([org.springframework.boot:spring-boot-starter-web:2.2.0.RELEASE](https://projects.spring.io/spring-boot/#/spring-boot-parent/spring-boot-starters/spring-boot-starter-web))
 * Spring Cloud Commons ([org.springframework.cloud:spring-cloud-commons:2.2.2.RELEASE](https://projects.spring.io/spring-cloud/spring-cloud-commons/))
