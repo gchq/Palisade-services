@@ -70,3 +70,30 @@ Determine ingress root url
 {{- printf "/%s" $ns -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "audit-service.deployment.path" }}
+{{- if eq .Values.global.deployment "codeRelease" }}
+{{- $path := .Values.image.codeRelease | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
+{{- else }}
+{{- $path := .Values.global.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
+{{- end }}
+{{- end }}
+
+{{/*
+Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "audit-service.deployment.name" }}
+{{- include "audit-service.deployment.path" . | base }}
+{{- end }}
+
+{{/*
+Calculate a storage full name based on the code release artifact id or the supplied value of codeRelease
+*/}}
+{{- define "audit-service.deployment.fullname" }}
+{{- .Values.global.persistence.classpathJars.name }}-{{- include "audit-service.deployment.name" . }}
+{{- end }}

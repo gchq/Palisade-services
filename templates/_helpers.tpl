@@ -43,7 +43,7 @@ If release name contains chart name it will be used as a full name.
 Calculate a storage path based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "palisade.deployment.path" }}
-{{- if eq .Values.deployment "codeRelease" }}
+{{- if eq .Values.global.deployment "codeRelease" }}
 {{- if eq .Values.hosting "local" }}
 {{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
@@ -53,10 +53,10 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 {{- else }}
 {{- if eq .Values.hosting "local" }}
-{{- $path := .Values.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- $path := .Values.global.deployment | lower | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
 {{- else if eq .Values.hosting "aws" }}
-{{- $path := .Values.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- $path := .Values.global.deployment | lower | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
 {{- end }}
 {{- end }}

@@ -16,9 +16,6 @@
 # Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
 
-# deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
-deployment: codeRelease
-
 # hosting: [local | aws | metal] the target environment to deploy to
 hosting: local
 
@@ -62,6 +59,9 @@ global:
 
   # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
   repository: palisade
+
+  # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
+  deployment: codeRelease
 
   # see charts/kafka/charts/zookeeper
   zookeeperConnectString: palisade-zookeeper:2181
