@@ -24,8 +24,9 @@ spring:
     loadbalancer:
       ribbon:
         enabled: false
-  cache:
-    type: caffeine
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
 server:
   port: 8087
