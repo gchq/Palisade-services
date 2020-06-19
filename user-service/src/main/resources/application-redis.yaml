@@ -16,6 +16,8 @@
 spring:
   cache:
     type: redis
+    redis:
+      timeToLive: 60m
   redis:
     host: palisade-redis-cluster
     port: 6379
