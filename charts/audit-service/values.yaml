@@ -20,7 +20,7 @@ service:
 
 image:
   name: audit-service
-  tag: 98c80a8-SNAPSHOT
+  tag: 0b7615e-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.4.0-SNAPSHOT
 
