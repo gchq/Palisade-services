@@ -14,6 +14,13 @@
 
 # Create a number of persistent volumes for each configured data-store
 # New PV for each dataStores entry
+
+#N.B The datastore would theoretically only need accessMode ReadOnlyMany
+#however, the CSI driver's plugin GetVolumeHandle method determines whether
+#the volume is actually used by other pods as a different mode
+#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+#as to the slightly anomalous behaviour
+
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
@@ -25,9 +32,9 @@ metadata:
   {{- end }}
 spec:
   accessModes:
-  - ReadOnlyMany
+  - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ $name }}
+  storageClassName: {{ $.Values.global.persistence.storageClassName }}
   capacity:
     storage: {{ $value.storage }}
   {{- if eq $.Values.hosting "local" }}
@@ -35,6 +42,7 @@ spec:
     path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.hosting "aws" }}
+  volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}

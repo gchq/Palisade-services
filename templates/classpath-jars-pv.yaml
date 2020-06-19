@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
+#however, the CSI driver's plugin GetVolumeHandle method determines whether
+#the volume is actually used by other pods as a different mode
+#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+#as to the slightly anomalous behaviour
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -22,9 +27,9 @@ metadata:
   {{- end }}
 spec:
   accessModes:
-  - ReadOnlyMany
+  - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.global.persistence.classpathJars.name }}
+  storageClassName: {{ .Values.global.persistence.storageClassName }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
   {{- if eq .Values.hosting "local" }}
@@ -32,6 +37,7 @@ spec:
     path: {{ .Values.global.persistence.classpathJars.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
+  volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}

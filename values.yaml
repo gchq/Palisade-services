@@ -65,6 +65,7 @@ global:
 
   # persistent-volume and associated claims configurations
   persistence:
+    storageClassName: efs-sc-palisade
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
       name: palisade-classpath-jars
@@ -87,14 +88,14 @@ global:
     # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
     # nb. the mountPath here will be referenced by all client resource requests
     dataStores:
-      palisade-data-store:
-        mountPath: "/data/local-data-store"
-        storage: 1Gi
-        local:
-          hostPath: "/"
-        aws:
-          volumeHandle: data
-          volumePath: "/"
+      name: palisade-data-store
+      mountPath: "/data/local-data-store"
+      storage: 1Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: data
+        volumePath: "/"
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
