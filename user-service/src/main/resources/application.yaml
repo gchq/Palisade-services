@@ -24,6 +24,8 @@ spring:
     loadbalancer:
       ribbon:
         enabled: false
+  cache:
+    type: caffeine
 
 server:
   port: 8087
