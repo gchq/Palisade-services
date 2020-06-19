@@ -75,7 +75,7 @@ global:
       # environment-specific tags
       local:
         # hostPath: external host directory to be mounted
-        hostPath: "/"
+        hostPath: "/c"
       aws:
         # volumeHandle: aws handle for the volume to mount
         volumeHandle: null
@@ -91,7 +91,7 @@ global:
         mountPath: "/data/local-data-store"
         storage: 1Gi
         local:
-          hostPath: "/"
+          hostPath: "/c"
         aws:
           volumeHandle: data
           volumePath: "/"
@@ -101,7 +101,7 @@ global:
       name: kafka-persistence
       storage: 1Gi
       local:
-        hostPath: "/"
+        hostPath: "/c/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -111,7 +111,7 @@ global:
       name: redis-persistence
       storage: 8Gi
       local:
-        hostPath: "/"
+        hostPath: "/c/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"

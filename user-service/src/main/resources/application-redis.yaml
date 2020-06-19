@@ -17,5 +17,5 @@ spring:
   cache:
     type: redis
   redis:
-    host: localhost
+    host: palisade-redis-cluster
     port: 6379
