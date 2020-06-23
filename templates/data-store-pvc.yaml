@@ -25,10 +25,11 @@
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
 
+{{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.global.persistence.dataStores.name }}
+  name: {{ $name }}
   labels:
     "app.kubernetes.io/managed-by": "{{ $.Release.Service }}"
     "app.kubernetes.io/instance": "{{ $.Release.Name }}"
@@ -38,5 +39,6 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: {{ .Values.global.persistence.dataStores.storage }}
+      storage: {{ $value.storage }}
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
+{{- end }}

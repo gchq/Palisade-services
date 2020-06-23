@@ -89,14 +89,14 @@ global:
     # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
     # nb. the mountPath here will be referenced by all client resource requests
     dataStores:
-      name: palisade-data-store
-      mountPath: "/data/local-data-store"
-      storage: 1Gi
-      local:
-        hostPath: "/"
-      aws:
-        volumeHandle: data
-        volumePath: "/"
+      palisade-data-store:
+        mountPath: "/data/local-data-store"
+        storage: 1Gi
+        local:
+          hostPath: "/"
+        aws:
+          volumeHandle: data
+          volumePath: "/"
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:

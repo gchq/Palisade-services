@@ -67,18 +67,21 @@ spec:
         volumeMounts:
         - name: {{ .Values.global.persistence.classpathJars.name }}
           mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
-
-        - name: {{ .Values.global.persistence.dataStores.name }}
-          mountPath: {{ .Values.global.persistence.dataStores.mountPath }}
+        {{- range $name, $value := .Values.global.persistence.dataStores }}
+        - name: {{ $name }}
+          mountPath: {{ $value.mountPath }}
+        {{- end }}
       volumes:
       - name: {{ .Values.global.persistence.classpathJars.name }}
         persistentVolumeClaim:
           claimName: {{ .Values.global.persistence.classpathJars.name }}
           readOnly: true
-      - name: {{ .Values.global.persistence.dataStores.name }}
+      {{- range $name, $_ := .Values.global.persistence.dataStores }}
+      - name: {{ $name }}
         persistentVolumeClaim:
-          claimName: {{ .Values.global.persistence.dataStores.name }}
+          claimName: {{ $name }}
           readOnly: true
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{ toYaml . }}
