@@ -260,7 +260,7 @@
                         <licenseMerge>BSD License 3 :: bsd_license_3.html|BSD Licence 3</licenseMerge>
                         <licenseMerge>GNU Lesser General Public License 2.1 :: gnu_lgpl_2.1.html|GNU Lesser General Public License</licenseMerge>
                         <licenseMerge>Mozilla Public License 2.0 or Eclipse Public License 1.0 :: mpl_2.0_or_epl_1.0.html|MPL 2.0 or EPL 1.0</licenseMerge>
-                        <licenseMerge>Common Development and Distribution License (CDDL) 1.1 :: cddl_gpl_1.1.txt|CDDL 1.1|CDDL+GPL License</licenseMerge>v
+                        <licenseMerge>Common Development and Distribution License (CDDL) 1.1 :: cddl_gpl_1.1.txt|CDDL 1.1|cddl+gpl_1.1.html|CDDL+GPL License</licenseMerge>
                         <licenseMerge>CDDL and GNU GPL 2 w/ Classpath Exception :: cddl_gplv2_ce.html|CDDL/GPLv2+CE</licenseMerge>
                         <licenseMerge>GNU General Public License 2 w/ Classpath Exception :: missing|GPL2 w/ CPE</licenseMerge>
                     </licenseMerges>
@@ -293,6 +293,10 @@
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*mpl.*epl.*</regexp>
                             <replacement>mpl_2.0_or_epl_1.0</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*cddl.*gpl.*license.*_1.*</regexp>
+                            <replacement>cddl+gpl_1.1</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*cddl.*gpl.*1.*</regexp>
