@@ -21,11 +21,10 @@
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
 
-{{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $name }}
+  name: {{ .Values.global.persistence.dataStores.name }}
   {{- if eq $.Values.hosting "aws" }}
   labels:
     type: amazonEBS
@@ -36,18 +35,16 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
   capacity:
-    storage: {{ $value.storage }}
+    storage: {{ .Values.global.persistence.dataStores.storage }}
   {{- if eq $.Values.hosting "local" }}
   hostPath:
-    path: {{ $value.local.hostPath }}
+    path: {{ .Values.global.persistence.dataStores.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.hosting "aws" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.dataStores.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $value.aws.volumePath }}
+      path: {{ .Values.global.persistence.dataStores.aws.volumePath  }}
   {{- end }}
----
-{{- end }}

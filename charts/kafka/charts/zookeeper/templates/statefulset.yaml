@@ -227,5 +227,5 @@ spec:
       resources:
         requests:
           storage: {{ .Values.persistence.size }}
-      storageClassName: "{{ .Values.global.persistence.kafka.name }}"
+      storageClassName: {{ .Values.global.persistence.storageClassName }}
   {{- end }}
