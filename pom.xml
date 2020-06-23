@@ -58,11 +58,14 @@
         <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
 
         <!-- Plugins -->
+        <compiler.plugin.version>3.8.0</compiler.plugin.version>
         <javadoc.plugin.version>3.2.0</javadoc.plugin.version>
         <checkstyle.plugin.version>3.1.0</checkstyle.plugin.version>
-        <checkstyle.phase>verify</checkstyle.phase>
-        <depends.phase>prepare-package</depends.phase>
         <depends.maven.version>3.1.1</depends.maven.version>
+
+        <!-- Testing properties -->
+        <surefire.plugin.version>2.22.1</surefire.plugin.version>
+        <failsafe.version>2.22.1</failsafe.version>
 
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -132,7 +135,29 @@
     </distributionManagement>
 
     <build>
+        <!--this extension provides version number substitution for child poms-->
+        <!--see here: https://github.com/jcgay/unique-revision-maven-filtering-->
+        <!--ths article explains the issue solved by this extension: https://jeanchristophegay.com/en/posts/maven-unique-version-multi-modules-build/-->
+        <extensions>
+            <extension>
+                <groupId>fr.jcgay.maven.extension</groupId>
+                <artifactId>unique-revision-maven-filtering</artifactId>
+                <version>1.1</version>
+            </extension>
+        </extensions>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <compilerArgs>
+                        <arg>-Xlint:deprecation</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -141,17 +166,50 @@
                     <show>private</show>
                     <nohelp>true</nohelp>
                     <quiet>true</quiet>
+                    <header>Palisade ${project.version}</header>
+                    <footer>Palisade ${project.version}</footer>
+                    <doctitle>Palisade ${project.version}</doctitle>
+                    <tags>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation note:</head>
+                        </tag>
+                    </tags>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>javadoc</id>
+                        <id>javadoc-compile</id>
                         <phase>compile</phase>
+                        <configuration>
+                            <show>public</show>
+                        </configuration>
                         <goals>
                             <goal>javadoc-no-fork</goal>
                             <goal>aggregate-no-fork</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>javadoc-aggregate</id>
+                        <phase>site</phase>
+                        <configuration>
+                            <show>public</show>
+                        </configuration>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -160,7 +218,7 @@
                 <executions>
                     <execution>
                         <id>dependencies</id>
-                        <phase>${depends.phase}</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>tree</goal>
                         </goals>
@@ -171,61 +229,13 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle.plugin.version}</version>
-                <configuration>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <configLocation>code-style/checkstyle.xml</configLocation>
-                    <encoding>UTF-8</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <headerLocation>code-style/licenseHeader.txt
-                    </headerLocation>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>${checkstyle.phase}</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
-                <configuration>
-                    <destFile>${sonar.jacoco.reportPath}</destFile>
-                    <append>true</append>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>2.0.0</version>
                 <executions>
                     <execution>
                         <id>licenses-report</id>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>aggregate-download-licenses</goal>
                             <goal>aggregate-add-third-party</goal>
@@ -294,6 +304,61 @@
                         </licenseUrlFileNameSanitizer>
                     </licenseUrlFileNameSanitizers>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+                <configuration>
+                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                    <append>true</append>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>code-style/checkstyle.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <headerLocation>code-style/licenseHeader.txt
+                    </headerLocation>
+                    <suppressionsLocation>code-style/checkstyle-suppressions.xml</suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${failsafe.version}</version>
             </plugin>
         </plugins>
     </build>

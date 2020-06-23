@@ -143,8 +143,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |     +- org.apache.commons:commons-compress:jar:1.8.1:compile
 |     \- org.tukaani:xz:jar:1.5:compile
 +- uk.gov.gchq.palisade:hadoop-resource:jar:0.4.0-SNAPSHOT:compile
-|  +- org.apache.hadoop:hadoop-common:jar:3.2.0:compile
-|  |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.0:compile
+|  +- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
+|  |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
 |  |  +- com.google.guava:guava:jar:28.2-android:compile
 |  |  |  +- com.google.guava:failureaccess:jar:1.0.1:compile
 |  |  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile
@@ -181,12 +181,12 @@ uk.gov.gchq.palisade:resource-service:jar:0.4.0-SNAPSHOT
 |  |  +- com.google.re2j:re2j:jar:1.1:compile
 |  |  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
 |  |  +- com.google.code.gson:gson:jar:2.8.6:compile
-|  |  +- org.apache.hadoop:hadoop-auth:jar:3.2.0:compile
+|  |  +- org.apache.hadoop:hadoop-auth:jar:3.2.1:compile
 |  |  |  +- com.nimbusds:nimbus-jose-jwt:jar:4.41.1:compile
 |  |  |  |  \- com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
 |  |  |  \- org.apache.curator:curator-framework:jar:4.0.1:compile
 |  |  +- com.jcraft:jsch:jar:0.1.54:compile
-|  |  +- org.apache.curator:curator-client:jar:2.12.0:compile
+|  |  +- org.apache.curator:curator-client:jar:2.13.0:compile
 |  |  +- org.apache.curator:curator-recipes:jar:4.0.1:compile
 |  |  +- com.google.code.findbugs:jsr305:jar:3.0.0:compile
 |  |  +- org.apache.htrace:htrace-core4:jar:4.1.0-incubating:compile
