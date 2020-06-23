@@ -223,7 +223,8 @@ spec:
   - metadata:
       name: {{ .Values.global.persistence.kafka.name }}
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+      - ReadWriteMany
       resources:
         requests:
           storage: {{ .Values.persistence.size }}

@@ -418,9 +418,8 @@ spec:
           component: slave
       spec:
         accessModes:
-        {{- range .Values.slave.persistence.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
+        - ReadWriteMany
+        storageClassName: {{ .Values.global.persistence.storageClassName }}
         resources:
           requests:
             storage: {{ .Values.slave.persistence.size | quote }}
