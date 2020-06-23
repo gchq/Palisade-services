@@ -15,15 +15,15 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Generated;
 
+
 import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
@@ -35,18 +35,29 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service
  */
 
-@JsonDeserialize(builder = OriginalRequest.Builder.class)
 public final class OriginalRequest {
 
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final String userId;  //Unique identifier for the user
-    private final String resourceId;  //Resource that that is being asked to access
-    private final Map<String, String> context; //Relevant information about the request.
+    public final String token; // Unique identifier for this specific request end-to-end
+    private final String user;  //Unique identifier for the user
+    private final String resource;  //Resource that that is being asked to access
+    private final Map<String, String> context; //Relevant context information about the request.
 
-    private OriginalRequest(final String token, final String userId, final String resourceId, final Map<String, String> context) {
+    //?? should be able to set the mapper to include private methods
+    // mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+
+    @JsonCreator
+    private OriginalRequest(@JsonProperty("token") final String token, @JsonProperty("user") final String user, @JsonProperty("resource") final String resource, @JsonProperty("context") final Map<String, String> context) {
+
+        Assert.notNull(token, "Token Id cannot be null");
+        Assert.notNull(user, "User cannot be null");
+        Assert.notNull(resource, "Resource cannot be null");
+        Assert.notNull(context, "Context cannot be null");
+        Assert.notEmpty(context, "Context cannot be empty");
+
+
         this.token = token;
-        this.userId = userId;
-        this.resourceId = resourceId;
+        this.user = user;
+        this.resource = resource;
         this.context = context;
     }
 
@@ -56,13 +67,13 @@ public final class OriginalRequest {
     }
 
     @Generated
-    public String getUserId() {
-        return userId;
+    public String getUser() {
+        return user;
     }
 
     @Generated
-    public String getResourceID() {
-        return resourceId;
+    public String getResource() {
+        return resource;
     }
 
     @Generated
@@ -70,83 +81,55 @@ public final class OriginalRequest {
         return context;
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof OriginalRequest)) {
-            return false;
-        }
-        OriginalRequest that = (OriginalRequest) o;
-        return token.equals(that.token) &&
-                userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(token, userId, resourceId, context);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add(super.toString())
-                .toString();
-    }
-
-
-
     /**
-     * Builder class for the creation of instances of the OriginalRequest.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the UserRequest class.
+     * Builder class for the creation of instances of the OriginalRequest.  This is a variant of the Fluent Builder
+     * Pattern with the addition of the option for building with either Java objects or JSon strings.
      */
-    @JsonPOJOBuilder
     public static class Builder {
         private String token;
-        private String userId;
-        private String resourceId;
+        private String user;
+        private String resource;
         private Map<String, String> context;
 
-
-
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
+        public static IToken create() {
+            return token -> user -> resource -> context ->
+                    new OriginalRequest(token, user, resource, context);
         }
 
-        public Builder userId(final String userId) {
-            this.userId = userId;
-            return this;
+
+        interface IToken {
+            /**
+             * @param token {@link String} is the token provided in the original request
+             * @return the {@link OriginalRequest}
+             */
+            IUser withToken(String token);
         }
 
-        public Builder resourceId(final String resourceId) {
-            this.resourceId = resourceId;
-            return this;
+        interface IUser {
+            /**
+             * @param user {@link String} is the user id provided in the original request
+             * @return the {@link OriginalRequest}
+             */
+            IResource withUser(String user);
+
+
+            interface IResource {
+                /**
+                 * @param resource {@link String} is the resource id provided in the register request
+                 * @return the {@link OriginalRequest}
+                 */
+                IContext withResource(String resource);
+            }
         }
 
-        public Builder context(final Map<String, String> context) {
-            this.context = context;
-            return this;
+        interface IContext {
+            /**
+             * @param context the context that was passed by the client to the palisade service
+             * @return the {@link OriginalRequest}
+             */
+            OriginalRequest withContext(Map<String, String> context);
         }
 
-        public OriginalRequest build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(userId, "User Id cannot be null");
-            Assert.notNull(resourceId, "Resource Id cannot be null");
-            Assert.notNull(context, "Context  cannot be null");
-            Assert.notEmpty(context, "Context  cannot be empty");
-            return new OriginalRequest(token, userId, resourceId, context);
-        }
     }
 
 }

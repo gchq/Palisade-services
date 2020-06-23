@@ -17,7 +17,10 @@ package uk.gov.gchq.palisade.service.user.response;
 
 import org.springframework.util.Assert;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
 import java.util.Objects;
@@ -31,124 +34,99 @@ import java.util.StringJoiner;
  * The next in the sequence will the request for Resource Service.
  * Note there are two class that represent effectively the same data where each has a different purpose.
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the client request that came into Palisade Service.
- * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the User Service
+ * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the Resource Service
  */
 public final class  UserResponse {
 
     private final String token; // Unique identifier for this specific request end-to-end
     private final User user;  //Representation of the User
-    private final String resourceId;  //Resource that that is being asked to access
-    private final String contextJson;  // represents the context information as a Json string of a Map<String, String>
+    private final String resource;  //Resource that that is being asked to access
+    private final String context;  // represents the context information as a Json string of a Map<String, String>
 
 
-    private UserResponse(final String token, final User user, final String resourceId, final String contextJson) {
+    private UserResponse(final String token, final User user, final String resource, final String contextJson) {
         this.token = token;
         this.user = user;
-        this.resourceId = resourceId;
-        this.contextJson = contextJson;
-    }
-
-    @Generated
-    public String getToken() {
-        return token;
+        this.resource = resource;
+        this.context = contextJson;
     }
 
 
-    @Generated
-    public User user() {
-        return user;
-    }
 
-    @Generated
-    public String getResourceId() {
-        return resourceId;
-    }
-
-
-    @Generated
-    public String getContextJson() {
-        return contextJson;
-    }
-    //Should we have a getter method for User and context?
-    //@JSonIgnore
-    // User user;
-    // @JsonIgnore
-    // private Map<String, String> context = null;
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof UserResponse)) {
-            return false;
-        }
-        UserResponse that = (UserResponse) o;
-        return token.equals(that.token) &&
-                user.equals(that.user) &&
-                resourceId.equals(that.resourceId) &&
-                contextJson.equals(that.contextJson);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(token, user, resourceId, contextJson);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", UserResponse.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("user=" + user)
-                .add("resourceId='" + resourceId + "'")
-                .add("contextJson='" + contextJson + "'")
-                .add(super.toString())
-                .toString();
-    }
 
     /**
-     * Builder class for the creation of instances of the UserResponse.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the UserRequest class.
+     * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
+     * Pattern with the addition of the option for building with either Java objects or JSon strings.
      */
-    public static class Builder {
+    public static class Builder implements IToken, IUser, IResource, IContext {
         private String token;
         private User user;
         private String resourceId;
-        private String contextJson;
+        private String context;
 
 
+        public static UserResponse create() {
+           // Assert.notNull(token, "Token Id cannot be null");
+           // Assert.notNull(user, "User cannot be null");
+           // Assert.notNull(resourceId, "Resource Id cannot be null");
+           // Assert.notNull(context, "Context  cannot be null");
 
-        public Builder token(final String token) {
-            this.token = token;
+     //    return token -> user -> resourceId -> context -> exception -> serviceClass -> new UserResponse(token, user, resourceId, context) ;
+
+           // return new UserResponse(token, user, resourceId, context);
+            return null;
+        }
+
+        @Override
+        public IUser withToken(final String token) {
             return this;
         }
 
-        public Builder user(final User user) {
-            this.user = user;
+        @Override
+        public IResource withUser(final User user) {
             return this;
         }
 
-        public Builder resourceId(final String resourceId) {
-            this.resourceId = resourceId;
+        @Override
+        public IContext withResourceId(final String resourceId) {
             return this;
         }
 
-        public Builder context(final String contextJson) {
-            this.contextJson = contextJson;
+        @Override
+        public Builder withContext(final String context) {
             return this;
-        }
-
-        public UserResponse build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(user, "User cannot be null");
-            Assert.notNull(resourceId, "Resource Id cannot be null");
-            Assert.notNull(contextJson, "Context  cannot be null");
-            return new UserResponse(token, user, resourceId, contextJson);
         }
     }
 
+    public interface IToken {
+        /**
+         * @param token {@link String} is the user id provided in the request
+         * @return the {@link UserResponse}
+         */
+        IUser withToken(String token);
+    }
 
+    public interface IUser {
+        /**
+         * @param user {@link User} is the user id provided in the request
+         * @return the {@link UserResponse}
+         */
+        IResource withUser(User user);
+    }
+
+    public interface IResource {
+        /**
+         * @param resourceId {@link String} is the resource id provided in the request
+         * @return the {@link UserResponse}
+         */
+        IContext withResourceId(String resourceId);
+    }
+
+    public interface IContext {
+        /**
+         * @param context {@link String} is the context as a JSon string
+         * @return the {@link UserResponse}
+         */
+        Builder withContext(String context);
+    }
 }
