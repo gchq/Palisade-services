@@ -41,4 +41,7 @@ spec:
     requests:
       storage: {{ $value.storage }}
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  selector:
+    matchLabels:
+      selectorFilter: {{ $name }}
 {{- end }}

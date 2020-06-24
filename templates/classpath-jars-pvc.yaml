@@ -39,3 +39,6 @@ spec:
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
+  selector:
+    matchLabels:
+      selectorFilter: {{ .Values.global.persistence.classpathJars.name }}

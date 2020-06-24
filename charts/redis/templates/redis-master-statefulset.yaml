@@ -409,9 +409,8 @@ spec:
             storage: {{ .Values.master.persistence.size | quote }}
         storageClassName: {{ .Values.global.persistence.storageClassName }}
         selector:
-        {{- if .Values.master.persistence.matchLabels }}
-          matchLabels: {{- toYaml .Values.master.persistence.matchLabels | nindent 12 }}
-        {{- end -}}
+          matchLabels:
+            selectorFilter: {{ .Values.global.persistence.redis.name }}
         {{- if .Values.master.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
         {{- end -}}

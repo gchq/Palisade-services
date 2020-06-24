@@ -425,9 +425,8 @@ spec:
             storage: {{ .Values.slave.persistence.size | quote }}
         {{ include "redis.slave.storageClass" . }}
         selector:
-        {{- if .Values.slave.persistence.matchLabels }}
-          matchLabels: {{- toYaml .Values.slave.persistence.matchLabels | nindent 12 }}
-        {{- end -}}
+          matchLabels:
+            selectorFilter: {{ .Values.global.persistence.redis.name }}
         {{- if .Values.slave.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.slave.persistence.matchExpressions | nindent 12 }}
         {{- end -}}

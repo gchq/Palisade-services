@@ -19,6 +19,7 @@ metadata:
   {{- if eq .Values.hosting "aws" }}
   labels:
     type: amazonEBS
+    selectorFilter: {{ .Values.global.persistence.redis.name }}
   {{- end }}
 spec:
   accessModes:
