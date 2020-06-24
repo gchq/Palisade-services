@@ -18,16 +18,16 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
-import uk.gov.gchq.palisade.Generated;
 
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
 
 
 /**
@@ -38,102 +38,89 @@ import java.util.StringJoiner;
  * Note there are two class that represent effectively the same data where each represents a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
- *
  */
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class OriginalRequest {
 
-    private final String user;  //Unique identifier for the user
-    private final String resource;  //Resource that that is being asked to access
-    private final Map<String, String> context; //Relevant context information about the request.
+    //want to be @Autowired but has to be static to be used in the default method
+   private static final  ObjectMapper mapper= new ObjectMapper();
+
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId;  //Resource that that is being asked to access
+    private final JsonNode context; //Relevant context information about the request.
 
 
     @JsonCreator
-    private OriginalRequest( @JsonProperty("user") final String user, @JsonProperty("resource") final String resource, @JsonProperty("context") final Map<String, String> context) {
+    private OriginalRequest(
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context) {
 
-        Assert.notNull(user, "User cannot be null");
-        Assert.notNull(resource, "Resource cannot be null");
+        Assert.notNull(userId, "User cannot be null");
+        Assert.notNull(resourceId, "Resource cannot be null");
         Assert.notNull(context, "Context cannot be null");
-        Assert.notEmpty(context, "Context cannot be empty");
 
-        this.user = user;
-        this.resource = resource;
+        this.userId = userId;
+        this.resourceId = resourceId;
         this.context = context;
     }
 
-    @Override
-    @Generated
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof OriginalRequest)) {
-            return false;
-        }
-        OriginalRequest that = (OriginalRequest) o;
-        return user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                context.equals(that.context);
+    public String getUserId() {
+        return userId;
     }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(user, resource, context);
+    public String getResourceId() {
+        return resourceId;
     }
 
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
-                .add("user='" + user + "'")
-                .add("resource='" + resource + "'")
-                .add("context=" + context)
-                .add(super.toString())
-                .toString();
+    public Map<String, String> getContext() throws JsonProcessingException {
+        return mapper.treeToValue(context, HashMap.class);
     }
 
     /**
      * Builder class for the creation of instances of the OriginalRequest.  This is a variant of the Fluent Builder
-     * Pattern with the addition of the option for building with either Java objects or JSon strings.
+     * which will build the Java objects from Json string.
      */
     public static class Builder {
-        private String user;
-        private String resource;
-        private Map<String, String> context;
 
         public static IUser create() {
-            return  user -> resource -> context ->
+            return user -> resource -> context ->
                     new OriginalRequest(user, resource, context);
         }
 
 
         interface IUser {
             /**
-             * @param user {@link String} is the user id provided in the original request
+             * @param userId {@link String} is the user id provided in the register request
              * @return the {@link OriginalRequest}
              */
-            IResource withUser(String user);
-
-
-            interface IResource {
-                /**
-                 * @param resource {@link String} is the resource id provided in the register request
-                 * @return the {@link OriginalRequest}
-                 */
-                IContext withResource(String resource);
-            }
+            IResource withUser(String userId);
         }
 
-        interface IContext {
+        interface IResource {
             /**
-             * @param context the context that was passed by the client to the palisade service
+             * @param resourceId {@link String} is the resource id provided in the register request
              * @return the {@link OriginalRequest}
              */
-            OriginalRequest withContext(Map<String, String> context);
+            IContext withResource(String resourceId);
         }
+    }
+
+    interface IContext {
+        /**
+         * @param context the context that was passed by the client to the palisade service
+         * @return the {@link OriginalRequest}
+         */
+        default OriginalRequest withContext(Map context) {
+
+            return withContextNode(mapper.valueToTree(context));
+        }
+
+        OriginalRequest withContextNode(JsonNode context);
 
     }
 
 }
+
+
