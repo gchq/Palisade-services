@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.response;
 
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Generated;
 
@@ -34,18 +33,10 @@ import java.util.StringJoiner;
  **/
 public class ErrorResponse {
 
-    private final String token; // Unique identifier for this specific request end-to-end
     private final String errorMessage;  //Detailed description of the error in English
 
-    public ErrorResponse(final String token, final String errorMessage) {
-        this.token = token;
+    public ErrorResponse( final String errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-
-    @Generated
-    public String getToken() {
-        return token;
     }
 
     @Generated
@@ -55,7 +46,7 @@ public class ErrorResponse {
 
     @Override
     @Generated
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -63,47 +54,21 @@ public class ErrorResponse {
             return false;
         }
         ErrorResponse that = (ErrorResponse) o;
-        return token.equals(that.token) &&
-                errorMessage.equals(that.errorMessage);
+        return errorMessage.equals(that.errorMessage);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, errorMessage);
+        return Objects.hash(errorMessage);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", ErrorResponse.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
                 .add("errorMessage='" + errorMessage + "'")
                 .add(super.toString())
                 .toString();
     }
-
-
-    public static class Builder {
-        private String token;
-        private String errorMessage;
-
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
-        }
-
-        public Builder errorMessage(final String errorMessage) {
-            this.errorMessage = errorMessage;
-            return this;
-        }
-
-        public ErrorResponse build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(errorMessage, "Resources cannot be null");
-
-            return new ErrorResponse(token, errorMessage);
-        }
-    }
-
 }

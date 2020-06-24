@@ -55,7 +55,6 @@ public class OriginalRequestTest {
     public void testSerialiseOriginalRequestToJson() throws IOException {
 
         OriginalRequest originalRequest = OriginalRequest.Builder.create()
-                .withToken("testToken")
                 .withUser("testUser")
                 .withResource("testResource")
                 .withContext(context);
@@ -63,13 +62,12 @@ public class OriginalRequestTest {
         JsonContent<OriginalRequest> request = jsonTester.write(originalRequest);
 
         //these tests are each for strings
-        assertThat(request).extractingJsonPathStringValue("$.token").isEqualTo("testToken");
         assertThat(request).extractingJsonPathStringValue("$.user").isEqualTo("testUser");
         assertThat(request).extractingJsonPathStringValue("$.resource").isEqualTo("testResource");
 
         //test is for a json representation of a Map<String, String>
-        assertThat(request).extractingJsonPathStringValue("$.context").isEqualTo("{key1=context1, key2=context2}");
-
+        assertThat(request).extractingJsonPathMapValue("$.context").containsKey("key1");
+        assertThat(request).extractingJsonPathMapValue("$.context").containsValue("context2");
 
     }
 
@@ -77,12 +75,11 @@ public class OriginalRequestTest {
     @Test
     public void testDeserialiseJsonToOriginalRequest() throws IOException {
 
-        String jsonString = "{\"token\":\"testToken\",\"user\":\"testUser\",\"resource\":\"testResource\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"}}";
+        String jsonString = "{\"user\":\"testUser\",\"resource\":\"testResource\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"}}";
 
         ObjectContent originalRequest = (ObjectContent) this.jsonTester.parse(jsonString);
         OriginalRequest request = (OriginalRequest) originalRequest.getObject();
-        assertThat(request.getToken().equals("testResource"));
-
+        //assertion
     }
 
 }

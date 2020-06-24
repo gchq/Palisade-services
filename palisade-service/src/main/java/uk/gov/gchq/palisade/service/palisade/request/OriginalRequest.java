@@ -15,14 +15,19 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Generated;
 
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 
 /**
@@ -32,53 +37,61 @@ import java.util.Map;
  * input (or in other words a request) for a User.
  * Note there are two class that represent effectively the same data where each represents a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
- * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service
+ * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
+ *
  */
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class OriginalRequest {
 
-    public final String token; // Unique identifier for this specific request end-to-end
     private final String user;  //Unique identifier for the user
     private final String resource;  //Resource that that is being asked to access
     private final Map<String, String> context; //Relevant context information about the request.
 
-    //?? should be able to set the mapper to include private methods
-    // mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
     @JsonCreator
-    private OriginalRequest(@JsonProperty("token") final String token, @JsonProperty("user") final String user, @JsonProperty("resource") final String resource, @JsonProperty("context") final Map<String, String> context) {
+    private OriginalRequest( @JsonProperty("user") final String user, @JsonProperty("resource") final String resource, @JsonProperty("context") final Map<String, String> context) {
 
-        Assert.notNull(token, "Token Id cannot be null");
         Assert.notNull(user, "User cannot be null");
         Assert.notNull(resource, "Resource cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notEmpty(context, "Context cannot be empty");
 
-
-        this.token = token;
         this.user = user;
         this.resource = resource;
         this.context = context;
     }
 
+    @Override
     @Generated
-    public String getToken() {
-        return token;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OriginalRequest)) {
+            return false;
+        }
+        OriginalRequest that = (OriginalRequest) o;
+        return user.equals(that.user) &&
+                resource.equals(that.resource) &&
+                context.equals(that.context);
     }
 
+    @Override
     @Generated
-    public String getUser() {
-        return user;
+    public int hashCode() {
+        return Objects.hash(user, resource, context);
     }
 
+    @Override
     @Generated
-    public String getResource() {
-        return resource;
-    }
-
-    @Generated
-    public Map<String, String> getContext() {
-        return context;
+    public String toString() {
+        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
+                .add("user='" + user + "'")
+                .add("resource='" + resource + "'")
+                .add("context=" + context)
+                .add(super.toString())
+                .toString();
     }
 
     /**
@@ -86,24 +99,15 @@ public final class OriginalRequest {
      * Pattern with the addition of the option for building with either Java objects or JSon strings.
      */
     public static class Builder {
-        private String token;
         private String user;
         private String resource;
         private Map<String, String> context;
 
-        public static IToken create() {
-            return token -> user -> resource -> context ->
-                    new OriginalRequest(token, user, resource, context);
+        public static IUser create() {
+            return  user -> resource -> context ->
+                    new OriginalRequest(user, resource, context);
         }
 
-
-        interface IToken {
-            /**
-             * @param token {@link String} is the token provided in the original request
-             * @return the {@link OriginalRequest}
-             */
-            IUser withToken(String token);
-        }
 
         interface IUser {
             /**
