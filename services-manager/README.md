@@ -40,14 +40,14 @@ The manager is designed to be used by defining a collection of SpringBoot config
  * One set for each service - these are discovered through the above configuration and passed on as an argument to the service jar
     * These wll all already be located in each service's `resources` directory
  
- The manager works in several modes, operated by the use of several flags:
+The manager works in several modes, operated by the use of several flags:
  * `--run` - run the *schedule*, in turn running a sequence of *tasks*, with each task running a collection of *services*
  * `--shutdown` - shutdown the services in the opposite order to how they were started in the schedule
  * `--loggers` - perform a change to the logging level of configured services by REST requests (POST /actuator/loggers/*)
  * `--config` - print out a human-readable view of the spring-boot configuration given to the services-manager, useful for debugging
- 
- 
- 
+
+
+
 ## Examples
 
 ### Starting Services
@@ -62,9 +62,12 @@ Using the built-in profiles, the services-manager can be used to perform a numbe
    * No eureka dashboard here, but take a look at the /actuator endpoints for some metadata 
    * By default, palisade-service will be at `localhost:8084` and data-service will be at `localhost:8082` 
  * Pre-populated Palisade example (see [palisade-examples](https://github.com/gchq/Palisade-examples)) 
-   * For even more automation, the start-services (above) -> configure-services (example) -> run-example (example) steps can be performed in one go 
-     * First start the discovery-service as above - `java -jar -Dspring.profiles.active=discovery services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run` 
-     * Start up services with pre-populated example data and run the rest example, run using the example profile - `java -jar -Dspring.profiles.active=example services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run`
+   * For even more automation, the start-services (above) -> configure-services (example) -> run-example (example) steps can be performed in one automated step 
+     * First start the discovery-service as above - `java -jar -Dspring.profiles.active=discovery services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run`   
+     Then choose any ***one*** of the following:
+     * Start up services with pre-populated example data, run using the *examplelibs* profile - `java -jar -Dspring.profiles.active=examplelibs services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run`
+     * Do all the above, then run the rest-example, run using the *examplemodel* profile - `java -jar -Dspring.profiles.active=examplemodel services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run`
+     * Do all the above, then run the performance tests, run using the *exampleperf* profile - `java -jar -Dspring.profiles.active=exampleperf services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run`
 
 **The choice here between `eureka` or `static` profiles will be referred to unilaterally as the `environment` profile - make sure to substitute as appropriate**  
 
@@ -77,7 +80,7 @@ If services are not running, or debug logging is required from startup, using th
  * *For the appropriate `environment`*, add the `debug` profile during the manager's run command - `java -jar -Dspring.profiles.active=environment,debug services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=run` 
  * The `logging.level.uk.gov.gchq.palisade=DEBUG` configuration value will be set for all services at start-time 
    * Services should now log at `DEBUG` level from startup  
- 
+
 #### During Runtime
 If services are already running, using the built-in profiles:  
  * *For the appropriate `environment`*, add the `debug` profile and use the manager's logging command - `java -jar -Dspring.profiles.active=environment,debug services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=loggers`
@@ -93,8 +96,8 @@ When testing your new configuration, you may find the config flag useful:
  1. Write a new configuration `application-mynewprofile.yaml`
  1. See what the services-manager has been given by Spring - `java -jar -Dspring.profiles.active=mynewprofile services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=config` (the Java object representing the configuration should be printed to screen)  
  1. Need a little more? Also add the `debug` profile - `java -jar -Dspring.profiles.active=mynewprofile,debug services-manager-0.4.0-SNAPSHOT-exec.jar --manager.mode=config`  
- 
- 
+
+
 
 ## License
 

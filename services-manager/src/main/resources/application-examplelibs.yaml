@@ -17,7 +17,7 @@ spring:
   profiles:
     include:
       - eureka
-      - example-config
+      - examplelibs-config
 
 # Spring profile dependency resolution forces this two-profile setup
 # `example` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
@@ -25,15 +25,14 @@ spring:
 ---
 
 spring:
-  profiles: example-config
+  profiles: examplelibs-config
 
 # Example field used internally to the yaml ONLY   - these are not interpreted by any java application, just to minimise duplication of long filepaths etc.
 # example.path relative to manager.root (e.g. ../Palisade-examples => Palisade-services/../Palisade-examples)
 # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
 example:
   version: ${app.version}
-  path: ../Palisade-examples
-  model: ${example.path}/example-model/target/example-model-${example.version}-exec.jar
+  path: ../Palisade-examples/example-library
   libs: &libraries
     - ${example.path}/example-library/target/example-library-${example.version}.jar
     - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
@@ -42,23 +41,7 @@ example:
     - example
 
 manager:
-  # Can optionally run the full example by passing --manager.schedule=[palisade-task,example-task]
-  schedule:
-    - palisade-task
-    # - example-task
-
-  tasks:
-    example-task:
-      - rest-example
-
   services:
-    rest-example:
-      jar: ${example.model}
-      profiles:
-        - rest
-      log: rest-example.log
-      err: rest-example.err
-
     audit-service:
       paths: *libraries
       profiles: *profiles
