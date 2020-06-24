@@ -16,8 +16,8 @@
 spring:
   profiles:
     include:
-      - examplemodel
-      - exampleperf-config
+    - examplemodel
+    - exampleperf-config
 
 ---
 
@@ -28,15 +28,18 @@ example:
   version: ${app.version}
   path: ../Palisade-examples
   perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
+  service-profiles: &profiles
+  - eureka
+  - exampleperf
 
 manager:
   schedule:
-    - palisade-task
-    - performance-task
+  - palisade-task
+  - performance-task
 
   tasks:
     performance-task:
-      - performance-test
+    - performance-test
 
   services:
     performance-test:
@@ -45,3 +48,21 @@ manager:
       - eureka
       log: performance-test.log
       err: performance-test.err
+
+    audit-service:
+      profiles: *profiles
+
+    data-service:
+      profiles: *profiles
+
+    palisade-service:
+      profiles: *profiles
+
+    policy-service:
+      profiles: *profiles
+
+    resource-service:
+      profiles: *profiles
+
+    user-service:
+      profiles: *profiles
