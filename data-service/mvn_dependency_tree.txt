@@ -123,8 +123,8 @@ uk.gov.gchq.palisade:data-service:jar:0.4.0-SNAPSHOT
 |  +- commons-io:commons-io:jar:2.6:compile
 |  +- uk.gov.gchq.palisade:readers-common:jar:0.4.0-SNAPSHOT:compile
 |  +- uk.gov.gchq.palisade:shade-hadoop-client:jar:0.4.0-SNAPSHOT:compile
-|  +- org.apache.hadoop:hadoop-common:jar:3.2.0:compile
-|  |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.0:compile
+|  +- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
+|  |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
 |  |  +- com.google.guava:guava:jar:28.2-android:compile
 |  |  |  +- com.google.guava:failureaccess:jar:1.0.1:compile
 |  |  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile
@@ -167,12 +167,12 @@ uk.gov.gchq.palisade:data-service:jar:0.4.0-SNAPSHOT
 |  |  |  \- org.xerial.snappy:snappy-java:jar:1.0.5:compile
 |  |  +- com.google.re2j:re2j:jar:1.1:compile
 |  |  +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
-|  |  +- org.apache.hadoop:hadoop-auth:jar:3.2.0:compile
+|  |  +- org.apache.hadoop:hadoop-auth:jar:3.2.1:compile
 |  |  |  +- com.nimbusds:nimbus-jose-jwt:jar:4.41.1:compile
 |  |  |  |  \- com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
 |  |  |  \- org.apache.curator:curator-framework:jar:4.0.1:compile
 |  |  +- com.jcraft:jsch:jar:0.1.54:compile
-|  |  +- org.apache.curator:curator-client:jar:2.12.0:compile
+|  |  +- org.apache.curator:curator-client:jar:2.13.0:compile
 |  |  +- org.apache.curator:curator-recipes:jar:4.0.1:compile
 |  |  +- com.google.code.findbugs:jsr305:jar:3.0.0:compile
 |  |  +- org.apache.htrace:htrace-core4:jar:4.1.0-incubating:compile
@@ -180,8 +180,7 @@ uk.gov.gchq.palisade:data-service:jar:0.4.0-SNAPSHOT
 |  |  |  +- jline:jline:jar:0.9.94:compile
 |  |  |  +- org.apache.yetus:audience-annotations:jar:0.5.0:compile
 |  |  |  \- io.netty:netty:jar:3.10.6.Final:compile
-|  |  +- org.apache.commons:commons-compress:jar:1.4.1:compile
-|  |  |  \- org.tukaani:xz:jar:1.0:compile
+|  |  +- org.apache.commons:commons-compress:jar:1.18:compile
 |  |  +- org.apache.kerby:kerb-simplekdc:jar:1.0.1:compile
 |  |  |  +- org.apache.kerby:kerb-client:jar:1.0.1:compile
 |  |  |  |  +- org.apache.kerby:kerby-config:jar:1.0.1:compile
