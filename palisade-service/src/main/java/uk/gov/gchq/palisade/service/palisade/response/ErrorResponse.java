@@ -15,60 +15,46 @@
  */
 package uk.gov.gchq.palisade.service.palisade.response;
 
-
-import uk.gov.gchq.palisade.Generated;
-
-import java.util.Objects;
-import java.util.StringJoiner;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Error message in human readable form.  This can be generated in any of the services.  Once an error occurs
  * in a service,  processing of the requests stops.  This messaging is constructed and forwarded to the Results
- * Service skipping any services that have not processed the request.  The Results Services will forward this
- * message back to the client.  This should be enough information to explain the issue and possibly suggest
- * what is needed before tying again.
- * This message will be sent to the Results Service where it will be de-seralised into a
- * uk.gov.gchq.palisade.service.results.request.ErrorRequest.  This will then be the starting point for sending an
- * error message back to the client as the response to their request.
- **/
+ * Service skipping any services that have not been preformed.  Results services will forward this message back
+ * to client who should be given enough information to correct the problem before tying again.
+ */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ErrorResponse {
 
-    private final String errorMessage;  //Detailed description of the error in English
+    //This version of the message may not necessarily be sanitised.  It will need to pass information to
+    // the Audit Service that may technical details as to the reason for the failure.  This can then be used to
+    // resolve the issue if it was technical in natured.
+    private final String technicalMessage;
 
-    public ErrorResponse( final String errorMessage) {
+    private final String errorMessage;  //Detailed description of the error in english
+
+    @JsonCreator
+    private ErrorResponse(
+            final @JsonProperty("technicalMessage") String technicalMessage,
+            final @JsonProperty("errorMessage") String errorMessage) {
+        this.technicalMessage = technicalMessage;
         this.errorMessage = errorMessage;
     }
 
-    @Generated
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    @Override
-    @Generated
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    public static class Builder {
+        public static ITechMessage create() {
+            return techMessage -> errorMessage ->
+                    new ErrorResponse(techMessage, errorMessage);
         }
-        if (!(o instanceof ErrorResponse)) {
-            return false;
+
+        interface ITechMessage {
+            IErrorMessage withTechnicalMessage(String technicalMessage);
         }
-        ErrorResponse that = (ErrorResponse) o;
-        return errorMessage.equals(that.errorMessage);
-    }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(errorMessage);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ErrorResponse.class.getSimpleName() + "[", "]")
-                .add("errorMessage='" + errorMessage + "'")
-                .add(super.toString())
-                .toString();
+        interface IErrorMessage {
+            ErrorResponse withTechnicalMessage(String technicalMessage);
+        }
     }
 }

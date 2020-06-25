@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,10 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-//import static org.hamcrest.MatcherAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 
 @RunWith(SpringRunner.class)
@@ -61,7 +57,7 @@ public class OriginalRequestTest {
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
-     * @throws IOException
+     * @throws IOException throws if the object can not be converted to a Json string.
      */
     @Test
     public void testSerialiseOriginalRequestToJson() throws IOException {
@@ -81,8 +77,8 @@ public class OriginalRequestTest {
     }
 
     /**
-     * Create the object from a JSon string and then test the content of the object.
-     * @throws IOException
+     * Create the object from a Json string and then test the content of the object.
+     * @throws IOException if it fails to parse the object
      */
     @Test
     public void testDeserialiseJsonToOriginalRequest() throws IOException {
@@ -91,8 +87,8 @@ public class OriginalRequestTest {
 
         ObjectContent originalRequest = (ObjectContent) this.jsonTester.parse(jsonString);
         OriginalRequest request = (OriginalRequest) originalRequest.getObject();
+        assertThat(request.getUserId()).isEqualTo("testUser");
         assertThat(request.getResourceId()).isEqualTo("testResource");
-        assertThat(request.getResourceId()).isEqualTo("testUser");
 
     }
 

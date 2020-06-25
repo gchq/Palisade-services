@@ -21,9 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-
 
 
 import java.util.HashMap;
@@ -44,7 +42,7 @@ import java.util.Map;
 public final class OriginalRequest {
 
     //want to be @Autowired but has to be static to be used in the default method
-   private static final  ObjectMapper mapper= new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource that that is being asked to access
@@ -75,7 +73,7 @@ public final class OriginalRequest {
     }
 
     public Map<String, String> getContext() throws JsonProcessingException {
-        return mapper.treeToValue(context, HashMap.class);
+        return MAPPER.treeToValue(context, HashMap.class);
     }
 
     /**
@@ -114,7 +112,7 @@ public final class OriginalRequest {
          */
         default OriginalRequest withContext(Map context) {
 
-            return withContextNode(mapper.valueToTree(context));
+            return withContextNode(MAPPER.valueToTree(context));
         }
 
         OriginalRequest withContextNode(JsonNode context);
