@@ -30,6 +30,8 @@ example:
   model: ${example.path}/example-model/target/example-model-${example.version}-exec.jar
 
 manager:
+  mode: run
+
   schedule:
     - palisade-task
     - example-task

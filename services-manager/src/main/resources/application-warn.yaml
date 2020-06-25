@@ -13,27 +13,29 @@
 # limitations under the License.
 #
 
-# Configuration for just the discovery service, which is then used for configuring all other services
-# Extract the project version (x.y.z-REVISION etc.)
-app:
-  version: '@project.version@'
+# Start EVERYTHING in WARN logging (or kick them into it with the --logging runtime flag)
+# Can be included in the spring active profiles with any other profile
+
+logging:
+  level: &warn
+    uk.gov.gchq.palisade: "WARN"
 
 manager:
-  mode: run
-
-  schedule:
-    - discovery-task
-
-  tasks:
-    discovery-task:
-      - discovery-service
-
   services:
-    discovery-service:
-      jar: discovery-service/target/discovery-service-${app.version}-exec.jar
-      log: discovery-service.log
+    audit-service:
+      level: *warn
 
-web:
-  client:
-    discovery-service:
-      - http://localhost:8083
+    data-service:
+      level: *warn
+
+    palisade-service:
+      level: *warn
+
+    policy-service:
+      level: *warn
+
+    resource-service:
+      level: *warn
+
+    user-service:
+      level: *warn

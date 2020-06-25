@@ -41,6 +41,8 @@ example:
     - example
 
 manager:
+  mode: run
+
   services:
     audit-service:
       paths: *libraries

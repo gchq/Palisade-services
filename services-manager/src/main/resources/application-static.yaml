@@ -28,6 +28,8 @@ spring:
   profiles: static-config
 
 manager:
+  mode: run
+
   schedule:
     - palisade-task
 
