@@ -15,16 +15,19 @@
  */
 package uk.gov.gchq.palisade.service.user.response;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.UserId;
+
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -36,97 +39,88 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the client request that came into Palisade Service.
  * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the Resource Service
  */
-public final class  UserResponse {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public final class UserResponse {
 
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final User user;  //Representation of the User
-    private final String resource;  //Resource that that is being asked to access
-    private final String context;  // represents the context information as a Json string of a Map<String, String>
+    //want to be @Autowired but has to be static to be used in the default method
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private final String resourceId;  //Resource that that is being asked to access
+    private final JsonNode context;  // represents the context information as a Json string of a Map<String, String>
+    public final User user;  //Representation of the User
 
 
-    private UserResponse(final String token, final User user, final String resource, final String contextJson) {
-        this.token = token;
+    @JsonCreator
+    private UserResponse(
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("user") User user) {
+
+        Assert.notNull(resourceId, "Resource cannot be null");
+        Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(user, "User cannot be null");
+
+        this.resourceId = resourceId;
+        this.context = context;
         this.user = user;
-        this.resource = resource;
-        this.context = contextJson;
+
     }
 
+    public String getResourceId() {
+        return resourceId;
+    }
 
+    public Map<String, String> getContext() throws JsonProcessingException {
+        return MAPPER.treeToValue(context, HashMap.class);
+    }
 
 
     /**
      * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * Pattern with the addition of the option for building with either Java objects or JSon strings.
+     * which will build the Java objects from Json string.
      */
-    public static class Builder implements IToken, IUser, IResource, IContext {
-        private String token;
-        private User user;
+    public static class Builder {
         private String resourceId;
-        private String context;
+        private JsonNode context;
+        private User user;
 
 
-        public static UserResponse create() {
-           // Assert.notNull(token, "Token Id cannot be null");
-           // Assert.notNull(user, "User cannot be null");
-           // Assert.notNull(resourceId, "Resource Id cannot be null");
-           // Assert.notNull(context, "Context  cannot be null");
-
-     //    return token -> user -> resourceId -> context -> exception -> serviceClass -> new UserResponse(token, user, resourceId, context) ;
-
-           // return new UserResponse(token, user, resourceId, context);
-            return null;
+        public static IResource create() {
+            return resource -> context -> user ->
+                    new UserResponse(resource, context, user);
         }
 
-        @Override
-        public IUser withToken(final String token) {
-            return this;
-        }
-
-        @Override
-        public IResource withUser(final User user) {
-            return this;
-        }
-
-        @Override
-        public IContext withResourceId(final String resourceId) {
-            return this;
-        }
-
-        @Override
-        public Builder withContext(final String context) {
-            return this;
+        interface IResource {
+            /**
+             * @param resourceId {@link String} is the resource id provided in the register request
+             * @return the {@link UserResponse}
+             */
+            IContext withResource(String resourceId);
         }
     }
 
-    public interface IToken {
+    interface IContext {
         /**
-         * @param token {@link String} is the user id provided in the request
+         * @param context the context that was passed by the client to the palisade service
          * @return the {@link UserResponse}
          */
-        IUser withToken(String token);
+        default IUser withContext(Map<String, String> context) {
+            return withContextNode(MAPPER.valueToTree(context));
+        }
+
+        IUser withContextNode(JsonNode context);
+
     }
 
-    public interface IUser {
+
+    interface IUser {
         /**
-         * @param user {@link User} is the user id provided in the request
+         * @param user the context that was passed by the client to the palisade service
          * @return the {@link UserResponse}
          */
-        IResource withUser(User user);
+        UserResponse withUser(User user);
+
     }
 
-    public interface IResource {
-        /**
-         * @param resourceId {@link String} is the resource id provided in the request
-         * @return the {@link UserResponse}
-         */
-        IContext withResourceId(String resourceId);
-    }
 
-    public interface IContext {
-        /**
-         * @param context {@link String} is the context as a JSon string
-         * @return the {@link UserResponse}
-         */
-        Builder withContext(String context);
-    }
 }
