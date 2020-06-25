@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.palisade.request;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,9 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.gchq.palisade.Context;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,21 +38,6 @@ public class OriginalRequestTest {
     private JacksonTester<OriginalRequest> jsonTester;
 
 
-    private Map<String, String> context;
-    private OriginalRequest originalRequest;
-
-    @Before
-    public void setUp() {
-        context = new HashMap<>();
-        context.put("key1", "context1");
-        context.put("key2", "context2");
-
-        originalRequest = OriginalRequest.Builder.create()
-                .withUser("testUser")
-                .withResource("testResource")
-                .withContext(context);
-    }
-
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * @throws IOException throws if the object can not be converted to a Json string.
@@ -62,17 +45,16 @@ public class OriginalRequestTest {
     @Test
     public void testSerialiseOriginalRequestToJson() throws IOException {
 
+        Context context = new Context().purpose("testContext");
+        OriginalRequest originalRequest  = OriginalRequest.Builder.create()
+                .withUser("testUser")
+                .withResource("testResource")
+                .withContext(context);
+        JsonContent<OriginalRequest> originalRequestJsonContent = jsonTester.write(originalRequest);
 
-        JsonContent<OriginalRequest> request = jsonTester.write(originalRequest);
-
-
-        //these tests are each for strings
-        assertThat(request).extractingJsonPathStringValue("$.userId").isEqualTo("testUser");
-        assertThat(request).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResource");
-
-        //test is for a json representation of a Map<String, String>
-        assertThat(request).extractingJsonPathMapValue("$.context").containsKey("key1");
-        assertThat(request).extractingJsonPathMapValue("$.context").containsValue("context2");
+        assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUser");
+        assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResource");
+        assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
 
     }
 
@@ -83,10 +65,10 @@ public class OriginalRequestTest {
     @Test
     public void testDeserialiseJsonToOriginalRequest() throws IOException {
 
-        String jsonString = "{\"userId\":\"testUser\",\"resourceId\":\"testResource\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"}}";
+        String jsonString = "{\"userId\":\"testUser\",\"resourceId\":\"testResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}}}";
 
-        ObjectContent originalRequest = (ObjectContent) this.jsonTester.parse(jsonString);
-        OriginalRequest request = (OriginalRequest) originalRequest.getObject();
+        ObjectContent<OriginalRequest> originalRequestObjectContent =  this.jsonTester.parse(jsonString);
+        OriginalRequest request =  originalRequestObjectContent.getObject();
         assertThat(request.getUserId()).isEqualTo("testUser");
         assertThat(request.getResourceId()).isEqualTo("testResource");
 
