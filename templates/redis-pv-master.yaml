@@ -15,11 +15,11 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redis.name }}
+  name: {{ .Values.global.persistence.redisMaster.name }}
   {{- if eq .Values.hosting "aws" }}
   labels:
     type: amazonEBS
-    selectorFilter: {{ .Values.global.persistence.redis.name }}
+    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
   {{- end }}
 spec:
   accessModes:
@@ -27,15 +27,15 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
   capacity:
-    storage: {{ .Values.global.persistence.redis.storage }}
+    storage: {{ .Values.global.persistence.redisMaster.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redis.local.hostPath }}
+    path: {{ .Values.global.persistence.redisMaster.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redis.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisMaster.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redis.aws.volumePath }}
+      path: {{ .Values.global.persistence.redisMaster.aws.volumePath }}
   {{- end }}

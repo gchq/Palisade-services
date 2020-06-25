@@ -213,7 +213,7 @@ persistence:
   ## A manually managed Persistent Volume and Claim
   ## Requires persistence.enabled: true
   ## If defined, PVC must be created manually before volume will be bound
-  existingClaim: "redis-persistence"
+  existingClaim:
 
 # Redis port
 redisPort: 6379
@@ -630,7 +630,7 @@ metrics:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
 volumePermissions:
-  enabled: false
+  enabled: true
   image:
     registry: docker.io
     repository: bitnami/minideb

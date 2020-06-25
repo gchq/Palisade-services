@@ -28,6 +28,30 @@ spec:
       app: {{ template "redis.name" . }}
       release: {{ .Release.Name }}
       role: master
+    {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+      labels:
+        app: {{ template "redis.name" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+        component: master
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: {{ .Values.master.persistence.size | quote }}
+      storageClassName: {{ .Values.global.persistence.storageClassName }}
+      selector:
+        matchLabels:
+          selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
+      {{- if .Values.master.persistence.matchExpressions }}
+      matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
+      {{- end -}}
+        {{- end }}
+
   serviceName: {{ template "redis.fullname" . }}-headless
   template:
     metadata:
@@ -323,7 +347,9 @@ spec:
               containerPort: 9121
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
   {{- end }}
-      {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and ( and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) ) .Values.securityContext.enabled) }}
+
+
+  {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and ( and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) ) .Values.securityContext.enabled) }}
       {{- if or $needsVolumePermissions .Values.sysctlImage.enabled }}
       initContainers:
       {{- if $needsVolumePermissions }}
@@ -392,29 +418,6 @@ spec:
         - name: sentinel-tmp-conf
           emptyDir: {}
         {{- end }}
-  {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-data
-        labels:
-          app: {{ template "redis.name" . }}
-          release: {{ .Release.Name }}
-          heritage: {{ .Release.Service }}
-          component: master
-      spec:
-        accessModes:
-        - ReadWriteMany
-        resources:
-          requests:
-            storage: {{ .Values.master.persistence.size | quote }}
-        storageClassName: {{ .Values.global.persistence.storageClassName }}
-        selector:
-          matchLabels:
-            selectorFilter: {{ .Values.global.persistence.redis.name }}
-        {{- if .Values.master.persistence.matchExpressions }}
-          matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
-        {{- end -}}
-  {{- end }}
   updateStrategy:
     type: {{ .Values.master.statefulset.updateStrategy }}
     {{- if .Values.master.statefulset.rollingUpdatePartition }}

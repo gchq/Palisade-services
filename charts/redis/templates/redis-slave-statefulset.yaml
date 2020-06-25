@@ -426,7 +426,7 @@ spec:
         {{ include "redis.slave.storageClass" . }}
         selector:
           matchLabels:
-            selectorFilter: {{ .Values.global.persistence.redis.name }}
+            selectorFilter: {{ .Values.global.persistence.redisSlave.name }}
         {{- if .Values.slave.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.slave.persistence.matchExpressions | nindent 12 }}
         {{- end -}}
