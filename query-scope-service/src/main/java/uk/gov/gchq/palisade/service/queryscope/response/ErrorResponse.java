@@ -15,95 +15,54 @@
  */
 package uk.gov.gchq.palisade.service.queryscope.response;
 
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.Assert;
-
-import uk.gov.gchq.palisade.Generated;
-
-import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * Error message in human readable form.  This can be generated in any of the services.  Once an error occurs
  * in a service,  processing of the requests stops.  This messaging is constructed and forwarded to the Results
- * Service skipping any services that have not processed the request.  The Results Services will forward this
- * message back to the client.  This should be enough information to explain the issue and possibly suggest
- * what is needed before tying again.
- * This message will be sent to the Results Service where it will be de-seralised into a
- * uk.gov.gchq.palisade.service.results.request.ErrorRequest.  This will then be the starting point for sending an
- * error message back to the client as the response to their request.
- **/
+ * Service skipping any services that have not been preformed.  Results services will forward this message back
+ * to client who should be given enough information to correct the problem before tying again.
+ * The technical information will contain information that may help in understanding the issue and so may contain
+ * information about the service which should not be made public such as the stack trace of the error.
+ */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ErrorResponse {
 
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final String errorMessage;  //Detailed description of the error in English
 
-    public ErrorResponse(final String token, final String errorMessage) {
-        this.token = token;
+    public final String technicalMessage; //Technical detail about where/when the error occurred.
+
+    public final String errorMessage;  //Detailed description of the error in english
+
+    @JsonCreator
+    private ErrorResponse(
+            final @JsonProperty("technicalMessage") String technicalMessage,
+            final @JsonProperty("errorMessage") String errorMessage) {
+
+        Assert.notNull(technicalMessage, "TechnicalMessage cannot be null");
+        Assert.notNull(errorMessage, "ErrorMessage cannot be null");
+
+        this.technicalMessage = technicalMessage;
         this.errorMessage = errorMessage;
     }
 
 
-    @Generated
-    public String getToken() {
-        return token;
-    }
-
-    @Generated
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ErrorResponse)) {
-            return false;
-        }
-        ErrorResponse that = (ErrorResponse) o;
-        return token.equals(that.token) &&
-                errorMessage.equals(that.errorMessage);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(token, errorMessage);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ErrorResponse.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("errorMessage='" + errorMessage + "'")
-                .add(super.toString())
-                .toString();
-    }
-
 
     public static class Builder {
-        private String token;
-        private String errorMessage;
-
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
+        public static ITechMessage create() {
+            return techMessage -> errorMessage ->
+                    new ErrorResponse(techMessage, errorMessage);
         }
 
-        public Builder errorMessage(final String errorMessage) {
-            this.errorMessage = errorMessage;
-            return this;
+        interface ITechMessage {
+            IErrorMessage withTechnicalMessage(String technicalMessage);
         }
 
-        public ErrorResponse build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(errorMessage, "Resources cannot be null");
-
-            return new ErrorResponse(token, errorMessage);
+        interface IErrorMessage {
+            ErrorResponse withErrorMessage(String errorMessage);
         }
     }
-
 }
