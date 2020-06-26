@@ -32,6 +32,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * A helper class for running a single task from a schedule (list of tasks)
+ *
+ * A task is an unordered collection of services
+ * Every service in a task must complete before the task is reported as complete
+ */
 public class TaskRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskRunner.class);
 
@@ -65,8 +71,16 @@ public class TaskRunner {
         return processes.entrySet().stream()
                 .map(entry -> {
                     LinkedList<Supplier<Boolean>> indicators = new LinkedList<>();
-                    indicators.addLast(() -> !entry.getValue().isAlive());
-                    indicators.addLast(() -> serviceProducer.apply(entry.getKey()).isHealthy());
+                    indicators.addLast(() -> {
+                        boolean alive = entry.getValue().isAlive();
+                        LOGGER.info("Process for {} is {}", entry.getKey(), alive ? "RUNNING" : "HALTED");
+                        return !alive;
+                    });
+                    indicators.addLast(() -> {
+                        boolean healthy = serviceProducer.apply(entry.getKey()).isHealthy();
+                        LOGGER.info("Health for {} is {}", entry.getKey(), healthy ? "UP" : "DOWN");
+                        return healthy;
+                    });
                     return new SimpleImmutableEntry<>(entry.getKey(), indicators);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

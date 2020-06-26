@@ -16,49 +16,51 @@
 
 package uk.gov.gchq.palisade.service.user.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties(prefix = "population")
+/**
+ * Implementation of a {@link UserConfiguration} that uses Spring to configure a list of users from a yaml file
+ * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
+ * These users will be used for prepopulating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
+ */
 public class StdUserConfiguration implements UserConfiguration {
-
-    private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
+    private List<StdUserPrepopulationFactory> users;
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link UserConfiguration} interface
      */
     public StdUserConfiguration() {
+        this.users = Collections.emptyList();
     }
 
     /**
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link UserCacheWarmerFactory} interface
+     * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
-    public StdUserConfiguration(final List<StdUserCacheWarmerFactory> users) {
+    public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
         this.users = users;
     }
 
     @Override
     @Generated
-    public List<StdUserCacheWarmerFactory> getUsers() {
+    public List<StdUserPrepopulationFactory> getUsers() {
         return users;
     }
 
     @Generated
-    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
+    public void setUsers(final List<StdUserPrepopulationFactory> users) {
         requireNonNull(users);
         this.users = users;
     }

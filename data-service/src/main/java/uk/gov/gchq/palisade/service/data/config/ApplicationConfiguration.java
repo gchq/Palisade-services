@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -35,19 +33,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
+import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
 import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
+import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 import uk.gov.gchq.palisade.service.data.web.AuditClient;
-import uk.gov.gchq.palisade.service.data.web.DataHealthIndicator;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 /**
  * Bean configuration and dependency injection graph
@@ -58,12 +55,15 @@ import java.util.function.Supplier;
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    @Bean
-    @ConfigurationProperties(prefix = "web")
-    public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration();
-    }
-
+    /**
+     * Simple data service bean created with instances of auditService, palisadeService and dataReader
+     * which is used by a simple implementation of {@link DataService} to connect to different data storage technologies and deserialise the data
+     *
+     * @param auditService    the audit service
+     * @param palisadeService the palisade service
+     * @param dataReader      the data reader
+     * @return the simple data service
+     */
     @Bean
     public SimpleDataService simpleDataService(final AuditService auditService,
                                                final PalisadeService palisadeService,
@@ -71,31 +71,39 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new SimpleDataService(auditService, palisadeService, dataReader);
     }
 
+    /**
+     * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
+     *
+     * @return a new instance of {@link HadoopDataReader}
+     * @throws IOException ioException
+     */
     @Bean
     public DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
     }
 
+    /**
+     * Palisade service bean created with a palisadeClient which uses Feign to send rest requests to the Palisade Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
+     *
+     * @param palisadeClient the palisade client
+     * @return the palisade service
+     */
     @Bean
-    @Profile("eureka")
-    public DataHealthIndicator dataHealthIndicator(final PalisadeService palisadeService, final AuditService auditService) {
-        return new DataHealthIndicator(palisadeService, auditService);
+    public PalisadeService palisadeService(final PalisadeClient palisadeClient) {
+        return new PalisadeService(palisadeClient, getAsyncExecutor());
     }
 
+    /**
+     * Audit service bean created with an auditClient which uses Feign to send rest requests to the Audit Service
+     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
+     *
+     * @param auditClient the audit client
+     * @return the audit service
+     */
     @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final ClientConfiguration clientConfig) {
-        Supplier<URI> palisadeUriSupplier = () -> clientConfig
-                .getClientUri("palisade-service")
-                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'palisade-service' - see 'web.client' properties or discovery service registration"));
-        return new PalisadeService(palisadeClient, palisadeUriSupplier, getAsyncExecutor());
-    }
-
-    @Bean
-    public AuditService auditService(final AuditClient auditClient, final ClientConfiguration clientConfig) {
-        Supplier<URI> auditUriSupplier = () -> clientConfig
-                .getClientUri("audit-service")
-                .orElseThrow(() -> new RuntimeException("Cannot find any instance of 'audit-service' - see 'web.client' properties or discovery service registration"));
-        return new AuditService(auditClient, auditUriSupplier, getAsyncExecutor());
+    public AuditService auditService(final AuditClient auditClient) {
+        return new AuditService(auditClient);
     }
 
     @Bean

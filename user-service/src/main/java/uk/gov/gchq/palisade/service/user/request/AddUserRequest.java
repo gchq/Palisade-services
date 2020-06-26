@@ -42,8 +42,8 @@ public class AddUserRequest extends Request {
     public final User user;
 
     @JsonCreator
-    private AddUserRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user) {
-        LOGGER.debug("AddUserRequest with requestId: {}, originalRequestId {} and User {}", id, originalRequestId, user);
+    private AddUserRequest(@JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user) {
+        LOGGER.debug("AddUserRequest with originalRequestId {} and User {}", originalRequestId, user);
         setOriginalRequestId(originalRequestId);
         this.user = requireNonNull(user);
     }
@@ -56,7 +56,7 @@ public class AddUserRequest extends Request {
      */
     public static IUser create(final RequestId original) {
         LOGGER.debug("AddUserRequest.create with requestId: {}", original);
-        return user -> new AddUserRequest(null, original, user);
+        return user -> new AddUserRequest(original, user);
     }
 
     public interface IUser {

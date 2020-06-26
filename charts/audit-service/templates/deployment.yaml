@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,40 +35,51 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: web
-              containerPort: 8081
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8081
-            initialDelaySeconds: 10
-            failureThreshold: 5
-            periodSeconds: 20
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8081
-            initialDelaySeconds: 10
-            failureThreshold: 5
-            periodSeconds: 20
-            timeoutSeconds: 5
-          resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: web
+            containerPort: 8089
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8089
+          initialDelaySeconds: 10
+          failureThreshold: 5
+          periodSeconds: 20
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8089
+          initialDelaySeconds: 10
+          failureThreshold: 5
+          periodSeconds: 20
+          timeoutSeconds: 5
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: "LOADER_PATH"
+          value: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+        volumeMounts:
+        - name: {{ .Values.global.persistence.classpathJars.name }}
+          mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+      volumes:
+      - name: {{ .Values.global.persistence.classpathJars.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.global.persistence.classpathJars.name }}
+          readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.affinity }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
+      {{- end }}
+      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}

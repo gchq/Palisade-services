@@ -21,17 +21,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-import java.util.Arrays;
-
-@EnableEurekaClient
+/**
+ * SpringBoot application entry-point class for audit-service executable
+ * All spring components to be scanned must be in this package
+ */
+@EnableDiscoveryClient
 @SpringBootApplication
 public class AuditApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditApplication.class);
 
+    /**
+     * SpringBoot application entry-point method for audit-service executable
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
-        LOGGER.debug("AuditApplication started with: {}", AuditApplication.class.toString(), "main", Arrays.toString(args));
+        LOGGER.debug("AuditApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }

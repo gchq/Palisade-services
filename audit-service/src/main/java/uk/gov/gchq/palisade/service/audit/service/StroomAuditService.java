@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
@@ -87,14 +88,18 @@ public class StroomAuditService implements AuditService {
     private final DefaultEventLoggingService eventLogger;
     private final Logger errorLogger;
 
-
+    /**
+     * Create a new StroomAuditService, which will take in an {@link AuditRequest} and produce events from the request to be logged to an {@link event.logging.EventLoggingService}
+     *
+     * @param eventLoggingService the target {@link event.logging.EventLoggingService} for all created events
+     */
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
         errorLogger = LoggerFactory.getLogger(StroomAuditService.class);
         eventLogger = eventLoggingService;
         LOGGER.debug("StroomAuditService called and the defaultEventLoggingService is: {}", eventLoggingService);
     }
 
-    private static void addUserToEvent(final Event event, final uk.gov.gchq.palisade.UserId user) {
+    private static void addUserToEvent(final Event event, final UserId user) {
         Event.EventSource eventSource = event.getEventSource();
         User stroomUser = EventLoggingUtil.createUser(user.getId());
         eventSource.setUser(stroomUser);
@@ -307,6 +312,7 @@ public class StroomAuditService implements AuditService {
      * @param systemName the name of the system from which the audit service is receiving audit logs from
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService systemName(final String systemName) {
         requireNonNull(systemName, "The system name cannot be null.");
         LOGGER.debug("systemName is {}", systemName);
@@ -328,6 +334,7 @@ public class StroomAuditService implements AuditService {
      * @param organisation the organisation that the system belongs too
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService organisation(final String organisation) {
         requireNonNull(organisation, "The organisation cannot be null.");
         LOGGER.debug("organisation is {}", organisation);
@@ -351,6 +358,7 @@ public class StroomAuditService implements AuditService {
      * @param env the system environment of this deployment, e.g prod, ref, test
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService systemEnv(final String env) {
         requireNonNull(env, "The env cannot be null.");
         LOGGER.debug("systemEnv is {}", env);
@@ -372,6 +380,7 @@ public class StroomAuditService implements AuditService {
      * @param description the description of the system from which the audit service is receiving audit logs from
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService systemDescription(final String description) {
         requireNonNull(description, "The description cannot be null.");
         LOGGER.debug("systemDescription is {}", description);
@@ -393,6 +402,7 @@ public class StroomAuditService implements AuditService {
      * @param systemVersion the system version of this deployment, v1, v1.0.2, v2, etc
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService systemVersion(final String systemVersion) {
         requireNonNull(systemVersion, "The systemVersion cannot be null.");
         SYSTEM.setVersion(systemVersion);
@@ -413,6 +423,7 @@ public class StroomAuditService implements AuditService {
      * @param systemClassification the classification of the system from which the audit service is receiving audit logs from
      * @return {@link StroomAuditService}
      */
+    @Generated
     public StroomAuditService systemClassification(final String systemClassification) {
         requireNonNull(systemClassification, "The systemClassification cannot be null.");
         LOGGER.debug("systemClassification is {}", systemClassification);

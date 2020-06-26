@@ -25,8 +25,7 @@ spring:
 spring:
   profiles: k8s-config
 
-# Kubernetes discovery by DNS for the pod name
-# i.e. map from what-i-call-a-service -> name-of-that-service's-pod
+# Kubernetes discovery via DNS to the service loadbalancer
 web:
   client:
     audit-service: audit-service

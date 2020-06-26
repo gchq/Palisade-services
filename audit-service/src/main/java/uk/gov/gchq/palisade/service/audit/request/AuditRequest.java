@@ -42,17 +42,14 @@ import java.util.StringJoiner;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This is the abstract class that is passed to the audit-service
- * to be able to store an audit record. The default information is
- * when was the audit record created and by what server.
- * <p>
- * The four immutable data subclasses below can be instantiated by static
- * {@code create(RequestId orig)} factory methods which chain construction by fluid interface definitions.
+ * This is the abstract class that is passed to the audit-service to be able to store an audit record. The default information consists of
+ * when the audit record was created and which server created it.
+ *
+ * The four immutable data subclasses below can be instantiated by static {@code create(RequestId orig)} factory methods which chain
+ * construction by fluid interface definitions.
  */
-
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
         property = "class"
 )
 @JsonSubTypes({
@@ -65,8 +62,17 @@ public class AuditRequest extends Request {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditRequest.class);
 
+    /**
+     * Timestamp for when the audit request was created
+     */
     public final ZonedDateTime timestamp;
+    /**
+     * Localhost IP address of the machine that created this request
+     */
     public final String serverIp;
+    /**
+     * Localhost hostname of the machine that created this request
+     */
     public final String serverHostname;
 
     protected AuditRequest() {
@@ -83,7 +89,7 @@ public class AuditRequest extends Request {
         try {
             inetAddress = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            LOGGER.error("AuditRequest UnknownHostException: {}", e);
+            LOGGER.error("AuditRequest UnknownHostException", e);
             throw new RuntimeException(e);
         }
         serverHostname = inetAddress.getHostName();
@@ -127,14 +133,22 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * This is one of the objects that is passed to the audit-service to be able to store an audit record. This class extends
-     * {@link AuditRequest}. This class is used to indicate to the Audit logs that a RegisterDataRequest has been successfully
+     * Used to indicate to the Audit service that a RegisterDataRequest has been successfully
      * processed and these are the resources that this user is approved to read for this data access request.
      */
     public static final class RegisterRequestCompleteAuditRequest extends AuditRequest {
 
+        /**
+         * The {@link User} who made a request to Palisade.
+         */
         public final User user;
+        /**
+         * The {@link LeafResource}s returned as accessible to this user (after applying policy)
+         */
         public final Set<LeafResource> leafResources;
+        /**
+         * The {@link Context} for this request
+         */
         public final Context context;
 
         @JsonCreator
@@ -191,24 +205,36 @@ public class AuditRequest extends Request {
                     .toString();
         }
 
+        /**
+         * Fluid interface requiring a {@link User} for this {@link AuditRequest}
+         */
         public interface IUser {
             /**
+             * Add a user to the request
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
             ILeafResources withUser(User user);
         }
 
+        /**
+         * Fluid interface requiring a {@link Set} of {@link LeafResource}s for this {@link AuditRequest}
+         */
         public interface ILeafResources {
             /**
+             * Add a set of leaf resources to the request
              * @param leafResources a set of {@link LeafResource} which contains the relevant details about the resource being accessed
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
             IContext withLeafResources(Set<LeafResource> leafResources);
         }
 
+        /**
+         * Fluid interface requiring a {@link Context} for this {@link AuditRequest}
+         */
         public interface IContext {
             /**
+             * Add a context to the request
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestCompleteAuditRequest}
              */
@@ -217,17 +243,30 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * This is one of the objects that is passed to the audit-service
-     * to be able to store an audit record. This class extends {@link AuditRequest} This class
-     * is used for the indication to the Audit logs that an exception has been received while processing the RegisterDataRequest
-     * and which service it was that triggered the exception.
+     * Used to indicate to the Audit service that an exception has been received while processing the RegisterDataRequest
+     * and which service triggered the exception.
      */
     public static final class RegisterRequestExceptionAuditRequest extends AuditRequest {
 
+        /**
+         * The {@link UserId} declared by the client on access
+         */
         public final UserId userId;
+        /**
+         * The requested resourceId to be accessed by the client
+         */
         public final String resourceId;
+        /**
+         * The {@link Context} for this request
+         */
         public final Context context;
+        /**
+         * A caught exception that caused this audit
+         */
         public final Throwable exception;
+        /**
+         * The service that threw the exception
+         */
         public final Class<? extends Service> serviceClass;
 
         @JsonCreator
@@ -290,40 +329,60 @@ public class AuditRequest extends Request {
                     .toString();
         }
 
+        /**
+         * Fluid interface requiring a {@link UserId} for this {@link AuditRequest}
+         */
         public interface IUserId {
             /**
+             * Add a userId to the request
              * @param userId {@link UserId} is the user id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
             IResourceId withUserId(UserId userId);
         }
 
+        /**
+         * Fluid interface requiring a resourceId for this {@link AuditRequest}
+         */
         public interface IResourceId {
             /**
+             * Add a resourceId to the request
              * @param resourceId {@link String} is the resource id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
             IContext withResourceId(String resourceId);
         }
 
+        /**
+         * Fluid interface requiring a {@link Context} for this {@link AuditRequest}
+         */
         public interface IContext {
             /**
+             * Add a context to the request
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
             IException withContext(Context context);
         }
 
+        /**
+         * Fluid interface requiring a {@link Throwable} for this {@link AuditRequest}
+         */
         public interface IException {
             /**
+             * Add an exception to the request
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
             IServiceClass withException(Throwable exception);
         }
 
+        /**
+         * Fluid interface requiring a {@link Service} for this {@link AuditRequest}
+         */
         public interface IServiceClass {
             /**
+             * Add a service class to the request
              * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
@@ -332,16 +391,33 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * This is one of the objects that is passed to the audit-service to be able to store an audit record. This class extends
-     * {@link AuditRequest} This class is used for the indication to the Audit logs that processing has been completed.
+     * Used to indicate to the Audit service that the data-service has successfully completed a ReadRequest and returned data to a client.
      */
     public static final class ReadRequestCompleteAuditRequest extends AuditRequest {
 
+        /**
+         * The {@link User} that requested to read some data
+         */
         public final User user;
+        /**
+         * The {@link LeafResource} that was read, with data from this resource returned to the client
+         */
         public final LeafResource leafResource;
+        /**
+         * The {@link Context} for this data read
+         */
         public final Context context;
+        /**
+         * The {@link Rules} that were applied to each object read from the resource
+         */
         public final Rules rulesApplied;
+        /**
+         * The number of records returned to the client (ie. excluding those which were redacted entirely)
+         */
         public final long numberOfRecordsReturned;
+        /**
+         * The number of records processed by the data-reader (ex. including those which were redacted entirely)
+         */
         public final long numberOfRecordsProcessed;
 
         @JsonCreator
@@ -407,48 +483,72 @@ public class AuditRequest extends Request {
                     .toString();
         }
 
+        /**
+         * Fluid interface requiring a {@link User} for this {@link AuditRequest}
+         */
         public interface IUser {
             /**
+             * Add a user to the request
              * @param user {@link User} is the user that made the initial registration request to access data
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
             ILeafResource withUser(User user);
         }
 
+        /**
+         * Fluid interface requiring a {@link LeafResource} for this {@link AuditRequest}
+         */
         public interface ILeafResource {
             /**
+             * Add a leaf resource to the request
              * @param leafResource the {@link LeafResource} which the data has just finished being read
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
             IContext withLeafResource(LeafResource leafResource);
         }
 
+        /**
+         * Fluid interface requiring a {@link Context} for this {@link AuditRequest}
+         */
         public interface IContext {
             /**
+             * Add a context to the request
              * @param context the context that was passed by the client to the palisade service
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
             IRulesApplied withContext(Context context);
         }
 
+        /**
+         * Fluid interface requiring the {@link Rules} applied to the resource for this {@link AuditRequest}
+         */
         public interface IRulesApplied {
             /**
+             * Add a collection of rules to the request
              * @param rules {@link Rules} is the rules that are being applied to this resource for this request
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
             INumberOfRecordsReturned withRulesApplied(Rules rules);
         }
 
+        /**
+         * Fluid interface requiring the number of records returned for this {@link AuditRequest}
+         */
         public interface INumberOfRecordsReturned {
             /**
+             * Add the number of records returned to the request
              * @param numberOfRecordsReturned is the number of records that was returned to the user from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
             INumberOfRecordsProcessed withNumberOfRecordsReturned(long numberOfRecordsReturned);
         }
 
+        /**
+         * Fluid interface requiring the number of records processed for this {@link AuditRequest}
+         */
         public interface INumberOfRecordsProcessed {
             /**
+             * Add the number of records processed to the request
              * @param numberOfRecordsProcessed is the number of records that was processed from this resource
              * @return the {@link ReadRequestCompleteAuditRequest}
              */
@@ -457,14 +557,21 @@ public class AuditRequest extends Request {
     }
 
     /**
-     * This is one of the objects that is passed to the audit-service
-     * to be able to store an audit record. This class extends {@link Request} This class
-     * is used for the indication to the Audit logs that an exception has been received.
+     * Used to indicate to the Audit service that the data-service encountered an exception while processing the ReadRequest.
      */
     public static final class ReadRequestExceptionAuditRequest extends AuditRequest {
 
+        /**
+         * The token generated by the palisade-service and supplied as part of a ReadRequest
+         */
         public final String token;
+        /**
+         * The leaf resource requested by the client and supplied as part of a ReadRequest
+         */
         public final LeafResource leafResource;
+        /**
+         * The exception thrown while trying to read the data record or resource
+         */
         public final Throwable exception;
 
         @JsonCreator
@@ -520,24 +627,36 @@ public class AuditRequest extends Request {
                     .toString();
         }
 
+        /**
+         * Fluid interface requiring a token for this {@link AuditRequest}
+         */
         public interface IToken {
             /**
+             * Add a token to the request
              * @param token this is the token that is used to retrieve cached information from the palisade service
              * @return the {@link ReadRequestExceptionAuditRequest}
              */
             ILeafResource withToken(String token);
         }
 
+        /**
+         * Fluid interface requiring a {@link LeafResource} for this {@link AuditRequest}
+         */
         public interface ILeafResource {
             /**
+             * Add a leaf resource to the request
              * @param leafResource {@link LeafResource} is the leafResource for the ReadRequest
              * @return the {@link ReadRequestExceptionAuditRequest}
              */
             IThrowable withLeafResource(LeafResource leafResource);
         }
 
+        /**
+         * Fluid interface requiring a {@link Throwable} for this {@link AuditRequest}
+         */
         public interface IThrowable {
             /**
+             * Add an exception to the request
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link ReadRequestExceptionAuditRequest}
              */

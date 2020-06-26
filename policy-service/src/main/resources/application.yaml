@@ -25,6 +25,10 @@ spring:
 server:
   port: 8085
 
+eureka:
+  client:
+    enabled: false
+
 management:
   endpoints:
     web:
@@ -35,5 +39,6 @@ management:
       enabled: true
 
 population:
-  policy: std
-  user: std
+  policyProvider: std
+  userProvider: std
+  resourceProvider: std

@@ -54,6 +54,11 @@ public class LoggerAuditService implements AuditService {
 
     private final Logger auditLogger;
 
+    /**
+     * Create a new LoggerAuditService, which will take in an {@link AuditRequest} and write information from the request to a {@link Logger}
+     *
+     * @param loggingService the target {@link Logger} to output data to
+     */
     public LoggerAuditService(final Logger loggingService) {
         auditLogger = loggingService;
     }

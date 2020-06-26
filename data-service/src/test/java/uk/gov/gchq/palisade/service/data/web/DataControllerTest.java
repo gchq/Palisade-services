@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
@@ -49,6 +50,8 @@ public class DataControllerTest {
 
     @Mock
     DataService dataService;
+    @Mock
+    StdSerialiserConfiguration config;
 
     @Before
     public void setUp() {
@@ -56,7 +59,7 @@ public class DataControllerTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        controller = new DataController(dataService);
+        controller = new DataController(dataService, config);
     }
 
     @After

@@ -16,19 +16,20 @@ replicaCount: 1
 
 service:
   port: 80
+  type: ClusterIP
 
 image:
-  repository: palisade/@artifactId@
+  name: @artifactId@
   tag: @git.commit.id.abbrev@-@revision@
   pullPolicy: IfNotPresent
 
 resources:
   limits:
     cpu: 750m
-    memory: 2.5Gi
+    memory: 1Gi
   requests:
     cpu: 250m
-    memory: 1Gi
+    memory: 512Mi
 
 nodeSelector: {}
 tolerations: []

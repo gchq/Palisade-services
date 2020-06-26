@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ service:
 
 image:
   name: user-service
-  tag: f268320-SNAPSHOT
+  tag: a9f62f8-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
   limits:
     cpu: 750m
-    memory: 2.5Gi
+    memory: 1Gi
   requests:
     cpu: 250m
-    memory: 1Gi
+    memory: 512Mi
 
 nodeSelector: {}
 tolerations: []

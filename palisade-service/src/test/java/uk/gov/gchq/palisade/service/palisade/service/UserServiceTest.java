@@ -27,11 +27,9 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.palisade.request.GetUserRequest;
 import uk.gov.gchq.palisade.service.palisade.web.UserClient;
 
-import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -48,14 +46,7 @@ public class UserServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        Supplier<URI> uriSupplier = () -> {
-            try {
-                return new URI("audit-service");
-            } catch (Exception e) {
-                return null;
-            }
-        };
-        userService = new UserService(userClient, uriSupplier, executor);
+        userService = new UserService(userClient, executor);
         testUser = new User().userId(userId).roles("Role1", "Role2").auths("Auth1", "Auth2");
     }
 
@@ -63,7 +54,7 @@ public class UserServiceTest {
     public void getUserReturnsUser() {
 
         //Given
-        when(userClient.getUser(Mockito.any(), Mockito.any(GetUserRequest.class))).thenReturn(testUser);
+        when(userClient.getUser(Mockito.any(GetUserRequest.class))).thenReturn(testUser);
 
         //When
         GetUserRequest request = new GetUserRequest().userId(userId);

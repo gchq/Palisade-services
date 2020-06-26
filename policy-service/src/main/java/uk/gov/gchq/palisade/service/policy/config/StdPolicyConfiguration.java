@@ -16,67 +16,55 @@
 
 package uk.gov.gchq.palisade.service.policy.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.PolicyCacheWarmerFactory;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
-import uk.gov.gchq.palisade.service.UserCacheWarmerFactory;
+import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
 
-@ConfigurationProperties(prefix = "population")
+/**
+ * Implementation of a {@link PolicyConfiguration} that uses Spring to configure a list of policies from a yaml file
+ * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.service.request.Policy}s
+ * These will be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
+ * These policies will be used for prepopulating the {@link uk.gov.gchq.palisade.service.policy.service.PolicyService}
+ */
 public class StdPolicyConfiguration implements PolicyConfiguration {
 
-    private List<StdPolicyCacheWarmerFactory> policies = new ArrayList<>();
-    private List<StdUserCacheWarmerFactory> users = new ArrayList<>();
+    private List<StdPolicyPrepopulationFactory> policies;
 
     /**
      * Constructor with 0 arguments for a standard implementation
      * of the {@link PolicyConfiguration} interface
      */
     public StdPolicyConfiguration() {
+        this.policies = Collections.emptyList();
     }
 
     /**
-     * Constructor with 2 arguments for a standard implementation
+     * Constructor with one argument for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param policies  a {@link List} of objects implementing the {@link PolicyCacheWarmerFactory} interface
-     * @param users  a {@link List} of objects implementing the {@link UserCacheWarmerFactory} interface
+     * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
-    public StdPolicyConfiguration(final List<StdPolicyCacheWarmerFactory> policies,
-                                  final List<StdUserCacheWarmerFactory> users) {
-        this.policies = policies;
-        this.users = users;
-    }
-
-    @Generated
-    public List<StdPolicyCacheWarmerFactory> getPolicies() {
-        return policies;
-    }
-
-    @Generated
-    public void setPolicies(final List<StdPolicyCacheWarmerFactory> policies) {
-        requireNonNull(policies);
+    public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
         this.policies = policies;
     }
 
     @Override
     @Generated
-    public List<StdUserCacheWarmerFactory> getUsers() {
-        return users;
+    public List<StdPolicyPrepopulationFactory> getPolicies() {
+        return policies;
     }
 
     @Generated
-    public void setUsers(final List<StdUserCacheWarmerFactory> users) {
-        requireNonNull(users);
-        this.users = users;
+    public void setPolicies(final List<StdPolicyPrepopulationFactory> policies) {
+        requireNonNull(policies);
+        this.policies = policies;
     }
 
     @Override
@@ -89,14 +77,13 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
             return false;
         }
         final StdPolicyConfiguration that = (StdPolicyConfiguration) o;
-        return Objects.equals(policies, that.policies) &&
-                Objects.equals(users, that.users);
+        return Objects.equals(policies, that.policies);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(policies, users);
+        return Objects.hash(policies);
     }
 
     @Override
@@ -104,7 +91,6 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
     public String toString() {
         return new StringJoiner(", ", StdPolicyConfiguration.class.getSimpleName() + "[", "]")
                 .add("policies=" + policies)
-                .add("users=" + users)
                 .add(super.toString())
                 .toString();
     }
