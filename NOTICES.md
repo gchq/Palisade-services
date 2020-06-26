@@ -25,6 +25,7 @@ List of third-party dependencies grouped by their license type
 * common ([uk.gov.gchq.palisade:common:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
 * hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
 * hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
+
 ### [CDDL and GNU GPL 2 w/ Classpath Exception](./licenses/cddl_gplv2_ce.html):
 * JavaBeans Activation Framework API jar ([javax.activation:javax.activation-api:1.2.0](http://java.net/all/javax.activation-api/))
 
