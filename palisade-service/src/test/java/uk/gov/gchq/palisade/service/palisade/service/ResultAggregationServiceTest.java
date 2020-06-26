@@ -39,15 +39,14 @@ import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,15 +72,8 @@ public class ResultAggregationServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        Supplier<URI> uriSupplier = () -> {
-            try {
-                return new URI("audit-service");
-            } catch (Exception e) {
-                return null;
-            }
-        };
         auditService = new AuditService(auditClient);
-        service = new ResultAggregationService(auditService, persistenceLayer);
+        service = new ResultAggregationService(persistenceLayer);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
@@ -107,19 +99,15 @@ public class ResultAggregationServiceTest {
         when(auditClient.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, user, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
+        DataRequestResponse actual = service.aggregateDataRequestResults(
+                request,
+                CompletableFuture.supplyAsync(() -> user),
+                CompletableFuture.supplyAsync(() -> resources),
+                CompletableFuture.supplyAsync(() -> rules),
+                requestId.getId());
 
         //Then
         assertEquals(response.getResources(), actual.getResources());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void aggregateDataRequestResultsWithErrorTest() throws Exception {
-
-        //Given
-        when(auditClient.audit(any(AuditRequest.class))).thenReturn(true);
-
-        //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, null, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
-    }
 }

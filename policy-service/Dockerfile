@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/policy-service/policy-service.jar
 
 LABEL service="policy" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-classpath", "/usr/share/classpath", "-jar", "/usr/share/policy-service/policy-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/policy-service/policy-service.jar"]

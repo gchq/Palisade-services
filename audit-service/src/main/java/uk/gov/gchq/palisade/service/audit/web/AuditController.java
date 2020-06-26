@@ -28,9 +28,11 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * RESTful interface to a number of different {@link AuditService}s
+ */
 @RestController
 @RequestMapping(path = "/")
 public class AuditController {
@@ -39,24 +41,40 @@ public class AuditController {
 
     private final Map<String, AuditService> services;
 
+    /**
+     * Constructor taking in a collection of named {@link AuditService}s, auditing to each of them per request
+     *
+     * @param services a {@link Map} of services to use for this controller
+     */
     public AuditController(final Map<String, AuditService> services) {
         this.services = services;
     }
 
+    /**
+     * Audit an incoming REST POST {@link AuditRequest} on the /audit endpoint.
+     * Consumes and produces JSON requests and responses
+     *
+     * @param request the request to pass to each of the underlying services
+     * @return true if all services completed their audit successfully, otherwise false
+     */
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
-    public Boolean auditRequest(@RequestBody final AuditRequest request) throws ExecutionException, InterruptedException {
+    public Boolean auditRequest(@RequestBody final AuditRequest request) {
         LOGGER.debug("Invoking GetUserRequest: {}", request);
         // Submit audit to all providing services
         final List<CompletableFuture<Boolean>> audits = this.audit(request);
         // Wait for all providers to complete
-        final CompletableFuture<List<Boolean>> results = CompletableFuture.allOf(audits.toArray(new CompletableFuture[0]))
-                .thenApply(res -> audits.stream().map(CompletableFuture::join).collect(Collectors.toList()));
         // Succeed only if all providers succeeded
-        boolean result = results.get().stream().allMatch(res -> res);
+        boolean result = audits.stream().allMatch(CompletableFuture::join);
         LOGGER.debug("AuditRequest result is {}", result);
         return result;
     }
 
+    /**
+     * Asynchronously audit a request with all underlying services in parallel
+     *
+     * @param request the request to pass to each of the underlying services
+     * @return a list of futures for whether each service completed and whether it was a successful completion
+     */
     public List<CompletableFuture<Boolean>> audit(final AuditRequest request) {
         List<CompletableFuture<Boolean>> result = services.values().stream().map(
                 auditService -> auditService.audit(request)

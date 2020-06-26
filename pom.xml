@@ -29,6 +29,7 @@
     <version>0.4.0-${revision}</version>
     <name>palisade</name>
     <description>Service layer for palisade</description>
+    <url>https://github.com/gchq/Palisade-services</url>
     <packaging>pom</packaging>
 
     <developers>
@@ -57,11 +58,14 @@
         <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
 
         <!-- Plugins -->
+        <compiler.plugin.version>3.8.0</compiler.plugin.version>
         <javadoc.plugin.version>3.2.0</javadoc.plugin.version>
         <checkstyle.plugin.version>3.1.0</checkstyle.plugin.version>
-        <checkstyle.phase>verify</checkstyle.phase>
-        <depends.phase>validate</depends.phase>
         <depends.maven.version>3.1.1</depends.maven.version>
+
+        <!-- Testing properties -->
+        <surefire.plugin.version>2.22.1</surefire.plugin.version>
+        <failsafe.version>2.22.1</failsafe.version>
 
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -92,6 +96,8 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <dockerfile.skip>true</dockerfile.skip>
+                <license.skipAggregateAddThirdParty>true</license.skipAggregateAddThirdParty>
+                <license.skipAggregateDownloadLicenses>true</license.skipAggregateDownloadLicenses>
             </properties>
         </profile>
     </profiles>
@@ -131,7 +137,29 @@
     </distributionManagement>
 
     <build>
+        <!--this extension provides version number substitution for child poms-->
+        <!--see here: https://github.com/jcgay/unique-revision-maven-filtering-->
+        <!--ths article explains the issue solved by this extension: https://jeanchristophegay.com/en/posts/maven-unique-version-multi-modules-build/-->
+        <extensions>
+            <extension>
+                <groupId>fr.jcgay.maven.extension</groupId>
+                <artifactId>unique-revision-maven-filtering</artifactId>
+                <version>1.1</version>
+            </extension>
+        </extensions>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <compilerArgs>
+                        <arg>-Xlint:deprecation</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -140,17 +168,50 @@
                     <show>private</show>
                     <nohelp>true</nohelp>
                     <quiet>true</quiet>
+                    <header>Palisade ${project.version}</header>
+                    <footer>Palisade ${project.version}</footer>
+                    <doctitle>Palisade ${project.version}</doctitle>
+                    <tags>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation note:</head>
+                        </tag>
+                    </tags>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>javadoc</id>
+                        <id>javadoc-compile</id>
                         <phase>compile</phase>
+                        <configuration>
+                            <show>public</show>
+                        </configuration>
                         <goals>
                             <goal>javadoc-no-fork</goal>
                             <goal>aggregate-no-fork</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>javadoc-aggregate</id>
+                        <phase>site</phase>
+                        <configuration>
+                            <show>public</show>
+                        </configuration>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -159,7 +220,7 @@
                 <executions>
                     <execution>
                         <id>dependencies</id>
-                        <phase>${depends.phase}</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>tree</goal>
                         </goals>
@@ -170,27 +231,85 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle.plugin.version}</version>
-                <configuration>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <configLocation>code-style/checkstyle.xml</configLocation>
-                    <encoding>UTF-8</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <headerLocation>code-style/licenseHeader.txt
-                    </headerLocation>
-                </configuration>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
                 <executions>
                     <execution>
-                        <id>validate</id>
-                        <phase>${checkstyle.phase}</phase>
+                        <id>licenses-report</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>aggregate-download-licenses</goal>
+                            <goal>aggregate-add-third-party</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <fileTemplate>${project.basedir}/code-style/NOTICES.ftl</fileTemplate>
+                    <outputDirectory>${project.basedir}</outputDirectory>
+                    <thirdPartyFilename>NOTICES.md</thirdPartyFilename>
+                    <licensesOutputDirectory>${project.basedir}/licenses</licensesOutputDirectory>
+                    <includeTransitiveDependencies>false</includeTransitiveDependencies>
+                    <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                    <!--
+                     Normalise equivalent license names (see also NOTICES.ftl)
+                     Format is "<preferred license name> :: <file name>|<license name>|<license name>|..."
+                    -->
+                    <licenseMerges>
+                        <licenseMerge>Apache Software License 2.0 :: apache_software_license_2.0.txt|Apache Software License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache 2|Apache 2.0</licenseMerge>
+                        <licenseMerge>MIT License :: mit_license.txt|MIT License|The MIT License|MIT X11 License</licenseMerge>
+                        <licenseMerge>Eclipse Public License 1.0 :: eclipse_public_license_1.0.html|Eclipse Public License 1.0|The Eclipse Public License 1.0|Eclipse Public License - v 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
+                        <licenseMerge>BSD License 3 :: bsd_license_3.html|BSD Licence 3</licenseMerge>
+                        <licenseMerge>GNU Lesser General Public License 2.1 :: gnu_lgpl_2.1.html|GNU Lesser General Public License</licenseMerge>
+                        <licenseMerge>Mozilla Public License 2.0 or Eclipse Public License 1.0 :: mpl_2.0_or_epl_1.0.html|MPL 2.0 or EPL 1.0</licenseMerge>
+                        <licenseMerge>Common Development and Distribution License (CDDL) 1.1 :: cddl_gpl_1.1.txt|CDDL 1.1|cddl+gpl_1.1.html|CDDL+GPL License</licenseMerge>
+                        <licenseMerge>CDDL and GNU GPL 2 w/ Classpath Exception :: cddl_gplv2_ce.html|CDDL/GPLv2+CE</licenseMerge>
+                        <licenseMerge>GNU General Public License 2 w/ Classpath Exception :: missing|GPL2 w/ CPE</licenseMerge>
+                    </licenseMerges>
+                    <!--
+                     Normalise equivalent license filenames, unfortunately cannot match or change filetype
+                     Must match the above equivalent <file name> field
+                     Must be a valid URL (ie must not contain spaces, pluses (+), etc...)
+                    -->
+                    <licenseUrlFileNameSanitizers>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*apache.*license.*2.*</regexp>
+                            <replacement>apache_software_license_2.0</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*mit.*license.*</regexp>
+                            <replacement>mit_license</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*eclipse.*license.*1.0.*</regexp>
+                            <replacement>eclipse_public_license_1.0</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*bsd.*licence.*3.*</regexp>
+                            <replacement>bsd_license_3</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*gnu.*lesser.*license.*</regexp>
+                            <replacement>gnu_lgpl_2.1</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*mpl.*epl.*</regexp>
+                            <replacement>mpl_2.0_or_epl_1.0</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*cddl.*gpl.*license.*_1.*</regexp>
+                            <replacement>cddl+gpl_1.1</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*cddl.*gpl.*1.*</regexp>
+                            <replacement>cddl_gpl_1.1</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*cddl.*gpl.*2.*ce.*</regexp>
+                            <replacement>cddl_gplv2_ce</replacement>
+                        </licenseUrlFileNameSanitizer>
+                    </licenseUrlFileNameSanitizers>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -216,6 +335,36 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>code-style/checkstyle.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <headerLocation>code-style/licenseHeader.txt
+                    </headerLocation>
+                    <suppressionsLocation>code-style/checkstyle-suppressions.xml</suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${failsafe.version}</version>
             </plugin>
         </plugins>
     </build>

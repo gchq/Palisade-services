@@ -26,12 +26,16 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>policy-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/policy-service</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <slf4j-test>1.1.0</slf4j-test>
+        <caffeine.version>2.8.1</caffeine.version>
     </properties>
 
     <dependencies>
@@ -270,6 +274,7 @@
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
+                    <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>
                     <execution>
