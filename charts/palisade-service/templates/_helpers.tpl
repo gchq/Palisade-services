@@ -76,10 +76,10 @@ Calculate a storage path based on the code release artifact id or the supplied v
 */}}
 {{- define "palisade-service.deployment.path" }}
 {{- if eq .Values.global.deployment "codeRelease" }}
-{{- $path := .Values.image.codeRelease | lower | trunc 63 | trimSuffix "-" }}
+{{- $path := .Values.image.codeRelease | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
 {{- else }}
-{{- $path := .Values.global.deployment | lower | trunc 63 | trimSuffix "-" }}
+{{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s/classpath/%s" .Values.global.persistence.classpathJars.mountPath .Chart.Name $path }}
 {{- end }}
 {{- end }}

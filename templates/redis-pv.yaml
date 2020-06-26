@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.redis.install }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -38,3 +39,4 @@ spec:
     volumeAttributes:
       path: {{ .Values.global.persistence.redis.aws.volumePath }}
   {{- end }}
+{{- end }}
