@@ -20,8 +20,9 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
-# The palisade-classpath-jars PV is set to a reclaim policy of RETAIN
-# In the situation where a helm upgrade makes a modification to the PV
+# The palisade-classpath-jars PV is set to a reclaim policy of DELETE
+# In the future we may want to set the policy to RETAIN, in this situation where a
+# helm upgrade makes a modification to the PV
 # then we need to force the PVC to also be deleted.
 # hence we need to hash or sha the PV as an annotation
 

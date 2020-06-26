@@ -14,7 +14,8 @@
 
 # Create a number of persistent volumes for each configured data-store
 # New PVC for each dataStores entry
-# The palisade-classpath-jars PV is set to a reclaim policy of RETAIN
+# The palisade-classpath-jars PV is set to a reclaim policy of DELETE
+# In the future we may want to set the reclaim policy to RETAIN
 # In the situation where a helm upgrade makes a modification to the PV
 # then we need to force the PVC to also be deleted.
 # hence we need to hash or sha the PV as an annotation
