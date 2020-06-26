@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.resource.response;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +31,9 @@ import org.springframework.util.Assert;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ErrorResponse {
 
+
     public final String technicalMessage; //Technical detail about where/when the error occurred.
+
     public final String errorMessage;  //Detailed description of the error in english
 
     @JsonCreator

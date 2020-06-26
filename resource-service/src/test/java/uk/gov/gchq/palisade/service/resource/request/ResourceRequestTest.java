@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.gov.gchq.palisade.service.resource.request;
 
 import org.junit.Test;
@@ -8,11 +23,11 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,28 +46,20 @@ public class ResourceRequestTest {
      * @throws IOException if it fails to parse the object
      */
     @Test
-    public void testSerialiseUserRequestToJson() throws IOException {
+    public void testSerialiseResourceRequestToJson() throws IOException {
 
-        Map<String, String> context = new HashMap<>();
-        context.put("key1", "context1");
-        context.put("key2", "context2");
-
-        ResourceRequest userRequest = ResourceRequest.Builder.create()
+        Context context = new Context().purpose("testContext");
+        ResourceRequest resourceRequest = ResourceRequest.Builder.create()
                 .withResource("testResourceId")
                 .withContext(context)
                 .withUser(User.create("testUserId"));
 
-
-        JsonContent<ResourceRequest> resourceRequestJsonContent = jacksonTester.write(userRequest);
+        JsonContent<ResourceRequest> resourceRequestJsonContent = jacksonTester.write(resourceRequest);
 
         //these tests are each for strings
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-
-        //test is for a json representation of a Map<String, String>, should stay unchanged
-        assertThat(resourceRequestJsonContent).extractingJsonPathMapValue("$.context").containsKey("key1");
-        assertThat(resourceRequestJsonContent).extractingJsonPathMapValue("$.context").containsValue("context2");
-
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
     }
 
     /**
@@ -61,16 +68,16 @@ public class ResourceRequestTest {
      * @throws IOException if it fails to parse the string into an object
      */
     @Test
-    public void testDeserializeJsonToUserRequest() throws IOException {
+    public void testDeserializeJsonToResourceRequest() throws IOException {
 
-        String jsonString ="{\"resourceId\":\"testResourceId\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
+        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
 
-        ObjectContent resourceRequestContent = (ObjectContent) jacksonTester.parse(jsonString);
+        ObjectContent<ResourceRequest> resourceRequestContent = jacksonTester.parse(jsonString);
 
-        ResourceRequest request = (ResourceRequest) resourceRequestContent.getObject();
+        ResourceRequest request = resourceRequestContent.getObject();
         assertThat(request.resourceId).isEqualTo("testResourceId");
+        assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(request.getUser().userId).isEqualTo("testUserId");
-
     }
 
 

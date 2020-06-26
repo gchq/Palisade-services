@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.gov.gchq.palisade.service.resource.response;
 
 import org.junit.Test;
@@ -8,12 +23,15 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.gchq.palisade.service.resource.response.common.ResourceMetadata;
+
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,34 +52,20 @@ public class ResourceResponseTest {
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
 
-        Map<String, String> context = new HashMap<>();
-        context.put("key1", "context1");
-        context.put("key2", "context2");
-
-        Map<String, ResourceMetadata> resources = new HashMap<>();
-        ResourceMetadata metadata1 = new ResourceMetadata();
-        ResourceMetadata metadata2 = new ResourceMetadata();
-
-        resources.put("resourceKey1", metadata1);
-        resources.put("resourceKey2", metadata2);
-
-
-        ResourceResponse resourceResponse = ResourceResponse.Builder.create()
-                .withContext(context)
-                .withUser(User.create("testUserId"))
-                .withResources(resources);
-
-
+        Context context = new Context().purpose("testContext");
+        User user = User.create("testUserId");
+        LeafResource resource = new FileResource().id("/test/file.format")
+                .type("java.lang.String")
+                .serialisedFormat("format")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
+                .parent(new SystemResource().id("/test"));
+        ResourceResponse resourceResponse = ResourceResponse.Builder.create().withContext(context).withUser(user).withResource(resource);
 
         JsonContent<ResourceResponse> resourceRequestJsonContent = jacksonTester.write(resourceResponse);
 
-        //these tests are each for strings
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId");
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-
-        //test is for a json representation of a Map<String, String>, should stay unchanged
-        assertThat(resourceRequestJsonContent).extractingJsonPathMapValue("$.context").containsKey("key1");
-        assertThat(resourceRequestJsonContent).extractingJsonPathMapValue("$.context").containsValue("context2");
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
     }
 
@@ -73,13 +77,14 @@ public class ResourceResponseTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString ="{\"resourceId\":\"testResourceId\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
+        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
-        ObjectContent resourceRequestContent = (ObjectContent) jacksonTester.parse(jsonString);
+        ObjectContent<ResourceResponse> resourceRequestContent =  jacksonTester.parse(jsonString);
 
-        ResourceResponse request = (ResourceResponse) resourceRequestContent.getObject();
-      //  assertThat(request.resourceId).isEqualTo("testResourceId");
-      //  assertThat(request.getUser().userId).isEqualTo("testUserId");
+        ResourceResponse resourceResponse =  resourceRequestContent.getObject();
+        assertThat(resourceResponse.getContext().getPurpose()).isEqualTo("testContext");
+        assertThat(resourceResponse.getUser().userId).isEqualTo("testUserId");
+        assertThat(resourceResponse.resource.getId()).isEqualTo("/test/file.format");
 
     }
 }
