@@ -26,16 +26,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response from the Policy Service
- * The next in the sequence will the request for the Query Scope Service.
+ * This class represents the response for Policy Service which adds the policy information to data set
+ * The next in the sequence will the response from Policy Service.
  * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the Resource Service
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRewquest is the input for the Query Scope Service
- * The key difference in the representation of the attributes.  In this class the all of the objects are needed to
- * process the request.
+ * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Resource Service
+ * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the Query Scope Service
  */
 public class PolicyResponse {
     private final String token; // Unique identifier for this specific request end-to-end

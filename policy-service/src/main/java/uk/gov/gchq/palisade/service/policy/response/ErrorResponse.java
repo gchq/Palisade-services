@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.policy.response;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
