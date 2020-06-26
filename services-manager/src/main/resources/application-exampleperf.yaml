@@ -49,7 +49,7 @@ manager:
       - performance-test
 
   services:
-    create-performance-data:
+    create-perf-data:
       jar: ${example.perf}
       profiles:
       - create
