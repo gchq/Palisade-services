@@ -53,13 +53,13 @@ manager:
       jar: ${example.perf}
       profiles:
       - create
+      log: create-perf-data.log
 
     performance-test:
       jar: ${example.perf}
       profiles:
         - eureka
       log: performance-test.log
-      err: performance-test.err
 
     audit-service:
       profiles: *profiles
