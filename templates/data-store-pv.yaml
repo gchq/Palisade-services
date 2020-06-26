@@ -34,7 +34,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
   capacity:
     storage: {{ $value.storage }}
