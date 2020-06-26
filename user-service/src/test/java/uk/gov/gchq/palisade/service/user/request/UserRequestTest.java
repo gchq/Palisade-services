@@ -24,9 +24,9 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.gov.gchq.palisade.Context;
+
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,25 +46,18 @@ public class UserRequestTest {
     @Test
     public void testSerialiseUserRequestToJson() throws IOException {
 
-        Map<String, String> context = new HashMap<>();
-        context.put("key1", "context1");
-        context.put("key2", "context2");
-
+        Context context = new Context().purpose("testContext");
         UserRequest userRequest = UserRequest.Builder.create()
                 .withUser("testUserId")
                 .withResource("testResourceId")
                 .withContext(context);
 
-        JsonContent<UserRequest> request = jsonTester.write(userRequest);
+        JsonContent<UserRequest> userRequestJsonContent = jsonTester.write(userRequest);
 
         //these tests are each for strings
-        assertThat(request).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId");
-        assertThat(request).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-
-        //test is for a json representation of a Map<String, String>, should stay unchanged
-        assertThat(request).extractingJsonPathMapValue("$.context").containsKey("key1");
-        assertThat(request).extractingJsonPathMapValue("$.context").containsValue("context2");
-
+        assertThat(userRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId");
+        assertThat(userRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
+        assertThat(userRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
     }
 
     /**
@@ -75,13 +68,14 @@ public class UserRequestTest {
     @Test
     public void testDeserialiseJsonToUserRequest() throws IOException {
 
+        String jsonString = "{\"userId\":\"testUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}}}";
+        ObjectContent<UserRequest> userRequest = this.jsonTester.parse(jsonString);
 
-        String jsonString = "{\"userId\":\"testUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"}}";
-        ObjectContent userRequest = (ObjectContent) this.jsonTester.parse(jsonString);
-
-        UserRequest request = (UserRequest) userRequest.getObject();
+        UserRequest request = userRequest.getObject();
         assertThat(request.userId).isEqualTo("testUserId");
         assertThat(request.getResourceId()).isEqualTo("testResourceId");
+        assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
+
     }
 
 

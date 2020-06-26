@@ -24,15 +24,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
-import java.util.HashMap;
-import java.util.Map;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This step in the sequence is the request to the User Service to identify the user associated with
  * the user id given in this original request.
+ * The next in the sequence will be the response from the User Service
  * Note there are two class that represent effectively the same data where each has a different purpose.
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that came into Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input/request for the User Service
@@ -40,12 +43,11 @@ import java.util.Map;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserRequest {
 
-    //want the mapper  @Autowired, but need it static for the default method
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public final String userId;  //Unique identifier for the user
     private final String resourceId;  //Unique identifier for the resource that that is being asked to access
-    private final JsonNode context;  // represents the context information as a Json string of a Map<String, String>
+    private final JsonNode context;  // represents the context information
 
     @JsonCreator
     private UserRequest(
@@ -62,22 +64,50 @@ public final class UserRequest {
         this.context = context;
     }
 
-    public String getUserId() {
-        return userId;
-    }
 
     public String getResourceId() {
         return resourceId;
     }
 
-    public Map<String, String> getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(context, HashMap.class);
+    public Context getContext() throws JsonProcessingException {
+        return MAPPER.treeToValue(context, Context.class);
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserRequest)) {
+            return false;
+        }
+        UserRequest that = (UserRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", UserRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add(super.toString())
+                .toString();
+    }
 
     /**
      * Builder class for the creation of instances of the UserRequest.  This is a variant of the Fluent Builder
-     * which will build the Java objects from Json string.
+     * which will use the String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
@@ -87,33 +117,22 @@ public final class UserRequest {
         }
 
         interface IUser {
-            /**
-             * @param userId {@link String} is the user id provided in the original request
-             * @return the {@link UserRequest}
-             */
             IResource withUser(String userId);
 
-
-            interface IResource {
-                /**
-                 * @param resourceId {@link String} is the resource id provided in the register request
-                 * @return the {@link UserRequest}
-                 */
-                IContext withResource(String resourceId);
-            }
         }
 
+        interface IResource {
+            IContext withResource(String resourceId);
+        }
+
+
         interface IContext {
-            /**
-             * @param context the context that was passed by the client to the palisade service
-             * @return the {@link UserRequest}
-             */
-            default UserRequest withContext(Map<String, String> context) {
+            default UserRequest withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
             UserRequest withContextNode(JsonNode context);
         }
-
     }
+
 }

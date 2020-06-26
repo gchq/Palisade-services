@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.resource.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,9 +50,9 @@ public final class ResourceResponse {
     public final LeafResource resource; // Resources related to this query
 
     private ResourceResponse(
-            final JsonNode context,
-            final JsonNode user,
-            final LeafResource resource) {
+            final  @JsonProperty("context") JsonNode context,
+            final  @JsonProperty("user") JsonNode user,
+            final  @JsonProperty("resource") LeafResource resource) {
 
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
