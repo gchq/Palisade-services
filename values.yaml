@@ -65,6 +65,8 @@ global:
 
   # persistent-volume and associated claims configurations
   persistence:
+    storageClassDeploy: false
+    storageClassName: efs-sc
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
       name: palisade-classpath-jars
@@ -107,14 +109,24 @@ global:
         volumePath: "/"
 
     # redis: Store used by redis and redis-cluster for persistence and caching
-    redis:
-      name: redis-persistence
+    redisMaster:
+      name: redis-persistence-master
       storage: 8Gi
       local:
         hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
+
+    redisSlave:
+      name: redis-persistence-slave
+      storage: 8Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
 
   # must be last for file to be appended with addresses
   globalIPAddresses:
