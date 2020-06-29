@@ -1,4 +1,6 @@
 {{/*
+# Copyright 2020 Crown Copyright
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +13,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Copied from: https://github.com/bitnami/charts/tree/780db91641bf4e1f98c6e020e1fd971e4d2abc90/bitnami/redis
+# Originally based on: https://github.com/bitnami/charts/tree/780db91641bf4e1f98c6e020e1fd971e4d2abc90/bitnami/redis
 */}}
 
 ** Please be patient while the chart is being deployed **
+
+{{- if contains .Values.master.service.type "LoadBalancer" }}
+{{- if not .Values.usePassword }}
+
+-------------------------------------------------------------------------------
+ WARNING
+
+    By specifying "master.service.type=LoadBalancer" and "usePassword=false" you have
+    most likely exposed the Redis service externally without any authentication
+    mechanism.
+
+    For security reasons, we strongly suggest that you switch to "ClusterIP" or
+    "NodePort". As alternative, you can also switch to "usePassword=true"
+    providing a valid password on "password" parameter.
+
+-------------------------------------------------------------------------------
+{{- end }}
+{{- end }}
+
+{{- if .Values.cluster.enabled }}
+{{- if .Values.sentinel.enabled }}
+Redis can be accessed via port {{ .Values.sentinel.service.redisPort }} on the following DNS name from within your cluster:
+
+{{ template "redis.fullname" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }} for read only operations
+
+For read/write operations, first access the Redis Sentinel cluster, which is available in port {{ .Values.sentinel.service.sentinelPort }} using the same domain name above.
+
+{{- else }}
+Redis can be accessed via port {{ .Values.redisPort }} on the following DNS names from within your cluster:
+
+{{ template "redis.fullname" . }}-master.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }} for read/write operations
+{{ template "redis.fullname" . }}-slave.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }} for read-only operations
+{{- end }}
+
+{{- else }}
+Redis can be accessed via port {{ .Values.redisPort }} on the following DNS name from within your cluster:
+
+{{ template "redis.fullname" . }}-master.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+
+{{- end }}
 
 {{ if .Values.usePassword }}
 To get your password run:
@@ -43,6 +85,7 @@ To connect to your Redis server:
 {{- else }}
    redis-cli -h {{ template "redis.fullname" . }}-master{{ if .Values.usePassword }} -a $REDIS_PASSWORD{{ end }}
 {{- end }}
+
 
 To connect to your database from outside the cluster execute the following commands:
 
