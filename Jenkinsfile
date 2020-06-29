@@ -249,15 +249,17 @@ spec:
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
-                            sh 'namespace-create ${env.BRANCH_NAME}'
-                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                            //create the branch namespace
-                            sh 'helm upgrade --install palisade . \
+                            if (sh(script: "namespace-create ${env.BRANCH_NAME}", returnStatus: true) == 0) {
+                                sh 'echo namespace create succeeded'
+                                sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                                //create the branch namespace
+                                sh 'helm upgrade --install palisade . \
                               --set hosting=aws  \
                               --set traefik.install=false,dashboard.install=false \
                               --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
                               --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
                               --namespace ${env.BRANCH_NAME}'
+                            }
                         }
                     }
                 }
