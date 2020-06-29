@@ -19,12 +19,13 @@ metadata:
   {{- if eq .Values.hosting "aws" }}
   labels:
     type: amazonEBS
+    selectorFilter: {{ .Values.global.persistence.kafka.name }}
   {{- end }}
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.global.persistence.kafka.name }}
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: {{ $.Values.global.persistence.storageClassName }}
   capacity:
     storage: {{ .Values.global.persistence.kafka.storage }}
   {{- if eq .Values.hosting "local" }}
@@ -34,7 +35,7 @@ spec:
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
       path: {{ .Values.global.persistence.kafka.aws.volumePath }}
   {{- end }}

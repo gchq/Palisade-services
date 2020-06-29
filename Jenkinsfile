@@ -242,8 +242,13 @@ spec:
                             sh 'helm upgrade --install palisade . \
                               --set hosting=aws  \
                               --set traefik.install=true,dashboard.install=true \
-                              --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
-                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
+                              --set global.repository=${ECR_REGISTRY} \
+                              --set global.hostname=${EGRESS_ELB} \
+                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} \
+                              --set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} \
+                              --set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} \
+                              --set global.persistence.redisMaster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} \
+                              --set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} \
                               --namespace dev'
                         } else {
                             sh "echo - no deploy"
