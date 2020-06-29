@@ -16,9 +16,16 @@
 spring:
   profiles:
     include:
+    - h2
     - k8s-config
 
 ---
 
 spring:
   profiles: k8s-config
+
+# Kubernetes discovery by DNS for the pod name
+# i.e. map from what-i-call-a-service -> name-of-that-service's-pod
+web:
+  client:
+    data-service: data-service

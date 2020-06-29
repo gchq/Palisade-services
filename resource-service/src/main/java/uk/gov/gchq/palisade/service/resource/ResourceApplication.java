@@ -21,11 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 import java.util.Arrays;
 
-@EnableEurekaClient
+@EnableDiscoveryClient
 @SpringBootApplication
 public class ResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceApplication.class);

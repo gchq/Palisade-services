@@ -1,4 +1,4 @@
- # Copyright 2019 Crown Copyright
+ # Copyright 2020 Crown Copyright
  #
  # Licensed under the Apache License, Version 2.0 (the "License");
  # you may not use this file except in compliance with the License.
@@ -29,4 +29,16 @@ dependencies:
   - name: metrics-server
     version: 0.4.0
     repository: file://charts/metrics-server
-    condition: metricsServer.install
+    condition: metrics-server.install
+  - name: kafka
+    version: 0.4.0
+    repository: file://charts/kafka
+    condition: kafka.install
+  - name: redis
+    version: 0.4.0
+    repository: file://charts/redis
+    condition: redis.install
+  - name: redis-cluster
+    version: 0.4.0
+    repository: file://charts/redis-cluster
+    condition: redis-cluster.install

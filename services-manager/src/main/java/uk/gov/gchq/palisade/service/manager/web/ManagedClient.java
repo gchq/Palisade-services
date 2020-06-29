@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.net.URI;
 
+/**
+ * A Feign REST client for a single instance of a service
+ */
 @FeignClient(name = "managed-client", url = "undefined")
 public interface ManagedClient {
-
     @GetMapping(path = "/actuator/health", produces = "application/json")
     Response getHealth(final URI url);
 
@@ -36,5 +38,4 @@ public interface ManagedClient {
 
     @PostMapping(path = "/actuator/shutdown")
     void shutdown(final URI url);
-
 }

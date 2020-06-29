@@ -1,0 +1,28 @@
+# Copied from https://github.com/helm/charts/blob/6c85be7b88748171afd17affe8b1b57c66bf66a2/incubator/kafka/Chart.yaml
+
+
+
+apiVersion: v1
+description: Apache Kafka is publish-subscribe messaging rethought as a distributed
+  commit log.
+name: kafka
+version: 0.20.9
+appVersion: 5.0.1
+keywords:
+- kafka
+- zookeeper
+- kafka statefulset
+home: https://kafka.apache.org/
+sources:
+- https://github.com/kubernetes/charts/tree/master/incubator/zookeeper
+- https://github.com/Yolean/kubernetes-kafka
+- https://github.com/confluentinc/cp-docker-images
+- https://github.com/apache/kafka
+maintainers:
+- name: faraazkhan
+  email: faraaz@rationalizeit.us
+- name: h0tbird
+  email: marc.villacorta@gmail.com
+- name: benjigoldberg
+  email: ben@spothero.com
+icon: https://kafka.apache.org/images/logo.png

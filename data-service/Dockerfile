@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-COPY $JAR_FILE /usr/share/palisade-service/data-service.jar
+COPY $JAR_FILE /usr/share/data-service/data-service.jar
 
 LABEL service="data" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-classpath", "/usr/share/data", "-jar", "/usr/share/palisade-service/data-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/data-service/data-service.jar"]

@@ -20,7 +20,7 @@ service:
 
 image:
   name: policy-service
-  tag: 4775745-SNAPSHOT
+  tag: a9f62f8-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
@@ -51,6 +51,7 @@ persistence:
   pvcSizes:
     policy:
       size: 1Gi
+
 master:
   componentName:
   - "efc-ebs-policy-service"

@@ -26,22 +26,35 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <!--  *********** Aritfact ID ***********    -->
     <artifactId>resource-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/resource-service</url>
+    <!--  *********** Aritfact ID ***********    -->
 
     <properties>
         <eureka.version>1.9.16</eureka.version>
-        <hadoop.version>3.2.0</hadoop.version>
+        <hadoop.version>3.2.1</hadoop.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.netflix.eureka</groupId>
-            <artifactId>eureka-client</artifactId>
-            <version>${eureka.version}</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-config-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,12 +69,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-commons</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-eureka-client</artifactId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
@@ -72,12 +85,6 @@
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>hadoop-resource</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -264,6 +271,7 @@
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
+                    <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>
                     <execution>

@@ -28,9 +28,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
@@ -39,14 +37,16 @@ import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
 import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
 import uk.gov.gchq.palisade.service.palisade.web.AuditClient;
 import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +63,7 @@ public class ResultAggregationServiceTest {
 
     private RegisterDataRequest request;
     private User user;
-    private Map<LeafResource, ConnectionDetail> resources = new HashMap<>();
+    private Set<LeafResource> resources = new HashSet<>();
     private Map<LeafResource, Rules> rules = new HashMap<>();
     private RequestId requestId = new RequestId().id(UUID.randomUUID().toString());
     private RequestId originalRequestId = new RequestId().id("OriginalId");
@@ -72,27 +72,18 @@ public class ResultAggregationServiceTest {
     @Before
     public void setup() {
         executor = Executors.newSingleThreadExecutor();
-        Supplier<URI> uriSupplier = () -> {
-            try {
-                return new URI("audit-service");
-            } catch (Exception e) {
-                return null;
-            }
-        };
-        auditService = new AuditService(auditClient, uriSupplier, executor);
-        service = new ResultAggregationService(auditService, persistenceLayer);
+        auditService = new AuditService(auditClient);
+        service = new ResultAggregationService(persistenceLayer);
         request = new RegisterDataRequest().userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("/path/to/new/bob_file.txt");
         request.originalRequestId(originalRequestId);
         user = new User().userId("Bob").roles("Role1", "Role2").auths("Auth1", "Auth2");
 
-        FileResource resource = new FileResource();
-        resource.id("/path/to/new/bob_file.txt").type("bob").serialisedFormat("txt");
-        resource.parent(new DirectoryResource().id("/path/to/new/")
-                .parent(new DirectoryResource().id("/path/to/")
-                        .parent(new DirectoryResource().id("/path/")
-                                .parent(new SystemResource().id("/")))));
-        ConnectionDetail connectionDetail = new SimpleConnectionDetail().uri("http://localhost:8082");
-        resources.put(resource, connectionDetail);
+        ConnectionDetail connectionDetail = new SimpleConnectionDetail().serviceName("data-service");
+        FileResource resource = ((FileResource) ResourceBuilder.create("file:/path/to/new/bob_file.txt"))
+                .type("bob")
+                .serialisedFormat("txt")
+                .connectionDetail(connectionDetail);
+        resources.add(resource);
 
         Rules rule = new Rules().rule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
@@ -105,22 +96,18 @@ public class ResultAggregationServiceTest {
     public void aggregateDataRequestResultsTest() throws Exception {
 
         //Given
-        when(auditClient.audit(any(), any(AuditRequest.class))).thenReturn(true);
+        when(auditClient.audit(any(AuditRequest.class))).thenReturn(true);
 
         //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, user, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
+        DataRequestResponse actual = service.aggregateDataRequestResults(
+                request,
+                CompletableFuture.supplyAsync(() -> user),
+                CompletableFuture.supplyAsync(() -> resources),
+                CompletableFuture.supplyAsync(() -> rules),
+                requestId.getId());
 
         //Then
         assertEquals(response.getResources(), actual.getResources());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void aggregateDataRequestResultsWithErrorTest() throws Exception {
-
-        //Given
-        when(auditClient.audit(any(), any(AuditRequest.class))).thenReturn(true);
-
-        //When
-        DataRequestResponse actual = service.aggregateDataRequestResults(request, null, resources, rules, requestId, originalRequestId).toCompletableFuture().get();
-    }
 }

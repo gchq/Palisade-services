@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.palisade.web;
 
-import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -25,16 +23,19 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.request.GetPolicyRequest;
 
-import java.net.URI;
 import java.util.Map;
 
-@FeignClient(name = "policy-service", url = "undefined")
+/**
+ * The interface Policy client which uses Feign and uses services urls if provided, otherwise discovery by name with eureka
+ */
+@FeignClient(name = "policy-service", url = "${web.client.policy-service}")
 public interface PolicyClient {
-
+    /**
+     * Sends a post rest request to the PolicyService and returns a Completable future of LeafResources and rules
+     *
+     * @param request the request
+     * @return the policy sync
+     */
     @PostMapping(path = "/getPolicySync", consumes = "application/json", produces = "application/json")
-    Map<LeafResource, Rules> getPolicySync(final URI url, @RequestBody final GetPolicyRequest request);
-
-    @GetMapping(path = "/actuator/health", produces = "application/json")
-    Response getHealth(final URI url);
-
+    Map<LeafResource, Rules> getPolicySync(@RequestBody final GetPolicyRequest request);
 }
