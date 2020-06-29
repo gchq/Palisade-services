@@ -15,10 +15,9 @@
 
 # Start EVERYTHING in WARN logging (or kick them into it with the --logging runtime flag)
 # Can be included in the spring active profiles with any other profile
-
-logging:
-  level: &warn
-    root: "WARN"
+# Don't start services-manager in warn though
+warn-level: &warn
+  root: "WARN"
 
 manager:
   services:
