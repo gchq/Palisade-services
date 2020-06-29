@@ -105,7 +105,7 @@ spec:
         ephemeral-storage: "2Gi"
 
   - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:200608
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:200629
     imagePullPolicy: IfNotPresent
     command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
@@ -249,10 +249,15 @@ spec:
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
+                            sh 'namespace-create ${env.BRANCH_NAME}'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                             //create the branch namespace
-
-                            sh "echo - no deploy"
+                            sh 'helm upgrade --install palisade . \
+                              --set hosting=aws  \
+                              --set traefik.install=false,dashboard.install=false \
+                              --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
+                              --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
+                              --namespace ${env.BRANCH_NAME}'
                         }
                     }
                 }
