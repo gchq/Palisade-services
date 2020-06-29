@@ -246,6 +246,12 @@ spec:
                               --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
                               --namespace dev'
                         } else {
+                            sh 'palisade-login'
+                            //now extract the public IP addresses that this will be open on
+                            sh 'extract-addresses'
+                            sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                            //create the branch namespace
+
                             sh "echo - no deploy"
                         }
                     }
