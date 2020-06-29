@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package uk.gov.gchq.palisade.service.policy.request;
 
 import org.junit.Test;
@@ -8,6 +23,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -62,9 +78,9 @@ public class PolicyRequestTest {
 
         String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
-        ObjectContent<PolicyRequest> policyRequestObjectContent =  jacksonTester.parse(jsonString);
+        ObjectContent<PolicyRequest> policyRequestObjectContent = jacksonTester.parse(jsonString);
 
-        PolicyRequest policyRequest =  policyRequestObjectContent.getObject();
+        PolicyRequest policyRequest = policyRequestObjectContent.getObject();
         assertThat(policyRequest.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(policyRequest.getUser().userId).isEqualTo("testUserId");
         assertThat(policyRequest.getResource().getId()).isEqualTo("/test/file.format");

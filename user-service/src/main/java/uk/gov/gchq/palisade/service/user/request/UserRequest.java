@@ -107,7 +107,7 @@ public final class UserRequest {
 
     /**
      * Builder class for the creation of instances of the UserRequest.  This is a variant of the Fluent Builder
-     * which will use the String or optionally JsonNodes for the components in the build.
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
 

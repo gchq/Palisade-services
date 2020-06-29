@@ -2,6 +2,7 @@ List of third-party dependencies grouped by their license type
 
 ### [Apache Software License 2.0](./licenses/apache_software_license_2.0.txt):
 * jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.10.0](http://github.com/FasterXML/jackson))
+* Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.0](https://github.com/ben-manes/caffeine))
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * project ':json-path' ([com.jayway.jsonpath:json-path:2.4.0](https://github.com/jayway/JsonPath))
@@ -22,7 +23,7 @@ List of third-party dependencies grouped by their license type
 * Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
-* common ([uk.gov.gchq.palisade:common:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
+* common ([uk.gov.gchq.palisade:common:0.4.0-20200626.141034-75](https://github.com/gchq/Palisade-common))
 * hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
 * hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
 

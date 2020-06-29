@@ -15,150 +15,123 @@
  */
 package uk.gov.gchq.palisade.service.policy.response;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.policy.response.common.ResourceMetadata;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.Rule;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
 
 
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response for Policy Service which adds the policy information to data set
- * The next in the sequence will the response from Policy Service.
- * Note there are two class that represents the same data where each has a different purpose.
+ * This class is the response from Policy Service which has added the policy information to data set
+ * The next in the sequence will the response from Query Scope Service.
+ * Note there are two classes that represents the same data where each has a different purpose.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Resource Service
  * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the Query Scope Service
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PolicyResponse {
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final User user;  //
-    private final Map<String, ResourceMetadata> resources; //map of resources related to this query
-    private final Map<String, String> context;  // represents the context information
-    private final Map<String, Rule> rules; // holds all of the rules applicable to this request
 
-    private PolicyResponse(final String token, final User user, final Map<String, ResourceMetadata> resources, final Map<String, String> context, final Map<String, Rule> rules) {
-        this.token = token;
-        this.user = user;
-        this.resources = resources;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private final JsonNode context;  // Json Node representation of the Context
+    private final JsonNode user;  //Json Node representation of the User
+    private final JsonNode resource; // Json Node representation of the Resources
+    public final Rules rules; // holds all of the Rules applicable to this request
+
+    @JsonCreator
+    private PolicyResponse(
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resource") JsonNode resource,
+            final @JsonProperty("rules") Rules rules) {
+
+        Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(user, "User cannot be null");
+        Assert.notNull(resource, "Resource cannot be null");
+        Assert.notNull(rules, "Rules cannot be null");
+
         this.context = context;
+        this.user = user;
+        this.resource = resource;
         this.rules = rules;
     }
 
-    @Generated
-    public String getToken() {
-        return token;
+    public Context getContext() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.context, Context.class);
     }
 
-    @Generated
-    public User getUser() {
-        return user;
+    public User getUser() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.user, User.class);
     }
 
-    @Generated
-    public Map<String, ResourceMetadata> getResources() {
-        return resources;
+    public LeafResource getResource() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
-    @Generated
-    public Map<String, String> getContext() {
-        return context;
-    }
-
-    @Generated
-    public Map<String, Rule> getRules() {
-        return rules;
-    }
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PolicyResponse)) {
-            return false;
-        }
-        PolicyResponse that = (PolicyResponse) o;
-        return token.equals(that.token) &&
-                user.equals(that.user) &&
-                resources.equals(that.resources) &&
-                context.equals(that.context) &&
-                rules.equals(that.rules);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(token, user, resources, context, rules);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", PolicyResponse.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("user=" + user)
-                .add("resources=" + resources)
-                .add("context=" + context)
-                .add("rules=" + rules)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
-     * Builder class for the creation of instances of the PolicyResponse.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the PolicyResponse class.
+     * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String token;
-        private User user;
-        private Map<String, ResourceMetadata> resources;
-        private Map<String, String> context;
-        private Map<String, Rule> rules;
+        private JsonNode context;
+        private JsonNode user;
+        private JsonNode resources;
+        private Rules rules;
 
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
+        public static IContext create() {
+            return context -> user -> resource -> rules ->
+                    new PolicyResponse(context, user, resource, rules);
         }
 
-        public Builder userJson(final User user) {
-            this.user = user;
-            return this;
+        interface IContext {
+            default IUser withContext(Context context) {
+                return withContextNode(MAPPER.valueToTree(context));
+            }
+
+            IUser withContextNode(JsonNode context);
+
         }
 
-        public Builder resource(final Map<String, ResourceMetadata> resources) {
-            this.resources = resources;
-            return this;
+        interface IUser {
+            default IResource withUser(User user) {
+                return withUserNode(MAPPER.valueToTree(user));
+            }
+
+            IResource withUserNode(JsonNode context);
         }
 
-        public Builder context(final Map<String, String> context) {
-            this.context = context;
-            return this;
+        interface IResource {
+            default IRules withResource(Resource resource) {
+                return withResourceNode(MAPPER.valueToTree(resource));
+            }
+
+            IRules withResourceNode(JsonNode resource);
         }
 
-        public Builder rules(final Map<String, Rule> rules) {
-            this.rules = rules;
-            return this;
-        }
+        interface IRules {
+            PolicyResponse withRule(Rules rules);
 
+        }
 
         public PolicyResponse build() {
-            Assert.notNull(token, "Token Id cannot be null");
             Assert.notNull(user, "User cannot be null");
             Assert.notNull(resources, "Resources cannot be null");
             Assert.notNull(resources, "Resources cannot be empty");
             Assert.notNull(context, "Context cannot be null");
-            Assert.notEmpty(context, "Context cannot be empty");
             Assert.notNull(rules, "Context cannot be null");
-            Assert.notEmpty(rules, "Context cannot be empty");
-            return new PolicyResponse(token, user, resources, context, rules);
+            return new PolicyResponse(user, resources, context, rules);
         }
     }
 

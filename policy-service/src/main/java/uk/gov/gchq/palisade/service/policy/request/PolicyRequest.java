@@ -77,8 +77,8 @@ public final class PolicyRequest {
 
 
     /**
-     * Builder class for the creation of instances of the PolicyRequest.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the PolicyRequest class.
+     * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private JsonNode context;
