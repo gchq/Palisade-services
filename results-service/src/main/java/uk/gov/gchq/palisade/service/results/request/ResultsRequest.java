@@ -15,103 +15,128 @@
  */
 package uk.gov.gchq.palisade.service.results.request;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
-import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.results.request.common.domain.ResourceMetadata;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.results.request.common.domain.User;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+
+
 
 
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
- * The data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the request for the Results Service
- * The next in the sequence will the ResultsResponse which is the message that is sent back to the client.
+ * This data will be forwarded to a set of services with each contributing to the processing of this request.
+ * This class represents the request for Results Service.
+ * The next in the sequence will the response from Results Service.
  * Note there are two class that represents the same data where each has a different purpose.
  * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the Query Scope Service
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Response Service
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Results Service
  */
-@JsonDeserialize(builder = ResultsRequest.Builder.class)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ResultsRequest {
 
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final Map<String, ResourceMetadata> resources; //masked resources related to this query
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private ResultsRequest(final String token, final Map<String, ResourceMetadata> resources) {
-        this.token = token;
+    private final JsonNode context;  // Json Node representation of the Context
+    private final JsonNode user;  //Json Node representation of the User
+    private final JsonNode resources; // Json Node representation of the Resources
+    private final JsonNode rules; // Json Node representation of the Rules
+
+    @JsonCreator
+    private ResultsRequest(
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resources") JsonNode resources,
+            final @JsonProperty("rules") JsonNode rules) {
+
+
+        Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(user, "User cannot be null");
+        Assert.notNull(resources, "Resources cannot be null");
+        Assert.notNull(rules, "Rules cannot be null");
+
+        this.context = context;
+        this.user = user;
         this.resources = resources;
+        this.rules = rules;
     }
 
-    @Generated
-    public String getToken() {
-        return token;
+    public Context getContext() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.context, Context.class);
     }
 
-    @Generated
-    public Map<String, ResourceMetadata> getResources() {
-        return resources;
+    public User getUser() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.user, User.class);
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ResultsRequest)) {
-            return false;
-        }
-        ResultsRequest that = (ResultsRequest) o;
-        return token.equals(that.token) &&
-                resources.equals(that.resources);
+    public LeafResource getResource() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.resources, LeafResource.class);
     }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(token, resources);
+    public Rules getRules() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.rules, Rules.class);
     }
 
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ResultsRequest.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
-                .add("resources=" + resources)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
-     * Builder class for the creation of instances of the ResultsRequest.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the ResultsRequest class.
+     * Builder class for the creation of instances of the QueryScopeResponse.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
-    @JsonPOJOBuilder
     public static class Builder {
-        private String token;
-        private Map<String, ResourceMetadata> resources;
+        private JsonNode context;
+        private JsonNode user;
+        private JsonNode resources;
+        private JsonNode rules;
 
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
+        public static IContext create() {
+            return context -> user -> resources -> rules ->
+                    new ResultsRequest(context, user, resources, rules);
         }
 
-        public Builder resource(final Map<String, ResourceMetadata> resources) {
-            this.resources = resources;
-            return this;
+        interface IContext {
+            default IUser withContext(Context context) {
+                return withContextNode(MAPPER.valueToTree(context));
+            }
+
+            IUser withContextNode(JsonNode context);
+
         }
 
-        public ResultsRequest build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(resources, "Resources cannot be null");
-            Assert.notNull(resources, "Resources cannot be empty");
-            return new ResultsRequest(token, resources);
+        interface IUser {
+            default IResource withUser(User user) {
+                return withUserNode(MAPPER.valueToTree(user));
+            }
+
+            IResource withUserNode(JsonNode context);
         }
+
+        interface IResource {
+            default IRules withResource(Resource resource) {
+                return withResourceNode(MAPPER.valueToTree(resource));
+            }
+
+            IRules withResourceNode(JsonNode resource);
+        }
+
+        interface IRules {
+            default ResultsRequest withRules(Rules rules) {
+                return withResourceNode(MAPPER.valueToTree(rules));
+            }
+
+            ResultsRequest withResourceNode(JsonNode rules);
+        }
+
     }
+
 
 }

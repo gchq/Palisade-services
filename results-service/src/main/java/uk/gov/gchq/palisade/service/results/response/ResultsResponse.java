@@ -15,40 +15,29 @@
  */
 package uk.gov.gchq.palisade.service.results.response;
 
-import org.springframework.util.Assert;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
+
 /**
  * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
- * The data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response from the Results Service that is to be sent to the client as a response
- * to their initial request.
- * From the client's perspective, this is the response to their initial request sent to the Palisade Service
- * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest.
- * This will provide the necessary information for them to query the data service.
+ * This data will be forwarded to a set of services with each contributing to the processing of this request.
+ * This class represents the response from Response Service.
+ * This version of the message represents the information that is to be returned to the client and is the final
+ * step in the sequence.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResultsResponse {
 
-    private final String token; // Unique identifier for this specific request end-to-end
-    private final String queuePointer; //reference to where the data is located
+    public final String queuePointer; //reference to where the data is located
 
-    private ResultsResponse(final String token, final String queuePointer) {
-        this.token = token;
+    private ResultsResponse(final @JsonProperty("queuePointer") String queuePointer) {
         this.queuePointer = queuePointer;
-    }
-
-    @Generated
-    public String getToken() {
-        return token;
-    }
-
-    @Generated
-    public String getQueuePointer() {
-        return queuePointer;
     }
 
     @Override
@@ -61,48 +50,40 @@ public final class ResultsResponse {
             return false;
         }
         ResultsResponse that = (ResultsResponse) o;
-        return token.equals(that.token) &&
-                queuePointer.equals(that.queuePointer);
+        return queuePointer.equals(that.queuePointer);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(token, queuePointer);
+        return Objects.hash(queuePointer);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", ResultsResponse.class.getSimpleName() + "[", "]")
-                .add("token='" + token + "'")
                 .add("queuePointer='" + queuePointer + "'")
                 .add(super.toString())
                 .toString();
     }
 
     /**
-     * Builder class for the creation of instances of the ResultsRequest.  The variant of the Builder Pattern is
-     * meant to be used by first populating the Builder class and then us this to create the ResultsRequest class.
+     * Builder class for the creation of instances of the ResultsResponse.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String token;
         private String queuePointer;
 
-        public Builder token(final String token) {
-            this.token = token;
-            return this;
+        public static IQueuePointer create() {
+            return queuePointer ->
+                    new ResultsResponse(queuePointer);
         }
 
-        public Builder queuePointer(final String queuePointer) {
-            this.queuePointer = queuePointer;
-            return this;
-        }
+        interface IQueuePointer {
 
-        public ResultsResponse build() {
-            Assert.notNull(token, "Token Id cannot be null");
-            Assert.notNull(queuePointer, "Resources cannot be null");
-            return new ResultsResponse(token, queuePointer);
+            ResultsResponse withQueuePointer(String queuePointer);
+
         }
     }
 }
