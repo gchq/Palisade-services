@@ -104,17 +104,17 @@ java -jar -Dspring.profiles.active=eureka target/services-manager-0.4.0-SNAPSHOT
 ---
 
 
-#### `examplelibs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/develop/example-library))
+#### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/develop/example-library))
 ```bash
-java -jar -Dspring.profiles.active=examplelibs target/services-manager-0.4.0-SNAPSHOT-exec.jar
+java -jar -Dspring.profiles.active=example-libs target/services-manager-0.4.0-SNAPSHOT-exec.jar
 ```
  * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
 
 
-#### `examplemodel` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/develop/example-model))
+#### `example-model` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/develop/example-model))
 ```bash
-java -jar -Dspring.profiles.active=examplemodel target/services-manager-0.4.0-SNAPSHOT-exec.jar
+java -jar -Dspring.profiles.active=example-model target/services-manager-0.4.0-SNAPSHOT-exec.jar
 ```
  * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
@@ -124,9 +124,9 @@ java -jar -Dspring.profiles.active=examplemodel target/services-manager-0.4.0-SN
 The data used in this example comes checked-in to the repo and does not need generating
  
  
-#### `exampleperf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/develop/performance))
+#### `example-perf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/develop/performance))
 ```bash
-java -jar -Dspring.profiles.active=exampleperf target/services-manager-0.4.0-SNAPSHOT-exec.jar
+java -jar -Dspring.profiles.active=example-perf target/services-manager-0.4.0-SNAPSHOT-exec.jar
 ```
  * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
@@ -135,16 +135,17 @@ java -jar -Dspring.profiles.active=exampleperf target/services-manager-0.4.0-SNA
  
 The data used in this example contains numerous large files, as a result they do not come checked-in with the repo.
 Instead, they must be generated before running the performance tests.
-Either enable generation of performance test data as part of the services-manager `exampleperf` configuration:
+
+Either enable generation of performance test data as part of the services-manager `example-perf` configuration:
  * Change the above command to include the (previously unused) `performance-create-task`:
-```bash
-java -jar -Dspring.profiles.active=exampleperf target/services-manager-0.4.0-SNAPSHOT-exec.jar --manager.schedule=performance-create-task,palisade-task,performance-test-task
-```
+    ```bash
+    java -jar -Dspring.profiles.active=example-perf target/services-manager-0.4.0-SNAPSHOT-exec.jar --manager.schedule=performance-create-task,palisade-task,performance-test-task
+    ```
 Or manually generate the data:  
  * From the [Palisade-examples](https://github.com/gchq/Palisade-examples/) directory, run the following command:
-```bash
-java -jar performance/target/performance-*-exec.jar --performance.action=create
-```
+    ```bash
+    java -jar performance/target/performance-*-exec.jar --performance.action=create
+    ```
 
 
 

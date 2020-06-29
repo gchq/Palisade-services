@@ -17,15 +17,14 @@ spring:
   profiles:
     include:
       - warn
-      - examplemodel
-      - exampleperf-config
-
+      - example-model
+      - example-perf-config
 # use `warn` profile to set all palisade services log levels to warn only to avoid bottle-necking if any service is writing too much
 
 ---
 
 spring:
-  profiles: exampleperf-config
+  profiles: example-perf-config
 
 example:
   version: ${app.version}
@@ -33,7 +32,7 @@ example:
   perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
   service-profiles: &profiles
     - eureka
-    - exampleperf
+    - example-perf
 
 manager:
   mode: run

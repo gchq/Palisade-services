@@ -16,13 +16,13 @@
 spring:
   profiles:
     include:
-      - examplelibs
-      - examplemodel-config
+      - example-libs
+      - example-model-config
 
 ---
 
 spring:
-  profiles: examplemodel-config
+  profiles: example-model-config
 
 example:
   version: ${app.version}
