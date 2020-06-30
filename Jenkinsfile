@@ -251,7 +251,7 @@ spec:
                               --set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} \
                               --namespace dev'
                         } else {
-                            GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase()
+                            def GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase()
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
