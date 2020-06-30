@@ -257,11 +257,11 @@ spec:
                             sh 'extract-addresses'
                             if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                 sh 'echo namespace create succeeded'
-                                sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                                sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                                 //create the branch namespace
                                 if (sh (script: "helm upgrade --install palisade . " +
                               "--set hosting=aws  " +
-                              "--set traefik.install=true,dashboard.install=true " +
+                              "--set traefik.install=false,dashboard.install=false " +
                               "--set global.repository=${ECR_REGISTRY} " +
                               "--set global.hostname=${EGRESS_ELB} " +
                               "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +

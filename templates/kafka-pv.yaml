@@ -15,11 +15,11 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.kafka.name }}
+  name: {{ .Release.Namespace }}-{{ .Values.global.persistence.kafka.name }}
   {{- if eq .Values.hosting "aws" }}
   labels:
     type: amazonEBS
-    selectorFilter: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.kafka.name }}
+    selectorFilter: {{ .Release.Namespace }}-{{ .Values.global.persistence.kafka.name }}
   {{- end }}
 spec:
   accessModes:
