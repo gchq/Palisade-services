@@ -128,6 +128,7 @@ spec:
 ''') {
     node(POD_LABEL) {
         def GIT_BRANCH_NAME
+        def GIT_BRANCH_NAME_LOWER
 
         stage('Bootstrap') {
             if (env.CHANGE_BRANCH) {
@@ -135,6 +136,7 @@ spec:
             } else {
                 GIT_BRANCH_NAME = env.BRANCH_NAME
             }
+            GIT_BRANCH_NAME_LOWER = env.BRANCH_NAME.toLowerCase()
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
@@ -249,7 +251,7 @@ spec:
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
-                            if (sh(script: "namespace-create ${env.BRANCH_NAME}", returnStatus: true) == 0) {
+                            if (sh(script: "namespace-create ${env.BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                 sh 'echo namespace create succeeded'
                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                                 //create the branch namespace
@@ -258,7 +260,7 @@ spec:
                               --set traefik.install=false,dashboard.install=false \
                               --set global.repository=${ECR_REGISTRY},global.hostname=${EGRESS_ELB} \
                               --set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE},global.persistence.redis.aws.volumeHandle=${VOLUME_HANDLE} \
-                              --namespace ${env.BRANCH_NAME}'
+                              --namespace ${env.BRANCH_NAME_LOWER}'
                             }
                         }
                     }
