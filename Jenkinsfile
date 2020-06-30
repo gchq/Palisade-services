@@ -259,7 +259,7 @@ spec:
                                 sh 'echo namespace create succeeded'
                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                                 //create the branch namespace
-                                sh 'helm upgrade --install palisade . \
+                                if (sh (script: "helm upgrade --install palisade . \
                               --set hosting=aws  \
                               --set traefik.install=true,dashboard.install=true \
                               --set global.repository=${ECR_REGISTRY} \
@@ -269,7 +269,11 @@ spec:
                               --set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} \
                               --set global.persistence.redisMaster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} \
                               --set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} \
-                              --namespace ${GIT_BRANCH_NAME_LOWER}'
+                              --namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
+                                    echo("successfully deployed")
+                                } else {
+                                    error("Build failed because of failed maven deploy")
+                                }
                             }
                         }
                     }
