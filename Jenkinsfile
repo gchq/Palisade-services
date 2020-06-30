@@ -274,6 +274,8 @@ spec:
                                 } else {
                                     error("Build failed because of failed maven deploy")
                                 }
+                            } else {
+                                error("Could not create namespace")
                             }
                         }
                     }
