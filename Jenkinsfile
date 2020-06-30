@@ -133,10 +133,15 @@ spec:
         stage('Bootstrap') {
             if (env.CHANGE_BRANCH) {
                 GIT_BRANCH_NAME = env.CHANGE_BRANCH
+                GIT_BRANCH_NAME_LOWER = env.CHANGE_BRANCH.toLowerCase()
+                echo "${GIT_BRANCH_NAME}"
+                echo "${GIT_BRANCH_NAME_LOWER}"
             } else {
                 GIT_BRANCH_NAME = env.BRANCH_NAME
+                GIT_BRANCH_NAME_LOWER = env.BRANCH_NAME.toLowerCase()
+                echo "${GIT_BRANCH_NAME}"
+                echo "${GIT_BRANCH_NAME_LOWER}"
             }
-            GIT_BRANCH_NAME_LOWER = env.BRANCH_NAME.toLowerCase()
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
