@@ -128,15 +128,12 @@ spec:
 ''') {
     node(POD_LABEL) {
         def GIT_BRANCH_NAME
-        def GIT_BRANCH_NAME_LOWER
 
         stage('Bootstrap') {
             if (env.CHANGE_BRANCH) {
                 GIT_BRANCH_NAME = env.CHANGE_BRANCH
-                GIT_BRANCH_NAME_LOWER = env.CHANGE_BRANCH.toLowerCase()
             } else {
                 GIT_BRANCH_NAME = env.BRANCH_NAME
-                GIT_BRANCH_NAME_LOWER = env.BRANCH_NAME.toLowerCase()
             }
             echo sh(script: 'env | sort', returnStdout: true)
         }
@@ -254,6 +251,7 @@ spec:
                               --set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} \
                               --namespace dev'
                         } else {
+                            GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase()
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
