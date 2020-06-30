@@ -42,4 +42,4 @@ spec:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   selector:
     matchLabels:
-      selectorFilter: {{ .Values.global.persistence.classpathJars.name }}
+      selectorFilter: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.classpathJars.name }}

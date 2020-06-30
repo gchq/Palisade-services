@@ -48,7 +48,7 @@ spec:
       storageClassName: {{ .Values.global.persistence.storageClassName }}
       selector:
         matchLabels:
-          selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
+          selectorFilter: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.redisMaster.name }}
       {{- if .Values.master.persistence.matchExpressions }}
       matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
       {{- end -}}

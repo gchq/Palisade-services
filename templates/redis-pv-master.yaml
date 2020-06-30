@@ -15,11 +15,11 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisMaster.name }}
+  name: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.redisMaster.name }}
   {{- if eq .Values.hosting "aws" }}
   labels:
     type: amazonEBS
-    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
+    selectorFilter: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.redisMaster.name }}
   {{- end }}
 spec:
   accessModes:

@@ -282,7 +282,7 @@ spec:
       storageClassName: {{ $.Values.global.persistence.storageClassName }}
       selector:
         matchLabels:
-          selectorFilter: {{ .Values.global.persistence.kafka.name }}
+          selectorFilter: {{ include "palisade.namespace" . }}-{{ .Values.global.persistence.kafka.name }}
 
   {{- end }}
 
