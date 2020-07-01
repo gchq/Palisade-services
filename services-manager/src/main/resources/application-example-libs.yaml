@@ -32,7 +32,7 @@ spring:
 # While the example.version happens to be the same version as services app.version, it should be declared here as a separate name
 example:
   version: ${app.version}
-  path: ../Palisade-examples/example-library
+  path: ../Palisade-examples
   libs: &libraries
     - ${example.path}/example-library/target/example-library-${example.version}.jar
     - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
