@@ -245,7 +245,7 @@ spec:
       {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
-      - name: {{ .Release.Namespace }}-{{ .Values.global.persistence.kafka.name }}
+      - name: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.kafka.name }}
         emptyDir: {}
         {{- end }}
         {{- if .Values.prometheus.jmx.enabled }}
@@ -272,7 +272,7 @@ spec:
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
-      name: {{ .Release.Namespace }}-{{ .Values.global.persistence.kafka.name }}
+      name: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.kafka.name }}
     spec:
       accessModes:
       - ReadWriteMany
@@ -282,7 +282,7 @@ spec:
       storageClassName: {{ $.Values.global.persistence.storageClassName }}
       selector:
         matchLabels:
-          selectorFilter: {{ .Release.Namespace }}-{{ .Values.global.persistence.kafka.name }}
+          selectorFilter: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.kafka.name }}
 
   {{- end }}
 

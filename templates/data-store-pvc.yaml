@@ -44,5 +44,5 @@ spec:
   storageClassName: {{ $.Values.global.persistence.storageClassName }}
   selector:
     matchLabels:
-      selectorFilter: {{ $.Release.Namespace }}-{{ $name }}
+      selectorFilter: {{ include "palisade.namespace" $ }}-{{ $name }}
 {{- end }}
