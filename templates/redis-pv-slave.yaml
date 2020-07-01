@@ -31,13 +31,13 @@ spec:
     storage: {{ .Values.global.persistence.redisSlave.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}
+    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/slave
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisSlave.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}
+      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/slave
   {{- end }}
 {{- end }}

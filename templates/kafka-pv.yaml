@@ -31,7 +31,7 @@ spec:
     storage: {{ .Values.global.persistence.kafka.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.kafka.local.hostPath }}
+    path: {{ .Values.global.persistence.kafka.local.hostPath }}/kafka/{{ include "palisade.namespace" . }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
