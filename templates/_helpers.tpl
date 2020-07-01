@@ -87,7 +87,7 @@ Create chart name and version as used by the chart label.
 Modify the namespace if required
  */}}
 {{- define "palisade.namespace" }}
-{{- if .Values.global.uniqueNamespace }}
+{{- if $.Values.global.uniqueNamespace }}
 {{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- if .Release.Namespace }}
@@ -108,3 +108,4 @@ Create the name of the service account to use
     {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+

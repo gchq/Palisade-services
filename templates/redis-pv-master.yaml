@@ -15,17 +15,17 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisMaster.name }}
-  {{- if eq .Values.hosting "aws" }}
+  name: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
   labels:
+    {{- if eq .Values.hosting "aws" }}
     type: amazonEBS
-    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
-  {{- end }}
+    {{- end }}
+    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  storageClassName: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
   capacity:
     storage: {{ .Values.global.persistence.redisMaster.storage }}
   {{- if eq .Values.hosting "local" }}

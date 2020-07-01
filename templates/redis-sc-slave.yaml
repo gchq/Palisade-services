@@ -12,26 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.global.persistence.storageClassDeploy }}
-{{- if .Values.kafka.install }}
+  {{- if .Values.global.persistence.storageClassDeploy }}
+  {{- if .Values.redis.install }}
   {{/* Local Storage classes */}}
-{{- if eq .Values.hosting "local" }}
+  {{- if eq .Values.hosting "local" }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- end }}
-{{/* AWS Storage classes */}}
-{{- if eq .Values.hosting "aws" }}
-{{- if eq .Values.global.persistence.kafka.storageClassName.aws "efs-sc" }}
+  {{- end }}
+  {{/* AWS Storage classes */}}
+  {{- if eq .Values.hosting "aws" }}
+  {{- if eq .Values.global.persistence.redisSlave.storageClassName.aws "efs-sc" }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+  name: {{ .Values.global.persistence.redisSlave.name }}-{{ .Release.Namespace }}
 provisioner: efs.csi.aws.com
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
