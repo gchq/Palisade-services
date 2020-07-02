@@ -153,8 +153,8 @@ public class AuditMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the ResultsRequest.  This is a variant of the Fluent Builder
-     * which will use Java Objects or JsonNodes equivalents for the components in the build.
+     * Builder class for the creation of ResultsRequest instances.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNode equivalents for the components in the build.
      */
     public static class Builder {
         private String timeStamp;
