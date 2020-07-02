@@ -15,27 +15,27 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisMaster.name }}
-  {{- if eq .Values.hosting "aws" }}
+  name: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
   labels:
+    {{- if eq .Values.hosting "aws" }}
     type: amazonEBS
-    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}
-  {{- end }}
+    {{- end }}
+    selectorFilter: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  storageClassName: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
   capacity:
     storage: {{ .Values.global.persistence.redisMaster.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisMaster.local.hostPath }}
+    path: {{ .Values.global.persistence.redisMaster.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/master
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisMaster.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisMaster.aws.volumePath }}
+      path: {{ .Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/master
   {{- end }}

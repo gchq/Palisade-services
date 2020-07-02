@@ -20,6 +20,10 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
 
 server:
   port: 8087
