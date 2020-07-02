@@ -63,18 +63,18 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
         - name: "LOADER_PATH"
-          value: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+          value: {{ include "data-service.deployment.path" . }}
         volumeMounts:
-        - name: {{ .Values.global.persistence.classpathJars.name }}
-          mountPath: {{ .Values.global.persistence.classpathJars.mountPath }}/{{ .Chart.Name }}/classpath/{{ .Chart.Version }}
+        - name: {{ include "data-service.deployment.fullname" . }}
+          mountPath: {{ include "data-service.deployment.path" . }}
         {{- range $name, $value := .Values.global.persistence.dataStores }}
         - name: {{ $name }}
           mountPath: {{ $value.mountPath }}
         {{- end }}
       volumes:
-      - name: {{ .Values.global.persistence.classpathJars.name }}
+      - name: {{ include "data-service.deployment.fullname" . }}
         persistentVolumeClaim:
-          claimName: {{ .Values.global.persistence.classpathJars.name }}
+          claimName: {{ include "data-service.deployment.fullname" . }}
           readOnly: true
       {{- range $name, $_ := .Values.global.persistence.dataStores }}
       - name: {{ $name }}

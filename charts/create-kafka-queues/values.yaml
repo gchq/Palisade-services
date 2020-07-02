@@ -18,28 +18,28 @@ service:
   port: 80
 
 kafkaCreateTopics:
-- name: palisade
-  replicationFactor: 1
-  partitions: 1
-- name: user
-  replicationFactor: 1
-  partitions: 1
-- name: resource
-  replicationFactor: 1
-  partitions: 1
-- name: policy
-  replicationFactor: 1
-  partitions: 1
-- name: query-scope
-  replicationFactor: 1
-  partitions: 1
-- name: results-controller
-  replicationFactor: 1
-  partitions: 1
+  - name: palisade
+    replicationFactor: 1
+    partitions: 1
+  - name: user
+    replicationFactor: 1
+    partitions: 1
+  - name: resource
+    replicationFactor: 1
+    partitions: 1
+  - name: policy
+    replicationFactor: 1
+    partitions: 1
+  - name: query-scope
+    replicationFactor: 1
+    partitions: 1
+  - name: results-controller
+    replicationFactor: 1
+    partitions: 1
 
 image:
   name: create-kafka-queues
-  tag: a9f62f8-SNAPSHOT
+  tag: 0b7615e-SNAPSHOT
   pullPolicy: IfNotPresent
 
 resources:
