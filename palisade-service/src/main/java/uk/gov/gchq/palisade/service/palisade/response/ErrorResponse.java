@@ -22,10 +22,10 @@ import org.springframework.util.Assert;
 
 /**
  * Error message in human readable form.  This can be generated in any of the services.  Once an error occurs
- * in a service,  processing of the requests stops.  This messaging is constructed and forwarded to the Results
- * Service skipping any services that have not been preformed.  Results services will forward this message back
+ * in a service,  processing of the request stops.  This message is constructed and forwarded to the results-service
+ * skipping any other services that have not been preformed.  The results-service will forward this message back
  * to client who should be given enough information to correct the problem before tying again.
- * The technical information will contain information that may help in understanding the issue and so may contain
+ * The technical message will contain information that may help in understanding the issue and so may contain
  * information about the service which should not be made public such as the stack trace of the error.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
