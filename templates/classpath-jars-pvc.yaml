@@ -15,11 +15,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.global.persistence.classpathJars.name }}
+  name: {{ include "palisade.deployment.fullname" . }}
   labels:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  namespace: {{ include "palisade.namespace" . }}
 # The palisade-classpath-jars PV is set to a reclaim policy of DELETE
 # In the future we may want to set the policy to RETAIN, in this situation where a
 # helm upgrade makes a modification to the PV
@@ -36,10 +37,10 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: {{ .Values.global.persistence.storageClassName }}
+  storageClassName: {{- pluck $.Values.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   selector:
     matchLabels:
-      selectorFilter: {{ .Values.global.persistence.classpathJars.name }}
+      selectorFilter: {{ include "palisade.deployment.fullname" . }}

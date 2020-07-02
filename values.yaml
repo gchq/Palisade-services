@@ -60,15 +60,22 @@ global:
   # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
   repository: palisade
 
+  # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
+  deployment: codeRelease
+
   # see charts/kafka/charts/zookeeper
   zookeeperConnectString: palisade-zookeeper:2181
 
   # persistent-volume and associated claims configurations
   persistence:
-    storageClassDeploy: false
-    storageClassName: efs-sc
+    storageClassDeploy: true
+
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
+      storageClassName:
+        _default: local-storage
+        local: local-storage
+        aws: efs-sc
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
@@ -90,6 +97,10 @@ global:
     # nb. the mountPath here will be referenced by all client resource requests
     dataStores:
       palisade-data-store:
+        storageClassName:
+          _default: local-storage
+          local: local-storage
+          aws: efs-sc
         mountPath: "/data/local-data-store"
         storage: 1Gi
         local:
@@ -100,6 +111,10 @@ global:
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
+      storageClassName:
+        _default: local-storage
+        local: local-storage
+        aws: efs-sc
       name: kafka-persistence
       storage: 1Gi
       local:
@@ -110,6 +125,10 @@ global:
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
+      storageClassName:
+        _default: local-storage
+        local: local-storage
+        aws: efs-sc
       name: redis-persistence-master
       storage: 8Gi
       local:
@@ -119,6 +138,10 @@ global:
         volumePath: "/"
 
     redisSlave:
+      storageClassName:
+        _default: local-storage
+        local: local-storage
+        aws: efs-sc
       name: redis-persistence-slave
       storage: 8Gi
       local:
@@ -127,6 +150,12 @@ global:
         volumeHandle: null
         volumePath: "/"
 
+    redisCluster:
+      storageClassName:
+        _default: local-storage
+        local: local-storage
+        aws: efs-sc
+      name: redis-persistence-cluster
 
   # must be last for file to be appended with addresses
   globalIPAddresses:
