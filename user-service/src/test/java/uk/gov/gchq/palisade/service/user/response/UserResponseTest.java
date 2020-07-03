@@ -79,7 +79,7 @@ class UserResponseTest {
      * @throws IOException if it fails to parse the object
      */
     @Test
-    public void testDeserialiseJsonToOriginalRequest() throws IOException {
+    public void testDeserialiseJsonToUserResponse() throws IOException {
 
         String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
         ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
