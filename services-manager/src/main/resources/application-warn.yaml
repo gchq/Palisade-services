@@ -13,16 +13,28 @@
 # limitations under the License.
 #
 
-# Included by eureka and static
+# Start EVERYTHING in WARN logging (or kick them into it with the --logging runtime flag)
+# Can be included in the spring active profiles with any other profile
+# Don't start services-manager in warn though
+warn-level: &warn
+  root: "WARN"
 
-# Configure h2 as persistence store (for local examples)
-spring:
-  datasource:
-    url: jdbc:h2:file:./palisade-cache-h2
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+manager:
+  services:
+    audit-service:
+      level: *warn
+
+    data-service:
+      level: *warn
+
+    palisade-service:
+      level: *warn
+
+    policy-service:
+      level: *warn
+
+    resource-service:
+      level: *warn
+
+    user-service:
+      level: *warn
