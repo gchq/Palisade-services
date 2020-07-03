@@ -45,11 +45,9 @@ management:
 population:
   resourceProvider: std
 
+# Available options: simple, hadoop
 resource:
-  # Available options: simple, hadoop
   implementation: simple
-  # If a type for the resource cannot be deduced, use this as the default
-  defaultType: java.lang.String
 
 web:
   client:

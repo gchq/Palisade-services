@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
-    private final SimpleResourceService service = new SimpleResourceService("data-service", "java.lang.String");
+    private final SimpleResourceService service = new SimpleResourceService("data-service");
 
 
     @Test

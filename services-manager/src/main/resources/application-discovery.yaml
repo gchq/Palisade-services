@@ -19,8 +19,6 @@ app:
   version: '@project.version@'
 
 manager:
-  mode: run
-
   schedule:
     - discovery-task
 

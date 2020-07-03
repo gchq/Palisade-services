@@ -76,10 +76,9 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
     public static final Integer CORE_POOL_SIZE = 6;
 
+
     @Value("${web.client.data-service:data-service}")
     private String dataServiceName;
-    @Value("${resource.defaultType}")
-    private String defaultResourceType;
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
@@ -182,7 +181,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
     public ResourceService simpleResourceService() {
-        return new SimpleResourceService(dataServiceName, defaultResourceType);
+        return new SimpleResourceService(dataServiceName);
     }
 
     /**

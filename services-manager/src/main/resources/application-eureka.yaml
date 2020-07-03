@@ -29,8 +29,6 @@ spring:
   profiles: eureka-config
 
 manager:
-  mode: run
-
   schedule:
     - palisade-task
 
