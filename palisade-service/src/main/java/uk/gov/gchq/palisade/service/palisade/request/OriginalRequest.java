@@ -34,8 +34,8 @@ import java.util.StringJoiner;
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This version represents the original request.
- * Next in the sequence is User Service where this data will be used to request a User.
- * Note there are two classes that, effectively, represent the same data but represent a different stage of the process.
+ * Next in the sequence is the input for user-service where this data will be used as a request for a User.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
  */
@@ -65,14 +65,17 @@ public final class OriginalRequest {
         this.context = context;
     }
 
+    @Generated
     public String getUserId() {
         return userId;
     }
 
+    @Generated
     public String getResourceId() {
         return resourceId;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }

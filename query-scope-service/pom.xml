@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>query-scope-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/query-scope-service</url>
 
     <properties>
         <eureka.version>1.9.16</eureka.version>

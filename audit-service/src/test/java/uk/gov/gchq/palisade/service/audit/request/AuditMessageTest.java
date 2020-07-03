@@ -51,7 +51,7 @@ public class AuditMessageTest {
      * @throws IOException if it fails to parse the object
      */
     @Test
-    public void testSerialiseResourceResponseToJson() throws IOException {
+    public void testSerialiseAuditMessageToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
         User user = User.create("testUserId");
@@ -75,26 +75,28 @@ public class AuditMessageTest {
                 .withRecordsProcessed(37)
                 .withErrorMessage(null);
 
-        JsonContent<AuditMessage> auditRequest2JsonContent = jacksonTester.write(auditMessage);
+        JsonContent<AuditMessage> auditMessageJsonContent = jacksonTester.write(auditMessage);
 
-        assertThat(auditRequest2JsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
-        assertThat(auditRequest2JsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(auditMessageJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
+        assertThat(auditMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
 
     }
 
+
+
     /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
+     * Create the AuditMessage object from a Json string and then test the content of the object.
      *
      * @throws IOException if it fails to parse the string into an object
      */
     @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
+    public void testDeserializeJsonToAuditMessage() throws IOException {
 
 
         String jsonString = "{\"timeStamp\":\"testTimeStamp\",\"serverIp\":\"testServerIP\",\"serverHostname\":\"testServerIP\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"userId\":\"testUserID\",\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resourceId\":\"testResourceId\",\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"testResourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{}},\"numberOfRecordsReturned\":42,\"numberOfRecordsProcessed\":37,\"errorMessage\":null}";
-        ObjectContent<AuditMessage> auditRequest2ObjectContent =  jacksonTester.parse(jsonString);
+        ObjectContent<AuditMessage> auditMessageObjectContent =  jacksonTester.parse(jsonString);
 
-        AuditMessage auditMessage =  auditRequest2ObjectContent.getObject();
+        AuditMessage auditMessage =  auditMessageObjectContent.getObject();
         assertThat(auditMessage.context.getPurpose()).isEqualTo("testContext");
         assertThat(auditMessage.user.userId).isEqualTo("testUserId");
         assertThat(auditMessage.resource.getId()).isEqualTo("testResourceId");
@@ -102,5 +104,38 @@ public class AuditMessageTest {
 
     }
 
+
+
+    /**
+     * Create the AuditMessage object for the audit-service from a Json string based on the content from an
+     * AuditMessage.  This unit test is meant to demonstrate the sending of an AuditMessage from one the
+     * different services being sent to the audit-service where it is processed.  In this instance the Json string
+     * is the message created in the palisade-service and is then forwarded to the audit-service.  The AuditMessage
+     * (for audit-service) should be able to represent the data from this variant (palisade-service) along with all
+     * of the other versions from each of the services.
+     *
+     * @throws IOException if it fails to parse the string into an object
+     */
+    @Test
+    public void testDeserializeJsonFromPalisadeServiceToAuditMessage() throws IOException {
+
+        //message content for a message sent from Palisade service.
+        String jsonString = "{\"timeStamp\":\"testTimeStamp\",\"serverIp\":\"testServerIP\",\"serverHostname\":\"testServerHoseName\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"userId\":\"testUserId\",\"resourceId\":\"testResourceId\",\"errorMessage\":null}";
+
+        ObjectContent<AuditMessage> auditMessageObjectContent =  jacksonTester.parse(jsonString);
+
+        AuditMessage auditMessage =  auditMessageObjectContent.getObject();
+        assertThat(auditMessage.context.getPurpose()).isEqualTo("testContext");
+        assertThat(auditMessage.userId).isEqualTo("testUserId");
+        assertThat(auditMessage.resourceId).isEqualTo("testResourceId");
+
+        assertThat(auditMessage.user).isNull();
+        assertThat(auditMessage.resource).isNull();
+        assertThat(auditMessage.rules).isNull();
+
+        assertThat(auditMessage.numberOfRecordsProcessed).isEqualTo(0);
+
+
+    }
 
 }

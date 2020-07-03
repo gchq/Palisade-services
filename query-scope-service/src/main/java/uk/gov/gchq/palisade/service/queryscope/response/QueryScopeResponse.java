@@ -34,14 +34,15 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 
+
 /**
- * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
+ * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response for Query Scope Service.
- * The next in the sequence will the request from Results Service.
- * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the Query Scope Service
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Results Service
+ * This version represents the output for query-scope-service with the filtered version of the request.
+ * Next in the sequence will be the input for the result-service which will construct a response to the client.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the query-scope-service.
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class QueryScopeResponse {
@@ -72,18 +73,22 @@ public class QueryScopeResponse {
         this.rules = rules;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
 
+    @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resources, LeafResource.class);
     }
 
+    @Generated
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }

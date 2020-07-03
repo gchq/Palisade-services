@@ -24,23 +24,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.results.request.common.domain.User;
 
-
-
-
-
 /**
- * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
+ * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the request for Results Service.
- * The next in the sequence will the response from Results Service.
- * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the Query Scope Service
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the Results Service
+ * This version represents the input for results-service to construct a response to the original request from the client.
+ * Next in the sequence will be the output for the result-service which will be a response to the client.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the query-scope-service.
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ResultsRequest {
@@ -71,18 +68,23 @@ public class ResultsRequest {
         this.rules = rules;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
+
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
 
+    @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resources, LeafResource.class);
     }
 
+    @Generated
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
@@ -137,6 +139,5 @@ public class ResultsRequest {
         }
 
     }
-
 
 }

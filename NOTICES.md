@@ -23,9 +23,9 @@ List of third-party dependencies grouped by their license type
 * Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
-* common ([uk.gov.gchq.palisade:common:0.4.0-20200626.141034-75](https://github.com/gchq/Palisade-common))
-* hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
-* hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
+* common ([uk.gov.gchq.palisade:common:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
+* hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.4.0-20200630.084659-36](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
+* hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.4.0-20200630.084637-24](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
 
 ### [CDDL and GNU GPL 2 w/ Classpath Exception](./licenses/cddl_gplv2_ce.html):
 * JavaBeans Activation Framework API jar ([javax.activation:javax.activation-api:1.2.0](http://java.net/all/javax.activation-api/))

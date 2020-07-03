@@ -33,11 +33,11 @@ import java.util.Map;
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the response from the Use Service.
- * The next in the sequence will the request for Resource Service.
- * Note there are two class that represent effectively the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the client request that came into Palisade Service.
- * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the Resource Service
+ * This version represents the output for user-service where the User has been identified.
+ * Next in the sequence will be the request for resource-service.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
+ * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserResponse {
@@ -97,30 +97,30 @@ public final class UserResponse {
              */
             IContext withResource(String resourceId);
         }
-    }
 
-    interface IContext {
-        /**
-         * @param context the context that was passed by the client to the palisade service
-         * @return the {@link UserResponse}
-         */
-        default IUser withContext(Map<String, String> context) {
-            return withContextNode(MAPPER.valueToTree(context));
+
+        interface IContext {
+            /**
+             * @param context the context that was passed by the client to the palisade service
+             * @return the {@link UserResponse}
+             */
+            default IUser withContext(Map<String, String> context) {
+                return withContextNode(MAPPER.valueToTree(context));
+            }
+
+            IUser withContextNode(JsonNode context);
+
         }
 
-        IUser withContextNode(JsonNode context);
 
+        interface IUser {
+            /**
+             * @param user the context that was passed by the client to the palisade service
+             * @return the {@link UserResponse}
+             */
+            UserResponse withUser(User user);
+
+        }
     }
-
-
-    interface IUser {
-        /**
-         * @param user the context that was passed by the client to the palisade service
-         * @return the {@link UserResponse}
-         */
-        UserResponse withUser(User user);
-
-    }
-
 
 }

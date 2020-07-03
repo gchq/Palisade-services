@@ -32,13 +32,13 @@ import java.util.StringJoiner;
 
 
 /**
- * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
+ * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class represents the response from the Resource Service which adds the resource information to data set
- * The next in the sequence will the request for Policy Service.
- * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the Resource Service
- * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the Policy Service
+ * This version represents the output for resource-service where the resource has been identified.
+ * Next in the sequence will be the request for policy-service.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
+ * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResourceResponse {
@@ -63,10 +63,12 @@ public final class ResourceResponse {
         this.resource = resource;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }
 
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(user, User.class);
     }

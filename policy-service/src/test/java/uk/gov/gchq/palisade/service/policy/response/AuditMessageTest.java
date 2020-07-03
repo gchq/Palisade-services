@@ -46,7 +46,8 @@ public class AuditMessageTest {
         private JacksonTester<AuditMessage> jacksonTester;
 
         /**
-         * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+         * Create the AuditMessage object using the builder and then serialise it to a Json string.
+         * Test the content of the Json string
          *
          * @throws IOException if it fails to parse the object
          */
@@ -80,7 +81,7 @@ public class AuditMessageTest {
         }
 
         /**
-         * Create the ResourceResponse object from a Json string and then test the content of the object.
+         * Create the AuditMessage object from a Json string and then test the content of the object.
          *
          * @throws IOException if it fails to parse the string into an object
          */

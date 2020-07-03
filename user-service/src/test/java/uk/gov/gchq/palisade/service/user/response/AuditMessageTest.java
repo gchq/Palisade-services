@@ -45,7 +45,8 @@ public class AuditMessageTest {
         private JacksonTester<AuditMessage> jacksonTester;
 
         /**
-         * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+         * Create the AuditMessage object using the builder and then serialise it to a Json string.
+         * Test the content of the Json string
          *
          * @throws IOException if it fails to parse the object
          */
@@ -78,7 +79,7 @@ public class AuditMessageTest {
         }
 
         /**
-         * Create the ResourceResponse object from a Json string and then test the content of the object.
+         * Create the AuditMessage object from a Json string and then test the content of the object.
          *
          * @throws IOException if it fails to parse the string into an object
          */
@@ -87,9 +88,9 @@ public class AuditMessageTest {
 
 
             String jsonString = "{\"timeStamp\":\"testTimeStamp\",\"serverIp\":\"testServerIP\",\"serverHostname\":\"testServerIP\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"userId\":\"testUserID\",\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resourceId\":\"testResourceId\",\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"testResourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{}},\"numberOfRecordsReturned\":42,\"numberOfRecordsProcessed\":37,\"errorMessage\":null}";
-            ObjectContent<AuditMessage> auditRequest2ObjectContent =  jacksonTester.parse(jsonString);
+            ObjectContent<AuditMessage> auditMessageObjectContent =  jacksonTester.parse(jsonString);
 
-            AuditMessage auditMessage =  auditRequest2ObjectContent.getObject();
+            AuditMessage auditMessage =  auditMessageObjectContent.getObject();
             assertThat(auditMessage.context.getPurpose()).isEqualTo("testContext");
             assertThat(auditMessage.user.userId).isEqualTo("testUserId");
 

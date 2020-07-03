@@ -49,7 +49,10 @@ public class ErrorResponse {
     }
 
 
-
+    /**
+     * Builder class for the creation of instances of the ErrorResponse.  This is a variant of the Fluent Builder
+     * which will use the String for the components in the build.
+     */
     public static class Builder {
         public static ITechMessage create() {
             return techMessage -> errorMessage ->

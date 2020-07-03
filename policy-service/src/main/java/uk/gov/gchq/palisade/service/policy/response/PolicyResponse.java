@@ -24,20 +24,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 
+
 /**
- * Represents the  data that has been sent from the client to Palisade Service for a request to access data.
+ * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This class is the response from Policy Service which has added the policy information to data set
- * The next in the sequence will the response from Query Scope Service.
- * Note there are two classes that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the Resource Service
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the Query Scope Service
+ * This version represents the output for policy-service where the related policies have been added.
+ * Next in the sequence will be the input for the query-scope-service with the policies added.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
+ * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
+ *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PolicyResponse {
@@ -67,14 +70,17 @@ public class PolicyResponse {
         this.rules = rules;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
 
+    @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
@@ -125,14 +131,6 @@ public class PolicyResponse {
 
         }
 
-        public PolicyResponse build() {
-            Assert.notNull(user, "User cannot be null");
-            Assert.notNull(resources, "Resources cannot be null");
-            Assert.notNull(resources, "Resources cannot be empty");
-            Assert.notNull(context, "Context cannot be null");
-            Assert.notNull(rules, "Context cannot be null");
-            return new PolicyResponse(user, resources, context, rules);
-        }
     }
 
 }

@@ -30,13 +30,15 @@ import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+
 /**
+ * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the data used in request for the Resource Service.
- * Next in the sequence is response form the Resource Service.
- * Note there are two class that represents the same data where each has a different purpose.
- * uk.gov.gchq.palisade.service.user.response.UserResponse is the output of the User Service
- * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input of the Resource Service
+ * This version represents the input for resource-service where the resource is to be identified.
+ * Next in the sequence will be the response for resource-service.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
+ * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResourceRequest {
@@ -62,10 +64,12 @@ public final class ResourceRequest {
         this.user = user;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }
 
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(user, User.class);
     }
