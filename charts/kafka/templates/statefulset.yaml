@@ -263,23 +263,24 @@ spec:
         {{- end }}
         {{- range .Values.secrets }}
         {{- if .mountPath }}
-      - name: {{ include "kafka.fullname" $ }}- {{ .name }}
-        secret:
-          secretName: {{ .name }}
+    - name: {{ include "kafka.fullname" $ }}- {{ .name }}
+      secret:
+        secretName: {{ .name }}
       {{- end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
-      name: {{ .Values.global.persistence.kafka.name }}
+      name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
     spec:
       accessModes:
       - ReadWriteMany
       resources:
         requests:
           storage: {{ .Values.persistence.size }}
-      storageClassName: {{ $.Values.global.persistence.storageClassName }}
+      {{- $_ := set . "index" "kafka" }}
+      storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
       selector:
         matchLabels:
           selectorFilter: {{ .Values.global.persistence.kafka.name }}
