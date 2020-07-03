@@ -42,15 +42,20 @@ public class SimpleResourceService implements ResourceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
     private final String dataServiceName;
+    private final String resourceType;
 
     /**
      * Instantiates a new Simple resource service.
      *
      * @param dataServiceName the data service name used in the connection detail to contain the location,
      *                        either URL or hostname for the data service associated with this resource
+     * @param resourceType    the type of resource returned by the service, a string representation of a
+     *                        java class - the class itself does not need to be available to the service,
+     *                        as it is only passed around as a String
      */
-    public SimpleResourceService(final String dataServiceName) {
+    public SimpleResourceService(final String dataServiceName, final String resourceType) {
         this.dataServiceName = dataServiceName;
+        this.resourceType = resourceType;
     }
 
     private Stream<File> filesOf(final Path path) {
@@ -82,7 +87,7 @@ public class SimpleResourceService implements ResourceService {
 
         return ((FileResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
-                .type("java.lang.String")
+                .type(this.resourceType)
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
     }
 
