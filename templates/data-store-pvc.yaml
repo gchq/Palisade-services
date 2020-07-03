@@ -20,13 +20,13 @@
 # then we need to force the PVC to also be deleted.
 # hence we need to hash or sha the PV as an annotation
 
-#N.B The datastore would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
+# N.B The datastore would theoretically only need accessMode ReadOnlyMany
+# however, the CSI driver's plugin GetVolumeHandle method determines whether
+# the volume is actually used by other pods as a different mode
+# there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+# as to the slightly anomalous behaviour
 
-{{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- range $name, $store := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -41,10 +41,8 @@ spec:
   - ReadWriteMany
   resources:
     requests:
-      storage: {{ $value.storage }}
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
-  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
-  storageClassName: {{- $sc | default $default | indent 1 }}
+      storage: {{ $store.storage }}
+  storageClassName: {{ pluck $.Values.hosting $store.storageClassName | first | default $store.storageClassName._default }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}

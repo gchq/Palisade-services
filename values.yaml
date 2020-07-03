@@ -22,7 +22,7 @@ hosting: local
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
   install: false
-metrics-server:
+metricsServer:
   # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
 dashboard:
@@ -31,12 +31,9 @@ dashboard:
 kafka:
   # install: install kafka streaming platform
   install: true
-redis:
-  # install: install redis persistence and caching data storage platform
-  install: true
-redis-cluster:
+redisCluster:
   # install: install clustered redis persistence and caching data storage platform
-  install: false
+  install: true
 
 namespaces:
   default: default
@@ -106,7 +103,7 @@ global:
         local:
           hostPath: "/"
         aws:
-          volumeHandle: data
+          volumeHandle: null
           volumePath: "/"
 
     # kafka: Store used by kafka for persisting stream logs
@@ -124,38 +121,18 @@ global:
         volumePath: "/"
 
     # redis: Store used by redis and redis-cluster for persistence and caching
-    redisMaster:
-      storageClassName:
-        _default: local-storage
-        local: local-storage
-        aws: efs-sc
-      name: redis-persistence-master
-      storage: 8Gi
-      local:
-        hostPath: "/"
-      aws:
-        volumeHandle: null
-        volumePath: "/"
-
-    redisSlave:
-      storageClassName:
-        _default: local-storage
-        local: local-storage
-        aws: efs-sc
-      name: redis-persistence-slave
-      storage: 8Gi
-      local:
-        hostPath: "/"
-      aws:
-        volumeHandle: null
-        volumePath: "/"
-
     redisCluster:
       storageClassName:
         _default: local-storage
         local: local-storage
         aws: efs-sc
       name: redis-persistence-cluster
+      storage: 8Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
 
   # must be last for file to be appended with addresses
   globalIPAddresses:

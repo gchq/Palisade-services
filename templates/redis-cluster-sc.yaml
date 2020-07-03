@@ -12,26 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-  {{- if .Values.global.persistence.storageClassDeploy }}
-  {{- if .Values.redis.install }}
-  {{/* Local Storage classes */}}
-  {{- if eq .Values.hosting "local" }}
+{{- if and .Values.global.persistence.storageClassDeploy .Values.redisCluster.install }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+  name: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
+{{/* Local Storage classes */}}
+{{- if eq .Values.hosting "local" }}
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-  {{- end }}
-  {{/* AWS Storage classes */}}
-  {{- if eq .Values.hosting "aws" }}
-  {{- if eq .Values.global.persistence.redisSlave.storageClassName.aws "efs-sc" }}
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: {{ .Values.global.persistence.redisSlave.name }}-{{ .Release.Namespace }}
+{{/* AWS Storage classes */}}
+{{- else if eq .Values.hosting "aws" }}
+{{/* AWS-EFS Storage classes */}}
+{{- if eq .Values.global.persistence.redisCluster.storageClassName.aws "efs-sc" }}
 provisioner: efs.csi.aws.com
-  {{- end }}
-  {{- end }}
-  {{- end }}
-  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

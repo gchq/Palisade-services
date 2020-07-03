@@ -12,32 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.redis.install }}
+{{- if .Values.redisCluster.install }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+  name: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
   labels:
     {{- if eq .Values.hosting "aws" }}
     type: amazonEBS
-  {{- end }}
-    selectorFilter: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+    {{- end }}
+    selectorFilter: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+  storageClassName: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
   capacity:
-    storage: {{ .Values.global.persistence.redisSlave.storage }}
+    storage: {{ .Values.global.persistence.redisCluster.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/slave
+    path: {{ .Values.global.persistence.redisCluster.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/cluster
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisSlave.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisCluster.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/slave
+      path: {{ .Values.global.persistence.redisCluster.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/cluster
   {{- end }}
 {{- end }}

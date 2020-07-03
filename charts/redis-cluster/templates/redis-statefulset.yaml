@@ -197,7 +197,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
             - name: default-config
@@ -258,7 +258,7 @@ spec:
           resources:
           {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           volumeMounts:
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisCluster.name }}-{{ include "palisade.namespace" . }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
         {{- end }}
