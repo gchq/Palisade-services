@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.queryscope.response;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -35,24 +34,50 @@ import java.util.StringJoiner;
  * Each individual service sends a record to the Audit Service for every request that it receives.
  * The components of the message will differ depending on which service has sent the data and if the processing was
  * successful or not.
- *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public final class AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    /**
+     * Time when the service processed the request.
+     */
+    public final String timeStamp;
 
+    /**
+     * The server IP address for the service
+     */
+    public final String serverIp;
 
+    /**
+     * The server host name for the service
+     */
+    public final String serverHostname;
 
-    public final String timeStamp; //when the service processed the request
-    public final String serverIp;   //server for the service that processed the request
-    public final String serverHostname;  //server host name for the service
+    /**
+     * The context for the client's request.  This contains the information about the user in the context of the
+     * request.
+     */
+    public final Context context;
 
-    public final Context context;  //Context of the client's request
-    public final User user;        //User  for the client.  Can be null if there is a userId
-    public final LeafResource resource; //Resource for the client.  Can be null if there is a Resource Id
-    public final Rules rules;   //Rules that apply to the request.  Can be null if this has not been generated yet.
-    public final String errorMessage;  //Error message that occurred during thge processing of the request.  Will be null if there was no issue.
+    /**
+     * The user corresponding to the given user ID
+     */
+    public final User user;
+
+    /**
+     * The resource that is being requested to access
+     */
+    public final LeafResource resource;
+
+    /**
+     * The rules and restrictions that are in place for accessing the resource
+     */
+    public final Rules<?> rules;
+
+    /**
+     * Error message if there was an issue with the request
+     */
+    public final String errorMessage;
 
     @SuppressWarnings("checkstyle:parameterNumber")
     @JsonCreator
@@ -63,7 +88,7 @@ public class AuditMessage {
             final @JsonProperty("context") Context context,
             final @JsonProperty("user") User user,
             final @JsonProperty("resource") LeafResource resource,
-            final @JsonProperty("rules") Rules rules,
+            final @JsonProperty("rules") Rules<?> rules,
             final @JsonProperty("errorMessage") String errorMessage) {
 
         //required parameters
@@ -139,45 +164,122 @@ public class AuditMessage {
         private Context context;
         private User user;
         private LeafResource resource;
-        private Rules rulesApplied;
+        private Rules<?> rulesApplied;
         private String errorMessage;
 
 
         public static ITimeStamp create() {
-            return timeStamp -> serverIp -> serverHostname -> context -> user ->  resource -> rules  -> errorMessage ->
-                    new AuditMessage(timeStamp, serverIp, serverHostname, context,  user,  resource, rules,  errorMessage);
+            return timeStamp -> serverIp -> serverHostname -> context -> user -> resource -> rules -> errorMessage ->
+                    new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resource, rules, errorMessage);
         }
 
+        /**
+         * Adds the timestamp information for the message.
+         */
         interface ITimeStamp {
+
+            /**
+             * Adds the timestamp for the message.
+             *
+             * @param timeStamp when the message was created.
+             * @return interface  {@link IServerIp} for the next step in the build.
+             */
             IServerIp withTimeStamp(String timeStamp);
         }
 
+        /**
+         * Adds the server IP information for the message.
+         */
         interface IServerIp {
+
+            /**
+             * Adds the server IP information for the message.
+             *
+             * @param serverIp where the message was created.
+             * @return interface  {@link IServerHostname} for the next step in the build.
+             */
             IServerHostname withServerIp(String serverIp);
         }
 
+        /**
+         * Adds the server host name for the message.
+         */
         interface IServerHostname {
+            /**
+             * Adds the server host name for where the message was created.
+             *
+             * @param serverHostname server host name.
+             * @return interface  {@link IContext} for the next step in the build.
+             */
             IContext withServerHostname(String serverHostname);
         }
 
+        /**
+         * Adds the user context information to the message.
+         */
         interface IContext {
+            /**
+             * Adds the user's information for the request.
+             *
+             * @param context the user information for this request.
+             * @return interface  {@link IUser} for the next step in the build.
+             */
             IUser withContext(Context context);
 
         }
 
+        /**
+         * Adds the user information to the message.
+         */
         interface IUser {
+            /**
+             * Adds the user to the message.  This can be null if the user ID is provided.
+             *
+             * @param user making the request.
+             * @return interface {@link IResource} for the next step in the build.
+             */
             IResource withUser(User user);
         }
 
+
+        /**
+         * Adds the information about the resource that is being requested to access
+         */
         interface IResource {
+            /**
+             * Adds the resource.  This can be null if the resource ID is provided.
+             *
+             * @param resource for the request
+             * @return interface {@link IRules} for the next step in the build.
+             */
             IRules withResource(LeafResource resource);
         }
 
+        /**
+         * Adds the restrictions that are to enforced for the resource that is being requested to access
+         */
         interface IRules {
-            IErrorMessage withRules(Rules rules);
+            /**
+             * Adds the rules for the request.  This can be null instances where the message is for a step before
+             * the policy-service.
+             *
+             * @param rules for the request.
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
+            IErrorMessage withRules(Rules<?> rules);
         }
 
+        /**
+         * Adds the error message if there was an issue with processing the request
+         */
         interface IErrorMessage {
+            /**
+             * Adds the error message that has been produced processing the request.  This can be null is there was no
+             * issue with the processing of the request.
+             *
+             * @param errorMessage error message.
+             * @return class {@link AuditMessage} class this builder is set-up to create.
+             */
             AuditMessage withErrorMessage(String errorMessage);
         }
 

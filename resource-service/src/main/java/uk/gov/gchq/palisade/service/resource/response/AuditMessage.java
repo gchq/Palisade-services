@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.resource.response;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -37,24 +36,48 @@ import java.util.StringJoiner;
  *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public final class AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    /**
+     * Time when the service processed the request.
+     */
+    public final String timeStamp;
 
+    /**
+     * The server IP address for the service
+     */
+    public final String serverIp;
 
+    /**
+     * The server host name for the service
+     */
+    public final String serverHostname;
 
-    public final String timeStamp; //when the service processed the request
-    public final String serverIp;   //server for the service that processed the request
-    public final String serverHostname;  //server host name for the service
+    /**
+     * The context for the client's request.  This contains the information about the user in the context of the
+     * request.
+     */
+    public final Context context;
 
-    public final Context context;  //Context of the client's request
+    /**
+     * The user corresponding to the given user ID
+     */
+    public final User user;
 
-    public final User user;        //User  for the client.  Can be null if there is a userId
+    /**
+     * The resource ID that is being requested to access
+     */
+    public final String resourceId;
 
-    public final String resourceId;  //Resource Id for the client.  Can be null if there is a Resource
-    public final LeafResource resource; //Resource for the client.  Can be null if there is a Resource Id
+    /**
+     * The resource that is being requested to access
+     */
+    public final LeafResource resource;
 
-    public final String errorMessage;  //Error message that occurred during thge processing of the request.  Will be null if there was no issue.
+    /**
+     * Error message if there was an issue with the request
+     */
+    public final String errorMessage;
 
     @SuppressWarnings("checkstyle:parameterNumber")
     @JsonCreator
@@ -151,40 +174,63 @@ public class AuditMessage {
                     new AuditMessage(timeStamp, serverIp, serverHostname, context,  user, resourceId, resource,  errorMessage);
         }
 
+        /**
+         * Adds the timestamp information to the object
+         */
         interface ITimeStamp {
             IServerIp withTimeStamp(String timeStamp);
         }
 
+        /**
+         * Adds the server IP address information to the object
+         */
         interface IServerIp {
             IServerHostname withServerIp(String serverIp);
         }
 
+        /**
+         * Adds the server host name information to the object
+         */
         interface IServerHostname {
             IContext withServerHostname(String serverHostname);
         }
 
+        /**
+         * Adds the user context information to the object
+         */
         interface IContext {
             IUser withContext(Context context);
 
         }
 
-
+        /**
+         * Adds the user information for the given ID to the object
+         */
         interface IUser {
             IResourceId withUser(User user);
         }
 
+        /**
+         * Adds the  ID for resource that is being requested to access
+         */
         interface IResourceId {
             IResource withResourceId(String resourceId);
         }
 
+        /**
+         * Adds the information about the resource that is being requested to access
+         */
         interface IResource {
             IErrorMessage withResource(LeafResource resource);
         }
 
+
+        /**
+         * Adds the error message if there was an issue with processing the request
+         */
         interface IErrorMessage {
             AuditMessage withErrorMessage(String errorMessage);
         }
-
     }
 
 }

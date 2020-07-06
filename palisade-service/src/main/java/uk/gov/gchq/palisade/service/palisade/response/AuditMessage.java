@@ -31,11 +31,9 @@ import java.util.StringJoiner;
  * Each individual service sends a record to the Audit Service for every request that it receives.
  * The components of the message will differ depending on which service has sent the data and if the processing was
  * successful or not.
- *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditMessage {
-
 
 
     /**
@@ -164,42 +162,105 @@ public final class AuditMessage {
          * @return fully constructed AuditMessage instance
          */
         public static ITimeStamp create() {
-            return timeStamp -> serverIp -> serverHostname -> context -> userId ->   resourceId ->   errorMessage ->
-                    new AuditMessage(timeStamp, serverIp,  serverHostname, context, userId,  resourceId,  errorMessage);
+            return timeStamp -> serverIp -> serverHostname -> context -> userId -> resourceId -> errorMessage ->
+                    new AuditMessage(timeStamp, serverIp, serverHostname, context, userId, resourceId, errorMessage);
         }
 
         /**
-         * Adds the timestamp information to the object
+         * Adds the timestamp information for the message.
          */
         interface ITimeStamp {
+
+            /**
+             * Adds the timestamp for the message.
+             *
+             * @param timeStamp when the message was created.
+             * @return interface  {@link IServerIp} for the next step in the build.
+             */
             IServerIp withTimeStamp(String timeStamp);
         }
 
+        /**
+         * Adds the server IP information for the message.
+         */
         interface IServerIp {
+
+            /**
+             * Adds the server IP information for the message.
+             *
+             * @param serverIp where the message was created.
+             * @return interface  {@link IServerHostname} for the next step in the build.
+             */
             IServerHostname withServerIp(String serverIp);
         }
 
+        /**
+         * Adds the server host name for the message.
+         */
         interface IServerHostname {
+            /**
+             * Adds the server host name for where the message was created.
+             *
+             * @param serverHostname server host name.
+             * @return interface  {@link IContext} for the next step in the build.
+             */
             IContext withServerHostname(String serverHostname);
         }
 
+        /**
+         * Adds the user context information to the message.
+         */
         interface IContext {
+            /**
+             * Adds the user's information for the request.
+             *
+             * @param context the user information for this request.
+             * @return interface  {@link IUserId} for the next step in the build.
+             */
             IUserId withContext(Context context);
 
         }
 
+        /**
+         * Adds the user ID information to the message.
+         */
         interface IUserId {
-            IResourceId withUserId(String context);
+
+            /**
+             * Adds the user's ID to the message.  Can be null if the user is provided.
+             *
+             * @param userId user ID.
+             * @return interface  {@link IResourceId} for the next step in the build.
+             */
+            IResourceId withUserId(String userId);
         }
 
+
+        /**
+         * Adds the  ID for resource that is being requested to access
+         */
         interface IResourceId {
+            /**
+             * Adds the user to the resource ID.  This can be null if the resource is provided.
+             *
+             * @param resourceId resource id for the request.
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
             IErrorMessage withResourceId(String resourceId);
         }
 
+        /**
+         * Adds the error message if there was an issue with processing the request
+         */
         interface IErrorMessage {
+            /**
+             * Adds the error message that has been produced processing the request.  This can be null is there was no
+             * issue with the processing of the request.
+             *
+             * @param errorMessage error message.
+             * @return class {@link AuditMessage} class this builder is set-up to create.
+             */
             AuditMessage withErrorMessage(String errorMessage);
         }
-
     }
-
 }

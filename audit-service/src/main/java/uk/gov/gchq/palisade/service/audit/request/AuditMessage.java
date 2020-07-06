@@ -376,7 +376,7 @@ public final class AuditMessage {
              * Adds the error message that has been produced processing the request.  This can be null is there was no
              * issue with the processing of the request.
              *
-             * @param errorMessage error message
+             * @param errorMessage error message.
              * @return class {@link AuditMessage} class this builder is set-up to create.
              */
             AuditMessage withErrorMessage(String errorMessage);

@@ -37,11 +37,17 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator
+ * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator.
  */
 public final class UserWithRoles implements IUser {
 
+    /**
+     * List of Roles a user can be in making requests.
+     */
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
+    /**
+     * Constant for the term Role used to define this category by attribute.
+     */
     private static final String ROLE_KEY = "ROLES";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -96,8 +102,6 @@ public final class UserWithRoles implements IUser {
             try {
                 return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
-                return new ArrayList<String>();
-            } catch (IOException e) {
                 return new ArrayList<String>();
             }
         }).orElseGet(ArrayList::new);
