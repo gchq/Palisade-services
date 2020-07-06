@@ -202,15 +202,15 @@ public final class AuditMessage {
         private String resourceId;
         private LeafResource resource;
         private Rules<?> rules;
-        private long numberOfRecordsReturned;
-        private long numberOfRecordsProcessed;
+        private long recordsReturned;
+        private long recordsApplied;
         private String errorMessage;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditMessage class.
          *
-         * @return fully constructed AuditMessage instance
+         * @return fully constructed AuditMessage instance.
          */
         public static ITimeStamp create() {
             return timeStamp -> serverIp -> serverHostname -> context -> userId -> user -> resourceId -> resource -> rules -> recordsReturned -> recordsApplied -> errorMessage ->
@@ -218,45 +218,84 @@ public final class AuditMessage {
         }
 
         /**
-         * Adds the timestamp information to the object
+         * Adds the timestamp information for the message.
          */
         interface ITimeStamp {
+
+            /**
+             * Adds the timestamp for the message.
+             *
+             * @param timeStamp when the message was created.
+             * @return interface  {@link IServerIp} for the next step in the build.
+             */
             IServerIp withTimeStamp(String timeStamp);
         }
 
         /**
-         * Adds the server IP address information to the object
+         * Adds the server IP information for the message.
          */
         interface IServerIp {
+
+            /**
+             * Adds the server IP information for the message.
+             *
+             * @param serverIp where the message was created.
+             * @return interface  {@link IServerHostname} for the next step in the build.
+             */
             IServerHostname withServerIp(String serverIp);
         }
 
         /**
-         * Adds the server host name information to the object
+         * Adds the server host name for the message.
          */
         interface IServerHostname {
+            /**
+             * Adds the server host name for where the message was created.
+             *
+             * @param serverHostname server host name.
+             * @return interface  {@link IContext} for the next step in the build.
+             */
             IContext withServerHostname(String serverHostname);
         }
 
         /**
-         * Adds the user context information to the object
+         * Adds the user context information to the message.
          */
         interface IContext {
+            /**
+             * Adds the user's information for the request.
+             *
+             * @param context the user information for this request.
+             * @return interface  {@link IUserId} for the next step in the build.
+             */
             IUserId withContext(Context context);
 
         }
 
         /**
-         * Adds the user ID information to the object
+         * Adds the user ID information to the message.
          */
         interface IUserId {
+
+            /**
+             * Adds the user's ID to the message.  Can be null if the user is provided.
+             *
+             * @param userId user ID.
+             * @return interface  {@link IUser} for the next step in the build.
+             */
             IUser withUserId(String userId);
         }
 
         /**
-         * Adds the user information for the given ID to the object
+         * Adds the user information to the message.
          */
         interface IUser {
+            /**
+             * Adds the user to the message.  This can be null if the user ID is provided.
+             *
+             * @param user making the request.
+             * @return interface {@link IResourceId} for the next step in the build.
+             */
             IResourceId withUser(User user);
         }
 
@@ -264,6 +303,12 @@ public final class AuditMessage {
          * Adds the  ID for resource that is being requested to access
          */
         interface IResourceId {
+            /**
+             * Adds the user to the resource ID.  This can be null if the resource is provided.
+             *
+             * @param resourceId resource id for the request.
+             * @return interface {@link IResource} for the next step in the build.
+             */
             IResource withResourceId(String resourceId);
         }
 
@@ -271,6 +316,12 @@ public final class AuditMessage {
          * Adds the information about the resource that is being requested to access
          */
         interface IResource {
+            /**
+             * Adds the resource.  This can be null if the resource ID is provided.
+             *
+             * @param resource for the request
+             * @return interface {@link IRules} for the next step in the build.
+             */
             IRules withResource(LeafResource resource);
         }
 
@@ -278,6 +329,13 @@ public final class AuditMessage {
          * Adds the restrictions that are to enforced for the resource that is being requested to access
          */
         interface IRules {
+            /**
+             * Adds the rules for the request.  This can be null instances where the message is for a step before
+             * the policy-service.
+             *
+             * @param rules for the request.
+             * @return interface {@link IRecordsReturned} for the next step in the build.
+             */
             IRecordsReturned withRules(Rules<?> rules);
         }
 
@@ -286,20 +344,41 @@ public final class AuditMessage {
          * the rules.
          */
         interface IRecordsReturned {
-            IRecordsProcessed withRecordsReturned(long numberOfRecordsReturned);
+            /**
+             * Adds the number of records that have been found that meet the criterion.  This can be zero if are no
+             * records that meet the criterion or this message is for a step before results-service.
+             *
+             * @param recordsReturned number of records.
+             * @return interface {@link IRecordsProcessed} for the next step in the build.
+             */
+            IRecordsProcessed withRecordsReturned(long recordsReturned);
         }
 
         /**
          * Adds the number of records that have been processed
          */
         interface IRecordsProcessed {
-            IErrorMessage withRecordsProcessed(long numberOfRecordsProcessed);
+            /**
+             * Adds the number of records that have been processed.  This can be zero if are no
+             * records that have been sent or this message is for a step before results-service
+             *
+             * @param recordsApplied records processed
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
+            IErrorMessage withRecordsProcessed(long recordsApplied);
         }
 
         /**
          * Adds the error message if there was an issue with processing the request
          */
         interface IErrorMessage {
+            /**
+             * Adds the error message that has been produced processing the request.  This can be null is there was no
+             * issue with the processing of the request.
+             *
+             * @param errorMessage error message
+             * @return class {@link AuditMessage} class this builder is set-up to create.
+             */
             AuditMessage withErrorMessage(String errorMessage);
         }
 
