@@ -36,7 +36,10 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class UserWithRoles implements IUser {
+/**
+ * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator.
+ */
+public final class UserWithRoles implements IUser {
 
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
@@ -44,10 +47,17 @@ public class UserWithRoles implements IUser {
 
 
     @JsonProperty("userWithRoles")
-    private final User userWithRoles;
+    private final User userAndRoles; //named userAndRoles to avoid ambiguity with userWithRoles
 
+    /**
+     * user ID for the client.
+     */
     @JsonIgnore
     public final String userId;
+
+    /**
+     * list of roles associated with this user.
+     */
     @JsonIgnore
     public final List<String> roles;
 
@@ -70,20 +80,24 @@ public class UserWithRoles implements IUser {
 
     @JsonCreator
     private UserWithRoles(@JsonProperty("userWithRoles") final User userWithRoles) {
-        this.userWithRoles = userWithRoles;
+        this.userAndRoles = userWithRoles;
         this.userId = userWithRoles.userId;
         this.roles = Collections.unmodifiableList(roleGen(new Proxy(userWithRoles).getAttributes()));
     }
 
     private UserWithRoles(final String userId, final Map<String, String> attributes) {
-        this.userWithRoles = new Proxy(userId, attributes);
+        this.userAndRoles = new Proxy(userId, attributes);
         this.userId = userId;
         this.roles = Collections.unmodifiableList(roleGen(attributes));
     }
 
-
+    /**
+     * Provides the public view of User without the associated rules.
+     *
+     * @return the UserWithRoles as a User
+     */
     public User userWithRoles() {
-        return this.userWithRoles;
+        return this.userAndRoles;
     }
 
 
@@ -93,12 +107,17 @@ public class UserWithRoles implements IUser {
                 return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
                 return new ArrayList<String>();
-            } catch (IOException e) {
-                return new ArrayList<String>();
             }
         }).orElseGet(ArrayList::new);
     }
 
+    /**
+     * Starter method for the Builder class.  This method is called to start the process of creating the
+     * UserWithRoles class.
+     *
+     * @param userId the given ID for the user.
+     * @return interface  {@link IRoles} for the next step in the build.
+     */
     public static IRoles create(final String userId) {
         return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<>(ROLE_KEY,
                 MAPPER.writeValueAsString(Stream.of(roles)
@@ -107,11 +126,27 @@ public class UserWithRoles implements IUser {
         )).collect(toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue)));
     }
 
+    /**
+     * Creates a UserWithRoles from a User.
+     *
+     * @param user that is being used to create the UserWithRoles.
+     * @return new UserWithRoles.
+     */
     public static UserWithRoles create(final User user) {
         return new UserWithRoles(user);
     }
 
+    /**
+     * Adds the roles to the UserWithRoles being build.
+     */
     public interface IRoles {
+        /**
+         * Adds an array of roles.
+         *
+         * @param roles that are to be associated with this user.
+         * @return the completed UserWithRoles instance.
+         * @throws JsonProcessingException if it fails to parse the text
+         */
         UserWithRoles withRoles(String... roles) throws JsonProcessingException;
     }
 }

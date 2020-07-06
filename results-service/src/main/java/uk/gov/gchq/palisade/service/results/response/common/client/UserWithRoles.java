@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.audit.request.common.client;
+package uk.gov.gchq.palisade.service.results.response.common.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,9 +21,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.gov.gchq.palisade.service.audit.request.common.domain.IUser;
-import uk.gov.gchq.palisade.service.audit.request.common.domain.User;
+import uk.gov.gchq.palisade.service.results.request.common.domain.IUser;
+import uk.gov.gchq.palisade.service.results.request.common.domain.User;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,14 +39,14 @@ import static java.util.stream.Collectors.toMap;
 /**
  * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator.
  */
-public final class UserWithRoles implements IUser {
+public class UserWithRoles implements IUser {
 
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @JsonProperty("userWithRoles")
-    private final User userAndRoles; //named userAndRoles to avoid ambiguity with userWithRoles
+    private final User userAndRoles;
 
     /**
      * user ID for the client.
@@ -77,10 +78,10 @@ public final class UserWithRoles implements IUser {
     }
 
     @JsonCreator
-    private UserWithRoles(@JsonProperty("userWithRoles") final User userAndRoles) {
-        this.userAndRoles = userAndRoles;
-        this.userId = userAndRoles.userId;
-        this.roles = Collections.unmodifiableList(roleGen(new Proxy(userAndRoles).getAttributes()));
+    private UserWithRoles(@JsonProperty("userWithRoles") final User userWithRoles) {
+        this.userAndRoles = userWithRoles;
+        this.userId = userWithRoles.userId;
+        this.roles = Collections.unmodifiableList(roleGen(new Proxy(userWithRoles).getAttributes()));
     }
 
     private UserWithRoles(final String userId, final Map<String, String> attributes) {
@@ -108,7 +109,6 @@ public final class UserWithRoles implements IUser {
             }
         }).orElseGet(ArrayList::new);
     }
-
 
     /**
      * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -149,3 +149,5 @@ public final class UserWithRoles implements IUser {
         UserWithRoles withRoles(String... roles) throws JsonProcessingException;
     }
 }
+
+
