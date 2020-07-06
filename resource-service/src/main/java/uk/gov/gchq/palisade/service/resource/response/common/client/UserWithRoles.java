@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.IUser;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
 
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
