@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.audit.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -35,32 +34,70 @@ import java.util.StringJoiner;
  * Each individual service sends a record to the Audit Service for every request that it receives.
  * The components of the message will differ depending on which service has sent the data and if the processing was
  * successful or not.
- *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public final class AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    /**
+     * Time when the service processed the request.
+     */
+    public final String timeStamp;
 
+    /**
+     * The server IP address for the service
+     */
+    public final String serverIp;
 
+    /**
+     * The server host name for the service
+     */
+    public final String serverHostname;
 
-    public final String timeStamp; //when the service processed the request
-    public final String serverIp;   //server for the service that processed the request
-    public final String serverHostname;  //server host name for the service
+    /**
+     * The context for the client's request.  This contains the information about the user in the context of the
+     * request.
+     */
+    public final Context context;
 
-    public final Context context;  //Context of the client's request
+    /**
+     * The user ID for the client
+     */
+    public final String userId;
 
-    public final String userId;    //User Id for the client.  Can be null if there is a User
-    public final User user;        //User  for the client.  Can be null if there is a userId
+    /**
+     * The user corresponding to the given user ID
+     */
+    public final User user;
 
-    public final String resourceId;  //Resource Id for the client.  Can be null if there is a Resource
-    public final LeafResource resource; //Resource for the client.  Can be null if there is a Resource Id
+    /**
+     * The resource ID that is being requested to access
+     */
+    public final String resourceId;
 
-    public final Rules rules;   //Rules that apply to the request.  Can be null if this has not been generated yet.
-    public final long numberOfRecordsReturned; //Number of records that are provided for the request.  Can be 0 if this has not been generated yet.
-    public final long numberOfRecordsProcessed; //Number of records that have been processed for the request.  Can be 0 if this has not been generated yet.
+    /**
+     * The resource that is being requested to access
+     */
+    public final LeafResource resource;
 
-    public final String errorMessage;  //Error message that occurred during the processing of the request.  Will be null if there was no issue.
+    /**
+     * The rules and restrictions that are in place for accessing the resource
+     */
+    public final Rules<?> rules;
+
+    /**
+     * Number of records that are provided for the request Can be zero if this has not been generated yet
+     */
+    public final long numberOfRecordsReturned;
+
+    /**
+     * Number of records that have been processed for the request
+     */
+    public final long numberOfRecordsProcessed;
+
+    /**
+     * Error message if there was an issue with the request
+     */
+    public final String errorMessage;
 
     @SuppressWarnings("checkstyle:parameterNumber")
     @JsonCreator
@@ -73,7 +110,7 @@ public class AuditMessage {
             final @JsonProperty("user") User user,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("resource") LeafResource resource,
-            final @JsonProperty("rules") Rules rules,
+            final @JsonProperty("rules") Rules<?> rules,
             final @JsonProperty("numberOfRecordsReturned") long numberOfRecordsReturned,
             final @JsonProperty("numberOfRecordsProcessed") long numberOfRecordsProcessed,
             final @JsonProperty("errorMessage") String errorMessage) {
@@ -88,7 +125,6 @@ public class AuditMessage {
         this.serverIp = serverIp;
         this.serverHostname = serverHostname;
         this.context = context;
-
 
         //Optional and depends on which service this originated from and if the request was successful or caused an error.
         this.userId = userId;
@@ -165,62 +201,104 @@ public class AuditMessage {
         private User user;
         private String resourceId;
         private LeafResource resource;
-        private Rules rulesApplied;
+        private Rules<?> rules;
         private long numberOfRecordsReturned;
         private long numberOfRecordsProcessed;
         private String errorMessage;
 
-
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * AuditMessage class.
+         *
+         * @return fully constructed AuditMessage instance
+         */
         public static ITimeStamp create() {
             return timeStamp -> serverIp -> serverHostname -> context -> userId -> user -> resourceId -> resource -> rules -> recordsReturned -> recordsApplied -> errorMessage ->
                     new AuditMessage(timeStamp, serverIp, serverHostname, context, userId, user, resourceId, resource, rules, recordsReturned, recordsApplied, errorMessage);
         }
 
+        /**
+         * Adds the timestamp information to the object
+         */
         interface ITimeStamp {
             IServerIp withTimeStamp(String timeStamp);
         }
 
+        /**
+         * Adds the server IP address information to the object
+         */
         interface IServerIp {
             IServerHostname withServerIp(String serverIp);
         }
 
+        /**
+         * Adds the server host name information to the object
+         */
         interface IServerHostname {
             IContext withServerHostname(String serverHostname);
         }
 
+        /**
+         * Adds the user context information to the object
+         */
         interface IContext {
             IUserId withContext(Context context);
 
         }
 
+        /**
+         * Adds the user ID information to the object
+         */
         interface IUserId {
-            IUser withUserId(String context);
+            IUser withUserId(String userId);
         }
 
+        /**
+         * Adds the user information for the given ID to the object
+         */
         interface IUser {
             IResourceId withUser(User user);
         }
 
+        /**
+         * Adds the  ID for resource that is being requested to access
+         */
         interface IResourceId {
             IResource withResourceId(String resourceId);
         }
 
+        /**
+         * Adds the information about the resource that is being requested to access
+         */
         interface IResource {
             IRules withResource(LeafResource resource);
         }
 
+        /**
+         * Adds the restrictions that are to enforced for the resource that is being requested to access
+         */
         interface IRules {
-            IRecordsReturned withRules(Rules rules);
+            IRecordsReturned withRules(Rules<?> rules);
         }
 
+        /**
+         * Adds the number of records that match the request criterion and comply with the restrictions set with
+         * the rules.
+         */
         interface IRecordsReturned {
             IRecordsProcessed withRecordsReturned(long numberOfRecordsReturned);
         }
 
+        /**
+         * Adds the number of records that have been processed
+         */
         interface IRecordsProcessed {
             IErrorMessage withRecordsProcessed(long numberOfRecordsProcessed);
         }
 
+        /**
+         * Adds the error message if there was an issue with processing the request
+         */
         interface IErrorMessage {
             AuditMessage withErrorMessage(String errorMessage);
         }
