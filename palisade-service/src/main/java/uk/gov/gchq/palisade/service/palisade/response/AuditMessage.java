@@ -18,13 +18,10 @@ package uk.gov.gchq.palisade.service.palisade.response;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -160,11 +157,20 @@ public final class AuditMessage {
         private String errorMessage;
 
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * AuditMessage class.
+         *
+         * @return fully constructed AuditMessage instance
+         */
         public static ITimeStamp create() {
             return timeStamp -> serverIp -> serverHostname -> context -> userId ->   resourceId ->   errorMessage ->
                     new AuditMessage(timeStamp, serverIp,  serverHostname, context, userId,  resourceId,  errorMessage);
         }
 
+        /**
+         * Adds the timestamp information to the object
+         */
         interface ITimeStamp {
             IServerIp withTimeStamp(String timeStamp);
         }
