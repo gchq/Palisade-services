@@ -23,6 +23,8 @@ import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -35,18 +37,45 @@ import java.util.StringJoiner;
  *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public final class AuditMessage {
 
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public final String timeStamp; //when the service processed the request
-    public final String serverIp;   //server for the service that processed the request
-    public final String serverHostname;  //server host name for the service
-    public final Context context;  //Context of the client's request
-    public final String userId;    //User Id for the client.  Can be null if there is a User
-    public final String resourceId;  //Resource Id for the client.  Can be null if there is a Resource
-    public final String errorMessage;  //Error message that occurred during the processing of the request.  Will be null if there was no issue.
+    /**
+     * Time when the service processed the request.
+     */
+    public final String timeStamp;
+
+    /**
+     * The server IP address for the service
+     */
+    public final String serverIp;
+
+    /**
+     * The server host name for the service
+     */
+    public final String serverHostname;
+
+    /**
+     * The context for the client's request.  This contains the information about the user in the context of the
+     * request.
+     */
+    public final Context context;
+
+    /**
+     * The user ID for the client
+     */
+    public final String userId;
+
+    /**
+     * The resource ID that is being requested to access
+     */
+    public final String resourceId;
+
+    /**
+     * Error message if there was an issue with the request
+     */
+    public final String errorMessage;
 
     @SuppressWarnings("checkstyle:parameterNumber")
     @JsonCreator

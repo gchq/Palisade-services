@@ -36,7 +36,10 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class UserWithRoles implements IUser {
+/**
+ * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator
+ */
+public final class UserWithRoles implements IUser {
 
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
@@ -44,10 +47,11 @@ public class UserWithRoles implements IUser {
 
 
     @JsonProperty("userWithRoles")
-    private final User userWithRoles;
+    private final User userAndRoles;
 
     @JsonIgnore
     public final String userId;
+
     @JsonIgnore
     public final List<String> roles;
 
@@ -69,21 +73,21 @@ public class UserWithRoles implements IUser {
     }
 
     @JsonCreator
-    private UserWithRoles(@JsonProperty("userWithRoles") final User userWithRoles) {
-        this.userWithRoles = userWithRoles;
-        this.userId = userWithRoles.userId;
-        this.roles = Collections.unmodifiableList(roleGen(new Proxy(userWithRoles).getAttributes()));
+    private UserWithRoles(@JsonProperty("userWithRoles") final User userAndRoles) {
+        this.userAndRoles = userAndRoles;
+        this.userId = userAndRoles.userId;
+        this.roles = Collections.unmodifiableList(roleGen(new Proxy(userAndRoles).getAttributes()));
     }
 
     private UserWithRoles(final String userId, final Map<String, String> attributes) {
-        this.userWithRoles = new Proxy(userId, attributes);
+        this.userAndRoles = new Proxy(userId, attributes);
         this.userId = userId;
         this.roles = Collections.unmodifiableList(roleGen(attributes));
     }
 
 
     public User userWithRoles() {
-        return this.userWithRoles;
+        return this.userAndRoles;
     }
 
 
