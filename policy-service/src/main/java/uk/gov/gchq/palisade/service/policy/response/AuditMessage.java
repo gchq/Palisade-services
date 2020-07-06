@@ -123,7 +123,7 @@ public final class AuditMessage {
         private User user;
         private String resourceId;
         private LeafResource resource;
-        private Rules<?> rulesApplied;
+        private Rules<?> rules;
         private String errorMessage;
 
 

@@ -183,7 +183,7 @@ public final class AuditMessage {
         private Context context;
         private User user;
         private LeafResource resource;
-        private Rules<?> rulesApplied;
+        private Rules<?> rules;
         private long numberOfRecordsReturned;
         private long numberOfRecordsProcessed;
         private String errorMessage;

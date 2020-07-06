@@ -164,7 +164,7 @@ public final class AuditMessage {
         private Context context;
         private User user;
         private LeafResource resource;
-        private Rules<?> rulesApplied;
+        private Rules<?> rules;
         private String errorMessage;
 
 
