@@ -218,7 +218,6 @@ spec:
       - name: data
         emptyDir: {}
         {{- end }}
-  {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
       name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
@@ -230,4 +229,3 @@ spec:
           storage: {{ .Values.persistence.size }}
       {{- $_ := set . "index" "kafka" }}
       storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
-  {{- end }}
