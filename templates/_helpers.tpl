@@ -93,7 +93,7 @@ Modify the namespace if required
 {{- if .Release.Namespace }}
 {{- printf "%s" .Release.Namespace }}
 {{- else }}
-{{- printf "%s" .Values.global.namespace | trunc 63 | trimSuffix "-" }}
+{{- printf "%s" $.Values.global.namespace | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 {{- end }}

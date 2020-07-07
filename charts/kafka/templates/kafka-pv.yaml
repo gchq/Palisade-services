@@ -13,34 +13,40 @@
 # limitations under the License.
 
 {{- if .Values.global.kafka.install }}
+{{- $namespace := include "palisade.namespace" . }}
+{{- $kafkaname := include "kafka.fullname" . }}
+{{ range $index := until (.Values.replicas | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}-0
+  name: {{ $.Values.global.persistence.kafka.name }}-{{ $namespace }}-{{ $index | toString }}
   labels:
-    {{- if eq .Values.global.hosting "aws" }}
+    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
 spec:
   accessModes:
   - ReadWriteMany
   claimRef:
-    namespace: {{ include "palisade.namespace" . }}
-    name: {{ .Values.global.persistence.kafka.name }}-{{ include "kafka.fullname" . }}-0
+    namespace: {{ $namespace }}
+    name: {{ $.Values.global.persistence.kafka.name }}-{{ $kafkaname }}-{{ $index | toString }}
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+    {{- $sc := index $.Values "global" "persistence" "kafka" "storageClassName" $.Values.global.hosting }}
+    {{- $default := index $.Values "global" "persistence" "kafka" "storageClassName" "_default" }}
+  storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
-    storage: {{ .Values.global.persistence.kafka.storage }}
-  {{- if eq .Values.global.hosting "local" }}
+    storage: {{ $.Values.global.persistence.kafka.storage }}
+  {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.kafka.local.hostPath }}/kafka/{{ include "palisade.namespace" . }}/0
+    path: {{ $.Values.global.persistence.kafka.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" .Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.kafka.aws.hostPath }}/kafka/{{ include "palisade.namespace" . }}/0
+      path: {{ $.Values.global.persistence.kafka.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index | toString }}
       type: DirectoryOrCreate
   {{- end }}
+{{- end }}
 {{- end }}
