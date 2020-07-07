@@ -29,12 +29,17 @@ import org.springframework.util.Assert;
  * information about the service which should not be made public such as the stack trace of the error.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ErrorResponse {
+public final class ErrorResponse {
 
+    /**
+     * Technical detail about where/when the error occurred.
+     */
+    public final String technicalMessage;
 
-    public final String technicalMessage; //Technical detail about where/when the error occurred.
-
-    public final String errorMessage;  //Detailed description of the error in english
+    /**
+     * Detailed description of the error in english
+     */
+    public final String errorMessage;
 
     @JsonCreator
     private ErrorResponse(
@@ -48,6 +53,7 @@ public class ErrorResponse {
         this.errorMessage = errorMessage;
     }
 
+
     /**
      * Builder class for the creation of instances of the ErrorResponse.  This is a variant of the Fluent Builder
      * which will use the String for the components in the build.
@@ -58,11 +64,29 @@ public class ErrorResponse {
                     new ErrorResponse(techMessage, errorMessage);
         }
 
+        /**
+         * Adds the technical information about the issue to the creation of the message.
+         */
         interface ITechMessage {
+            /**
+             * Adds the technical information about the issue to the message.
+             *
+             * @param technicalMessage technical error information
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
             IErrorMessage withTechnicalMessage(String technicalMessage);
         }
 
+        /**
+         * Adds the human readable information about the issue to the message.
+         */
         interface IErrorMessage {
+            /**
+             * Adds the error message.
+             *
+             * @param errorMessage error message
+             * @return class {@link ErrorResponse} for the completed build.
+             */
             ErrorResponse withErrorMessage(String errorMessage);
         }
     }

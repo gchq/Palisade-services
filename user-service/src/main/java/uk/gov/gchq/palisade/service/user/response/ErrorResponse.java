@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.user.response;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.util.Assert;
 
 /**
  * Error message in human readable form.  This can be generated in any of the services.  Once an error occurs
@@ -26,22 +27,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * to client who should be given enough information to correct the problem before tying again.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ErrorResponse {
+public final class ErrorResponse {
 
-    //This version of the message may not necessarily be sanitised.  It will need to pass information to
-    // the Audit Service that may technical details as to the reason for the failure.  This can then be used to
-    // resolve the issue if it was technical in natured.
-    private final String technicalMessage;
+    /**
+     * Technical detail about where/when the error occurred.
+     */
+    public final String technicalMessage;
 
-    private final String errorMessage;  //Detailed description of the error in english
+    /**
+     * Detailed description of the error in english
+     */
+    public final String errorMessage;
 
     @JsonCreator
     private ErrorResponse(
             final @JsonProperty("technicalMessage") String technicalMessage,
             final @JsonProperty("errorMessage") String errorMessage) {
+
+        Assert.notNull(technicalMessage, "TechnicalMessage cannot be null");
+        Assert.notNull(errorMessage, "ErrorMessage cannot be null");
+
         this.technicalMessage = technicalMessage;
         this.errorMessage = errorMessage;
     }
+
 
     /**
      * Builder class for the creation of instances of the ErrorResponse.  This is a variant of the Fluent Builder
@@ -53,12 +62,30 @@ public class ErrorResponse {
                     new ErrorResponse(techMessage, errorMessage);
         }
 
+        /**
+         * Adds the technical information about the issue to the creation of the message.
+         */
         interface ITechMessage {
+            /**
+             * Adds the technical information about the issue to the message.
+             *
+             * @param technicalMessage technical error information
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
             IErrorMessage withTechnicalMessage(String technicalMessage);
         }
 
+        /**
+         * Adds the human readable information about the issue to the message.
+         */
         interface IErrorMessage {
-            ErrorResponse withTechnicalMessage(String technicalMessage);
+            /**
+             * Adds the error message.
+             *
+             * @param errorMessage error message
+             * @return class {@link ErrorResponse} for the completed build.
+             */
+            ErrorResponse withErrorMessage(String errorMessage);
         }
     }
 }
