@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.resource.response.common.domain.IUser;
 import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
@@ -38,8 +40,9 @@ import static java.util.stream.Collectors.toMap;
 /**
  * User including the role that have for the request.  The set of possible roles include: User; Developer; and Administrator.
  */
-public class UserWithRoles implements IUser {
+public final class UserWithRoles implements IUser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserWithRoles.class);
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -100,13 +103,14 @@ public class UserWithRoles implements IUser {
 
 
     private static List<String> roleGen(final Map<String, String> attributes) {
-        return Optional.ofNullable(attributes.get(ROLE_KEY)).map(val -> {
+        return Optional.ofNullable(attributes.get(ROLE_KEY)).map((String val) -> {
             try {
                 return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
+                LOGGER.info("Failed to parse list of roles", e);
                 return new ArrayList<String>();
             }
-        }).orElseGet(ArrayList::new);
+        }).orElseGet(ArrayList<String>::new);
     }
 
     /**
@@ -117,7 +121,7 @@ public class UserWithRoles implements IUser {
      * @return interface  {@link IRoles} for the next step in the build.
      */
     public static IRoles create(final String userId) {
-        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<>(ROLE_KEY,
+        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<String, String>(ROLE_KEY,
                 MAPPER.writeValueAsString(Stream.of(roles)
                         .peek(role -> Optional.of(ALLOWED.contains(role)).filter(val -> val).orElseThrow(() -> new RuntimeException("Invalid Role supplied")))
                         .collect(toList()))

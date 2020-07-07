@@ -24,8 +24,14 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Base class for User.  Provides the information about a user in the system.
+ */
 public class User implements IUser {
 
+    /**
+     * user ID for the client.
+     */
     @JsonProperty("user_id")
     public final String userId;
 

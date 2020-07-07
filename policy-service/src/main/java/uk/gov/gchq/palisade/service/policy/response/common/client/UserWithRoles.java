@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.policy.response.common.domain.IUser;
 import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
@@ -40,6 +42,7 @@ import static java.util.stream.Collectors.toMap;
  */
 public final class UserWithRoles implements IUser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserWithRoles.class);
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -55,15 +58,15 @@ public final class UserWithRoles implements IUser {
 
     private static class Proxy extends User {
 
-         Proxy(final String userId, final Map<String, String> attributes) {
+        Proxy(final String userId, final Map<String, String> attributes) {
             super(userId, attributes);
         }
 
-         Proxy(final User user) {
+        Proxy(final User user) {
             super(user);
         }
 
-         Map<String, String> getAttributes() {
+        Map<String, String> getAttributes() {
             return super.attributes;
         }
     }
@@ -83,6 +86,7 @@ public final class UserWithRoles implements IUser {
 
     /**
      * Provides the public view of User without the associated rules.
+     *
      * @return the UserWithRoles as a User
      */
     public User userWithRoles() {
@@ -91,24 +95,25 @@ public final class UserWithRoles implements IUser {
 
 
     private static List<String> roleGen(final Map<String, String> attributes) {
-        return Optional.ofNullable(attributes.get(ROLE_KEY)).map(val -> {
+        return Optional.ofNullable(attributes.get(ROLE_KEY)).map((String val) -> {
             try {
                 return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
+                LOGGER.info("Failed to parse list of roles", e);
                 return new ArrayList<String>();
             }
-        }).orElseGet(ArrayList::new);
+        }).orElseGet(ArrayList<String>::new);
     }
 
     /**
      * Starter method for the Builder class.  This method is called to start the process of creating the
      * UserWithRoles class.
-
+     *
      * @param userId the given ID for the user.
      * @return interface  {@link IRoles} for the next step in the build.
      */
     public static IRoles create(final String userId) {
-        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<>(ROLE_KEY,
+        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<String, String>(ROLE_KEY,
                 MAPPER.writeValueAsString(Stream.of(roles)
                         .peek(role -> Optional.of(ALLOWED.contains(role)).filter(val -> val).orElseThrow(() -> new RuntimeException("Invalid Role supplied")))
                         .collect(toList()))
@@ -117,6 +122,7 @@ public final class UserWithRoles implements IUser {
 
     /**
      * Creates a UserWithRoles from a User.
+     *
      * @param user that is being used to create the UserWithRoles.
      * @return new UserWithRoles.
      */
@@ -126,11 +132,11 @@ public final class UserWithRoles implements IUser {
 
     /**
      * Adds the roles to the UserWithRoles being build.
-     *
      */
     public interface IRoles {
         /**
          * Adds an array of roles.
+         *
          * @param roles that are to be associated with this user.
          * @return the completed UserWithRoles instance.
          * @throws JsonProcessingException if it fails to parse the text

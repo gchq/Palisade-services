@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class UserWithRoles implements IUser {
+public final class UserWithRoles implements IUser {
 
     private static final List<String> ALLOWED = Stream.of("USER", "DEV", "ADMIN").collect(toList());
     private static final String ROLE_KEY = "ROLES";

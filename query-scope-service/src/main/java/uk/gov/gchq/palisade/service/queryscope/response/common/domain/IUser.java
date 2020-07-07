@@ -15,5 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.queryscope.response.common.domain;
 
+/**
+ * Interface for User types.
+ */
 public interface IUser {
 }
