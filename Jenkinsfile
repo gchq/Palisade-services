@@ -240,7 +240,7 @@ spec:
                             sh 'extract-addresses'
                             sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                             sh 'helm upgrade --install palisade . \
-                              --set hosting=aws  \
+                              --set global.hosting=aws  \
                               --set traefik.install=true,dashboard.install=true \
                               --set global.repository=${ECR_REGISTRY} \
                               --set global.hostname=${EGRESS_ELB} \
@@ -260,7 +260,7 @@ spec:
                                 sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                                 //create the branch namespace
                                 if (sh (script: "helm upgrade --install palisade . " +
-                              "--set hosting=aws  " +
+                              "--set global.hosting=aws  " +
                               "--set traefik.install=false,dashboard.install=false " +
                               "--set global.repository=${ECR_REGISTRY} " +
                               "--set global.hostname=${EGRESS_ELB} " +

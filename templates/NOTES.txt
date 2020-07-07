@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 ================================
-You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }} hosting on {{ .Values.hosting }}
+You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespace {{ include "palisade.namespace" . }} hosting on {{ .Values.global.hosting }}
 ================================
 
 {{- if .Values.traefik.install }}

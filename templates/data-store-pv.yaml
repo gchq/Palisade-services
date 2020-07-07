@@ -27,7 +27,7 @@ kind: PersistentVolume
 metadata:
   name: {{ $name }}
   labels:
-    {{- if eq $.Values.hosting "aws" }}
+    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
     selectorFilter: {{ $name }}
@@ -35,16 +35,16 @@ spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
   {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
   storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
     storage: {{ $value.storage }}
-  {{- if eq $.Values.hosting "local" }}
+  {{- if eq $.Values.global.hosting "local" }}
   hostPath:
     path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq $.Values.hosting "aws" }}
+  {{- else if eq $.Values.global.hosting "aws" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com

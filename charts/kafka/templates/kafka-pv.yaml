@@ -12,31 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.global.redis.install }}
+{{- if .Values.global.kafka.install }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
-  {{- if eq .Values.global.hosting "aws" }}
+  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}-0
   labels:
+    {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
-  {{- end }}
+    {{- end }}
 spec:
   accessModes:
   - ReadWriteMany
+  claimRef:
+    namespace: {{ include "palisade.namespace" . }}
+    name: {{ .Values.global.persistence.kafka.name }}-{{ include "kafka.fullname" . }}-0
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+  storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
   capacity:
-    storage: {{ .Values.global.persistence.redisSlave.storage }}
+    storage: {{ .Values.global.persistence.kafka.storage }}
   {{- if eq .Values.global.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/slave
+    path: {{ .Values.global.persistence.kafka.local.hostPath }}/kafka/{{ include "palisade.namespace" . }}/0
     type: DirectoryOrCreate
   {{- else if eq .Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisSlave.aws.volumeHandle }}
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" .Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/slave
+      path: {{ .Values.global.persistence.kafka.aws.hostPath }}/kafka/{{ include "palisade.namespace" . }}/0
+      type: DirectoryOrCreate
   {{- end }}
 {{- end }}

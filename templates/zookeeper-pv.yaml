@@ -16,28 +16,28 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+  name: {{ .Values.global.persistence.zookeeper.name }}-{{ include "palisade.namespace" . }}
   labels:
-    {{- if eq .Values.hosting "aws" }}
+    {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
-    selectorFilter: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+    selectorFilter: {{ .Values.global.persistence.zookeeper.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+  storageClassName: {{ .Values.global.persistence.zookeeper.name }}-{{ include "palisade.namespace" . }}
   capacity:
-    storage: {{ .Values.global.persistence.kafka.storage }}
-  {{- if eq .Values.hosting "local" }}
+    storage: {{ .Values.global.persistence.zookeeper.storage }}
+  {{- if eq .Values.global.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.kafka.local.hostPath }}/kafka/{{ include "palisade.namespace" . }}
+    path: {{ .Values.global.persistence.zookeeper.local.hostPath }}/zookeeper/{{ include "palisade.namespace" . }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.hosting "aws" }}
+  {{- else if eq .Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.kafka.aws.volumePath }}
+      path: {{ .Values.global.persistence.zookeeper.aws.volumePath }}
   {{- end }}
 {{- end }}

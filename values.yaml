@@ -16,8 +16,6 @@
 # Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
 
-# hosting: [local | aws | metal] the target environment to deploy to
-hosting: local
 
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
@@ -27,15 +25,6 @@ metrics-server:
   install: false
 dashboard:
   # install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
-  install: false
-kafka:
-  # install: install kafka streaming platform
-  install: true
-redis:
-  # install: install redis persistence and caching data storage platform
-  install: true
-redis-cluster:
-  # install: install clustered redis persistence and caching data storage platform
   install: false
 
 namespaces:
@@ -47,6 +36,19 @@ namespaces:
 global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
+
+  kafka:
+    # install: install kafka streaming platform
+    install: true
+  redis:
+    # install: install redis persistence and caching data storage platform
+    install: true
+  redis-cluster:
+    # install: install clustered redis persistence and caching data storage platform
+    install: false
+
+  # hosting: [local | aws | metal] the target environment to deploy to
+  hosting: local
 
   # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
@@ -73,8 +75,8 @@ global:
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
       storageClassName:
-        _default: local-storage
-        local: local-storage
+        _default: hostpath
+        local: hostpath
         aws: efs-sc
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
@@ -98,8 +100,8 @@ global:
     dataStores:
       palisade-data-store:
         storageClassName:
-          _default: local-storage
-          local: local-storage
+          _default: hostpath
+          local: hostpath
           aws: efs-sc
         mountPath: "/data/local-data-store"
         storage: 1Gi
@@ -112,8 +114,8 @@ global:
     # kafka: Store used by kafka for persisting stream logs
     kafka:
       storageClassName:
-        _default: local-storage
-        local: local-storage
+        _default: hostpath
+        local: hostpath
         aws: efs-sc
       name: kafka-persistence
       storage: 1Gi
@@ -123,11 +125,26 @@ global:
         volumeHandle: null
         volumePath: "/"
 
+    # zookeeper: Store used by zookeeper for persisting stream logs
+    zookeeper:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: zookeeper-persistence
+      storage: 1Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
       storageClassName:
-        _default: local-storage
-        local: local-storage
+        _default: hostpath
+        local: hostpath
         aws: efs-sc
       name: redis-persistence-master
       storage: 8Gi
@@ -139,8 +156,8 @@ global:
 
     redisSlave:
       storageClassName:
-        _default: local-storage
-        local: local-storage
+        _default: hostpath
+        local: hostpath
         aws: efs-sc
       name: redis-persistence-slave
       storage: 8Gi
@@ -152,8 +169,8 @@ global:
 
     redisCluster:
       storageClassName:
-        _default: local-storage
-        local: local-storage
+        _default: hostpath
+        local: hostpath
         aws: efs-sc
       name: redis-persistence-cluster
 

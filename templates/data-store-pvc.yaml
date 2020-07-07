@@ -42,7 +42,7 @@ spec:
   resources:
     requests:
       storage: {{ $value.storage }}
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
   {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
   storageClassName: {{- $sc | default $default | indent 1 }}
   selector:

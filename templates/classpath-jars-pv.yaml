@@ -22,7 +22,7 @@ kind: PersistentVolume
 metadata:
   name: {{ include "palisade.deployment.fullname" . }}
   labels:
-  {{- if eq .Values.hosting "aws" }}
+  {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
   {{- end }}
     selectorFilter: {{ include "palisade.deployment.fullname" . }}
@@ -30,14 +30,14 @@ spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{- pluck .Values.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
+  storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
-  {{- if eq .Values.hosting "local" }}
+  {{- if eq .Values.global.hosting "local" }}
   hostPath:
     path: {{ include "palisade.deployment.path" . }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.hosting "aws" }}
+  {{- else if eq .Values.global.hosting "aws" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
