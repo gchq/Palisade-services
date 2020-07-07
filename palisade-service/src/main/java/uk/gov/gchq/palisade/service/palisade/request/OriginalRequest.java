@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.Generated;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -120,6 +119,7 @@ public final class OriginalRequest {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * OriginalRequest class.
+         *
          * @return fully constructed OriginalRequest instance.
          */
         public static IUser create() {
@@ -133,6 +133,7 @@ public final class OriginalRequest {
         interface IUser {
             /**
              * Adds the user's ID to the request.
+             *
              * @param userId user ID.
              * @return interface  {@link IResource} for the next step in the build.
              */
@@ -145,6 +146,7 @@ public final class OriginalRequest {
         interface IResource {
             /**
              * Adds the user to the resource ID.
+             *
              * @param resourceId resource id for the request.
              * @return interface {@link IContext} for the next step in the build.
              */
@@ -154,9 +156,10 @@ public final class OriginalRequest {
         /**
          * Adds the user context information to the request.
          */
-         interface IContext {
+        interface IContext {
             /**
              * Adds the user context information.
+             *
              * @param context information about the user in context to this request.
              * @return class {@link OriginalRequest} this builder is set-up to create.
              */
@@ -166,12 +169,14 @@ public final class OriginalRequest {
 
             /**
              * Adds the user context information. Uses a JsonNode string form of the information.
+             *
              * @param context information about the user in context to this request.
-             * @return class {@link OriginalRequest} this builder is set-up to create.
+             * @return class {@link OriginalRequest} for the completion of the builder steps is to create the class.
              */
             OriginalRequest withContextNode(JsonNode context);
         }
 
     }
 }
+
 

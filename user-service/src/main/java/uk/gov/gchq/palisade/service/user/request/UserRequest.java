@@ -45,7 +45,11 @@ public final class UserRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public final String userId;  //Unique identifier for the user
+    /**
+     * Unique identifier for the user
+     */
+    public final String userId;
+
     private final String resourceId;  //Unique identifier for the resource that that is being asked to access
     private final JsonNode context;  // represents the context information
 
@@ -64,11 +68,12 @@ public final class UserRequest {
         this.context = context;
     }
 
-
+    @Generated
     public String getResourceId() {
         return resourceId;
     }
 
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }
@@ -111,26 +116,64 @@ public final class UserRequest {
      */
     public static class Builder {
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * UserRequest class.
+         *
+         * @return fully constructed UserRequest instance.
+         */
         public static IUser create() {
             return user -> resource -> context ->
                     new UserRequest(user, resource, context);
         }
 
+        /**
+         * Adds the user id information for the request.
+         */
         interface IUser {
+            /**
+             * Adds the user's ID to the request.
+             *
+             * @param userId user ID.
+             * @return interface  {@link IResource} for the next step in the build.
+             */
             IResource withUser(String userId);
 
         }
 
+        /**
+         * Adds the resource ID information for the request.
+         */
         interface IResource {
+            /**
+             * Adds the user to the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
             IContext withResource(String resourceId);
         }
 
-
+        /**
+         * Adds the user context information to the request.
+         */
         interface IContext {
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user.
+             * @return class {@link UserRequest} the  is set-up to create.
+             */
             default UserRequest withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information. Uses a JsonNode string form of the information.
+             *
+             * @param context information about the user in context to this request.
+             * @return class {@link UserRequest} or the completion of the builder steps is to create the class.
+             */
             UserRequest withContextNode(JsonNode context);
         }
     }

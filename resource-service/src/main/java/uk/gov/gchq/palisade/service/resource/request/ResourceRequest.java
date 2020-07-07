@@ -45,7 +45,10 @@ public final class ResourceRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public final String resourceId;  //Resource that that is being asked to access
+    /**
+     * Resource ID that that is being asked to access
+     */
+    public final String resourceId;
     private final JsonNode context;  // Json Node representation of Context
     private final JsonNode user;  //Json Node representation of the User
 
@@ -107,40 +110,82 @@ public final class ResourceRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * which will build the Java objects from Json string.
+     * Builder class for the creation of instances of the ResourceRequest.  This is a variant of the Fluent Builder
+     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private String resourceId;
         private JsonNode context;
         private JsonNode user;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * ResourceRequest class.
+         *
+         * @return fully constructed  {@link ResourceRequest} instance.
+         */
         public static IResource create() {
             return resource -> context -> user ->
                     new ResourceRequest(resource, context, user);
         }
 
+        /**
+         * Adds the resource id information for the response message.
+         */
         interface IResource {
+            /**
+             * @param resourceId {@link String} is the resource id to the response message.
+             * @return the {@link IContext} the next step in the build.
+             */
             IContext withResource(String resourceId);
         }
 
+        /**
+         * Adds the user context information to the response message.
+         */
         interface IContext {
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
+        /**
+         * Adds the user associated with this request to the response message.
+         */
         interface IUser {
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this response message.
+             * @return class {@link ResourceRequest} for the completed class from the builder.
+             */
             default ResourceRequest withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            ResourceRequest withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this response message.
+             * @return class {@link ResourceRequest} for the completed class from the builder.
+             */
+            ResourceRequest withUserNode(JsonNode user);
         }
 
     }
 }
-

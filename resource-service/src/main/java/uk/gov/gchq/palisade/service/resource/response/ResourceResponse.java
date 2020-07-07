@@ -47,12 +47,16 @@ public final class ResourceResponse {
 
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
+
+    /**
+     * Resource that has been requested to access.
+     */
     public final LeafResource resource; // Resources related to this query
 
     private ResourceResponse(
-            final  @JsonProperty("context") JsonNode context,
-            final  @JsonProperty("user") JsonNode user,
-            final  @JsonProperty("resource") LeafResource resource) {
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resource") LeafResource resource) {
 
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
@@ -108,35 +112,81 @@ public final class ResourceResponse {
 
     /**
      * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * which will build the Java objects from Json string.
+     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private JsonNode context;
         private JsonNode user;
         private LeafResource resource;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * ResourceResponse class.
+         *
+         * @return fully constructed  {@link ResourceResponse} instance.
+         */
         public static IContext create() {
             return context -> user -> resource ->
                     new ResourceResponse(context, user, resource);
         }
 
+        /**
+         * Adds the user context information to the response message.
+         */
         interface IContext {
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link Context} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
         }
 
+        /**
+         * Adds the user associated with this request to the response message.
+         */
         interface IUser {
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this response message.
+             * @return class {@link IResource} for the next step in the build.
+             */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this response message.
+             * @return class {@link IResource} for the next step in the build.
+             */
+            IResource withUserNode(JsonNode user);
         }
 
+        /**
+         * Adds the resource associated with this request to the response message.
+         */
         interface IResource {
+
+            /**
+             * Adds the resource that has been requested to access
+             *
+             * @param resource that is requested to access
+             * @return class {@link ResourceResponse} for the completed class from the builder.
+             */
             ResourceResponse withResource(LeafResource resource);
 
         }

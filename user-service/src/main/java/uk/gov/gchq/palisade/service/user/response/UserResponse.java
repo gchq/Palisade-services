@@ -23,7 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
-
+import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.user.request.UserRequest;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
 import java.util.HashMap;
@@ -42,13 +43,15 @@ import java.util.Map;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class UserResponse {
 
-    //want to be @Autowired but has to be static to be used in the default method
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String resourceId;  //Resource that that is being asked to access
     private final JsonNode context;  // represents the context information as a Json string of a Map<String, String>
-    public final User user;  //Representation of the User
 
+    /**
+     * The user that has made the request
+     */
+    public final User user;  //Representation of the User
 
     @JsonCreator
     private UserResponse(
@@ -66,10 +69,12 @@ public final class UserResponse {
 
     }
 
+    @Generated
     public String getResourceId() {
         return resourceId;
     }
 
+    @Generated
     public Map<String, String> getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, HashMap.class);
     }
@@ -77,7 +82,7 @@ public final class UserResponse {
 
     /**
      * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * which will build the Java objects from Json string.
+     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private String resourceId;
@@ -85,41 +90,63 @@ public final class UserResponse {
         private User user;
 
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * UserRequest class.
+         *
+         * @return fully constructed UserResponse instance.
+         */
         public static IResource create() {
             return resource -> context -> user ->
                     new UserResponse(resource, context, user);
         }
 
+        /**
+         * Adds the resource id information for the response message.
+         */
         interface IResource {
             /**
-             * @param resourceId {@link String} is the resource id provided in the register request
-             * @return the {@link UserResponse}
+             * @param resourceId {@link String} is the resource id to the response message.
+             * @return the {@link IContext}
              */
             IContext withResource(String resourceId);
         }
 
-
+        /**
+         * Adds the user context information to the response message.
+         */
         interface IContext {
             /**
-             * @param context the context that was passed by the client to the palisade service
-             * @return the {@link UserResponse}
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link UserRequest} this builder is set-up to create.
              */
             default IUser withContext(Map<String, String> context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information. Uses a JsonNode string form of the information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
-
+        /**
+         * Adds the user information to the response message.
+         */
         interface IUser {
             /**
-             * @param user the context that was passed by the client to the palisade service
-             * @return the {@link UserResponse}
+             * Adds the user to this response.
+             *
+             * @param user user for the request.
+             * @return interface {@link UserResponse} for the completed class from the builder.
              */
             UserResponse withUser(User user);
-
         }
     }
 
