@@ -154,3 +154,4 @@ public final class UserWithRoles implements IUser {
         UserWithRoles withRoles(String... roles) throws JsonProcessingException;
     }
 }
+
