@@ -22,6 +22,7 @@ image:
   name: @artifactId@
   tag: @git.commit.id.abbrev@-@revision@
   pullPolicy: IfNotPresent
+  codeRelease: @project.parent.version@
 
 resources:
   limits:

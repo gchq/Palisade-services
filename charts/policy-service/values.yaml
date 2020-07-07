@@ -20,8 +20,9 @@ service:
 
 image:
   name: policy-service
-  tag: a9f62f8-SNAPSHOT
+  tag: 0b7615e-SNAPSHOT
   pullPolicy: IfNotPresent
+  codeRelease: 0.4.0-SNAPSHOT
 
 resources:
   limits:

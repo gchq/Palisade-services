@@ -12,25 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.kafka.install }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.kafka.name }}
-  {{- if eq .Values.hosting "aws" }}
+  name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
   labels:
+    {{- if eq .Values.hosting "aws" }}
     type: amazonEBS
-    selectorFilter: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.kafka.name }}
-  {{- end }}
+    {{- end }}
+    selectorFilter: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
   capacity:
     storage: {{ .Values.global.persistence.kafka.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.kafka.local.hostPath }}
+    path: {{ .Values.global.persistence.kafka.local.hostPath }}/kafka/{{ include "palisade.namespace" . }}
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
@@ -39,3 +40,4 @@ spec:
     volumeAttributes:
       path: {{ .Values.global.persistence.kafka.aws.volumePath }}
   {{- end }}
+{{- end }}

@@ -11,18 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-# Included by eureka and static
-
-# Configure h2 as persistence store (for local examples)
-spring:
-  datasource:
-    url: jdbc:h2:file:./palisade-cache-h2
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+{{- if and ( .Values.global.persistence.storageClassDeploy ) ( eq .Values.hosting "aws" ) }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+{{- end }}

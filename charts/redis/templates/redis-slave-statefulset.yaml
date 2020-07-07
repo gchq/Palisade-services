@@ -421,14 +421,14 @@ spec:
       spec:
         accessModes:
         - ReadWriteMany
-        storageClassName: {{ .Values.global.persistence.storageClassName }}
+        storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
         resources:
           requests:
             storage: {{ .Values.slave.persistence.size | quote }}
         {{ include "redis.slave.storageClass" . }}
         selector:
           matchLabels:
-            selectorFilter: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.redisSlave.name }}
+            selectorFilter: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
         {{- if .Values.slave.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.slave.persistence.matchExpressions | nindent 12 }}
         {{- end -}}

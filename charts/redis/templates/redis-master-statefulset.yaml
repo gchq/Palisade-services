@@ -45,10 +45,10 @@ spec:
       resources:
         requests:
           storage: {{ .Values.master.persistence.size | quote }}
-      storageClassName: {{ .Values.global.persistence.storageClassName }}
+      storageClassName: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
       selector:
         matchLabels:
-          selectorFilter: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.redisMaster.name }}
+          selectorFilter: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
       {{- if .Values.master.persistence.matchExpressions }}
       matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
       {{- end -}}

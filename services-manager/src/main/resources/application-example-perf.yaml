@@ -1,0 +1,79 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+spring:
+  profiles:
+    include:
+      - warn
+      - example-model
+      - example-perf-config
+# use `warn` profile to set all palisade services log levels to warn only to avoid bottle-necking if any service is writing too much
+
+---
+
+spring:
+  profiles: example-perf-config
+
+example:
+  version: ${app.version}
+  path: ../Palisade-examples
+  perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
+  service-profiles: &profiles
+    - eureka
+    - example-perf
+
+manager:
+  mode: run
+
+  schedule:
+    - palisade-task
+    - performance-test-task
+
+  tasks:
+    performance-create-task:
+    - create-perf-data
+    performance-test-task:
+      - performance-test
+
+  services:
+    create-perf-data:
+      jar: ${example.perf}
+      profiles:
+      - create
+      log: create-perf-data.log
+
+    performance-test:
+      jar: ${example.perf}
+      profiles:
+        - eureka
+      log: performance-test.log
+
+    audit-service:
+      profiles: *profiles
+
+    data-service:
+      profiles: *profiles
+
+    palisade-service:
+      profiles: *profiles
+
+    policy-service:
+      profiles: *profiles
+
+    resource-service:
+      profiles: *profiles
+
+    user-service:
+      profiles: *profiles

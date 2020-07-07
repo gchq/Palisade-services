@@ -26,16 +26,18 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ include "palisade.namespace" $ }}-{{ $name }}
-  {{- if eq $.Values.hosting "aws" }}
   labels:
+    {{- if eq $.Values.hosting "aws" }}
     type: amazonEBS
-    selectorFilter: {{ include "palisade.namespace" $ }}-{{ $name }}
   {{- end }}
+    selectorFilter: {{ include "palisade.namespace" $ }}-{{ $name }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
+  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
+  storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
     storage: {{ $value.storage }}
   {{- if eq $.Values.hosting "local" }}

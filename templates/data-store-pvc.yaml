@@ -35,13 +35,16 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ $.Release.Service }}"
     "app.kubernetes.io/instance": "{{ $.Release.Name }}"
     "helm.sh/chart": "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+  namespace: {{ include "palisade.namespace" $ }}
 spec:
   accessModes:
   - ReadWriteMany
   resources:
     requests:
       storage: {{ $value.storage }}
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
+  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
+  storageClassName: {{- $sc | default $default | indent 1 }}
   selector:
     matchLabels:
       selectorFilter: {{ include "palisade.namespace" $ }}-{{ $name }}

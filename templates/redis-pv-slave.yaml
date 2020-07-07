@@ -12,30 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.redis.install }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.redisSlave.name }}
-  {{- if eq .Values.hosting "aws" }}
+  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
   labels:
+    {{- if eq .Values.hosting "aws" }}
     type: amazonEBS
-    selectorFilter: {{ include "palisade.namespace" $ }}-{{ .Values.global.persistence.redisSlave.name }}
   {{- end }}
+    selectorFilter: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
 spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ $.Values.global.persistence.storageClassName }}
+  storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
   capacity:
     storage: {{ .Values.global.persistence.redisSlave.storage }}
   {{- if eq .Values.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}
+    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/slave
     type: DirectoryOrCreate
   {{- else if eq .Values.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisSlave.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}
+      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/slave
   {{- end }}
+{{- end }}
