@@ -19,6 +19,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "kafka.fullname" . }}
+  namespace: "{{- include "palisade.namespace" . }}"
   labels:
   {{- include "kafka.broker.labels" . | nindent 4 }}
 spec:
@@ -272,7 +273,7 @@ spec:
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
-      name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+      name: {{ .Values.global.persistence.kafka.name }}
     spec:
       accessModes:
       - ReadWriteMany
@@ -280,10 +281,6 @@ spec:
         requests:
           storage: {{ .Values.persistence.size }}
       {{- $_ := set . "index" "kafka" }}
-      storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
-      selector:
-        matchLabels:
-          selectorFilter: {{ .Values.global.persistence.kafka.name }}
-
+      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.kafka.storageClassName | first | default .Values.global.persistence.kafka.storageClassName._default | indent 1 }}
   {{- end }}
 
