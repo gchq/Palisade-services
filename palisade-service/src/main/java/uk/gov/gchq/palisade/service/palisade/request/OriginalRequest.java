@@ -39,7 +39,6 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
  */
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class OriginalRequest {
 
@@ -118,24 +117,58 @@ public final class OriginalRequest {
      */
     public static class Builder {
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * OriginalRequest class.
+         * @return fully constructed OriginalRequest instance.
+         */
         public static IUser create() {
             return user -> resource -> context ->
                     new OriginalRequest(user, resource, context);
         }
 
+        /**
+         * Adds the user id information for the request.
+         */
         interface IUser {
+            /**
+             * Adds the user's ID to the request.
+             * @param userId user ID.
+             * @return interface  {@link IResource} for the next step in the build.
+             */
             IResource withUser(String userId);
         }
 
+        /**
+         * Adds the resource id information for the request.
+         */
         interface IResource {
+            /**
+             * Adds the user to the resource ID.
+             * @param resourceId resource id for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
             IContext withResource(String resourceId);
         }
 
-        interface IContext {
+        /**
+         * Adds the user context information to the request.
+         */
+         interface IContext {
+            /**
+             * Adds the user context information.
+             * @param context information about the user in context to this request.
+             * @return class {@link OriginalRequest} this builder is set-up to create.
+             */
             default OriginalRequest withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information. Uses a JsonNode string form of the information.
+             * @param context information about the user in context to this request.
+             * @return class {@link OriginalRequest} this builder is set-up to create.
+             */
             OriginalRequest withContextNode(JsonNode context);
         }
 
