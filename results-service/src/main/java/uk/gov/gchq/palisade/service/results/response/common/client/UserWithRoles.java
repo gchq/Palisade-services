@@ -110,7 +110,7 @@ public final class UserWithRoles implements IUser {
                 LOGGER.info("Failed to parse list of roles", e);
                 return new ArrayList<String>();
             }
-        }).orElseGet(ArrayList::new);
+        }).orElseGet(ArrayList<String>::new);
     }
 
     /**
