@@ -102,7 +102,6 @@ public final class UserWithRoles implements IUser {
         return this.userAndRoles;
     }
 
-    @SuppressWarnings("checkstyle:parameterNumber") //
     private static List<String> roleGen(final Map<String, String> attributes) {
         return Optional.ofNullable(attributes.get(ROLE_KEY)).map((String val) -> {
             try {
