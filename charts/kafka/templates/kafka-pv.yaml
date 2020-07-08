@@ -24,6 +24,8 @@ metadata:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany

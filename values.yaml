@@ -118,7 +118,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: kafka-persistence
-      storage: 1Gi
+      storage: 9Gi
       local:
         hostPath: "/"
       aws:
@@ -132,7 +132,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: zookeeper-persistence
-      storage: 1Gi
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
