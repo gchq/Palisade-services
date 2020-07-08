@@ -66,8 +66,8 @@ spec:
           value: {{ include "data-service.deployment.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
-        - name: $item.name
-          value: $item.value
+        - name: {{ $item.name }}
+          value: {{ $item.value }}
         {{- end }}
         volumeMounts:
         - name: {{ include "data-service.deployment.fullname" . }}

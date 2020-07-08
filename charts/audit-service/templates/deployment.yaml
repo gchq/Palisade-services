@@ -65,8 +65,8 @@ spec:
           value: {{ include "audit-service.deployment.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
-        - name: $item.name
-          value: $item.value
+        - name: {{ $item.name }}
+          value: {{ $item.value }}
         {{- end }}
         volumeMounts:
         - name: {{ include "audit-service.deployment.fullname" . }}
