@@ -63,6 +63,11 @@ spec:
         env:
         - name: "LOADER_PATH"
           value: {{ include "policy-service.deployment.path" . }}
+        {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
+        {{- range $name, $value := $envVars }}
+        - name: $name
+          value: $value
+        {{- end }}
         volumeMounts:
         - name: {{ include "policy-service.deployment.fullname" . }}
           mountPath: {{ include "policy-service.deployment.path" . }}

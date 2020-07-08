@@ -63,6 +63,15 @@ global:
   # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
   deployment: codeRelease
 
+  # set environment variables for all palisade services pods by deployment type eg. spring profiles active
+  env:
+    _default:
+    - name: "SPRING_PROFILES_ACTIVE"
+      value: "k8s"
+    codeRelease:
+    - name: "SPRING_PROFILES_ACTIVE"
+      value: "k8s"
+
   # see charts/kafka/charts/zookeeper
   zookeeperConnectString: palisade-zookeeper:2181
 
