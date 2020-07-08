@@ -31,7 +31,7 @@ spec:
   - ReadWriteMany
   claimRef:
     namespace: {{ $namespace }}
-    name: {{ $.Values.global.persistence.redisSlave.name }}-{{ $redisname }}-{{ $index }}
+    name: {{ $.Values.global.persistence.redisSlave.name }}-{{ $redisname }}-slave-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
     {{- $sc := index $.Values "global" "persistence" "redisSlave" "storageClassName" $.Values.global.hosting }}
     {{- $default := index $.Values "global" "persistence" "redisSlave" "storageClassName" "_default" }}
