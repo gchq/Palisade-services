@@ -35,6 +35,8 @@ import java.util.StringJoiner;
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
  * This version represents the output for resource-service where the resource has been identified.
+ * Note there can any number of these messages generated from a single request.  There will be one message for each
+ * of the resources that were found to correspond to the resource ID.
  * Next in the sequence will be the request for policy-service.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
@@ -51,7 +53,7 @@ public final class ResourceResponse {
     /**
      * Resource that has been requested to access.
      */
-    public final LeafResource resource; // Resources related to this query
+    public final LeafResource resource;
 
     private ResourceResponse(
             final @JsonProperty("context") JsonNode context,

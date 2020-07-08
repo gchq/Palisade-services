@@ -24,14 +24,10 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.queryscope.response.common.domain.User;
 
 import java.io.IOException;
 
@@ -53,21 +49,17 @@ public class QueryScopeResponseTest {
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
 
-        Context context = new Context().purpose("testContext");
-        User user = User.create("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules().rule("Rule1", new PassThroughRule());
-        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create().withContext(context).withUser(user).withResource(resource).withRules(rules);
+
+        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create().withResource(resource);
 
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jacksonTester.write(queryScopeResponse);
 
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+          assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
     }
 
@@ -79,13 +71,11 @@ public class QueryScopeResponseTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.policy.PassThroughRule\"}}}}";
+        String jsonString = "{\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
         ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jacksonTester.parse(jsonString);
 
         QueryScopeResponse queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
-         assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(queryScopeResponse.getUser().userId).isEqualTo("testUserId");
         assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
 
     }

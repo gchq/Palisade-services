@@ -19,3 +19,4 @@ logging:
 
 resource:
   implementation: simple
+  defaultType: java.lang.String
