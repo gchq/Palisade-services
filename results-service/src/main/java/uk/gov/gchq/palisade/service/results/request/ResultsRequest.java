@@ -77,7 +77,7 @@ public class ResultsRequest {
          * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
-            return ResultsRequest::new;
+            return resource -> new ResultsRequest(resource);
         }
 
 

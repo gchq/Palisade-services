@@ -102,7 +102,7 @@ public final class QueryScopeResponse {
          * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
-            return QueryScopeResponse::new;
+            return resource -> new QueryScopeResponse(resource);
         }
 
         /**
