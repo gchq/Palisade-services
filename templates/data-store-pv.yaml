@@ -31,6 +31,8 @@ metadata:
     type: amazonEBS
     {{- end }}
     selectorFilter: {{ $name }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
