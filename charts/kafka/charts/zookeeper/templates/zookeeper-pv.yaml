@@ -15,13 +15,13 @@
 {{- if .Values.global.kafka.install }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $zookeepername := include "zookeeper.fullname" . }}
-{{ range $index := until (.Values.replicas | int) }}
+{{ range $index := until (.Values.replicaCount | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.zookeeper.name }}-{{ $namespace }}-{{ $index }}
+  name: {{ $.Values.global.persistence.zookeeper.name }}-{{ $namespace }}-{{ $index | toString }}
   labels:
-    {{- if eq .Values.global.hosting "aws" }}
+    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
 spec:
@@ -30,22 +30,22 @@ spec:
   claimRef:
     namespace: {{ $namespace }}
     name: {{ $.Values.global.persistence.zookeeper.name }}-{{ $zookeepername }}-{{ $index }}
-    persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Delete
     {{- $sc := index $.Values "global" "persistence" "zookeeper" "storageClassName" $.Values.global.hosting }}
     {{- $default := index $.Values "global" "persistence" "zookeeper" "storageClassName" "_default" }}
   storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
-    storage: {{ .Values.global.persistence.zookeeper.storage }}
-  {{- if eq .Values.global.hosting "local" }}
+    storage: {{ $.Values.global.persistence.zookeeper.storage }}
+  {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.zookeeper.local.hostPath }}/zookeeper/{{ $namespace }}/{{ $index }}
+    path: {{ $.Values.global.persistence.zookeeper.local.hostPath }}/zookeeper/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.zookeeper.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.zookeeper.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.zookeeper.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
+      path: {{ $.Values.global.persistence.zookeeper.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
   {{- end }}
 {{- end }}
 {{- end }}
