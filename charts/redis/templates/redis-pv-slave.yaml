@@ -13,30 +13,41 @@
 # limitations under the License.
 
 {{- if .Values.global.redis.install }}
+{{- $namespace := include "palisade.namespace" . }}
+{{- $redisname := include "redis.fullname" . }}
+{{ range $index := until (1 | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
-  {{- if eq .Values.global.hosting "aws" }}
+  name: {{ $.Values.global.persistence.redisSlave.name }}-{{ $namespace }}-{{ $index }}
   labels:
+  {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
   {{- end }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
+  claimRef:
+    namespace: {{ $namespace }}
+    name: {{ $.Values.global.persistence.redisSlave.name }}-{{ $redisname }}-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+    {{- $sc := index $.Values "global" "persistence" "redisSlave" "storageClassName" $.Values.global.hosting }}
+    {{- $default := index $.Values "global" "persistence" "redisSlave" "storageClassName" "_default" }}
+  storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
-    storage: {{ .Values.global.persistence.redisSlave.storage }}
-  {{- if eq .Values.global.hosting "local" }}
+    storage: {{ $.Values.global.persistence.redisSlave.storage }}
+  {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ .Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ include "palisade.namespace" . }}/slave
+    path: {{ $.Values.global.persistence.redisSlave.local.hostPath }}/redis/{{ $namespace }}/slave/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq .Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisSlave.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ include "palisade.namespace" . }}/slave
+      path: {{ .Values.global.persistence.redisSlave.aws.volumePath }}/redis/{{ $namespace }}/slave/{{ $index }}
   {{- end }}
+{{- end }}
 {{- end }}
