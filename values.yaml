@@ -147,7 +147,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-master
-      storage: 8Gi
+      storage: 12Gi
       local:
         hostPath: "/"
       aws:
@@ -160,7 +160,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-slave
-      storage: 8Gi
+      storage: 11Gi
       local:
         hostPath: "/"
       aws:
