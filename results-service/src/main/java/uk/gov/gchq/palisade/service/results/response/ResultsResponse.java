@@ -75,13 +75,28 @@ public final class ResultsResponse {
     public static class Builder {
         private String queuePointer;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * PolicyResponse class.
+         *
+         * @return fully constructed  {@link ResultsResponse} instance.
+         */
         public static IQueuePointer create() {
             return queuePointer ->
                     new ResultsResponse(queuePointer);
         }
 
+        /**
+         * Adds the queue pointer, reference to the results for the request.
+         */
         interface IQueuePointer {
 
+            /**
+             * Adds the queue pointer to the message.
+             *
+             * @param queuePointer reference to the results for the request.
+             * @return class {@link ResultsResponse} for the completed class from the builder.
+             */
             ResultsResponse withQueuePointer(String queuePointer);
 
         }

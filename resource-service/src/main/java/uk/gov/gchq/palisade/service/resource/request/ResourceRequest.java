@@ -111,7 +111,7 @@ public final class ResourceRequest {
 
     /**
      * Builder class for the creation of instances of the ResourceRequest.  This is a variant of the Fluent Builder
-     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private String resourceId;
@@ -122,7 +122,7 @@ public final class ResourceRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceRequest class.
          *
-         * @return fully constructed  {@link ResourceRequest} instance.
+         * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
             return resource -> context -> user ->
@@ -130,59 +130,63 @@ public final class ResourceRequest {
         }
 
         /**
-         * Adds the resource id information for the response message.
+         * Adds the resource ID information to the message.
          */
         interface IResource {
             /**
-             * @param resourceId {@link String} is the resource id to the response message.
-             * @return the {@link IContext} the next step in the build.
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
              */
             IContext withResource(String resourceId);
         }
 
         /**
-         * Adds the user context information to the response message.
+         * Adds the user context information to the message.
          */
         interface IContext {
+
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this response message.
-             * @return class {@link IUser} for the next step in the build.
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
             /**
-             * Adds the user context information.
+             * Adds the user context information. Uses a JsonNode string form of the information.
              *
-             * @param context information about the user in context to this response message.
-             * @return class {@link IUser} for the next step in the build.
+             * @param context user context information for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
 
         }
 
         /**
-         * Adds the user associated with this request to the response message.
+         * Adds the user information to the message.
          */
         interface IUser {
+
             /**
-             * Adds the user user information.
+             * Adds the user to this message.
              *
-             * @param user information about the user in context to this response message.
-             * @return class {@link ResourceRequest} for the completed class from the builder.
+             * @param user for the request.
+             * @return interface {@link ResourceRequest} for the completed class from the builder.
              */
             default ResourceRequest withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
             /**
-             * Adds the user user information.
+             * Adds the user to this message.  Uses a JsonNode string form of the information.
              *
-             * @param user information about the user in context to this response message.
-             * @return class {@link ResourceRequest} for the completed class from the builder.
+             * @param user for the request.
+             * @return interface {@link ResourceRequest} for the completed class from the builder.
              */
             ResourceRequest withUserNode(JsonNode user);
         }

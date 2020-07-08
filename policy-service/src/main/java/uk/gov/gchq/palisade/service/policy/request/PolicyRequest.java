@@ -90,33 +90,87 @@ public final class PolicyRequest {
         private JsonNode resources;
 
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * PolicyRequest class.
+         *
+         * @return interface  {@link IContext} for the next step in the build.
+         */
         public static IContext create() {
             return context -> user -> resource ->
                     new PolicyRequest(context, user, resource);
         }
 
+        /**
+         * Adds the user context information to the message.
+         */
         interface IContext {
+
+            /**
+             * Adds the user context information.
+             *
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.
+             *
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
+        /**
+         * Adds the user information to the message.
+         */
         interface IUser {
+
+            /**
+             * Adds the user user information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.  Uses a JsonNode string form of the information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
+            IResource withUserNode(JsonNode user);
         }
 
+        /**
+         * Adds the resource to this message.
+         */
         interface IResource {
+
+            /**
+             * Adds the resource that has been requested to access.
+             *
+             * @param resource that is requested to access
+             * @return class {@link PolicyRequest} for the completed class from the builder.
+             */
             default PolicyRequest withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
+            /**
+             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             *
+             * @param resource that is requested to access
+             * @return class {@link PolicyRequest} for the completed class from the builder.
+             */
             PolicyRequest withResourceNode(JsonNode resource);
         }
 

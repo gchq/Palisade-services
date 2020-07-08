@@ -111,8 +111,8 @@ public final class ResourceResponse {
     }
 
     /**
-     * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
+     * Builder class for the creation of instances of the ResourceResponse.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private JsonNode context;
@@ -123,7 +123,7 @@ public final class ResourceResponse {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceResponse class.
          *
-         * @return fully constructed  {@link ResourceResponse} instance.
+         * @return interface  {@link IContext} for the next step in the build.
          */
         public static IContext create() {
             return context -> user -> resource ->
@@ -131,14 +131,15 @@ public final class ResourceResponse {
         }
 
         /**
-         * Adds the user context information to the response message.
+         * Adds the user context information to the message.
          */
         interface IContext {
+
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this response message.
-             * @return class {@link Context} for the next step in the build.
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
@@ -147,42 +148,43 @@ public final class ResourceResponse {
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this response message.
-             * @return class {@link IUser} for the next step in the build.
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
         }
 
         /**
-         * Adds the user associated with this request to the response message.
+         * Adds the user information to the message.
          */
         interface IUser {
+
             /**
-             * Adds the user user information.
+             * Adds the user to this message.
              *
-             * @param user information about the user in context to this response message.
-             * @return class {@link IResource} for the next step in the build.
+             * @param user for the request.
+             * @return interface {@link IResource} for the next step in the build.
              */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
             /**
-             * Adds the user user information.
+             * Adds the user user information.  Uses a JsonNode string form of the information.
              *
-             * @param user information about the user in context to this response message.
+             * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
              */
             IResource withUserNode(JsonNode user);
         }
 
         /**
-         * Adds the resource associated with this request to the response message.
+         * Adds the resource to this message.
          */
         interface IResource {
 
             /**
-             * Adds the resource that has been requested to access
+             * Adds the resource that has been requested to access.
              *
              * @param resource that is requested to access
              * @return class {@link ResourceResponse} for the completed class from the builder.
@@ -190,7 +192,6 @@ public final class ResourceResponse {
             ResourceResponse withResource(LeafResource resource);
 
         }
-
 
     }
 }

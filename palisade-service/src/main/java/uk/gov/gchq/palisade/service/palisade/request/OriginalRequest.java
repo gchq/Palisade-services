@@ -111,8 +111,8 @@ public final class OriginalRequest {
     }
 
     /**
-     * Builder class for the creation of instances of the OriginalRequest.  This is a variant of the Fluent Builder
-     * which will use the String or optionally JsonNodes for the components in the build.
+     * Builder class for the creation of the OriginalRequest.  This is a variant of the Fluent Builder
+     * which will use String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
@@ -120,7 +120,7 @@ public final class OriginalRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * OriginalRequest class.
          *
-         * @return fully constructed OriginalRequest instance.
+         * @return interface  {@link IUser} for the next step in the build.
          */
         public static IUser create() {
             return user -> resource -> context ->
@@ -128,39 +128,39 @@ public final class OriginalRequest {
         }
 
         /**
-         * Adds the user id information for the request.
+         * Adds the user ID information to the message.
          */
         interface IUser {
             /**
-             * Adds the user's ID to the request.
+             * Adds the user's ID.
              *
-             * @param userId user ID.
+             * @param userId user ID for the request.
              * @return interface  {@link IResource} for the next step in the build.
              */
             IResource withUser(String userId);
         }
 
         /**
-         * Adds the resource id information for the request.
+         * Adds the resource ID information to the message.
          */
         interface IResource {
             /**
-             * Adds the user to the resource ID.
+             * Adds the resource ID.
              *
-             * @param resourceId resource id for the request.
+             * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
              */
             IContext withResource(String resourceId);
         }
 
         /**
-         * Adds the user context information to the request.
+         * Adds the user context information to the message.
          */
         interface IContext {
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this request.
+             * @param context information about this request.
              * @return class {@link OriginalRequest} this builder is set-up to create.
              */
             default OriginalRequest withContext(Context context) {
@@ -170,7 +170,7 @@ public final class OriginalRequest {
             /**
              * Adds the user context information. Uses a JsonNode string form of the information.
              *
-             * @param context information about the user in context to this request.
+             * @param context information about this request.
              * @return class {@link OriginalRequest} for the completion of the builder steps is to create the class.
              */
             OriginalRequest withContextNode(JsonNode context);

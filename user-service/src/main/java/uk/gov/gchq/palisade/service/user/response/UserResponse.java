@@ -23,12 +23,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.user.request.UserRequest;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -75,14 +73,14 @@ public final class UserResponse {
     }
 
     @Generated
-    public Map<String, String> getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(context, HashMap.class);
+    public Context getContext() throws JsonProcessingException {
+        return MAPPER.treeToValue(context, Context.class);
     }
 
 
     /**
      * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
-     * which will build use Java Objects or JsonNodes equivalents for the components in the build.
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private String resourceId;
@@ -94,7 +92,7 @@ public final class UserResponse {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * UserRequest class.
          *
-         * @return fully constructed UserResponse instance.
+         * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
             return resource -> context -> user ->
@@ -102,34 +100,37 @@ public final class UserResponse {
         }
 
         /**
-         * Adds the resource id information for the response message.
+         * Adds the resource ID information to the message.
          */
         interface IResource {
             /**
-             * @param resourceId {@link String} is the resource id to the response message.
-             * @return the {@link IContext}
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
              */
             IContext withResource(String resourceId);
         }
 
         /**
-         * Adds the user context information to the response message.
+         * Adds the user context information to the message.
          */
         interface IContext {
+
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this response message.
-             * @return class {@link UserRequest} this builder is set-up to create.
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
-            default IUser withContext(Map<String, String> context) {
+            default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
             /**
              * Adds the user context information. Uses a JsonNode string form of the information.
              *
-             * @param context information about the user in context to this response message.
+             * @param context user context information for the request.
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
@@ -137,13 +138,13 @@ public final class UserResponse {
         }
 
         /**
-         * Adds the user information to the response message.
+         * Adds the user information to the message.
          */
         interface IUser {
             /**
-             * Adds the user to this response.
+             * Adds the user to this message.
              *
-             * @param user user for the request.
+             * @param user for the request.
              * @return interface {@link UserResponse} for the completed class from the builder.
              */
             UserResponse withUser(User user);

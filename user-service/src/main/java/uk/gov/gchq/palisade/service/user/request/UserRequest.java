@@ -120,7 +120,7 @@ public final class UserRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * UserRequest class.
          *
-         * @return fully constructed UserRequest instance.
+         * @return interface  {@link IUser} for the next step in the build.
          */
         public static IUser create() {
             return user -> resource -> context ->
@@ -128,13 +128,13 @@ public final class UserRequest {
         }
 
         /**
-         * Adds the user id information for the request.
+         * Adds the user ID information for the request.
          */
         interface IUser {
             /**
-             * Adds the user's ID to the request.
+             * Adds the user's ID.
              *
-             * @param userId user ID.
+             * @param userId user ID for the request.
              * @return interface  {@link IResource} for the next step in the build.
              */
             IResource withUser(String userId);
@@ -142,11 +142,11 @@ public final class UserRequest {
         }
 
         /**
-         * Adds the resource ID information for the request.
+         * Adds the resource ID information to the message.
          */
         interface IResource {
             /**
-             * Adds the user to the resource ID.
+             * Adds the resource ID.
              *
              * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
@@ -155,14 +155,15 @@ public final class UserRequest {
         }
 
         /**
-         * Adds the user context information to the request.
+         * Adds the user context information to the message.
          */
         interface IContext {
+
             /**
              * Adds the user context information.
              *
-             * @param context information about the user.
-             * @return class {@link UserRequest} the  is set-up to create.
+             * @param context information about this request.
+             * @return class {@link UserRequest} this builder is set-up to create.
              */
             default UserRequest withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
@@ -171,8 +172,8 @@ public final class UserRequest {
             /**
              * Adds the user context information. Uses a JsonNode string form of the information.
              *
-             * @param context information about the user in context to this request.
-             * @return class {@link UserRequest} or the completion of the builder steps is to create the class.
+             * @param context information about this request.
+             * @return class {@link UserRequest} for the completion of the builder steps is to create the class.
              */
             UserRequest withContextNode(JsonNode context);
         }

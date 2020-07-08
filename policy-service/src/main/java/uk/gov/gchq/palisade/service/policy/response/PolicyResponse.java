@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -40,17 +39,19 @@ import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
  * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
- *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class PolicyResponse {
+public final class PolicyResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
-    public final Rules rules; // holds all of the Rules applicable to this request
+    /**
+     * Holds all of the Rules applicable to this request
+     */
+    public final Rules rules;
 
     @JsonCreator
     private PolicyResponse(
@@ -96,37 +97,99 @@ public class PolicyResponse {
         private JsonNode resources;
         private Rules rules;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * PolicyResponse class.
+         *
+         * @return interface  {@link IContext} for the next step in the build.
+         */
         public static IContext create() {
             return context -> user -> resource -> rules ->
                     new PolicyResponse(context, user, resource, rules);
         }
 
+        /**
+         * Adds the user context information to the message.
+         */
         interface IContext {
+            /**
+             * Adds the user context information.
+             *
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.
+             *
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
+        /**
+         * Adds the user information to the message.
+         */
         interface IUser {
+
+            /**
+             * Adds the user user information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.  Uses a JsonNode string form of the information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
+            IResource withUserNode(JsonNode user);
         }
 
+        /**
+         * Adds the resource to this message.
+         */
         interface IResource {
+
+            /**
+             * Adds the resource that has been requested to access.
+             *
+             * @param resource that is requested to access
+             * @return class {@link IRules} for the next step in the build.
+             */
             default IRules withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
+            /**
+             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             *
+             * @param resource that is requested to access
+             * @return class {@link IRules} for the next step in the build.
+             */
             IRules withResourceNode(JsonNode resource);
         }
 
+        /**
+         * Adds the rules to this message.
+         */
         interface IRules {
+            /**
+             * Adds the rules that has apply to this request.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link PolicyResponse} for the completed class from the builder.
+             */
             PolicyResponse withRule(Rules rules);
 
         }

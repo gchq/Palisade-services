@@ -100,41 +100,107 @@ public class ResultsRequest {
         private JsonNode resources;
         private JsonNode rules;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * PolicyRequest class.
+         *
+         * @return fully constructed  {@link ResultsRequest} instance.
+         */
         public static IContext create() {
             return context -> user -> resources -> rules ->
                     new ResultsRequest(context, user, resources, rules);
         }
 
+        /**
+         * Adds the user context information to the response message.
+         */
         interface IContext {
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.
+             *
+             * @param context information about the user in context to this message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
+        /**
+         * Adds the user associated with this request to the message.
+         */
         interface IUser {
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this message.
+             * @return interface {@link IResource} for the completed class from the builder.
+             */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.
+             *
+             * @param user information about the user in context to this message.
+             * @return interface {@link IResource} for the completed class from the builder.
+             */
+            IResource withUserNode(JsonNode user);
         }
 
+        /**
+         * Adds the resource associated with this message.
+         */
         interface IResource {
+            /**
+             * Adds the resource that has been requested to access.
+             *
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
+             */
             default IRules withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
+            /**
+             * Adds the resource that has been requested to access.
+             *
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
+             */
             IRules withResourceNode(JsonNode resource);
         }
 
+        /**
+         * Adds the rules associated with this response.
+         */
         interface IRules {
+            /**
+             * Adds the rules that has been requested to access.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link ResultsRequest} for the completed class from the builder.
+             */
             default ResultsRequest withRules(Rules rules) {
                 return withResourceNode(MAPPER.valueToTree(rules));
             }
 
+            /**
+             * Adds the rules that has been requested to access.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link ResultsRequest} for the completed class from the builder.
+             */
             ResultsRequest withResourceNode(JsonNode rules);
         }
 

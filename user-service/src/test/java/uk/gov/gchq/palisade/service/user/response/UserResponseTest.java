@@ -24,11 +24,10 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.user.response.common.domain.User;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,9 +49,7 @@ class UserResponseTest {
     @Test
     void testSerialiseUserResponseToJson() throws IOException {
 
-        Map<String, String> context = context = new HashMap<>();
-        context.put("key1", "context1");
-        context.put("key2", "context2");
+        Context context = new Context().purpose("testContext");
 
         User user = User.create("testUserId");
 
@@ -65,10 +62,9 @@ class UserResponseTest {
 
         //these tests are each for strings
         assertThat(response).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
+        assertThat(response).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
 
-        //test is for a json representation of a Map<String, String>, should stay unchanged
-        assertThat(response).extractingJsonPathMapValue("$.context").containsKey("key1");
-        assertThat(response).extractingJsonPathMapValue("$.context").containsValue("context2");
+
 
 
     }
@@ -81,7 +77,7 @@ class UserResponseTest {
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
 
-        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"key1\":\"context1\",\"key2\":\"context2\"},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
+        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
         ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
         UserResponse response = (UserResponse) userResponseContent.getObject();
         assertThat(response.user.userId).isEqualTo("testUserId");
