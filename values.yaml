@@ -173,6 +173,12 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-cluster
+      storage: 13Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
 
   # must be last for file to be appended with addresses
   globalIPAddresses:
