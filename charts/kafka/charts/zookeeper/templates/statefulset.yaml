@@ -117,7 +117,7 @@ spec:
         resources:
           {{- toYaml .Values.resources | indent 10 }}
         volumeMounts:
-        - name: data
+        - name: {{ .Values.global.persistence.zookeeper.name }}
           mountPath: /data
           {{- range $secret := .Values.secrets }}
           {{- if $secret.mountPath }}
