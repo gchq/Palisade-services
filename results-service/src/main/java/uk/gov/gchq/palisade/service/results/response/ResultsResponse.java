@@ -77,9 +77,9 @@ public final class ResultsResponse {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PolicyResponse class.
+         * ResultsResponse class.
          *
-         * @return fully constructed  {@link ResultsResponse} instance.
+         * @return interface  {@link IQueuePointer} for the next step in the build.
          */
         public static IQueuePointer create() {
             return queuePointer ->
@@ -87,7 +87,7 @@ public final class ResultsResponse {
         }
 
         /**
-         * Adds the queue pointer, reference to the results for the request.
+         * Adds the queue pointer, a reference for the results for the request.
          */
         interface IQueuePointer {
 

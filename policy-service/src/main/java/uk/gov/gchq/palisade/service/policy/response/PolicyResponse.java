@@ -123,7 +123,7 @@ public final class PolicyResponse {
             }
 
             /**
-             * Adds the user context information.
+             * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
              * @return interface {@link IUser} for the next step in the build.

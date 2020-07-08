@@ -31,7 +31,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.results.request.common.domain.User;
+import uk.gov.gchq.palisade.service.results.response.common.domain.User;
 
 import java.io.IOException;
 

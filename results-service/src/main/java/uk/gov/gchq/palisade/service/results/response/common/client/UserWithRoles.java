@@ -23,8 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.results.request.common.domain.IUser;
-import uk.gov.gchq.palisade.service.results.request.common.domain.User;
+import uk.gov.gchq.palisade.service.results.response.common.domain.IUser;
+import uk.gov.gchq.palisade.service.results.response.common.domain.User;
+
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public final class UserWithRoles implements IUser {
         return this.userAndRoles;
     }
 
-
+    @SuppressWarnings("checkstyle:parameterNumber") //
     private static List<String> roleGen(final Map<String, String> attributes) {
         return Optional.ofNullable(attributes.get(ROLE_KEY)).map((String val) -> {
             try {

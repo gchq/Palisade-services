@@ -34,7 +34,6 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -137,41 +136,112 @@ public class QueryScopeResponse {
         private JsonNode resources;
         private JsonNode rules;
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * QueryScopeResponse class.
+         *
+         * @return interface  {@link IContext} for the next step in the build.
+         */
         public static IContext create() {
             return context -> user -> resources -> rules ->
                     new QueryScopeResponse(context, user, resources, rules);
         }
 
+        /**
+         * Adds the user context information to the message.
+         */
         interface IContext {
+
+            /**
+             * Adds the user context information.
+             *
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
+            /**
+             * Adds the user context information.  Uses a JsonNode string form of the information.
+             *
+             * @param context information about the user in context to this response message.
+             * @return class {@link IUser} for the next step in the build.
+             */
             IUser withContextNode(JsonNode context);
 
         }
 
+        /**
+         * Adds the user information to the message.
+         */
         interface IUser {
+
+            /**
+             * Adds the user user information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
-            IResource withUserNode(JsonNode context);
+            /**
+             * Adds the user user information.  Uses a JsonNode string form of the information.
+             *
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
+             */
+            IResource withUserNode(JsonNode user);
         }
 
+        /**
+         * Adds the resource to this message.
+         */
         interface IResource {
+
+            /**
+             * Adds the resource that has been requested to access.
+             *
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
+             */
             default IRules withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
+            /**
+             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             *
+             *
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
+             */
             IRules withResourceNode(JsonNode resource);
         }
 
+        /**
+         * Adds the rules associated with this request.
+         */
         interface IRules {
+
+            /**
+             * Adds the rules that specify the access.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link QueryScopeResponse} for the completed class from the builder.
+             */
             default QueryScopeResponse withRules(Rules rules) {
                 return withResourceNode(MAPPER.valueToTree(rules));
             }
 
+            /**
+             * Adds the rules that specify the access.  Uses a JsonNode string form of the information.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link QueryScopeResponse} for the completed class from the builder.
+             */
             QueryScopeResponse withResourceNode(JsonNode rules);
         }
 

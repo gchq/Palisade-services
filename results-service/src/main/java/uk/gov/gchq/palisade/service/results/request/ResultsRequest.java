@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.results.request.common.domain.User;
+import uk.gov.gchq.palisade.service.results.response.common.domain.User;
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
@@ -102,9 +102,9 @@ public class ResultsRequest {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PolicyRequest class.
+         * ResultsRequest class.
          *
-         * @return fully constructed  {@link ResultsRequest} instance.
+         * @return interface  {@link IContext} for the next step in the build.
          */
         public static IContext create() {
             return context -> user -> resources -> rules ->
@@ -112,23 +112,24 @@ public class ResultsRequest {
         }
 
         /**
-         * Adds the user context information to the response message.
+         * Adds the user context information to the message.
          */
         interface IContext {
+
             /**
              * Adds the user context information.
              *
-             * @param context information about the user in context to this message.
-             * @return class {@link IUser} for the next step in the build.
+             * @param context user context for the request.
+             * @return interface {@link IUser} for the next step in the build.
              */
             default IUser withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
             /**
-             * Adds the user context information.
+             * Adds the user context information.  Uses a JsonNode string form of the information.
              *
-             * @param context information about the user in context to this message.
+             * @param context information about the user in context to this response message.
              * @return class {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
@@ -136,32 +137,34 @@ public class ResultsRequest {
         }
 
         /**
-         * Adds the user associated with this request to the message.
+         * Adds the user information to the message.
          */
         interface IUser {
+
             /**
              * Adds the user user information.
              *
-             * @param user information about the user in context to this message.
-             * @return interface {@link IResource} for the completed class from the builder.
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
              */
             default IResource withUser(User user) {
                 return withUserNode(MAPPER.valueToTree(user));
             }
 
             /**
-             * Adds the user user information.
+             * Adds the user user information.  Uses a JsonNode string form of the information.
              *
-             * @param user information about the user in context to this message.
-             * @return interface {@link IResource} for the completed class from the builder.
+             * @param user for the request.
+             * @return class {@link IResource} for the next step in the build.
              */
             IResource withUserNode(JsonNode user);
         }
 
         /**
-         * Adds the resource associated with this message.
+         * Adds the resource to this message.
          */
         interface IResource {
+
             /**
              * Adds the resource that has been requested to access.
              *
@@ -173,7 +176,8 @@ public class ResultsRequest {
             }
 
             /**
-             * Adds the resource that has been requested to access.
+             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             *
              *
              * @param resource that is requested to access.
              * @return interface {@link IRules} for the next step in the build.
@@ -182,11 +186,12 @@ public class ResultsRequest {
         }
 
         /**
-         * Adds the rules associated with this response.
+         * Adds the rules associated with this request.
          */
         interface IRules {
+
             /**
-             * Adds the rules that has been requested to access.
+             * Adds the rules that specify the access.
              *
              * @param rules that apply to this request.
              * @return class {@link ResultsRequest} for the completed class from the builder.
@@ -196,7 +201,7 @@ public class ResultsRequest {
             }
 
             /**
-             * Adds the rules that has been requested to access.
+             * Adds the rules that specify the access.  Uses a JsonNode string form of the information.
              *
              * @param rules that apply to this request.
              * @return class {@link ResultsRequest} for the completed class from the builder.
