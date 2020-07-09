@@ -26,7 +26,7 @@ metadata:
   {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
   {{- end }}
-  selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+    selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
