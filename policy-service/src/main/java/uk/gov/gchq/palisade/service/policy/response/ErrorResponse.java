@@ -29,12 +29,17 @@ import org.springframework.util.Assert;
  * information about the service which should not be made public such as the stack trace of the error.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ErrorResponse {
+public final class ErrorResponse {
 
+    /**
+     * Technical detail about where/when the error occurred.
+     */
+    public final String technicalMessage;
 
-    public final String technicalMessage; //Technical detail about where/when the error occurred.
-
-    public final String errorMessage;  //Detailed description of the error in english
+    /**
+     * Detailed description of the error in english
+     */
+    public final String errorMessage;
 
     @JsonCreator
     private ErrorResponse(
@@ -54,16 +59,34 @@ public class ErrorResponse {
      * which will use the String for the components in the build.
      */
     public static class Builder {
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * ErrorResponse class.
+         *
+         * @return fully constructed {@link ErrorResponse} class
+         */
         public static ITechMessage create() {
             return techMessage -> errorMessage ->
                     new ErrorResponse(techMessage, errorMessage);
         }
 
         interface ITechMessage {
+            /**
+             * Adds the technical information about the issue to the message.
+             *
+             * @param technicalMessage technical error information
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
             IErrorMessage withTechnicalMessage(String technicalMessage);
         }
 
         interface IErrorMessage {
+            /**
+             * Adds the error message.
+             *
+             * @param errorMessage error message
+             * @return class {@link ErrorResponse} for the completed build.
+             */
             ErrorResponse withErrorMessage(String errorMessage);
         }
     }

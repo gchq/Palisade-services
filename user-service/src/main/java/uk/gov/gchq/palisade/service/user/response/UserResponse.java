@@ -43,8 +43,15 @@ public final class UserResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String resourceId;  //Resource that that is being asked to access
-    private final JsonNode context;  // represents the context information as a Json string of a Map<String, String>
+    /**
+     * Resource that that is being asked to access
+     */
+    private final String resourceId;
+
+    /**
+     * represents the context information as a Json string of a Map<String, String>
+     */
+    private final JsonNode context;
 
     /**
      * The user that has made the request
