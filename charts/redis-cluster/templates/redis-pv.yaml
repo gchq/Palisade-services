@@ -48,7 +48,7 @@ spec:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.redisMaster.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ .Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
+      path: {{ $.Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
   {{- end }}
 {{- end }}
 {{- end }}
