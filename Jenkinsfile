@@ -263,7 +263,8 @@ spec:
                                 }
                             }
                         } else {
-                            def GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase()
+                            //only get the first 10 characters of the namespace
+                            def GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(10)
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
