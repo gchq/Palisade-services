@@ -44,7 +44,7 @@ import java.util.StringJoiner;
  */
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class DataRequest {
+public final class DataRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
