@@ -267,7 +267,7 @@ spec:
                             def GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(10)
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
-                            sh 'extract-addresses'
+//                            sh 'extract-addresses'
                             if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                 sh 'echo namespace create succeeded'
                                 sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
