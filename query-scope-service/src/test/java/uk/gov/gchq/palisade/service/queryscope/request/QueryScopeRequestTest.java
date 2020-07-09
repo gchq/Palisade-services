@@ -25,7 +25,6 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;

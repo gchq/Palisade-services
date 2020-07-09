@@ -51,7 +51,7 @@ public final class QueryScopeResponse {
     private QueryScopeResponse(
             final @JsonProperty("resource") JsonNode resource) {
 
-        Assert.notNull(resource, "Resources cannot be null");
+        Assert.notNull(resource, "Resource cannot be null");
         this.resource = resource;
     }
 

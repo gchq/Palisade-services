@@ -45,7 +45,7 @@ public class ResultsRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
 
-    private final JsonNode resource; // Json Node representation of the Resources
+    private final JsonNode resource; // Json Node representation of the Resource
 
     @JsonCreator
     private ResultsRequest(
@@ -98,7 +98,7 @@ public class ResultsRequest {
      */
     public static class Builder {
 
-        private JsonNode resources;
+        private JsonNode resource;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
