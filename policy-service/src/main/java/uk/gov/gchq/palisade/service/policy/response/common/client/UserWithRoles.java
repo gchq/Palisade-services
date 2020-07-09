@@ -106,9 +106,9 @@ public final class UserWithRoles implements IUser {
                 return MAPPER.readValue(val, MAPPER.getTypeFactory().constructCollectionType(List.class, String.class));
             } catch (JsonProcessingException e) {
                 LOGGER.info("Failed to parse list of roles", e);
-                return new ArrayList<String>();
+                return List.<String>of();
             }
-        }).orElseGet(ArrayList<String>::new);
+        }).orElseGet(ArrayList::new);
     }
 
     /**
