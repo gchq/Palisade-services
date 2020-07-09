@@ -46,7 +46,7 @@ spec:
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.redisMaster.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.redisMaster.aws.volumeHandle }}
     volumeAttributes:
       path: {{ .Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
   {{- end }}
