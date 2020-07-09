@@ -269,7 +269,8 @@ spec:
                                         "--set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
                                         "--set global.persistence.redisMaster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
                                         "--set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} " +
-                                        "--set global.persistence.redisCluster.aws.volumeHandle=$VOLUME_HANDLE_REDIS_MASTER " +
+                                        "--set global.persistence.redisCluster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
+                                        "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
                                         "--set global.redis.install=false " +
                                         "--set global.redis-cluster.install=true " +
                                         "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
