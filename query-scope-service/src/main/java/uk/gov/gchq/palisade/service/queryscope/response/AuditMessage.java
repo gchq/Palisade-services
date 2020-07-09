@@ -168,6 +168,12 @@ public final class AuditMessage {
         private String errorMessage;
 
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * AuditMessage class.
+         *
+         * @return fully constructed {@link AuditMessage} instance
+         */
         public static ITimeStamp create() {
             return timeStamp -> serverIp -> serverHostname -> context -> user -> resource -> rules -> errorMessage ->
                     new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resource, rules, errorMessage);

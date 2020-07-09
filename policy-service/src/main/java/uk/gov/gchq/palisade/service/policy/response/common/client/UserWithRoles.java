@@ -50,9 +50,15 @@ public final class UserWithRoles implements IUser {
     @JsonProperty("userWithRoles")
     private final User userWithRoles;
 
+    /**
+     * {@link String} userId of the user
+     */
     @JsonIgnore
     public final String userId;
 
+    /**
+     * {@link List} {@link String} roles assigned to the user
+     */
     @JsonIgnore
     public final List<String> roles;
 

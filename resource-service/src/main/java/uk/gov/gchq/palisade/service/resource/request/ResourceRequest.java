@@ -122,7 +122,7 @@ public final class ResourceRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceRequest class.
          *
-         * @return interface  {@link IResource} for the next step in the build.
+         * @return interface {@link IResource} for the next step in the build.
          */
         public static IResource create() {
             return resource -> context -> user ->

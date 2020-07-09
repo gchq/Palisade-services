@@ -28,6 +28,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class QueryScopeApplication {
 
 
+    /**
+     * SpringBoot application entry-point method for query-scope-Application executable
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(QueryScopeApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);

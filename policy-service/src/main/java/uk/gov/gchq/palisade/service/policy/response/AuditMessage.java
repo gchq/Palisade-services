@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,6 +238,12 @@ public final class AuditMessage {
          * Adds the error message if there was an issue with processing the request
          */
         interface IErrorMessage {
+            /**
+             * Builder method for adding error Message to the request
+             *
+             * @param errorMessage Error message if there was an issue with the request
+             * @return interface {@link IErrorMessage} for the next step in the build
+             */
             AuditMessage withErrorMessage(String errorMessage);
         }
     }
