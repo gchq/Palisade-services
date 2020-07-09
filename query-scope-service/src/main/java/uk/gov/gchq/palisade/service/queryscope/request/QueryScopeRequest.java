@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.queryscope.response.common.domain.User;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
