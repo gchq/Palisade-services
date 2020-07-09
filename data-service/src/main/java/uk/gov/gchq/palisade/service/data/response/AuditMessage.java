@@ -170,6 +170,10 @@ public final class AuditMessage {
         private String errorMessage;
 
 
+        /**
+         * Builder create method to create new AuditMessage Object
+         * @return new {@link AuditMessage} with new variables declared
+         */
         public static ITimeStamp create() {
             return timeStamp -> serverIp -> serverHostname -> context -> user -> resource -> rules -> errorMessage ->
                     new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resource, rules, errorMessage);
