@@ -98,8 +98,6 @@ public class ResultsRequest {
      */
     public static class Builder {
 
-        private JsonNode resource;
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResultsRequest class.
