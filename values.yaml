@@ -70,7 +70,7 @@ global:
 
   # persistent-volume and associated claims configurations
   persistence:
-    storageClassDeploy: true
+    storageClassDeploy: false
 
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
