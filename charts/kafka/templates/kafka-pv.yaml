@@ -45,7 +45,7 @@ spec:
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" .Values.global.persistence.kafka.aws.volumeHandle }}
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
       path: {{ $.Values.global.persistence.kafka.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
       type: DirectoryOrCreate
