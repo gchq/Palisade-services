@@ -49,7 +49,8 @@ public final class UserResponse {
     private final String resourceId;
 
     /**
-     * represents the context information as a Json string of a Map<String, String>
+     * Represents the context information as a Json string.
+     * {@link java.util.Map} of type {@link String}, {@link String}
      */
     private final JsonNode context;
 
