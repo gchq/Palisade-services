@@ -59,7 +59,7 @@ public class QueryScopeResponseTest {
 
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jacksonTester.write(queryScopeResponse);
 
-          assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
     }
 

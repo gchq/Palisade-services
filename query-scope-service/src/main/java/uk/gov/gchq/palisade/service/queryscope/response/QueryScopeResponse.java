@@ -45,19 +45,19 @@ public final class QueryScopeResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final JsonNode resources; // Json Node representation of the Resources
+    private final JsonNode resource; // Json Node representation of the Resources
 
     @JsonCreator
     private QueryScopeResponse(
-            final @JsonProperty("resources") JsonNode resources) {
+            final @JsonProperty("resource") JsonNode resource) {
 
-        Assert.notNull(resources, "Resources cannot be null");
-        this.resources = resources;
+        Assert.notNull(resource, "Resources cannot be null");
+        this.resource = resource;
     }
 
     @Generated
     public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resources, LeafResource.class);
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
     @Override
@@ -70,20 +70,20 @@ public final class QueryScopeResponse {
             return false;
         }
         QueryScopeResponse that = (QueryScopeResponse) o;
-        return resources.equals(that.resources);
+        return resource.equals(that.resource);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(resources);
+        return Objects.hash(resource);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", QueryScopeResponse.class.getSimpleName() + "[", "]")
-                .add("resources=" + resources)
+                .add("resources=" + resource)
                 .add(super.toString())
                 .toString();
     }
@@ -93,7 +93,7 @@ public final class QueryScopeResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private JsonNode resources;
+        private JsonNode resource;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -102,7 +102,7 @@ public final class QueryScopeResponse {
          * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
-            return resource -> new QueryScopeResponse(resource);
+            return QueryScopeResponse::new;
         }
 
         /**

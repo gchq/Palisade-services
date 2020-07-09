@@ -27,6 +27,9 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -42,25 +45,52 @@ public class ResultsRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
 
-    private final JsonNode resources; // Json Node representation of the Resources
+    private final JsonNode resource; // Json Node representation of the Resources
 
     @JsonCreator
     private ResultsRequest(
 
-            final @JsonProperty("resources") JsonNode resources) {
+            final @JsonProperty("resource") JsonNode resource) {
 
-        Assert.notNull(resources, "Resources cannot be null");
+        Assert.notNull(resource, "Resources cannot be null");
 
-        this.resources = resources;
+        this.resource = resource;
     }
 
 
 
     @Generated
     public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resources, LeafResource.class);
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
+    @Override
+    @Generated
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResultsRequest)) {
+            return false;
+        }
+        ResultsRequest that = (ResultsRequest) o;
+        return resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", ResultsRequest.class.getSimpleName() + "[", "]")
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
+    }
 
     /**
      * Builder class for the creation of instances of the ResultsRequest.  This is a variant of the Fluent Builder
@@ -77,7 +107,7 @@ public class ResultsRequest {
          * @return interface  {@link IResource} for the next step in the build.
          */
         public static IResource create() {
-            return resource -> new ResultsRequest(resource);
+            return ResultsRequest::new;
         }
 
 
