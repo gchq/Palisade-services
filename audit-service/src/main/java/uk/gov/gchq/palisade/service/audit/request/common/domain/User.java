@@ -63,7 +63,11 @@ public class User implements IUser {
         this.userId = userId;
         this.attributes = Collections.unmodifiableMap(entries);
     }
-
+    /**
+     * Builds an instance of the User class with the user ID.
+     * @param userId for this user.
+     * @return new instance of User.
+     */
     public static User create(final String userId) {
         return new User(userId);
     }
