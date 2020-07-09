@@ -17,15 +17,18 @@
 #the volume is actually used by other pods as a different mode
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
+{{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "palisade.deployment.fullname" . }}
+  name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
   labels:
   {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
   {{- end }}
-    selectorFilter: {{ include "palisade.deployment.fullname" . }}
+  selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany

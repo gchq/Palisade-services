@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -20,7 +21,7 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
-  namespace: {{ include "palisade.namespace" . }}
+  namespace: {{ $namespace }}
 # The palisade-classpath-jars PV is set to a reclaim policy of DELETE
 # In the future we may want to set the policy to RETAIN, in this situation where a
 # helm upgrade makes a modification to the PV
@@ -43,4 +44,4 @@ spec:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.deployment.fullname" . }}
+      selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}

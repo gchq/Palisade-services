@@ -21,16 +21,17 @@
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
 
+{{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $name }}
+  name: {{ $name }}-{{ $namespace }}
   labels:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
-    selectorFilter: {{ $name }}
+    selectorFilter: {{ $name }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
