@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.response;
+package uk.gov.gchq.palisade.service.data.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,42 +28,42 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
+import uk.gov.gchq.palisade.service.data.response.common.domain.User;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the output for policy-service where the related policies have been added.
- * Next in the sequence will be the input for the query-scope-service with the policies added.
+ * This version represents the input for data-service for the information to be stored for later use by the client.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
  * uk.gov.gchq.palisade.service.data.request.DataRequest is the input for the data-service.
  * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
  */
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class PolicyResponse {
+public class DataRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
-    /**
-     * Holds all of the Rules applicable to this request
-     */
-    public final Rules rules;
+    private final JsonNode rules; // Json Node representation of the Rules
 
     @JsonCreator
-    private PolicyResponse(
+    private DataRequest(
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resource") JsonNode resource,
-            final @JsonProperty("rules") Rules rules) {
+            final @JsonProperty("resources") JsonNode resource,
+            final @JsonProperty("rules") JsonNode rules) {
+
 
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
-        Assert.notNull(resource, "Resource cannot be null");
+        Assert.notNull(resource, "Resources cannot be null");
         Assert.notNull(rules, "Rules cannot be null");
 
         this.context = context;
@@ -87,26 +87,64 @@ public final class PolicyResponse {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
+    @Generated
+    public Rules getRules() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.rules, Rules.class);
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DataRequest)) {
+            return false;
+        }
+        DataRequest that = (DataRequest) o;
+        return context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource) &&
+                rules.equals(that.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(context, user, resource, rules);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", DataRequest.class.getSimpleName() + "[", "]")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
+    }
 
     /**
-     * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the DataRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         private JsonNode context;
         private JsonNode user;
-        private JsonNode resources;
-        private Rules rules;
+        private JsonNode resource;
+        private JsonNode rules;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PolicyResponse class.
+         * ResourceRequest class.
          *
          * @return interface  {@link IContext} for the next step in the build.
          */
         public static IContext create() {
             return context -> user -> resource -> rules ->
-                    new PolicyResponse(context, user, resource, rules);
+                    new DataRequest(context, user, resource, rules);
         }
 
         /**
@@ -137,7 +175,6 @@ public final class PolicyResponse {
          * Adds the user information to the message.
          */
         interface IUser {
-
             /**
              * Adds the user user information.
              *
@@ -165,8 +202,8 @@ public final class PolicyResponse {
             /**
              * Adds the resource that has been requested to access.
              *
-             * @param resource that is requested to access
-             * @return class {@link IRules} for the next step in the build.
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
              */
             default IRules withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
@@ -175,28 +212,34 @@ public final class PolicyResponse {
             /**
              * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
              *
-             * @param resource that is requested to access
-             * @return class {@link IRules} for the next step in the build.
+             * @param resource that is requested to access.
+             * @return interface {@link IRules} for the next step in the build.
              */
             IRules withResourceNode(JsonNode resource);
         }
 
         /**
-         * Adds the rules to this message.
+         * Adds the rules associated with this request.
          */
         interface IRules {
             /**
-             * Adds the rules that has apply to this request.
+             * Adds the rules that specify the access.
              *
              * @param rules that apply to this request.
-             * @return class {@link PolicyResponse} for the completed class from the builder.
+             * @return class {@link DataRequest} for the completed class from the builder.
              */
-            PolicyResponse withRule(Rules rules);
+            default DataRequest withRules(Rules rules) {
+                return withRulesNode(MAPPER.valueToTree(rules));
+            }
 
+            /**
+             * Adds the rules that specify the access.  Uses a JsonNode string form of the information.
+             *
+             * @param rules that apply to this request.
+             * @return class {@link DataRequest} for the completed class from the builder.
+             */
+            DataRequest withRulesNode(JsonNode rules);
         }
-
     }
-
 }
-
 

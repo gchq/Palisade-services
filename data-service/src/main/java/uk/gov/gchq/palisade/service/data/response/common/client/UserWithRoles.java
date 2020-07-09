@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.results.response.common.client;
+package uk.gov.gchq.palisade.service.data.response.common.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -23,9 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.results.response.common.domain.IUser;
-import uk.gov.gchq.palisade.service.results.response.common.domain.User;
-
+import uk.gov.gchq.palisade.service.data.response.common.domain.IUser;
+import uk.gov.gchq.palisade.service.data.response.common.domain.User;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -48,8 +47,9 @@ public final class UserWithRoles implements IUser {
     private static final String ROLE_KEY = "ROLES";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+
     @JsonProperty("userWithRoles")
-    private final User userAndRoles;
+    private final User userAndRoles; //named userAndRoles to avoid ambiguity with userWithRoles
 
     /**
      * user ID for the client.
@@ -102,6 +102,7 @@ public final class UserWithRoles implements IUser {
         return this.userAndRoles;
     }
 
+
     private static List<String> roleGen(final Map<String, String> attributes) {
         return Optional.ofNullable(attributes.get(ROLE_KEY)).map((String val) -> {
             try {
@@ -121,7 +122,7 @@ public final class UserWithRoles implements IUser {
      * @return interface  {@link IRoles} for the next step in the build.
      */
     public static IRoles create(final String userId) {
-        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<>(ROLE_KEY,
+        return roles -> new UserWithRoles(userId, Stream.of(new AbstractMap.SimpleImmutableEntry<String, String>(ROLE_KEY,
                 MAPPER.writeValueAsString(Stream.of(roles)
                         .peek(role -> Optional.of(ALLOWED.contains(role)).filter(val -> val).orElseThrow(() -> new RuntimeException("Invalid Role supplied")))
                         .collect(toList()))
@@ -152,5 +153,6 @@ public final class UserWithRoles implements IUser {
         UserWithRoles withRoles(String... roles) throws JsonProcessingException;
     }
 }
+
 
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.queryscope.request;
+package uk.gov.gchq.palisade.service.policy.response;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,18 +30,19 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.queryscope.response.common.domain.User;
+import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 @RunWith(SpringRunner.class)
 @JsonTest
-public class QueryScopeRequestTest {
-    @Autowired
-    private JacksonTester<QueryScopeRequest> jacksonTester;
+public class PolicyResponseTest {
 
+    @Autowired
+    private JacksonTester<PolicyResponse> jacksonTester;
 
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
@@ -58,14 +59,17 @@ public class QueryScopeRequestTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
+
         Rules rules = new Rules().rule("Rule1", new PassThroughRule());
-        QueryScopeRequest queryScopeResponse = QueryScopeRequest.Builder.create().withContext(context).withUser(user).withResource(resource).withRules(rules);
 
-        JsonContent<QueryScopeRequest> queryScopeResponseJsonContent = jacksonTester.write(queryScopeResponse);
+        PolicyResponse policyResponse = PolicyResponse.Builder.create().withContext(context).withUser(user).withResource(resource).withRule(rules);
 
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        JsonContent<PolicyResponse> policyRequestJsonContent = jacksonTester.write(policyResponse);
+
+        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
+        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set");
 
     }
 
@@ -77,15 +81,16 @@ public class QueryScopeRequestTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.policy.PassThroughRule\"}}}}";
+        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.service.policy.response.PassThroughRule\"}}}}";
 
-        ObjectContent<QueryScopeRequest> queryScopeResponseObjectContentObjectContent = jacksonTester.parse(jsonString);
+        ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(jsonString);
 
-        QueryScopeRequest queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
-        assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(queryScopeResponse.getUser().userId).isEqualTo("testUserId");
-        assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
+        PolicyResponse policyResponse = policyResponseObjectContent.getObject();
+        assertThat(policyResponse.getContext().getPurpose()).isEqualTo("testContext");
+        assertThat(policyResponse.getUser().userId).isEqualTo("testUserId");
+        assertThat(policyResponse.getResource().getId()).isEqualTo("/test/file.format");
+        assertThat(policyResponse.rules.getMessage()).isEqualTo("no rules set");
+
 
     }
 }
-

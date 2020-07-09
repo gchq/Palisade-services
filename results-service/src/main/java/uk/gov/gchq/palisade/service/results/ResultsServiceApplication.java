@@ -26,11 +26,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 @SpringBootApplication
 public class ResultsServiceApplication {
 
-
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ResultsServiceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
-
-
 }
+
