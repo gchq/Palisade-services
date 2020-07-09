@@ -33,7 +33,6 @@ import java.util.StringJoiner;
  * Each individual service sends a record to the Audit Service for every request that it receives.
  * The components of the message will differ depending on which service has sent the data and if the processing was
  * successful or not.
- *
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditMessage {
@@ -169,15 +168,27 @@ public final class AuditMessage {
         private String errorMessage;
 
 
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * AuditMessage class.
+         *
+         * @return fully constructed {@link AuditMessage} instance
+         */
         public static ITimeStamp create() {
-            return timeStamp -> serverIp -> serverHostname -> context ->  user -> resourceId -> resource  -> errorMessage ->
-                    new AuditMessage(timeStamp, serverIp, serverHostname, context,  user, resourceId, resource,  errorMessage);
+            return timeStamp -> serverIp -> serverHostname -> context -> user -> resourceId -> resource -> errorMessage ->
+                    new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resourceId, resource, errorMessage);
         }
 
         /**
          * Adds the timestamp information to the object
          */
         interface ITimeStamp {
+            /**
+             * Adds the timestamp for the message.
+             *
+             * @param timeStamp when the message was created.
+             * @return interface {@link IServerIp} for the next step in the build.
+             */
             IServerIp withTimeStamp(String timeStamp);
         }
 
@@ -185,6 +196,12 @@ public final class AuditMessage {
          * Adds the server IP address information to the object
          */
         interface IServerIp {
+            /**
+             * Adds the server IP information to the message.
+             *
+             * @param serverIp where the message was created.
+             * @return interface {@link IServerHostname} for the next step in the build.
+             */
             IServerHostname withServerIp(String serverIp);
         }
 
@@ -192,6 +209,12 @@ public final class AuditMessage {
          * Adds the server host name information to the object
          */
         interface IServerHostname {
+            /**
+             * Adds the server host name for where the message was created.
+             *
+             * @param serverHostname server host name.
+             * @return interface {@link IContext} for the next step in the build.
+             */
             IContext withServerHostname(String serverHostname);
         }
 
@@ -199,6 +222,12 @@ public final class AuditMessage {
          * Adds the user context information to the object
          */
         interface IContext {
+            /**
+             * Adds the user's information for the request.
+             *
+             * @param context the user information for this request.
+             * @return interface {@link IUser} for the next step in the build.
+             */
             IUser withContext(Context context);
 
         }
@@ -207,13 +236,25 @@ public final class AuditMessage {
          * Adds the user information for the given ID to the object
          */
         interface IUser {
+            /**
+             * Adds the user to the message.  This can be null if the user ID is provided.
+             *
+             * @param user making the request.
+             * @return interface {@link IResource} for the next step in the build.
+             */
             IResourceId withUser(User user);
         }
 
         /**
-         * Adds the  ID for resource that is being requested to access
+         * Adds the ID for resource that is being requested to access
          */
         interface IResourceId {
+            /**
+             * Adds the resourceId
+             *
+             * @param resourceId for the request
+             * @return interface {@link IResource} for the next step in the build.
+             */
             IResource withResourceId(String resourceId);
         }
 
@@ -221,6 +262,12 @@ public final class AuditMessage {
          * Adds the information about the resource that is being requested to access
          */
         interface IResource {
+            /**
+             * Adds the resource.  This can be null if the resource ID is provided.
+             *
+             * @param resource for the request
+             * @return interface {@link IErrorMessage} for the next step in the build.
+             */
             IErrorMessage withResource(LeafResource resource);
         }
 
@@ -229,6 +276,13 @@ public final class AuditMessage {
          * Adds the error message if there was an issue with processing the request
          */
         interface IErrorMessage {
+            /**
+             * Adds the error message that has been produced processing the request.  This can be null is there was no
+             * issue with the processing of the request.
+             *
+             * @param errorMessage error message.
+             * @return class {@link AuditMessage} class this builder is set-up to create.
+             */
             AuditMessage withErrorMessage(String errorMessage);
         }
     }

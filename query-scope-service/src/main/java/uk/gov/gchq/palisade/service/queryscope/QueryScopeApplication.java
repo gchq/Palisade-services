@@ -29,7 +29,7 @@ public class QueryScopeApplication {
 
 
     /**
-     * SpringBoot application entry-point method for query-scope-Application executable
+     * SpringBoot application entry-point method for the {@link QueryScopeApplication} executable
      *
      * @param args command-line arguments passed to the application
      */

@@ -50,8 +50,15 @@ public final class UserRequest {
      */
     public final String userId;
 
-    private final String resourceId;  //Unique identifier for the resource that that is being asked to access
-    private final JsonNode context;  // represents the context information
+    /**
+     * Unique identifier for the resource that that is being asked to access
+     */
+    private final String resourceId;
+
+    /**
+     * represents the context information
+     */
+    private final JsonNode context;
 
     @JsonCreator
     private UserRequest(

@@ -40,12 +40,14 @@ import java.util.StringJoiner;
  * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ResultsRequest {
+public final class ResultsRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-
-    private final JsonNode resource; // Json Node representation of the Resource
+    /**
+     * Json Node representation of the Resource
+     */
+    private final JsonNode resource;
 
     @JsonCreator
     private ResultsRequest(
@@ -56,7 +58,6 @@ public class ResultsRequest {
 
         this.resource = resource;
     }
-
 
 
     @Generated
@@ -107,7 +108,6 @@ public class ResultsRequest {
         public static IResource create() {
             return ResultsRequest::new;
         }
-
 
 
         /**

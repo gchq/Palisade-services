@@ -26,6 +26,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 @SpringBootApplication
 public class ResultsServiceApplication {
 
+    /**
+     * SpringBoot application entry-point method for {@link ResultsServiceApplication} executable
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
         new SpringApplicationBuilder(ResultsServiceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);

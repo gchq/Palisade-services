@@ -34,7 +34,10 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResultsResponse {
 
-    public final String queuePointer; //reference to where the data is located
+    /**
+     * {@link String} reference to where the data is located
+     */
+    public final String queuePointer;
 
     private ResultsResponse(final @JsonProperty("queuePointer") String queuePointer) {
         this.queuePointer = queuePointer;
@@ -82,8 +85,7 @@ public final class ResultsResponse {
          * @return interface  {@link IQueuePointer} for the next step in the build.
          */
         public static IQueuePointer create() {
-            return queuePointer ->
-                    new ResultsResponse(queuePointer);
+            return ResultsResponse::new;
         }
 
         /**

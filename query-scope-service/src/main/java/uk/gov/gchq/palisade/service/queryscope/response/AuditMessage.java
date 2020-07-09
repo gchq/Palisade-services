@@ -199,7 +199,7 @@ public final class AuditMessage {
         interface IServerIp {
 
             /**
-             * Adds the server IP information for the message.
+             * Adds the server IP information to the message.
              *
              * @param serverIp where the message was created.
              * @return interface  {@link IServerHostname} for the next step in the build.

@@ -59,6 +59,12 @@ public final class ErrorResponse {
      * which will use the String for the components in the build.
      */
     public static class Builder {
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * ErrorResponse class.
+         *
+         * @return fully constructed {@link ErrorResponse} class
+         */
         public static ITechMessage create() {
             return techMessage -> errorMessage ->
                     new ErrorResponse(techMessage, errorMessage);
