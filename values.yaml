@@ -42,7 +42,7 @@ global:
     install: true
   redis:
     # install: install redis persistence and caching data storage platform
-    install: true
+    install: false
   redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
