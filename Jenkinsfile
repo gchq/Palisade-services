@@ -255,8 +255,9 @@ spec:
                             sh 'palisade-login'
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
+                            sh 'echo ${GIT_BRANCH_NAME_LOWER}'
                             sh 'namespace-create ${GIT_BRANCH_NAME_LOWER}'
-                            sh 'echo namespace create succeeded'
+                            sh 'echo namespace ${GIT_BRANCH_NAME_LOWER} create succeeded'
                             sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                             sh 'helm upgrade --install palisade . \
                                     --set global.hosting=aws \
