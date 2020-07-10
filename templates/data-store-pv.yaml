@@ -38,7 +38,7 @@ spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ pluck $.Values.hosting $store.storageClassName | first | default $store.storageClassName._default }}
+  storageClassName: {{ pluck $.Values.global.hosting $store.storageClassName | first | default $store.storageClassName._default }}
   capacity:
     storage: {{ $store.storage }}
   {{- if eq $.Values.global.hosting "local" }}

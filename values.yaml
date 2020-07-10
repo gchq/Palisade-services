@@ -16,11 +16,10 @@
 # Used by templates for naming resources, see assorted helpers.tpl
 fullnameOverride: palisade-services
 
-
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
   install: false
-metrics-server:
+metricsServer:
   # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
 dashboard:
@@ -42,8 +41,8 @@ global:
     install: true
   redis:
     # install: install redis persistence and caching data storage platform
-    install: false
-  redis-cluster:
+    install: true
+  redisCluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
 
@@ -120,7 +119,7 @@ global:
       name: kafka-persistence
       storage: 9Gi
       local:
-        hostPath: "/"
+        hostPath: "/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -134,7 +133,7 @@ global:
       name: zookeeper-persistence
       storage: 8Gi
       local:
-        hostPath: "/"
+        hostPath: "/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -149,7 +148,7 @@ global:
       name: redis-persistence-master
       storage: 12Gi
       local:
-        hostPath: "/"
+        hostPath: "/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -162,7 +161,7 @@ global:
       name: redis-persistence-slave
       storage: 11Gi
       local:
-        hostPath: "/"
+        hostPath: "/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -175,7 +174,7 @@ global:
       name: redis-persistence-cluster
       storage: 13Gi
       local:
-        hostPath: "/"
+        hostPath: "/tmp"
       aws:
         volumeHandle: null
         volumePath: "/"
