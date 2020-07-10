@@ -119,7 +119,6 @@ public final class ResourceRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String resourceId;
         private JsonNode context;
         private JsonNode user;
 

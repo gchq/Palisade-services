@@ -32,8 +32,10 @@ public class ResultsServiceApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
+        //Note the args is a security issue and if used, needs to be checked.
+        //SonarQube "Using command line arguments is security-sensitive"
         new SpringApplicationBuilder(ResultsServiceApplication.class).web(WebApplicationType.SERVLET)
-                .run(args);
+                .run(null);  //null instead of args for security reason
     }
 }
 
