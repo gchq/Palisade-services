@@ -28,20 +28,13 @@ metadata:
 # then we need to force the PVC to also be deleted.
 # hence we need to hash or sha the PV as an annotation
 
-#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
-  annotations:
-    "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: efs-sc #{{- pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
+  storageClassName: efs-sc #{{- pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   selector:
     matchLabels:
       selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
