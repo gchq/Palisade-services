@@ -250,10 +250,8 @@ spec:
                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
                                         "--set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
-                                        "--set global.persistence.redisMaster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-                                        "--set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} " +
                                         "--set global.persistence.redisCluster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-                                        "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
+                                        "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_ZOOKEEPER} " +
                                         "--set global.redis.install=false " +
                                         "--set global.redis-cluster.install=true " +
                                         "--namespace dev", returnStatus: true) == 0) {
@@ -280,10 +278,8 @@ spec:
                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
                                         "--set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
-                                        "--set global.persistence.redisMaster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-                                        "--set global.persistence.redisSlave.aws.volumeHandle=${VOLUME_HANDLE_REDIS_SLAVE} " +
                                         "--set global.persistence.redisCluster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-                                        "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
+                                        "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_ZOOKEEPER} " +
                                         "--set global.redis.install=false " +
                                         "--set global.redis-cluster.install=true " +
                                         "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
