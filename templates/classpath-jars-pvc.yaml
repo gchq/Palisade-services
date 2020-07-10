@@ -24,6 +24,7 @@
 # there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 # as to the slightly anomalous behaviour
 
+{{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -32,16 +33,16 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
-  namespace: {{ include "palisade.namespace" . }}
+  namespace: {{ $namespace }}
   annotations:
     "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: {{- pluck $.Values.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
+  storageClassName: {{- pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.deployment.fullname" . }}
+      selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
