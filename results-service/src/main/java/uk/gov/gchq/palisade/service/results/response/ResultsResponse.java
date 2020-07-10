@@ -76,7 +76,6 @@ public final class ResultsResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String queuePointer;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the

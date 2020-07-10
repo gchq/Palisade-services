@@ -126,6 +126,7 @@ public final class AuditMessage {
 
     }
 
+
     @Override
     @Generated
     public boolean equals(final Object o) {
@@ -184,8 +185,8 @@ public final class AuditMessage {
         private User user;
         private LeafResource resource;
         private Rules<?> rules;
-        private long numberOfRecordsReturned;
-        private long numberOfRecordsProcessed;
+        private long recordsReturned;
+        private long recordsProcessed;
         private String errorMessage;
 
         /**
@@ -195,8 +196,8 @@ public final class AuditMessage {
          * @return fully constructed AuditMessage instance.
          */
         public static ITimeStamp create() {
-            return timeStamp -> serverIp -> serverHostname -> context -> user -> resource -> rules -> recordsReturned -> recordsApplied -> errorMessage ->
-                    new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resource, rules, recordsReturned, recordsApplied, errorMessage);
+            return timeStamp -> serverIp -> serverHostname -> context -> user -> resource -> rules -> recordsReturned -> recordsProcessed -> errorMessage ->
+                    new AuditMessage(timeStamp, serverIp, serverHostname, context, user, resource, rules, recordsReturned, recordsProcessed, errorMessage);
         }
 
 
@@ -319,10 +320,10 @@ public final class AuditMessage {
              * Adds the number of records that have been processed.  This can be zero if are no
              * records that have been sent or this message is for a step before results-service
              *
-             * @param recordsApplied records processed
+             * @param recordsProcessed records processed
              * @return interface {@link IErrorMessage} for the next step in the build.
              */
-            IErrorMessage withRecordsProcessed(long recordsApplied);
+            IErrorMessage withRecordsProcessed(long recordsProcessed);
         }
 
         /**

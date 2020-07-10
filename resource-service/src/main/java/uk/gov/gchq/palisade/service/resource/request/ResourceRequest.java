@@ -68,6 +68,11 @@ public final class ResourceRequest {
     }
 
     @Generated
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
     }

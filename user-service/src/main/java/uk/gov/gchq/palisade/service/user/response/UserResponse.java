@@ -43,16 +43,8 @@ public final class UserResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    /**
-     * Resource that that is being asked to access
-     */
-    private final String resourceId;
-
-    /**
-     * Represents the context information as a Json string.
-     * {@link java.util.Map} of type {@link String}, {@link String}
-     */
-    private final JsonNode context;
+    private final String resourceId; //Resource that that is being asked to access
+    private final JsonNode context; //Represents the context information as a Json string.
 
     /**
      * The user that has made the request
@@ -91,7 +83,6 @@ public final class UserResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String resourceId;
         private JsonNode context;
         private User user;
 
