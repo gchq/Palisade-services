@@ -104,7 +104,7 @@ global:
           local: hostpath
           aws: efs-sc
         mountPath: "/data/local-data-store"
-        storage: 1Gi
+        storage: 4Gi
         local:
           hostPath: "/"
         aws:
