@@ -28,6 +28,8 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $sc := index $.Values.global.persistence.dataStores" $name "storageClassName" $.Values.global.hosting }}
+{{- $scdefault := index $.Values.global.persistence.dataStores" $name "storageClassName" "_default" }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -43,9 +45,7 @@ spec:
   resources:
     requests:
       storage: {{ $value.storage }}
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
-  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
-  storageClassName: efs-sc #{{- $sc | default $default | indent 1 }}
+  storageClassName: {{- $sc | default $scdefault }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}

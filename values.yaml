@@ -98,7 +98,7 @@ global:
     # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
     # nb. the mountPath here will be referenced by all client resource requests
     dataStores:
-      palisade-data-store:
+      palisadeDataStore:
         storageClassName:
           _default: hostpath
           local: hostpath
