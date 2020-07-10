@@ -25,7 +25,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.user.response.common.domain.User;
+import uk.gov.gchq.palisade.User;
 
 import java.io.IOException;
 
@@ -51,7 +51,7 @@ class UserResponseTest {
 
         Context context = new Context().purpose("testContext");
 
-        User user = User.create("testUserId");
+        User user = new User().userId("testUserId");
 
         UserResponse userResponse = UserResponse.Builder.create()
                 .withResource("testResourceId")
@@ -77,10 +77,11 @@ class UserResponseTest {
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
 
-        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
+        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
         ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
         UserResponse response = (UserResponse) userResponseContent.getObject();
-        assertThat(response.user.userId).isEqualTo("testUserId");
+
+        assertThat(response.user.getUserId().getId()).isEqualTo("testUserId");
         assertThat(response.getResourceId()).isEqualTo("testResourceId");
 
     }

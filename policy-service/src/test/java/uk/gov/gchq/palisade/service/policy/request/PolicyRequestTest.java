@@ -25,11 +25,11 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 import java.io.IOException;
 
@@ -52,7 +52,7 @@ public class PolicyRequestTest {
     public void testSerialiseResourceResponseToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
-        User user = User.create("testUserId");
+        User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
@@ -62,7 +62,7 @@ public class PolicyRequestTest {
 
         JsonContent<PolicyRequest> policyRequestJsonContent = jacksonTester.write(policyRequest);
 
-        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
+        assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
         assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
@@ -76,13 +76,13 @@ public class PolicyRequestTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
+        String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
         ObjectContent<PolicyRequest> policyRequestObjectContent = jacksonTester.parse(jsonString);
 
         PolicyRequest policyRequest = policyRequestObjectContent.getObject();
         assertThat(policyRequest.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(policyRequest.getUser().userId).isEqualTo("testUserId");
+        assertThat(policyRequest.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(policyRequest.getResource().getId()).isEqualTo("/test/file.format");
 
     }

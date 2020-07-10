@@ -25,7 +25,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
+import uk.gov.gchq.palisade.User;
 
 import java.io.IOException;
 
@@ -49,17 +49,19 @@ public class ResourceRequestTest {
     public void testSerialiseResourceRequestToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
+        User user = new User().userId("testUserId");
         ResourceRequest resourceRequest = ResourceRequest.Builder.create()
                 .withResource("testResourceId")
                 .withContext(context)
-                .withUser(User.create("testUserId"));
+                .withUser(user);
 
         JsonContent<ResourceRequest> resourceRequestJsonContent = jacksonTester.write(resourceRequest);
 
         //these tests are each for strings
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.user_id").isEqualTo("testUserId");
+        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+
     }
 
     /**
@@ -70,14 +72,14 @@ public class ResourceRequestTest {
     @Test
     public void testDeserializeJsonToResourceRequest() throws IOException {
 
-        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"user_id\":\"testUserId\",\"attributes\":{}}}";
+        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
 
         ObjectContent<ResourceRequest> resourceRequestContent = jacksonTester.parse(jsonString);
 
         ResourceRequest request = resourceRequestContent.getObject();
         assertThat(request.resourceId).isEqualTo("testResourceId");
         assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(request.getUser().userId).isEqualTo("testUserId");
+        assertThat(request .getUser().getUserId().getId()).isEqualTo("testUserId");
     }
 
 

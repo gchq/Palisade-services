@@ -21,9 +21,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.response.common.domain.User;
 
 
 /**

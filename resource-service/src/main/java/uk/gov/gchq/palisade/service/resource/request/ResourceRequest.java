@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.resource.response.common.domain.User;
+import uk.gov.gchq.palisade.User;
 
 import java.util.Objects;
 import java.util.StringJoiner;
