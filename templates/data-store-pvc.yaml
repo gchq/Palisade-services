@@ -45,7 +45,7 @@ spec:
       storage: {{ $value.storage }}
   {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
   {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
-  storageClassName: {{- $sc | default $default | indent 1 }}
+  storageClassName: efs-sc #{{- $sc | default $default | indent 1 }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}
