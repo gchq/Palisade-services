@@ -60,7 +60,7 @@ spec:
 
   - name: docker-cmds
     image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:200608
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     command:
     - sleep
     args:
@@ -105,8 +105,8 @@ spec:
         ephemeral-storage: "2Gi"
 
   - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:200630
-    imagePullPolicy: Always
+    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:200710
+    imagePullPolicy: IfNotPresent
     command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
     volumeMounts:
