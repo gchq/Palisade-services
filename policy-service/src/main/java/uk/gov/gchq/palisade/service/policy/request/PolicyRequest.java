@@ -87,7 +87,7 @@ public final class PolicyRequest {
     public static class Builder {
         private JsonNode context;
         private JsonNode user;
-        private JsonNode resources;
+        private JsonNode resource;
 
 
         /**

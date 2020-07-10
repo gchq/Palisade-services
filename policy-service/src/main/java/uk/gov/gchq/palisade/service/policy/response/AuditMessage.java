@@ -119,9 +119,7 @@ public final class AuditMessage {
         private String serverIp;
         private String serverHostname;
         private Context context;
-        private String userId;
         private User user;
-        private String resourceId;
         private LeafResource resource;
         private Rules<?> rules;
         private String errorMessage;
