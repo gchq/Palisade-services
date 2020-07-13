@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.response;
+package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -152,12 +152,6 @@ public final class PolicyResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
-        private JsonNode resource;
-        private Rules rules;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -168,6 +162,15 @@ public final class PolicyResponse {
         public static IUserId create() {
             return userId -> resourceId -> context -> user -> resource -> rules ->
                     new PolicyResponse(userId, resourceId, context, user, resource, rules);
+        }
+
+        public static IRules create(final PolicyRequest request) {
+            return create()
+                    .withUserId(request.getUserId())
+                    .withResourceId(request.getResourceId())
+                    .withContextNode(request.getContextNode())
+                    .withUserNode(request.getUserNode())
+                    .withResourceNode(request.getResourceNode());
         }
 
         /**

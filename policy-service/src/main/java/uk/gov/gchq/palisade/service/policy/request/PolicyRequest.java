@@ -74,7 +74,6 @@ public final class PolicyRequest {
         this.context = context;
     }
 
-
     @Generated
     public String getUserId() {
         return userId;
@@ -91,13 +90,26 @@ public final class PolicyRequest {
     }
 
     @Generated
+    JsonNode getContextNode() {
+        return this.context;
+    }
+
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
 
     @Generated
+    JsonNode getUserNode() {
+        return this.user;
+    }
+
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
+    }
+
+    @Generated
+    JsonNode getResourceNode() {
+        return this.resource;
     }
 
     @Override
@@ -141,13 +153,6 @@ public final class PolicyRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
-        private JsonNode resource;
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * PolicyRequest class.
