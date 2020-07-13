@@ -29,6 +29,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 
+import java.util.Objects;
+import java.util.StringJoiner;
 
 
 /**
@@ -45,23 +47,42 @@ public final class PolicyRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
 
     @JsonCreator
     private PolicyRequest(
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
             final @JsonProperty("resource") JsonNode resource) {
 
+        Assert.notNull(userId, "User ID cannot be null");
+        Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "Context cannot be null");
         Assert.notNull(resource, "Resource cannot be null");
 
+        this.userId = userId;
+        this.resourceId = resourceId;
         this.user = user;
         this.resource = resource;
         this.context = context;
+    }
+
+
+    @Generated
+    public String getUserId() {
+        return userId;
+    }
+
+    @Generated
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
@@ -79,12 +100,49 @@ public final class PolicyRequest {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyRequest)) {
+            return false;
+        }
+        PolicyRequest that = (PolicyRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
+    }
 
     /**
      * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
+        private String userId;
+        private String resourceId;
         private JsonNode context;
         private JsonNode user;
         private JsonNode resource;
@@ -92,14 +150,41 @@ public final class PolicyRequest {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PolicyRequest class.
+         * ResourceResponse class.
          *
-         * @return interface  {@link IContext} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IContext create() {
-            return context -> user -> resource ->
-                    new PolicyRequest(context, user, resource);
+        public static IUserId create() {
+            return userId -> resourceId -> context -> user -> resource ->
+                    new PolicyRequest(userId, resourceId, context, user, resource);
         }
+
+        /**
+         * Adds the user ID information to the message.
+         */
+        interface IUserId {
+            /**
+             * Adds the user ID.
+             *
+             * @param userId user ID for the request.
+             * @return interface {@link IResourceId} for the next step in the build.
+             */
+            IResourceId withUserId(String userId);
+        }
+
+        /**
+         * Adds the resource ID information to the message.
+         */
+        interface IResourceId {
+            /**
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
+            IContext withResourceId(String resourceId);
+        }
+
 
         /**
          * Adds the user context information to the message.

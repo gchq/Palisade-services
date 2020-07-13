@@ -54,6 +54,7 @@ class UserResponseTest {
         User user = new User().userId("testUserId");
 
         UserResponse userResponse = UserResponse.Builder.create()
+                .withRUserId("originalUserID")
                 .withResource("testResourceId")
                 .withContext(context)
                 .withUser(user);
@@ -61,8 +62,10 @@ class UserResponseTest {
         JsonContent<UserResponse> response = jsonTester.write(userResponse);
 
         //these tests are each for strings
+        assertThat(response).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
         assertThat(response).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
         assertThat(response).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(response).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
 
 
 
@@ -77,10 +80,11 @@ class UserResponseTest {
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
 
-        String jsonString = "{\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
         ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
         UserResponse response = (UserResponse) userResponseContent.getObject();
 
+        assertThat(response.getUserId()).isEqualTo("originalUserID");
         assertThat(response.user.getUserId().getId()).isEqualTo("testUserId");
         assertThat(response.getResourceId()).isEqualTo("testResourceId");
 

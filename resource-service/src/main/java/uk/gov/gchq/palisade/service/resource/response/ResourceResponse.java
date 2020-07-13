@@ -47,6 +47,8 @@ public final class ResourceResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
 
@@ -56,18 +58,35 @@ public final class ResourceResponse {
     public final LeafResource resource;
 
     private ResourceResponse(
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
             final @JsonProperty("resource") LeafResource resource) {
 
+        Assert.notNull(userId, "User ID cannot be null");
+        Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
         Assert.notNull(resource, "User cannot be null");
 
+        this.userId = userId;
+        this.resourceId = resourceId;
         this.context = context;
         this.user = user;
         this.resource = resource;
     }
+
+    @Generated
+    public String getUserId() {
+        return userId;
+    }
+
+    @Generated
+    public String getResourceId() {
+        return resourceId;
+    }
+
 
     @Generated
     public Context getContext() throws JsonProcessingException {
@@ -79,7 +98,6 @@ public final class ResourceResponse {
         return MAPPER.treeToValue(user, User.class);
     }
 
-
     @Override
     @Generated
     public boolean equals(final Object o) {
@@ -90,7 +108,9 @@ public final class ResourceResponse {
             return false;
         }
         ResourceResponse that = (ResourceResponse) o;
-        return context.equals(that.context) &&
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
                 user.equals(that.user) &&
                 resource.equals(that.resource);
     }
@@ -98,16 +118,18 @@ public final class ResourceResponse {
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(context, user, resource);
+        return Objects.hash(userId, resourceId, context, user, resource);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", ResourceResponse.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
                 .add("user=" + user)
-                .add("resources=" + resource)
+                .add("resource=" + resource)
                 .add(super.toString())
                 .toString();
     }
@@ -117,19 +139,48 @@ public final class ResourceResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
+        private String userId;
+        private String resourceId;
         private JsonNode context;
         private JsonNode user;
         private LeafResource resource;
+
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceResponse class.
          *
-         * @return interface  {@link IContext} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IContext create() {
-            return context -> user -> resource ->
-                    new ResourceResponse(context, user, resource);
+        public static IUserId create() {
+            return userId -> resourceId -> context -> user -> resource ->
+                    new ResourceResponse(userId, resourceId, context, user, resource);
+        }
+
+        /**
+         * Adds the user ID information to the message.
+         */
+        interface IUserId {
+            /**
+             * Adds the user ID.
+             *
+             * @param userId user ID for the request.
+             * @return interface {@link IResourceId} for the next step in the build.
+             */
+            IResourceId withUserId(String userId);
+        }
+
+        /**
+         * Adds the resource ID information to the message.
+         */
+        interface IResourceId {
+            /**
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
+            IContext withResourceId(String resourceId);
         }
 
         /**
