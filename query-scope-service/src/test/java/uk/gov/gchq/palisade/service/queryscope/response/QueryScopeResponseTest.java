@@ -24,6 +24,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -49,16 +50,25 @@ public class QueryScopeResponseTest {
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
 
+        Context context = new Context().purpose("testContext");
+
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
 
-        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create().withResource(resource);
+        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create()
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
+                .withContext(context)
+                .withResource(resource);
 
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jacksonTester.write(queryScopeResponse);
 
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
     }
@@ -71,13 +81,15 @@ public class QueryScopeResponseTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString = "{\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
         ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jacksonTester.parse(jsonString);
 
         QueryScopeResponse queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
+        assertThat(queryScopeResponse.getUserId()).isEqualTo("originalUserID");
+        assertThat(queryScopeResponse.getResourceId()).isEqualTo("originalResourceID");
+        assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
-
     }
 }
 

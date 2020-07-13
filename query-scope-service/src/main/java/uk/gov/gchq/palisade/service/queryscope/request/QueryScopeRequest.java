@@ -48,29 +48,47 @@ public final class QueryScopeRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
-    private final JsonNode resources; // Json Node representation of the Resources
+    private final JsonNode resource; // Json Node representation of the Resources
     private final JsonNode rules; // Json Node representation of the Rules
 
     @JsonCreator
     private QueryScopeRequest(
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resources") JsonNode resources,
+            final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") JsonNode rules) {
 
-
+        Assert.notNull(userId, "User ID cannot be null");
+        Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
-        Assert.notNull(resources, "Resources cannot be null");
+        Assert.notNull(resource, "Resources cannot be null");
         Assert.notNull(rules, "Rules cannot be null");
 
+        this.userId = userId;
+        this.resourceId = resourceId;
         this.context = context;
         this.user = user;
-        this.resources = resources;
+        this.resource = resource;
         this.rules = rules;
     }
+
+    @Generated
+    public String getUserId() {
+        return userId;
+    }
+
+    @Generated
+    public String getResourceId() {
+        return resourceId;
+    }
+
 
     @Generated
     public Context getContext() throws JsonProcessingException {
@@ -84,7 +102,7 @@ public final class QueryScopeRequest {
 
     @Generated
     public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resources, LeafResource.class);
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
     @Generated
@@ -102,25 +120,29 @@ public final class QueryScopeRequest {
             return false;
         }
         QueryScopeRequest that = (QueryScopeRequest) o;
-        return context.equals(that.context) &&
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
                 user.equals(that.user) &&
-                resources.equals(that.resources) &&
+                resource.equals(that.resource) &&
                 rules.equals(that.rules);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(context, user, resources, rules);
+        return Objects.hash(userId, resourceId, context, user, resource, rules);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", QueryScopeRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
                 .add("user=" + user)
-                .add("resources=" + resources)
+                .add("resources=" + resource)
                 .add("rules=" + rules)
                 .add(super.toString())
                 .toString();
@@ -131,21 +153,50 @@ public final class QueryScopeRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
+        private String userId;
+        private String resourceId;
         private JsonNode context;
         private JsonNode user;
-        private JsonNode resources;
+        private JsonNode resource;
         private JsonNode rules;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * ResourceRequest class.
+         * QueryScopeRequest class.
          *
-         * @return interface  {@link IContext} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IContext create() {
-            return context -> user -> resources -> rules ->
-                    new QueryScopeRequest(context, user, resources, rules);
+        public static IUserId create() {
+            return userId -> resourceId -> context -> user -> resource -> rules ->
+                    new QueryScopeRequest(userId, resourceId, context, user, resource, rules);
         }
+
+        /**
+         * Adds the user ID information to the message.
+         */
+        interface IUserId {
+            /**
+             * Adds the user ID.
+             *
+             * @param userId user ID for the request.
+             * @return interface {@link IResourceId} for the next step in the build.
+             */
+            IResourceId withUserId(String userId);
+        }
+
+        /**
+         * Adds the resource ID information to the message.
+         */
+        interface IResourceId {
+            /**
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
+            IContext withResourceId(String resourceId);
+        }
+
 
         /**
          * Adds the user context information to the message.

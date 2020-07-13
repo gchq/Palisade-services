@@ -48,6 +48,8 @@ public final class DataRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
@@ -55,21 +57,37 @@ public final class DataRequest {
 
     @JsonCreator
     private DataRequest(
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resources") JsonNode resource,
+            final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") JsonNode rules) {
 
 
+        Assert.notNull(userId, "User ID cannot be null");
+        Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
         Assert.notNull(resource, "Resources cannot be null");
         Assert.notNull(rules, "Rules cannot be null");
 
+        this.userId = userId;
+        this.resourceId = resourceId;
         this.context = context;
         this.user = user;
         this.resource = resource;
         this.rules = rules;
+    }
+
+    @Generated
+    public String getUserId() {
+        return userId;
+    }
+
+    @Generated
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
@@ -131,6 +149,8 @@ public final class DataRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
+        private String userId;
+        private String resourceId;
         private JsonNode context;
         private JsonNode user;
         private JsonNode resource;
@@ -138,14 +158,41 @@ public final class DataRequest {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * ResourceRequest class.
+         * DataRequest class.
          *
-         * @return interface  {@link IContext} for the next step in the build.
+         * @return interface {@link IUserId} for the next step in the build.
          */
-        public static IContext create() {
-            return context -> user -> resource -> rules ->
-                    new DataRequest(context, user, resource, rules);
+        public static IUserId create() {
+            return userId -> resourceId -> context -> user -> resource -> rules ->
+                    new DataRequest(userId, resourceId, context, user, resource, rules);
         }
+
+        /**
+         * Adds the user ID information to the message.
+         */
+        interface IUserId {
+            /**
+             * Adds the user ID.
+             *
+             * @param userId user ID for the request.
+             * @return interface {@link IResourceId} for the next step in the build.
+             */
+            IResourceId withUserId(String userId);
+        }
+
+        /**
+         * Adds the resource ID information to the message.
+         */
+        interface IResourceId {
+            /**
+             * Adds the resource ID.
+             *
+             * @param resourceId resource ID for the request.
+             * @return interface {@link IContext} for the next step in the build.
+             */
+            IContext withResourceId(String resourceId);
+        }
+
 
         /**
          * Adds the user context information to the message.

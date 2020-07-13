@@ -150,7 +150,7 @@ public final class PolicyRequest {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * ResourceResponse class.
+         * PolicyRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */

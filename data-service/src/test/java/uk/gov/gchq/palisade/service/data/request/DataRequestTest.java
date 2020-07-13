@@ -60,7 +60,13 @@ public class DataRequestTest {
                     .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                     .parent(new SystemResource().id("/test"));
             Rules rules = new Rules().rule("Rule1", new PassThroughRule());
-            DataRequest dataRequest = DataRequest.Builder.create().withContext(context).withUser(user).withResource(resource).withRules(rules);
+            DataRequest dataRequest = DataRequest.Builder.create()
+                    .withUserId("originalUserID")
+                    .withResourceId("originalResourceID")
+                    .withContext(context)
+                    .withUser(user)
+                    .withResource(resource)
+                    .withRules(rules);
 
             JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(dataRequest);
 
@@ -77,12 +83,15 @@ public class DataRequestTest {
         @Test
         public void testDeserializeJsonToResourceResponse() throws IOException {
 
-            String jsonString = "{\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.service.data.request.PassThroughRule\"}}}}";
+            String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.service.data.request.PassThroughRule\"}}}}";
             ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(jsonString);
 
             DataRequest dataRequest = dataRequestObjectContent.getObject();
-            assertThat(dataRequest.getContext().getPurpose()).isEqualTo("testContext");
-            assertThat(dataRequest.getUser().getUserId().getId()).isEqualTo("testUserId");
 
+            assertThat(dataRequest.getUserId()).isEqualTo("originalUserID");
+            assertThat(dataRequest.getResourceId()).isEqualTo("originalResourceID");
+            assertThat(dataRequest.getContext().getPurpose()).isEqualTo("testContext");
+            assertThat(dataRequest .getUser().getUserId().getId()).isEqualTo("testUserId");
+            assertThat(dataRequest.getResource().getId()).isEqualTo("/test/file.format");
         }
 }

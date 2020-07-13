@@ -161,7 +161,7 @@ public final class PolicyResponse {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * ResourceResponse class.
+         * PolicyResponse class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */

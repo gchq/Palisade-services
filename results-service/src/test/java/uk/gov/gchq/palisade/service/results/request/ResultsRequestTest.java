@@ -24,6 +24,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -50,15 +51,22 @@ public class ResultsRequestTest {
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
 
+        Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        ResultsRequest resultsRequest = ResultsRequest.Builder.create().withResource(resource);
+        ResultsRequest resultsRequest = ResultsRequest.Builder.create()
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
+                .withContext(context)
+                .withResource(resource);
 
         JsonContent<ResultsRequest> resultsRequestJsonContent = jacksonTester.write(resultsRequest);
-        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
 
     }
 
@@ -70,13 +78,14 @@ public class ResultsRequestTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
 
-        String jsonString = "{\"resources\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
         ObjectContent<ResultsRequest> resultsRequestObjectContent = jacksonTester.parse(jsonString);
 
-        ResultsRequest queryScopeResponse = resultsRequestObjectContent.getObject();
-        assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
-
+        ResultsRequest resultsRequest = resultsRequestObjectContent.getObject();
+        assertThat(resultsRequest.getUserId()).isEqualTo("originalUserID");
+        assertThat(resultsRequest.getResourceId()).isEqualTo("originalResourceID");
+        assertThat(resultsRequest.getContext().getPurpose()).isEqualTo("testContext");
     }
 }
 
