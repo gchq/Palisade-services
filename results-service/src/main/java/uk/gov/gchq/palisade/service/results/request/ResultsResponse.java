@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.results.response;
+package uk.gov.gchq.palisade.service.results.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,33 +43,7 @@ public final class ResultsResponse {
         this.queuePointer = queuePointer;
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ResultsResponse)) {
-            return false;
-        }
-        ResultsResponse that = (ResultsResponse) o;
-        return queuePointer.equals(that.queuePointer);
-    }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(queuePointer);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ResultsResponse.class.getSimpleName() + "[", "]")
-                .add("queuePointer='" + queuePointer + "'")
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the ResultsResponse.  This is a variant of the Fluent Builder
@@ -101,5 +75,33 @@ public final class ResultsResponse {
             ResultsResponse withQueuePointer(String queuePointer);
 
         }
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResultsResponse)) {
+            return false;
+        }
+        ResultsResponse that = (ResultsResponse) o;
+        return queuePointer.equals(that.queuePointer);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(queuePointer);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", ResultsResponse.class.getSimpleName() + "[", "]")
+                .add("queuePointer='" + queuePointer + "'")
+                .add(super.toString())
+                .toString();
     }
 }

@@ -112,47 +112,13 @@ public final class PolicyRequest {
         return this.resource;
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PolicyRequest)) {
-            return false;
-        }
-        PolicyRequest that = (PolicyRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resource=" + resource)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
+
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * PolicyRequest class.
@@ -163,6 +129,8 @@ public final class PolicyRequest {
             return userId -> resourceId -> context -> user -> resource ->
                     new PolicyRequest(userId, resourceId, context, user, resource);
         }
+
+
 
         /**
          * Adds the user ID information to the message.
@@ -266,6 +234,41 @@ public final class PolicyRequest {
 
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyRequest)) {
+            return false;
+        }
+        PolicyRequest that = (PolicyRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
+    }
 }
 
 

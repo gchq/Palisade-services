@@ -164,6 +164,13 @@ public final class PolicyResponse {
                     new PolicyResponse(userId, resourceId, context, user, resource, rules);
         }
 
+        /**
+         * Starter method for the Builder class that uses a PolicyRequest and appends the Rules.
+         * This method is called followed by the call to add rules with the IRules interface to create the
+         * PolicyResponse class.
+         *
+         * @return interface {@link IRules} for the next step in the build.
+         */
         public static IRules create(final PolicyRequest request) {
             return create()
                     .withUserId(request.getUserId())

@@ -50,7 +50,7 @@ public class PolicyResponseTest {
      * @throws IOException if it fails to parse the object
      */
     @Test
-    public void testSerialiseResourceResponseToJson() throws IOException {
+    public void testSerialisePolicyResponseToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
@@ -82,14 +82,14 @@ public class PolicyResponseTest {
     }
 
     /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
+     * Create the PolicyResponse object from a Json string and then test the content of the object.
      *
      * @throws IOException if it fails to parse the string into an object
      */
     @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
+    public void testDeserialisePolicyResponseUsingToJson() throws IOException {
 
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.service.policy.response.PassThroughRule\"}}}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":\"uk.gov.gchq.palisade.service.policy.request.PassThroughRule\"}}}}";
         ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(jsonString);
 
         PolicyResponse policyResponse = policyResponseObjectContent.getObject();
@@ -99,6 +99,45 @@ public class PolicyResponseTest {
         assertThat(policyResponse.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(policyResponse.getResource().getId()).isEqualTo("/test/file.format");
         assertThat(policyResponse.rules.getMessage()).isEqualTo("no rules set");
+
+
+    }
+
+    /**
+     * Create the PolicyResponse object from a PolicyRequest, serialise it and then test the content of the object.
+     *
+     * @throws IOException if it fails to parse the string into an object
+     */
+    @Test
+    public void testSerialisePolicyResponseUsingPolicyRequestToJson() throws IOException {
+
+        Context context = new Context().purpose("testContext");
+        User user = new User().userId("testUserId");
+        LeafResource resource = new FileResource().id("/test/file.format")
+                .type("java.lang.String")
+                .serialisedFormat("format")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
+                .parent(new SystemResource().id("/test"));
+
+        PolicyRequest policyRequest = PolicyRequest.Builder.create()
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
+                .withContext(context)
+                .withUser(user)
+                .withResource(resource);
+
+        Rules rules = new Rules().rule("Rule1", new PassThroughRule());
+        PolicyResponse policyResponse = PolicyResponse.Builder.create(policyRequest).withRule(rules);
+
+        JsonContent<PolicyResponse> policyResponseJsonContent = jacksonTester.write(policyResponse);
+
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set");
+
 
 
     }
