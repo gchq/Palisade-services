@@ -227,4 +227,4 @@ spec:
       resources:
         requests:
           storage: {{ $.Values.global.persistence.zookeeper.storage }}
-      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.zookeeper.storageClassName | first | default .Values.global.persistence.zookeeper.storageClassName._default | indent 1 }}
+      storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.zookeeper.storageClassName | first | default .Values.global.persistence.zookeeper.storageClassName._default }}

@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.global.kafka.install }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $zookeepername := include "zookeeper.fullname" . }}
+{{- $config := .Values.global.persistence.zookeeper }}
 {{ range $index := until (.Values.replicaCount | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $.Values.global.persistence.zookeeper.name }}-{{ $namespace }}-{{ $index | toString }}
+  name: {{ $config.name }}-{{ $namespace }}-{{ $index | toString }}
   labels:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
@@ -31,23 +31,20 @@ spec:
   - ReadWriteMany
   claimRef:
     namespace: {{ $namespace }}
-    name: {{ $.Values.global.persistence.zookeeper.name }}-{{ $zookeepername }}-{{ $index }}
+    name: {{ $config.name }}-{{ $zookeepername }}-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
-    {{- $sc := index $.Values "global" "persistence" "zookeeper" "storageClassName" $.Values.global.hosting }}
-    {{- $default := index $.Values "global" "persistence" "zookeeper" "storageClassName" "_default" }}
-  storageClassName: {{- $sc | default $default | indent 1 }}
+  storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
-    storage: {{ $.Values.global.persistence.zookeeper.storage }}
+    storage: {{ $config.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $.Values.global.persistence.zookeeper.local.hostPath }}/zookeeper/{{ $namespace }}/{{ $index }}
+    path: {{ $config.local.hostPath }}/zookeeper/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.zookeeper.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $.Values.global.persistence.zookeeper.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
+      path: {{ $config.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
   {{- end }}
-{{- end }}
 {{- end }}

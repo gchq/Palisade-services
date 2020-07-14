@@ -281,6 +281,6 @@ spec:
         requests:
           storage: {{ $.Values.global.persistence.kafka.storage }}
       {{- $_ := set . "index" "kafka" }}
-      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.kafka.storageClassName | first | default .Values.global.persistence.kafka.storageClassName._default | indent 1 }}
+      storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.kafka.storageClassName | first | default .Values.global.persistence.kafka.storageClassName._default }}
   {{- end }}
 

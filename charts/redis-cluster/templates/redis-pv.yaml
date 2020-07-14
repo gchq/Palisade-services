@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- $install := index .Values "global" "redis-cluster" "install"  }}
-{{ if $install }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis-cluster.fullname" . }}
+{{- $config := .Values.global.persistence.redisCluster }}
 {{ range $index := until ( .Values.cluster.nodes | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $.Values.global.persistence.redisCluster.name }}-{{ $namespace }}-{{ $index }}
+  name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
   labels:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
@@ -32,23 +31,20 @@ spec:
   - ReadWriteMany
   claimRef:
     namespace: {{ $namespace }}
-    name: {{ $.Values.global.persistence.redisCluster.name }}-{{ $redisname }}-{{ $index }}
+    name: {{ $config.name }}-{{ $redisname }}-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
-    {{- $sc := index $.Values "global" "persistence" "redisCluster" "storageClassName" $.Values.global.hosting }}
-    {{- $default := index $.Values "global" "persistence" "redisCluster" "storageClassName" "_default" }}
-  storageClassName: {{- $sc | default $default | indent 1 }}
+  storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
-    storage: {{ $.Values.global.persistence.redisCluster.storage }}
+    storage: {{ $config.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $.Values.global.persistence.redisMaster.local.hostPath }}/redis/{{ $namespace }}/cluster/{{ $index }}
+    path: {{ $config.local.hostPath }}/redis/{{ $namespace }}/cluster/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.redisMaster.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $.Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
+      path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/cluster/{{ $index }}
   {{- end }}
-{{- end }}
 {{- end }}

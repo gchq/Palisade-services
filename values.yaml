@@ -119,7 +119,7 @@ global:
       name: kafka-persistence
       storage: 9Gi
       local:
-        hostPath: "/tmp"
+        hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -133,11 +133,10 @@ global:
       name: zookeeper-persistence
       storage: 8Gi
       local:
-        hostPath: "/tmp"
+        hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
-
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
@@ -148,7 +147,7 @@ global:
       name: redis-persistence-master
       storage: 12Gi
       local:
-        hostPath: "/tmp"
+        hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -161,7 +160,7 @@ global:
       name: redis-persistence-slave
       storage: 11Gi
       local:
-        hostPath: "/tmp"
+        hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
@@ -174,7 +173,7 @@ global:
       name: redis-persistence-cluster
       storage: 13Gi
       local:
-        hostPath: "/tmp"
+        hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"

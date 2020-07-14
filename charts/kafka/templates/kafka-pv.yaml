@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if .Values.global.kafka.install }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $kafkaname := include "kafka.fullname" . }}
+{{- $config := .Values.global.persistence.kafka }}
 {{ range $index := until (.Values.replicas | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $.Values.global.persistence.kafka.name }}-{{ $namespace }}-{{ $index }}
+  name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
   labels:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
@@ -31,24 +31,21 @@ spec:
   - ReadWriteMany
   claimRef:
     namespace: {{ $namespace }}
-    name: {{ $.Values.global.persistence.kafka.name }}-{{ $kafkaname }}-{{ $index }}
+    name: {{ $config.name }}-{{ $kafkaname }}-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
-    {{- $sc := index $.Values "global" "persistence" "kafka" "storageClassName" $.Values.global.hosting }}
-    {{- $default := index $.Values "global" "persistence" "kafka" "storageClassName" "_default" }}
-  storageClassName: {{- $sc | default $default | indent 1 }}
+  storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
-    storage: {{ $.Values.global.persistence.kafka.storage }}
+    storage: {{ $config.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $.Values.global.persistence.kafka.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
+    path: {{ $config.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.kafka.aws.volumeHandle }}
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $.Values.global.persistence.kafka.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
+      path: {{ $config.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
       type: DirectoryOrCreate
   {{- end }}
-{{- end }}
 {{- end }}

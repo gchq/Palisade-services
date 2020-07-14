@@ -42,7 +42,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
-  storageClassName: {{- pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
+  storageClassName: {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
   selector:
     matchLabels:
       selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}

@@ -20,7 +20,7 @@ service:
 
 image:
   name: user-service
-  tag: 1e537ed-SNAPSHOT
+  tag: 6640c10-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.4.0-SNAPSHOT
 

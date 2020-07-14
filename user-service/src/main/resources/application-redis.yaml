@@ -21,5 +21,5 @@ spring:
     redis:
       timeToLive: 60m
   redis:
-    host: palisade-redis-cluster
+    host: palisade-redis
     port: 6379

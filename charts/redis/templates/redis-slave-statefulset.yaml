@@ -310,8 +310,8 @@ spec:
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
             - name: {{ .Values.global.persistence.redisSlave.name }}
-              mountPath: {{ .Values.master.persistence.path }}
-              subPath: {{ .Values.master.persistence.subPath }}
+              mountPath: {{ .Values.slave.persistence.path }}
+              subPath: {{ .Values.slave.persistence.subPath }}
             - name: config
               mountPath: /opt/bitnami/redis-sentinel/mounted-etc
             - name: sentinel-tmp-conf
@@ -348,7 +348,7 @@ spec:
             - name: metrics
               containerPort: 9121
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
-  {{- end }}
+        {{- end }}
       {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and .Values.slave.persistence.enabled .Values.securityContext.enabled) }}
       {{- if or $needsVolumePermissions .Values.sysctlImage.enabled }}
       initContainers:
