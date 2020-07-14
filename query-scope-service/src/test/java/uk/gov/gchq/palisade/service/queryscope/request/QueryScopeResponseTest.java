@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.queryscope.response;
+package uk.gov.gchq.palisade.service.queryscope.request;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,9 +25,11 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 
 import java.io.IOException;
@@ -39,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class QueryScopeResponseTest {
 
     @Autowired
-    private JacksonTester<QueryScopeResponse> jacksonTester;
+    private JacksonTester<QueryScopeResponse> jsonTester;
 
 
     /**
@@ -64,7 +66,7 @@ public class QueryScopeResponseTest {
                 .withContext(context)
                 .withResource(resource);
 
-        JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jacksonTester.write(queryScopeResponse);
+        JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
 
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
@@ -83,13 +85,47 @@ public class QueryScopeResponseTest {
 
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
-        ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jacksonTester.parse(jsonString);
+        ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jsonTester.parse(jsonString);
 
         QueryScopeResponse queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
         assertThat(queryScopeResponse.getUserId()).isEqualTo("originalUserID");
         assertThat(queryScopeResponse.getResourceId()).isEqualTo("originalResourceID");
         assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
+    }
+
+    /**
+     * Create the QueryScopeResponse object from a QueryScopeRequest, serialise it and then test the content of the object.
+     *
+     * @throws IOException if it fails to parse the string into an object
+     */
+    @Test
+    public void testSerialiseQueryScopeResponseUsingQueryScopeRequestToJson() throws IOException {
+
+        Context context = new Context().purpose("testContext");
+        User user = new User().userId("testUserId");
+        LeafResource resource = new FileResource().id("/test/file.format")
+                .type("java.lang.String")
+                .serialisedFormat("format")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
+                .parent(new SystemResource().id("/test"));
+        Rules rules = new Rules().rule("Rule1", new PassThroughRule());
+        QueryScopeRequest queryScopeRequest = QueryScopeRequest.Builder.create()
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
+                .withContext(context)
+                .withUser(user)
+                .withResource(resource)
+                .withRules(rules);
+
+        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create(queryScopeRequest).withResource(resource);
+
+        JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
+
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
     }
 }
 

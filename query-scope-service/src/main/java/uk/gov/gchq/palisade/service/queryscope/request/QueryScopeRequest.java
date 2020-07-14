@@ -96,6 +96,11 @@ public final class QueryScopeRequest {
     }
 
     @Generated
+    public JsonNode getContextNode()  {
+        return context;
+    }
+
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
@@ -110,43 +115,7 @@ public final class QueryScopeRequest {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof QueryScopeRequest)) {
-            return false;
-        }
-        QueryScopeRequest that = (QueryScopeRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                rules.equals(that.rules);
-    }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource, rules);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", QueryScopeRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resources=" + resource)
-                .add("rules=" + rules)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the QueryScopeRequest.  This is a variant of the Fluent Builder
@@ -294,4 +263,41 @@ public final class QueryScopeRequest {
 
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof QueryScopeRequest)) {
+            return false;
+        }
+        QueryScopeRequest that = (QueryScopeRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource) &&
+                rules.equals(that.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource, rules);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", QueryScopeRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resources=" + resource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
+    }
 }

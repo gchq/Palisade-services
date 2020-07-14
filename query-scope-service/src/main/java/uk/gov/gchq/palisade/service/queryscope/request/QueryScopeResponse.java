@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.queryscope.response;
+package uk.gov.gchq.palisade.service.queryscope.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -37,7 +37,7 @@ import java.util.StringJoiner;
  * This version represents the output for query-scope-service with the filtered version of the request.
  * Next in the sequence will be the input for the result-service which will construct a response to the client.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the query-scope-service.
+ * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeResponse is the output from the query-scope-service.
  * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -94,50 +94,12 @@ public final class QueryScopeResponse {
         return resource;
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof QueryScopeResponse)) {
-            return false;
-        }
-        QueryScopeResponse that = (QueryScopeResponse) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                resource.equals(that.resource);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, resource);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", QueryScopeResponse.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("resource=" + resource)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the QueryScopeResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private Context context;
-
-        private LeafResource resource;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -148,6 +110,23 @@ public final class QueryScopeResponse {
         public static IUserId create() {
             return userId -> resourceId -> context -> resource ->
                     new QueryScopeResponse(userId, resourceId, context, resource);
+        }
+
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * QueryScopeResponse class.
+         * Starter method for the Builder class that uses a QueryScopeRequests and appends the redacted version of the resource.
+         * This method is called followed by the call to add user with the IUserId interface to create the
+         * QueryScopeResponse class.
+         * @param request message that was sent to the query-scope-service
+
+         * @return interface  {@link IResourceId} for the next step in the build.
+         */
+        public static IResource create(final QueryScopeRequest request) {
+            return create()
+                    .withUserId(request.getUserId())
+                    .withResourceId(request.getResourceId())
+                    .withContextNode(request.getContextNode());
         }
 
         /**
@@ -218,4 +197,37 @@ public final class QueryScopeResponse {
 
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof QueryScopeResponse)) {
+            return false;
+        }
+        QueryScopeResponse that = (QueryScopeResponse) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", QueryScopeResponse.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
+    }
 }
