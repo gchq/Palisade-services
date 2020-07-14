@@ -197,4 +197,38 @@ public final class ResourceRequest {
         }
 
     }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResourceRequest)) {
+            return false;
+        }
+        ResourceRequest that = (ResourceRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", ResourceRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add(super.toString())
+                .toString();
+    }
 }

@@ -122,7 +122,7 @@ public final class ResourceResponse {
          * Starter method for the Builder class that uses a ResourceRequest and appends the Rules.
          * This method is called followed by the call to add resource with the IResource interface to create the
          * ResourceResponse class.
-         *
+         * @param request  the request message that was sent to the resource-service
          * @return interface {@link IResource} for the next step in the build.
          */
         public static IResource create(final ResourceRequest request) {
@@ -226,7 +226,7 @@ public final class ResourceResponse {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
