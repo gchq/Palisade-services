@@ -47,6 +47,7 @@ public final class ResourceRequest {
 
     private final String userId;  //Unique identifier for the user
 
+
     /**
      * Resource ID that that is being asked to access
      */
@@ -88,42 +89,18 @@ public final class ResourceRequest {
     }
 
     @Generated
+    public JsonNode getContextNode()  {
+        return context;
+    }
+
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(user, User.class);
     }
 
-    @Override
     @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ResourceRequest)) {
-            return false;
-        }
-        ResourceRequest that = (ResourceRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ResourceRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add(super.toString())
-                .toString();
+    public JsonNode getUserNode()  {
+        return user;
     }
 
     /**
@@ -131,11 +108,6 @@ public final class ResourceRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
 
 
         /**

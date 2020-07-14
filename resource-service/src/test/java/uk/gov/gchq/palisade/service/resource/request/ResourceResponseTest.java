@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.response;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,15 +86,48 @@ public class ResourceResponseTest {
 
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
-        ObjectContent<ResourceResponse> resourceRequestContent =  jacksonTester.parse(jsonString);
+        ObjectContent<ResourceResponse> resourceRequestContent = jacksonTester.parse(jsonString);
 
-        ResourceResponse resourceResponse =  resourceRequestContent.getObject();
+        ResourceResponse resourceResponse = resourceRequestContent.getObject();
         assertThat(resourceResponse.getUserId()).isEqualTo("originalUserID");
         assertThat(resourceResponse.getResourceId()).isEqualTo("originalResourceID");
 
         assertThat(resourceResponse.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(resourceResponse.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(resourceResponse.resource.getId()).isEqualTo("/test/file.format");
+
+    }
+
+    /**
+     * Create the ResourceResponse object from a ResourceRequest, serialise it and then test the content of the object.
+     *
+     * @throws IOException if it fails to parse the string into an object
+     */
+    @Test
+    public void testSerialisePolicyResponseUsingResourceRequestToJson() throws IOException {
+
+        Context context = new Context().purpose("testContext");
+        User user = new User().userId("testUserId");
+        LeafResource resource = new FileResource().id("/test/file.format")
+                .type("java.lang.String")
+                .serialisedFormat("format")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
+                .parent(new SystemResource().id("/test"));
+
+        ResourceRequest resourceRequest = ResourceRequest.Builder.create()
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
+                .withContext(context)
+                .withUser(user);
+
+        ResourceResponse resourceResponse = ResourceResponse.Builder.create(resourceRequest).withResource(resource);
+        JsonContent<ResourceResponse> resourceResponseJsonContent = jacksonTester.write(resourceResponse);
+
+        assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+        assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
 
     }
 }

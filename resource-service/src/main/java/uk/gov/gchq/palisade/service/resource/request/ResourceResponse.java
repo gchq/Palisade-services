@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.response;
+package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,7 +39,7 @@ import java.util.StringJoiner;
  * of the resources that were found to correspond to the resource ID.
  * Next in the sequence will be the request for policy-service.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
+ * uk.gov.gchq.palisade.service.resource.request.ResourceResponse is the output from the resource-service.
  * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -98,52 +98,13 @@ public final class ResourceResponse {
         return MAPPER.treeToValue(user, User.class);
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ResourceResponse)) {
-            return false;
-        }
-        ResourceResponse that = (ResourceResponse) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource);
-    }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", ResourceResponse.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resource=" + resource)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the ResourceResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
-        private LeafResource resource;
 
 
         /**
@@ -155,6 +116,21 @@ public final class ResourceResponse {
         public static IUserId create() {
             return userId -> resourceId -> context -> user -> resource ->
                     new ResourceResponse(userId, resourceId, context, user, resource);
+        }
+
+        /**
+         * Starter method for the Builder class that uses a ResourceRequest and appends the Rules.
+         * This method is called followed by the call to add resource with the IResource interface to create the
+         * ResourceResponse class.
+         *
+         * @return interface {@link IResource} for the next step in the build.
+         */
+        public static IResource create(final ResourceRequest request) {
+            return create()
+                    .withUserId(request.getUserId())
+                    .withResourceId(request.getResourceId())
+                    .withContextNode(request.getContextNode())
+                    .withUserNode(request.getUserNode());
         }
 
         /**
@@ -246,5 +222,41 @@ public final class ResourceResponse {
 
         }
 
+    }
+
+    @Override
+    @Generated
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResourceResponse)) {
+            return false;
+        }
+        ResourceResponse that = (ResourceResponse) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", ResourceResponse.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
     }
 }
