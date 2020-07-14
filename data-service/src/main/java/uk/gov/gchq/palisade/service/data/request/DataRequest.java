@@ -110,51 +110,12 @@ public final class DataRequest {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof DataRequest)) {
-            return false;
-        }
-        DataRequest that = (DataRequest) o;
-        return context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                rules.equals(that.rules);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(context, user, resource, rules);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", DataRequest.class.getSimpleName() + "[", "]")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resource=" + resource)
-                .add("rules=" + rules)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the DataRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
-        private JsonNode resource;
-        private JsonNode rules;
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -288,5 +249,40 @@ public final class DataRequest {
             DataRequest withRulesNode(JsonNode rules);
         }
     }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DataRequest)) {
+            return false;
+        }
+        DataRequest that = (DataRequest) o;
+        return context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource) &&
+                rules.equals(that.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(context, user, resource, rules);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", DataRequest.class.getSimpleName() + "[", "]")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
+    }
+
 }
 
