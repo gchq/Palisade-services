@@ -18,8 +18,10 @@
 .DS_Store
 # Common VCS dirs
 .git/
+.github/
 .gitignore
 *.tmp
+*.iml
 *~
 Jenkinsfile
 mvn_dependency_tree.txt
@@ -33,6 +35,7 @@ velocity*
 *.tmproj
 .vscode/
 /logos/
+/licences/
 /target/
 /code-style/
 # Add the directory for every service module here
@@ -44,3 +47,6 @@ velocity*
 /resource-service/
 /services-manager/
 /user-service/
+/query-scope-service/
+/results-service/
+/services-launcher/
