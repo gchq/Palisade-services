@@ -54,6 +54,7 @@ public final class PolicyResponse {
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
+
     /**
      * Holds all of the Rules applicable to this request
      */
@@ -109,43 +110,7 @@ public final class PolicyResponse {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PolicyResponse)) {
-            return false;
-        }
-        PolicyResponse that = (PolicyResponse) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                rules.equals(that.rules);
-    }
 
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource, rules);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", PolicyResponse.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resource=" + resource)
-                .add("rules=" + rules)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
@@ -169,8 +134,10 @@ public final class PolicyResponse {
          * This method is called followed by the call to add rules with the IRules interface to create the
          * PolicyResponse class.
          *
+         * @param request message that has been sent to the policy-service
          * @return interface {@link IRules} for the next step in the build.
          */
+
         public static IRules create(final PolicyRequest request) {
             return create()
                     .withUserId(request.getUserId())
@@ -295,6 +262,43 @@ public final class PolicyResponse {
 
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyResponse)) {
+            return false;
+        }
+        PolicyResponse that = (PolicyResponse) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource) &&
+                rules.equals(that.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource, rules);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyResponse.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add("rules=" + rules)
+                .add(super.toString())
+                .toString();
+    }
 }
 
 
