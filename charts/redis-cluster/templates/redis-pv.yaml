@@ -41,14 +41,14 @@ spec:
     storage: {{ $.Values.global.persistence.redisCluster.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $.Values.global.persistence.redisMaster.local.hostPath }}/redis/{{ $namespace }}/cluster/{{ $index }}
+    path: {{ $.Values.global.persistence.redisCluster.local.hostPath }}/redis/{{ $namespace }}/cluster/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.redisMaster.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.redisCluster.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $.Values.global.persistence.redisMaster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
+      path: {{ $.Values.global.persistence.redisCluster.aws.volumePath }}/redis/{{ $namespace }}/cluster{{ $index }}
   {{- end }}
 {{- end }}
 {{- end }}
