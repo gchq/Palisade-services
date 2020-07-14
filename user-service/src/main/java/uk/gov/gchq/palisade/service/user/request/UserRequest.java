@@ -76,6 +76,11 @@ public final class UserRequest {
     }
 
     @Generated
+    public String getUserId() {
+        return userId;
+    }
+
+    @Generated
     public String getResourceId() {
         return resourceId;
     }
@@ -85,36 +90,9 @@ public final class UserRequest {
         return MAPPER.treeToValue(context, Context.class);
     }
 
-    @Override
     @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof UserRequest)) {
-            return false;
-        }
-        UserRequest that = (UserRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", UserRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add(super.toString())
-                .toString();
+    public JsonNode getContextNode() {
+        return context;
     }
 
     /**
@@ -184,6 +162,38 @@ public final class UserRequest {
              */
             UserRequest withContextNode(JsonNode context);
         }
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserRequest)) {
+            return false;
+        }
+        UserRequest that = (UserRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", UserRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add(super.toString())
+                .toString();
     }
 
 }

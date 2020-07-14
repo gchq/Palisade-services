@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.response;
+package uk.gov.gchq.palisade.service.user.request;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @JsonTest
-class UserResponseTest {
+public class UserResponseTest {
 
 
     @Autowired
@@ -47,14 +47,14 @@ class UserResponseTest {
      * This equates to a failure to serialise the string.
      */
     @Test
-    void testSerialiseUserResponseToJson() throws IOException {
+   public void testSerialiseUserResponseToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
 
         User user = new User().userId("testUserId");
 
         UserResponse userResponse = UserResponse.Builder.create()
-                .withRUserId("originalUserID")
+                .withUserId("originalUserID")
                 .withResource("testResourceId")
                 .withContext(context)
                 .withUser(user);
@@ -90,5 +90,31 @@ class UserResponseTest {
 
     }
 
+    /**
+     * Create the UserResponse object from a UserRequest, serialise it and then test the content of the object.
+     *
+     * @throws IOException if it fails to parse the string into an object
+     */
+    @Test
+    public void testSerialiseUserResponseUsingUserRequestToJson() throws IOException {
 
+        Context context = new Context().purpose("testContext");
+        User user = new User().userId("testUserId");
+
+        UserRequest userRequest = UserRequest.Builder.create()
+
+                .withUser("originalUserID")
+                .withResource("originalResourceID")
+                .withContext(context);
+
+        UserResponse policyResponse = UserResponse.Builder.create(userRequest).withUser(user);
+
+        JsonContent<UserResponse> userResponseJsonContent = jsonTester.write(policyResponse);
+
+        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
+        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
+        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+
+    }
 }

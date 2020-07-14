@@ -43,16 +43,16 @@ public final class OriginalRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String userId;  //Unique identifier for the user
-    private final String resourceId;  //Resource that that is being asked to access
-    private final JsonNode context; //Relevant context information about the request.
+    private final String userId;  //Unique identifier for the user.
+    private final String resourceId;  //Resource that that is being asked to access.
+    private final Context context; //Relevant context information about the request.
 
 
     @JsonCreator
     private OriginalRequest(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context) {
+            final @JsonProperty("context") Context context) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource cannot be null");
@@ -74,41 +74,10 @@ public final class OriginalRequest {
     }
 
     @Generated
-    public Context getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(context, Context.class);
+    public Context getContext() {
+        return context;
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof OriginalRequest)) {
-            return false;
-        }
-        OriginalRequest that = (OriginalRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add(super.toString())
-                .toString();
-    }
 
     /**
      * Builder class for the creation of the OriginalRequest.  This is a variant of the Fluent Builder
@@ -163,20 +132,44 @@ public final class OriginalRequest {
              * @param context information about this request.
              * @return class {@link OriginalRequest} this builder is set-up to create.
              */
-            default OriginalRequest withContext(Context context) {
-                return withContextNode(MAPPER.valueToTree(context));
-            }
+            OriginalRequest withContext(Context context);
 
-            /**
-             * Adds the user context information. Uses a JsonNode string form of the information.
-             *
-             * @param context information about this request.
-             * @return class {@link OriginalRequest} for the completion of the builder steps is to create the class.
-             */
-            OriginalRequest withContextNode(JsonNode context);
         }
 
     }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OriginalRequest)) {
+            return false;
+        }
+        OriginalRequest that = (OriginalRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", OriginalRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add(super.toString())
+                .toString();
+    }
+
 }
 
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.response;
+package uk.gov.gchq.palisade.service.user.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -129,11 +129,6 @@ public final class UserResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private User user;
-
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
@@ -147,6 +142,23 @@ public final class UserResponse {
         }
 
         /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * UserRequest class.
+         * Starter method for the Builder class that uses a UserRequest and appends the User.
+         * This method is called followed by the call to add user with the IUserId interface to create the
+         * UserResponse class.
+         * @param request  is the request message that has been supplied to the user-service
+         * @return interface  {@link IUser} for the next step in the build.
+         */
+
+        public static IUser create(final UserRequest request) {
+            return create()
+                    .withUserId(request.getUserId())
+                    .withResource(request.getResourceId())
+                    .withContextNode(request.getContextNode());
+        }
+
+        /**
          * Adds the user ID information to the message.
          */
         interface IUserId {
@@ -156,7 +168,7 @@ public final class UserResponse {
              * @param userId user ID for the request.
              * @return interface {@link IResourceId} for the next step in the build.
              */
-            IResourceId withRUserId(String userId);
+            IResourceId withUserId(String userId);
         }
 
         /**
