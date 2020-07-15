@@ -240,6 +240,8 @@ spec:
                             sh 'extract-addresses'
                             if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
                                 sh 'echo namespace create succeeded'
+                                git url: 'https://github.com/gchq/Palisade-services.git'
+                                sh "git checkout ${GIT_BRANCH_NAME}"
                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                                 //create the branch namespace
                                 if (sh(script: "helm upgrade --install palisade . " +
