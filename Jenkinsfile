@@ -163,18 +163,18 @@ spec:
 //             }
 //         }
 //
-//         stage('Install, Unit Tests, Checkstyle') {
-//             dir('Palisade-services') {
-//                 git url: 'https://github.com/gchq/Palisade-services.git'
-//                 sh "git checkout ${GIT_BRANCH_NAME}"
-//                 container('docker-cmds') {
-//                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+        stage('Install, Unit Tests, Checkstyle') {
+            dir('Palisade-services') {
+                git url: 'https://github.com/gchq/Palisade-services.git'
+                sh "git checkout ${GIT_BRANCH_NAME}"
+                container('docker-cmds') {
+                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
 //                         sh 'mvn -s $MAVEN_SETTINGS install'
-//                     }
-//                 }
-//             }
-//             echo sh(script: 'env | sort', returnStdout: true)
-//         }
+                    }
+                }
+            }
+            echo sh(script: 'env | sort', returnStdout: true)
+        }
 //
 //         stage('Integration Tests') {
 //             // Always run some sort of integration test
@@ -239,9 +239,6 @@ spec:
                             //now extract the public IP addresses that this will be open on
                             sh 'extract-addresses'
                             if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
-                                sh 'echo namespace create succeeded'
-                                git url: 'https://github.com/gchq/Palisade-services.git'
-                                sh "git checkout ${GIT_BRANCH_NAME}"
                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
                                 //create the branch namespace
                                 if (sh(script: "helm upgrade --install palisade . " +
