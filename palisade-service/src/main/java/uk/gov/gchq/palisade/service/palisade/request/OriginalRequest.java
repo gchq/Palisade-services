@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -38,8 +37,6 @@ import java.util.StringJoiner;
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class OriginalRequest {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String userId;  //Unique identifier for the user.
     private final String resourceId;  //Resource that that is being asked to access.
