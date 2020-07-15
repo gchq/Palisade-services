@@ -32,7 +32,7 @@ import java.util.StringJoiner;
  * forwarded to the audit-service.
  * Note all of the services can potentially send an error message.
  */
-public class AuditErrorMessage extends AuditMessage {
+public final class AuditErrorMessage extends AuditMessage {
 
     @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
@@ -145,6 +145,7 @@ public class AuditErrorMessage extends AuditMessage {
          * Adds the error that occurred.
          */
         interface IError {
+
             /**
              * Adds the error for the message.
              *
@@ -155,6 +156,12 @@ public class AuditErrorMessage extends AuditMessage {
                 return withErrorNode(MAPPER.valueToTree(error));
             }
 
+            /**
+             * Adds the attributes for the message.  Uses a JsonNode string form of the information.
+             *
+             * @param error user context for the request.
+             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
+             */
             AuditErrorMessage withErrorNode(JsonNode error);
         }
 
