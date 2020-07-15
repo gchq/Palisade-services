@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.service.results.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,80 +25,64 @@ import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that is to be
- * sent to audit service.
+ * Audit information for a request provided by each service. This is the version that will represent messages
+ * that have been received by the Audit Service.
+ * Error Audit messages will be sent from every service to both the Results and Audit Service.
+ * Successful Audit will be sent from the results-service or the data-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "palisade-service";
-
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @JsonProperty("userId")
+
+    protected final String serviceName;  //service that sent the message
     protected final String userId; //Unique identifier for the user.
-
-    @JsonProperty("resourceId")
     protected final String resourceId;  //Resource that that is being asked to access.
-
-    @JsonProperty("context")
     protected final JsonNode context;   //Relevant context information about the request.
 
-    @JsonProperty("serviceName")
-    protected final String serviceName;  //service that sent the message
-
-    @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
-
-    @JsonProperty("serverIP")
     protected final String serverIP;  //the server IP address for the service
-
-    @JsonProperty("serverHostname")
     protected final String serverHostname;  //the hostname of the server hosting the service
 
-    @JsonProperty("attributes")
-    protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
+    protected final JsonNode attributes;  //Map<String, Object> holding optional extra information
 
 
     @JsonCreator
     protected AuditMessage(
 
-            final String userId,
-            final String resourceId,
-            final JsonNode context) {
+            final  String userId,
+            final  String resourceId,
+            final  JsonNode context,
+            final  String serviceName,
+            final  String timestamp,
+            final  String serverIP,
+            final  String serverHostname,
+            final  JsonNode attributes) {
 
+        Assert.notNull(serviceName, "Service Name cannot be null");
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
         Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(timestamp, "Timestamp cannot be null");
+        Assert.notNull(serverIP, "Server IP address cannot be null");
+        Assert.notNull(serverHostname, "Server Hostname cannot be null");
+        Assert.notNull(attributes, "Attributes cannot be null");
 
         this.userId = userId;
         this.resourceId = resourceId;
         this.context = context;
-
-        this.serviceName = SERVICE_NAME;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-
-        try {
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            this.serverHostname = inetAddress.getHostName();
-            this.serverIP = inetAddress.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Failed to get server host and IP address", e);
-        }
-
-        this.attributes = new HashMap<String, Object>();
+        this.serviceName = serviceName;
+        this.timestamp = timestamp;
+        this.serverIP = serverIP;
+        this.serverHostname = serverHostname;
+        this.attributes = attributes;
 
     }
 
@@ -139,8 +122,8 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map getAttributes() {
-        return attributes;
+    public Map getAttributes() throws JsonProcessingException {
+        return MAPPER.treeToValue(attributes, Map.class);
     }
 
     @Override
