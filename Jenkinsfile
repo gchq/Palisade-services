@@ -229,7 +229,7 @@ spec:
         }
 
 
-//         stage('Maven deploy') {
+//         stage('Helm deploy') {
 //             dir('Palisade-services') {
 //                 container('maven') {
 //                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
