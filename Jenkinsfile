@@ -138,95 +138,95 @@ spec:
             echo sh(script: 'env | sort', returnStdout: true)
         }
 
-        stage('Prerequisites') {
-            // If this branch name exists in the repo for a mvn dependency
-            // Install that version, rather than pulling from nexus
-            dir('Palisade-common') {
-                git url: 'https://github.com/gchq/Palisade-common.git'
-                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
-                        }
-                    }
-                }
-            }
-            dir('Palisade-readers') {
-                git url: 'https://github.com/gchq/Palisade-readers.git'
-                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh 'mvn -s $MAVEN_SETTINGS install -P quick'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Install, Unit Tests, Checkstyle') {
-            dir('Palisade-services') {
-                git url: 'https://github.com/gchq/Palisade-services.git'
-                sh "git checkout ${GIT_BRANCH_NAME}"
-                container('docker-cmds') {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -s $MAVEN_SETTINGS install'
-                    }
-                }
-            }
-            echo sh(script: 'env | sort', returnStdout: true)
-        }
-
-        stage('Integration Tests') {
-            // Always run some sort of integration test
-            // If this branch name exists in integration-tests, use that
-            // Otherwise, default to integration-tests/develop
-            dir('Palisade-integration-tests') {
-                git url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
-                container('docker-cmds') {
-                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                        sh 'mvn -s $MAVEN_SETTINGS install'
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            dir('Palisade-services') {
-                container('docker-cmds') {
-                    withCredentials([string(credentialsId: "${env.SQ_WEB_HOOK}", variable: 'SONARQUBE_WEBHOOK'),
-                                     string(credentialsId: "${env.SQ_KEY_STORE_PASS}", variable: 'KEYSTORE_PASS'),
-                                     file(credentialsId: "${env.SQ_KEY_STORE}", variable: 'KEYSTORE')]) {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            withSonarQubeEnv(installationName: 'sonar') {
-                                sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services-${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage("SonarQube Quality Gate") {
-            // Wait for SonarQube to prepare the report
-            sleep(time: 10, unit: 'SECONDS')
-            // Just in case something goes wrong, pipeline will be killed after a timeout
-            timeout(time: 5, unit: 'MINUTES') {
-                // Reuse taskId previously collected by withSonarQubeEnv
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
-                }
-            }
-        }
-
-        stage('Hadolinting') {
-            dir('Palisade-services') {
-                container('hadolint') {
-                    sh 'hadolint */Dockerfile'
-                }
-            }
-        }
+//         stage('Prerequisites') {
+//             // If this branch name exists in the repo for a mvn dependency
+//             // Install that version, rather than pulling from nexus
+//             dir('Palisade-common') {
+//                 git url: 'https://github.com/gchq/Palisade-common.git'
+//                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+//                     container('docker-cmds') {
+//                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                             sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+//                         }
+//                     }
+//                 }
+//             }
+//             dir('Palisade-readers') {
+//                 git url: 'https://github.com/gchq/Palisade-readers.git'
+//                 if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+//                     container('docker-cmds') {
+//                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                             sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//
+//         stage('Install, Unit Tests, Checkstyle') {
+//             dir('Palisade-services') {
+//                 git url: 'https://github.com/gchq/Palisade-services.git'
+//                 sh "git checkout ${GIT_BRANCH_NAME}"
+//                 container('docker-cmds') {
+//                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                         sh 'mvn -s $MAVEN_SETTINGS install'
+//                     }
+//                 }
+//             }
+//             echo sh(script: 'env | sort', returnStdout: true)
+//         }
+//
+//         stage('Integration Tests') {
+//             // Always run some sort of integration test
+//             // If this branch name exists in integration-tests, use that
+//             // Otherwise, default to integration-tests/develop
+//             dir('Palisade-integration-tests') {
+//                 git url: 'https://github.com/gchq/Palisade-integration-tests.git'
+//                 sh "git checkout ${GIT_BRANCH_NAME} || git checkout develop"
+//                 container('docker-cmds') {
+//                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                         sh 'mvn -s $MAVEN_SETTINGS install'
+//                     }
+//                 }
+//             }
+//         }
+//
+//         stage('SonarQube Analysis') {
+//             dir('Palisade-services') {
+//                 container('docker-cmds') {
+//                     withCredentials([string(credentialsId: "${env.SQ_WEB_HOOK}", variable: 'SONARQUBE_WEBHOOK'),
+//                                      string(credentialsId: "${env.SQ_KEY_STORE_PASS}", variable: 'KEYSTORE_PASS'),
+//                                      file(credentialsId: "${env.SQ_KEY_STORE}", variable: 'KEYSTORE')]) {
+//                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+//                             withSonarQubeEnv(installationName: 'sonar') {
+//                                 sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services-${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//
+//         stage("SonarQube Quality Gate") {
+//             // Wait for SonarQube to prepare the report
+//             sleep(time: 10, unit: 'SECONDS')
+//             // Just in case something goes wrong, pipeline will be killed after a timeout
+//             timeout(time: 5, unit: 'MINUTES') {
+//                 // Reuse taskId previously collected by withSonarQubeEnv
+//                 def qg = waitForQualityGate()
+//                 if (qg.status != 'OK') {
+//                     error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+//                 }
+//             }
+//         }
+//
+//         stage('Hadolinting') {
+//             dir('Palisade-services') {
+//                 container('hadolint') {
+//                     sh 'hadolint */Dockerfile'
+//                 }
+//             }
+//         }
 
 
         stage('Maven deploy') {
