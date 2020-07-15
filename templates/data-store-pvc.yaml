@@ -43,7 +43,9 @@ spec:
   resources:
     requests:
       storage: {{ $value.storage }}
-  storageClassName: {{- pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default | indent 1}}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
+  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
+  storageClassName: {{- $sc | default $default | indent 1 }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}
