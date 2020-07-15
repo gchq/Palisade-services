@@ -43,7 +43,7 @@ import java.util.StringJoiner;
  * sent to audit service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public abstract class AuditMessage {
+public class AuditMessage {
 
     public static final String SERVICE_NAME = "data-service";
 

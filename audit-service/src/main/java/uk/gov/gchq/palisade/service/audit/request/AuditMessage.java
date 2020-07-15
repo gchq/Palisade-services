@@ -36,7 +36,7 @@ import java.util.StringJoiner;
  * sent from each of the different services.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public abstract class AuditMessage {
+public class AuditMessage {
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 

@@ -39,8 +39,6 @@ import java.util.StringJoiner;
  */
 public final class AuditSuccessMessage extends AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource
 

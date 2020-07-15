@@ -36,7 +36,7 @@ import java.util.StringJoiner;
  * the audit service.
  */
 public final class AuditErrorMessage extends AuditMessage {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+
 
     @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
@@ -277,3 +277,4 @@ public final class AuditErrorMessage extends AuditMessage {
                 .toString();
     }
 }
+

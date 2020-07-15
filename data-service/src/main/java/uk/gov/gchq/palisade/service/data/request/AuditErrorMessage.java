@@ -33,20 +33,19 @@ import java.util.StringJoiner;
  * forwarded to the audit-service.
  * Note all of the services can potentially send an error message.
  */
-public class AuditErrorMessage extends AuditMessage {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+public final class AuditErrorMessage extends AuditMessage {
 
-    @JsonProperty("leafResourceId")
+    @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
 
 
     @JsonCreator
     private AuditErrorMessage(
 
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("leafResourceId") JsonNode error
+            final String userId,
+            final String resourceId,
+            final JsonNode context,
+            final JsonNode error
     ) {
 
         super(userId, resourceId, context);
@@ -75,8 +74,8 @@ public class AuditErrorMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context ->  error ->
-                    new AuditErrorMessage(userId, resourceId, context,  error);
+            return userId -> resourceId -> context -> error ->
+                    new AuditErrorMessage(userId, resourceId, context, error);
         }
 
         /**
@@ -158,6 +157,12 @@ public class AuditErrorMessage extends AuditMessage {
                 return withErrorNode(MAPPER.valueToTree(error));
             }
 
+            /**
+             * Adds the error for the message and uses a JsonNode version in the build
+             *
+             * @param error that occurred.
+             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
+             */
             AuditErrorMessage withErrorNode(JsonNode error);
         }
 
