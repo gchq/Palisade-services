@@ -27,43 +27,56 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 
 /**
- * Audit information for a request provided by each service. This is the version that will represent messages
- * that have been received by the Audit Service.
- * Error Audit messages will be sent from every service to both the Results and Audit Service.
- * Successful Audit will be sent from the results-service or the data-service.
+ * This is the parent class for Audit information.  It represents the common component of the data that has been
+ * sent from each of the different services.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuditMessage {
+public abstract class AuditMessage {
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
 
-    protected final String serviceName;  //service that sent the message
+    @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.
+
+    @JsonProperty("resourceId")
     protected final String resourceId;  //Resource that that is being asked to access.
+
+    @JsonProperty("context")
     protected final JsonNode context;   //Relevant context information about the request.
 
+    @JsonProperty("serviceName")
+    protected final String serviceName;  //service that sent the message
+
+    @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
+
+    @JsonProperty("serverIP")
     protected final String serverIP;  //the server IP address for the service
+
+    @JsonProperty("serverHostname")
     protected final String serverHostname;  //the hostname of the server hosting the service
 
-    protected final JsonNode attributes;  //Map<String, Object> holding optional extra information
+    @JsonProperty("attributes")
+    protected final JsonNode attributes;  //JsonNode holding Map<String, Object> holding optional extra information
 
 
     @JsonCreator
     protected AuditMessage(
 
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("serviceName") String serviceName,
-            final @JsonProperty("timestamp") String timestamp,
-            final @JsonProperty("serverIP") String serverIP,
-            final @JsonProperty("serverHostname") String serverHostname,
-            final @JsonProperty("attributes") JsonNode attributes) {
+            final  String userId,
+            final  String resourceId,
+            final  JsonNode context,
+            final  String serviceName,
+            final  String timestamp,
+            final  String serverIP,
+            final  String serverHostname,
+            final  JsonNode attributes) {
 
         Assert.notNull(serviceName, "Service Name cannot be null");
         Assert.notNull(userId, "User cannot be null");
@@ -125,6 +138,46 @@ public class AuditMessage {
         return MAPPER.treeToValue(attributes, Map.class);
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditMessage)) {
+            return false;
+        }
+        AuditMessage that = (AuditMessage) o;
+        return serviceName.equals(that.serviceName) &&
+                userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                timestamp.equals(that.timestamp) &&
+                serverIP.equals(that.serverIP) &&
+                serverHostname.equals(that.serverHostname) &&
+                attributes.equals(that.attributes);
+    }
 
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(serviceName, userId, resourceId, context, timestamp, serverIP, serverHostname, attributes);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditMessage.class.getSimpleName() + "[", "]")
+                .add("serviceName='" + serviceName + "'")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("timestamp='" + timestamp + "'")
+                .add("serverIP='" + serverIP + "'")
+                .add("serverHostname='" + serverHostname + "'")
+                .add("attributes=" + attributes)
+                .add(super.toString())
+                .toString();
+    }
 }
 

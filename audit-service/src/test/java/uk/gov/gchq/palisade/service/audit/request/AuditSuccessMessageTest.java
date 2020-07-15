@@ -39,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class AuditSuccessMessageTest {
 
+   private static final String NOW = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
@@ -55,6 +57,7 @@ public class AuditSuccessMessageTest {
         Context context = new Context().purpose("testContext");
 
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
 
@@ -72,10 +75,14 @@ public class AuditSuccessMessageTest {
 
         JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jsonTester.write(auditSuccessMessage);
 
-        //these tests are each for strings
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("testServicename");
+        assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.timestamp").isEqualTo(now);
+        assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serverIP").isEqualTo("testServerIP");
+        assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serverHostname").isEqualTo("testServerHostname");
+        assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23");
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.leafResourceId").isEqualTo("testLeafResourceId");
 
 
@@ -94,10 +101,15 @@ public class AuditSuccessMessageTest {
 
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
 
+
         AuditSuccessMessage auditSuccessMessage = auditSuccessMessageObjectContent.getObject();
         assertThat(auditSuccessMessage.getUserId()).isEqualTo("originalUserID");
         assertThat(auditSuccessMessage.getResourceId()).isEqualTo("testResourceId");
         assertThat(auditSuccessMessage.getContext().getPurpose()).isEqualTo("testContext");
+        assertThat(auditSuccessMessage.getServiceName()).isEqualTo("testServicename");
+        assertThat(auditSuccessMessage.getServerIP()).isEqualTo("testServerIP");
+        assertThat(auditSuccessMessage.getServeHostName()).isEqualTo("testServerHostname");
+        assertThat(auditSuccessMessage.getAttributes().get("messagesSent")).isEqualTo("23");
         assertThat(auditSuccessMessage.getLeafResourceId()).isEqualTo("testLeafResourceId");
 
     }

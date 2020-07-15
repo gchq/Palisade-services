@@ -25,11 +25,14 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
+ * Note there are three classes that effectively represent the same kind of data but represent a different
+ * stage of the process:
  * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
  * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
  * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the data-service.
@@ -38,21 +41,22 @@ public final class AuditSuccessMessage extends AuditMessage {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource
 
 
     @JsonCreator
     private AuditSuccessMessage(
 
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("serviceName") String serviceName,
-            final @JsonProperty("timestamp") String timestamp,
-            final @JsonProperty("serverIP") String serverIP,
-            final @JsonProperty("serverHostname") String serverHostname,
-            final @JsonProperty("attributes") JsonNode attributes,
-            final @JsonProperty("leafResourceId") String leafResourceId
+            final  String userId,
+            final  String resourceId,
+            final  JsonNode context,
+            final  String serviceName,
+            final  String timestamp,
+            final  String serverIP,
+            final  String serverHostname,
+            final JsonNode attributes,
+            final String leafResourceId
     ) {
 
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
@@ -133,7 +137,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param context user context for the request.
              * @return interface {@link IServiceName} for the next step in the build.
              */
-            IServiceName withContextNode(com.fasterxml.jackson.databind.JsonNode context);
+            IServiceName withContextNode(JsonNode context);
 
         }
 
@@ -231,5 +235,36 @@ public final class AuditSuccessMessage extends AuditMessage {
             AuditSuccessMessage withLeafResourceId(String leafResourceId);
         }
 
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditSuccessMessage)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AuditSuccessMessage that = (AuditSuccessMessage) o;
+        return leafResourceId.equals(that.leafResourceId);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), leafResourceId);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditSuccessMessage.class.getSimpleName() + "[", "]")
+                .add("leafResourceId='" + leafResourceId + "'")
+                .add(super.toString())
+                .toString();
     }
 }

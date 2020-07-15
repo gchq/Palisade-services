@@ -26,32 +26,34 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
- * forwarded to the audit-service.
- * Note all of the services can potentially send an error message.
+ * received by the audit-service and processed.
+ * Note each of the services can potentially send an error message.  This version is for recording the information in
+ * the audit service.
  */
-public class AuditErrorMessage extends AuditMessage {
+public final class AuditErrorMessage extends AuditMessage {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-
+    @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
 
 
     @JsonCreator
     private AuditErrorMessage(
 
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("serviceName") String serviceName,
-            final @JsonProperty("timestamp") String timestamp,
-            final @JsonProperty("serverIP") String serverIP,
-            final @JsonProperty("serverHostname") String serverHostname,
-            final @JsonProperty("attributes") JsonNode attributes,
-            final @JsonProperty("leafResourceId") JsonNode error
-    ) {
+            final String userId,
+            final String resourceId,
+            final JsonNode context,
+            final String serviceName,
+            final String timestamp,
+            final String serverIP,
+            final String serverHostname,
+            final JsonNode attributes,
+            final JsonNode error) {
 
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
 
@@ -66,8 +68,13 @@ public class AuditErrorMessage extends AuditMessage {
         return MAPPER.treeToValue(error, Throwable.class);
     }
 
+    @Generated
+    public JsonNode getErrorNode() {
+        return error;
+    }
+
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AuditErrorMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
@@ -75,7 +82,7 @@ public class AuditErrorMessage extends AuditMessage {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * AuditSuccessMessage class.
+         * AuditErrorMessage class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */
@@ -160,7 +167,7 @@ public class AuditErrorMessage extends AuditMessage {
              * @param timestamp timestamp for the request.
              * @return interface {@link IServerIp} for the next step in the build.
              */
-             IServerIp withTimestamp(String timestamp);
+            IServerIp withTimestamp(String timestamp);
         }
 
         /**
@@ -228,10 +235,45 @@ public class AuditErrorMessage extends AuditMessage {
                 return withErrorNode(MAPPER.valueToTree(error));
             }
 
+            /**
+             * Adds the attributes for the message.  Uses a JsonNode string form of the information.
+             *
+             * @param error user context for the request.
+             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
+             */
             AuditErrorMessage withErrorNode(JsonNode error);
         }
 
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditErrorMessage)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AuditErrorMessage that = (AuditErrorMessage) o;
+        return error.equals(that.error);
+    }
 
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), error);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
+                .add("error=" + error)
+                .add(super.toString())
+                .toString();
+    }
 }
