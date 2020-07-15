@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.results.request;
+package uk.gov.gchq.palisade.service.queryscope.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,7 +44,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "results-service";
+    public static final String SERVICE_NAME = "query-scope-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -97,10 +96,10 @@ public class AuditMessage {
             this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
-            throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
+            throw new RuntimeException("Failed to get server host and IP address", e);
         }
 
-        this.attributes = new HashMap<>();
+        this.attributes = new HashMap<String, Object>();
 
     }
 

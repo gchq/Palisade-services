@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.results.request;
+package uk.gov.gchq.palisade.service.user.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -45,7 +45,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "results-service";
+    public static final String SERVICE_NAME = "resource-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 

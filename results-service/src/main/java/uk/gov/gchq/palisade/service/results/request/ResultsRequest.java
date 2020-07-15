@@ -89,6 +89,11 @@ public final class ResultsRequest {
     }
 
     @Generated
+    public JsonNode getContextNode()  {
+        return context;
+    }
+
+    @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
