@@ -96,6 +96,11 @@ public final class DataRequest {
     }
 
     @Generated
+    public JsonNode getContextNode()  {
+        return context;
+    }
+
+    @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
@@ -106,10 +111,19 @@ public final class DataRequest {
     }
 
     @Generated
+    public JsonNode getResourceNode()   {
+        return resource;
+    }
+
+    @Generated
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
 
+    @Generated
+    public JsonNode getRulesNode()  {
+        return rules;
+    }
 
     /**
      * Builder class for the creation of instances of the DataRequest.  This is a variant of the Fluent Builder
