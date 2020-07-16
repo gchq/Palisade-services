@@ -39,6 +39,7 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args: {{ include "palisade.redis-args" . }}
         ports:
         - name: web
           containerPort: 8087

@@ -15,7 +15,7 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis.fullname" . }}
 {{- $config := $.Values.global.persistence.redisSlave }}
-{{ range $index := until (1 | int) }}
+{{ range $index := until (.Values.cluster.slaveCount | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -47,4 +47,5 @@ spec:
     volumeAttributes:
       path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/slave/{{ $index }}
   {{- end }}
+---
 {{- end }}

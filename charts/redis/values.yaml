@@ -58,7 +58,7 @@ nameOverride: "redis"
 ## Cluster settings
 cluster:
   enabled: true
-  slaveCount: 1
+  slaveCount: 3
 
 ## Use redis sentinel in the redis pod. This will disable the master and slave services and
 ## create one redis service with ports to the sentinel and the redis instances
@@ -344,7 +344,7 @@ master:
     enabled: true
     ## The path the volume will be mounted at, useful when using different
     ## Redis images.
-    path: /data
+    path: /opt/bitnami/redis/data
     ## The subdirectory of the volume to mount to, useful in dev environments
     ## and one PV for multiple services.
     subPath: ""
@@ -499,7 +499,7 @@ slave:
     enabled: true
     ## The path the volume will be mounted at, useful when using different
     ## Redis images.
-    path: /data
+    path: /opt/bitnami/redis/data
     ## The subdirectory of the volume to mount to, useful in dev environments
     ## and one PV for multiple services.
     subPath: ""

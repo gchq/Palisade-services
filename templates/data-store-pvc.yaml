@@ -47,4 +47,5 @@ spec:
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}
+---
 {{- end }}

@@ -215,7 +215,8 @@ spec:
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
             - name: {{ .Values.global.persistence.redisSlave.name }}
-              mountPath: /data
+              mountPath: {{ .Values.slave.persistence.path }}
+              subPath: {{ .Values.slave.persistence.subPath }}
             - name: config
               mountPath: /opt/bitnami/redis/mounted-etc
             - name: redis-tmp-conf

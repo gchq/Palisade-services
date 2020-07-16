@@ -39,12 +39,29 @@ global:
   kafka:
     # install: install kafka streaming platform
     install: true
+
   redis:
     # install: install redis persistence and caching data storage platform
     install: true
+    # config: configure services to connect to (previously installed?) redis (if unset, use install value)
+    # config: true
+    exports:
+      nameOverride: "redis"
+    master:
+      service:
+        port: 6379
+
   redisCluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
+    # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
+    # config: false
+    # imported from sub-chart, default values here are overridden by sub-chart values
+    exports:
+      nameOverride: "redis"
+      redisPort: 6379
+    cluster:
+      nodes: 6
 
   # hosting: [local | aws | metal] the target environment to deploy to
   hosting: local
@@ -117,7 +134,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: kafka-persistence
-      storage: 9Gi
+      storage: 4Gi
       local:
         hostPath: "/"
       aws:
@@ -131,7 +148,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: zookeeper-persistence
-      storage: 8Gi
+      storage: 4Gi
       local:
         hostPath: "/"
       aws:
@@ -145,7 +162,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-master
-      storage: 12Gi
+      storage: 4Gi
       local:
         hostPath: "/"
       aws:
@@ -158,7 +175,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-slave
-      storage: 11Gi
+      storage: 4Gi
       local:
         hostPath: "/"
       aws:
@@ -171,7 +188,7 @@ global:
         local: hostpath
         aws: efs-sc
       name: redis-persistence-cluster
-      storage: 13Gi
+      storage: 4Gi
       local:
         hostPath: "/"
       aws:

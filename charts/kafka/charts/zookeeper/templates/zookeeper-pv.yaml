@@ -47,4 +47,5 @@ spec:
     volumeAttributes:
       path: {{ $config.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
   {{- end }}
+---
 {{- end }}

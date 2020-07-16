@@ -23,6 +23,15 @@ global:
   #   storageClass: myStorageClass
   redis: {}
 
+# Export some root-level values (import-values must take a table and cannot take ".")
+exports:
+  ## String to partially override redis.fullname template (will maintain the release name)
+  ##
+  nameOverride: "redis"
+  ## String to fully override redis.fullname template
+  ##
+  # fullnameOverride:
+
 ## Bitnami Redis image version
 ## ref: https://hub.docker.com/r/bitnami/redis/tags/
 ##
@@ -45,14 +54,6 @@ image:
   # pullSecrets:
   #   - myRegistryKeySecretName
 
-## String to partially override redis.fullname template (will maintain the release name)
-##
-nameOverride: "redis"
-
-## String to fully override redis.fullname template
-##
-# fullnameOverride:
-
 ## Redis Cluster settings
 ##
 cluster:
@@ -64,7 +65,7 @@ cluster:
   activeDeadlineSeconds: 600
   ## Number of Redis nodes to be deployed
   ##
-  nodes: 1
+  nodes: 6
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created
   ##
@@ -270,7 +271,7 @@ persistence:
   enabled: true
   ## The path the volume will be mounted at, useful when using different
   ## Redis images.
-  path: /data
+  path: /opt/bitnami/redis/data
   ## The subdirectory of the volume to mount to, useful in dev environments
   ## and one PV for multiple services.
   subPath: ""
