@@ -124,9 +124,9 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link IServiceName} for the next step in the build.
+             * @return interface {@link IServicename} for the next step in the build.
              */
-            default IServiceName withContext(Context context) {
+            default IServicename withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -134,31 +134,31 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return interface {@link IServiceName} for the next step in the build.
+             * @return interface {@link IServicename} for the next step in the build.
              */
-            IServiceName withContextNode(JsonNode context);
+            IServicename withContextNode(JsonNode context);
 
         }
 
         /**
          * Adds the service name for the service that created this message.
          */
-        interface IServiceName {
+        interface IServicename {
 
             /**
              * Adds the service name.
              *
              * @param servicename name of the service that created the message.
-             * @return interface  {@link ITimeStamp} for the next step in the build.
+             * @return interface  {@link ITimestamp} for the next step in the build.
              */
-            ITimeStamp withServiceName(String servicename);
+            ITimestamp withServiceName(String servicename);
         }
 
 
         /**
          * Adds the timestamp for when the service created this message.
          */
-        interface ITimeStamp {
+        interface ITimestamp {
 
             /**
              * Adds the timestamp for the message.

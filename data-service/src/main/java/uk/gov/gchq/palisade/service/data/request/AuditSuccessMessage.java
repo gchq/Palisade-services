@@ -34,7 +34,7 @@ import java.util.StringJoiner;
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
  * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the data-service.
+ * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditSuccessMessage extends AuditMessage {
