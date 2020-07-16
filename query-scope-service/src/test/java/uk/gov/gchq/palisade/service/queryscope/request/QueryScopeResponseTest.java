@@ -109,7 +109,7 @@ public class QueryScopeResponseTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules().rule("Rule1", new PassThroughRule());
+        Rules rules = new Rules().addRule("Rule1", new PassThroughRule());
         QueryScopeRequest queryScopeRequest = QueryScopeRequest.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
