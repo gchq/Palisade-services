@@ -26,6 +26,7 @@
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
 
+{{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -35,17 +36,17 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ $.Release.Service }}"
     "app.kubernetes.io/instance": "{{ $.Release.Name }}"
     "helm.sh/chart": "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
-  namespace: {{ include "palisade.namespace" $ }}
+  namespace: {{ $namespace }}
 spec:
   accessModes:
   - ReadWriteMany
   resources:
     requests:
       storage: {{ $value.storage }}
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.hosting }}
+  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
   {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
   storageClassName: {{- $sc | default $default | indent 1 }}
   selector:
     matchLabels:
-      selectorFilter: {{ $name }}
+      selectorFilter: {{ $name }}-{{ $namespace }}
 {{- end }}
