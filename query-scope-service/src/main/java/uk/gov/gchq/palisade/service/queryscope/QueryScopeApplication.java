@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.queryscope;
 
-
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -27,15 +26,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 @SpringBootApplication
 public class QueryScopeApplication {
 
-
     /**
      * SpringBoot application entry-point method for the {@link QueryScopeApplication} executable
      *
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
-        //Note the args is a security issue and if used, needs to be checked.
-        //SonarQube "Using command line arguments is security-sensitive"
+
+        //Need to add checks for args if it is to be used otherwise use null
         new SpringApplicationBuilder(QueryScopeApplication.class).web(WebApplicationType.SERVLET)
                 .run(null); //null instead of args for security reason
     }
