@@ -44,18 +44,18 @@ Calculate a storage path based on the code release artifact id or the supplied v
 */}}
 {{- define "palisade.deployment.path" }}
 {{- if eq .Values.global.deployment "codeRelease" }}
-{{- if eq .Values.hosting "local" }}
+{{- if eq .Values.global.hosting "local" }}
 {{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
-{{- else if eq .Values.hosting "aws" }}
+{{- else if eq .Values.global.hosting "aws" }}
 {{- $path := index .Values "palisade-service" "image" "codeRelease" | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
 {{- end }}
 {{- else }}
-{{- if eq .Values.hosting "local" }}
+{{- if eq .Values.global.hosting "local" }}
 {{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.local.hostPath $path }}
-{{- else if eq .Values.hosting "aws" }}
+{{- else if eq .Values.global.hosting "aws" }}
 {{- $path := .Values.global.deployment | lower | replace "." "-" | trunc 63 | trimSuffix "-" }}
 {{- printf "%s/%s" .Values.global.persistence.classpathJars.aws.volumePath $path }}
 {{- end }}
@@ -93,7 +93,7 @@ Modify the namespace if required
 {{- if .Release.Namespace }}
 {{- printf "%s" .Release.Namespace }}
 {{- else }}
-{{- printf "%s" .Values.global.namespace | trunc 63 | trimSuffix "-" }}
+{{- printf "%s" $.Values.global.namespace | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 {{- end }}

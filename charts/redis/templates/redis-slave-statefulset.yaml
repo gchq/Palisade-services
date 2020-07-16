@@ -19,7 +19,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ template "redis.fullname" . }}-slave
-  namespace: {{ .Release.Namespace }}
+  namespace: "{{- include "palisade.namespace" . }}"
   labels:
     app: {{ template "redis.name" . }}
     chart: {{ template "redis.chart" . }}
@@ -214,7 +214,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisSlave.name }}
               mountPath: /data
             - name: config
               mountPath: /opt/bitnami/redis/mounted-etc
@@ -309,7 +309,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisSlave.name }}
               mountPath: {{ .Values.master.persistence.path }}
               subPath: {{ .Values.master.persistence.subPath }}
             - name: config
@@ -361,7 +361,7 @@ spec:
             runAsUser: 0
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           volumeMounts:
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisSlave.name }}
               mountPath: {{ .Values.slave.persistence.path }}
               subPath: {{ .Values.slave.persistence.subPath }}
         {{- end }}
@@ -412,7 +412,7 @@ spec:
     {{- else }}
   volumeClaimTemplates:
     - metadata:
-        name: redis-data
+        name: {{ .Values.global.persistence.redisSlave.name }}
         labels:
           app: {{ template "redis.name" . }}
           release: {{ .Release.Name }}
@@ -421,10 +421,10 @@ spec:
       spec:
         accessModes:
         - ReadWriteMany
-        storageClassName: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
+        storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisSlave.storageClassName | first | default .Values.global.persistence.redisSlave.storageClassName._default | indent 1 }}
         resources:
           requests:
-            storage: {{ .Values.slave.persistence.size | quote }}
+            storage: {{ $.Values.global.persistence.redisSlave.storage }}
         {{ include "redis.slave.storageClass" . }}
         selector:
           matchLabels:

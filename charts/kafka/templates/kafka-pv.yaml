@@ -12,47 +12,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Create a number of persistent volumes for each configured data-store
-# New PV for each dataStores entry
-
-#N.B The datastore would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
-
+{{- if .Values.global.kafka.install }}
 {{- $namespace := include "palisade.namespace" . }}
-{{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $kafkaname := include "kafka.fullname" . }}
+{{ range $index := until (.Values.replicas | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ $name }}-{{ $namespace }}
+  name: {{ $.Values.global.persistence.kafka.name }}-{{ $namespace }}-{{ $index }}
   labels:
     {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
     {{- end }}
-    selectorFilter: {{ $name }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
+  claimRef:
+    namespace: {{ $namespace }}
+    name: {{ $.Values.global.persistence.kafka.name }}-{{ $kafkaname }}-{{ $index }}
   persistentVolumeReclaimPolicy: Delete
-  {{- $sc := index $.Values "global" "persistence" "dataStores" $name "storageClassName" $.Values.global.hosting }}
-  {{- $default := index $.Values "global" "persistence" "dataStores" $name "storageClassName" "_default" }}
+    {{- $sc := index $.Values "global" "persistence" "kafka" "storageClassName" $.Values.global.hosting }}
+    {{- $default := index $.Values "global" "persistence" "kafka" "storageClassName" "_default" }}
   storageClassName: {{- $sc | default $default | indent 1 }}
   capacity:
-    storage: {{ $value.storage }}
+    storage: {{ $.Values.global.persistence.kafka.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $value.local.hostPath }}
+    path: {{ $.Values.global.persistence.kafka.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
-  volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $.Values.global.persistence.kafka.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $value.aws.volumePath }}
+      path: {{ $.Values.global.persistence.kafka.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
+      type: DirectoryOrCreate
   {{- end }}
+{{- end }}
 {{- end }}

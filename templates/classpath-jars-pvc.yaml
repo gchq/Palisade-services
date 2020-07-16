@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -20,27 +21,20 @@ metadata:
     "app.kubernetes.io/managed-by": "{{ .Release.Service }}"
     "app.kubernetes.io/instance": "{{ .Release.Name }}"
     "helm.sh/chart": "{{ .Chart.Name }}-{{ .Chart.Version }}"
-  namespace: {{ include "palisade.namespace" . }}
+  namespace: {{ $namespace }}
 # The palisade-classpath-jars PV is set to a reclaim policy of DELETE
 # In the future we may want to set the policy to RETAIN, in this situation where a
 # helm upgrade makes a modification to the PV
 # then we need to force the PVC to also be deleted.
 # hence we need to hash or sha the PV as an annotation
 
-#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
-  annotations:
-    "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: {{- pluck $.Values.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
+  storageClassName: {{- pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default | indent 1 }}
   selector:
     matchLabels:
-      selectorFilter: {{ include "palisade.deployment.fullname" . }}
+      selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}

@@ -18,7 +18,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ template "redis.fullname" . }}-master
-  namespace: {{ .Release.Namespace }}
+  namespace: "{{- include "palisade.namespace" . }}"
   labels:
     app: {{ template "redis.name" . }}
     chart: {{ template "redis.chart" . }}
@@ -30,10 +30,11 @@ spec:
       app: {{ template "redis.name" . }}
       release: {{ .Release.Name }}
       role: master
+  replicas: 1
     {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
-      name: redis-data
+      name: {{ .Values.global.persistence.redisMaster.name }}
       labels:
         app: {{ template "redis.name" . }}
         release: {{ .Release.Name }}
@@ -44,14 +45,8 @@ spec:
       - ReadWriteMany
       resources:
         requests:
-          storage: {{ .Values.master.persistence.size | quote }}
-      storageClassName: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
-      selector:
-        matchLabels:
-          selectorFilter: {{ .Values.global.persistence.redisMaster.name }}-{{ include "palisade.namespace" . }}
-      {{- if .Values.master.persistence.matchExpressions }}
-      matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
-      {{- end -}}
+          storage: {{ $.Values.global.persistence.redisMaster.storage }}
+      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisMaster.storageClassName | first | default .Values.global.persistence.redisMaster.storageClassName._default | indent 1 }}
         {{- end }}
 
   serviceName: {{ template "redis.fullname" . }}-headless
@@ -209,7 +204,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisMaster.name }}
               mountPath: {{ .Values.master.persistence.path }}
               subPath: {{ .Values.master.persistence.subPath }}
             - name: config
@@ -309,7 +304,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: redis-data
+            - name: {{ .Values.global.persistence.redisMaster.name }}
               mountPath: {{ .Values.master.persistence.path }}
               subPath: {{ .Values.master.persistence.subPath }}
             - name: config
@@ -363,7 +358,7 @@ spec:
           runAsUser: 0
         resources: {{- toYaml .Values.volumePermissions.resources | nindent 10 }}
         volumeMounts:
-          - name: redis-data
+          - name: {{ .Values.global.persistence.redisMaster.name }}
             mountPath: {{ .Values.master.persistence.path }}
             subPath: {{ .Values.master.persistence.subPath }}
       {{- end }}
