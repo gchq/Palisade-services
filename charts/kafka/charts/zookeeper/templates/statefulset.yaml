@@ -17,7 +17,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ template "zookeeper.fullname" . }}
+  name: {{ include "zookeeper.fullname" . }}
   namespace: {{ include "palisade.namespace" . }}
   labels:
     app: {{ template "zookeeper.name" . }}
@@ -117,7 +117,7 @@ spec:
         resources:
           {{- toYaml .Values.resources | indent 10 }}
         volumeMounts:
-        - name: data
+        - name: {{ .Values.global.persistence.zookeeper.name }}
           mountPath: /data
           {{- range $secret := .Values.secrets }}
           {{- if $secret.mountPath }}
@@ -215,19 +215,16 @@ spec:
           name: {{ .Release.Name }}-jmx-exporter
         {{- end }}
         {{- if not .Values.persistence.enabled }}
-      - name: data
+      - name: {{ .Values.global.persistence.zookeeper.name }}
         emptyDir: {}
         {{- end }}
-  {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
-      name: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
+      name: {{ .Values.global.persistence.zookeeper.name }}
     spec:
       accessModes:
       - ReadWriteMany
       resources:
         requests:
-          storage: {{ .Values.persistence.size }}
-      {{- $_ := set . "index" "kafka" }}
-      storageClassName: {{ .Values.global.persistence.kafka.name }}-{{ include "palisade.namespace" . }}
-  {{- end }}
+          storage: {{ $.Values.global.persistence.zookeeper.storage }}
+      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.zookeeper.storageClassName | first | default .Values.global.persistence.zookeeper.storageClassName._default | indent 1 }}

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{{- if and ( .Values.global.persistence.storageClassDeploy ) ( eq .Values.hosting "aws" ) }}
+{{- if and ( .Values.global.persistence.storageClassDeploy ) ( eq .Values.global.hosting "aws" ) }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
