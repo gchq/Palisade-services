@@ -69,7 +69,7 @@ public class PolicyServiceTest {
 
         policyService = new PolicyService(policyClient, executor);
         FileResource resource = new FileResource().id("/path/to/bob_file.txt");
-        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        Rules rule = new Rules().addRule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
 
     }
