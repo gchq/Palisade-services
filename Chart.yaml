@@ -33,16 +33,16 @@ dependencies:
   - name: kafka
     version: 0.4.0
     repository: file://charts/kafka
-    condition: kafka.install
+    condition: global.kafka.install
   - name: create-kafka-queues
     version: 0.4.0
     repository: file://charts/create-kafka-queues
-    condition: kafka.install
+    condition: global.kafka.install
   - name: redis
     version: 0.4.0
     repository: file://charts/redis
-    condition: redis.install
+    condition: global.redis.install
   - name: redis-cluster
     version: 0.4.0
     repository: file://charts/redis-cluster
-    condition: redis-cluster.install
+    condition: global.redis-cluster.install
