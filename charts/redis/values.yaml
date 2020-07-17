@@ -25,6 +25,14 @@ global:
   # storageClass: myStorageClass
   redis: {}
 
+exports:
+  ## String to partially override redis.fullname template (will maintain the release name)
+  ##
+  nameOverride: "redis"
+  ## String to fully override redis.fullname template
+  ##
+  # fullnameOverride:
+
 ## Bitnami Redis image version
 ## ref: https://hub.docker.com/r/bitnami/redis/tags/
 ##
@@ -46,14 +54,6 @@ image:
   ##
   # pullSecrets:
   #   - myRegistryKeySecretName
-
-## String to partially override redis.fullname template (will maintain the release name)
-##
-nameOverride: "redis"
-
-## String to fully override redis.fullname template
-##
-# fullnameOverride:
 
 ## Cluster settings
 cluster:

@@ -109,31 +109,22 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{/*
+Create a number of arguments to pass to a spring application (set up some redis properties)
+*/}}
 {{- define "palisade.redis-args" -}}
 {{- if or .Values.global.redis.install .Values.global.redis.config -}}
 {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) -}}
-{{- printf "[\"--spring.redis.host=%s\", \"--spring.redis.port=%d\"]" (include "palisade.redis.fullname" .) .Values.global.redis.exports.redisPort -}}
+{{- $masterPort := int .Values.global.redis.master.service.port -}}
+{{- printf "[\"--spring.redis.host=%s\", \"--spring.redis.port=%d\"]" $masterFullname $masterPort -}}
 {{- else if or .Values.global.redisCluster.install .Values.global.redisCluster.config -}}
-{{- printf "[\"--spring.redis.cluster.nodes=%s\"]" (include "palisade.redis-cluster.headlessNodes" . | trimAll ",") -}}
+{{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," -}}
+{{- printf "[\"--spring.redis.cluster.nodes=%s\"]" $clusterNodes -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Create a list of headless nodes to pass to Spring
-*/}}
-{{- define "palisade.redis-cluster.headlessNodes" -}}
-{{- $count := .Values.global.redisCluster.cluster.nodes | int -}}
-{{- $clusterFullname := printf "%s-cluster" (include "palisade.redis-cluster.fullname" .) -}}
-{{- $headlessPort := int .Values.global.redisCluster.exports.redisPort -}}
-{{- range $i, $v := until $count -}}
-{{- printf "%s-%d.%s-headless:%d," $clusterFullname $i $clusterFullname $headlessPort -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+Create the service name of the redis master
 */}}
 {{- define "palisade.redis.fullname" -}}
 {{- if .Values.global.redis.exports.fullnameOverride -}}
@@ -149,9 +140,19 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+Create a list of headless redis-cluster nodes from service name and node count
+*/}}
+{{- define "palisade.redis-cluster.headlessNodes" -}}
+{{- $count := .Values.global.redisCluster.cluster.nodes | int -}}
+{{- $clusterFullname := printf "%s-cluster" (include "palisade.redis-cluster.fullname" .) -}}
+{{- $headlessPort := int .Values.global.redisCluster.exports.redisPort -}}
+{{- range $i, $v := until $count -}}
+{{- printf "%s-%d.%s-headless:%d," $clusterFullname $i $clusterFullname $headlessPort -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the service name of the redis cluster
 */}}
 {{- define "palisade.redis-cluster.fullname" -}}
 {{- if .Values.global.redisCluster.exports.fullnameOverride -}}
