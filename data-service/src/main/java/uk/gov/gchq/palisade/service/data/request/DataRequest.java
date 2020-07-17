@@ -198,7 +198,7 @@ public final class DataRequest {
          */
         interface IUser {
             /**
-             * Adds the user user information.
+             * Adds the user information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.
@@ -208,7 +208,7 @@ public final class DataRequest {
             }
 
             /**
-             * Adds the user user information.  Uses a JsonNode string form of the information.
+             * Adds the user identified int the system that requested the information.  Uses a JsonNode string form of the information.
              *
              * @param user for the request.
              * @return class {@link IResource} for the next step in the build.

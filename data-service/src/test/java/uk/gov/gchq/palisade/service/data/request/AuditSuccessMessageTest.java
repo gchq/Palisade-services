@@ -55,12 +55,9 @@ public class AuditSuccessMessageTest {
     public void testSerialiseUAuditSuccessMessageToJson() throws IOException {
 
         Context context = new Context().purpose("testContext");
-
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
-
         AuditSuccessMessage auditSuccessMessage = AuditSuccessMessage.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId(

@@ -216,7 +216,6 @@ public final class AuditSuccessMessage extends AuditMessage {
             AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
         }
 
-
     }
 
 
