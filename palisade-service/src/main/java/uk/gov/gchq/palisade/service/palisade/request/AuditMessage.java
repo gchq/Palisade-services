@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
@@ -32,7 +31,6 @@ import java.net.UnknownHostException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -56,7 +54,7 @@ public class AuditMessage {
     protected final String resourceId;  //Resource that that is being asked to access.
 
     @JsonProperty("context")
-    protected final JsonNode context;   //Relevant context information about the request.
+    protected final Context context;   //Relevant context information about the request.
 
     @JsonProperty("serviceName")
     protected final String serviceName;  //service that sent the message
@@ -79,11 +77,13 @@ public class AuditMessage {
 
             final String userId,
             final String resourceId,
-            final JsonNode context) {
+            final Context context,
+            final Map<String, Object> attributes) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
         Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(attributes, "Attributes cannot be null");
 
         this.userId = userId;
         this.resourceId = resourceId;
@@ -100,7 +100,7 @@ public class AuditMessage {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
 
-        this.attributes = new HashMap<>();
+        this.attributes = attributes;
 
     }
 
@@ -116,7 +116,7 @@ public class AuditMessage {
 
     @Generated
     public Context getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(context, Context.class);
+        return context;
     }
 
     @Generated
