@@ -85,7 +85,7 @@ public class ResultAggregationServiceTest {
                 .connectionDetail(connectionDetail);
         resources.add(resource);
 
-        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        Rules rule = new Rules().addRule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
 
         response.originalRequestId(originalRequestId);
