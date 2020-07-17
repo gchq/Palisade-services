@@ -47,7 +47,7 @@ public final class AuditErrorMessage extends AuditMessage {
             final Map<String, Object> attributes,
             final  Throwable error) {
 
-        super(userId, resourceId, context);
+        super(userId, resourceId, context, attributes);
 
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
@@ -83,9 +83,10 @@ public final class AuditErrorMessage extends AuditMessage {
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request the request message that was sent to the palisade-service
+         * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final UserRequest request, Map<String, Object> attributes) {
+        public static IError create(final UserRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
