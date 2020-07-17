@@ -196,7 +196,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         }
 
         /**
-         * Adds the server host name for the message.
+         * Adds the attributes for the message.
          */
         interface IAttributes {
             /**

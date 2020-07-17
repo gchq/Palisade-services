@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.resource.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.util.Assert;
 
@@ -84,9 +83,10 @@ public final class AuditErrorMessage extends AuditMessage {
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request the request message that was sent to the palisade-service
+         * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final ResourceRequest request, Map<String, Object> attributes) {
+        public static IError create(final ResourceRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
