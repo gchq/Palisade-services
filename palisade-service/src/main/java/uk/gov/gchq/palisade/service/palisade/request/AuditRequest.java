@@ -216,6 +216,10 @@ public class AuditRequest extends Request {
         public final String resourceId;
         public final Context context;
         public final Throwable exception;
+
+        /**
+         * The name of the service which caused the exception
+         */
         public final String serviceName;
 
         @JsonCreator
@@ -283,40 +287,60 @@ public class AuditRequest extends Request {
                     .toString();
         }
 
+        /**
+         * A fluent builder interface used to set the {@link IUserId}
+         */
         public interface IUserId {
             /**
+             * Sets the user id with the provided value
              * @param userId {@link UserId} is the user id provided in the register request
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
             IResourceId withUserId(UserId userId);
         }
 
+        /**
+         * A fluent builder interface used to set the resource id
+         */
         public interface IResourceId {
             /**
+             * Sets the resource id with the provided value
              * @param resourceId {@link String} is the resource id provided in the register request
-             * @return the {@link RegisterRequestExceptionAuditRequest}
+             * @return the {@link IContext}
              */
             IContext withResourceId(String resourceId);
         }
 
+        /**
+         * A fluent builder interface used to set the context
+         */
         public interface IContext {
             /**
+             * Sets the context id with the provided value
              * @param context the context that was passed by the client to the palisade service
-             * @return the {@link RegisterRequestExceptionAuditRequest}
+             * @return the {@link IException}
              */
             IException withContext(Context context);
         }
 
+        /**
+         * A fluent builder interface used to set the exception
+         */
         public interface IException {
             /**
+             * Sets the exception with the provided value
              * @param exception {@link Throwable} is the type of the exception while processing
-             * @return the {@link RegisterRequestExceptionAuditRequest}
+             * @return the {@link IServiceName}
              */
             IServiceName withException(Throwable exception);
         }
 
+        /**
+         * A fluent builder interface used to set the service name
+         */
         public interface IServiceName {
             /**
+             * Sets the service name with the provided value
              * @param serviceName {@link String} is the name of the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
