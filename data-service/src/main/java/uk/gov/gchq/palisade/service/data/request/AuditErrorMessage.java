@@ -17,13 +17,13 @@ package uk.gov.gchq.palisade.service.data.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -35,19 +35,19 @@ import java.util.StringJoiner;
 public final class AuditErrorMessage extends AuditMessage {
 
     @JsonProperty("error")
-    private final JsonNode error;  //Error that occurred
+    private final Throwable error;  //Error that occurred
 
 
     @JsonCreator
     private AuditErrorMessage(
-
             final String userId,
             final String resourceId,
             final JsonNode context,
-            final JsonNode error
+            final Map<String, Object> attributes,
+            final Throwable error
     ) {
 
-        super(userId, resourceId, context);
+        super(userId, resourceId, context, attributes);
 
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
@@ -55,8 +55,8 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     @Generated
-    public Throwable getError() throws JsonProcessingException {
-        return MAPPER.treeToValue(error, Throwable.class);
+    public Throwable getError()  {
+        return error;
     }
 
     /**
@@ -73,8 +73,8 @@ public final class AuditErrorMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> error ->
-                    new AuditErrorMessage(userId, resourceId, context, error);
+            return userId -> resourceId -> context -> attributes -> error ->
+                    new AuditErrorMessage(userId, resourceId, context, attributes, error);
         }
 
         /**
@@ -83,13 +83,16 @@ public final class AuditErrorMessage extends AuditMessage {
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request the request message that was sent to the data-service
+         * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final DataRequest request) {
+
+        public static IError create(final DataRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode());
+                    .withContextNode(request.getContextNode())
+                    .withAttributes(attributes);
         }
 
         /**
@@ -128,7 +131,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param context user context for the request.
              * @return interface {@link IError} for the next step in the build.
              */
-            default IError withContext(Context context) {
+            default IAttributes withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -136,9 +139,23 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
+             * @return interface {@link IAttributes} for the next step in the build.
+             */
+            IAttributes withContextNode(JsonNode context);
+
+        }
+
+        /**
+         * Adds the attributes for the message.
+         */
+        interface IAttributes {
+            /**
+             * Adds the attributes for the message.
+             *
+             * @param attributes timestamp for the request.
              * @return interface {@link IError} for the next step in the build.
              */
-            IError withContextNode(JsonNode context);
+            IError withAttributes(Map<String, Object> attributes);
 
         }
 
@@ -152,17 +169,8 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param error that occurred.
              * @return class  {@link AuditErrorMessage} for the completed class from the builder.
              */
-            default AuditErrorMessage withError(Throwable error) {
-                return withErrorNode(MAPPER.valueToTree(error));
-            }
+            AuditErrorMessage withError(Throwable error);
 
-            /**
-             * Adds the error for the message and uses a JsonNode version in the build
-             *
-             * @param error that occurred.
-             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
-             */
-            AuditErrorMessage withErrorNode(JsonNode error);
         }
 
     }

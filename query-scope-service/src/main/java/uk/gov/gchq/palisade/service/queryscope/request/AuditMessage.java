@@ -79,7 +79,8 @@ public class AuditMessage {
 
             final String userId,
             final String resourceId,
-            final JsonNode context) {
+            final JsonNode context,
+            final Map<String, Object> attributes) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
@@ -100,7 +101,7 @@ public class AuditMessage {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
 
-        this.attributes = new HashMap<>();
+        this.attributes = attributes;
 
     }
 

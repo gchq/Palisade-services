@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -54,11 +55,12 @@ public final class AuditSuccessMessage extends AuditMessage {
             final String userId,
             final String resourceId,
             final JsonNode context,
+            final Map<String, Object> attributes,
             final String leafResourceId,
             final long recordsProcessed,
             final long recordsReturned) {
 
-        super(userId, resourceId, context);
+        super(userId, resourceId, context, attributes);
 
         Assert.notNull(leafResourceId, "Resource ID cannot be null");
         this.leafResourceId = leafResourceId;
@@ -89,8 +91,9 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> leafResource -> recordsProcessed -> recordsReturned ->
-                    new AuditSuccessMessage(userId, resourceId, context, leafResource, recordsProcessed, recordsReturned);
+            return userId -> resourceId -> context -> attributes
+                    ->leafResource -> recordsProcessed -> recordsReturned ->
+                    new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource, recordsProcessed, recordsReturned);
         }
 
         /**
@@ -101,11 +104,12 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @param request the request message that was sent to the data-service
          * @return interface {@link ILeafResourceId} for the next step in the build.
          */
-        public static ILeafResourceId create(final ResultsRequest request) {
+        public static ILeafResourceId create(final ResultsRequest request, Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode());
+                    .withContextNode(request.getContextNode())
+                    .withAttributes(attributes);
         }
 
         /**
@@ -142,9 +146,9 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link ILeafResourceId} for the next step in the build.
+             * @return interface {@link IAttributes} for the next step in the build.
              */
-            default ILeafResourceId withContext(Context context) {
+            default IAttributes withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -152,9 +156,23 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
+             * @return interface {@link IAttributes} for the next step in the build.
+             */
+            IAttributes withContextNode(JsonNode context);
+
+        }
+
+        /**
+         * Adds the attributes for the message.
+         */
+        interface IAttributes {
+            /**
+             * Adds the attributes for the message.
+             *
+             * @param attributes timestamp for the request.
              * @return interface {@link ILeafResourceId} for the next step in the build.
              */
-            ILeafResourceId withContextNode(JsonNode context);
+            ILeafResourceId withAttributes(Map<String, Object> attributes);
 
         }
 

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +59,7 @@ public class AuditErrorMessageTest {
                 .withResourceId(
                         "testResourceId")
                 .withContext(context)
+                .withAttributes(new HashMap<String,Object>())
                 .withError(new InternalError("Something went wrong!"));
 
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);

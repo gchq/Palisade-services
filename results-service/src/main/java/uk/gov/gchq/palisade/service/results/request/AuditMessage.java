@@ -45,7 +45,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "results-service";
+    public static final String SERVICE_NAME = "data-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -79,11 +79,13 @@ public class AuditMessage {
 
             final String userId,
             final String resourceId,
-            final JsonNode context) {
+            final JsonNode context,
+            final Map<String, Object> attributes) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
         Assert.notNull(context, "Context cannot be null");
+        Assert.notNull(attributes, "Attributes cannot be null");
 
         this.userId = userId;
         this.resourceId = resourceId;
@@ -100,7 +102,7 @@ public class AuditMessage {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
 
-        this.attributes = new HashMap<>();
+        this.attributes = attributes;
 
     }
 
