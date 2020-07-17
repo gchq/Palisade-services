@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.results.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.util.Assert;
 
@@ -56,7 +55,7 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     @Generated
-    public Throwable getError() throws JsonProcessingException {
+    public Throwable getError() {
         return error;
     }
 
@@ -83,10 +82,11 @@ public final class AuditErrorMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request the request message that was sent to the data-service
+         * @param request    the request message that was sent to the data-service
+         * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final ResultsRequest request, Map<String, Object> attributes) {
+        public static IError create(final ResultsRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
@@ -177,7 +177,7 @@ public final class AuditErrorMessage extends AuditMessage {
 
     @Override
     @Generated
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

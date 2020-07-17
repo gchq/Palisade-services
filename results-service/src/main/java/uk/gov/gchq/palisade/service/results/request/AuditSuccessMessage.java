@@ -92,7 +92,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          */
         public static IUserId create() {
             return userId -> resourceId -> context -> attributes
-                    ->leafResource -> recordsProcessed -> recordsReturned ->
+                    -> leafResource -> recordsProcessed -> recordsReturned ->
                     new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource, recordsProcessed, recordsReturned);
         }
 
@@ -102,9 +102,10 @@ public final class AuditSuccessMessage extends AuditMessage {
          * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request the request message that was sent to the data-service
+         * @param attributes optional information stored in a Map
          * @return interface {@link ILeafResourceId} for the next step in the build.
          */
-        public static ILeafResourceId create(final ResultsRequest request, Map<String, Object> attributes) {
+        public static ILeafResourceId create(final ResultsRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())

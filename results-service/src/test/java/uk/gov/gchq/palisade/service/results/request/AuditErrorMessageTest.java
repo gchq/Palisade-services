@@ -59,7 +59,7 @@ public class AuditErrorMessageTest {
                 .withResourceId(
                         "testResourceId")
                 .withContext(context)
-                .withAttributes(new HashMap<String,Object>())
+                .withAttributes(new HashMap<String, Object>())
                 .withError(new InternalError("Something went wrong!"));
 
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);

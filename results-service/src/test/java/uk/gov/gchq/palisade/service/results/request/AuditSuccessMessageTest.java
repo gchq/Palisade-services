@@ -66,7 +66,7 @@ public class AuditSuccessMessageTest {
                 .withResourceId(
                         "testResourceId")
                 .withContext(context)
-                .withAttributes(new HashMap<String,Object>())
+                .withAttributes(new HashMap<String, Object>())
                 .withLeafResourceId("testLeafResourceId")
                 .withNumberOfRecordsProcessed(17)
                 .withNumberOfRecordsReturned(4);
