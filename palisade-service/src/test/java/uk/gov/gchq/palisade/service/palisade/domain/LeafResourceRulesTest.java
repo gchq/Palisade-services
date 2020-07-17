@@ -68,7 +68,7 @@ public class LeafResourceRulesTest {
         final FileResource fileResource = (FileResource) ResourceBuilder.create("file:/organisation/dept/team/employee/john");
         final Rule<Employee> rule = new PhoneRule();
         Rules<Employee> resourceRules = new Rules<>();
-        resourceRules.rule("phone-rule", rule);
+        resourceRules.addRule("phone-rule", rule);
         final LeafResourceRulesEntity entity = new LeafResourceRulesEntity(new RequestId().id("xxxx"), fileResource, resourceRules);
 
         this.leafResourceRulesRepository.save(entity);
