@@ -97,7 +97,7 @@ public class SimplePalisadeServiceTest {
                 .connectionDetail(connectionDetail);
         resources.add(resource);
 
-        Rules rule = new Rules().rule("Rule1", new PassThroughRule());
+        Rules rule = new Rules().addRule("Rule1", new PassThroughRule());
         rules.put(resource, rule);
 
         dataRequest.userId(new UserId().id("Bob")).context(new Context().purpose("Testing")).resourceId("file:/path/to/new/bob_file.txt");
