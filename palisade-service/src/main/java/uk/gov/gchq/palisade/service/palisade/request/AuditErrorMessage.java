@@ -40,9 +40,9 @@ public final class AuditErrorMessage extends AuditMessage {
     @JsonCreator
     private AuditErrorMessage(
 
-            final  String userId,
-            final  String resourceId,
-            final  Context context,
+            final String userId,
+            final String resourceId,
+            final Context context,
             final Map<String, Object> attributes,
             final Throwable error) {
 
@@ -54,7 +54,7 @@ public final class AuditErrorMessage extends AuditMessage {
     }
 
     @Generated
-    public Throwable getError()  {
+    public Throwable getError() {
         return error;
     }
 
@@ -81,7 +81,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request the request message that was sent to the palisade-service
+         * @param request    the request message that was sent to the palisade-service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
@@ -90,7 +90,8 @@ public final class AuditErrorMessage extends AuditMessage {
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
                     .withContext(request.getContext())
-                    .withAttributes(attributes);        }
+                    .withAttributes(attributes);
+        }
 
         /**
          * Adds the user ID information to the message.

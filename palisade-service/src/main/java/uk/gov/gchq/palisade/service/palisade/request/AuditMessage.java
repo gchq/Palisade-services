@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
@@ -115,7 +114,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public Context getContext() throws JsonProcessingException {
+    public Context getContext() {
         return context;
     }
 
