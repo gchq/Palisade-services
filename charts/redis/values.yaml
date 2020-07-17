@@ -627,8 +627,6 @@ metrics:
     annotations: {}
     labels: {}
 
-##
-## Init containers parameters:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
 volumePermissions:

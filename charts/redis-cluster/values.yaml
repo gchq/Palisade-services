@@ -54,6 +54,12 @@ image:
   # pullSecrets:
   #   - myRegistryKeySecretName
 
+## Busybox init image version
+initImage:
+  repository: busybox
+  tag: latest
+  pullPolicy: IfNotPresent
+
 ## Redis Cluster settings
 ##
 cluster:
@@ -402,7 +408,7 @@ metrics:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
 volumePermissions:
-  enabled: false
+  enabled: true
   image:
     registry: docker.io
     repository: bitnami/minideb
