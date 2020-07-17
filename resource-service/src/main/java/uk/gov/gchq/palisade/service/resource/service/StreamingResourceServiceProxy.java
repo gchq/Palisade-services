@@ -175,7 +175,7 @@ public class StreamingResourceServiceProxy {
                 .forEach(entry -> {
                     Resource rootResource = entry.getKey();
                     LeafResource leafResource = entry.getValue();
-                    LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
+                    LOGGER.debug("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
                     Stream<LeafResource> resources = Stream.of(leafResource);
                     resources = persistence.withPersistenceById(rootResource.getId(), resources);
                     resources = persistence.withPersistenceByType(leafResource.getType(), resources);
