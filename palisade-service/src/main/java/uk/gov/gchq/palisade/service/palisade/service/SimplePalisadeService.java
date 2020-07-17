@@ -179,7 +179,7 @@ public class SimplePalisadeService implements PalisadeService {
         LOGGER.info("Auditing error with audit service");
         AuditRequest auditException = getAuditException(request)
                 .withException(ex)
-                .withServiceClass(serviceClass);
+                .withServiceName(serviceClass.getSimpleName());
         auditService.audit(auditException);
     }
 

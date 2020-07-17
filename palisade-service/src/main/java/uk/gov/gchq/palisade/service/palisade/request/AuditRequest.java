@@ -26,7 +26,6 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.net.InetAddress;
@@ -217,17 +216,23 @@ public class AuditRequest extends Request {
         public final String resourceId;
         public final Context context;
         public final Throwable exception;
-        public final Class<? extends Service> serviceClass;
+        public final String serviceName;
 
         @JsonCreator
-        private RegisterRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId, @JsonProperty("resourceId") final String resourceId,
-                                                     @JsonProperty("context") final Context context, @JsonProperty("exception") final Throwable exception, @JsonProperty("serviceClass") final Class<? extends Service> serviceClass) {
+        private RegisterRequestExceptionAuditRequest(
+                @JsonProperty("id")                final RequestId id,
+                @JsonProperty("originalRequestId") final RequestId originalRequestId,
+                @JsonProperty("userId")            final UserId userId,
+                @JsonProperty("resourceId")        final String resourceId,
+                @JsonProperty("context")           final Context context,
+                @JsonProperty("exception")         final Throwable exception,
+                @JsonProperty("serviceName")       final String serviceName) {
             super(originalRequestId);
             this.userId = requireNonNull(userId);
             this.resourceId = requireNonNull(resourceId);
             this.context = requireNonNull(context);
             this.exception = requireNonNull(exception);
-            this.serviceClass = requireNonNull(serviceClass);
+            this.serviceName = requireNonNull(serviceName);
         }
 
         /**
@@ -237,7 +242,7 @@ public class AuditRequest extends Request {
          * @return the {@link RegisterRequestExceptionAuditRequest}
          */
         public static IUserId create(final RequestId original) {
-            return user -> resourceId -> context -> exception -> serviceClass -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceClass);
+            return user -> resourceId -> context -> exception -> serviceName -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceName);
         }
 
         @Override
@@ -257,13 +262,13 @@ public class AuditRequest extends Request {
                     Objects.equals(resourceId, that.resourceId) &&
                     Objects.equals(context, that.context) &&
                     Objects.equals(exception, that.exception) &&
-                    Objects.equals(serviceClass, that.serviceClass);
+                    Objects.equals(serviceName, that.serviceName);
         }
 
         @Override
         @Generated
         public int hashCode() {
-            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
+            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceName);
         }
 
         @Override
@@ -274,7 +279,7 @@ public class AuditRequest extends Request {
                     .add("resourceId='" + resourceId + "'")
                     .add("context=" + context)
                     .add("exception=" + exception)
-                    .add("serviceClass=" + serviceClass)
+                    .add("serviceName=" + serviceName)
                     .toString();
         }
 
@@ -307,15 +312,15 @@ public class AuditRequest extends Request {
              * @param exception {@link Throwable} is the type of the exception while processing
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            IServiceClass withException(Throwable exception);
+            IServiceName withException(Throwable exception);
         }
 
-        public interface IServiceClass {
+        public interface IServiceName {
             /**
-             * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
+             * @param serviceName {@link String} is the name of the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            RegisterRequestExceptionAuditRequest withServiceClass(Class<? extends Service> serviceClass);
+            RegisterRequestExceptionAuditRequest withServiceName(String serviceName);
         }
     }
 }

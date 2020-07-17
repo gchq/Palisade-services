@@ -20,7 +20,7 @@ service:
 
 image:
   name: data-service
-  tag: 0b7615e-SNAPSHOT
+  tag: 4a3d4bc-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.4.0-SNAPSHOT
 

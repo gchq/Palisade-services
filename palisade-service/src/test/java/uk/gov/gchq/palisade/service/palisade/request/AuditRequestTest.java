@@ -91,7 +91,7 @@ public class AuditRequestTest {
                 .withResourceId("resource")
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a reason for access", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
                 .withException(new SecurityException("not allowed"))
-                .withServiceClass(UserService.class);
+                .withServiceName(UserService.class.getSimpleName());
 
         assertThat("RegisterRequestExceptionAuditRequest not constructed", subject.resourceId, is(equalTo("resource")));
     }
