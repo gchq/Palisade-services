@@ -19,9 +19,6 @@ ARG JAR_FILE
 
 COPY $JAR_FILE /usr/share/user-service/user-service.jar
 
-RUN apt update
-RUN apt install -y redis-server
-
 LABEL service="user" project="palisade"
 
 ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/user-service/user-service.jar"]

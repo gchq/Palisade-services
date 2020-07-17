@@ -43,8 +43,6 @@ management:
   endpoint:
     shutdown:
       enabled: true
-    health:
-      show-details: always
 
 feign:
   client:
