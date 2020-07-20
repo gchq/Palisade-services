@@ -24,7 +24,6 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
-
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +35,6 @@ public class ResultsResponseTest {
     @Autowired
     private JacksonTester<ResultsResponse> jacksonTester;
 
-
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
      *
@@ -44,15 +42,10 @@ public class ResultsResponseTest {
      */
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
-
-
         ResultsResponse resultsResponse = ResultsResponse.Builder.create().withQueuePointer("testQueuePointer");
-
-
         JsonContent<ResultsResponse> resultsResponseJsonContent = jacksonTester.write(resultsResponse);
 
         assertThat(resultsResponseJsonContent).extractingJsonPathStringValue("$.queuePointer").isEqualTo("testQueuePointer");
-
     }
 
     /**
@@ -62,15 +55,11 @@ public class ResultsResponseTest {
      */
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
-
         String jsonString = "{\"queuePointer\":\"testQueuePointer\"}";
-
-
         ObjectContent<ResultsResponse> resultsResponseObjectContent = jacksonTester.parse(jsonString);
-
         ResultsResponse queryScopeResponse = resultsResponseObjectContent.getObject();
-        assertThat(queryScopeResponse.queuePointer).isEqualTo("testQueuePointer");
 
+        assertThat(queryScopeResponse.queuePointer).isEqualTo("testQueuePointer");
     }
 }
 

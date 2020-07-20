@@ -22,8 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.HasTestingPurpose;
@@ -42,7 +40,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @RunWith(JUnit4.class)
 public class SetResourcePolicyRequestTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetResourcePolicyRequestTest.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private final FileResource fileResource1 = createTestFileResource(1);
     private User testUser = new User().userId("TestUser");
@@ -55,7 +52,6 @@ public class SetResourcePolicyRequestTest {
 
     @Test
     public void SetResourcePolicyRequestToJsonTest() throws IOException {
-
         // Given
         final SetResourcePolicyRequest request = new SetResourcePolicyRequest().policy(resourcePolicy).resource(fileResource1);
 
@@ -71,7 +67,6 @@ public class SetResourcePolicyRequestTest {
 
     @Test
     public void SetResourcePolicyRequestFromJsonTest() throws IOException {
-
         // Given
         final SetResourcePolicyRequest request = new SetResourcePolicyRequest().policy(resourcePolicy).resource(fileResource1);
 

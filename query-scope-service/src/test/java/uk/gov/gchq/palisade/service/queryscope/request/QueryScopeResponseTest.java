@@ -51,9 +51,7 @@ public class QueryScopeResponseTest {
      */
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
-
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
@@ -72,7 +70,6 @@ public class QueryScopeResponseTest {
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
-
     }
 
     /**
@@ -82,9 +79,7 @@ public class QueryScopeResponseTest {
      */
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
-
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
-
         ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jsonTester.parse(jsonString);
 
         QueryScopeResponse queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
@@ -101,7 +96,6 @@ public class QueryScopeResponseTest {
      */
     @Test
     public void testSerialiseQueryScopeResponseUsingQueryScopeRequestToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -109,7 +103,8 @@ public class QueryScopeResponseTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules().addRule("Rule1", new PassThroughRule());
+        Rules rules = new Rules<>();
+
         QueryScopeRequest queryScopeRequest = QueryScopeRequest.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
@@ -119,7 +114,6 @@ public class QueryScopeResponseTest {
                 .withRules(rules);
 
         QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create(queryScopeRequest).withResource(resource);
-
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
 
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");

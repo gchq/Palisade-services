@@ -40,7 +40,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @RunWith(JUnit4.class)
 public class SetTypePolicyRequestTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SetTypePolicyRequestTest.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private User testUser = new User().userId("TestUser");
     private Policy typePolicy;
@@ -52,7 +51,6 @@ public class SetTypePolicyRequestTest {
 
     @Test
     public void SetTypePolicyRequestToJsonTest() throws IOException {
-
         // Given
         final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 
@@ -70,7 +68,6 @@ public class SetTypePolicyRequestTest {
 
     @Test
     public void SetTypePolicyRequestFromJsonTest() throws IOException {
-
         // Given
         final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 

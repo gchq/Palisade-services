@@ -51,11 +51,9 @@ public class AuditErrorMessageTest {
     public void testSerialiseAuditErrorMessageToJson() throws IOException {
         Context context = new Context().purpose("testContext");
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-
         AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
-                .withResourceId(
-                        "testResourceId")
+                .withResourceId("testResourceId")
                 .withContext(context)
                 .withAttributes(new HashMap<String, Object>())
                 .withError(new InternalError("Something went wrong!"));

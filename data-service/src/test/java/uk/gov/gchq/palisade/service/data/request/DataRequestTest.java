@@ -57,7 +57,7 @@ public class DataRequestTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules().addRule("Rule1", new PassThroughRule());
+        Rules rules = new Rules<>();
 
         DataRequest dataRequest = DataRequest.Builder.create()
                 .withUserId("originalUserID")
