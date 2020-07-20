@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same kind of data but represent a different
@@ -41,42 +40,33 @@ public final class AuditSuccessMessage extends AuditMessage {
     @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource
 
-
     @JsonCreator
     private AuditSuccessMessage(
-
-            final  String userId,
-            final  String resourceId,
-            final  JsonNode context,
-            final  String serviceName,
-            final  String timestamp,
-            final  String serverIP,
-            final  String serverHostname,
-            final JsonNode attributes,
-            final String leafResourceId
-    ) {
-
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("serviceName") String serviceName,
+            final @JsonProperty("timestamp") String timestamp,
+            final @JsonProperty("serverIP") String serverIP,
+            final @JsonProperty("serverHostname") String serverHostname,
+            final @JsonProperty("attributes") JsonNode attributes,
+            final @JsonProperty("leafResourceId") String leafResourceId) {
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
 
         Assert.notNull(leafResourceId, "Resource ID cannot be null");
         this.leafResourceId = leafResourceId;
-
     }
-
 
     @Generated
     public String getLeafResourceId() {
         return leafResourceId;
     }
 
-
     /**
      * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.
@@ -135,7 +125,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return interface {@link IServiceName} for the next step in the build.
              */
             IServiceName withContextNode(JsonNode context);
-
         }
 
         /**
@@ -165,7 +154,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return interface {@link IServerIp} for the next step in the build.
              */
             IServerIp withTimestamp(String timestamp);
-
         }
 
         /**
@@ -216,7 +204,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return interface {@link ILeafResourceId} for the next step in the build.
              */
             ILeafResourceId withAttributesNode(JsonNode attributes);
-
         }
 
         /**
@@ -231,7 +218,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              */
             AuditSuccessMessage withLeafResourceId(String leafResourceId);
         }
-
     }
 
     @Override

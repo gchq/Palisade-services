@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
@@ -48,42 +47,34 @@ public final class AuditSuccessMessage extends AuditMessage {
     @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource
 
-
     @JsonCreator
     private AuditSuccessMessage(
-
-            final String userId,
-            final String resourceId,
-            final JsonNode context,
-            final Map<String, Object> attributes,
-            final String leafResourceId,
-            final long recordsProcessed,
-            final long recordsReturned) {
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("leafResourceId") String leafResourceId,
+            final @JsonProperty("recordsProcessed") long recordsProcessed,
+            final @JsonProperty("recordsReturned") long recordsReturned) {
 
         super(userId, resourceId, context, attributes);
-
         Assert.notNull(leafResourceId, "Resource ID cannot be null");
         this.leafResourceId = leafResourceId;
 
         attributes.put(RECORDS_PROCESSED, recordsProcessed);
         attributes.put(RECORDS_RETURNED, recordsReturned);
-
     }
-
 
     @Generated
     public String getLeafResourceId() {
         return leafResourceId;
     }
 
-
     /**
      * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.
@@ -101,7 +92,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request the request message that was sent to the data-service
+         * @param request    the request message that was sent to the data-service
          * @param attributes optional information stored in a Map
          * @return interface {@link ILeafResourceId} for the next step in the build.
          */
@@ -160,7 +151,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return interface {@link IAttributes} for the next step in the build.
              */
             IAttributes withContextNode(JsonNode context);
-
         }
 
         /**
@@ -174,7 +164,6 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @return interface {@link ILeafResourceId} for the next step in the build.
              */
             ILeafResourceId withAttributes(Map<String, Object> attributes);
-
         }
 
         /**
@@ -215,10 +204,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              */
             AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
         }
-
-
     }
-
 
     @Override
     @Generated
