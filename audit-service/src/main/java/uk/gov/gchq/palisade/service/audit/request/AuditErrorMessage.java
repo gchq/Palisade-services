@@ -53,7 +53,6 @@ public final class AuditErrorMessage extends AuditMessage {
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
-
     }
 
     @Generated

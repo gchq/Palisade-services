@@ -75,11 +75,10 @@ public class AuditMessage {
 
     @JsonCreator
     protected AuditMessage(
-
-            final String userId,
-            final String resourceId,
-            final JsonNode context,
-            final Map<String, Object> attributes) {
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("attributes") Map<String, Object> attributes) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
@@ -101,7 +100,6 @@ public class AuditMessage {
         }
 
         this.attributes = attributes;
-
     }
 
     @Generated

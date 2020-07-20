@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.Assert;
 
@@ -73,11 +74,10 @@ public class AuditMessage {
 
     @JsonCreator
     protected AuditMessage(
-
-            final String userId,
-            final String resourceId,
-            final Context context,
-            final Map<String, Object> attributes) {
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") Context context,
+            final @JsonProperty("attributes") Map<String, Object> attributes) {
 
         Assert.notNull(userId, "User cannot be null");
         Assert.notNull(resourceId, "Resource ID  cannot be null");
@@ -100,7 +100,6 @@ public class AuditMessage {
         }
 
         this.attributes = attributes;
-
     }
 
     @Generated

@@ -68,15 +68,14 @@ public class AuditMessage {
 
     @JsonCreator
     protected AuditMessage(
-
-            final  String userId,
-            final  String resourceId,
-            final  JsonNode context,
-            final  String serviceName,
-            final  String timestamp,
-            final  String serverIP,
-            final  String serverHostname,
-            final  JsonNode attributes) {
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("serviceName") String serviceName,
+            final @JsonProperty("timestamp") String timestamp,
+            final @JsonProperty("serverIP") String serverIP,
+            final @JsonProperty("serverHostname") String serverHostname,
+            final @JsonProperty("attributes") JsonNode attributes) {
 
         Assert.notNull(serviceName, "Service Name cannot be null");
         Assert.notNull(userId, "User cannot be null");
@@ -95,7 +94,6 @@ public class AuditMessage {
         this.serverIP = serverIP;
         this.serverHostname = serverHostname;
         this.attributes = attributes;
-
     }
 
     @Generated
