@@ -135,7 +135,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IAttributes} for the next step in the build.
              */
             IAttributes withContextNode(JsonNode context);
-
         }
 
         /**
@@ -149,7 +148,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IError} for the next step in the build.
              */
             IError withAttributes(Map<String, Object> attributes);
-
         }
 
         /**
@@ -163,9 +161,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return class  {@link AuditErrorMessage} for the completed class from the builder.
              */
             AuditErrorMessage withError(Throwable error);
-
         }
-
     }
 
     @Override

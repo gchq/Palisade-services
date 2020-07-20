@@ -128,7 +128,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IServicename} for the next step in the build.
              */
             IServicename withContextNode(JsonNode context);
-
         }
 
         /**
@@ -144,7 +143,6 @@ public final class AuditErrorMessage extends AuditMessage {
              */
             ITimestamp withServiceName(String servicename);
         }
-
 
         /**
          * Adds the timestamp for when the service created this message.
@@ -208,7 +206,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IError} for the next step in the build.
              */
             IError withAttributesNode(JsonNode attributes);
-
         }
 
         /**
@@ -233,7 +230,6 @@ public final class AuditErrorMessage extends AuditMessage {
              */
             AuditErrorMessage withErrorNode(JsonNode error);
         }
-
     }
 
     @Override

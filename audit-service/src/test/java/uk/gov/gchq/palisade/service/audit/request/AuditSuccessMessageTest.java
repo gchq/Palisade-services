@@ -41,7 +41,6 @@ public class AuditSuccessMessageTest {
 
    private static final String NOW = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
-
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
 
@@ -53,11 +52,8 @@ public class AuditSuccessMessageTest {
      */
     @Test
     public void testSerialiseUserResponseToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
-
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
 
@@ -84,10 +80,7 @@ public class AuditSuccessMessageTest {
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.serverHostname").isEqualTo("testServerHostname");
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23");
         assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.leafResourceId").isEqualTo("testLeafResourceId");
-
-
     }
-
 
     /**
      * Create the object from a Json string and then test the content of the object.
@@ -96,11 +89,8 @@ public class AuditSuccessMessageTest {
      */
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
-
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"serviceName\":\"testServicename\",\"timestamp\":\"2020-07-14T09:56:08.244549Z\",\"serverIP\":\"testServerIP\",\"serverHostname\":\"testServerHostname\",\"attributes\":{\"messagesSent\":\"23\"},\"leafResourceId\":\"testLeafResourceId\",\"serveHostName\":\"testServerHostname\"}";
-
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
-
 
         AuditSuccessMessage auditSuccessMessage = auditSuccessMessageObjectContent.getObject();
         assertThat(auditSuccessMessage.getUserId()).isEqualTo("originalUserID");
@@ -111,6 +101,5 @@ public class AuditSuccessMessageTest {
         assertThat(auditSuccessMessage.getServeHostName()).isEqualTo("testServerHostname");
         assertThat(auditSuccessMessage.getAttributes().get("messagesSent")).isEqualTo("23");
         assertThat(auditSuccessMessage.getLeafResourceId()).isEqualTo("testLeafResourceId");
-
     }
 }

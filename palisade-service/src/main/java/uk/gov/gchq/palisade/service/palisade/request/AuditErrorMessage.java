@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -124,7 +123,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IAttributes} for the next step in the build.
              */
             IAttributes withContext(Context context);
-
         }
 
         /**
@@ -138,7 +136,6 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return interface {@link IError} for the next step in the build.
              */
             IError withAttributes(Map<String, Object> attributes);
-
         }
 
         /**
@@ -152,9 +149,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @return class  {@link AuditErrorMessage} for the completed class from the builder.
              */
             AuditErrorMessage withError(Throwable error);
-
         }
-
     }
 
     @Override
