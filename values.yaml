@@ -70,9 +70,6 @@ global:
     _default:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "k8s"
-    codeRelease:
-    - name: "SPRING_PROFILES_ACTIVE"
-      value: "k8s"
 
   # see charts/kafka/charts/zookeeper
   zookeeperConnectString: palisade-zookeeper:2181
