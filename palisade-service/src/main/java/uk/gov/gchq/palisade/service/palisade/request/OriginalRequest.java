@@ -42,7 +42,6 @@ public final class OriginalRequest {
     private final String resourceId;  //Resource that that is being asked to access.
     private final Context context; //Relevant context information about the request.
 
-
     @JsonCreator
     private OriginalRequest(
             final @JsonProperty("userId") String userId,
@@ -72,7 +71,6 @@ public final class OriginalRequest {
     public Context getContext() {
         return context;
     }
-
 
     /**
      * Builder class for the creation of the OriginalRequest.  This is a variant of the Fluent Builder
@@ -128,9 +126,7 @@ public final class OriginalRequest {
              * @return class {@link OriginalRequest} this builder is set-up to create.
              */
             OriginalRequest withContext(Context context);
-
         }
-
     }
 
     @Override
@@ -164,7 +160,4 @@ public final class OriginalRequest {
                 .add(super.toString())
                 .toString();
     }
-
 }
-
-

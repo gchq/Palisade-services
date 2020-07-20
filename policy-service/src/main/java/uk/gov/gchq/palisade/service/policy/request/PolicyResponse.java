@@ -111,13 +111,11 @@ public final class PolicyResponse {
     }
 
 
-
     /**
      * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * PolicyResponse class.
@@ -137,7 +135,6 @@ public final class PolicyResponse {
          * @param request message that has been sent to the policy-service
          * @return interface {@link IRules} for the next step in the build.
          */
-
         public static IRules create(final PolicyRequest request) {
             return create()
                     .withUserId(request.getUserId())
@@ -173,7 +170,6 @@ public final class PolicyResponse {
             IContext withResourceId(String resourceId);
         }
 
-
         /**
          * Adds the user context information to the message.
          */
@@ -195,14 +191,12 @@ public final class PolicyResponse {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
          * Adds the user information to the message.
          */
         interface IUser {
-
             /**
              * Adds the user user information.
              *
@@ -226,7 +220,6 @@ public final class PolicyResponse {
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
@@ -257,9 +250,7 @@ public final class PolicyResponse {
              * @return class {@link PolicyResponse} for the completed class from the builder.
              */
             PolicyResponse withRule(Rules rules);
-
         }
-
     }
 
     @Override

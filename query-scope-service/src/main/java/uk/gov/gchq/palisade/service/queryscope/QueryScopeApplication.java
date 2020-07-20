@@ -32,8 +32,6 @@ public class QueryScopeApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
-
-        //Need to add checks for args if it is to be used otherwise use null
         new SpringApplicationBuilder(QueryScopeApplication.class).web(WebApplicationType.SERVLET)
                 .run(null); //null instead of args for security reason
     }

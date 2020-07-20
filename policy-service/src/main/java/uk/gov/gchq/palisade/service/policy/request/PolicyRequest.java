@@ -32,7 +32,6 @@ import uk.gov.gchq.palisade.resource.Resource;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -112,13 +111,11 @@ public final class PolicyRequest {
         return this.resource;
     }
 
-
     /**
      * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * PolicyRequest class.
@@ -129,8 +126,6 @@ public final class PolicyRequest {
             return userId -> resourceId -> context -> user -> resource ->
                     new PolicyRequest(userId, resourceId, context, user, resource);
         }
-
-
 
         /**
          * Adds the user ID information to the message.
@@ -158,12 +153,10 @@ public final class PolicyRequest {
             IContext withResourceId(String resourceId);
         }
 
-
         /**
          * Adds the user context information to the message.
          */
         interface IContext {
-
             /**
              * Adds the user context information.
              *
@@ -181,14 +174,12 @@ public final class PolicyRequest {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
          * Adds the user information to the message.
          */
         interface IUser {
-
             /**
              * Adds the user user information.
              *
@@ -212,7 +203,6 @@ public final class PolicyRequest {
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
@@ -231,7 +221,6 @@ public final class PolicyRequest {
              */
             PolicyRequest withResourceNode(JsonNode resource);
         }
-
     }
 
     @Override

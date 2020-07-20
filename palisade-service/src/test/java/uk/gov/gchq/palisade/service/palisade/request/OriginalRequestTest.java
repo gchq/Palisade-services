@@ -30,7 +30,6 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @RunWith(SpringRunner.class)
 @JsonTest
 public class OriginalRequestTest {
@@ -38,16 +37,15 @@ public class OriginalRequestTest {
     @Autowired
     private JacksonTester<OriginalRequest> jsonTester;
 
-
     /**
      * Create the object with the builder and then convert to the Json equivalent.
+     *
      * @throws IOException throws if the object can not be converted to a Json string.
      */
     @Test
     public void testSerialiseOriginalRequestToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
-        OriginalRequest originalRequest  = OriginalRequest.Builder.create()
+        OriginalRequest originalRequest = OriginalRequest.Builder.create()
                 .withUser("testUser")
                 .withResource("testResource")
                 .withContext(context);
@@ -56,23 +54,20 @@ public class OriginalRequestTest {
         assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUser");
         assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResource");
         assertThat(originalRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-
     }
 
     /**
      * Create the object from a Json string and then test the content of the object.
+     *
      * @throws IOException if it fails to parse the object
      */
     @Test
     public void testDeserialiseJsonToOriginalRequest() throws IOException {
-
         String jsonString = "{\"userId\":\"testUser\",\"resourceId\":\"testResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}}}";
 
-        ObjectContent<OriginalRequest> originalRequestObjectContent =  this.jsonTester.parse(jsonString);
-        OriginalRequest request =  originalRequestObjectContent.getObject();
+        ObjectContent<OriginalRequest> originalRequestObjectContent = this.jsonTester.parse(jsonString);
+        OriginalRequest request = originalRequestObjectContent.getObject();
         assertThat(request.getUserId()).isEqualTo("testUser");
         assertThat(request.getResourceId()).isEqualTo("testResource");
-
     }
-
 }
