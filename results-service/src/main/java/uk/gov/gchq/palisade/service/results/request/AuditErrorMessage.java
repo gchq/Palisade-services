@@ -37,21 +37,16 @@ public final class AuditErrorMessage extends AuditMessage {
     @JsonProperty("error")
     private final Throwable error;  //Error that occurred
 
-
     @JsonCreator
     private AuditErrorMessage(
-            final String userId,
-            final String resourceId,
-            final JsonNode context,
-            final Map<String, Object> attributes,
-            final Throwable error
-    ) {
-
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("error") Throwable error) {
         super(userId, resourceId, context, attributes);
-
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
-
     }
 
     @Generated
@@ -64,8 +59,6 @@ public final class AuditErrorMessage extends AuditMessage {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.

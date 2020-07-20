@@ -37,25 +37,21 @@ public final class AuditErrorMessage extends AuditMessage {
     @JsonProperty("error")
     private final Throwable error;  //Error that occurred
 
-
     @JsonCreator
     private AuditErrorMessage(
-            final String userId,
-            final String resourceId,
-            final JsonNode context,
-            final Map<String, Object> attributes,
-            final Throwable error
-    ) {
-
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("error") Throwable error) {
         super(userId, resourceId, context, attributes);
-
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
 
     }
 
     @Generated
-    public Throwable getError()  {
+    public Throwable getError() {
         return error;
     }
 
@@ -64,8 +60,6 @@ public final class AuditErrorMessage extends AuditMessage {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditSuccessMessage class.
@@ -82,7 +76,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request the request message that was sent to the data-service
+         * @param request    the request message that was sent to the data-service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */

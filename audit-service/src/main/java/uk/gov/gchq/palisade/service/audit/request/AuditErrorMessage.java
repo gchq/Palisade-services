@@ -36,31 +36,25 @@ import java.util.StringJoiner;
  */
 public final class AuditErrorMessage extends AuditMessage {
 
-
     @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
 
-
     @JsonCreator
     private AuditErrorMessage(
-
-            final String userId,
-            final String resourceId,
-            final JsonNode context,
-            final String serviceName,
-            final String timestamp,
-            final String serverIP,
-            final String serverHostname,
-            final JsonNode attributes,
-            final JsonNode error) {
-
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("serviceName") String serviceName,
+            final @JsonProperty("timestamp") String timestamp,
+            final @JsonProperty("serverIP") String serverIP,
+            final @JsonProperty("serverHostname") String serverHostname,
+            final @JsonProperty("attributes") JsonNode attributes,
+            final @JsonProperty("error") JsonNode error) {
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
-
         Assert.notNull(error, "Error cannot be null");
         this.error = error;
 
     }
-
 
     @Generated
     public Throwable getError() throws JsonProcessingException {
@@ -77,8 +71,6 @@ public final class AuditErrorMessage extends AuditMessage {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditErrorMessage class.
