@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2019 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,39 +16,31 @@ replicaCount: 1
 
 service:
   port: 80
-
-kafkaCreateTopics:
-  - name: palisade
-    replicationFactor: 1
-    partitions: 1
-  - name: user
-    replicationFactor: 1
-    partitions: 1
-  - name: resource
-    replicationFactor: 1
-    partitions: 1
-  - name: policy
-    replicationFactor: 1
-    partitions: 1
-  - name: query-scope
-    replicationFactor: 1
-    partitions: 1
-  - name: results-controller
-    replicationFactor: 1
-    partitions: 1
+  type: ClusterIP
 
 image:
-  name: create-kafka-queues
+  name: data-service
+<<<<<<< HEAD
   tag: 4a3d4bc-SNAPSHOT
+=======
+  tag: dcd462c-SNAPSHOT
+>>>>>>> develop
   pullPolicy: IfNotPresent
+  codeRelease: 0.4.0-SNAPSHOT
 
 resources:
   limits:
     cpu: 750m
-    memory: 2.5Gi
+    memory: 1Gi
   requests:
     cpu: 250m
-    memory: 1Gi
+    memory: 512Mi
+
+autoscaling:
+  targetCPUUtilizationPercentage: 50
+  targetMemoryUtilizationPercentage: 50
+  minReplicas: 1
+  maxReplicas: 3
 
 nodeSelector: {}
 tolerations: []
