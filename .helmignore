@@ -25,17 +25,24 @@ Jenkinsfile
 mvn_dependency_tree.txt
 hadolint.yaml
 pom.xml
-README.md
+*.md
 velocity*
 # Various IDEs
 .project
 .idea/
+*.iml
 *.tmproj
 .vscode/
+# Non-service directories
 /logos/
 /target/
+/licenses/
 /code-style/
+*.lock
+# Previous helm packages
+Palisade-services-*.tgz
 # Add the directory for every service module here
+/create-kafka-queues/
 /discovery-service/
 /audit-service/
 /data-service/

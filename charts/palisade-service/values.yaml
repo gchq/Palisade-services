@@ -20,7 +20,7 @@ service:
 
 image:
   name: palisade-service
-  tag: 0b7615e-SNAPSHOT
+  tag: dcd462c-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.4.0-SNAPSHOT
 
