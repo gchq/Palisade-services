@@ -90,7 +90,6 @@ public final class QueryScopeResponse {
     @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
-
     }
 
     /**
