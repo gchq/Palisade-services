@@ -57,7 +57,7 @@ public class ResultsResponseTest {
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
         Long longValue = 31415L;
-        String jsonString = "{\"queuePointer\":\""+ longValue + "\"}";
+        String jsonString = "{\"queuePointer\":\"" + longValue + "\"}";
         ObjectContent<ResultsResponse> resultsResponseObjectContent = jacksonTester.parse(jsonString);
         ResultsResponse queryScopeResponse = resultsResponseObjectContent.getObject();
         assertThat(queryScopeResponse.queuePointer).isEqualTo(longValue);
