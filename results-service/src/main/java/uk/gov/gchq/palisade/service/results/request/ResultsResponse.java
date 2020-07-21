@@ -37,9 +37,9 @@ public final class ResultsResponse {
     /**
      * {@link String} reference to where the data is located
      */
-    public final String queuePointer;
+    public final Long queuePointer;
 
-    private ResultsResponse(final @JsonProperty("queuePointer") String queuePointer) {
+    private ResultsResponse(final @JsonProperty("queuePointer") Long queuePointer) {
         this.queuePointer = queuePointer;
     }
 
@@ -69,7 +69,7 @@ public final class ResultsResponse {
              * @param queuePointer reference to the results for the request.
              * @return class {@link ResultsResponse} for the completed class from the builder.
              */
-            ResultsResponse withQueuePointer(String queuePointer);
+            ResultsResponse withQueuePointer(Long queuePointer);
         }
     }
 
