@@ -49,7 +49,6 @@ public final class UserResponse {
     private final String resourceId; //Resource that that is being asked to access
     private final JsonNode context; //Represents the context information as a Json string.
 
-
     /**
      * Represents the User in the system corresponding to the given useId.
      */
@@ -71,7 +70,6 @@ public final class UserResponse {
         this.resourceId = resourceId;
         this.context = context;
         this.user = user;
-
     }
 
 
@@ -129,7 +127,6 @@ public final class UserResponse {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * UserRequest class.
@@ -154,7 +151,7 @@ public final class UserResponse {
         public static IUser create(final UserRequest request) {
             return create()
                     .withUserId(request.getUserId())
-                    .withResource(request.getResourceId())
+                    .withResourceId(request.getResourceId())
                     .withContextNode(request.getContextNode());
         }
 
@@ -181,7 +178,7 @@ public final class UserResponse {
              * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
              */
-            IContext withResource(String resourceId);
+            IContext withResourceId(String resourceId);
         }
 
         /**
@@ -206,7 +203,6 @@ public final class UserResponse {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
@@ -222,5 +218,4 @@ public final class UserResponse {
             UserResponse withUser(User user);
         }
     }
-
 }

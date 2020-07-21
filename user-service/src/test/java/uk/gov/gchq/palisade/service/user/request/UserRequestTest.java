@@ -37,7 +37,6 @@ public class UserRequestTest {
     @Autowired
     private JacksonTester<UserRequest> jsonTester;
 
-
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
      *
@@ -48,8 +47,8 @@ public class UserRequestTest {
 
         Context context = new Context().purpose("testContext");
         UserRequest userRequest = UserRequest.Builder.create()
-                .withUser("testUserId")
-                .withResource("testResourceId")
+                .withUserId("testUserId")
+                .withResourceId("testResourceId")
                 .withContext(context);
 
         JsonContent<UserRequest> userRequestJsonContent = jsonTester.write(userRequest);
@@ -67,16 +66,13 @@ public class UserRequestTest {
      */
     @Test
     public void testDeserialiseJsonToUserRequest() throws IOException {
-
-        String jsonString = "{\"userId\":\"testUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}}}";
+        String jsonString = "{\"userId\":\"testUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"" +
+                "uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}}}";
         ObjectContent<UserRequest> userRequest = this.jsonTester.parse(jsonString);
 
         UserRequest request = userRequest.getObject();
         assertThat(request.userId).isEqualTo("testUserId");
         assertThat(request.getResourceId()).isEqualTo("testResourceId");
         assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
-
     }
-
-
 }

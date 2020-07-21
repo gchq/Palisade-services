@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.user.request;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +28,6 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
 import java.util.StringJoiner;
-
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
@@ -122,8 +120,7 @@ public final class UserRequest {
              * @param userId user ID for the request.
              * @return interface  {@link IResource} for the next step in the build.
              */
-            IResource withUser(String userId);
-
+            IResource withUserId(String userId);
         }
 
         /**
@@ -136,14 +133,13 @@ public final class UserRequest {
              * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
              */
-            IContext withResource(String resourceId);
+            IContext withResourceId(String resourceId);
         }
 
         /**
          * Adds the user context information to the message.
          */
         interface IContext {
-
             /**
              * Adds the user context information.
              *
@@ -195,5 +191,4 @@ public final class UserRequest {
                 .add(super.toString())
                 .toString();
     }
-
 }

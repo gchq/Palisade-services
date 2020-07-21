@@ -59,8 +59,7 @@ public class AuditSuccessMessageTest {
 
         AuditSuccessMessage auditSuccessMessage = AuditSuccessMessage.Builder.create()
                 .withUserId("originalUserID")
-                .withResourceId(
-                        "testResourceId")
+                .withResourceId("testResourceId")
                 .withContext(context)
                 .withAttributes(new HashMap<String, Object>())
                 .withLeafResourceId("testLeafResourceId")

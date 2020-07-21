@@ -35,27 +35,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class UserResponseTest {
 
-
     @Autowired
     private JacksonTester<UserResponse> jsonTester;
-
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      *
      * @throws IOException throws if the UserResponse object cannot be converted to a JsonContent.
-     * This equates to a failure to serialise the string.
+     *                     This equates to a failure to serialise the string.
      */
     @Test
-   public void testSerialiseUserResponseToJson() throws IOException {
-
+    public void testSerialiseUserResponseToJson() throws IOException {
         Context context = new Context().purpose("testContext");
-
         User user = new User().userId("testUserId");
 
         UserResponse userResponse = UserResponse.Builder.create()
                 .withUserId("originalUserID")
-                .withResource("testResourceId")
+                .withResourceId("testResourceId")
                 .withContext(context)
                 .withUser(user);
 
@@ -66,10 +62,6 @@ public class UserResponseTest {
         assertThat(response).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
         assertThat(response).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(response).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
-
-
-
-
     }
 
     /**
@@ -79,15 +71,14 @@ public class UserResponseTest {
      */
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
-
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"" +
+                "contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
         ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
         UserResponse response = (UserResponse) userResponseContent.getObject();
 
         assertThat(response.getUserId()).isEqualTo("originalUserID");
         assertThat(response.user.getUserId().getId()).isEqualTo("testUserId");
         assertThat(response.getResourceId()).isEqualTo("testResourceId");
-
     }
 
     /**
@@ -97,24 +88,20 @@ public class UserResponseTest {
      */
     @Test
     public void testSerialiseUserResponseUsingUserRequestToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
 
         UserRequest userRequest = UserRequest.Builder.create()
-
-                .withUser("originalUserID")
-                .withResource("originalResourceID")
+                .withUserId("originalUserID")
+                .withResourceId("originalResourceID")
                 .withContext(context);
 
         UserResponse policyResponse = UserResponse.Builder.create(userRequest).withUser(user);
-
         JsonContent<UserResponse> userResponseJsonContent = jsonTester.write(policyResponse);
 
         assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
         assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
         assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
-
     }
 }

@@ -57,8 +57,7 @@ public class AuditSuccessMessageTest {
 
         AuditSuccessMessage auditSuccessMessage = AuditSuccessMessage.Builder.create()
                 .withUserId("originalUserID")
-                .withResourceId(
-                        "testResourceId")
+                .withResourceId("testResourceId")
                 .withContext(context)
                 .withServiceName("testServicename")
                 .withTimestamp(now)
