@@ -39,8 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class AuditSuccessMessageTest {
 
-   private static final String NOW = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
 
@@ -89,16 +87,19 @@ public class AuditSuccessMessageTest {
      */
     @Test
     public void testDeserialiseJsonToUserResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"serviceName\":\"testServicename\",\"timestamp\":\"2020-07-14T09:56:08.244549Z\",\"serverIP\":\"testServerIP\",\"serverHostname\":\"testServerHostname\",\"attributes\":{\"messagesSent\":\"23\"},\"leafResourceId\":\"testLeafResourceId\",\"serveHostName\":\"testServerHostname\"}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":" +
+                "{\"purpose\":\"testContext\"}},\"serviceName\":\"audit-service\",\"timestamp\":\"2020-07-14T09:56:08.244549Z\",\"serverIP\":\"192.168.1.1\"," +
+                "\"serverHostname\":\"host.name\",\"attributes\":{\"messagesSent\":\"23\"},\"leafResourceId\":\"testLeafResourceId\",\"serveHostName\":\"host.name\"}";
+
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
 
         AuditSuccessMessage auditSuccessMessage = auditSuccessMessageObjectContent.getObject();
         assertThat(auditSuccessMessage.getUserId()).isEqualTo("originalUserID");
         assertThat(auditSuccessMessage.getResourceId()).isEqualTo("testResourceId");
         assertThat(auditSuccessMessage.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(auditSuccessMessage.getServiceName()).isEqualTo("testServicename");
-        assertThat(auditSuccessMessage.getServerIP()).isEqualTo("testServerIP");
-        assertThat(auditSuccessMessage.getServeHostName()).isEqualTo("testServerHostname");
+        assertThat(auditSuccessMessage.getServiceName()).isEqualTo("audit-service");
+        assertThat(auditSuccessMessage.getServerIP()).isEqualTo("192.168.1.1");
+        assertThat(auditSuccessMessage.getServeHostName()).isEqualTo("host.name");
         assertThat(auditSuccessMessage.getAttributes().get("messagesSent")).isEqualTo("23");
         assertThat(auditSuccessMessage.getLeafResourceId()).isEqualTo("testLeafResourceId");
     }

@@ -83,13 +83,20 @@ public class AuditSuccessMessageTest {
      */
     @Test
     public void testDeserialiseJsonToAuditSuccessMessage() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"leafResourceId\":\"testLeafResourceId\",\"serveHostName\":\"CIC00948.lan\",\"serviceName\":\"data-service\",\"timestamp\":\"2020-07-15T07:37:16.707702Z\",\"serverIP\":\"192.168.2.226\",\"serverHostname\":\"CIC00948.lan\",\"attributes\":{\"RECORDS_RETURNED\":4,\"RECORDS_PROCESSED\":17}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":" +
+                "{\"purpose\":\"testContext\"}},\"serviceName\":\"audit-service\",\"timestamp\":\"2020-07-14T09:56:08.244549Z\",\"serverIP\":\"192.168.1.1\"," +
+                "\"serverHostname\":\"host.name\",\"attributes\":{\"messagesSent\":\"23\"},\"leafResourceId\":\"testLeafResourceId\",\"serveHostName\":\"host.name\"}";
+
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
 
         AuditSuccessMessage auditSuccessMessage = auditSuccessMessageObjectContent.getObject();
         assertThat(auditSuccessMessage.getUserId()).isEqualTo("originalUserID");
         assertThat(auditSuccessMessage.getResourceId()).isEqualTo("testResourceId");
         assertThat(auditSuccessMessage.getContext().getPurpose()).isEqualTo("testContext");
+        assertThat(auditSuccessMessage.getServiceName()).isEqualTo("audit-service");
+        assertThat(auditSuccessMessage.getServerIP()).isEqualTo("192.168.1.1");
+        assertThat(auditSuccessMessage.getServeHostName()).isEqualTo("host.name");
+        assertThat(auditSuccessMessage.getAttributes().get("messagesSent")).isEqualTo("23");
         assertThat(auditSuccessMessage.getLeafResourceId()).isEqualTo("testLeafResourceId");
     }
 }
