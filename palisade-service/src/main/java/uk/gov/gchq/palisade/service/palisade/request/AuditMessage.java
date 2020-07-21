@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
@@ -42,8 +43,6 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "palisade-service";
-
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     @JsonProperty("userId")
@@ -55,11 +54,12 @@ public class AuditMessage {
     @JsonProperty("context")
     protected final Context context;   //Relevant context information about the request.
 
-    @JsonProperty("serviceName")
-    protected final String serviceName;  //service that sent the message
-
     @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
+
+    @Value("${spring.application.name}")
+    @JsonProperty("serviceName")
+    protected String serviceName = "palisade-service";  //service that sent the message
 
     @JsonProperty("serverIP")
     protected final String serverIP;  //the server IP address for the service
@@ -69,7 +69,6 @@ public class AuditMessage {
 
     @JsonProperty("attributes")
     protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
-
 
     @JsonCreator
     protected AuditMessage(
@@ -87,7 +86,6 @@ public class AuditMessage {
         this.resourceId = resourceId;
         this.context = context;
 
-        this.serviceName = SERVICE_NAME;
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
         try {

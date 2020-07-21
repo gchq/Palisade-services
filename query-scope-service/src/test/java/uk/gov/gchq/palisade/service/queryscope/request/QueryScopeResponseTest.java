@@ -113,7 +113,8 @@ public class QueryScopeResponseTest {
                 .withResource(resource)
                 .withRules(rules);
 
-        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create(queryScopeRequest).withResource(resource);
+        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create(queryScopeRequest);
+
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
 
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
@@ -122,4 +123,3 @@ public class QueryScopeResponseTest {
         assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
     }
 }
-

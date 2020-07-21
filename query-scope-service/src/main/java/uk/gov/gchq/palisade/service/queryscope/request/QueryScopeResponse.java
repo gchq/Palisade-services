@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -53,14 +52,14 @@ public final class QueryScopeResponse {
      * Resource after it has been processed.  This will be information that has been
      * redacted.
      */
-    public final LeafResource resource; // Masked resource metadata
+    public final JsonNode resource; // Masked resource metadata
 
     @JsonCreator
     private QueryScopeResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("resource") LeafResource resource) {
+            final @JsonProperty("resource") JsonNode resource) {
 
         Assert.notNull(userId, "User ID cannot be null");
         Assert.notNull(resourceId, "Resource ID cannot be null");
@@ -83,24 +82,22 @@ public final class QueryScopeResponse {
         return resourceId;
     }
 
-
     @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
     @Generated
-    public LeafResource getResource() {
-        return resource;
-    }
+    public LeafResource getResource() throws JsonProcessingException {
+        return MAPPER.treeToValue(this.resource, LeafResource.class);
 
+    }
 
     /**
      * Builder class for the creation of instances of the QueryScopeResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * QueryScopeResponse class.
@@ -118,15 +115,16 @@ public final class QueryScopeResponse {
          * Starter method for the Builder class that uses a QueryScopeRequests and appends the redacted version of the resource.
          * This method is called followed by the call to add user with the IUserId interface to create the
          * QueryScopeResponse class.
+         *
          * @param request message that was sent to the query-scope-service
-
          * @return interface  {@link IResourceId} for the next step in the build.
          */
-        public static IResource create(final QueryScopeRequest request) {
+        public static QueryScopeResponse create(final QueryScopeRequest request) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode());
+                    .withContextNode(request.getContextNode())
+                    .withResourceNode(request.getResourceNode());
         }
 
         /**
@@ -155,7 +153,6 @@ public final class QueryScopeResponse {
             IContext withResourceId(String resourceId);
         }
 
-
         /**
          * Adds the user context information to the message.
          */
@@ -177,24 +174,30 @@ public final class QueryScopeResponse {
              * @return interface {@link IResource} for the next step in the build.
              */
             IResource withContextNode(JsonNode context);
-
         }
 
         /**
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
              * @param resource that is requested to access.
              * @return class {@link QueryScopeResponse} for the completed class from the builder.
              */
-            QueryScopeResponse withResource(LeafResource resource);
+            default QueryScopeResponse withResource(LeafResource resource) {
+                return withResourceNode(MAPPER.valueToTree(resource));
+            }
 
+            /**
+             * Adds the Resource information. Uses a JsonNode String form of the information
+             *
+             * @param resource resource that has been requested to access
+             * @return class {@link QueryScopeResponse} for the completed class from the builder
+             */
+            QueryScopeResponse withResourceNode(JsonNode resource);
         }
-
     }
 
     @Override

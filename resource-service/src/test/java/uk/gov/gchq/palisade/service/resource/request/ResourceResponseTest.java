@@ -43,7 +43,6 @@ public class ResourceResponseTest {
     @Autowired
     private JacksonTester<ResourceResponse> jacksonTester;
 
-
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
      *
@@ -51,7 +50,6 @@ public class ResourceResponseTest {
      */
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -73,7 +71,6 @@ public class ResourceResponseTest {
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
-
     }
 
     /**
@@ -83,7 +80,6 @@ public class ResourceResponseTest {
      */
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
-
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
 
         ObjectContent<ResourceResponse> resourceRequestContent = jacksonTester.parse(jsonString);
@@ -95,7 +91,6 @@ public class ResourceResponseTest {
         assertThat(resourceResponse.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(resourceResponse.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(resourceResponse.resource.getId()).isEqualTo("/test/file.format");
-
     }
 
     /**
@@ -105,7 +100,6 @@ public class ResourceResponseTest {
      */
     @Test
     public void testSerialisePolicyResponseUsingResourceRequestToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -128,6 +122,5 @@ public class ResourceResponseTest {
         assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
         assertThat(resourceResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
-
     }
 }

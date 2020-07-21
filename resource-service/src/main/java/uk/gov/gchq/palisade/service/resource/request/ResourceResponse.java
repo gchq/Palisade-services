@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -51,11 +50,7 @@ public final class ResourceResponse {
     private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
-
-    /**
-     * Resource that has been requested to access.
-     */
-    public final LeafResource resource;
+    public final LeafResource resource; // Resource that has been requested to access.
 
     private ResourceResponse(
             final @JsonProperty("userId") String userId,
@@ -98,15 +93,11 @@ public final class ResourceResponse {
         return MAPPER.treeToValue(user, User.class);
     }
 
-
-
     /**
      * Builder class for the creation of instances of the ResourceResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceResponse class.
@@ -122,7 +113,8 @@ public final class ResourceResponse {
          * Starter method for the Builder class that uses a ResourceRequest and appends the Rules.
          * This method is called followed by the call to add resource with the IResource interface to create the
          * ResourceResponse class.
-         * @param request  the request message that was sent to the resource-service
+         *
+         * @param request the request message that was sent to the resource-service
          * @return interface {@link IResource} for the next step in the build.
          */
         public static IResource create(final ResourceRequest request) {
@@ -187,7 +179,6 @@ public final class ResourceResponse {
          * Adds the user information to the message.
          */
         interface IUser {
-
             /**
              * Adds the user to this message.
              *
@@ -211,7 +202,6 @@ public final class ResourceResponse {
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
@@ -219,9 +209,7 @@ public final class ResourceResponse {
              * @return class {@link ResourceResponse} for the completed class from the builder.
              */
             ResourceResponse withResource(LeafResource resource);
-
         }
-
     }
 
     @Override

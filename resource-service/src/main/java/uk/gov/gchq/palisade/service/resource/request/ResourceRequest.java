@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.User;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
@@ -46,12 +45,7 @@ public final class ResourceRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String userId;  //Unique identifier for the user
-
-
-    /**
-     * Resource ID that that is being asked to access
-     */
-    public final String resourceId;
+    public final String resourceId; // Resource Id of the resource requested
     private final JsonNode context;  // Json Node representation of Context
     private final JsonNode user;  //Json Node representation of the User
 
@@ -89,7 +83,7 @@ public final class ResourceRequest {
     }
 
     @Generated
-    public JsonNode getContextNode()  {
+    public JsonNode getContextNode() {
         return context;
     }
 
@@ -99,7 +93,7 @@ public final class ResourceRequest {
     }
 
     @Generated
-    public JsonNode getUserNode()  {
+    public JsonNode getUserNode() {
         return user;
     }
 
@@ -108,8 +102,6 @@ public final class ResourceRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResourceRequest class.
@@ -169,14 +161,12 @@ public final class ResourceRequest {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
          * Adds the user information to the message.
          */
         interface IUser {
-
             /**
              * Adds the user to this message.
              *
@@ -195,7 +185,6 @@ public final class ResourceRequest {
              */
             ResourceRequest withUserNode(JsonNode user);
         }
-
     }
 
     @Override

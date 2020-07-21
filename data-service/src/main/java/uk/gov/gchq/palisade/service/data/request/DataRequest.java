@@ -64,7 +64,6 @@ public final class DataRequest {
             final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") JsonNode rules) {
 
-
         Assert.notNull(userId, "User ID cannot be null");
         Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
@@ -96,7 +95,7 @@ public final class DataRequest {
     }
 
     @Generated
-    public JsonNode getContextNode()  {
+    public JsonNode getContextNode() {
         return context;
     }
 
@@ -111,7 +110,7 @@ public final class DataRequest {
     }
 
     @Generated
-    public JsonNode getResourceNode()   {
+    public JsonNode getResourceNode() {
         return resource;
     }
 
@@ -121,7 +120,7 @@ public final class DataRequest {
     }
 
     @Generated
-    public JsonNode getRulesNode()  {
+    public JsonNode getRulesNode() {
         return rules;
     }
 
@@ -168,7 +167,6 @@ public final class DataRequest {
             IContext withResourceId(String resourceId);
         }
 
-
         /**
          * Adds the user context information to the message.
          */
@@ -190,7 +188,6 @@ public final class DataRequest {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
@@ -220,7 +217,6 @@ public final class DataRequest {
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
@@ -297,6 +293,5 @@ public final class DataRequest {
                 .add(super.toString())
                 .toString();
     }
-
 }
 

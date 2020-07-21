@@ -40,7 +40,6 @@ public class AuditMessage {
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
-
     @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.
 
@@ -64,7 +63,6 @@ public class AuditMessage {
 
     @JsonProperty("attributes")
     protected final JsonNode attributes;  //JsonNode holding Map<String, Object> holding optional extra information
-
 
     @JsonCreator
     protected AuditMessage(

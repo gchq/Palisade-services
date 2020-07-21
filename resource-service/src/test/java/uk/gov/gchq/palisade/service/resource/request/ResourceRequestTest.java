@@ -35,10 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class ResourceRequestTest {
 
-
     @Autowired
     private JacksonTester<ResourceRequest> jacksonTester;
-
 
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
@@ -47,7 +45,6 @@ public class ResourceRequestTest {
      */
     @Test
     public void testSerialiseResourceRequestToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         ResourceRequest resourceRequest = ResourceRequest.Builder.create()
@@ -63,7 +60,6 @@ public class ResourceRequestTest {
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
         assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
-
     }
 
     /**
@@ -73,7 +69,6 @@ public class ResourceRequestTest {
      */
     @Test
     public void testDeserializeJsonToResourceRequest() throws IOException {
-
         String jsonString = "{\"userId\":\"originalUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
 
         ObjectContent<ResourceRequest> resourceRequestContent = jacksonTester.parse(jsonString);
@@ -84,6 +79,4 @@ public class ResourceRequestTest {
         assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(request.getUser().getUserId().getId()).isEqualTo("testUserId");
     }
-
-
 }

@@ -84,6 +84,3 @@ public class ResultsRequestTest {
         assertThat(resultsRequest.getContext().getPurpose()).isEqualTo("testContext");
     }
 }
-
-
-

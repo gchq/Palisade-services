@@ -89,14 +89,13 @@ public final class QueryScopeRequest {
         return resourceId;
     }
 
-
     @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
     @Generated
-    public JsonNode getContextNode()  {
+    public JsonNode getContextNode() {
         return context;
     }
 
@@ -111,11 +110,14 @@ public final class QueryScopeRequest {
     }
 
     @Generated
+    public JsonNode getResourceNode() {
+        return resource;
+    }
+
+    @Generated
     public Rules getRules() throws JsonProcessingException {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
-
-
 
     /**
      * Builder class for the creation of instances of the QueryScopeRequest.  This is a variant of the Fluent Builder
@@ -188,7 +190,6 @@ public final class QueryScopeRequest {
              * @return interface {@link IUser} for the next step in the build.
              */
             IUser withContextNode(JsonNode context);
-
         }
 
         /**
@@ -218,7 +219,6 @@ public final class QueryScopeRequest {
          * Adds the resource to this message.
          */
         interface IResource {
-
             /**
              * Adds the resource that has been requested to access.
              *
@@ -260,7 +260,6 @@ public final class QueryScopeRequest {
              */
             QueryScopeRequest withRulesNode(JsonNode rules);
         }
-
     }
 
     @Override

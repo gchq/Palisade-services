@@ -42,7 +42,6 @@ public class QueryScopeRequestTest {
     @Autowired
     private JacksonTester<QueryScopeRequest> jacksonTester;
 
-
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
      *
@@ -94,4 +93,3 @@ public class QueryScopeRequestTest {
         assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
     }
 }
-
