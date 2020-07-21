@@ -58,7 +58,7 @@ public class AuditMessage {
 
     @Value("${spring.application.name}")
     @JsonProperty("serviceName")
-    protected String serviceName = "data-service";  //service that sent the message
+    protected String serviceName = "policy-service";  //service that sent the message
 
     @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
