@@ -42,10 +42,11 @@ public class ResultsResponseTest {
      */
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
-        ResultsResponse resultsResponse = ResultsResponse.Builder.create().withQueuePointer("testQueuePointer");
+        Long x = 31415L;
+        ResultsResponse resultsResponse = ResultsResponse.Builder.create().withQueuePointer(x);
         JsonContent<ResultsResponse> resultsResponseJsonContent = jacksonTester.write(resultsResponse);
-
-        assertThat(resultsResponseJsonContent).extractingJsonPathStringValue("$.queuePointer").isEqualTo("testQueuePointer");
+        System.out.println(resultsResponseJsonContent);
+        assertThat(resultsResponseJsonContent).extractingJsonPathNumberValue("$.queuePointer").isEqualTo(x.intValue());
     }
 
     /**
@@ -55,10 +56,10 @@ public class ResultsResponseTest {
      */
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
-        String jsonString = "{\"queuePointer\":\"testQueuePointer\"}";
+        Long longValue = 31415L;
+        String jsonString = "{\"queuePointer\":\""+ longValue + "\"}";
         ObjectContent<ResultsResponse> resultsResponseObjectContent = jacksonTester.parse(jsonString);
         ResultsResponse queryScopeResponse = resultsResponseObjectContent.getObject();
-
-        assertThat(queryScopeResponse.queuePointer).isEqualTo("testQueuePointer");
+        assertThat(queryScopeResponse.queuePointer).isEqualTo(longValue);
     }
 }
