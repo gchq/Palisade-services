@@ -78,7 +78,7 @@ public class ResultsRequestTest {
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
         ObjectContent<ResultsRequest> resultsRequestObjectContent = jacksonTester.parse(jsonString);
         ResultsRequest resultsRequest = resultsRequestObjectContent.getObject();
-        
+
         assertThat(resultsRequest.getUserId()).isEqualTo("originalUserID");
         assertThat(resultsRequest.getResourceId()).isEqualTo("originalResourceID");
         assertThat(resultsRequest.getContext().getPurpose()).isEqualTo("testContext");
