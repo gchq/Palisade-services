@@ -39,9 +39,6 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditSuccessMessage extends AuditMessage {
 
-    public static final String RECORDS_PROCESSED = "RECORDS_PROCESSED";
-    public static final String RECORDS_RETURNED = "RECORDS_RETURNED";
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @JsonProperty("leafResourceId")
@@ -53,16 +50,12 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
-            final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("recordsProcessed") long recordsProcessed,
-            final @JsonProperty("recordsReturned") long recordsReturned) {
+            final @JsonProperty("leafResourceId") String leafResourceId) {
 
         super(userId, resourceId, context, attributes);
         Assert.notNull(leafResourceId, "Resource ID cannot be null");
         this.leafResourceId = leafResourceId;
 
-        attributes.put(RECORDS_PROCESSED, recordsProcessed);
-        attributes.put(RECORDS_RETURNED, recordsReturned);
     }
 
     @Generated
@@ -82,9 +75,8 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> attributes
-                    -> leafResource -> recordsProcessed -> recordsReturned ->
-                    new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource, recordsProcessed, recordsReturned);
+            return userId -> resourceId -> context -> attributes -> leafResource ->
+                    new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource);
         }
 
         /**
@@ -174,35 +166,9 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the leaf resource ID for the message.
              *
              * @param leafResource leaf resource ID.
-             * @return interface  {@link IRecordsReturned} for the next step in the build.
+             * @return class {@link AuditSuccessMessage} for the completed class from the builder.
              */
-            IRecordsProcessed withLeafResourceId(String leafResource);
-        }
-
-        /**
-         * Adds the leaf resource ID for the message.
-         */
-        interface IRecordsProcessed {
-            /**
-             * Adds the leaf resource ID for the message.
-             *
-             * @param recordsProcessed leaf resource ID.
-             * @return interface  {@link IRecordsReturned} for the next step in the build.
-             */
-            IRecordsReturned withNumberOfRecordsProcessed(long recordsProcessed);
-        }
-
-        /**
-         * Adds the leaf resource ID for the message.
-         */
-        interface IRecordsReturned {
-            /**
-             * Adds the leaf resource ID for the message.
-             *
-             * @param recordsReturned leaf resource ID.
-             * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
-             */
-            AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
+            AuditSuccessMessage withLeafResourceId(String leafResource);
         }
     }
 

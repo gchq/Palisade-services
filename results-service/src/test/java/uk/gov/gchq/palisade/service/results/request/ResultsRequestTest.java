@@ -38,10 +38,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class ResultsRequestTest {
 
-
     @Autowired
     private JacksonTester<ResultsRequest> jacksonTester;
-
 
     /**
      * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
@@ -75,7 +73,10 @@ public class ResultsRequestTest {
      */
     @Test
     public void testDeserializeJsonToResourceResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
+        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"" +
+                "contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\"" +
+                ",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\"" +
+                ":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
         ObjectContent<ResultsRequest> resultsRequestObjectContent = jacksonTester.parse(jsonString);
         ResultsRequest resultsRequest = resultsRequestObjectContent.getObject();
 

@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class AuditSuccessMessageTest {
 
-   private static final String NOW = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    private static final String NOW = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
@@ -63,9 +63,7 @@ public class AuditSuccessMessageTest {
                         "testResourceId")
                 .withContext(context)
                 .withAttributes(new HashMap<String, Object>())
-                .withLeafResourceId("testLeafResourceId")
-                .withNumberOfRecordsProcessed(17)
-                .withNumberOfRecordsReturned(4);
+                .withLeafResourceId("testLeafResourceId");
 
         JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jsonTester.write(auditSuccessMessage);
 

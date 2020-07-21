@@ -43,14 +43,11 @@ public final class ResultsResponse {
         this.queuePointer = queuePointer;
     }
 
-
-
     /**
      * Builder class for the creation of instances of the ResultsResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResultsResponse class.
@@ -73,7 +70,6 @@ public final class ResultsResponse {
              * @return class {@link ResultsResponse} for the completed class from the builder.
              */
             ResultsResponse withQueuePointer(String queuePointer);
-
         }
     }
 

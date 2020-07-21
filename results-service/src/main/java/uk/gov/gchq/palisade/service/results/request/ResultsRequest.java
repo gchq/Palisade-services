@@ -47,12 +47,7 @@ public final class ResultsRequest {
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
-
-
-    /**
-     * Json Node representation of the Resource
-     */
-    private final JsonNode resource;
+    private final JsonNode resource; // Json Node representation of the Resource
 
     @JsonCreator
     private ResultsRequest(
@@ -137,7 +132,6 @@ public final class ResultsRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * ResultsRequest class.
@@ -197,7 +191,6 @@ public final class ResultsRequest {
              * @return interface {@link IResource} for the next step in the build.
              */
             IResource withContextNode(JsonNode context);
-
         }
 
         /**
@@ -222,10 +215,6 @@ public final class ResultsRequest {
              * @return interface {@link IResource} for the next step in the build.
              */
             ResultsRequest withResourceNode(JsonNode context);
-
-
         }
-
     }
-
 }

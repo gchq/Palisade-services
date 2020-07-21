@@ -62,8 +62,3 @@ public class ResultsResponseTest {
         assertThat(queryScopeResponse.queuePointer).isEqualTo("testQueuePointer");
     }
 }
-
-
-
-
-

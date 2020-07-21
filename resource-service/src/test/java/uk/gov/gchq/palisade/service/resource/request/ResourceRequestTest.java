@@ -69,7 +69,8 @@ public class ResourceRequestTest {
      */
     @Test
     public void testDeserializeJsonToResourceRequest() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+        String jsonString = "{\"userId\":\"originalUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context" +
+                "\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
 
         ObjectContent<ResourceRequest> resourceRequestContent = jacksonTester.parse(jsonString);
 
