@@ -32,6 +32,9 @@ import java.util.concurrent.Executor;
  * UserService which implements {@link Service} and uses Feign within {@link UserClient} to send rest requests to the User Service
  */
 public class UserService implements Service {
+
+    public static final String NAME = "user-service";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final UserClient client;

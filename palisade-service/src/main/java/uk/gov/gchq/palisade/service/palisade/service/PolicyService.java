@@ -33,6 +33,12 @@ import java.util.concurrent.Executor;
  * PolicyService which implements {@link Service} and uses Feign within {@link PolicyClient} to send rest requests to the Policy Service
  */
 public class PolicyService implements Service {
+
+    /**
+     * Service name
+     */
+    public static final String NAME = "policy-service";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
 
     private final PolicyClient client;
