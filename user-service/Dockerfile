@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/user-service/user-service.jar
 
 LABEL service="user" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/user-service/user-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/share/user-service/user-service.jar"]

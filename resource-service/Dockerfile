@@ -21,4 +21,4 @@ COPY $JAR_FILE /usr/share/resource-service/resource-service.jar
 
 LABEL service="resource" project="palisade"
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=k8s", "-jar", "/usr/share/resource-service/resource-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/share/resource-service/resource-service.jar"]
