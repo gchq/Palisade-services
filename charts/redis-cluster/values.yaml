@@ -57,7 +57,7 @@ image:
 ## Busybox init image version
 initImage:
   repository: busybox
-  tag: latest
+  tag: 1.32.0
   pullPolicy: IfNotPresent
 
 ## Redis Cluster settings
