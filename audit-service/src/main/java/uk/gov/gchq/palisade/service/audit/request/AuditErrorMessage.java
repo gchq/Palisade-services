@@ -36,7 +36,6 @@ import java.util.StringJoiner;
  */
 public final class AuditErrorMessage extends AuditMessage {
 
-    @JsonProperty("error")
     private final JsonNode error;  //Error that occurred
 
     @JsonCreator

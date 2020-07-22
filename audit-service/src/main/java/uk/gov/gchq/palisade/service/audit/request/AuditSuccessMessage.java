@@ -37,7 +37,6 @@ import java.util.StringJoiner;
  */
 public final class AuditSuccessMessage extends AuditMessage {
 
-    @JsonProperty("leafResourceId")
     private final String leafResourceId;  //leafResource ID for the resource
 
     @JsonCreator

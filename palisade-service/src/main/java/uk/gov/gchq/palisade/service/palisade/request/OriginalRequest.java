@@ -82,37 +82,37 @@ public final class OriginalRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * OriginalRequest class.
          *
-         * @return interface  {@link IUser} for the next step in the build.
+         * @return interface  {@link IUserId} for the next step in the build.
          */
-        public static IUser create() {
-            return user -> resource -> context ->
-                    new OriginalRequest(user, resource, context);
+        public static IUserId create() {
+            return userId -> resourceId -> context ->
+                    new OriginalRequest(userId, resourceId, context);
         }
 
         /**
          * Adds the user ID information to the message.
          */
-        interface IUser {
+        interface IUserId {
             /**
              * Adds the user's ID.
              *
              * @param userId user ID for the request.
-             * @return interface  {@link IResource} for the next step in the build.
+             * @return interface  {@link IResourceId} for the next step in the build.
              */
-            IResource withUser(String userId);
+            IResourceId withUserId(String userId);
         }
 
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResource {
+        interface IResourceId {
             /**
              * Adds the resource ID.
              *
              * @param resourceId resource ID for the request.
              * @return interface {@link IContext} for the next step in the build.
              */
-            IContext withResource(String resourceId);
+            IContext withResourceId(String resourceId);
         }
 
         /**

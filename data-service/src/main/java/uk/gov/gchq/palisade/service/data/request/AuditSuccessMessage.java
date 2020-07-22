@@ -82,8 +82,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> attributes
-                    -> leafResource -> recordsProcessed -> recordsReturned ->
+            return userId -> resourceId -> context -> attributes -> leafResource -> recordsProcessed -> recordsReturned ->
                     new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource, recordsProcessed, recordsReturned);
         }
 

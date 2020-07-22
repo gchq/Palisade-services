@@ -46,8 +46,8 @@ public class OriginalRequestTest {
     public void testSerialiseOriginalRequestToJson() throws IOException {
         Context context = new Context().purpose("testContext");
         OriginalRequest originalRequest = OriginalRequest.Builder.create()
-                .withUser("testUser")
-                .withResource("testResource")
+                .withUserId("testUser")
+                .withResourceId("testResource")
                 .withContext(context);
         JsonContent<OriginalRequest> originalRequestJsonContent = jsonTester.write(originalRequest);
 

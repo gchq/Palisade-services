@@ -22,6 +22,8 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
@@ -88,7 +90,7 @@ public class AuditErrorMessageTest {
     public void testDeserialiseJsonToAuditErrorMessage() throws IOException {
         String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":" +
                 "{\"purpose\":\"testContext\"}},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"Something went wrong!\",\"suppressed\":[],\"localizedMessage" +
-                "\":\"Something went wrong!\"},\"serveHostName\":\"host.name\",\"serviceName\":\"audit-service\",\"timestamp\":\"2020-01-01T08:00:00.000000Z\",\"serverIP" +
+                "\":\"Something went wrong!\"},\"serviceName\":\"audit-service\",\"timestamp\":\"2020-01-01T08:00:00.000000Z\",\"serverIP" +
                 "\":\"192.168.1.1\",\"serverHostname\":\"host.name\",\"attributes\":{}}";
 
         ObjectContent<AuditErrorMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
