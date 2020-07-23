@@ -31,11 +31,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestResponse;
 public interface PalisadeService extends Service {
 
     /**
-     * Service name
-     */
-    String NAME = "palisade-service";
-
-    /**
      * This method is used by the client code to register that they want to read a resource or data set. This method
      * will check that the user can have access to the resource and pass back details of all the resources linked to the
      * initial request (if they asked for a data set) and how to connect to the relevant data service to get that data.
