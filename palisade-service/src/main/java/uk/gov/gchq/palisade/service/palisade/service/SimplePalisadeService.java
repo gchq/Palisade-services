@@ -50,11 +50,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class SimplePalisadeService implements PalisadeService {
 
-    /**
-     * Service name
-     */
-    public static final String NAME = "simple-service";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
 
     private final AuditService auditService;
@@ -159,12 +154,12 @@ public class SimplePalisadeService implements PalisadeService {
 
             return response;
         } catch (RuntimeException ex) {
-            auditRequestReceivedException(request, ex, SimplePalisadeService.NAME);
+            auditRequestReceivedException(request, ex, PalisadeService.NAME);
             throw new RegisterRequestException(ex);
         } catch (Error err) {
             // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
             // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
-            auditRequestReceivedException(request, err, SimplePalisadeService.NAME);
+            auditRequestReceivedException(request, err, PalisadeService.NAME);
             // Rethrow this Error, don't wrap it in the RegisterRequestException
             throw err;
         }
