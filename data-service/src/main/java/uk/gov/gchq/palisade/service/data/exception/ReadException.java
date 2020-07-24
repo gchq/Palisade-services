@@ -18,11 +18,13 @@ package uk.gov.gchq.palisade.service.data.exception;
 
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
+import java.io.IOException;
+
 /**
  * {@link RuntimeException} to be thrown by a {@link DataService} to indicate a failure while processing a request.
  * This failure should be caught and audited with the audit service.
  */
-public class ReadException extends RuntimeException {
+public class ReadException extends IOException {
 
     /**
      * Instantiates a new Read exception with a {@link Throwable} cause
