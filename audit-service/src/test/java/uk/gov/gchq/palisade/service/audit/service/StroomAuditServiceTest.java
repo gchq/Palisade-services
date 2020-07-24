@@ -146,7 +146,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName("UserService");
+                .withServiceName("USER_SERVICE");
         auditRequest.setOriginalRequestId(requestId);
 
         // When
@@ -177,7 +177,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName("ResourceService");
+                .withServiceName("RESOURCE_SERVICE");
 
         // When
         auditService.audit(auditRequest);
