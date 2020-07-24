@@ -246,7 +246,8 @@ public class AuditRequest extends Request {
          * @return the {@link RegisterRequestExceptionAuditRequest}
          */
         public static IUserId create(final RequestId original) {
-            return user -> resourceId -> context -> exception -> serviceName -> new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceName);
+            return user -> resourceId -> context -> exception -> serviceName ->
+                    new RegisterRequestExceptionAuditRequest(null, original, user, resourceId, context, exception, serviceName);
         }
 
         @Override

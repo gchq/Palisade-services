@@ -33,8 +33,6 @@ import java.util.concurrent.Executor;
  */
 public class UserService implements Service {
 
-    public static final String NAME = "user-service";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final UserClient client;

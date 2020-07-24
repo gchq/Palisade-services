@@ -36,7 +36,6 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import java.util.HashSet;
@@ -147,7 +146,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(UserService.class);
+                .withServiceName("UserService");
         auditRequest.setOriginalRequestId(requestId);
 
         // When
@@ -178,7 +177,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(ResourceService.class);
+                .withServiceName("ResourceService");
 
         // When
         auditService.audit(auditRequest);
@@ -208,7 +207,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(Service.class);
+                .withServiceName("Service");
 
         // When
         auditService.audit(auditRequest);

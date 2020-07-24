@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.palisade.domain.ServiceName;
 import uk.gov.gchq.palisade.service.palisade.exception.RegisterRequestException;
 import uk.gov.gchq.palisade.service.palisade.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.palisade.request.AuditRequest;
@@ -49,11 +50,6 @@ import static java.util.Objects.requireNonNull;
  * registerDataRequest. </p>
  */
 public class SimplePalisadeService implements PalisadeService {
-
-    /**
-     * Service name
-     */
-    public static final String NAME = "palisade-service";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplePalisadeService.class);
 
@@ -98,7 +94,7 @@ public class SimplePalisadeService implements PalisadeService {
         return userService
                 .getUser(userRequest)
                 .exceptionally((Throwable ex) -> {
-                    auditRequestReceivedException(request, ex, UserService.NAME);
+                    auditRequestReceivedException(request, ex, ServiceName.USER_SERVICE.name());
                     throw new RegisterRequestException("Exception from userService", ex);
                 });
     }
@@ -109,7 +105,7 @@ public class SimplePalisadeService implements PalisadeService {
         return resourceService
                 .getResourcesById(resourceRequest)
                 .exceptionally((Throwable ex) -> {
-                    auditRequestReceivedException(request, ex, ResourceService.NAME);
+                    auditRequestReceivedException(request, ex, ServiceName.RESOURCE_SERVICE.name());
                     throw new RegisterRequestException("Exception from resourceService", ex);
                 });
     }
@@ -127,7 +123,7 @@ public class SimplePalisadeService implements PalisadeService {
             policyRequest.setOriginalRequestId(request.getId());
             return policyService.getPolicy(policyRequest).join();
         }).exceptionally((Throwable ex) -> {
-            auditRequestReceivedException(request, ex, PolicyService.NAME);
+            auditRequestReceivedException(request, ex, ServiceName.POLICY_SERVICE.name());
             throw new RegisterRequestException("Exception from policyService", ex);
         });
     }
@@ -159,12 +155,12 @@ public class SimplePalisadeService implements PalisadeService {
 
             return response;
         } catch (RuntimeException ex) {
-            auditRequestReceivedException(request, ex, SimplePalisadeService.NAME);
+            auditRequestReceivedException(request, ex, ServiceName.PALISADE_SERVICE.name());
             throw new RegisterRequestException(ex);
         } catch (Error err) {
             // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
             // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
-            auditRequestReceivedException(request, err, SimplePalisadeService.NAME);
+            auditRequestReceivedException(request, err, ServiceName.PALISADE_SERVICE.name());
             // Rethrow this Error, don't wrap it in the RegisterRequestException
             throw err;
         }

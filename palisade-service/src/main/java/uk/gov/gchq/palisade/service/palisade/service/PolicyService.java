@@ -34,11 +34,6 @@ import java.util.concurrent.Executor;
  */
 public class PolicyService implements Service {
 
-    /**
-     * Service name
-     */
-    public static final String NAME = "policy-service";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyService.class);
 
     private final PolicyClient client;

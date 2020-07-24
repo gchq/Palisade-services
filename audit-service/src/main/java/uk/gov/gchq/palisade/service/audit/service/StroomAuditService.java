@@ -207,12 +207,12 @@ public class StroomAuditService implements AuditService {
         stroomResource.setId(registerRequestExceptionAuditRequest.resourceId);
         authorise.getObjects().add(stroomResource);
         Outcome outcome = createOutcome(false);
-        if (registerRequestExceptionAuditRequest.serviceClass.getSimpleName().equalsIgnoreCase("UserService")) {
+        if (registerRequestExceptionAuditRequest.serviceName.equalsIgnoreCase("UserService")) {
             LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is UserService");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION);
             outcome.setDescription(REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION);
-        } else if (registerRequestExceptionAuditRequest.serviceClass.getSimpleName().equalsIgnoreCase("ResourceService")) {
+        } else if (registerRequestExceptionAuditRequest.serviceName.equalsIgnoreCase("ResourceService")) {
             LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is ResourceService");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION);

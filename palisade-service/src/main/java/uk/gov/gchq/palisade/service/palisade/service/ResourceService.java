@@ -46,11 +46,6 @@ import java.util.stream.Stream;
  */
 public class ResourceService implements Service {
 
-    /**
-     * Service name
-     */
-    public static final String NAME = "resource-service";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
 
     private final ResourceClient client;
