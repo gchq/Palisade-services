@@ -27,9 +27,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
 
 import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +51,6 @@ public class AuditErrorMessageTest {
     @Test
     public void groupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
-        String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
 
@@ -62,7 +58,7 @@ public class AuditErrorMessageTest {
                 .withUserId("originalUserID")
                 .withResourceId("testResourceId")
                 .withContext(context)
-                .withAttributes(new HashMap<String, Object>())
+                .withAttributes(attributes)
                 .withError(new InternalError("Something went wrong!"));
 
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
@@ -75,6 +71,7 @@ public class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("data-service"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message").isEqualTo("Something went wrong!")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
@@ -83,6 +80,8 @@ public class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(auditErrorMessage.getContext().getPurpose()),
                         () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
                         () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
+                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
                         () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
                 ),
                 () -> assertAll("ObjectComparison",

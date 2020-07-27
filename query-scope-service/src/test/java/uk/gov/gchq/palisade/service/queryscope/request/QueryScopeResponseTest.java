@@ -25,16 +25,15 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
@@ -73,56 +72,49 @@ public class QueryScopeResponseTest {
     }
 
     /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
+     * Grouped assertion test
+     * Create the object with the builder and then convert to the Json equivalent.
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException if it fails to parse the string into an object
+     * @throws IOException throws if the {@link QueryScopeResponse} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\"," +
-                "\"contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\"" +
-                ",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\"" +
-                ":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
-        ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jsonTester.parse(jsonString);
-
-        QueryScopeResponse queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
-        assertThat(queryScopeResponse.getUserId()).isEqualTo("originalUserID");
-        assertThat(queryScopeResponse.getResourceId()).isEqualTo("originalResourceID");
-        assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
-    }
-
-    /**
-     * Create the QueryScopeResponse object from a QueryScopeRequest, serialise it and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testSerialiseQueryScopeResponseUsingQueryScopeRequestToJson() throws IOException {
+    public void groupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
-        User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules<>();
 
-        QueryScopeRequest queryScopeRequest = QueryScopeRequest.Builder.create()
+        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
                 .withContext(context)
-                .withUser(user)
-                .withResource(resource)
-                .withRules(rules);
-
-        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create(queryScopeRequest);
+                .withResource(resource);
 
         JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
+        ObjectContent<QueryScopeResponse> queryScopeResponseObjectContentObjectContent = jsonTester.parse(queryScopeResponseJsonContent.getJson());
+        QueryScopeResponse queryScopeResponseMessageObject = queryScopeResponseObjectContentObjectContent.getObject();
 
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
+                ),
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(queryScopeResponseMessageObject.getUserId()).isEqualTo(queryScopeResponse.getUserId()),
+                        () -> assertThat(queryScopeResponseMessageObject.getContext()).isEqualTo(queryScopeResponse.getContext()),
+                        () -> assertThat(queryScopeResponseMessageObject.getResource()).isEqualTo(queryScopeResponse.getResource()),
+                        () -> assertThat(queryScopeResponseMessageObject.getResourceId()).isEqualTo(queryScopeResponse.getResourceId())
+                ),
+                () -> assertAll("ObjectComparison",
+                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                        () -> assertThat(queryScopeResponseMessageObject.equals(queryScopeResponse))
+                )
+        );
     }
 }

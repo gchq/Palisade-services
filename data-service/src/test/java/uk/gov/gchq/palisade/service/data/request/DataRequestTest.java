@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
@@ -44,12 +45,15 @@ public class DataRequestTest {
     private JacksonTester<DataRequest> jacksonTester;
 
     /**
-     * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+     * Grouped assertion test
+     * Create the object with the builder and then convert to the Json equivalent.
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException if it fails to parse the object
+     * @throws IOException throws if the {@link DataRequest} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testSerialiseResourceResponseToJson() throws IOException {
+    public void groupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -68,35 +72,30 @@ public class DataRequestTest {
                 .withRules(rules);
 
         JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(dataRequest);
-        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
-        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
-        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service");
-        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set");
-    }
+        ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
+        DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
-    /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":" +
-                "{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}," +
-                "\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"" +
-                "uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource" +
-                "\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"Rule1\":{\"class\":" +
-                "\"uk.gov.gchq.palisade.service.data.request.PassThroughRule\"}}}}";
-        ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(jsonString);
-
-        DataRequest dataRequest = dataRequestObjectContent.getObject();
-
-        assertThat(dataRequest.getUserId()).isEqualTo("originalUserID");
-        assertThat(dataRequest.getResourceId()).isEqualTo("originalResourceID");
-        assertThat(dataRequest.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(dataRequest.getUser().getUserId().getId()).isEqualTo("testUserId");
-        assertThat(dataRequest.getResource().getId()).isEqualTo("/test/file.format");
-        assertThat(dataRequest.getRulesNode().toString()).contains("PassThroughRule");
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service"),
+                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
+                ),
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(dataRequestMessageObject.getUser()).isEqualTo(dataRequest.getUser()),
+                        () -> assertThat(dataRequestMessageObject.getContext().getPurpose()).isEqualTo(dataRequest.getContext().getPurpose()),
+                        () -> assertThat(dataRequestMessageObject.getContext()).isEqualTo(dataRequest.getContext()),
+                        () -> assertThat(dataRequestMessageObject.getResource()).isEqualTo(dataRequest.getResource()),
+                        () -> assertThat(dataRequestMessageObject.getRules()).isEqualTo(dataRequest.getRules())
+                ),
+                () -> assertAll("ObjectComparison",
+                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                        () -> assertThat(dataRequestMessageObject.equals(dataRequest))
+                )
+        );
     }
 }

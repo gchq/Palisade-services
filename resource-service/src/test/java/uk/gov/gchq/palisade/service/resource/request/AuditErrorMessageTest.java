@@ -87,7 +87,7 @@ public class AuditErrorMessageTest {
         assertThat(auditErrorMessage.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(auditErrorMessage.getServiceName()).isEqualTo("resource-service");
         assertThat(auditErrorMessage.getServerIP()).isEqualTo("192.168.1.1");
-        assertThat(auditErrorMessage.getServeHostName()).isEqualTo("host.name");
+        assertThat(auditErrorMessage.getServerHostName()).isEqualTo("host.name");
         assertThat(auditErrorMessage.getError().getMessage()).isEqualTo("Something went wrong!");
     }
 }

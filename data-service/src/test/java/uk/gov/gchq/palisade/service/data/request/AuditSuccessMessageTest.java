@@ -27,9 +27,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.gchq.palisade.Context;
 
 import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,9 +49,8 @@ public class AuditSuccessMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
+    public void groupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
-        String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
 
@@ -88,6 +84,8 @@ public class AuditSuccessMessageTest {
                         () -> assertThat(auditSuccessMessageObject.getContext().getPurpose()).isEqualTo(auditSuccessMessage.getContext().getPurpose()),
                         () -> assertThat(auditSuccessMessageObject.getServiceName()).isEqualTo(auditSuccessMessage.getServiceName()),
                         () -> assertThat(auditSuccessMessageObject.getTimestamp()).isEqualTo(auditSuccessMessage.getTimestamp()),
+                        () -> assertThat(auditSuccessMessageObject.getServerHostName()).isEqualTo(auditSuccessMessage.getServerHostName()),
+                        () -> assertThat(auditSuccessMessageObject.getServerIP()).isEqualTo(auditSuccessMessage.getServerIP()),
                         () -> assertThat(auditSuccessMessageObject.getLeafResourceId()).isEqualTo(auditSuccessMessage.getLeafResourceId())
                 ),
                 () -> assertAll("ObjectComparison",
