@@ -20,7 +20,7 @@ service:
 
 image:
   name: policy-service
-  tag: 6640c10-SNAPSHOT
+  tag: dcd462c-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.4.0-SNAPSHOT
 
