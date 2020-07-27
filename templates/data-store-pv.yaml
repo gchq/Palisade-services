@@ -15,11 +15,11 @@
 # Create a number of persistent volumes for each configured data-store
 # New PV for each dataStores entry
 
-#N.B The datastore would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
+# N.B The datastore would theoretically only need accessMode ReadOnlyMany
+# however, the CSI driver's plugin GetVolumeHandle method determines whether
+# the volume is actually used by other pods as a different mode
+# there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+# as to the slightly anomalous behaviour
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
