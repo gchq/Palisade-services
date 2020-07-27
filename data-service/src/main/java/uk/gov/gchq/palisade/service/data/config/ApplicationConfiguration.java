@@ -128,5 +128,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @Override
     public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(getAsyncExecutor());
+        // One minute timeout, same as feign will have
+        configurer.setDefaultTimeout(60000);
     }
 }
