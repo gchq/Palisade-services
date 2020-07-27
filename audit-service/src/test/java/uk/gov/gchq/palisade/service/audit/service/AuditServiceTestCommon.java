@@ -114,7 +114,7 @@ class AuditServiceTestCommon {
                 .withResourceId(mockResource().getId())
                 .withContext(mockContext())
                 .withException(mockException())
-                .withServiceName("Service");
+                .withServiceName(ServiceName.USER_SERVICE.name());
     }
 
     static AuditRequest.ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest() {

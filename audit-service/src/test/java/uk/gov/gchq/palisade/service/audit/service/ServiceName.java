@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.palisade.domain;
+package uk.gov.gchq.palisade.service.audit.service;
 
 /**
  * Enum providing type safety for service names
@@ -22,6 +22,8 @@ package uk.gov.gchq.palisade.service.palisade.domain;
  * @since 0.4.0
  */
 public enum ServiceName {
+    TEST_SERVICE,
+    AUDIT_SERVICE,
     DATA_SERVICE,
     PALISADE_SERVICE,
     POLICY_SERVICE,

@@ -104,7 +104,7 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName("Service");
+                .withServiceName(ServiceName.USER_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
