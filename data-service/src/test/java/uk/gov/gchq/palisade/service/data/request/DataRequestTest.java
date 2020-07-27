@@ -68,9 +68,11 @@ public class DataRequestTest {
                 .withRules(rules);
 
         JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(dataRequest);
-
         assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
         assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
+        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service");
+        assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set");
     }
 
     /**
@@ -95,5 +97,6 @@ public class DataRequestTest {
         assertThat(dataRequest.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(dataRequest.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(dataRequest.getResource().getId()).isEqualTo("/test/file.format");
+        assertThat(dataRequest.getRulesNode().toString()).contains("PassThroughRule");
     }
 }

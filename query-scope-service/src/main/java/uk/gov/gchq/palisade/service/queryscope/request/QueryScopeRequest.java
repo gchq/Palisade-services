@@ -119,18 +119,16 @@ public final class QueryScopeRequest {
         return MAPPER.treeToValue(this.rules, Rules.class);
     }
 
+    @Generated
+    public JsonNode getRulesNode() {
+        return rules;
+    }
+
     /**
      * Builder class for the creation of instances of the QueryScopeRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-        private String userId;
-        private String resourceId;
-        private JsonNode context;
-        private JsonNode user;
-        private JsonNode resource;
-        private JsonNode rules;
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * QueryScopeRequest class.

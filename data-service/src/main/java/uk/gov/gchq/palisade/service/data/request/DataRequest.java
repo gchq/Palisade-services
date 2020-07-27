@@ -129,7 +129,6 @@ public final class DataRequest {
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
-
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * DataRequest class.

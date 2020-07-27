@@ -90,6 +90,7 @@ public class QueryScopeRequestTest {
                 "\"uk.gov.gchq.palisade.service.queryscope.request.PassThroughRule\"}}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":" +
                 "\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"}" +
                 ",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
+
         ObjectContent<QueryScopeRequest> queryScopeResponseObjectContentObjectContent = jacksonTester.parse(jsonString);
 
         QueryScopeRequest queryScopeResponse = queryScopeResponseObjectContentObjectContent.getObject();
@@ -98,5 +99,6 @@ public class QueryScopeRequestTest {
         assertThat(queryScopeResponse.getContext().getPurpose()).isEqualTo("testContext");
         assertThat(queryScopeResponse.getUser().getUserId().getId()).isEqualTo("testUserId");
         assertThat(queryScopeResponse.getResource().getId()).isEqualTo("/test/file.format");
+        assertThat(queryScopeResponse.getRulesNode().toString()).contains("PassThroughRule");
     }
 }

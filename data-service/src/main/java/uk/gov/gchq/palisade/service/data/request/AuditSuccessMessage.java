@@ -179,26 +179,26 @@ public final class AuditSuccessMessage extends AuditMessage {
         }
 
         /**
-         * Adds the leaf resource ID for the message.
+         * Adds the Number of Records Processed.
          */
         interface IRecordsProcessed {
             /**
-             * Adds the leaf resource ID for the message.
+             * Adds the number of records processed
              *
-             * @param recordsProcessed leaf resource ID.
+             * @param recordsProcessed recordsProcessed
              * @return interface  {@link IRecordsReturned} for the next step in the build.
              */
             IRecordsReturned withNumberOfRecordsProcessed(long recordsProcessed);
         }
 
         /**
-         * Adds the leaf resource ID for the message.
+         * Adds the Number of records returned.
          */
         interface IRecordsReturned {
             /**
-             * Adds the leaf resource ID for the message.
+             * Adds the Number of records returned.
              *
-             * @param recordsReturned leaf resource ID.
+             * @param recordsReturned the number of records returned.
              * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
              */
             AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
@@ -43,13 +44,15 @@ public class AuditErrorMessageTest {
     private JacksonTester<AuditErrorMessage> jsonTester;
 
     /**
+     * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
+     * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the UserResponse object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise the string.
+     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testSerialiseAuditErrorMessageToJson() throws IOException {
+    public void groupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();
@@ -67,39 +70,34 @@ public class AuditErrorMessageTest {
                 .withError(new InternalError("Something went wrong!"));
 
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
+        ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
+        AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("testServicename");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.timestamp").isEqualTo(now);
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serverIP").isEqualTo("testServerIP");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serverHostname").isEqualTo("testServerHostname");
-        assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23");
-    }
-
-
-    /**
-     * Create the object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the object
-     */
-    @Test
-    public void testDeserialiseJsonToAuditErrorMessage() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":" +
-                "{\"purpose\":\"testContext\"}},\"error\":{\"cause\":null,\"stackTrace\":[],\"message\":\"Something went wrong!\",\"suppressed\":[],\"localizedMessage" +
-                "\":\"Something went wrong!\"},\"serviceName\":\"audit-service\",\"timestamp\":\"2020-01-01T08:00:00.000000Z\",\"serverIP" +
-                "\":\"192.168.1.1\",\"serverHostname\":\"host.name\",\"attributes\":{}}";
-
-        ObjectContent<AuditErrorMessage> auditSuccessMessageObjectContent = jsonTester.parse(jsonString);
-
-        AuditErrorMessage auditErrorMessage = auditSuccessMessageObjectContent.getObject();
-        assertThat(auditErrorMessage.getUserId()).isEqualTo("originalUserID");
-        assertThat(auditErrorMessage.getResourceId()).isEqualTo("testResourceId");
-        assertThat(auditErrorMessage.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(auditErrorMessage.getServiceName()).isEqualTo("audit-service");
-        assertThat(auditErrorMessage.getServerIP()).isEqualTo("192.168.1.1");
-        assertThat(auditErrorMessage.getServeHostName()).isEqualTo("host.name");
-        assertThat(auditErrorMessage.getError().getMessage()).isEqualTo("Something went wrong!");
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("testServicename"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.timestamp").isEqualTo(now),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serverIP").isEqualTo("testServerIP"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serverHostname").isEqualTo("testServerHostname"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23")
+                ),
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(auditErrorMessageObject.getUserId()).isEqualTo(auditErrorMessage.getUserId()),
+                        () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(auditErrorMessage.getResourceId()),
+                        () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(auditErrorMessage.getContext().getPurpose()),
+                        () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
+                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
+                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
+                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
+                ),
+                () -> assertAll("ObjectComparison",
+                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                        () -> assertThat(auditErrorMessageObject.equals(auditErrorMessage))
+                )
+        );
     }
 }
