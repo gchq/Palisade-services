@@ -22,7 +22,7 @@
 #as to the slightly anomalous behaviour
 
 {{- $namespace := include "palisade.namespace" . }}
-{{- range $name, $store := .Values.global.persistence.dataStores }}
+{{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -38,20 +38,20 @@ spec:
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ pluck $.Values.global.hosting $store.storageClassName | first | default $store.storageClassName._default }}
+  storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
-    storage: {{ $store.storage }}
+    storage: {{ $value.storage }}
   {{- if eq $.Values.global.hosting "local" }}
   hostPath:
-    path: {{ $store.local.hostPath }}
+    path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
   {{- else if eq $.Values.global.hosting "aws" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $store.aws.volumeHandle }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
     volumeAttributes:
-      path: {{ $store.aws.volumePath }}
+      path: {{ $value.aws.volumePath }}
   {{- end }}
 ---
 {{- end }}

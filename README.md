@@ -112,11 +112,11 @@ Some more important arguments are as follows:
 | global.persistence.**xxx**.volumePath   | The EFS volume directory to use as a mount point for internal volumes
 | **Optional Installs**                   |
 | traefik.install                         | Install the traefik ingress controller, **default=false**
-| metricsServer.install                   | Install the metrics-server to enable horizontal scaling, **default=false**
+| metrics-server.install                  | Install the metrics-server to enable horizontal scaling, **default=false**
 | dashboard.install                       | Install the kubernetes dashboard, **default=false**
 | global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
-| global.redisCluster.install             | Install Redis-cluster, **default=false**
+| global.redis-cluster.install            | Install Redis-cluster, **default=false**
 
 #### Redis vs Redis-Cluster
 The key difference is scalability, write-points, sharding and partitioning.

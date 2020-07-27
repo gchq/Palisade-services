@@ -19,7 +19,7 @@ fullnameOverride: palisade-services
 traefik:
   # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
   install: false
-metricsServer:
+metrics-server:
   # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
   install: false
 dashboard:
@@ -51,7 +51,7 @@ global:
       service:
         port: 6379
 
-  redisCluster:
+  redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
     # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
