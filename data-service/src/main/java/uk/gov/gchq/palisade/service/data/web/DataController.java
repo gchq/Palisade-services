@@ -21,6 +21,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +58,7 @@ public class DataController {
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
         LOGGER.info("Invoking read (chunked): {}", request);
-        StreamingResponseBody stream = out -> service.read(request).accept(out);
+        StreamingResponseBody stream = outputStream -> service.read(request, outputStream);
 
         LOGGER.info("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);

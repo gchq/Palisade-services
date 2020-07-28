@@ -82,7 +82,6 @@ public class DataControllerTest {
         Consumer<OutputStream> response = out -> {
         };
         OutputStream output = Mockito.mock(OutputStream.class);
-        Mockito.when(dataService.read(request)).thenReturn(response);
 
         // When
         controller.readChunked(request).getBody().writeTo(output);
