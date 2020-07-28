@@ -69,7 +69,6 @@ public class UserRequestTest {
                         () -> assertThat(userRequestObject.getResourceId()).isEqualTo(userRequest.getResourceId()),
                         () -> assertThat(userRequestObject.getContext().getPurpose()).isEqualTo(userRequest.getContext())
                 ),
-
                 () -> assertAll("ObjectComparison",
                         () -> assertThat(userRequestObject).isEqualTo(userRequest)
                 )

@@ -33,21 +33,24 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
 public class ResultsRequestTest {
 
     @Autowired
-    private JacksonTester<ResultsRequest> jacksonTester;
+    private JacksonTester<ResultsRequest> jsonTester;
 
     /**
-     * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+     * Tests the creation of the message type, ResultsRequest using the builder
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
      * @throws IOException if it fails to parse the object
      */
     @Test
-    public void testSerialiseResourceResponseToJson() throws IOException {
+    public void testResultsRequestSerialisingAndDeserialising() throws IOException {
+
         Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
@@ -60,28 +63,28 @@ public class ResultsRequestTest {
                 .withContext(context)
                 .withResource(resource);
 
-        JsonContent<ResultsRequest> resultsRequestJsonContent = jacksonTester.write(resultsRequest);
-        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
-        assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
+        JsonContent<ResultsRequest> resultsRequestJsonContent = jsonTester.write(resultsRequest);
+        ObjectContent<ResultsRequest> resultsRequestObjectContent = this.jsonTester.parse(resultsRequestJsonContent.getJson());
+        ResultsRequest resultsRequestObject = resultsRequestObjectContent.getObject();
+
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(resultsRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service")
+
+                ),
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(resultsRequest.getUserId()).isEqualTo(resultsRequestObject.getUserId()),
+                        () -> assertThat(resultsRequest.getResourceId()).isEqualTo(resultsRequestObject.getResourceId()),
+                        () -> assertThat(resultsRequest.getContext()).isEqualTo(resultsRequestObject.getContext()),
+                        () -> assertThat(resultsRequest.getResource()).isEqualTo((resultsRequestObject.getResource()))
+                ),
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(resultsRequest).isEqualTo(resultsRequestObject)
+                )
+        );
     }
 
-    /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"" +
-                "contents\":{\"purpose\":\"testContext\"}},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\"" +
-                ",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\"" +
-                ":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"}}";
-        ObjectContent<ResultsRequest> resultsRequestObjectContent = jacksonTester.parse(jsonString);
-        ResultsRequest resultsRequest = resultsRequestObjectContent.getObject();
-
-        assertThat(resultsRequest.getUserId()).isEqualTo("originalUserID");
-        assertThat(resultsRequest.getResourceId()).isEqualTo("originalResourceID");
-        assertThat(resultsRequest.getContext().getPurpose()).isEqualTo("testContext");
-    }
 }

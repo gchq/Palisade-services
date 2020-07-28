@@ -33,33 +33,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ResultsResponseTest {
 
     @Autowired
-    private JacksonTester<ResultsResponse> jacksonTester;
+    private JacksonTester<ResultsResponse> jsonTester;
 
     /**
-     * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+     * Tests the creation of the message type, ResultsResponse using the builder
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
      * @throws IOException if it fails to parse the object
      */
     @Test
     public void testSerialiseResourceResponseToJson() throws IOException {
+
         Long x = 31415L;
-        ResultsResponse resultsResponse = ResultsResponse.Builder.create().withQueuePointer(x);
-        JsonContent<ResultsResponse> resultsResponseJsonContent = jacksonTester.write(resultsResponse);
-        System.out.println(resultsResponseJsonContent);
+        ResultsResponse resultsResponse = ResultsResponse.Builder.create()
+                .withQueuePointer(x);
+        JsonContent<ResultsResponse> resultsResponseJsonContent = jsonTester.write(resultsResponse);
+
+        ObjectContent<ResultsResponse> resultsResponseObjectContent = this.jsonTester.parse(resultsResponseJsonContent.getJson());
+        ResultsResponse resultsResponseObject = resultsResponseObjectContent.getObject();
+
         assertThat(resultsResponseJsonContent).extractingJsonPathNumberValue("$.queuePointer").isEqualTo(x.intValue());
+        assertThat(resultsResponse.queuePointer).isEqualTo(resultsResponseObject.queuePointer);
+        assertThat(resultsResponse).isEqualTo(resultsResponseObject);
     }
 
-    /**
-     * Create the ResourceResponse object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testDeserializeJsonToResourceResponse() throws IOException {
-        Long longValue = 31415L;
-        String jsonString = "{\"queuePointer\":\"" + longValue + "\"}";
-        ObjectContent<ResultsResponse> resultsResponseObjectContent = jacksonTester.parse(jsonString);
-        ResultsResponse queryScopeResponse = resultsResponseObjectContent.getObject();
-        assertThat(queryScopeResponse.queuePointer).isEqualTo(longValue);
-    }
+
 }
