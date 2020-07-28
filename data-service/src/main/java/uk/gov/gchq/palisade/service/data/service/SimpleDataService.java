@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.data.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.RequestId;
@@ -109,7 +108,7 @@ public class SimpleDataService implements DataService {
     }
 
     @Override
-    public void read(final ReadRequest dataRequest, OutputStream out) throws IOException {
+    public void read(final ReadRequest dataRequest, final OutputStream out) throws IOException {
         try {
             final AtomicLong recordsProcessed = new AtomicLong(0);
             final AtomicLong recordsReturned = new AtomicLong(0);

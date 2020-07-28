@@ -49,12 +49,13 @@ public interface DataService extends Service {
      * request due to not having the resources to do so, or if it is currently
      * serving too many requests then it may throw a {@link NoCapacityException}.
      *
-     * @param request The {@link ReadRequest} that came from registering the
-     *                request with the palisade service. The request can be
-     *                altered to contain only a subset of the resources to be
-     *                read by this data service instance.
-     * @param out     an {@link OutputStream} to sink the file into
-     *                and then apply appropriate complete/exception auditing
+     * @param request       The {@link ReadRequest} that came from registering the
+     *                      request with the palisade service. The request can be
+     *                      altered to contain only a subset of the resources to be
+     *                      read by this data service instance.
+     * @param out           an {@link OutputStream} to sink the file into
+     *                      and then apply appropriate complete/exception auditing
+     * @throws IOException  The {@link Exception} thrown
      */
     void read(final ReadRequest request, OutputStream out) throws IOException;
 
