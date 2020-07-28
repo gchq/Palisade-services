@@ -108,7 +108,7 @@ class AuditServiceTestCommon {
                 .withContext(mockContext());
     }
 
-    static AuditRequest.RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest() {
+    static AuditRequest.RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequestFromUserService() {
         return AuditRequest.RegisterRequestExceptionAuditRequest.create(mockOriginalRequestId())
                 .withUserId(mockUserID())
                 .withResourceId(mockResource().getId())
