@@ -71,9 +71,10 @@ timestamps {
             value: tcp://localhost:2375
         resources:
           requests:
-            resourceRequestCpu: "4"
+            cpu: "2"
             ephemeral-storage: "4Gi"
           limits:
+            cpu: "4"
             ephemeral-storage: "8Gi"
 
       - name: hadolint
@@ -148,7 +149,7 @@ timestamps {
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+                                sh 'mvn -T 1C -s $MAVEN_SETTINGS install -P quick'
                             }
                         }
                     }
@@ -158,7 +159,7 @@ timestamps {
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh 'mvn -s $MAVEN_SETTINGS install -P quick'
+                                sh 'mvn -T 1C -s $MAVEN_SETTINGS install -P quick'
                             }
                         }
                     }
