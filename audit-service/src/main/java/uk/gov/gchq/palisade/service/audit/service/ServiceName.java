@@ -22,7 +22,6 @@ package uk.gov.gchq.palisade.service.audit.service;
  * @since 0.4.0
  */
 public enum ServiceName {
-    TEST_SERVICE,
     AUDIT_SERVICE,
     DATA_SERVICE,
     PALISADE_SERVICE,
