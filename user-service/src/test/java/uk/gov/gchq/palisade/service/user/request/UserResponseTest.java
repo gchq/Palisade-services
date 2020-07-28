@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.User;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
@@ -38,70 +39,48 @@ public class UserResponseTest {
     @Autowired
     private JacksonTester<UserResponse> jsonTester;
 
+
     /**
-     * Create the object with the builder and then convert to the Json equivalent.
+     * Tests the creation of the message type, UserRequest using the builder
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
-     * @throws IOException throws if the UserResponse object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise the string.
+     * @throws IOException throws if the {@link UserRequest} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or de-serialise the Json string.
      */
     @Test
-    public void testSerialiseUserResponseToJson() throws IOException {
-        Context context = new Context().purpose("testContext");
+    public void testUserResponseMessageSerialisingAndDeserialising() throws IOException {
+
         User user = new User().userId("testUserId");
 
+        Context context = new Context().purpose("testContext");
         UserResponse userResponse = UserResponse.Builder.create()
-                .withUserId("originalUserID")
+                .withUserId("originalUserId")
                 .withResourceId("testResourceId")
                 .withContext(context)
                 .withUser(user);
 
-        JsonContent<UserResponse> response = jsonTester.write(userResponse);
+        JsonContent<UserResponse> userResponseJsonContent = jsonTester.write(userResponse);
+        ObjectContent<UserResponse> userResponseObjectContent = this.jsonTester.parse(userResponseJsonContent.getJson());
+        UserResponse userResponseObject = userResponseObjectContent.getObject();
 
-        //these tests are each for strings
-        assertThat(response).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(response).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-        assertThat(response).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(response).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
-    }
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserId"),
+                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
+                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId")
+                ),
 
-    /**
-     * Create the object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the object
-     */
-    @Test
-    public void testDeserialiseJsonToUserResponse() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"" +
-                "contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
-        ObjectContent userResponseContent = (ObjectContent) this.jsonTester.parse(jsonString);
-        UserResponse response = (UserResponse) userResponseContent.getObject();
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(userResponseObject.getUserId()).isEqualTo(userResponse.getUserId()),
+                        () -> assertThat(userResponseObject.getResourceId()).isEqualTo(userResponse.getResourceId()),
+                        () -> assertThat(userResponseObject.getContext()).isEqualTo(userResponse.getContext()),
+                        () -> assertThat(userResponseObject.user).isEqualTo(user)
+                ),
 
-        assertThat(response.getUserId()).isEqualTo("originalUserID");
-        assertThat(response.user.getUserId().getId()).isEqualTo("testUserId");
-        assertThat(response.getResourceId()).isEqualTo("testResourceId");
-    }
-
-    /**
-     * Create the UserResponse object from a UserRequest, serialise it and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testSerialiseUserResponseUsingUserRequestToJson() throws IOException {
-        Context context = new Context().purpose("testContext");
-        User user = new User().userId("testUserId");
-
-        UserRequest userRequest = UserRequest.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("originalResourceID")
-                .withContext(context);
-
-        UserResponse policyResponse = UserResponse.Builder.create(userRequest).withUser(user);
-        JsonContent<UserResponse> userResponseJsonContent = jsonTester.write(policyResponse);
-
-        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
-        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(userResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(userResponseObject).isEqualTo(userResponse)
+                )
+        );
     }
 }
