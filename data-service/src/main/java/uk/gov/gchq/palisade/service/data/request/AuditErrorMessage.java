@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.data.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.util.Assert;
 
@@ -77,9 +78,12 @@ public final class AuditErrorMessage extends AuditMessage {
          * @param request    the request message that was sent to the data-service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
+         * @throws JsonProcessingException if there is a failure to parse information from the DataRequest.
+         *
          */
 
-        public static IError create(final DataRequest request, final Map<String, Object> attributes) {
+
+        public static IError create(final DataRequest request, final Map<String, Object> attributes) throws JsonProcessingException {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())

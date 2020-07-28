@@ -36,7 +36,8 @@ import java.util.StringJoiner;
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
  * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the input for data-service for the information to be stored for later use by the client.
+ * This version represents the authorised request access to the resource.  It is stored and later retrieved by the client
+ * when there is a request to see the data.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
  * uk.gov.gchq.palisade.service.data.request.DataRequest is the input for the data-service.
@@ -48,8 +49,6 @@ public final class DataRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String userId;  //Unique identifier for the user
-    private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
@@ -57,22 +56,16 @@ public final class DataRequest {
 
     @JsonCreator
     private DataRequest(
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
             final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") JsonNode rules) {
 
-        Assert.notNull(userId, "User ID cannot be null");
-        Assert.notNull(resourceId, "Resource ID cannot be null");
         Assert.notNull(context, "Context cannot be null");
         Assert.notNull(user, "User cannot be null");
         Assert.notNull(resource, "Resources cannot be null");
         Assert.notNull(rules, "Rules cannot be null");
 
-        this.userId = userId;
-        this.resourceId = resourceId;
         this.context = context;
         this.user = user;
         this.resource = resource;
@@ -80,13 +73,13 @@ public final class DataRequest {
     }
 
     @Generated
-    public String getUserId() {
-        return userId;
+    public String getUserId() throws JsonProcessingException {
+        return getUser().getUserId().getId();
     }
 
     @Generated
-    public String getResourceId() {
-        return resourceId;
+    public String getResourceId() throws JsonProcessingException {
+        return getResource().getId();
     }
 
     @Generated
@@ -133,38 +126,13 @@ public final class DataRequest {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * DataRequest class.
          *
-         * @return interface {@link IUserId} for the next step in the build.
+         * @return interface {@link IContext} for the next step in the build.
          */
-        public static IUserId create() {
-            return userId -> resourceId -> context -> user -> resource -> rules ->
-                    new DataRequest(userId, resourceId, context, user, resource, rules);
+        public static IContext create() {
+            return  context -> user -> resource -> rules ->
+                    new DataRequest(context, user, resource, rules);
         }
 
-        /**
-         * Adds the user ID information to the message.
-         */
-        interface IUserId {
-            /**
-             * Adds the user ID.
-             *
-             * @param userId user ID for the request.
-             * @return interface {@link IResourceId} for the next step in the build.
-             */
-            IResourceId withUserId(String userId);
-        }
-
-        /**
-         * Adds the resource ID information to the message.
-         */
-        interface IResourceId {
-            /**
-             * Adds the resource ID.
-             *
-             * @param resourceId resource ID for the request.
-             * @return interface {@link IContext} for the next step in the build.
-             */
-            IContext withResourceId(String resourceId);
-        }
 
         /**
          * Adds the user context information to the message.

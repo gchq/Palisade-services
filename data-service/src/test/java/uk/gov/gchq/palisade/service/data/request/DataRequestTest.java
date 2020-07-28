@@ -64,8 +64,6 @@ public class DataRequestTest {
         Rules rules = new Rules<>();
 
         DataRequest dataRequest = DataRequest.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("originalResourceID")
                 .withContext(context)
                 .withUser(user)
                 .withResource(resource)
@@ -78,10 +76,8 @@ public class DataRequestTest {
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
                         () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
                         () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
                         () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
                         () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service"),
                         () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
                 ),
