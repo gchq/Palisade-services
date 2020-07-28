@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.palisade.service.UserService;
+import uk.gov.gchq.palisade.service.palisade.domain.ServiceName;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -91,7 +91,7 @@ public class AuditRequestTest {
                 .withResourceId("resource")
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a reason for access", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))))
                 .withException(new SecurityException("not allowed"))
-                .withServiceClass(UserService.class);
+                .withServiceName(ServiceName.USER_SERVICE.name());
 
         assertThat("RegisterRequestExceptionAuditRequest not constructed", subject.resourceId, is(equalTo("resource")));
     }
