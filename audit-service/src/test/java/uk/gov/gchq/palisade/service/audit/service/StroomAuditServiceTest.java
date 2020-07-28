@@ -208,7 +208,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName(ServiceName.PALISADE_SERVICE.name());
+                .withServiceName(ServiceName.POLICY_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
