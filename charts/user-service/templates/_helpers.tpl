@@ -84,6 +84,14 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 {{- end }}
 
+
+{{/*
+Calculate the service application jar location
+*/}}
+{{- define "user-service.application.path" }}
+{{- printf "/usr/share/%s" .Chart.Name }}
+{{- end }}
+
 {{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}

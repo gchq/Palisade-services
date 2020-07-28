@@ -15,7 +15,7 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis-cluster.fullname" . }}
 {{- $config := .Values.global.persistence.redisCluster }}
-{{ range $index := until ( .Values.cluster.nodes | int) }}
+{{ range $index := until (.Values.cluster.nodes | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -46,6 +46,7 @@ spec:
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
     volumeAttributes:
       path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/cluster/{{ $index }}
+      type: DirectoryOrCreate
   {{- end }}
 ---
 {{- end }}

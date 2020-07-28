@@ -71,7 +71,7 @@ cluster:
   activeDeadlineSeconds: 600
   ## Number of Redis nodes to be deployed
   ##
-  nodes: 1
+  nodes: 6
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created
   ##
@@ -291,7 +291,7 @@ persistence:
   storageClass: "redis-persistence"
   accessModes:
     - ReadWriteOnce
-  size: 8Gi
+  size: 4Gi
   ## Persistent Volume selectors
   ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
   matchLabels: {}

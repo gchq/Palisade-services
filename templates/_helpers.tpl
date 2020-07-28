@@ -110,20 +110,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Create a number of arguments to pass to a spring application (set up some redis properties)
-*/}}
-{{- define "palisade.redis-args" -}}
-{{- if or .Values.global.redis.install .Values.global.redis.config -}}
-{{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) -}}
-{{- $masterPort := int .Values.global.redis.master.service.port -}}
-{{- printf "[\"--spring.redis.host=%s\", \"--spring.redis.port=%d\"]" $masterFullname $masterPort -}}
-{{- else if or .Values.global.redisCluster.install .Values.global.redisCluster.config -}}
-{{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," -}}
-{{- printf "[\"--spring.redis.cluster.nodes=%s\"]" $clusterNodes -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Create the service name of the redis master
 */}}
 {{- define "palisade.redis.fullname" -}}
@@ -143,9 +129,9 @@ Create the service name of the redis master
 Create a list of headless redis-cluster nodes from service name and node count
 */}}
 {{- define "palisade.redis-cluster.headlessNodes" -}}
-{{- $count := .Values.global.redisCluster.cluster.nodes | int -}}
+{{- $count := (index .Values.global "redis-cluster").cluster.nodes | int -}}
 {{- $clusterFullname := printf "%s-cluster" (include "palisade.redis-cluster.fullname" .) -}}
-{{- $headlessPort := int .Values.global.redisCluster.exports.redisPort -}}
+{{- $headlessPort := int (index .Values.global "redis-cluster").exports.redisPort -}}
 {{- range $i, $v := until $count -}}
 {{- printf "%s-%d.%s-headless:%d," $clusterFullname $i $clusterFullname $headlessPort -}}
 {{- end -}}
@@ -155,10 +141,10 @@ Create a list of headless redis-cluster nodes from service name and node count
 Create the service name of the redis cluster
 */}}
 {{- define "palisade.redis-cluster.fullname" -}}
-{{- if .Values.global.redisCluster.exports.fullnameOverride -}}
-{{- .Values.global.redisCluster.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- if (index .Values.global "redis-cluster").exports.fullnameOverride -}}
+{{- (index .Values.global "redis-cluster").exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.global.redisCluster.exports.nameOverride -}}
+{{- $name := default .Chart.Name (index .Values.global "redis-cluster").exports.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
