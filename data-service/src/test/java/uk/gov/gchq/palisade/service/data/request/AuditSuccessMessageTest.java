@@ -49,7 +49,7 @@ public class AuditSuccessMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");

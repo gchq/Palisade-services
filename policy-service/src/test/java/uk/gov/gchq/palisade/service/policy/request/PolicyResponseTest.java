@@ -45,25 +45,6 @@ public class PolicyResponseTest {
     @Autowired
     private JacksonTester<PolicyResponse> jacksonTester;
 
-    @Test
-    public void testDeserialisePolicyResponseUsingToJson() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserID\",\"resourceId\":\"originalResourceID\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\"" +
-                ":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\"" +
-                ":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/file.format\",\"attributes\":{},\"connectionDetail\":{\"class\":\"" +
-                "uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\"" +
-                ",\"id\":\"/test/\"},\"serialisedFormat\":\"format\",\"type\":\"java.lang.String\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{}}}";
-
-        ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(jsonString);
-
-        PolicyResponse policyResponse = policyResponseObjectContent.getObject();
-        assertThat(policyResponse.getUserId()).isEqualTo("originalUserID");
-        assertThat(policyResponse.getResourceId()).isEqualTo("originalResourceID");
-        assertThat(policyResponse.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(policyResponse.getUser().getUserId().getId()).isEqualTo("testUserId");
-        assertThat(policyResponse.getResource().getId()).isEqualTo("/test/file.format");
-        assertThat(policyResponse.rules.getMessage()).isEqualTo("no rules set");
-    }
-
     /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
@@ -73,7 +54,7 @@ public class PolicyResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantPolicyResponseSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantPolicyResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
