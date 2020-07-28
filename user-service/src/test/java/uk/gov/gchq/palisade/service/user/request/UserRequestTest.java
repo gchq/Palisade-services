@@ -67,7 +67,7 @@ public class UserRequestTest {
                 () -> assertAll("AuditDeserialisingComparedToObject",
                         () -> assertThat(userRequestObject.userId).isEqualTo(userRequest.getUserId()),
                         () -> assertThat(userRequestObject.getResourceId()).isEqualTo(userRequest.getResourceId()),
-                        () -> assertThat(userRequestObject.getContext().getPurpose()).isEqualTo(userRequest.getContext())
+                        () -> assertThat(userRequestObject.getContext()).isEqualTo(userRequest.getContext())
                 ),
                 () -> assertAll("ObjectComparison",
                         () -> assertThat(userRequestObject).isEqualTo(userRequest)

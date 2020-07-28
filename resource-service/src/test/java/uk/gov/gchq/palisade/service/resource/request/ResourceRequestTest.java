@@ -30,21 +30,24 @@ import uk.gov.gchq.palisade.User;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
 public class ResourceRequestTest {
 
     @Autowired
-    private JacksonTester<ResourceRequest> jacksonTester;
+    private JacksonTester<ResourceRequest> jsonTester;
 
     /**
-     * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
+     * Tests the creation of the message type, ResourceRequest using the builder
+     * plus tests the serialising to a Json string and deserialising to an object.
      *
-     * @throws IOException if it fails to parse the object
+     * @throws IOException throws if the {@link ResourceRequest} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
-    public void testSerialiseResourceRequestToJson() throws IOException {
+    public void testResourceRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         ResourceRequest resourceRequest = ResourceRequest.Builder.create()
@@ -53,31 +56,29 @@ public class ResourceRequestTest {
                 .withContext(context)
                 .withUser(user);
 
-        JsonContent<ResourceRequest> resourceRequestJsonContent = jacksonTester.write(resourceRequest);
+        JsonContent<ResourceRequest> resourceRequestJsonContent = jsonTester.write(resourceRequest);
+        ObjectContent<ResourceRequest> resourceRequestObjectContent = jsonTester.parse(resourceRequestJsonContent.getJson());
+        ResourceRequest resourceRequestObject = resourceRequestObjectContent.getObject();
 
-        //these tests are each for strings
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserId");
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId");
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId");
+
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("AuditSerialisingComparedToString",
+                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserId"),
+                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
+                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(resourceRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId")
+                ),
+                () -> assertAll("AuditDeserialisingComparedToObject",
+                        () -> assertThat(resourceRequest.getUserId()).isEqualTo(resourceRequestObject.getUserId()),
+                        () -> assertThat(resourceRequest.getResourceId()).isEqualTo(resourceRequestObject.getResourceId()),
+                        () -> assertThat(resourceRequest.getContext()).isEqualTo(resourceRequestObject.getContext()),
+                        () -> assertThat(resourceRequest.getUser()).isEqualTo((resourceRequestObject.getUser()))
+                ),
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(resourceRequest).isEqualTo(resourceRequestObject)
+                )
+        );
+
     }
 
-    /**
-     * Create the ResourceRequest object from a Json string and then test the content of the object.
-     *
-     * @throws IOException if it fails to parse the string into an object
-     */
-    @Test
-    public void testDeserializeJsonToResourceRequest() throws IOException {
-        String jsonString = "{\"userId\":\"originalUserId\",\"resourceId\":\"testResourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context" +
-                "\",\"contents\":{\"purpose\":\"testContext\"}},\"user\":{\"userId\":{\"id\":\"testUserId\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}";
-
-        ObjectContent<ResourceRequest> resourceRequestContent = jacksonTester.parse(jsonString);
-
-        ResourceRequest request = resourceRequestContent.getObject();
-        assertThat(request.getUserId()).isEqualTo("originalUserId");
-        assertThat(request.resourceId).isEqualTo("testResourceId");
-        assertThat(request.getContext().getPurpose()).isEqualTo("testContext");
-        assertThat(request.getUser().getUserId().getId()).isEqualTo("testUserId");
-    }
 }
