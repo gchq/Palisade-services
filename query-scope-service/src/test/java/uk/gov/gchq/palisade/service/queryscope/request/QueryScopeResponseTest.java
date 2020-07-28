@@ -80,7 +80,7 @@ public class QueryScopeResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")

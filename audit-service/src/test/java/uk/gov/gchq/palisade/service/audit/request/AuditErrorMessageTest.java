@@ -52,7 +52,7 @@ public class AuditErrorMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();

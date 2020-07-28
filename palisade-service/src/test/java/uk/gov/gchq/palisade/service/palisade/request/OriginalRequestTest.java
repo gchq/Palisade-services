@@ -47,7 +47,7 @@ public class OriginalRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         OriginalRequest originalRequest = OriginalRequest.Builder.create()
                 .withUserId("testUser")

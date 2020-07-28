@@ -53,7 +53,7 @@ public class DataRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void groupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
