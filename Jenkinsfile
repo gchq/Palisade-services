@@ -71,7 +71,7 @@ timestamps {
             value: tcp://localhost:2375
         resources:
           requests:
-            resourceRequestCpu:4
+            resourceRequestCpu: "4"
             ephemeral-storage: "4Gi"
           limits:
             ephemeral-storage: "8Gi"
