@@ -46,7 +46,7 @@ public class UserRequestTest {
      *                     This equates to a failure to serialise or deserialise the Json string.
      */
     @Test
-    public void testUserRequestMessageSerialisingAndDeserialising() throws IOException {
+    public void testUserRequestSerialisingAndDeserialising() throws IOException {
 
         Context context = new Context().purpose("testContext");
         UserRequest userRequest = UserRequest.Builder.create()

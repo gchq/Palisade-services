@@ -47,8 +47,8 @@ public class ResultsResponseTest {
         Long x = 31415L;
         ResultsResponse resultsResponse = ResultsResponse.Builder.create()
                 .withQueuePointer(x);
-        JsonContent<ResultsResponse> resultsResponseJsonContent = jsonTester.write(resultsResponse);
 
+        JsonContent<ResultsResponse> resultsResponseJsonContent = jsonTester.write(resultsResponse);
         ObjectContent<ResultsResponse> resultsResponseObjectContent = this.jsonTester.parse(resultsResponseJsonContent.getJson());
         ResultsResponse resultsResponseObject = resultsResponseObjectContent.getObject();
 
