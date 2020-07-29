@@ -57,7 +57,7 @@ public class DataController {
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
         LOGGER.info("Invoking read (chunked): {}", request);
-        StreamingResponseBody stream = out -> service.read(request).accept(out);
+        StreamingResponseBody stream = outputStream -> service.read(request, outputStream);
 
         LOGGER.info("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);

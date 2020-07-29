@@ -36,11 +36,11 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import java.util.HashSet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
@@ -147,7 +147,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(UserService.class);
+                .withServiceName(ServiceName.USER_SERVICE.name());
         auditRequest.setOriginalRequestId(requestId);
 
         // When
@@ -178,7 +178,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(ResourceService.class);
+                .withServiceName(ServiceName.RESOURCE_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
@@ -208,7 +208,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceClass(Service.class);
+                .withServiceName(ServiceName.POLICY_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
@@ -217,13 +217,14 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId()),
-                containsString(resource.getId()),
-                containsString(exception.getMessage())
-        ));
+        // better error messages
+        assertThat(log)
+            .contains(userId.getId())
+            .contains(context.getPurpose())
+            .contains(requestId.getId())
+            .contains(resource.getId())
+            .contains(exception.getMessage());
+
         assertThat(log, allOf(
                 containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID),
                 containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION)

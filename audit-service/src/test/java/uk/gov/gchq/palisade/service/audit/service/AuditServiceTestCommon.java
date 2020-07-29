@@ -108,13 +108,13 @@ class AuditServiceTestCommon {
                 .withContext(mockContext());
     }
 
-    static AuditRequest.RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequest() {
+    static AuditRequest.RegisterRequestExceptionAuditRequest registerRequestExceptionAuditRequestFromUserService() {
         return AuditRequest.RegisterRequestExceptionAuditRequest.create(mockOriginalRequestId())
                 .withUserId(mockUserID())
                 .withResourceId(mockResource().getId())
                 .withContext(mockContext())
                 .withException(mockException())
-                .withServiceClass(Service.class);
+                .withServiceName(ServiceName.USER_SERVICE.name());
     }
 
     static AuditRequest.ReadRequestCompleteAuditRequest readRequestCompleteAuditRequest() {
