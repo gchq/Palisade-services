@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.palisade.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -45,7 +44,7 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("error") Throwable error) {
 
         super(userId, resourceId, context, attributes);
-        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error" +" cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error cannot be null"));
     }
 
     @Generated
