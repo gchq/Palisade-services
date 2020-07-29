@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -33,6 +32,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 
@@ -77,14 +77,9 @@ public class AuditMessage {
             final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes) {
 
-        Assert.notNull(userId, "User cannot be null");
-        Assert.notNull(resourceId, "Resource ID  cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-        Assert.notNull(attributes, "Attributes cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
 
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 

@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -42,9 +43,9 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("error") Throwable error) {
+
         super(userId, resourceId, context, attributes);
-        Assert.notNull(error, "Error cannot be null");
-        this.error = error;
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error" +" cannot be null"));
     }
 
     @Generated
