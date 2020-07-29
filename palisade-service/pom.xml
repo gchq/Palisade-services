@@ -31,7 +31,6 @@
 
     <properties>
         <apache.commons.version>1.19</apache.commons.version>
-        <jackson.version>2.10.4</jackson.version>
     </properties>
 
     <dependencies>

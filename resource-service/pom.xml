@@ -34,7 +34,6 @@
     <properties>
         <eureka.version>1.9.16</eureka.version>
         <hadoop.version>3.2.1</hadoop.version>
-        <jackson.version>2.10.4</jackson.version>
     </properties>
 
     <dependencies>
