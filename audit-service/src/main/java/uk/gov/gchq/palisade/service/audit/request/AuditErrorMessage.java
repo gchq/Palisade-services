@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -49,9 +49,9 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("serverHostname") String serverHostname,
             final @JsonProperty("attributes") JsonNode attributes,
             final @JsonProperty("error") JsonNode error) {
+
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
-        Assert.notNull(error, "Error cannot be null");
-        this.error = error;
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error" +" cannot be null"));
     }
 
     @Generated

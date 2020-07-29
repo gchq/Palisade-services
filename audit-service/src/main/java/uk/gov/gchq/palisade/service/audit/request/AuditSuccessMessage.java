@@ -18,13 +18,13 @@ package uk.gov.gchq.palisade.service.audit.request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -50,10 +50,9 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("serverHostname") String serverHostname,
             final @JsonProperty("attributes") JsonNode attributes,
             final @JsonProperty("leafResourceId") String leafResourceId) {
-        super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
 
-        Assert.notNull(leafResourceId, "Resource ID cannot be null");
-        this.leafResourceId = leafResourceId;
+        super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Resource ID cannot be null"));
     }
 
     @Generated

@@ -21,13 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 
@@ -60,23 +60,15 @@ public class AuditMessage {
             final @JsonProperty("serverHostname") String serverHostname,
             final @JsonProperty("attributes") JsonNode attributes) {
 
-        Assert.notNull(serviceName, "Service Name cannot be null");
-        Assert.notNull(userId, "User cannot be null");
-        Assert.notNull(resourceId, "Resource ID  cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-        Assert.notNull(timestamp, "Timestamp cannot be null");
-        Assert.notNull(serverIP, "Server IP address cannot be null");
-        Assert.notNull(serverHostname, "Server Hostname cannot be null");
-        Assert.notNull(attributes, "Attributes cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
-        this.serviceName = serviceName;
-        this.timestamp = timestamp;
-        this.serverIP = serverIP;
-        this.serverHostname = serverHostname;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
+        this.serviceName = Optional.ofNullable(serviceName).orElseThrow(() -> new RuntimeException("Service Name cannot be null"));
+        this.timestamp = Optional.ofNullable(timestamp).orElseThrow(() -> new RuntimeException("Timestamp cannot be null"));
+        this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new RuntimeException("Server IP address cannot be null"));
+        this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new RuntimeException("Server Hostname cannot be null"));
         this.attributes = attributes;
+
     }
 
     @Generated
