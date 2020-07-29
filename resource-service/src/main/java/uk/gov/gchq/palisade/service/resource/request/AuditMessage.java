@@ -35,6 +35,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 
@@ -80,13 +81,9 @@ public class AuditMessage {
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes) {
 
-        Assert.notNull(userId, "User cannot be null");
-        Assert.notNull(resourceId, "Resource ID  cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
 
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
