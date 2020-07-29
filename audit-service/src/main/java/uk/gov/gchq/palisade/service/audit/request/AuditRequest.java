@@ -267,17 +267,18 @@ public class AuditRequest extends Request {
         /**
          * The service that threw the exception
          */
-        public final Class<? extends Service> serviceClass;
+        public final String serviceName;
 
         @JsonCreator
-        private RegisterRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("userId") final UserId userId, @JsonProperty("resourceId") final String resourceId,
-                                                     @JsonProperty("context") final Context context, @JsonProperty("exception") final Throwable exception, @JsonProperty("serviceClass") final Class<? extends Service> serviceClass) {
+        private RegisterRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId,
+                                                     @JsonProperty("userId") final UserId userId, @JsonProperty("resourceId") final String resourceId, @JsonProperty("context") final Context context,
+                                                     @JsonProperty("exception") final Throwable exception, @JsonProperty("serviceName") final String serviceName) {
             super(originalRequestId);
             this.userId = requireNonNull(userId);
             this.resourceId = requireNonNull(resourceId);
             this.context = requireNonNull(context);
             this.exception = requireNonNull(exception);
-            this.serviceClass = requireNonNull(serviceClass);
+            this.serviceName = requireNonNull(serviceName);
         }
 
         /**
@@ -307,13 +308,13 @@ public class AuditRequest extends Request {
                     Objects.equals(resourceId, that.resourceId) &&
                     Objects.equals(context, that.context) &&
                     Objects.equals(exception, that.exception) &&
-                    Objects.equals(serviceClass, that.serviceClass);
+                    Objects.equals(serviceName, that.serviceName);
         }
 
         @Override
         @Generated
         public int hashCode() {
-            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceClass);
+            return Objects.hash(super.hashCode(), userId, resourceId, context, exception, serviceName);
         }
 
         @Override
@@ -324,7 +325,7 @@ public class AuditRequest extends Request {
                     .add("resourceId='" + resourceId + "'")
                     .add("context=" + context)
                     .add("exception=" + exception)
-                    .add("serviceClass=" + serviceClass)
+                    .add("serviceClass=" + serviceName)
                     .add(super.toString())
                     .toString();
         }
@@ -383,10 +384,10 @@ public class AuditRequest extends Request {
         public interface IServiceClass {
             /**
              * Add a service class to the request
-             * @param serviceClass {@link Class} is the palisade service that the exception was triggered by.
+             * @param serviceName {@link String} name of the palisade service that the exception was triggered by.
              * @return the {@link RegisterRequestExceptionAuditRequest}
              */
-            RegisterRequestExceptionAuditRequest withServiceClass(Class<? extends Service> serviceClass);
+            RegisterRequestExceptionAuditRequest withServiceName(String serviceName);
         }
     }
 
@@ -421,8 +422,10 @@ public class AuditRequest extends Request {
         public final long numberOfRecordsProcessed;
 
         @JsonCreator
-        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
-                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
+        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId,
+                                                @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
+                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned,
+                                                @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResource = requireNonNull(leafResource);
@@ -439,7 +442,8 @@ public class AuditRequest extends Request {
          * @return {@link ReadRequestCompleteAuditRequest}
          */
         public static IUser create(final RequestId original) {
-            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed ->
+                    new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
         }
 
         @Override
