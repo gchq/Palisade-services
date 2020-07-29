@@ -37,7 +37,6 @@ import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -109,37 +108,37 @@ public class SimpleDataService implements DataService {
     }
 
     @Override
-    public Consumer<OutputStream> read(final ReadRequest dataRequest) {
-        return out -> {
-            try {
-                final AtomicLong recordsProcessed = new AtomicLong(0);
-                final AtomicLong recordsReturned = new AtomicLong(0);
+    public void read(final ReadRequest dataRequest, final OutputStream out) throws IOException {
+        try {
+            final AtomicLong recordsProcessed = new AtomicLong(0);
+            final AtomicLong recordsReturned = new AtomicLong(0);
 
-                LOGGER.debug("Querying palisade service for token {} and resource {}", dataRequest.getToken(), dataRequest.getResource());
-                // This realistically may throw a RuntimeException, ensure that it is caught for auditing
-                DataReaderRequest readerRequest = constructReaderRequest(dataRequest);
+            LOGGER.debug("Querying palisade service for token {} and resource {}", dataRequest.getToken(), dataRequest.getResource());
+            // This realistically may throw a RuntimeException, ensure that it is caught for auditing
+            DataReaderRequest readerRequest = constructReaderRequest(dataRequest);
 
-                LOGGER.debug("Reading from reader with request {}", readerRequest);
-                DataReaderResponse readerResponse = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
+            LOGGER.debug("Reading from reader with request {}", readerRequest);
+            DataReaderResponse readerResponse = getDataReader().read(readerRequest, recordsProcessed, recordsReturned);
 
-                LOGGER.debug("Writing reader response {} to output stream", readerResponse);
-                ReadResponse dataResponse = new NoInputReadResponse(readerResponse).message(dataRequest.toString());
-                dataResponse.writeTo(out);
-                out.close();
+            LOGGER.debug("Writing reader response {} to output stream", readerResponse);
+            ReadResponse dataResponse = new NoInputReadResponse(readerResponse).message(dataRequest.toString());
+            dataResponse.writeTo(out);
+            out.close();
 
-                LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
-                auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
-            } catch (IOException | RuntimeException ex) {
-                auditRequestReceivedException(dataRequest, ex);
-                throw new ReadException(ex);
-            } catch (Error err) {
-                // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
-                // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
-                auditRequestReceivedException(dataRequest, err);
-                // Rethrow this Error, don't wrap it in the ReadException
-                throw err;
-            }
-        };
+            LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
+            auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
+
+        } catch (RuntimeException ex) {
+            auditRequestReceivedException(dataRequest, ex);
+            // Ensure the StreamingResponseBody closes properly
+            throw new ReadException(ex);
+        } catch (Error err) {
+            // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
+            // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
+            auditRequestReceivedException(dataRequest, err);
+            // Rethrow this as an Error, don't wrap it in the ReadException
+            throw err;
+        }
     }
 
     @Override
