@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -31,6 +30,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 
@@ -69,19 +69,12 @@ public final class PolicyResponse {
             final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") Rules rules) {
 
-        Assert.notNull(userId, "User ID cannot be null");
-        Assert.notNull(resourceId, "Resource ID cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-        Assert.notNull(user, "User cannot be null");
-        Assert.notNull(resource, "Resource cannot be null");
-        Assert.notNull(rules, "Rules cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
-        this.user = user;
-        this.resource = resource;
-        this.rules = rules;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new RuntimeException("User cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
+        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new RuntimeException("Rules cannot be null"));
     }
 
     @Generated
