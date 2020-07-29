@@ -22,18 +22,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -58,8 +57,7 @@ import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServicePro
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.Executor;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -68,11 +66,9 @@ import java.util.stream.Collectors;
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableConfigurationProperties
-@EnableAutoConfiguration
 @EnableAsync
-@EnableScheduling
-public class ApplicationConfiguration implements AsyncConfigurer {
+@EnableWebMvc
+public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
     public static final Integer CORE_POOL_SIZE = 6;
 
@@ -222,22 +218,22 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Override
     @Bean("threadPoolTaskExecutor")
-    public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(CORE_POOL_SIZE);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
-    }
-
-    @Bean(name = "concurrentTaskExecutor")
-    public ConcurrentTaskExecutor getTaskExecutor() {
-        return new ConcurrentTaskExecutor(this.getAsyncExecutor());
+    public ThreadPoolTaskExecutor getAsyncExecutor() {
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(CORE_POOL_SIZE);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
     }
 
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new ApplicationAsyncExceptionHandler();
+    }
+
+    @Override
+    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
     }
 
 }

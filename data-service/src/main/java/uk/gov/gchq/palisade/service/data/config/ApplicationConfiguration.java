@@ -24,10 +24,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
@@ -43,17 +42,17 @@ import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.Executor;
+import java.util.Objects;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
 @EnableAsync
-@EnableScheduling
-public class ApplicationConfiguration implements AsyncConfigurer {
+@EnableWebMvc
+public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    public static final Integer CORE_POOL_SIZE = 6;
 
     /**
      * Simple data service bean created with instances of auditService, palisadeService and dataReader
@@ -114,12 +113,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Override
     @Bean("threadPoolTaskExecutor")
-    public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
+    public ThreadPoolTaskExecutor getAsyncExecutor() {
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(CORE_POOL_SIZE);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
     }
 
     @Override
@@ -127,18 +126,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ApplicationAsyncExceptionHandler();
     }
 
-    @Bean
-    public WebMvcConfigurer webMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-                configurer.setTaskExecutor(getTaskExecutor());
-            }
-        };
-    }
-
-    @Bean(name = "concurrentTaskExecutor")
-    public ConcurrentTaskExecutor getTaskExecutor() {
-        return new ConcurrentTaskExecutor(this.getAsyncExecutor());
+    @Override
+    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
     }
 }

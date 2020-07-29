@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("dbtest")
 public class JpaPersistenceLayerTest {
