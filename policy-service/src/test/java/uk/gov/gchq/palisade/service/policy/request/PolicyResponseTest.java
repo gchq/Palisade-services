@@ -70,7 +70,7 @@ public class PolicyResponseTest {
                 .withContext(context)
                 .withUser(user)
                 .withResource(resource)
-                .withRule(rules);
+                .withRules(rules);
 
         JsonContent<PolicyResponse> policyResponseJsonContent = jacksonTester.write(policyResponse);
         ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(policyResponseJsonContent.getJson());

@@ -242,7 +242,7 @@ public final class PolicyResponse {
              * @param rules that apply to this request.
              * @return class {@link PolicyResponse} for the completed class from the builder.
              */
-            PolicyResponse withRule(Rules rules);
+            PolicyResponse withRules(Rules rules);
         }
     }
 
