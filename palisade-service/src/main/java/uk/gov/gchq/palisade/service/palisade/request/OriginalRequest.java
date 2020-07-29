@@ -18,12 +18,12 @@ package uk.gov.gchq.palisade.service.palisade.request;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -48,13 +48,9 @@ public final class OriginalRequest {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") Context context) {
 
-        Assert.notNull(userId, "User cannot be null");
-        Assert.notNull(resourceId, "Resource cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
     }
 
     @Generated
