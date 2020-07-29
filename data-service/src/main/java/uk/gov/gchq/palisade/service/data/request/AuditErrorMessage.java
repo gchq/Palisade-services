@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -44,9 +44,10 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("error") Throwable error) {
+
         super(userId, resourceId, context, attributes);
-        Assert.notNull(error, "Error cannot be null");
-        this.error = error;
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error" + " cannot be null"));
+
     }
 
     @Generated
@@ -79,7 +80,6 @@ public final class AuditErrorMessage extends AuditMessage {
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          * @throws JsonProcessingException if there is a failure to parse information from the DataRequest.
-         *
          */
 
 

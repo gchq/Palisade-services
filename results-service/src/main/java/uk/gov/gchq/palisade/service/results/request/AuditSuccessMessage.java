@@ -20,13 +20,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -53,9 +53,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("leafResourceId") String leafResourceId) {
 
         super(userId, resourceId, context, attributes);
-        Assert.notNull(leafResourceId, "Resource ID cannot be null");
-        this.leafResourceId = leafResourceId;
-
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Leaf Resource ID cannot be null"));
     }
 
     @Generated

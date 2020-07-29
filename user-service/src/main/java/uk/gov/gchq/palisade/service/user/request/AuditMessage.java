@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.Assert;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -45,6 +43,8 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
+    public static final String SERVICE_NAME = "user-service";
+
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     @JsonProperty("userId")
@@ -56,9 +56,8 @@ public class AuditMessage {
     @JsonProperty("context")
     protected final JsonNode context;   //Relevant context information about the request.
 
-    @Value("${spring.application.name}")
     @JsonProperty("serviceName")
-    protected String serviceName = "user-service";  //service that sent the message
+    protected String serviceName = SERVICE_NAME;  //service that sent the message
 
     @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
