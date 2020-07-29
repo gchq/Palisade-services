@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -56,15 +57,10 @@ public final class ResultsRequest {
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("resource") JsonNode resource) {
 
-        Assert.notNull(userId, "User ID cannot be null");
-        Assert.notNull(resourceId, "Resource ID cannot be null");
-        Assert.notNull(context, "Context cannot be null");
-        Assert.notNull(resource, "Resources cannot be null");
-
-        this.userId = userId;
-        this.resourceId = resourceId;
-        this.context = context;
-        this.resource = resource;
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
     }
 
     @Generated

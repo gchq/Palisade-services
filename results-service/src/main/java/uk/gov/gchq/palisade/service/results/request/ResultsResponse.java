@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 
@@ -37,10 +38,11 @@ public final class ResultsResponse {
     /**
      * {@link String} reference to where the data is located
      */
-    public final Long queuePointer;
+    public final Long queuePointer; //pointer reference for the request given to the client
 
     private ResultsResponse(final @JsonProperty("queuePointer") Long queuePointer) {
-        this.queuePointer = queuePointer;
+
+        this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new RuntimeException("Queue pointer cannot be null"));
     }
 
     /**
