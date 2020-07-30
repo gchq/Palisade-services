@@ -14,4 +14,4 @@
 #
 logging:
   level:
-    uk.gov.gchq.palisade: "DEBUG"
+    uk.gov.gchq.palisade: "INFO"
