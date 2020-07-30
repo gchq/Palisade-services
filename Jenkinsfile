@@ -26,6 +26,7 @@
 //in experiments carried out, the security priviledges seemed to prevent
 //connection to the docker sock for much later versions
 
+timestamps {
 
 podTemplate(yaml: '''
 apiVersion: v1
@@ -75,7 +76,7 @@ spec:
         ephemeral-storage: "8Gi"
   
   - name: hadolint
-    image: hadolint/hadolint:latest-debian@sha256:15016b18964c5e623bd2677661a0be3c00ffa85ef3129b11acf814000872861e
+    image: hadolint/hadolint:v1.18.0-6-ga0d655d-alpine@sha256:e0f960b5acf09ccbf092ec1e8f250cd6b5c9a586a0e9783c53618d76590b6aec
     imagePullPolicy: IfNotPresent
     command:
         - cat
@@ -203,7 +204,8 @@ spec:
                                     sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${CHANGE_BRANCH}" -Dsonar.projectName="Palisade-Services-${CHANGE_BRANCH}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
                                 } else {
                                     sh 'mvn -s $MAVEN_SETTINGS org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey="Palisade-Services-${BRANCH_NAME}" -Dsonar.projectName="Palisade-Services-${BRANCH_NAME}" -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS'
-                                }                            }
+                                }
+                            }
                         }
                     }
                 }
@@ -299,4 +301,6 @@ spec:
 //             }
 //         }
     }
+}
+
 }
