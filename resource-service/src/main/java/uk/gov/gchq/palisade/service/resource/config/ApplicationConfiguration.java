@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -58,6 +57,7 @@ import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServicePro
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -66,7 +66,6 @@ import java.util.stream.Collectors;
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableConfigurationProperties
 @EnableAsync
 @EnableWebMvc
 public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
@@ -234,8 +233,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
 
     @Override
     public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-        configurer.setTaskExecutor(getAsyncExecutor());
-        // One minute timeout, same as feign will have
-        configurer.setDefaultTimeout(60000);
+        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
     }
+
 }

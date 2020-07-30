@@ -127,14 +127,16 @@ public class SimpleDataService implements DataService {
 
             LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
             auditRequestComplete(readerRequest, recordsProcessed, recordsReturned);
+
         } catch (RuntimeException ex) {
             auditRequestReceivedException(dataRequest, ex);
+            // Ensure the StreamingResponseBody closes properly
             throw new ReadException(ex);
         } catch (Error err) {
             // Either an auditRequestComplete or auditRequestException MUST be called here, so catch a broader set of Exception classes than might be expected
             // Generally this is a bad idea, but we need guarantees of the audit - ie. malicious attempt at StackOverflowError
             auditRequestReceivedException(dataRequest, err);
-            // Rethrow this Error, don't wrap it in the ReadException
+            // Rethrow this as an Error, don't wrap it in the ReadException
             throw err;
         }
     }

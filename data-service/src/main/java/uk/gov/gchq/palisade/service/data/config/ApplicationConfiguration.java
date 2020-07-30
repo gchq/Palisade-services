@@ -42,6 +42,7 @@ import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Bean configuration and dependency injection graph
@@ -127,8 +128,6 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
 
     @Override
     public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-        configurer.setTaskExecutor(getAsyncExecutor());
-        // One minute timeout, same as feign will have
-        configurer.setDefaultTimeout(60000);
+        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
     }
 }
