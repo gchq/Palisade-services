@@ -26,7 +26,7 @@ import java.util.StringJoiner;
 
 
 /**
- * * ResultsResponse represents the output for result-service which will be forwarded to the client provide the
+ * ResultsResponse represents the output for result-service which will be forwarded to the client provide the
  * information needed to retrieve the data for this Resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
