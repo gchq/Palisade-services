@@ -33,10 +33,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the input for policy-service where the related policies are requested.
- * Next in the sequence will be the output for policy-service with the policies added.
+ * The PolicyRequest is the input for policy-service to identify the Policy associated with the given Resource and User.
+ * PolicyResponse is the output for this service which will include the Rules to implement with this Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
  * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.

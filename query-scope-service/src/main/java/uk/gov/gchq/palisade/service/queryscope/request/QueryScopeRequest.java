@@ -34,13 +34,11 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the input for query-scope-service request for defining the filtered adaptation of this request.
- * Next in the sequence will be the output for the query-scope-service with the filtered version of the request.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
+ * The QueryScopeRequest is the input for query-scope-service for preliminary processing and routing of the data.
+ * QueryScopeResponse is the output for this service which will have the redacted data schema that is to be
+ * provided to the client.
+ * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.data.request.DataRequest is the input for the data-service.
  * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)

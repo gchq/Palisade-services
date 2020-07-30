@@ -31,10 +31,9 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the output for query-scope-service with the filtered version of the request.
- * Next in the sequence will be the input for the result-service which will construct a response to the client.
+ * QueryScopeResponse represents the output for query-scope-service which will include redacted data schema that is to be
+ * provided to the client.
+ * This will be forwarded to the results-service in preparation for the client's request for the related Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeResponse is the output from the query-scope-service.
  * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.

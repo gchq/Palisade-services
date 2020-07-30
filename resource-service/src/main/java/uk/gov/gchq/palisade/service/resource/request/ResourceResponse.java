@@ -31,13 +31,11 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the output for resource-service where the resource has been identified.
- * Note there can any number of these messages generated from a single request.  There will be one message for each
- * of the resources that were found to correspond to the resource ID.
- * Next in the sequence will be the request for policy-service.
- * Note there are two classes that effectively represent the same data but represent a different stage of the process.
+ * ResourceResponse represents the output for resource-service which will include the Resource identified by the service.
+ * This will be forwarded to the policy-service to identify the related Policies associated with the User and Resource.
+ * Note that there can any number of ResourceResponse messages generated from a single request.  There will be one message for each
+ * of the resources that were found to correspond to this Resource ID.
+ * There are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.resource.request.ResourceResponse is the output from the resource-service.
  * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.
  */

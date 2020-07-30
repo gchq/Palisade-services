@@ -32,10 +32,8 @@ import java.util.StringJoiner;
 
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the output for user-service where the User has been identified.
- * Next in the sequence will be the request for resource-service.
+ * This data represents the output for user-service which will include the User identified by the service.
+ * This will be forwarded to the resource-service to identify the Resources associated with this query.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
  * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.

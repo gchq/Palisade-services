@@ -34,18 +34,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the authorised request access to the resource.  It is stored and later retrieved by the client
- * when there is a request to see the data.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.data.request.DataRequest is the input for the data-service.
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
+ * The DataResponse is the output for data-service for the client. At this stage the data has been processed by the
+ * rules put in place and ready for use by client.  It represents the authorised data that is available for the client.
  */
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class DataRequest {
+public final class DataResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -55,7 +49,7 @@ public final class DataRequest {
     private final JsonNode rules; // Json Node representation of the Rules
 
     @JsonCreator
-    private DataRequest(
+    private DataResponse(
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
             final @JsonProperty("resource") JsonNode resource,
@@ -125,7 +119,7 @@ public final class DataRequest {
          */
         public static IContext create() {
             return  context -> user -> resource -> rules ->
-                    new DataRequest(context, user, resource, rules);
+                    new DataResponse(context, user, resource, rules);
         }
 
 
@@ -206,9 +200,9 @@ public final class DataRequest {
              * Adds the rules that specify the access.
              *
              * @param rules that apply to this request.
-             * @return class {@link DataRequest} for the completed class from the builder.
+             * @return class {@link DataResponse} for the completed class from the builder.
              */
-            default DataRequest withRules(Rules rules) {
+            default DataResponse withRules(Rules rules) {
                 return withRulesNode(MAPPER.valueToTree(rules));
             }
 
@@ -216,9 +210,9 @@ public final class DataRequest {
              * Adds the rules that specify the access.  Uses a JsonNode string form of the information.
              *
              * @param rules that apply to this request.
-             * @return class {@link DataRequest} for the completed class from the builder.
+             * @return class {@link DataResponse} for the completed class from the builder.
              */
-            DataRequest withRulesNode(JsonNode rules);
+            DataResponse withRulesNode(JsonNode rules);
         }
     }
 
@@ -228,10 +222,10 @@ public final class DataRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DataRequest)) {
+        if (!(o instanceof DataResponse)) {
             return false;
         }
-        DataRequest that = (DataRequest) o;
+        DataResponse that = (DataResponse) o;
         return context.equals(that.context) &&
                 user.equals(that.user) &&
                 resource.equals(that.resource) &&
@@ -247,7 +241,7 @@ public final class DataRequest {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", DataRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", DataResponse.class.getSimpleName() + "[", "]")
                 .add("context=" + context)
                 .add("user=" + user)
                 .add("resource=" + resource)

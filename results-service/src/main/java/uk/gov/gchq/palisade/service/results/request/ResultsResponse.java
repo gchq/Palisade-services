@@ -26,11 +26,8 @@ import java.util.StringJoiner;
 
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the output for results-service which is the response to the original request from the client.
- * This is the last in the sequence.   It will contain the response that is to be sent back to the client based on the
- * original request that was sent into palisade-service.
+ * * ResultsResponse represents the output for result-service which will be forwarded to the client provide the
+ * information needed to retrieve the data for this Resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResultsResponse {

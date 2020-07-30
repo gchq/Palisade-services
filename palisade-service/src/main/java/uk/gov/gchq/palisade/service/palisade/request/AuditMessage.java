@@ -29,6 +29,7 @@ import java.net.UnknownHostException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +81,7 @@ public class AuditMessage {
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
+        this.attributes = Optional.ofNullable(attributes).orElseGet(() -> new HashMap<>());
 
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
@@ -91,7 +93,6 @@ public class AuditMessage {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
         }
 
-        this.attributes = attributes;
     }
 
     @Generated

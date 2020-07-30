@@ -30,10 +30,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the input for user-service to identify the User.
- * The next in the sequence will be the response provided by the user-service
+ * The UserRequest is the input for user-service to identify the User associated with the given User ID.
+ * UserResponse is the output for this service which will include the User identified by the service.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.request.OriginalRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the user-service.

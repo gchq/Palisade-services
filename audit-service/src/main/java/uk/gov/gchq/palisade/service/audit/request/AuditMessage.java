@@ -67,7 +67,7 @@ public class AuditMessage {
         this.timestamp = Optional.ofNullable(timestamp).orElseThrow(() -> new RuntimeException("Timestamp cannot be null"));
         this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new RuntimeException("Server IP address cannot be null"));
         this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new RuntimeException("Server Hostname cannot be null"));
-        this.attributes = attributes;
+        this.attributes = Optional.ofNullable(attributes).orElseThrow(() -> new RuntimeException("Attributes cannot be null"));
 
     }
 

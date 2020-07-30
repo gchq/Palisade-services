@@ -31,10 +31,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the input for resource-service where the resource is to be identified.
- * Next in the sequence will be the response for resource-service.
+ * The ResourceRequest is the input for resource-service to identify the Resource associated with the given Resource ID.
+ * ResourceResponse is the output for this service which will include the Resource identified by the service.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
  * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.

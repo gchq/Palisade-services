@@ -39,21 +39,21 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
-public class DataRequestTest {
+public class DataResponseTest {
 
     @Autowired
-    private JacksonTester<DataRequest> jacksonTester;
+    private JacksonTester<DataResponse> jacksonTester;
 
     /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link DataRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link DataResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantDataResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -63,34 +63,34 @@ public class DataRequestTest {
                 .parent(new SystemResource().id("/test"));
         Rules rules = new Rules<>();
 
-        DataRequest dataRequest = DataRequest.Builder.create()
+        DataResponse dataResponse = DataResponse.Builder.create()
                 .withContext(context)
                 .withUser(user)
                 .withResource(resource)
                 .withRules(rules);
 
-        JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(dataRequest);
-        ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
-        DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
+        JsonContent<DataResponse> dataResponseJsonContent = jacksonTester.write(dataResponse);
+        ObjectContent<DataResponse> dataRequestObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
+        DataResponse dataResponseMessageObject = dataRequestObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service"),
-                        () -> assertThat(dataRequestJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
+                        () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
+                        () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
+                        () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service"),
+                        () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(dataRequestMessageObject.getUser()).isEqualTo(dataRequest.getUser()),
-                        () -> assertThat(dataRequestMessageObject.getContext().getPurpose()).isEqualTo(dataRequest.getContext().getPurpose()),
-                        () -> assertThat(dataRequestMessageObject.getContext()).isEqualTo(dataRequest.getContext()),
-                        () -> assertThat(dataRequestMessageObject.getResource()).isEqualTo(dataRequest.getResource()),
-                        () -> assertThat(dataRequestMessageObject.getRules()).isEqualTo(dataRequest.getRules())
+                        () -> assertThat(dataResponseMessageObject.getUser()).isEqualTo(dataResponse.getUser()),
+                        () -> assertThat(dataResponseMessageObject.getContext().getPurpose()).isEqualTo(dataResponse.getContext().getPurpose()),
+                        () -> assertThat(dataResponseMessageObject.getContext()).isEqualTo(dataResponse.getContext()),
+                        () -> assertThat(dataResponseMessageObject.getResource()).isEqualTo(dataResponse.getResource()),
+                        () -> assertThat(dataResponseMessageObject.getRules()).isEqualTo(dataResponse.getRules())
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(dataRequestMessageObject.equals(dataRequest))
+                        () -> assertThat(dataResponseMessageObject.equals(dataResponse))
                 )
         );
     }

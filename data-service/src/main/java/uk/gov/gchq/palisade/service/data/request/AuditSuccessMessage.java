@@ -96,7 +96,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link ILeafResourceId} for the next step in the build.
          * @throws JsonProcessingException if there is a failure to parse information from the DataRequest.
          */
-        public static ILeafResourceId create(final DataRequest request, final Map<String, Object> attributes) throws JsonProcessingException {
+        public static ILeafResourceId create(final DataResponse request, final Map<String, Object> attributes) throws JsonProcessingException {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())

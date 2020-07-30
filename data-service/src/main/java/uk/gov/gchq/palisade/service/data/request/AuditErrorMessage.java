@@ -83,7 +83,7 @@ public final class AuditErrorMessage extends AuditMessage {
          */
 
 
-        public static IError create(final DataRequest request, final Map<String, Object> attributes) throws JsonProcessingException {
+        public static IError create(final DataResponse request, final Map<String, Object> attributes) throws JsonProcessingException {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
