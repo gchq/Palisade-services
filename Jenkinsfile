@@ -182,7 +182,7 @@ spec:
             // Otherwise, default to integration-tests/develop
             dir('Palisade-integration-tests') {
                 git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                sh "git checkout ${GIT_BRANCH_NAME}"
+                sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true)
                 container('docker-cmds') {
                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                         sh 'mvn -s $MAVEN_SETTINGS install'
