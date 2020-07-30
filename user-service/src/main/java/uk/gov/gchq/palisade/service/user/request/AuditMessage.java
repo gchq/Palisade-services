@@ -83,7 +83,7 @@ public class AuditMessage {
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.attributes = Optional.ofNullable(attributes).orElseGet(() -> new HashMap<>());
+        this.attributes = Optional.ofNullable(attributes).orElseGet(HashMap::new);
 
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 
