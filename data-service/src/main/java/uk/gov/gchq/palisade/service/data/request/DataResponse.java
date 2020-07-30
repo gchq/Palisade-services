@@ -34,8 +34,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The DataResponse is the output for data-service for the client. At this stage the data has been processed by the
- * rules put in place and ready for use by client.  It represents the authorised data that is available for the client.
+ * This class represents the data that is returned from the authorised data store (key value store/database) when the data service checks if there is an authorised request for the given token and resourceId.
  */
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -250,4 +249,3 @@ public final class DataResponse {
                 .toString();
     }
 }
-
