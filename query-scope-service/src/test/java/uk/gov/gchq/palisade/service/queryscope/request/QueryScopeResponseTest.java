@@ -44,34 +44,6 @@ public class QueryScopeResponseTest {
 
 
     /**
-     * Create the object using the builder and then serialise it to a Json string. Test the content of the Json string
-     *
-     * @throws IOException if it fails to parse the object
-     */
-    @Test
-    public void testSerialiseResourceResponseToJson() throws IOException {
-        Context context = new Context().purpose("testContext");
-        LeafResource resource = new FileResource().id("/test/file.format")
-                .type("java.lang.String")
-                .serialisedFormat("format")
-                .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
-                .parent(new SystemResource().id("/test"));
-
-        QueryScopeResponse queryScopeResponse = QueryScopeResponse.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("originalResourceID")
-                .withContext(context)
-                .withResource(resource);
-
-        JsonContent<QueryScopeResponse> queryScopeResponseJsonContent = jsonTester.write(queryScopeResponse);
-
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext");
-        assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format");
-    }
-
-    /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object

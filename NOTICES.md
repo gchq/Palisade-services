@@ -22,7 +22,7 @@ List of third-party dependencies grouped by their license type
 * Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
-* common ([uk.gov.gchq.palisade:common:0.4.0-20200729.081745-88](https://github.com/gchq/Palisade-common))
+* common ([uk.gov.gchq.palisade:common:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
 * hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
 * hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.4.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
 
