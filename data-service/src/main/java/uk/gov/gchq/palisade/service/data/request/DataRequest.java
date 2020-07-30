@@ -34,14 +34,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
- * This data will be forwarded to a set of services with each contributing to the processing of this request.
- * This version represents the authorised request access to the resource.  It is stored and later retrieved by the client
- * when there is a request to see the data.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.data.request.DataRequest is the input for the data-service.
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
+ * This class represents the data that is returned from the authorised data store (key value store/database) when the data service checks if there is an authorised request for the given token and resourceId.
  */
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -256,4 +249,3 @@ public final class DataRequest {
                 .toString();
     }
 }
-
