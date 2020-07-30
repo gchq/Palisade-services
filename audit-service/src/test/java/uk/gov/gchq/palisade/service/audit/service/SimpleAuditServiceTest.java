@@ -64,7 +64,7 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
     @DataPoints()
     public static AuditRequest[] requests = new AuditRequest[] {
             registerRequestCompleteAuditRequest(),
-            registerRequestExceptionAuditRequest(),
+            registerRequestExceptionAuditRequestFromUserService(),
             readRequestCompleteAuditRequest(),
             readRequestExceptionAuditRequest()
 

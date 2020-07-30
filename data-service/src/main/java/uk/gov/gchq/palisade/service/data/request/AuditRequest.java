@@ -127,8 +127,11 @@ public class AuditRequest extends Request {
         public final long numberOfRecordsProcessed;
 
         @JsonCreator
-        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("context") final Context context,
-                                                @JsonProperty("rulesApplied") final Rules rulesApplied, @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned, @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
+        private ReadRequestCompleteAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId,
+                                                @JsonProperty("user") final User user, @JsonProperty("leafResource") final LeafResource leafResource,
+                                                @JsonProperty("context") final Context context, @JsonProperty("rulesApplied") final Rules rulesApplied,
+                                                @JsonProperty("numberOfRecordsReturned") final long numberOfRecordsReturned,
+                                                @JsonProperty("numberOfRecordsProcessed") final long numberOfRecordsProcessed) {
             super(originalRequestId);
             this.user = requireNonNull(user);
             this.leafResource = requireNonNull(leafResource);
@@ -145,7 +148,8 @@ public class AuditRequest extends Request {
          * @return {@link ReadRequestCompleteAuditRequest}
          */
         public static IUser create(final RequestId original) {
-            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed -> new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
+            return user -> leafResource -> context -> rulesApplied -> numberOfRecordsReturned -> numberOfRecordsProcessed ->
+                    new ReadRequestCompleteAuditRequest(null, original, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed);
         }
 
         @Override
@@ -249,7 +253,9 @@ public class AuditRequest extends Request {
         public final Throwable exception;
 
         @JsonCreator
-        private ReadRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId, @JsonProperty("token") final String token, @JsonProperty("leafResource") final LeafResource leafResource, @JsonProperty("exception") final Throwable exception) {
+        private ReadRequestExceptionAuditRequest(@JsonProperty("id") final RequestId id, @JsonProperty("originalRequestId") final RequestId originalRequestId,
+                                                 @JsonProperty("token") final String token, @JsonProperty("leafResource") final LeafResource leafResource,
+                                                 @JsonProperty("exception") final Throwable exception) {
             super(originalRequestId);
             this.token = requireNonNull(token);
             this.leafResource = requireNonNull(leafResource);
