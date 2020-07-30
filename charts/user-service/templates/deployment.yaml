@@ -72,11 +72,17 @@ spec:
         volumeMounts:
         - name: {{ include "user-service.deployment.fullname" . }}
           mountPath: {{ include "user-service.deployment.path" . }}
+        - name: config-volume
+          subPath: redis-config.yaml
+          mountPath: {{ include "user-service.application.path" . }}/redis-config.yaml
       volumes:
       - name: {{ include "user-service.deployment.fullname" . }}
         persistentVolumeClaim:
           claimName: {{ include "user-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "user-service.name" . }}-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

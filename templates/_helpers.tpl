@@ -109,3 +109,46 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{/*
+Create the service name of the redis master
+*/}}
+{{- define "palisade.redis.fullname" -}}
+{{- if .Values.global.redis.exports.fullnameOverride -}}
+{{- .Values.global.redis.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.global.redis.exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a list of headless redis-cluster nodes from service name and node count
+*/}}
+{{- define "palisade.redis-cluster.headlessNodes" -}}
+{{- $count := (index .Values.global "redis-cluster").cluster.nodes | int -}}
+{{- $clusterFullname := printf "%s-cluster" (include "palisade.redis-cluster.fullname" .) -}}
+{{- $headlessPort := int (index .Values.global "redis-cluster").exports.redisPort -}}
+{{- range $i, $v := until $count -}}
+{{- printf "%s-%d.%s-headless:%d," $clusterFullname $i $clusterFullname $headlessPort -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the service name of the redis cluster
+*/}}
+{{- define "palisade.redis-cluster.fullname" -}}
+{{- if (index .Values.global "redis-cluster").exports.fullnameOverride -}}
+{{- (index .Values.global "redis-cluster").exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name (index .Values.global "redis-cluster").exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

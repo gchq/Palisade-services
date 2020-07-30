@@ -114,10 +114,19 @@ Some more important arguments are as follows:
 | traefik.install                         | Install the traefik ingress controller, **default=false**
 | metrics-server.install                  | Install the metrics-server to enable horizontal scaling, **default=false**
 | dashboard.install                       | Install the kubernetes dashboard, **default=false**
-| kafka.install                           | Install Kafka and Zookeeper, **default=true**
-| redis.install                           | Install Redis, **default=true for local, false for aws**
-| redis-cluster.install                   | Install Redis-cluster, **default=false for local, true for aws**
+| global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
+| global.redis.install                    | Install Redis, **default=true**
+| global.redis-cluster.install            | Install Redis-cluster, **default=false**
 
+#### Redis vs Redis-Cluster
+The key difference is scalability, write-points, sharding and partitioning.
+* Redis will support a single (master) write-point with many replicated (slave) read-points.
+* Redis-cluster will support sharding across the keyspace such that keys are uniquely mapped to one of many partitions, each partition with a single write-point and many read-points as above.
+
+Recommended reading: [Amazon AWS documentation, Redis with Cluster Mode enabled](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.Redis-RedisCluster.html)
+Redis is simpler, but will bottle-neck on write-requests to the single master node, eventually.
+
+#### Kubernetes Dashboard
 If the [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) is required it must be installed separately as a prerequisite.
 The `dashboard.install` switch installs ingress definitions into traefik for access at `https://localhost/kubernetes`.
 Access to the dashboard should be by token, which can be obtained by running the following command against the cluster:

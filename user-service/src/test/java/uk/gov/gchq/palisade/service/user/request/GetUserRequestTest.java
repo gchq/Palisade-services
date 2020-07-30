@@ -74,8 +74,6 @@ public class GetUserRequestTest {
                 .collect(Collectors.toList());
     }
 
-
-
     @Test
     public void GetUserRequestTest() {
         final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId")).withUserId(new UserId().id("newUser"));

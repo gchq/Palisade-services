@@ -31,7 +31,7 @@ spec:
       release: {{ .Release.Name }}
       role: master
   replicas: 1
-    {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
+  {{- if and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
       name: {{ .Values.global.persistence.redisMaster.name }}
@@ -46,9 +46,8 @@ spec:
       resources:
         requests:
           storage: {{ $.Values.global.persistence.redisMaster.storage }}
-      storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisMaster.storageClassName | first | default .Values.global.persistence.redisMaster.storageClassName._default | indent 1 }}
-        {{- end }}
-
+      storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.redisMaster.storageClassName | first | default .Values.global.persistence.redisMaster.storageClassName._default }}
+  {{- end }}
   serviceName: {{ template "redis.fullname" . }}-headless
   template:
     metadata:
@@ -312,7 +311,7 @@ spec:
             - name: sentinel-tmp-conf
               mountPath: /opt/bitnami/redis-sentinel/etc/
         {{- end }}
-  {{- if .Values.metrics.enabled }}
+        {{- if .Values.metrics.enabled }}
         - name: metrics
           image: {{ template "redis.metrics.image" . }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy | quote }}
@@ -343,10 +342,8 @@ spec:
             - name: metrics
               containerPort: 9121
           resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
-  {{- end }}
-
-
-  {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and ( and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) ) .Values.securityContext.enabled) }}
+        {{- end }}
+      {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and ( and .Values.master.persistence.enabled (not .Values.persistence.existingClaim) ) .Values.securityContext.enabled) }}
       {{- if or $needsVolumePermissions .Values.sysctlImage.enabled }}
       initContainers:
       {{- if $needsVolumePermissions }}

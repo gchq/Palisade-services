@@ -42,7 +42,6 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAutoConfiguration
 public class ApplicationConfiguration implements AsyncConfigurer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     /**

@@ -23,6 +23,15 @@ global:
   #   storageClass: myStorageClass
   redis: {}
 
+# Export some root-level values (import-values must take a table and cannot take ".")
+exports:
+  ## String to partially override redis.fullname template (will maintain the release name)
+  ##
+  nameOverride: "redis"
+  ## String to fully override redis.fullname template
+  ##
+  # fullnameOverride:
+
 ## Bitnami Redis image version
 ## ref: https://hub.docker.com/r/bitnami/redis/tags/
 ##
@@ -45,13 +54,11 @@ image:
   # pullSecrets:
   #   - myRegistryKeySecretName
 
-## String to partially override redis.fullname template (will maintain the release name)
-##
-# nameOverride:
-
-## String to fully override redis.fullname template
-##
-# fullnameOverride:
+## Busybox init image version
+initImage:
+  repository: busybox
+  tag: 1.32.0
+  pullPolicy: IfNotPresent
 
 ## Redis Cluster settings
 ##
@@ -64,7 +71,7 @@ cluster:
   activeDeadlineSeconds: 600
   ## Number of Redis nodes to be deployed
   ##
-  nodes: 1
+  nodes: 6
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created
   ##
@@ -160,7 +167,7 @@ containerSecurityContext:
   #   value: "10000"
 
 ## Use password authentication
-usePassword: true
+usePassword: false
 ## Redis password
 ## Defaults to a random 10-character alphanumeric string if not set and usePassword is true
 ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
@@ -270,7 +277,7 @@ persistence:
   enabled: true
   ## The path the volume will be mounted at, useful when using different
   ## Redis images.
-  path: /bitnami/redis/data
+  path: /opt/bitnami/redis/data
   ## The subdirectory of the volume to mount to, useful in dev environments
   ## and one PV for multiple services.
   subPath: ""
@@ -284,7 +291,7 @@ persistence:
   storageClass: "redis-persistence"
   accessModes:
     - ReadWriteOnce
-  size: 8Gi
+  size: 4Gi
   ## Persistent Volume selectors
   ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
   matchLabels: {}
@@ -401,7 +408,7 @@ metrics:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
 volumePermissions:
-  enabled: false
+  enabled: true
   image:
     registry: docker.io
     repository: bitnami/minideb
