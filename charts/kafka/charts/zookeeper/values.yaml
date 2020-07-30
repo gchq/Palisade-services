@@ -138,7 +138,7 @@ persistence:
   ##
   storageClass: "kafka-persistence"
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 4Gi
 
 ## Exporters query apps for metrics and make those metrics available for
 ## Prometheus to scrape.
