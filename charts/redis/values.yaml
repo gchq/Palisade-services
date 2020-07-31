@@ -25,6 +25,14 @@ global:
   # storageClass: myStorageClass
   redis: {}
 
+exports:
+  ## String to partially override redis.fullname template (will maintain the release name)
+  ##
+  nameOverride: "redis"
+  ## String to fully override redis.fullname template
+  ##
+  # fullnameOverride:
+
 ## Bitnami Redis image version
 ## ref: https://hub.docker.com/r/bitnami/redis/tags/
 ##
@@ -47,18 +55,10 @@ image:
   # pullSecrets:
   #   - myRegistryKeySecretName
 
-## String to partially override redis.fullname template (will maintain the release name)
-##
-# nameOverride:
-
-## String to fully override redis.fullname template
-##
-# fullnameOverride:
-
 ## Cluster settings
 cluster:
   enabled: true
-  slaveCount: 1
+  slaveCount: 3
 
 ## Use redis sentinel in the redis pod. This will disable the master and slave services and
 ## create one redis service with ports to the sentinel and the redis instances
@@ -194,7 +194,7 @@ securityContext:
   #   value: "10000"
 
 ## Use password authentication
-usePassword: true
+usePassword: false
 ## Redis password (both master and slave)
 ## Defaults to a random 10-character alphanumeric string if not set and usePassword is true
 ## ref: https://github.com/bitnami/bitnami-docker-redis#setting-the-server-password-on-first-run
@@ -344,7 +344,7 @@ master:
     enabled: true
     ## The path the volume will be mounted at, useful when using different
     ## Redis images.
-    path: /data
+    path: /opt/bitnami/redis/data
     ## The subdirectory of the volume to mount to, useful in dev environments
     ## and one PV for multiple services.
     subPath: ""
@@ -358,7 +358,7 @@ master:
     # storageClass: "-"
     accessModes:
       - ReadWriteOnce
-    size: 8Gi
+    size: 4Gi
     ## Persistent Volume selectors
     ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
     matchLabels: {}
@@ -499,7 +499,7 @@ slave:
     enabled: true
     ## The path the volume will be mounted at, useful when using different
     ## Redis images.
-    path: /data
+    path: /opt/bitnami/redis/data
     ## The subdirectory of the volume to mount to, useful in dev environments
     ## and one PV for multiple services.
     subPath: ""
@@ -513,7 +513,7 @@ slave:
     # storageClass: "-"
     accessModes:
       - ReadWriteOnce
-    size: 8Gi
+    size: 4Gi
     ## Persistent Volume selectors
     ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
     matchLabels: {}
@@ -627,8 +627,6 @@ metrics:
     annotations: {}
     labels: {}
 
-##
-## Init containers parameters:
 ## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
 ##
 volumePermissions:

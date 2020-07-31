@@ -42,7 +42,19 @@ dependencies:
     version: 0.4.0
     repository: file://charts/redis
     condition: global.redis.install
+    import-values:
+    - child: master
+      parent: global.redis.master
+    - child: exports
+      parent: global.redis.exports
   - name: redis-cluster
     version: 0.4.0
     repository: file://charts/redis-cluster
     condition: global.redis-cluster.install
+    import-values:
+    - child: cluster
+      parent: global.redis-cluster.cluster
+    - child: exports
+      parent: global.redis-cluster.exports
+    - child: service
+      parent: global.redis-cluster.service

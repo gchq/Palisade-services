@@ -18,8 +18,10 @@
 .DS_Store
 # Common VCS dirs
 .git/
+.github/
 .gitignore
 *.tmp
+*.iml
 *~
 Jenkinsfile
 mvn_dependency_tree.txt
@@ -35,6 +37,7 @@ velocity*
 .vscode/
 # Non-service directories
 /logos/
+/licences/
 /target/
 /licenses/
 /code-style/
@@ -51,3 +54,6 @@ Palisade-services-*.tgz
 /resource-service/
 /services-manager/
 /user-service/
+/query-scope-service/
+/results-service/
+/services-launcher/

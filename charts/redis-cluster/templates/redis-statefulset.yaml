@@ -307,7 +307,7 @@ spec:
           configMap:
             name: {{ include "redis-cluster.fullname" . }}-default
         {{- if not .Values.persistence.enabled }}
-        - name: {{ .Values.global.persistence.redisCluster.name }}
+        - name: "redis-data"
           emptyDir: {}
         {{- end }}
         {{- if .Values.sysctlImage.mountHostSys }}
@@ -330,7 +330,7 @@ spec:
         storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.storageClassName | first | default .Values.global.persistence.redisCluster.storageClassName._default | indent 1 }}
         resources:
           requests:
-            storage: {{ .Values.persistence.size | quote }}
+            storage: {{ .Values.global.persistence.redisCluster.storage | quote }}
   {{- end }}
   updateStrategy:
     type: {{ .Values.statefulset.updateStrategy }}
