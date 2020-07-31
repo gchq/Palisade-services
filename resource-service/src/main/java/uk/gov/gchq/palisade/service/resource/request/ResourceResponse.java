@@ -44,11 +44,16 @@ public final class ResourceResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String userId;  //Unique identifier for the user
-    private final String resourceId;  //Resource ID that that is being asked to access
-    private final JsonNode context;  // Json Node representation of the Context
-    private final JsonNode user;  //Json Node representation of the User
-    public final LeafResource resource; // Resource that has been requested to access.
+    // Unique identifier for the user
+    private final String userId;
+    // Resource ID that that is being asked to access
+    private final String resourceId;
+    // Json Node representation of the Context
+    private final JsonNode context;
+    // Json Node representation of the User
+    private final JsonNode user;
+    // Resource that has been requested to access
+    public final LeafResource resource;
 
     private ResourceResponse(
             final @JsonProperty("userId") String userId,

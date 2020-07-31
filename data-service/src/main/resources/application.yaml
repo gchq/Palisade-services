@@ -61,3 +61,7 @@ web:
 
 population:
   serialiserProvder: std
+
+async:
+  webMvcTimeout: 60000
+  corePoolSize: 6

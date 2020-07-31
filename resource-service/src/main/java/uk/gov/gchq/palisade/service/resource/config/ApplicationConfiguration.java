@@ -70,12 +70,15 @@ import java.util.stream.Collectors;
 @EnableWebMvc
 public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-    public static final Integer CORE_POOL_SIZE = 6;
 
     @Value("${web.client.data-service:data-service}")
     private String dataServiceName;
     @Value("${resource.defaultType}")
     private String defaultResourceType;
+    @Value("${async.webMvcTimeout:60000}")
+    private Integer webMvcTimeout;
+    @Value("${async.corePoolSize:6}")
+    private Integer corePoolSize;
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
@@ -221,7 +224,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(CORE_POOL_SIZE);
+        ex.setCorePoolSize(corePoolSize);
         LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         return ex;
     }
@@ -234,7 +237,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @Override
     public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
-        configurer.setDefaultTimeout(60000);
+        configurer.setDefaultTimeout(webMvcTimeout);
     }
 
 }
