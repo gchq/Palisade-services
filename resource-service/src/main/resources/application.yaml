@@ -54,3 +54,7 @@ resource:
 web:
   client:
     data-service: "http://localhost:8082"
+
+async:
+  webMvcTimeout: 60000
+  corePoolSize: 6
