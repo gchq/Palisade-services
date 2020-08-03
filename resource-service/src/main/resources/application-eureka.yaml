@@ -42,3 +42,8 @@ eureka:
     enabled: true
     fetchRegistry: true
     registry-fetch-interval-seconds: 5
+
+# Connection detail for SimpleResourceService resources
+web:
+  client:
+    data-service: data-service
