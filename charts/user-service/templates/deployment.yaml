@@ -73,7 +73,7 @@ spec:
         - name: {{ include "user-service.deployment.fullname" . }}
           mountPath: {{ include "user-service.deployment.path" . }}
         - name: config-volume
-          subPath: redis-config.yaml
+          subPath: application-redis.yaml
           mountPath: {{ include "user-service.application.path" . }}/redis-config.yaml
       volumes:
       - name: {{ include "user-service.deployment.fullname" . }}
