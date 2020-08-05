@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.data.serialise.LineSerialiser;
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.resource.AbstractLeafResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByIdRequest;
 import uk.gov.gchq.palisade.service.palisade.request.GetResourcesByResourceRequest;
@@ -157,7 +158,7 @@ public class ResourceService implements Service {
             InputStream responseStream = feignCall.get().body().asInputStream();
             Stream<LeafResource> resourceStream = serialiser.deserialise(responseStream);
             Set<LeafResource> response = resourceStream.collect(Collectors.toSet());
-            LOGGER.info("Got {} resources, first three are:  {}", response.size(), response.stream().limit(3).collect(Collectors.toSet()));
+            LOGGER.info("Got resources:  {}", response.stream().map(Resource::getId).collect(Collectors.toList()));
             return response;
         } catch (IOException e) {
             LOGGER.error("IOException getting response body input stream");
