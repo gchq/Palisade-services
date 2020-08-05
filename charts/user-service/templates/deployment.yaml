@@ -74,7 +74,7 @@ spec:
           mountPath: {{ include "user-service.deployment.path" . }}
         - name: config-volume
           subPath: application-redis.yaml
-          mountPath: {{ include "user-service.application.path" . }}/redis-config.yaml
+          mountPath: {{ include "user-service.application.path" . }}/application-redis.yaml
       volumes:
       - name: {{ include "user-service.deployment.fullname" . }}
         persistentVolumeClaim:
