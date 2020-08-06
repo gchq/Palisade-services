@@ -64,6 +64,8 @@ spec:
         env:
         - name: "LOADER_PATH"
           value: {{ include "user-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "user-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}
@@ -73,8 +75,7 @@ spec:
         - name: {{ include "user-service.deployment.fullname" . }}
           mountPath: {{ include "user-service.deployment.path" . }}
         - name: config-volume
-          subPath: redis-config.yaml
-          mountPath: {{ include "user-service.application.path" . }}/redis-config.yaml
+          mountPath: {{ include "user-service.config.path" . }}
       volumes:
       - name: {{ include "user-service.deployment.fullname" . }}
         persistentVolumeClaim:
