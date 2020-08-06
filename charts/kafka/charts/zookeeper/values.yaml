@@ -100,9 +100,11 @@ podLabels: {}  # Key/value pairs that are attached to zookeeper pods.
   # team: "developers"
   # service: "zookeeper"
 
+# Zookeeper pod Security Context
 securityContext:
-  fsGroup: 1000
-  runAsUser: 1000
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
 
 ## Useful, if you want to use an alternate image.
 command:
@@ -243,6 +245,27 @@ exporters:
       interval: 30s
       scrapeTimeout: 30s
       scheme: http
+
+## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
+##
+volumePermissions:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/minideb
+    tag: buster
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    # pullSecrets:
+    #   - myRegistryKeySecretName
+  resources: {}
+  # resources:
+  #   requests:
+  #     memory: 128Mi
+  #     cpu: 100m
 
 ## ServiceMonitor configuration in case you are using Prometheus Operator
 prometheus:

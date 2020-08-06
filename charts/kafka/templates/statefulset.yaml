@@ -56,6 +56,10 @@ spec:
       {{- if .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: "{{ .Values.priorityClassName }}"
       {{- end }}
@@ -104,6 +108,10 @@ spec:
       - name: {{ include "kafka.name" . }}-broker
         image: "{{ .Values.image }}:{{ .Values.imageTag }}"
         imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+        {{- end }}
         livenessProbe:
           exec:
             command:
@@ -258,17 +266,28 @@ spec:
           name: {{ include "kafka.fullname" . }}-metrics
       {{- end }}
       {{- end }}
-      {{- if .Values.securityContext }}
-      securityContext:
-        {{ toYaml .Values.securityContext | indent 8 }}
-        {{- end }}
-        {{- range .Values.secrets }}
-        {{- if .mountPath }}
+      {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and  .Values.persistence.enabled .Values.securityContext.enabled) }}
+      {{- if $needsVolumePermissions }}
+      initContainers:
+        - name: volume-permissions
+          image: "{{ template "kafka.volumePermissions.image" . }}"
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          command: ["/bin/chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }}", "{{ .Values.persistence.mountPath | quote }}"]
+          securityConext:
+            runAsUser: 0
+          resources:
+            {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          volumeMounts:
+          - name: {{ .Values.global.persistence.kafka.name }}
+            mountPath: {{ .Values.persistence.mountPath | quote }}
+      {{- end }}
+    {{- range .Values.secrets }}
+    {{- if .mountPath }}
     - name: {{ include "kafka.fullname" $ }}-{{ .name }}
       secret:
         secretName: {{ .name }}
-      {{- end }}
-      {{- end }}
+    {{- end }}
+    {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
