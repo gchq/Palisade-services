@@ -42,10 +42,14 @@ public final class ResourceRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String userId;  //Unique identifier for the user
-    public final String resourceId; // Resource Id of the resource requested
-    private final JsonNode context;  // Json Node representation of Context
-    private final JsonNode user;  //Json Node representation of the User
+    // Unique identifier for the user
+    private final String userId;
+    // Resource Id of the resource requested
+    public final String resourceId;
+    // Json Node representation of Context
+    private final JsonNode context;
+    // Json Node representation of the User
+    private final JsonNode user;
 
     @JsonCreator
     private ResourceRequest(

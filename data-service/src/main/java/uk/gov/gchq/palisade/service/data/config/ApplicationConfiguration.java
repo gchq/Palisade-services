@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -52,7 +53,11 @@ import java.util.Objects;
 @EnableWebMvc
 public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-    public static final Integer CORE_POOL_SIZE = 6;
+
+    @Value("${async.webMvcTimeout:60000}")
+    private Integer webMvcTimeout;
+    @Value("${async.corePoolSize:6}")
+    private Integer corePoolSize;
 
     /**
      * Simple data service bean created with instances of auditService, palisadeService and dataReader
@@ -116,7 +121,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(CORE_POOL_SIZE);
+        ex.setCorePoolSize(corePoolSize);
         LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         return ex;
     }
@@ -129,5 +134,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @Override
     public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
+        configurer.setDefaultTimeout(webMvcTimeout);
     }
+
 }

@@ -24,8 +24,7 @@ spring:
 spring:
   profiles: static-config
 
-# Discoveryless static configuration (presumably over localhost for integration-tests)
-# i.e. map from what-i-call-a-service -> service-URI
+# Connection detail for SimpleResourceService resources
 web:
   client:
     data-service: http://localhost:8082
