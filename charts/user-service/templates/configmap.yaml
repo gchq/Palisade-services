@@ -23,7 +23,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
-  redis-config.yaml: |
+  application-redis.yaml: |
     {{- if or .Values.global.redis.install .Values.global.redis.config }}
     {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
     {{- $masterPort := int .Values.global.redis.master.service.port }}
