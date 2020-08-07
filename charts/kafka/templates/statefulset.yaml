@@ -252,6 +252,20 @@ spec:
           {{- end }}
         {{- end }}
       {{- end }}
+      {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and  .Values.persistence.enabled .Values.securityContext.enabled) }}
+      {{- if $needsVolumePermissions }}
+      initContainers:
+      - name: volume-permissions
+        image: "{{ template "kafka.volumePermissions.image" . }}"
+        imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+        command: ["/bin/chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }}", "{{ .Values.persistence.mountPath }}"]
+        securityContext:
+          runAsUser: 0
+        resources: {{- toYaml .Values.volumePermissions.resources | nindent 10 }}
+        volumeMounts:
+        - name: {{ .Values.global.persistence.kafka.name }}
+          mountPath: {{ .Values.persistence.mountPath | quote }}
+      {{- end }}
       volumes:
         {{- if not .Values.persistence.enabled }}
       - name: {{ .Values.global.persistence.kafka.name }}
@@ -264,30 +278,15 @@ spec:
           name: {{ .Values.jmx.configMap.overrideName }}
           {{- else }}
           name: {{ include "kafka.fullname" . }}-metrics
-      {{- end }}
-      {{- end }}
-      {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (and  .Values.persistence.enabled .Values.securityContext.enabled) }}
-      {{- if $needsVolumePermissions }}
-      initContainers:
-        - name: volume-permissions
-          image: "{{ template "kafka.volumePermissions.image" . }}"
-          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-          command: ["/bin/chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }}", "{{ .Values.persistence.mountPath | quote }}"]
-          securityConext:
-            runAsUser: 0
-          resources:
-            {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
-          volumeMounts:
-          - name: {{ .Values.global.persistence.kafka.name }}
-            mountPath: {{ .Values.persistence.mountPath | quote }}
-      {{- end }}
-    {{- range .Values.secrets }}
-    {{- if .mountPath }}
-    - name: {{ include "kafka.fullname" $ }}-{{ .name }}
-      secret:
-        secretName: {{ .name }}
-    {{- end }}
-    {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- range .Values.secrets }}
+        {{- if .mountPath }}
+      - name: {{ include "kafka.fullname" $ }}-{{ .name }}
+        secret:
+          secretName: {{ .name }}
+        {{- end }}
+        {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
