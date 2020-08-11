@@ -86,10 +86,10 @@ Calculate a storage path based on the code release artifact id or the supplied v
 
 
 {{/*
-Calculate the service application jar location
+Calculate the service config location
 */}}
-{{- define "user-service.application.path" }}
-{{- printf "/usr/share/%s" .Chart.Name }}
+{{- define "user-service.config.path" }}
+{{- printf "/usr/share/%s/config/" .Chart.Name }}
 {{- end }}
 
 {{/*

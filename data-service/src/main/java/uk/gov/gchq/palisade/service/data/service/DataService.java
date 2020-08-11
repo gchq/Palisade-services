@@ -57,7 +57,7 @@ public interface DataService extends Service {
      *                      and then apply appropriate complete/exception auditing
      * @throws IOException  The {@link Exception} thrown
      */
-    void read(final ReadRequest request, OutputStream out) throws IOException;
+    void read(final ReadRequest request, final OutputStream out) throws IOException;
 
     /**
      * Used to add a new serialiser to the data reader

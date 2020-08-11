@@ -54,9 +54,17 @@ else
 
   #Search for all environmental variables starting with the word: TOPIC
   for topic in "${!TOPIC@}"; do
-    # Use variable indirection to get the contents of TOPICX e.g palisade 1 1
-    write_to_kafka ${!topic}
+    # Check if topic already exists and store the returned value
+    echo "Checking for topic ${!topic}"
+    returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
+    if [ -z "${returnVal}" ]; then
+      # Use variable indirection to get the contents of TOPICX e.g palisade 1 1
+      echo "Creating topic ${!topic}"
+      write_to_kafka ${!topic}
+    else
+      echo "Topic ${!topic} already exists"
+    fi
   done
-  echo "topics created as follows - "
+  echo "Topics now in zookeeper - "
   ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi

@@ -49,7 +49,7 @@ feign:
     config:
       default:
         connectTimeout: 5000
-        readTimeout: 5000
+        readTimeout: 60000
         loggerLevel: basic
     default-config: default
 
