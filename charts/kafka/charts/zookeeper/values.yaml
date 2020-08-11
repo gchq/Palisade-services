@@ -103,8 +103,8 @@ podLabels: {}  # Key/value pairs that are attached to zookeeper pods.
 # Zookeeper pod Security Context
 securityContext:
   enabled: true
-  fsGroup: 1001
-  runAsUser: 1001
+  fsGroup: 1000
+  runAsUser: 1000
 
 ## Useful, if you want to use an alternate image.
 command:

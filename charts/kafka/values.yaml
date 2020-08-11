@@ -45,8 +45,8 @@ kafkaHeapOptions: "-Xmx1G -Xms1G"
 ## Kafka pod Security Context
 securityContext:
   enabled: true
-  fsGroup: 1001
-  runAsUser: 1001
+  fsGroup: 0
+  runAsUser: 0
 
 ## The StatefulSet Update Strategy which Kafka will use when changes are applied.
 ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
@@ -125,11 +125,11 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
 ##
 readinessProbe:
-  initialDelaySeconds: 30
+  initialDelaySeconds: 60
   periodSeconds: 10
   timeoutSeconds: 5
   successThreshold: 1
-  failureThreshold: 3
+  failureThreshold: 6
 
 ## Period to wait for broker graceful shutdown (sigterm) before pod is killed (sigkill)
 ## ref: https://kubernetes-v1-4.github.io/docs/user-guide/production-pods/#lifecycle-hooks-and-termination-notice
@@ -528,7 +528,7 @@ zookeeper:
     ZK_HEAP_SIZE: "1G"
 
   persistence:
-    enabled: false
+    enabled: true
     ## The amount of PV storage allocated to each Zookeeper pod in the statefulset
     # size: "2Gi"
 
