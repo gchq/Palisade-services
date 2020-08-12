@@ -80,7 +80,6 @@ data:
 
       mkdir -p $ZK_DATA_DIR
       mkdir -p $ZK_DATA_LOG_DIR
-      mkdir -p $ZK_CONF_DIR
       echo $MY_ID >> $ID_FILE
 
       echo "clientPort=$ZK_CLIENT_PORT" >> $ZK_CONFIG_FILE
