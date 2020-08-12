@@ -23,14 +23,18 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $sc := pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}-{{ $namespace }}
+  {{- if eq $sc "ebs-sc" }}
   labels:
-    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
-    {{- end }}
+  {{- else if eq $sc "efs-sc" }}
+  labels:
+    type: amazonEFS
+  {{- end }}
     selectorFilter: {{ $name }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
@@ -41,17 +45,15 @@ spec:
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
     storage: {{ $value.storage }}
-  {{- if eq $.Values.global.hosting "local" }}
+  {{- if eq $sc "hostpath" }}
   hostPath:
     path: {{ $value.local.hostPath }}
     type: DirectoryOrCreate
-  {{- else if eq $.Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ $value.aws.volumePath }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}:{{ $value.aws.volumePath }}
   {{- end }}
 ---
 {{- end }}

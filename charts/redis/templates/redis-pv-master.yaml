@@ -15,15 +15,19 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis.fullname" . }}
 {{- $config := $.Values.global.persistence.redisMaster }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (1 | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
+  {{- if eq $sc "ebs-sc" }}
   labels:
-    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
-    {{- end }}
+  {{- else if eq $sc "efs-sc" }}
+  labels:
+    type: amazonEFS
+  {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
@@ -36,16 +40,14 @@ spec:
   storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
     storage: {{ $config.storage }}
-  {{- if eq $.Values.global.hosting "local" }}
+  {{- if eq $sc "local" }}
   hostPath:
     path: {{ $config.local.hostPath }}/redis/{{ $namespace }}/master/{{ $index }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/master/{{ $index }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/redis/{{ $namespace }}/master/{{ $index }}
   {{- end }}
 ---
 {{- end }}
