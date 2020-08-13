@@ -262,10 +262,6 @@ volumePermissions:
     # pullSecrets:
     #   - myRegistryKeySecretName
   resources: {}
-  # resources:
-  #   requests:
-  #     memory: 128Mi
-  #     cpu: 100m
 
 ## ServiceMonitor configuration in case you are using Prometheus Operator
 prometheus:

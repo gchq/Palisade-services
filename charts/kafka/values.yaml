@@ -307,10 +307,6 @@ volumePermissions:
     # pullSecrets:
     #   - myRegistryKeySecretName
   resources: {}
-  # resources:
-  #   requests:
-  #     memory: 128Mi
-  #     cpu: 100m
 
 ## Prometheus Exporters / Metrics
 ##
