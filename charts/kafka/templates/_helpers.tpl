@@ -57,14 +57,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "kafka.volumePermissions.image" -}}
-{{- $registryName := .Values.volumePermissions.image.registry -}}
-{{/*
-Can be uncommented when we implent a imageRegistry in Values.global
-{{- if .Values.global.imageRegistry }}
-    {{- $registryName := .Values.global.imageRegistry -}}
-{{- end -}}
-*/}}
-{{- printf "%s/%s:%s" $registryName .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag | toString -}}
+{{- printf "%s/%s:%s" .Values.volumePermissions.image.registry .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag | toString -}}
 {{- end -}}
 
 {{/*

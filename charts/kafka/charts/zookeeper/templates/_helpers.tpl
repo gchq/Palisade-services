@@ -44,14 +44,7 @@ If release name contains chart name it will be used as a full name.
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "zookeeper.volumePermissions.image" -}}
-{{- $registryName := .Values.volumePermissions.image.registry -}}
-{{/*
-Can be uncommented when we implent a imageRegistry in Values.global
-{{- if .Values.global.imageRegistry }}
-    {{- $registryName := .Values.global.imageRegistry -}}
-{{- end -}}
-*/}}
-{{- printf "%s/%s:%s" $registryName .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag | toString -}}
+{{- printf "%s/%s:%s" .Values.volumePermissions.image.registry .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag | toString -}}
 {{- end -}}
 
 {{/*
