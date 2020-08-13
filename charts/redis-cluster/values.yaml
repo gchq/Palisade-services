@@ -411,8 +411,9 @@ volumePermissions:
   enabled: true
   image:
     registry: docker.io
-    repository: bitnami/minideb
-    tag: buster
+    repository: busybox
+    tag: latest
+    digest: sha256:400ee2ed939df769d4681023810d2e4fb9479b8401d97003c710d0e20f7c49c6
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
