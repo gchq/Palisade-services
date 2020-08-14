@@ -298,7 +298,7 @@ volumePermissions:
   image:
     registry: docker.io
     repository: busybox
-    tag: latest
+    tag: 1.32.0
     digest: sha256:400ee2ed939df769d4681023810d2e4fb9479b8401d97003c710d0e20f7c49c6
     pullPolicy: IfNotPresent
   resources: {}
