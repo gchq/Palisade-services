@@ -15,6 +15,8 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $zookeepername := include "zookeeper.fullname" . }}
 {{- $config := .Values.global.persistence.zookeeper }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
+{{- if eq $auto false }}
 {{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (.Values.replicaCount | int) }}
 apiVersion: v1
@@ -50,4 +52,5 @@ spec:
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/zookeeper/{{ $namespace }}/{{ $index }}
   {{- end }}
 ---
+{{- end }}
 {{- end }}

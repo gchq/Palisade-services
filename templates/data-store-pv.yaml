@@ -24,15 +24,16 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 {{- $sc := pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
+{{- $auto := pluck $.Values.global.hosting $value.auto | first | default $value.auto._default }}
+{{- if eq $auto false }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}-{{ $namespace }}
-  {{- if eq $sc "ebs-sc" }}
   labels:
+  {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
   {{- else if eq $sc "efs-sc" }}
-  labels:
     type: amazonEFS
   {{- end }}
     selectorFilter: {{ $name }}-{{ $namespace }}
@@ -44,7 +45,7 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
-    storage: {{ $value.storage }}
+    storage: 4Gi
   {{- if eq $sc "hostpath" }}
   hostPath:
     path: {{ $value.local.hostPath }}
@@ -56,4 +57,5 @@ spec:
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $value.aws.volumeHandle }}:{{ $value.aws.volumePath }}
   {{- end }}
 ---
+{{- end }}
 {{- end }}

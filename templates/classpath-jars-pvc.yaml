@@ -25,6 +25,8 @@
 # as to the slightly anomalous behaviour
 
 {{- $namespace := include "palisade.namespace" . }}
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -43,6 +45,8 @@ spec:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   storageClassName: {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
+  {{- if eq $auto false }}
   selector:
     matchLabels:
       selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  {{- end }}

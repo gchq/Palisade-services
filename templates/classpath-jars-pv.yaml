@@ -19,6 +19,8 @@
 #as to the slightly anomalous behaviour
 
 {{- $config := .Values.global.persistence.classpathJars }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
+{{- if eq $auto false }}
 {{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
@@ -52,3 +54,4 @@ spec:
     driver: efs.csi.aws.com
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ include "palisade.deployment.path" . }}
   {{- end }}
+{{- end }}
