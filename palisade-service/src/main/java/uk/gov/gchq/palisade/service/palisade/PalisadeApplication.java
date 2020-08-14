@@ -32,6 +32,7 @@ import java.util.Arrays;
 public class PalisadeApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeApplication.class);
 
+    //trivial change to test PAL-779
     public static void main(final String[] args) {
         LOGGER.debug("PalisadeApplication started with: {}", Arrays.toString(args));
 
