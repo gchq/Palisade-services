@@ -41,6 +41,13 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Return the proper image name (for the init container volume-permissions image)
+*/}}
+{{- define "zookeeper.volumePermissions.image" -}}
+{{- printf "%s/%s:%s" .Values.volumePermissions.image.registry .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag | toString -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "zookeeper.chart" -}}

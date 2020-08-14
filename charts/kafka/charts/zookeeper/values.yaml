@@ -100,7 +100,9 @@ podLabels: {}  # Key/value pairs that are attached to zookeeper pods.
   # team: "developers"
   # service: "zookeeper"
 
+# Zookeeper pod Security Context
 securityContext:
+  enabled: true
   fsGroup: 1000
   runAsUser: 1000
 
@@ -243,6 +245,18 @@ exporters:
       interval: 30s
       scrapeTimeout: 30s
       scheme: http
+
+## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
+##
+volumePermissions:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: 1.32.0
+    digest: sha256:400ee2ed939df769d4681023810d2e4fb9479b8401d97003c710d0e20f7c49c6
+    pullPolicy: IfNotPresent
+  resources: {}
 
 ## ServiceMonitor configuration in case you are using Prometheus Operator
 prometheus:

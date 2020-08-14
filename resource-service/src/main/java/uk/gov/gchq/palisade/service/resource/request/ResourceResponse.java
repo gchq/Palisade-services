@@ -52,7 +52,10 @@ public final class ResourceResponse {
     private final JsonNode context;
     // Json Node representation of the User
     private final JsonNode user;
-    // Resource that has been requested to access
+
+    /**
+     * Resource that has been requested to access
+     */
     public final LeafResource resource;
 
     private ResourceResponse(
