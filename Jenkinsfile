@@ -276,6 +276,8 @@ spec:
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
                                          "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                         "--set global.persistence.dataStores.palisade-data-store.storageClassName.aws=ebs-sc " +
+                                         "--set global.persistence.dataStores.palisade-data-store.auto.aws=true " +
                                          "--set global.redis.install=false " +
                                          "--set global.redis-cluster.install=true " +
                                          "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
