@@ -99,7 +99,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       auto:
         _default: true
         local: true
@@ -146,7 +146,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: kafka-persistence
       auto:
         _default: true
@@ -164,7 +164,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: zookeeper-persistence
       auto:
         _default: true
@@ -182,7 +182,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-master
       auto:
         _default: true
@@ -199,7 +199,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-slave
       auto:
         _default: true
@@ -216,7 +216,7 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-cluster
       auto:
         _default: true
