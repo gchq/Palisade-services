@@ -24,3 +24,13 @@ You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespa
     {{- println }}Routing to the kubernetes dashboard is provided at (https:/) /kubernetes/#/
 {{- end }}
 {{- end }}
+
+{{- if $.Values.global.redisClusterEnabled }}
+    {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
+    {{- println }}Redis is clustered using nodes: {{ $clusterNodes }}
+{{- else }}
+    {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
+    {{- $masterPort := int .Values.global.redis.master.service.port }}
+    {{- println }}Redis is master/worker with master at: {{ $masterFullname }}:{{ $masterPort }}
+{{- end }}
+
