@@ -44,7 +44,7 @@ spec:
   resources:
     requests:
       storage: {{ $value.storage }}
-      storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
+  storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   {{- if eq $auto false }}
   selector:
     matchLabels:

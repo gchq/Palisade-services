@@ -102,13 +102,13 @@ global:
         aws: efs-sc
       auto:
         _default: true
-        local: false
+        local: true
         aws: true
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
-      storage: 1Gi
+      storage: 2Gi
       # environment-specific tags
       local:
         # hostPath: external host directory to be mounted
@@ -152,7 +152,7 @@ global:
         _default: true
         local: true
         aws: true
-      storage: 4Gi
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
@@ -170,7 +170,7 @@ global:
         _default: true
         local: true
         aws: true
-      storage: 4Gi
+      storage: 2Gi
       local:
         hostPath: "/"
       aws:
@@ -188,7 +188,7 @@ global:
         _default: true
         local: true
         aws: true
-      storage: 4Gi
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
@@ -205,7 +205,7 @@ global:
         _default: true
         local: true
         aws: true
-      storage: 4Gi
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
