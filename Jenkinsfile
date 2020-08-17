@@ -275,7 +275,6 @@ spec:
                                          "--set traefik.install=false,dashboard.install=false " +
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
-                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
                                          "--set global.persistence.dataStores.palisade-data-store.storageClassName.aws=ebs-sc " +
                                          "--set global.persistence.dataStores.palisade-data-store.auto.aws=true " +
                                          "--set global.redis.install=false " +
