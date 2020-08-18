@@ -70,11 +70,11 @@ kubectl config use-context <name>
 Example first deployment to a local cluster (from the project root directory):
 ```  
  helm upgrade --install palisade . \
-  --set global.persistence.classpathJars.local.hostPath=$(pwd),global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd),global.persistence.kafka.local.hostPath=$(pwd),global.persistence.redisMaster.local.hostPath=$(pwd),global.persistence.redisSlave.local.hostPath=$(pwd),global.persistence.zookeeper.local.hostPath=$(pwd),traefik.install=true,kafka.install=true,redis.install=true,global.hosting=local,redis-cluster.install=false --timeout=200s
+  --set global.persistence.classpathJars.local.hostPath=$(pwd),global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd),global.persistence.redisMaster.local.hostPath=$(pwd),global.persistence.redisSlave.local.hostPath=$(pwd),traefik.install=true,redis.install=true,global.hosting=local,redis-cluster.install=false --timeout=200s
 ```
 This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the default namespace.
 The application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
-The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars and for kafka/redis persistence.
+The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars and for redis persistence.
 
 Multiple instances of Palisade may be deployed on the same cluster, separated by namespace.
 The ingress controller will be configured to provide a route via that namespace.
@@ -104,7 +104,7 @@ Some more important arguments are as follows:
 
 | Argument                                | Definition
 |:----------------------------------------|:----------------------------------------
-| --timeout                               | If the post-install create-kafka-queues job fails, increase the timeout, **default is 60s**, **recommendation is 200+s** 
+| --timeout                               | Increases the timeout, **default is 60s**, **recommendation is 200s**
 | **Local Deployments**                   |
 | global.persistence.**xxx**.hostPath     | The host directory to use as a mount point for internal volumes
 | **AWS Deployments**                     |
@@ -114,7 +114,6 @@ Some more important arguments are as follows:
 | traefik.install                         | Install the traefik ingress controller, **default=false**
 | metrics-server.install                  | Install the metrics-server to enable horizontal scaling, **default=false**
 | dashboard.install                       | Install the kubernetes dashboard, **default=false**
-| global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
 

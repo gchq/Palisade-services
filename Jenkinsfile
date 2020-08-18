@@ -60,7 +60,7 @@ spec:
         ephemeral-storage: "8Gi"
 
   - name: docker-cmds
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-did:200608
+    image: $(ECR_REGISTRY)/jnlp-did:200608
     imagePullPolicy: IfNotPresent
     command:
     - sleep
@@ -106,7 +106,7 @@ spec:
         ephemeral-storage: "2Gi"
 
   - name: maven
-    image: 779921734503.dkr.ecr.eu-west-1.amazonaws.com/jnlp-dood-new-infra:200710
+    image: $(ECR_REGISTRY)/jnlp-dood-new-infra:200710
     imagePullPolicy: IfNotPresent
     command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
     tty: true
@@ -231,74 +231,6 @@ spec:
                 }
             }
         }
-
-
-//         stage('Helm deploy') {
-//             dir('Palisade-services') {
-//                 container('maven') {
-//                     configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                         if (("${env.BRANCH_NAME}" == "develop") ||
-//                                 ("${env.BRANCH_NAME}" == "master")) {
-//                             sh 'palisade-login'
-//                             //now extract the public IP addresses that this will be open on
-//                             sh 'extract-addresses'
-//                             if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
-//                                 sh 'echo namespace create succeeded'
-//                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-//                                 //create the branch namespace
-//                                 if (sh(script: "helm upgrade --install palisade . " +
-//                                         "--set global.hosting=aws  " +
-//                                         "--set traefik.install=true,dashboard.install=true " +
-//                                         "--set global.repository=${ECR_REGISTRY} " +
-//                                         "--set global.hostname=${EGRESS_ELB} " +
-//                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-//                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-//                                         "--set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
-//                                         "--set global.persistence.redisCluster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-//                                         "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_ZOOKEEPER} " +
-//                                         "--set global.redis.install=false " +
-//                                         "--set global.redis-cluster.install=true " +
-//                                         "--namespace dev", returnStatus: true) == 0) {
-//                                     echo("successfully deployed")
-//                                 } else {
-//                                     error("Build failed because of failed maven deploy")
-//                                 }
-//                             }
-//                         } else {
-//                             //only get the first 10 characters of the namespace
-//                             def GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(10)
-//                             sh 'palisade-login'
-//                             //now extract the public IP addresses that this will be open on
-//                             sh 'extract-addresses'
-//                             if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
-//                                 sh 'echo namespace create succeeded'
-//                                 sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
-//                                 //create the branch namespace
-//                                 if (sh(script: "helm upgrade --install palisade . " +
-//                                         "--set global.hosting=aws  " +
-//                                         "--set traefik.install=false,dashboard.install=false " +
-//                                         "--set global.repository=${ECR_REGISTRY} " +
-//                                         "--set global.hostname=${EGRESS_ELB} " +
-//                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-//                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-//                                         "--set global.persistence.kafka.aws.volumeHandle=${VOLUME_HANDLE_KAFKA} " +
-//                                         "--set global.persistence.redisCluster.aws.volumeHandle=${VOLUME_HANDLE_REDIS_MASTER} " +
-//                                         "--set global.persistence.zookeeper.aws.volumeHandle=${VOLUME_HANDLE_ZOOKEEPER} " +
-//                                         "--set global.redis.install=false " +
-//                                         "--set global.redis-cluster.install=true " +
-//                                         "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
-//                                     echo("successfully deployed")
-//                                 } else {
-//                                     error("Build failed because of failed maven deploy")
-//                                 }
-//                             } else {
-//                                 error("Could not create namespace")
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
     }
 }
 
