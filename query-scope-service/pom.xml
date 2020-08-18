@@ -22,12 +22,12 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.4.0-${revision}</version>
+        <version>0.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>query-scope-service</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/develop/query-scope-service</url>
+    <url>https://github.com/gchq/Palisade-services/tree/main/query-scope-service</url>
 
     <properties>
         <slf4j-test>1.1.0</slf4j-test>

@@ -1,4 +1,4 @@
-uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
+uk.gov.gchq.palisade:palisade-service:jar:0.4.0
 +- com.h2database:h2:jar:1.4.200:runtime
 +- com.fasterxml.jackson.core:jackson-databind:jar:2.10.4:compile
 |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
@@ -145,7 +145,7 @@ uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
 |  +- io.github.openfeign:feign-slf4j:jar:10.7.4:compile
 |  \- io.github.openfeign:feign-hystrix:jar:10.7.4:compile
 |     \- com.netflix.hystrix:hystrix-core:jar:1.5.18:compile
-+- uk.gov.gchq.palisade:common:jar:0.4.0-SNAPSHOT:compile
++- uk.gov.gchq.palisade:common:jar:0.4.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile
@@ -186,4 +186,4 @@ uk.gov.gchq.palisade:palisade-service:jar:0.4.0-SNAPSHOT
 |  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
 |  +- org.springframework:spring-test:jar:5.2.7.RELEASE:test
 |  \- org.xmlunit:xmlunit-core:jar:2.7.0:test
-\- uk.gov.gchq.palisade:common:jar:tests:0.4.0-SNAPSHOT:test
+\- uk.gov.gchq.palisade:common:jar:tests:0.4.0:test
