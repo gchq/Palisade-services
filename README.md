@@ -117,7 +117,7 @@ Some more important arguments are as follows:
 | global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
-| global.redisClusterEnabled              | Set to true to use Redis cluster. Useful if redis is already installed. **default=false**
+| global.redisClusterEnabled              | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
 
 #### Redis vs Redis-Cluster
 
