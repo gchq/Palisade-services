@@ -422,7 +422,7 @@ spec:
           component: slave
       spec:
         accessModes:
-        - ReadWriteMany
+        - {{- pluck .Values.global.hosting .Values.global.persistence.redisSlave.mode | first | default .Values.global.persistence.redisSlave.mode._default | indent 1 }}
         storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisSlave.storageClassName | first | default .Values.global.persistence.redisSlave.storageClassName._default | indent 1 }}
         resources:
           requests:

@@ -104,6 +104,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteMany
+        aws: ReadWriteOnce
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
@@ -133,6 +137,10 @@ global:
           _default: false
           local: false
           aws: false
+        mode:
+          _default: ReadWriteOnce
+          local: ReadWriteMany
+          aws: ReadWriteMany
         mountPath: "/data/local-data-store"
         storage: 4Gi
         local:
@@ -152,6 +160,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 8Gi
       local:
         hostPath: "/"
@@ -170,6 +182,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 2Gi
       local:
         hostPath: "/"
@@ -188,6 +204,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 8Gi
       local:
         hostPath: "/"
@@ -205,6 +225,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 8Gi
       local:
         hostPath: "/"
@@ -222,6 +246,10 @@ global:
         _default: true
         local: true
         aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 4Gi
       local:
         hostPath: "/"

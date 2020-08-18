@@ -269,8 +269,7 @@ spec:
                              if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                  sh 'echo namespace create succeeded'
                                  sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
-                                 sh 'aws sts get-caller-identity'
-                                 sh ''
+                                 sh 'kubectl config get-contexts'
                                  //create the branch namespace
                                  if (sh(script: "helm upgrade --install palisade . " +
                                          "--set global.hosting=aws  " +

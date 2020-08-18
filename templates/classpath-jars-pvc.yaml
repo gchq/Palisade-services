@@ -40,7 +40,7 @@ metadata:
     "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
 spec:
   accessModes:
-  - ReadWriteMany
+  - {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.mode | first | default .Values.global.persistence.classpathJars.mode._default }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}

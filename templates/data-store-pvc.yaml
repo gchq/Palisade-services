@@ -40,7 +40,7 @@ metadata:
   namespace: {{ $namespace }}
 spec:
   accessModes:
-  - ReadWriteMany
+  - {{ pluck $.Values.global.hosting $value.mode | first | default $value.mode._default }}
   resources:
     requests:
       storage: {{ $value.storage }}
