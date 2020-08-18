@@ -117,16 +117,19 @@ Some more important arguments are as follows:
 | global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
+| global.redisClusterEnabled              | Set to true to use Redis cluster. Useful if redis is already installed. **default=false**
 
 #### Redis vs Redis-Cluster
+
 The key difference is scalability, write-points, sharding and partitioning.
-* Redis will support a single (master) write-point with many replicated (slave) read-points.
+* Redis will support a single (master) write-point with many replicated (worker) read-points.
 * Redis-cluster will support sharding across the keyspace such that keys are uniquely mapped to one of many partitions, each partition with a single write-point and many read-points as above.
 
 Recommended reading: [Amazon AWS documentation, Redis with Cluster Mode enabled](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.Redis-RedisCluster.html)
 Redis is simpler, but will bottle-neck on write-requests to the single master node, eventually.
 
 #### Kubernetes Dashboard
+
 If the [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) is required it must be installed separately as a prerequisite.
 The `dashboard.install` switch installs ingress definitions into traefik for access at `https://localhost/kubernetes`.
 Access to the dashboard should be by token, which can be obtained by running the following command against the cluster:
@@ -135,7 +138,6 @@ kubectl -n kube-system describe secrets \
   `kubectl -n kube-system get secrets | awk '/clusterrole-aggregation-controller/ {print $1}'` \
   | awk '/token:/ {print $2}'
 ```
-
 
 ### Changing Application Logging Level
 

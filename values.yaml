@@ -42,7 +42,7 @@ global:
 
   redis:
     # install: install redis persistence and caching data storage platform
-    install: false
+    install: true
     # config: configure services to connect to (previously installed?) redis (if unset, use install value)
     # config: true
     exports:
@@ -53,7 +53,7 @@ global:
 
   redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
-    install: true
+    install: false
     # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
     # config: false
     # imported from sub-chart, default values here are overridden by sub-chart values
@@ -67,7 +67,7 @@ global:
   hosting: local
 
   # Set to true to enable redis cluster. leave as false for master/worker
-  redisClusterEnabled: true
+  redisClusterEnabled: false
 
   # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
