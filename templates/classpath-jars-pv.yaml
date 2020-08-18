@@ -17,6 +17,7 @@
 #the volume is actually used by other pods as a different mode
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
+{{- if .Values.global.persistence.statefulset.pv.enabled }}
 {{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolume
@@ -47,4 +48,5 @@ spec:
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
     volumeAttributes:
       path: {{ include "palisade.deployment.path" . }}
+  {{- end }}
   {{- end }}

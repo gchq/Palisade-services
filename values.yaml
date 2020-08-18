@@ -201,5 +201,11 @@ global:
         volumeHandle: null
         volumePath: "/"
 
+
+    # global.persistence.statefulset.pv.enabled: Global variable that controls the generation of statefulset pv/pvc(s)
+    statefulset:
+      pv:
+        enabled: true
+
   # must be last for file to be appended with addresses
   globalIPAddresses:
