@@ -202,8 +202,8 @@ global:
         volumePath: "/"
 
 
-    # global.persistence.statefulset.pv.enabled: Global variable that controls the generation of statefulset pv/pvc(s)
-    statefulset:
+    # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
+    statefulSet:
       pv:
         enabled: true
 
