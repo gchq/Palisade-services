@@ -25,12 +25,18 @@ metadata:
 data:
   application-redis.yaml: |  
     {{- if $.Values.global.redisClusterEnabled }}
+      {{- if $.Values.global.redis.install }}
+        {{- fail "Cannot install Redis (master/worker) if Redis Cluster is selected" }}
+      {{- end }}
     {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
     spring:
       redis:
         cluster:
           nodes: {{ $clusterNodes }}
     {{- else }}
+      {{- if (index $.Values.global "redis-cluster").install }}
+        {{- fail "Cannot install Redis Cluster if Redis (master/worker) is selected" }}
+      {{- end }}
     {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
     {{- $masterPort := int $.Values.global.redis.master.service.port }}
     spring:
