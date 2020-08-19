@@ -48,5 +48,5 @@ spec:
     volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
     volumeAttributes:
       path: {{ include "palisade.deployment.path" . }}
-  {{- end }}
-  {{- end }}
+{{- end }}
+{{- end }}
