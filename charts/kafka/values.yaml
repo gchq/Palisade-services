@@ -42,8 +42,11 @@ resources: {}
   #   memory: 1024Mi
 kafkaHeapOptions: "-Xmx1G -Xms1G"
 
-## Optional Container Security context
-securityContext: {}
+## Kafka pod Security Context
+securityContext:
+  enabled: true
+  fsGroup: 0
+  runAsUser: 0
 
 ## The StatefulSet Update Strategy which Kafka will use when changes are applied.
 ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
@@ -288,6 +291,18 @@ jmx:
   - kafka.network:*
   - kafka.log:*
 
+## volumePermissions: Change the owner of the persist volume mountpoint to RunAsUser:fsGroup
+##
+volumePermissions:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: busybox
+    tag: 1.32.0
+    digest: sha256:400ee2ed939df769d4681023810d2e4fb9479b8401d97003c710d0e20f7c49c6
+    pullPolicy: IfNotPresent
+  resources: {}
+
 ## Prometheus Exporters / Metrics
 ##
 prometheus:
@@ -504,7 +519,7 @@ zookeeper:
     ZK_HEAP_SIZE: "1G"
 
   persistence:
-    enabled: false
+    enabled: true
     ## The amount of PV storage allocated to each Zookeeper pod in the statefulset
     # size: "2Gi"
 

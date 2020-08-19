@@ -70,7 +70,19 @@ kubectl config use-context <name>
 Example first deployment to a local cluster (from the project root directory):
 ```  
  helm upgrade --install palisade . \
-  --set global.persistence.classpathJars.local.hostPath=$(pwd),global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd),global.persistence.kafka.local.hostPath=$(pwd),global.persistence.redisMaster.local.hostPath=$(pwd),global.persistence.redisSlave.local.hostPath=$(pwd),global.persistence.zookeeper.local.hostPath=$(pwd),traefik.install=true,kafka.install=true,redis.install=true,global.hosting=local,redis-cluster.install=false --timeout=200s
+  --set global.persistence.statefulSet.pv.enabled=true \
+  --set global.persistence.classpathJars.local.hostPath=$(pwd) \
+  --set global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd) \
+  --set global.persistence.kafka.local.hostPath=$(pwd) \
+  --set global.persistence.redisMaster.local.hostPath=$(pwd) \
+  --set global.persistence.redisSlave.local.hostPath=$(pwd) \
+  --set global.persistence.zookeeper.local.hostPath=$(pwd) \
+  --set traefik.install=true \
+  --set kafka.install=true \
+  --set redis.install=true \
+  --set global.hosting=local \
+  --set redis-cluster.install=false \
+  --timeout=200s
 ```
 This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the default namespace.
 The application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
@@ -117,16 +129,19 @@ Some more important arguments are as follows:
 | global.kafka.install                    | Install Kafka and Zookeeper, **default=true**
 | global.redis.install                    | Install Redis, **default=true**
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
+| global.redisClusterEnabled              | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
 
 #### Redis vs Redis-Cluster
+
 The key difference is scalability, write-points, sharding and partitioning.
-* Redis will support a single (master) write-point with many replicated (slave) read-points.
+* Redis will support a single (master) write-point with many replicated (worker) read-points.
 * Redis-cluster will support sharding across the keyspace such that keys are uniquely mapped to one of many partitions, each partition with a single write-point and many read-points as above.
 
 Recommended reading: [Amazon AWS documentation, Redis with Cluster Mode enabled](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.Redis-RedisCluster.html)
 Redis is simpler, but will bottle-neck on write-requests to the single master node, eventually.
 
 #### Kubernetes Dashboard
+
 If the [Kubernetes dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) is required it must be installed separately as a prerequisite.
 The `dashboard.install` switch installs ingress definitions into traefik for access at `https://localhost/kubernetes`.
 Access to the dashboard should be by token, which can be obtained by running the following command against the cluster:
@@ -135,7 +150,6 @@ kubectl -n kube-system describe secrets \
   `kubectl -n kube-system get secrets | awk '/clusterrole-aggregation-controller/ {print $1}'` \
   | awk '/token:/ {print $2}'
 ```
-
 
 ### Changing Application Logging Level
 

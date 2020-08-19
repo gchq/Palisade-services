@@ -44,12 +44,15 @@ public final class ResourceRequest {
 
     // Unique identifier for the user
     private final String userId;
-    // Resource Id of the resource requested
-    public final String resourceId;
     // Json Node representation of Context
     private final JsonNode context;
     // Json Node representation of the User
     private final JsonNode user;
+
+    /**
+     * Resource Id of the resource requested
+     */
+    public final String resourceId;
 
     @JsonCreator
     private ResourceRequest(

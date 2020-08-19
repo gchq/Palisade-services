@@ -66,6 +66,9 @@ global:
   # hosting: [local | aws | metal] the target environment to deploy to
   hosting: local
 
+  # Set to true to enable redis cluster. leave as false for master/worker
+  redisClusterEnabled: false
+
   # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
   nodes: 1
 
@@ -256,6 +259,12 @@ global:
       aws:
         volumeHandle: null
         volumePath: "/"
+
+
+    # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
+    statefulSet:
+      pv:
+        enabled: true
 
   # must be last for file to be appended with addresses
   globalIPAddresses:
