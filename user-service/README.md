@@ -24,12 +24,3 @@ The `addUser` method is used in the example code to allow the configuration of n
 The API is reasonably simple at present and it is likely that this interface will grow.
 
 Specifically, we anticipate that `UserService` implementations will connect to a account provisioning service as explained above, which will let Palisade retrieve the details of users that it previously knows nothing about. That is, we do **not** expect that every user retrieved via `getUser` will have previously been added via a corresponding `addUser` call.
-
-#### Caching
-If you would like to add users to the cache on start up, (cache warming), located in the resources folder is users.txt. You can add users on individual lines i.e:
-```
-MauriceMoss
-RoyTrennerman
-RichmondAvenal
-```
-And on application startup, these users will be added to the user service and cached. 
