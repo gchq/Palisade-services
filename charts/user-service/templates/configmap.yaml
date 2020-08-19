@@ -24,17 +24,26 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
   application-redis.yaml: |
-    {{- if or .Values.global.redis.install .Values.global.redis.config }}
-    {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
-    {{- $masterPort := int .Values.global.redis.master.service.port }}
-    spring:
-      redis:
-        host: {{ $masterFullname }}
-        port: {{ $masterPort }}
-    {{- else if or (index .Values.global "redis-cluster").install (index .Values.global "redis-cluster").config }}
+    {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
+      {{- fail "Cannot install Redis (master/worker) and Redis Cluster at the same time" }}
+    {{- end }}
+    {{- if $.Values.global.redisClusterEnabled }}
+      {{- if $.Values.global.redis.install }}
+        {{- fail "Cannot install Redis (master/worker) if Redis Cluster is selected" }}
+      {{- end }}
     {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
     spring:
       redis:
         cluster:
           nodes: {{ $clusterNodes }}
+    {{- else }}
+      {{- if (index $.Values.global "redis-cluster").install }}
+        {{- fail "Cannot install Redis Cluster if Redis (master/worker) is selected" }}
+      {{- end }}
+    {{- $masterFullname := printf "%s-master" (include "palisade.redis.fullname" .) }}
+    {{- $masterPort := int $.Values.global.redis.master.service.port }}
+    spring:
+      redis:
+        host: {{ $masterFullname }}
+        port: {{ $masterPort }}
     {{- end }}
