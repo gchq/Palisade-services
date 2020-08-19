@@ -279,6 +279,7 @@ spec:
                                          "--set global.persistence.dataStores.palisade-data-store.storageClassName.aws=ebs-sc " +
                                          "--set global.persistence.dataStores.palisade-data-store.auto.aws=true " +
                                          "--set global.persistence.dataStores.palisade-data-store.mode.aws=ReadWriteOnce " +
+                                         "--set global.persistence.statefulSet.pv.enabled=true " +
                                          "--set global.redis.install=false " +
                                          "--set global.redis-cluster.install=true " +
                                          "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
