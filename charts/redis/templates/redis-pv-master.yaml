@@ -47,6 +47,6 @@ spec:
     volumeAttributes:
       path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/master/{{ $index }}
   {{- end }}
-  {{- end }}
+{{- end }}
 ---
 {{- end }}
