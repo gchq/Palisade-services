@@ -20,7 +20,7 @@
 # the volume is actually used by other pods as a different mode
 # there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 # as to the slightly anomalous behaviour
-{{- if .Values.global.persistence.statefulSet.pv.enabled }}
+
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
 apiVersion: v1
@@ -53,6 +53,5 @@ spec:
     volumeAttributes:
       path: {{ $value.aws.volumePath }}
   {{- end }}
-{{- end }}
 ---
 {{- end }}
