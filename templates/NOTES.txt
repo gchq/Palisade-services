@@ -33,4 +33,3 @@ You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespa
     {{- $masterPort := int .Values.global.redis.master.service.port }}
     {{- println }}Redis is master/worker with master at: {{ $masterFullname }}:{{ $masterPort }}
 {{- end }}
-
