@@ -36,6 +36,10 @@ global:
   # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
   hostname: localhost
 
+  kafka:
+    # install: install kafka streaming platform
+    install: true
+
   redis:
     # install: install redis persistence and caching data storage platform
     install: true
@@ -86,6 +90,9 @@ global:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "k8s"
 
+  # see charts/kafka/charts/zookeeper
+  zookeeperConnectString: palisade-zookeeper:2181
+
   # persistent-volume and associated claims configurations
   persistence:
     storageClassDeploy: false
@@ -129,6 +136,33 @@ global:
           volumeHandle: data
           volumePath: "/"
 
+    # kafka: Store used by kafka for persisting stream logs
+    kafka:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: kafka-persistence
+      storage: 4Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    # zookeeper: Store used by zookeeper for persisting stream logs
+    zookeeper:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: zookeeper-persistence
+      storage: 4Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
       storageClassName:
@@ -168,6 +202,11 @@ global:
       aws:
         volumeHandle: null
         volumePath: "/"
+
+    # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
+    statefulSet:
+      pv:
+        enabled: true
 
   # must be last for file to be appended with addresses
   globalIPAddresses:
