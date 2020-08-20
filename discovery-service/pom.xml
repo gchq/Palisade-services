@@ -21,13 +21,13 @@
     <parent>
         <groupId>uk.gov.gchq.palisade</groupId>
         <artifactId>service</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <!--  *********** Aritfact ID ***********    -->
     <artifactId>discovery-service</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/discovery-service</url>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/discovery-service</url>
     <!--  *********** Aritfact ID ***********    -->
 
     <dependencies>

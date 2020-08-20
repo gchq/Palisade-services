@@ -104,7 +104,7 @@ java -jar -Dspring.profiles.active=eureka target/services-manager-0.4.0-exec.jar
 ---
 
 
-#### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/main/example-library))
+#### `example-libs` - Pre-populated Palisade example (see [example-library](https://github.com/gchq/Palisade-examples/tree/develop/example-library))
 ```bash
 java -jar -Dspring.profiles.active=example-libs target/services-manager-0.4.0-exec.jar
 ```
@@ -112,7 +112,7 @@ java -jar -Dspring.profiles.active=example-libs target/services-manager-0.4.0-ex
  * Services will start up with their cache/persistence-store prepopulated with example data
 
 
-#### `example-model` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/main/example-model))
+#### `example-model` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/develop/example-model))
 ```bash
 java -jar -Dspring.profiles.active=example-model target/services-manager-0.4.0-exec.jar
 ```
@@ -124,7 +124,7 @@ java -jar -Dspring.profiles.active=example-model target/services-manager-0.4.0-e
 The data used in this example comes checked-in to the repo and does not need generating
  
  
-#### `example-perf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/main/performance))
+#### `example-perf` - Automated execution of Palisade performance tests on example data (see [performance](https://github.com/gchq/Palisade-examples/tree/develop/performance))
 ```bash
 java -jar -Dspring.profiles.active=example-perf target/services-manager-0.4.0-exec.jar
 ```

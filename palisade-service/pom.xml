@@ -22,12 +22,12 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>palisade-service</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/palisade-service</url>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/palisade-service</url>
 
     <properties>
         <apache.commons.version>1.19</apache.commons.version>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
-            <version>0.4.0</version>
+            <version>0.5.0-${revision}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

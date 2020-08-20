@@ -21,7 +21,7 @@
     <parent>
         <artifactId>service</artifactId>
         <groupId>uk.gov.gchq.palisade</groupId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,7 +35,7 @@
 
     <!--  *********** Aritfact ID ***********    -->
     <artifactId>audit-service</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/audit-service</url>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/audit-service</url>
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>

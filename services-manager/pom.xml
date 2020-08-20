@@ -22,13 +22,13 @@
     <parent>
         <groupId>uk.gov.gchq.palisade</groupId>
         <artifactId>service</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0-${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <!--  *********** Aritfact ID ***********    -->
     <artifactId>services-manager</artifactId>
-    <url>https://github.com/gchq/Palisade-services/tree/main/serives-manager</url>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/serives-manager</url>
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
