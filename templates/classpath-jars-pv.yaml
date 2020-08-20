@@ -1,0 +1,50 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
+#however, the CSI driver's plugin GetVolumeHandle method determines whether
+#the volume is actually used by other pods as a different mode
+#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+#as to the slightly anomalous behaviour
+{{- $namespace := include "palisade.namespace" . }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  labels:
+  {{- if eq .Values.global.hosting "aws" }}
+    type: amazonEBS
+  {{- end }}
+    selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  annotations:
+    "helm.sh/hook": "pre-install"
+spec:
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
+  capacity:
+    storage: {{ .Values.global.persistence.classpathJars.storage }}
+  {{- if eq .Values.global.hosting "local" }}
+  hostPath:
+    path: {{ include "palisade.deployment.path" . }}
+    type: DirectoryOrCreate
+  {{- else if eq .Values.global.hosting "aws" }}
+  volumeMode: Filesystem
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
+    volumeAttributes:
+      path: {{ include "palisade.deployment.path" . }}
+  {{- end }}

@@ -1,0 +1,59 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# The manager creates a number of commands to execute for each service in manager.services
+# All fields are *technically* optional but the jar is required to actually do anything
+
+# Extract the project version (x.y.z-REVISION etc.)
+app:
+  version: '@project.version@'
+
+manager:
+  schedule:
+    - palisade-task
+
+  tasks:
+    palisade-task:
+      - audit-service
+      - data-service
+      - palisade-service
+      - policy-service
+      - resource-service
+      - user-service
+
+  services:
+    audit-service:
+      jar: audit-service/target/audit-service-${app.version}-exec.jar
+      log: audit-service.log
+
+    data-service:
+      jar: data-service/target/data-service-${app.version}-exec.jar
+      log: data-service.log
+
+    palisade-service:
+      jar: palisade-service/target/palisade-service-${app.version}-exec.jar
+      log: palisade-service.log
+
+    policy-service:
+      jar: policy-service/target/policy-service-${app.version}-exec.jar
+      log: policy-service.log
+
+    resource-service:
+      jar: resource-service/target/resource-service-${app.version}-exec.jar
+      log: resource-service.log
+
+    user-service:
+      jar: user-service/target/user-service-${app.version}-exec.jar
+      log: user-service.log

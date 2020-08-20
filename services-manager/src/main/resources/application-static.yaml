@@ -1,0 +1,53 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+spring:
+  profiles:
+    include:
+      - palisade
+      - static-config
+
+# Spring profile dependency resolution forces this two-profile setup
+# `static` profile must forcibly override its dependencies as spring.profiles.include properties can no longer be overridden
+# So, include `static-config` along with dependencies and force correct override order to happen there
+---
+
+spring:
+  profiles: static-config
+
+manager:
+  mode: run
+
+  schedule:
+    - palisade-task
+
+# Discoveryless static configuration (presumably over localhost for integration-tests)
+# i.e. map from what-i-call-a-service -> service-URI
+web:
+  client:
+    audit-service:
+      - http://localhost:8089
+    data-service:
+      - http://localhost:8082
+    discovery-service:
+      - http://localhost:8083
+    palisade-service:
+      - http://localhost:8084
+    policy-service:
+      - http://localhost:8085
+    resource-service:
+      - http://localhost:8086
+    user-service:
+      - http://localhost:8087

@@ -1,0 +1,173 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Used by templates for naming resources, see assorted helpers.tpl
+fullnameOverride: palisade-services
+
+traefik:
+  # install: install the traefik ingress controller, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide ingress controller
+  install: false
+metrics-server:
+  # install: install the metrics server, this should be true for the first installation into the cluster as it resides in kube-system to provide a single cluster-wide metrics server
+  install: false
+dashboard:
+  # install: install routing through the ingress controller to a pre-installed kubernetes dashboard i.e. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+  install: false
+
+namespaces:
+  default: default
+  dev: dev
+  uat: uat
+  prod: prod
+
+global:
+  # hostname: the external hostname of the ingress, this may be the cluster master or public load-balancer
+  hostname: localhost
+
+  redis:
+    # install: install redis persistence and caching data storage platform
+    install: true
+    # config: configure services to connect to (previously installed?) redis (if unset, use install value)
+    # config: true
+    exports:
+      nameOverride: "redis"
+    master:
+      service:
+        port: 6379
+
+  redis-cluster:
+    # install: install clustered redis persistence and caching data storage platform
+    install: false
+    # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
+    # config: false
+    # imported from sub-chart, default values here are overridden by sub-chart values
+    exports:
+      nameOverride: "redis"
+      redisPort: 6379
+    cluster:
+      nodes: 6
+
+  # hosting: [local | aws | metal] the target environment to deploy to
+  hosting: local
+
+  # Set to true to enable redis cluster. leave as false for master/worker
+  redisClusterEnabled: false
+
+  # nodes: the number of nodes in the cluster, this will be used to calculate the service scaling factors
+  nodes: 1
+
+  # namespace: the target namespace, overridden by (1) --namespace (helm, the preferred override) or (2) global.uniqueNamespace=true, ingress path will include this name at the path root (default truncated to null)
+  namespace: default
+
+  # uniqueNamespace: if true (and this is a new install) the generated deployment name will be used as the namespace name too, ingress path will include this name at the path root eg. localhost/lazy-goat/palisade
+  uniqueNamespace: false
+
+  # repository: the name of the docker image repository that is the source of local application images that was populated during the project build process and will now be referenced in the pods
+  repository: palisade
+
+  # deployment: [codeRelease | example | <any previous code release tag>] the target deployment mode for partitioning external type dependencies, the value "codeRelease" will align it with the java parent project version
+  deployment: codeRelease
+
+  # set environment variables for all palisade services pods by deployment type eg. spring profiles active
+  env:
+    _default:
+    - name: "SPRING_PROFILES_ACTIVE"
+      value: "k8s"
+
+  # persistent-volume and associated claims configurations
+  persistence:
+    storageClassDeploy: false
+
+    # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
+    classpathJars:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: palisade-classpath-jars
+      # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
+      mountPath: "/usr/share"
+      # storage: storage size for this volume and its claims
+      storage: 1Gi
+      # environment-specific tags
+      local:
+        # hostPath: external host directory to be mounted
+        hostPath: "/"
+      aws:
+        # volumeHandle: aws handle for the volume to mount
+        volumeHandle: null
+        # aws host directory to mount
+        # The path has to be created before hand - see here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/63
+        # Only safe mount point is root as it currently stands
+        volumePath: "/"
+
+    # dataStores: List of stores used by data-service and associated data-readers to read resources and return to a client
+    # nb. the mountPath here will be referenced by all client resource requests
+    dataStores:
+      palisade-data-store:
+        storageClassName:
+          _default: hostpath
+          local: hostpath
+          aws: efs-sc
+        mountPath: "/data/local-data-store"
+        storage: 4Gi
+        local:
+          hostPath: "/"
+        aws:
+          volumeHandle: data
+          volumePath: "/"
+
+    # redis: Store used by redis and redis-cluster for persistence and caching
+    redisMaster:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: redis-persistence-master
+      storage: 4Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    redisSlave:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: redis-persistence-slave
+      storage: 4Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+    redisCluster:
+      storageClassName:
+        _default: hostpath
+        local: hostpath
+        aws: efs-sc
+      name: redis-persistence-cluster
+      storage: 4Gi
+      local:
+        hostPath: "/"
+      aws:
+        volumeHandle: null
+        volumePath: "/"
+
+  # must be last for file to be appended with addresses
+  globalIPAddresses:
