@@ -282,7 +282,6 @@ spec:
                                  sh 'mvn -s $MAVEN_SETTINGS -pl audit-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl create-kafka-queues dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl data-service dockerfile:push'
-                                 sh 'mvn -s $MAVEN_SETTINGS -pl discovery-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl palisade-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl policy-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl resource-service dockerfile:push'
