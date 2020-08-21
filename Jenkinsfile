@@ -279,14 +279,14 @@ spec:
                              if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                  sh 'echo namespace create succeeded'
                                  sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
-                                 sh 'mvn -pl audit-service dockerfile:push'
-                                 sh 'mvn -pl create-kafka-queues dockerfile:push'
-                                 sh 'mvn -pl data-service dockerfile:push'
-                                 sh 'mvn -pl discovery-service dockerfile:push'
-                                 sh 'mvn -pl palisade-service dockerfile:push'
-                                 sh 'mvn -pl policy-service dockerfile:push'
-                                 sh 'mvn -pl resource-service dockerfile:push'
-                                 sh 'mvn -pl user-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl audit-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl create-kafka-queues dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl data-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl discovery-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl palisade-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl policy-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl resource-service dockerfile:push'
+                                 sh 'mvn -s $MAVEN_SETTINGS -pl user-service dockerfile:push'
                                  sh 'kubectl config get-contexts'
                                  //create the branch namespace
                                  if (sh(script: "helm upgrade --install palisade . " +
