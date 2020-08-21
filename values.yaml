@@ -102,15 +102,15 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: ebs-sc
+        aws: efs-sc
       auto:
         _default: true
         local: true
-        aws: true
+        aws: false
       mode:
         _default: ReadWriteOnce
         local: ReadWriteMany
-        aws: ReadWriteOnce
+        aws: ReadWriteMany
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"

@@ -276,8 +276,10 @@ spec:
                              sh 'palisade-login'
                              //now extract the public IP addresses that this will be open on
                              sh 'extract-addresses'
+                             //create the branch namespace
                              if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                  sh 'echo namespace create succeeded'
+                                 // Push containers to the registry so they are available to helm
                                  sh 'mvn -s $MAVEN_SETTINGS install -Dmaven.test.skip=true'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl audit-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl create-kafka-queues dockerfile:push'
@@ -286,16 +288,17 @@ spec:
                                  sh 'mvn -s $MAVEN_SETTINGS -pl policy-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl resource-service dockerfile:push'
                                  sh 'mvn -s $MAVEN_SETTINGS -pl user-service dockerfile:push'
-                                 sh 'kubectl config get-contexts'
-                                 //create the branch namespace
+                                 //deploy application to the cluster
                                  if (sh(script: "helm upgrade --install palisade . " +
                                          "--set global.hosting=aws  " +
                                          "--set traefik.install=false,dashboard.install=false " +
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
-                                         "--set global.persistence.dataStores.palisade-data-store.storageClassName.aws=ebs-sc " +
-                                         "--set global.persistence.dataStores.palisade-data-store.auto.aws=true " +
-                                         "--set global.persistence.dataStores.palisade-data-store.mode.aws=ReadWriteOnce " +
+//                                         "--set global.persistence.dataStores.palisade-data-store.storageClassName.aws=ebs-sc " +
+//                                         "--set global.persistence.dataStores.palisade-data-store.auto.aws=true " +
+//                                         "--set global.persistence.dataStores.palisade-data-store.mode.aws=ReadWriteOnce " +
+                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
                                          "--set global.redisClusterEnabled=true " +
                                          "--set global.redis.install=false " +
                                          "--set global.redis-cluster.install=true " +
