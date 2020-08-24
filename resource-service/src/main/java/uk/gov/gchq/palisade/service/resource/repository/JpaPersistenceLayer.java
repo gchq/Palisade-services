@@ -236,7 +236,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param <T>           the type of this initial resource, e.g. {@link LeafResource}
      * @param childResource the initial resource to recurse up from
      * @return the resource with all parents resolved up-to some 'root' resource, usually the first {@link Resource}
-     *         that wasn't an instance of {@link ChildResource}
+     * that wasn't an instance of {@link ChildResource}
      */
     private <T extends Resource> T resolveParents(final T childResource) {
         return traverseParentsByEntity(
@@ -252,7 +252,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * Given a resource, get from persistence its grand*parents and set them up appropriately
      * This means setting each {@link ChildResource}'s parent to the appropriate {@link ParentResource}
      * Stop once a given 'root' resource has been reached at either the parent or the child
-     *
      * In practice, this check is only satisfied by the child when childResource == rootResource
      * Otherwise it will always be satisfied by the parent first before it is satisfied by the child
      * Subsequently, this is split as one initial check by child and all subsequent checks by parent
@@ -325,7 +324,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param parentResourceId the id for the (complete) parent
      * @param leafResource     the {@link LeafResource} that will be saved (as well as some of its parents)
      * @return Optional.of the resource represented by the parentResourceId if it was found while recursing
-     *         Optional.empty if this resourceId was never found
+     * Optional.empty if this resourceId was never found
      */
     private Optional<Resource> saveChildrenOfCompleteResource(final String parentResourceId, final LeafResource leafResource) {
         LOGGER.debug("Putting resource and parents up-to '{}' for resource '{}'", parentResourceId, leafResource.getId());
