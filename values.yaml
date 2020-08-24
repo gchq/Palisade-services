@@ -64,7 +64,7 @@ global:
       nodes: 6
 
   # hosting: [local | aws | metal] the target environment to deploy to
-  hosting: aws
+  hosting: local
 
   # Set to true to enable redis cluster. leave as false for master/worker
   redisClusterEnabled: false
