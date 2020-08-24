@@ -21,9 +21,13 @@ import org.springframework.data.repository.CrudRepository;
 import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 
-public interface CompletenessRepository extends CrudRepository<CompletenessEntity, String> {
+public interface CompletenessRepository extends CrudRepository<CompletenessEntity, Integer> {
 
-    boolean existsByEntityTypeAndEntityId(EntityType entityType, String entityId);
+    default boolean compositeExistsByEntityTypeAndEntityId(EntityType entityType, String entityId) {
+        return existsById(new CompletenessEntity(entityType, entityId).hashCode());
+    }
+
+    boolean existsById(Integer id);
 
     default void save(EntityType entityType, String entityId) {
         save(new CompletenessEntity(entityType, entityId));

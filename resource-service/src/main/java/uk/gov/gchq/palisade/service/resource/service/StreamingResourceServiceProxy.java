@@ -70,8 +70,8 @@ public class StreamingResourceServiceProxy {
     /**
      * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
      *
-     * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
+     * @param persistence  a {@link PersistenceLayer} for persisting resources in, as if it were a cache
+     * @param delegate     a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
      * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
      */
 
@@ -85,9 +85,9 @@ public class StreamingResourceServiceProxy {
     /**
      * Construct a StreamingResourceServiceProxy, passing each member as an argument
      *
-     * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param delegate a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
-     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
+     * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
+     * @param delegate        a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
+     * @param objectMapper    a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
      * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
      */
     public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
@@ -180,7 +180,8 @@ public class StreamingResourceServiceProxy {
                     resources = persistence.withPersistenceById(rootResource.getId(), resources);
                     resources = persistence.withPersistenceByType(leafResource.getType(), resources);
                     resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
-                    resources.forEach(x -> { });
+                    resources.forEach(x -> {
+                    });
                 });
     }
 

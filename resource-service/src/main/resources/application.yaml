@@ -25,6 +25,10 @@ spring:
     loadbalancer:
       ribbon:
         enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
 
 server:
   port: 8086

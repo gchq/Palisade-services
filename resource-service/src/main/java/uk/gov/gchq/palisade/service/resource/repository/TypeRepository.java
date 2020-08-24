@@ -20,6 +20,7 @@ import org.springframework.data.repository.CrudRepository;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link TypeEntity}
@@ -27,6 +28,10 @@ import java.util.stream.Stream;
  */
 public interface TypeRepository extends CrudRepository<TypeEntity, String> {
 
-    Stream<TypeEntity> findAllByType(String type);
+    default Stream<TypeEntity> streamFindAllByType(String type) {
+        return StreamSupport.stream(findAllByType(type).spliterator(), false);
+    }
+
+    Iterable<TypeEntity> findAllByType(String type);
 
 }

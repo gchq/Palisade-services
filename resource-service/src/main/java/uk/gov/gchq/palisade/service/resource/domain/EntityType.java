@@ -17,7 +17,7 @@
 package uk.gov.gchq.palisade.service.resource.domain;
 
 public enum EntityType {
-    Resource,
-    Type,
-    SerialisedFormat
+    RESOURCE,
+    TYPE,
+    FORMAT
 }

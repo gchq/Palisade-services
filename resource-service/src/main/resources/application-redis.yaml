@@ -11,12 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-logging:
-  level:
-    root: WARN
+spring:
+  data:
+    redis:
+      repositories:
+        enabled: true
+  # redis.host/port or redis.cluster.nodes configured by k8s
 
-resource:
-  implementation: simple
-  defaultType: java.lang.String
+# TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
+# Once released, if spring-boot 2.4.x fixes the health-check bugs, re-enable the endpoint here
+management:
+  health:
+    redis:
+      enabled: false

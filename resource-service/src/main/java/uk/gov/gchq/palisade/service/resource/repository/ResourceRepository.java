@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
@@ -30,6 +31,10 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
 
     Optional<ResourceEntity> findByResourceId(String resourceId);
 
-    Stream<ResourceEntity> findAllByParentId(String parentId);
+    default Stream<ResourceEntity> streamFindAllByParentId(String parentId) {
+        return StreamSupport.stream(findAllByParentId(parentId).spliterator(), false);
+    }
+
+    Iterable<ResourceEntity> findAllByParentId(String parentId);
 
 }

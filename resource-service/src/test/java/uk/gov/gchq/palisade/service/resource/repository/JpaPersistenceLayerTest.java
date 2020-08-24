@@ -62,9 +62,12 @@ public class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> { });
-        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> { });
-        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> { });
+        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> {
+        });
+        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> {
+        });
+        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> {
+        });
     }
 
     @Test

@@ -16,6 +16,10 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -28,6 +32,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
 @Entity
@@ -39,11 +44,15 @@ import java.util.StringJoiner;
                 @Index(name = "resource_id", columnList = "resource_id", unique = true),
                 @Index(name = "parent_id", columnList = "parent_id"),
         })
-public class ResourceEntity {
+@RedisHash("ResourceEntity")
+public class ResourceEntity implements Serializable {
     @Id
+    @org.springframework.data.annotation.Id
+    @Indexed
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
     private String resourceId;
 
+    @Indexed
     @Column(name = "parent_id", columnDefinition = "varchar(255)")
     private String parentId;
 
@@ -60,6 +69,7 @@ public class ResourceEntity {
         this.resource = resource;
     }
 
+    @PersistenceConstructor
     public ResourceEntity(final Resource resource) {
         this(
                 resource.getId(),

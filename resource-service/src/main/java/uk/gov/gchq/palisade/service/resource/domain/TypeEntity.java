@@ -16,6 +16,10 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+
 import uk.gov.gchq.palisade.Generated;
 
 import javax.persistence.Column;
@@ -24,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
 @Entity
@@ -31,17 +36,21 @@ import java.util.StringJoiner;
         indexes = {
                 @Index(name = "type", columnList = "type"),
         })
-public class TypeEntity {
+@RedisHash("TypeEntity")
+public class TypeEntity implements Serializable {
     @Id
+    @org.springframework.data.annotation.Id
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
     private String resourceId;
 
+    @Indexed
     @Column(name = "type", columnDefinition = "varchar(255)", nullable = false)
     private String type;
 
     public TypeEntity() {
     }
 
+    @PersistenceConstructor
     public TypeEntity(final String type, final String resourceId) {
         this.type = type;
         this.resourceId = resourceId;
