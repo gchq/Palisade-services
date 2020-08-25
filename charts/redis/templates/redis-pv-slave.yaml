@@ -11,19 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 {{- if .Values.global.persistence.statefulSet.pv.enabled }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis.fullname" . }}
 {{- $config := $.Values.global.persistence.redisSlave }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
+{{- if eq $auto false }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (.Values.cluster.slaveCount | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
+  {{- if eq $sc "ebs-sc" }}
   labels:
-  {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
+  {{- else if eq $sc "efs-sc" }}
+  labels:
+    type: amazonEFS
   {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
@@ -37,17 +42,16 @@ spec:
   storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
     storage: {{ $config.storage }}
-  {{- if eq $.Values.global.hosting "local" }}
+  {{- if eq $sc "hostpath" }}
   hostPath:
     path: {{ $config.local.hostPath }}/redis/{{ $namespace }}/slave/{{ $index }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ $config.aws.volumePath }}/redis/{{ $namespace }}/slave/{{ $index }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/redis/{{ $namespace }}/slave/{{ $index }}
   {{- end }}
 {{- end }}
 ---
+{{- end }}
 {{- end }}

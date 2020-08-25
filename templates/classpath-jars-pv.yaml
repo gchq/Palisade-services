@@ -17,15 +17,23 @@
 #the volume is actually used by other pods as a different mode
 #there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
 #as to the slightly anomalous behaviour
+
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
+{{- if eq $auto false }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{- $namespace := include "palisade.namespace" . }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  {{- if eq $sc "ebs-sc" }}
   labels:
-  {{- if eq .Values.global.hosting "aws" }}
     type: amazonEBS
-  {{- end }}
+  {{- else if eq $sc "efs-sc" }}
+  labels:
+    type: amazonEFS
+    {{- end }}
     selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
@@ -36,15 +44,14 @@ spec:
   storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
-  {{- if eq .Values.global.hosting "local" }}
+  {{- if eq $sc "hostpath" }}
   hostPath:
     path: {{ include "palisade.deployment.path" . }}
     type: DirectoryOrCreate
-  {{- else if eq .Values.global.hosting "aws" }}
+  {{- else if eq $sc "efs-sc" }}
   volumeMode: Filesystem
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}
-    volumeAttributes:
-      path: {{ include "palisade.deployment.path" . }}
+    volumeHandle: {{ required "A valid AWS EFS volume handle must be specified" .Values.global.persistence.classpathJars.aws.volumeHandle }}:{{ include "palisade.deployment.path" . }}
   {{- end }}
+{{- end }}

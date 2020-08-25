@@ -28,6 +28,7 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $auto := pluck $.Values.global.hosting $value.auto | first | default $value.auto._default }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -39,13 +40,15 @@ metadata:
   namespace: {{ $namespace }}
 spec:
   accessModes:
-  - ReadWriteMany
+  - {{ pluck $.Values.global.hosting $value.mode | first | default $value.mode._default }}
   resources:
     requests:
       storage: {{ $value.storage }}
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
+  {{- if eq $auto false }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}
+  {{- end }}
 ---
 {{- end }}
