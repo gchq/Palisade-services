@@ -326,7 +326,7 @@ spec:
         name: {{ .Values.global.persistence.redisCluster.name }}
       spec:
         accessModes:
-        - {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.mode | first | default .Values.global.persistence.redisCluster.mode._default | indent 1 }}
+        - ReadWriteMany
         storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.storageClassName | first | default .Values.global.persistence.redisCluster.storageClassName._default | indent 1 }}
         resources:
           requests:
@@ -336,7 +336,7 @@ spec:
     type: {{ .Values.statefulset.updateStrategy }}
     {{- if .Values.statefulset.rollingUpdatePartition }}
     {{- if (eq "Recreate" .Values.statefulset.updateStrategy) }}
-    rollingUpdate: {}
+    rollingUpdate: null
     {{- else }}
     rollingUpdate:
       partition: {{ .Values.statefulset.rollingUpdatePartition }}

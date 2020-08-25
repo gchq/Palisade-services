@@ -42,7 +42,7 @@ spec:
         component: master
     spec:
       accessModes:
-      - {{ pluck .Values.global.hosting .Values.global.persistence.redisMaster.mode | first | default .Values.global.persistence.redisMaster.mode._default }}
+      - ReadWriteMany
       resources:
         requests:
           storage: {{ $.Values.global.persistence.redisMaster.storage }}
@@ -416,7 +416,7 @@ spec:
     type: {{ .Values.master.statefulset.updateStrategy }}
     {{- if .Values.master.statefulset.rollingUpdatePartition }}
     {{- if (eq "Recreate" .Values.master.statefulset.updateStrategy) }}
-    rollingUpdate: {}
+    rollingUpdate: null
     {{- else }}
     rollingUpdate:
       partition: {{ .Values.master.statefulset.rollingUpdatePartition }}

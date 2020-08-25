@@ -15,21 +15,15 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $kafkaname := include "kafka.fullname" . }}
 {{- $config := .Values.global.persistence.kafka }}
-{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
-{{- if eq $auto false }}
-{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (.Values.replicas | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
-  {{- if eq $sc "ebs-sc" }}
   labels:
+    {{- if eq $.Values.global.hosting "aws" }}
     type: amazonEBS
-  {{- else if eq $sc "efs-sc" }}
-  labels:
-    type: amazonEFS
-  {{- end }}
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
@@ -42,16 +36,18 @@ spec:
   storageClassName: {{ pluck $.Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
   capacity:
     storage: {{ $config.storage }}
-  {{- if eq $sc "hostpath" }}
+  {{- if eq $.Values.global.hosting "local" }}
   hostPath:
     path: {{ $config.local.hostPath }}/kafka/{{ $namespace }}/{{ $index }}
     type: DirectoryOrCreate
-  {{- else if eq $sc "efs-sc" }}
+  {{- else if eq $.Values.global.hosting "aws" }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
+    volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}
+    volumeAttributes:
+      path: {{ $config.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
+      type: DirectoryOrCreate
   {{- end }}
 {{- end }}
 ---
-{{- end }}
 {{- end }}

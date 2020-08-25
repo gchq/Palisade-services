@@ -26,6 +26,22 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 +- org.springframework.boot:spring-boot-starter-cache:jar:2.3.1.RELEASE:compile
 |  \- org.springframework:spring-context-support:jar:5.2.7.RELEASE:compile
 |     \- org.springframework:spring-beans:jar:5.2.7.RELEASE:compile
++- org.springframework.boot:spring-boot-starter-data-redis:jar:2.3.1.RELEASE:compile
+|  +- org.springframework.data:spring-data-redis:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework.data:spring-data-keyvalue:jar:2.3.1.RELEASE:compile
+|  |  |  \- org.springframework.data:spring-data-commons:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework:spring-tx:jar:5.2.7.RELEASE:compile
+|  |  +- org.springframework:spring-oxm:jar:5.2.7.RELEASE:compile
+|  |  \- org.springframework:spring-aop:jar:5.2.7.RELEASE:compile
+|  \- io.lettuce:lettuce-core:jar:5.3.1.RELEASE:compile
+|     +- io.netty:netty-common:jar:4.1.50.Final:compile
+|     +- io.netty:netty-handler:jar:4.1.50.Final:compile
+|     |  +- io.netty:netty-resolver:jar:4.1.50.Final:compile
+|     |  +- io.netty:netty-buffer:jar:4.1.50.Final:compile
+|     |  \- io.netty:netty-codec:jar:4.1.50.Final:compile
+|     +- io.netty:netty-transport:jar:4.1.50.Final:compile
+|     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
+|        \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 +- org.springframework.boot:spring-boot-starter-web:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter-json:jar:2.3.1.RELEASE:compile
 |  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.11.0:compile
@@ -35,7 +51,6 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:9.0.36:compile
 |  +- org.springframework:spring-web:jar:5.2.7.RELEASE:compile
 |  \- org.springframework:spring-webmvc:jar:5.2.7.RELEASE:compile
-|     +- org.springframework:spring-aop:jar:5.2.7.RELEASE:compile
 |     \- org.springframework:spring-expression:jar:5.2.7.RELEASE:compile
 +- org.springframework.cloud:spring-cloud-config-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-commons:jar:2.2.2.RELEASE:compile
@@ -88,7 +103,6 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  |  |  +- com.netflix.ribbon:ribbon-transport:jar:2.3.0:runtime
 |  |  |  |  +- io.reactivex:rxnetty-contexts:jar:0.4.9:runtime
 |  |  |  |  \- io.reactivex:rxnetty-servo:jar:0.4.9:runtime
-|  |  |  +- com.netflix.hystrix:hystrix-core:jar:1.5.18:runtime
 |  |  |  \- io.reactivex:rxnetty:jar:0.4.9:runtime
 |  |  +- com.netflix.ribbon:ribbon-core:jar:2.3.0:compile
 |  |  +- com.netflix.ribbon:ribbon-httpclient:jar:2.3.0:compile
@@ -99,14 +113,21 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  |  \- io.reactivex:rxjava:jar:1.3.8:compile
 |  +- org.springframework.cloud:spring-cloud-starter-loadbalancer:jar:2.2.2.RELEASE:compile
 |  |  +- org.springframework.cloud:spring-cloud-loadbalancer:jar:2.2.2.RELEASE:compile
-|  |  |  +- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
-|  |  |  |  \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 |  |  |  \- io.projectreactor.addons:reactor-extra:jar:3.3.3.RELEASE:compile
 |  |  \- com.stoyanr:evictor:jar:1.0.0:compile
 |  +- com.netflix.ribbon:ribbon-eureka:jar:2.3.0:compile
 |  \- com.thoughtworks.xstream:xstream:jar:1.4.11.1:compile
 |     +- xmlpull:xmlpull:jar:1.1.3.1:compile
 |     \- xpp3:xpp3_min:jar:1.1.4c:compile
++- org.springframework.cloud:spring-cloud-starter-openfeign:jar:2.2.2.RELEASE:compile
+|  +- org.springframework.cloud:spring-cloud-openfeign-core:jar:2.2.2.RELEASE:compile
+|  |  \- io.github.openfeign.form:feign-form-spring:jar:3.8.0:compile
+|  |     +- io.github.openfeign.form:feign-form:jar:3.8.0:compile
+|  |     \- commons-fileupload:commons-fileupload:jar:1.4:compile
+|  +- io.github.openfeign:feign-core:jar:10.7.4:compile
+|  +- io.github.openfeign:feign-slf4j:jar:10.7.4:compile
+|  \- io.github.openfeign:feign-hystrix:jar:10.7.4:compile
+|     \- com.netflix.hystrix:hystrix-core:jar:1.5.18:compile
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
 |  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
@@ -134,15 +155,7 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  +- org.assertj:assertj-core:jar:3.16.1:test
 |  +- org.hamcrest:hamcrest:jar:2.2:test
 |  +- org.junit.jupiter:junit-jupiter:jar:5.6.2:test
-|  |  +- org.junit.jupiter:junit-jupiter-api:jar:5.6.2:test
-|  |  |  +- org.opentest4j:opentest4j:jar:1.2.0:test
-|  |  |  \- org.junit.platform:junit-platform-commons:jar:1.6.2:test
-|  |  +- org.junit.jupiter:junit-jupiter-params:jar:5.6.2:test
-|  |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.6.2:test
-|  +- org.junit.vintage:junit-vintage-engine:jar:5.6.2:test
-|  |  +- org.apiguardian:apiguardian-api:jar:1.1.0:test
-|  |  +- org.junit.platform:junit-platform-engine:jar:1.6.2:test
-|  |  \- junit:junit:jar:4.13:test
+|  |  \- org.junit.jupiter:junit-jupiter-params:jar:5.6.2:test
 |  +- org.mockito:mockito-core:jar:3.3.3:test
 |  |  +- net.bytebuddy:byte-buddy:jar:1.10.11:test
 |  |  +- net.bytebuddy:byte-buddy-agent:jar:1.10.11:test
@@ -152,6 +165,12 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
 |  +- org.springframework:spring-test:jar:5.2.7.RELEASE:test
 |  \- org.xmlunit:xmlunit-core:jar:2.7.0:test
++- org.junit.jupiter:junit-jupiter-api:jar:5.6.2:test
+|  +- org.apiguardian:apiguardian-api:jar:1.1.0:test
+|  +- org.opentest4j:opentest4j:jar:1.2.0:test
+|  \- org.junit.platform:junit-platform-commons:jar:1.6.2:test
++- org.junit.jupiter:junit-jupiter-engine:jar:5.6.2:test
+|  \- org.junit.platform:junit-platform-engine:jar:1.6.2:test
 \- uk.org.lidalia:slf4j-test:jar:1.1.0:test
    +- uk.org.lidalia:lidalia-lang:jar:1.0.0:test
    +- com.google.guava:guava:jar:28.2-android:runtime

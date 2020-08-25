@@ -15,8 +15,6 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis-cluster.fullname" . }}
 {{- $config := .Values.global.persistence.redisCluster }}
-{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
-{{- if eq $auto false }}
 {{ range $index := until (.Values.cluster.nodes | int) }}
 apiVersion: v1
 kind: PersistentVolume
@@ -51,5 +49,4 @@ spec:
       type: DirectoryOrCreate
   {{- end }}
 ---
-{{- end }}
 {{- end }}
