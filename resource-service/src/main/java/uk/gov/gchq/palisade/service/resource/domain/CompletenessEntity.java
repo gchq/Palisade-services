@@ -82,8 +82,12 @@ public class CompletenessEntity implements Serializable {
     @Override
     @Generated
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CompletenessEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CompletenessEntity)) {
+            return false;
+        }
         final CompletenessEntity that = (CompletenessEntity) o;
         return entityType == that.entityType &&
                 Objects.equals(entityId, that.entityId);
