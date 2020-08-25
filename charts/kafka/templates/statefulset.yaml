@@ -294,7 +294,7 @@ spec:
       name: {{ .Values.global.persistence.kafka.name }}
     spec:
       accessModes:
-      - ReadWriteMany
+      - {{ pluck .Values.global.hosting .Values.global.persistence.kafka.mode | first | default .Values.global.persistence.kafka.mode._default }}
       resources:
         requests:
           storage: {{ $.Values.global.persistence.kafka.storage }}

@@ -25,6 +25,8 @@
 # as to the slightly anomalous behaviour
 
 {{- $namespace := include "palisade.namespace" . }}
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -38,11 +40,13 @@ metadata:
     "checksum/pv": {{ include (print $.Template.BasePath "/classpath-jars-pv.yaml") . | sha256sum }}
 spec:
   accessModes:
-  - ReadWriteMany
+  - {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.mode | first | default .Values.global.persistence.classpathJars.mode._default }}
   resources:
     requests:
       storage: {{ .Values.global.persistence.classpathJars.storage }}
   storageClassName: {{ pluck $.Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
+  {{- if eq $auto false }}
   selector:
     matchLabels:
       selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+  {{- end }}

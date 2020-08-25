@@ -243,7 +243,7 @@ spec:
       name: {{ .Values.global.persistence.zookeeper.name }}
     spec:
       accessModes:
-      - ReadWriteMany
+      - {{ pluck .Values.global.hosting .Values.global.persistence.zookeeper.mode | first | default .Values.global.persistence.zookeeper.mode._default }}
       resources:
         requests:
           storage: {{ $.Values.global.persistence.zookeeper.storage }}

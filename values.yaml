@@ -103,11 +103,19 @@ global:
         _default: hostpath
         local: hostpath
         aws: efs-sc
+      auto:
+        _default: false
+        local: false
+        aws: false
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteMany
+        aws: ReadWriteMany
       name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
-      storage: 1Gi
+      storage: 2Gi
       # environment-specific tags
       local:
         # hostPath: external host directory to be mounted
@@ -128,6 +136,14 @@ global:
           _default: hostpath
           local: hostpath
           aws: efs-sc
+        auto:
+          _default: false
+          local: false
+          aws: false
+        mode:
+          _default: ReadWriteOnce
+          local: ReadWriteMany
+          aws: ReadWriteMany
         mountPath: "/data/local-data-store"
         storage: 4Gi
         local:
@@ -141,9 +157,17 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: kafka-persistence
-      storage: 4Gi
+      auto:
+        _default: true
+        local: true
+        aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
@@ -155,22 +179,39 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: zookeeper-persistence
-      storage: 4Gi
+      auto:
+        _default: true
+        local: true
+        aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 2Gi
       local:
         hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
+
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-master
-      storage: 4Gi
+      auto:
+        _default: true
+        local: true
+        aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
@@ -181,9 +222,17 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-slave
-      storage: 4Gi
+      auto:
+        _default: true
+        local: true
+        aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
+      storage: 8Gi
       local:
         hostPath: "/"
       aws:
@@ -194,14 +243,23 @@ global:
       storageClassName:
         _default: hostpath
         local: hostpath
-        aws: efs-sc
+        aws: ebs-sc
       name: redis-persistence-cluster
+      auto:
+        _default: true
+        local: true
+        aws: true
+      mode:
+        _default: ReadWriteOnce
+        local: ReadWriteOnce
+        aws: ReadWriteOnce
       storage: 4Gi
       local:
         hostPath: "/"
       aws:
         volumeHandle: null
         volumePath: "/"
+
 
     # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
     statefulSet:
