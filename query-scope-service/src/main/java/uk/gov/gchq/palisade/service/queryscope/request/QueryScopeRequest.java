@@ -134,7 +134,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -147,7 +147,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -161,7 +161,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -184,7 +184,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user user information.
              *
@@ -207,7 +207,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *
@@ -230,7 +230,7 @@ public final class QueryScopeRequest {
         /**
          * Adds the rules associated with this request.
          */
-        interface IRules {
+        public interface IRules {
             /**
              * Adds the rules that specify the access.
              *

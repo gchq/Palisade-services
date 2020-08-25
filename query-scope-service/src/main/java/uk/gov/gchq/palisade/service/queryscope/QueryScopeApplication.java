@@ -15,6 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.queryscope;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,6 +27,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  */
 @SpringBootApplication
 public class QueryScopeApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryScopeApplication.class);
 
     /**
      * SpringBoot application entry-point method for the {@link QueryScopeApplication} executable
@@ -32,7 +35,8 @@ public class QueryScopeApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
+        LOGGER.debug("QueryScopeApplication started with: {} {} {}", QueryScopeApplication.class, "main", args);
         new SpringApplicationBuilder(QueryScopeApplication.class).web(WebApplicationType.SERVLET)
-                .run(null); //null instead of args for security reason
+                .run(args);
     }
 }
