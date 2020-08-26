@@ -36,7 +36,6 @@
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
         <slf4j-test>1.1.0</slf4j-test>
         <caffeine.version>2.8.1</caffeine.version>
-        <sonar.tests>/src/unit-tests</sonar.tests>
     </properties>
 
     <dependencies>
