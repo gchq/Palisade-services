@@ -33,7 +33,8 @@ metadata:
   {{- else if eq $sc "efs-sc" }}
   labels:
     type: amazonEFS
-    {{- end }}
+  {{- end }}
+  labels:
     selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
   annotations:
     "helm.sh/hook": "pre-install"
