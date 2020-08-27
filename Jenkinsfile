@@ -291,7 +291,8 @@ spec:
                                  //deploy application to the cluster
                                  if (sh(script: "helm upgrade --install palisade . " +
                                          "--set global.hosting=aws  " +
-                                         "--set traefik.install=false,dashboard.install=false " +
+                                         "--set traefik.install=false" +
+                                         "--set dashboard.install=false " +
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
                                          "--set global.deployment=example " +
@@ -299,6 +300,7 @@ spec:
                                          "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
                                          "--set global.redisClusterEnabled=true " +
                                          "--set global.redis.install=false " +
+                                         "--set global.kafka.install=true" +
                                          "--set global.redis-cluster.install=true " +
                                          "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                      echo("successfully deployed")
