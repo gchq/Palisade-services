@@ -291,7 +291,7 @@ spec:
                                  //deploy application to the cluster
                                  if (sh(script: "helm upgrade --install palisade . " +
                                          "--set global.hosting=aws  " +
-                                         "--set traefik.install=false" +
+                                         "--set traefik.install=false " +
                                          "--set dashboard.install=false " +
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
