@@ -303,7 +303,9 @@ spec:
                                          "--namespace ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                      echo("successfully deployed")
                                  } else {
-                                     error("Build failed because of failed maven deploy")
+                                    sh 'kubectl get pods --namespace pal-649-po'
+                                    sh 'kubectl get jobs --namespace pal-649-po'
+                                    error("Build failed because of failed maven deploy")
                                  }
                              } else {
                                  error("Could not create namespace")
