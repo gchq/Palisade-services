@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-COPY $JAR_FILE /usr/share/query-scope-service/query-scope-service.jar
+COPY $JAR_FILE /usr/share/attribute-masking-service/attribute-masking-service.jar
 
-LABEL service="query-scope" project="palisade"
+LABEL service="attribute-masking" project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/query-scope-service/query-scope-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/share/attribute-masking-service/attribute-masking-service.jar"]
