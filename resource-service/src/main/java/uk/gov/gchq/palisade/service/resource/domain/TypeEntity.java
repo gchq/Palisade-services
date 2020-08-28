@@ -38,6 +38,8 @@ import java.util.StringJoiner;
         })
 @RedisHash("TypeEntity")
 public class TypeEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @org.springframework.data.annotation.Id
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)

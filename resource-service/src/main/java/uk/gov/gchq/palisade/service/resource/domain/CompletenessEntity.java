@@ -42,6 +42,8 @@ import java.util.StringJoiner;
         })
 @RedisHash("CompletenessEntity")
 public class CompletenessEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @org.springframework.data.annotation.Id
     @Column(name = "id_pair_hash", columnDefinition = "integer", nullable = false)

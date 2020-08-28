@@ -46,6 +46,8 @@ import java.util.StringJoiner;
         })
 @RedisHash("ResourceEntity")
 public class ResourceEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @org.springframework.data.annotation.Id
     @Indexed
