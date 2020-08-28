@@ -40,8 +40,6 @@ import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 import java.util.Collections;
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
-
 @RestController
 @RequestMapping(path = "/stream-api")
 public class AttributeMaskingController {
