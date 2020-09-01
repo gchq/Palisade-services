@@ -83,6 +83,7 @@
         <module>query-scope-service</module>
         <module>resource-service</module>
         <module>results-service</module>
+        <module>topic-offset-service</module>
         <module>user-service</module>
         <module>services-manager</module>
         <module>create-kafka-queues</module>
