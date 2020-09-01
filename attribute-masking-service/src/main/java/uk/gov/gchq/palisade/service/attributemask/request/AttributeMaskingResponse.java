@@ -31,12 +31,12 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * AttributeMaskingResponse represents the output for query-scope-service which will include redacted data schema that is to be
+ * AttributeMaskingResponse represents the output for attribute-masking-service which will include redacted data schema that is to be
  * provided to the client.
- * This will be forwarded to the results-service in preparation for the client's request for the related Resource.
+ * This will be forwarded to the filtered-resource-service in preparation for the client's request for the related Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.queryscope.request.AttributeMaskingResponse is the output from the query-scope-service.
- * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
+ * uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse is the output from the attribute-masking-service.
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the filtered-resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AttributeMaskingResponse {
@@ -105,11 +105,11 @@ public final class AttributeMaskingResponse {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AttributeMaskingResponse class.
-         * Starter method for the Builder class that uses a QueryScopeRequests and appends the redacted version of the resource.
+         * Starter method for the Builder class that uses a AttributeMaskingRequest and appends the redacted version of the resource.
          * This method is called followed by the call to add user with the IUserId interface to create the
          * AttributeMaskingResponse class.
          *
-         * @param request message that was sent to the query-scope-service
+         * @param request message that was sent to the attribute-masking-service
          * @return interface  {@link IResourceId} for the next step in the build.
          */
         public static AttributeMaskingResponse create(final AttributeMaskingRequest request) {

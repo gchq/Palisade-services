@@ -70,28 +70,28 @@ public class AttributeMaskingRequestTest {
                 .withResource(resource)
                 .withRules(rules);
 
-        JsonContent<AttributeMaskingRequest> queryScopeResponseJsonContent = jacksonTester.write(attributeMaskingRequest);
-        ObjectContent<AttributeMaskingRequest> queryScopeResponseObjectContent = jacksonTester.parse(queryScopeResponseJsonContent.getJson());
-        AttributeMaskingRequest queryScopeResponseMessageObject = queryScopeResponseObjectContent.getObject();
+        JsonContent<AttributeMaskingRequest> attributeMaskingResponseJsonContent = jacksonTester.write(attributeMaskingRequest);
+        ObjectContent<AttributeMaskingRequest> attributeMaskingResponseObjectContent = jacksonTester.parse(attributeMaskingResponseJsonContent.getJson());
+        AttributeMaskingRequest attributeMaskingResponseMessageObject = attributeMaskingResponseObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(queryScopeResponseMessageObject.getUser()).isEqualTo(attributeMaskingRequest.getUser()),
-                        () -> assertThat(queryScopeResponseMessageObject.getContext()).isEqualTo(attributeMaskingRequest.getContext()),
-                        () -> assertThat(queryScopeResponseMessageObject.getResource()).isEqualTo(attributeMaskingRequest.getResource()),
-                        () -> assertThat(queryScopeResponseMessageObject.getRules()).isEqualTo(attributeMaskingRequest.getRules())
+                        () -> assertThat(attributeMaskingResponseMessageObject.getUser()).isEqualTo(attributeMaskingRequest.getUser()),
+                        () -> assertThat(attributeMaskingResponseMessageObject.getContext()).isEqualTo(attributeMaskingRequest.getContext()),
+                        () -> assertThat(attributeMaskingResponseMessageObject.getResource()).isEqualTo(attributeMaskingRequest.getResource()),
+                        () -> assertThat(attributeMaskingResponseMessageObject.getRules()).isEqualTo(attributeMaskingRequest.getRules())
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(queryScopeResponseMessageObject.equals(attributeMaskingRequest))
+                        () -> assertThat(attributeMaskingResponseMessageObject.equals(attributeMaskingRequest))
                 )
         );
     }

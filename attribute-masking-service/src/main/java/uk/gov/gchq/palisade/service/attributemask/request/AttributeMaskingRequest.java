@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The AttributeMaskingRequest is the input for query-scope-service for preliminary processing and routing of the data.
+ * The AttributeMaskingRequest is the input for attribute-masking-service for preliminary processing and routing of the data.
  * AttributeMaskingResponse is the output for this service which will have the redacted data schema that is to be
  * provided to the client.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.

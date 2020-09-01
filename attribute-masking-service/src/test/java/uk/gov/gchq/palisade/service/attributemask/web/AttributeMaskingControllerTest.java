@@ -34,7 +34,7 @@ class AttributeMaskingControllerTest {
     ErrorHandlingService mockErrorHandler = Mockito.mock(ErrorHandlingService.class);
 
     @Test
-    void queryScopeServiceDelegatesToPersistenceLayer() {
+    void attributeMaskingServiceDelegatesToPersistenceLayer() {
         // given
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
 

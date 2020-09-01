@@ -31,7 +31,7 @@ public class AttributeMaskingApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
-        LOGGER.debug("QueryScopeApplication started with: {} {} {}", AttributeMaskingApplication.class, "main", args);
+        LOGGER.debug("AttributeMaskingApplication started with: {} {} {}", AttributeMaskingApplication.class, "main", args);
         new SpringApplicationBuilder(AttributeMaskingApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }

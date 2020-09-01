@@ -66,16 +66,16 @@ public class AttributeMaskingResponseTest {
                 .withContext(context)
                 .withResource(resource);
 
-        JsonContent<AttributeMaskingResponse> queryScopeResponseJsonContent = jsonTester.write(attributeMaskingResponse);
-        ObjectContent<AttributeMaskingResponse> queryScopeResponseObjectContentObjectContent = jsonTester.parse(queryScopeResponseJsonContent.getJson());
-        AttributeMaskingResponse attributeMaskingResponseMessageObject = queryScopeResponseObjectContentObjectContent.getObject();
+        JsonContent<AttributeMaskingResponse> attributeMaskingResponseJsonContent = jsonTester.write(attributeMaskingResponse);
+        ObjectContent<AttributeMaskingResponse> attributeMaskingResponseObjectContent = jsonTester.parse(attributeMaskingResponseJsonContent.getJson());
+        AttributeMaskingResponse attributeMaskingResponseMessageObject = attributeMaskingResponseObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(queryScopeResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(attributeMaskingResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
                         () -> assertThat(attributeMaskingResponseMessageObject.getUserId()).isEqualTo(attributeMaskingResponse.getUserId()),
