@@ -63,7 +63,7 @@ public class CompletenessEntity implements Serializable {
     public CompletenessEntity(final EntityType entityType, final String entityId) {
         this.entityType = entityType;
         this.entityId = entityId;
-        this.id = Integer.valueOf(entityType.toString() + "::" + entityId);
+        this.id = hashCode();
     }
 
     @Generated
