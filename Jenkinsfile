@@ -143,18 +143,20 @@ timestamps {
                 } else {
                     GIT_BRANCH_NAME = env.BRANCH_NAME
                 }
-                //only get the first 7 characters of the branch name e.g. pal-xxx
+                // set default values for the variables
+                COMMON_REVISION = "SNAPSHOT"
+                READERS_REVISION = "SNAPSHOT"
+                EXAMPLES_REVISION = "SNAPSHOT"
+                INTEGRATION_REVISION = "SNAPSHOT"
                 GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(7)
                 SERVICES_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
                 HELM_DEPLOY_NAMESPACE = GIT_BRANCH_NAME_LOWER
+                // update values for the variables if this is the develop branch build
                 if ("${env.BRANCH_NAME}" == "develop") {
                     SERVICES_REVISION = "SNAPSHOT"
-                    COMMON_REVISION = "SNAPSHOT"
-                    READERS_REVISION = "SNAPSHOT"
-                    EXAMPLES_REVISION = "SNAPSHOT"
-                    INTEGRATION_REVISION = "SNAPSHOT"
                     HELM_DEPLOY_NAMESPACE = "dev"
                 }
+                // update values for the variables if this is the main branch build
                 if ("${env.BRANCH_NAME}" == "main") {
                     SERVICES_REVISION = "RELEASE"
                     COMMON_REVISION = "RELEASE"
@@ -257,6 +259,16 @@ timestamps {
                     def qg = waitForQualityGate()
                     if (qg.status != 'OK') {
                         error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                    }
+                }
+            }
+
+            stage('Maven deploy') {
+                dir('Palisade-services') {
+                    container('docker-cmds') {
+                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                            sh "mvn -s ${MAVEN_SETTINGS} -P quick -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+                        }
                     }
                 }
             }
