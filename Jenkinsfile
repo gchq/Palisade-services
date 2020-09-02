@@ -284,9 +284,9 @@ timestamps {
                              sh 'palisade-login'
                              //now extract the public IP addresses that this will be open on
                              sh 'extract-addresses'
-                                 // Push containers to the registry so they are available to helm
-                                 sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
-                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             // Push containers to the registry so they are available to helm
+                             sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
+                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
@@ -294,23 +294,22 @@ timestamps {
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
 //                                  sh 'mvn -s $MAVEN_SETTINGS -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-                                 //deploy application to the cluster
-                                 if (sh(script: "helm upgrade --install palisade . " +
-                                         "--set global.hosting=aws  " +
-                                         "--set traefik.install=false,dashboard.install=false " +
-                                         "--set global.repository=${ECR_REGISTRY} " +
-                                         "--set global.hostname=${EGRESS_ELB} " +
-                                         "--set global.deployment=example " +
-                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                         "--set global.redisClusterEnabled=true " +
-                                         "--set global.redis.install=false " +
-                                         "--set global.redis-cluster.install=true " +
-                                         "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
-                                     echo("successfully deployed")
-                                 } else {
-                                     error("Build failed because of failed maven deploy")
-                                 }
+                             //deploy application to the cluster
+                             if (sh(script: "helm upgrade --install palisade . " +
+                                     "--set global.hosting=aws  " +
+                                     "--set traefik.install=false,dashboard.install=false " +
+                                     "--set global.repository=${ECR_REGISTRY} " +
+                                     "--set global.hostname=${EGRESS_ELB} " +
+                                     "--set global.deployment=example " +
+                                     "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                     "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
+                                     "--set global.redisClusterEnabled=true " +
+                                     "--set global.redis.install=false " +
+                                     "--set global.redis-cluster.install=true " +
+                                     "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
+                                 echo("successfully deployed")
+                             } else {
+                                 error("Build failed because of failed maven deploy")
                              }
                          }
                      }
