@@ -147,7 +147,7 @@ timestamps {
                 GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(7)
                 SERVICES_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
                 HELM_DEPLOY_NAMESPACE = GIT_BRANCH_NAME_LOWER
-                if (("${env.BRANCH_NAME}" == "develop") {
+                if ("${env.BRANCH_NAME}" == "develop") {
                     SERVICES_REVISION = "SNAPSHOT"
                     COMMON_REVISION = "SNAPSHOT"
                     READERS_REVISION = "SNAPSHOT"
