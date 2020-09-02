@@ -155,7 +155,7 @@ timestamps {
                     INTEGRATION_REVISION = "SNAPSHOT"
                     HELM_DEPLOY_NAMESPACE = "dev"
                 }
-                if ("${env.BRANCH_NAME}" == "main")) {
+                if ("${env.BRANCH_NAME}" == "main") {
                     SERVICES_REVISION = "RELEASE"
                     COMMON_REVISION = "RELEASE"
                     READERS_REVISION = "RELEASE"
