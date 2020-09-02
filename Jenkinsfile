@@ -297,15 +297,14 @@ timestamps {
                              //now extract the public IP addresses that this will be open on
                              sh 'extract-addresses'
                              // Push containers to the registry so they are available to helm
-                             sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
-                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl palisade-service  -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
-//                                  sh 'mvn -s $MAVEN_SETTINGS -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push'
+                             sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl palisade-service  -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                             sh "mvn -s ${MAVEN_SETTINGS} -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
                              //deploy application to the cluster
                              if (sh(script: "helm upgrade --install palisade . " +
                                      "--set global.hosting=aws  " +
