@@ -52,7 +52,7 @@ class JpaPersistenceLayerTest {
 
 
     @Test
-    void springDiscoversJpaPersistenceLayerTest() {
+    void testSpringDiscoversJpaPersistenceLayer() {
         // When the spring application is started
         // Then
         assertThat(persistenceLayer).isNotNull();
@@ -61,7 +61,7 @@ class JpaPersistenceLayerTest {
 
     @Test
     @Transactional
-    void putAndGetReturnsExpectedEntity() {
+    void testPutAndGetReturnsExpectedEntity() {
         // given
         persistenceLayer.put(
                 AttributeMaskingApplicationTestData.REQUEST_TOKEN,

@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -99,7 +100,7 @@ public class AttributeMaskingController {
                         request.getRules()
                 );
                 success = true;
-            } catch (Exception ex) {
+            } catch (JsonProcessingException ex) {
                 success = false;
                 AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, Collections.emptyMap())
                         .withError(ex);

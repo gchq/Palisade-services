@@ -33,7 +33,7 @@ class LeafResourceConverterTest {
     private final LeafResourceConverter leafResourceConverter = new LeafResourceConverter(MAPPER);
 
     @Test
-    void leafResourceConverterIsConsistent() {
+    void testLeafResourceConverterIsConsistent() {
         // given - leafResource
 
         // when
@@ -48,7 +48,7 @@ class LeafResourceConverterTest {
     }
 
     @Test
-    void leafResourceConverterIsCorrect() {
+    void testLeafResourceConverterIsCorrect() {
         // given - leafResource
 
         // when
@@ -60,7 +60,7 @@ class LeafResourceConverterTest {
     }
 
     @Test
-    void leafResourceConverterHandlesNulls() {
+    void testLeafResourceConverterHandlesNulls() {
         // given - nothing
 
         // when

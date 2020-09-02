@@ -27,7 +27,7 @@ class SimpleAttributeMaskingServiceTest {
     JpaPersistenceLayer mockPersistenceLayer = Mockito.mock(JpaPersistenceLayer.class);
 
     @Test
-    void queryScopeServiceDelegatesToPersistenceLayer() {
+    void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
         // given
         AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
 

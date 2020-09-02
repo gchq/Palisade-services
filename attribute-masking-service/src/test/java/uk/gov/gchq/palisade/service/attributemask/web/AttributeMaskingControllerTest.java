@@ -34,7 +34,7 @@ class AttributeMaskingControllerTest {
     ErrorHandlingService mockErrorHandler = Mockito.mock(ErrorHandlingService.class);
 
     @Test
-    void attributeMaskingServiceDelegatesToPersistenceLayer() {
+    void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
         // given
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
 
@@ -56,7 +56,7 @@ class AttributeMaskingControllerTest {
     }
 
     @Test
-    void streamMarkerBypassesServiceDelegation() {
+    void testStreamMarkerBypassesServiceDelegation() {
         // given
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
 

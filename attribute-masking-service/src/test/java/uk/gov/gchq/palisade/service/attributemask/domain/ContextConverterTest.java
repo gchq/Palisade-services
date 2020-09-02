@@ -33,7 +33,7 @@ class ContextConverterTest {
     private final ContextConverter contextConverter = new ContextConverter(MAPPER);
 
     @Test
-    void contextConverterIsConsistent() {
+    void testContextConverterIsConsistent() {
         // given - context
 
         // when
@@ -48,7 +48,7 @@ class ContextConverterTest {
     }
 
     @Test
-    void contextConverterIsCorrect() {
+    void testContextConverterIsCorrect() {
         // given - context
 
         // when
@@ -60,7 +60,7 @@ class ContextConverterTest {
     }
 
     @Test
-    void contextConverterHandlesNulls() {
+    void testContextConverterHandlesNulls() {
         // given - nothing
 
         // when

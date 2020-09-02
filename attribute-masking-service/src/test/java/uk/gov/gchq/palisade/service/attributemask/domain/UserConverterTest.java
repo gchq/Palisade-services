@@ -33,7 +33,7 @@ class UserConverterTest {
     private final UserConverter userConverter = new UserConverter(MAPPER);
 
     @Test
-    void userConverterIsConsistent() {
+    void testUserConverterIsConsistent() {
         // given - user
 
         // when
@@ -48,7 +48,7 @@ class UserConverterTest {
     }
 
     @Test
-    void userConverterIsCorrect() {
+    void testUserConverterIsCorrect() {
         // given - user
 
         // when
@@ -60,7 +60,7 @@ class UserConverterTest {
     }
 
     @Test
-    void userConverterHandlesNulls() {
+    void testUserConverterHandlesNulls() {
         // given - nothing
 
         // when

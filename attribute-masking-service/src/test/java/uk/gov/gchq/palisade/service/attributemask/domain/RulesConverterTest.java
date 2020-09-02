@@ -33,7 +33,7 @@ class RulesConverterTest {
     private final RulesConverter rulesConverter = new RulesConverter(MAPPER);
 
     @Test
-    void rulesConverterIsConsistent() {
+    void testRulesConverterIsConsistent() {
         // given - rules
 
         // when
@@ -48,7 +48,7 @@ class RulesConverterTest {
     }
 
     @Test
-    void rulesConverterIsCorrect() {
+    void testRulesConverterIsCorrect() {
         // given - rules
 
         // when
@@ -60,7 +60,7 @@ class RulesConverterTest {
     }
 
     @Test
-    void rulesConverterHandlesNulls() {
+    void testRulesConverterHandlesNulls() {
         // given - nothing
 
         // when

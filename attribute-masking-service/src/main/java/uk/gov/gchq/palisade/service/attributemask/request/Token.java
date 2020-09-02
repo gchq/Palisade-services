@@ -16,7 +16,7 @@
 
 package uk.gov.gchq.palisade.service.attributemask.request;
 
-public class Token {
+public final class Token {
     public static final String HEADER = "X-Request-Token";
 
     private Token() {
