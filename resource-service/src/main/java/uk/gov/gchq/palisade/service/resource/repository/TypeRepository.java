@@ -28,10 +28,22 @@ import java.util.stream.StreamSupport;
  */
 public interface TypeRepository extends CrudRepository<TypeEntity, String> {
 
+    /**
+     * Returns a stream of {@link TypeEntity} from a backing store by a type
+     *
+     * @param type of resource to retrieve
+     * @return a stream of TypeEntities from the backing store
+     */
     default Stream<TypeEntity> streamFindAllByType(String type) {
         return StreamSupport.stream(findAllByType(type).spliterator(), false);
     }
 
+    /**
+     * Iterable used to create a stream of resources by serialisedFormat
+     *
+     * @param type the type of the Resource to retrieve
+     * @return a list of TypeEntity from the backing store
+     */
     Iterable<TypeEntity> findAllByType(String type);
 
 }

@@ -28,10 +28,22 @@ import java.util.stream.StreamSupport;
  */
 public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
+    /**
+     * Returns a stream of {@link SerialisedFormatEntity} from a backing store by a serialisedFormat
+     *
+     * @param serialisedFormat the format of the resource
+     * @return a stream of SerialisedFormatEntity from the backing store
+     */
     default Stream<SerialisedFormatEntity> streamFindAllBySerialisedFormat(String serialisedFormat) {
         return StreamSupport.stream(findAllBySerialisedFormat(serialisedFormat).spliterator(), false);
     }
 
+    /**
+     * Iterable used to create a stream of resources by serialisedFormat
+     *
+     * @param serialisedFormat the format of the Resource
+     * @return a list of SerialisedFormatEntity from the backing store
+     */
     Iterable<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
 
 }

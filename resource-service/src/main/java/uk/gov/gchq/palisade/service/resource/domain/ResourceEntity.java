@@ -35,6 +35,11 @@ import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.StringJoiner;
 
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the ResourceID and ResourceEntity make up the key
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
 @Entity
 @Table(name = "resources",
         uniqueConstraints = {
@@ -71,6 +76,12 @@ public class ResourceEntity implements Serializable {
         this.resource = resource;
     }
 
+    /**
+     * Constructor used for the Database that takes a Resource and extracts the values
+     * Used for inserting objects into the backing store
+     *
+     * @param resource specified to insert into the backing store
+     */
     @PersistenceConstructor
     public ResourceEntity(final Resource resource) {
         this(

@@ -31,6 +31,11 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.StringJoiner;
 
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the ResourceID and SerialisedFormat make up the key
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
 @Entity
 @Table(name = "serialised_formats",
         indexes = {
@@ -52,6 +57,13 @@ public class SerialisedFormatEntity implements Serializable {
     public SerialisedFormatEntity() {
     }
 
+    /**
+     * Constructor used for the Database
+     * Used for inserting objects into the backing store
+     *
+     * @param serialisedFormat the serialised format of the resource that will be inserted into the backing store
+     * @param resourceId       the id of the resource that will be inserted into the backing store
+     */
     @PersistenceConstructor
     public SerialisedFormatEntity(final String serialisedFormat, final String resourceId) {
         this.serialisedFormat = serialisedFormat;
