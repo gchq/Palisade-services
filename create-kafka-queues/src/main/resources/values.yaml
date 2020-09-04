@@ -39,7 +39,7 @@ kafkaCreateTopics:
 
 image:
   name: @artifactId@
-  tag: @git.commit.id.abbrev@-@revision@
+  tag: @revision@-@git.commit.id.abbrev@
   pullPolicy: IfNotPresent
 
 resources:
