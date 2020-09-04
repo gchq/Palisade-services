@@ -40,6 +40,12 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+/**
+ * A proxy of (wrapper around) an instance of a {@link ResourceService}.
+ * This adds a cache-like behaviour to the service by persisting requests/responses in a database.
+ * Additionally, this is expected to be used by an asynchronous REST streaming response, so has further considerations
+ * to properly support the callback.
+ */
 public class StreamingResourceServiceProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(StreamingResourceServiceProxy.class);
 
