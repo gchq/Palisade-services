@@ -35,7 +35,7 @@ import java.util.StringJoiner;
 
 /**
  * The Database uses this as the object that will be stored in the backing store linked by an ID
- * In this case the Id_pair_hash is the ID
+ * In this case the Id_pair_hash is the ID which is created by creating a hash of the entity_type object and entity_id
  * This contains all objects that will be go into the database, including how they are serialised and indexed
  */
 @Entity
