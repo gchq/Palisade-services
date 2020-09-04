@@ -264,7 +264,7 @@ timestamps {
 
             Deploy: {
                  stage('Helm deploy') {
-                     dir('Palisade-services') {
+                     dir('Palisade-services-deploy') {
                          container('maven') {
                              configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                                  if (IS_PR == "true") {
