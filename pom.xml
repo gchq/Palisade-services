@@ -315,11 +315,17 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>agent</id>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <includes>
+                                <include></include>
+                            </includes>
+                        </configuration>
                     </execution>
+
                     <execution>
                         <id>report</id>
                         <phase>prepare-package</phase>

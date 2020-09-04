@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
@@ -31,7 +30,6 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest
 public class SetTypePolicyRequestTest {
 
     private final ObjectMapper mapper = new ObjectMapper();

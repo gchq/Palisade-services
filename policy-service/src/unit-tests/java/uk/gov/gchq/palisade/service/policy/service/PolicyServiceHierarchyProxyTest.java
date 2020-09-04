@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.policy.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -42,7 +41,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
 public class PolicyServiceHierarchyProxyTest {
     private static final User USER = new User().userId("testUser");
     private static final User SENSITIVE_USER = new User().userId("sensitiveTestUser").addAuths(Collections.singleton("Sensitive"));

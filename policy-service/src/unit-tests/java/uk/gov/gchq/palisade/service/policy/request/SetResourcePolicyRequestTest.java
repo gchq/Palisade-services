@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@TestInstance(Lifecycle.PER_CLASS)
 public class SetResourcePolicyRequestTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final FileResource fileResource1 = createTestFileResource(1);
