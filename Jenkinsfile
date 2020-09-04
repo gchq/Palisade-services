@@ -136,12 +136,15 @@ timestamps {
             def EXAMPLES_REVISION
             def INTEGRATION_REVISION
             def HELM_DEPLOY_NAMESPACE
+            def IS_PR
 
             stage('Bootstrap') {
                 if (env.CHANGE_BRANCH) {
                     GIT_BRANCH_NAME = env.CHANGE_BRANCH
+                    IS_PR = "true"
                 } else {
                     GIT_BRANCH_NAME = env.BRANCH_NAME
+                    IS_PR = "false"
                 }
                 // set default values for the variables
                 COMMON_REVISION = "SNAPSHOT"
@@ -149,7 +152,7 @@ timestamps {
                 EXAMPLES_REVISION = "SNAPSHOT"
                 INTEGRATION_REVISION = "SNAPSHOT"
                 GIT_BRANCH_NAME_LOWER = GIT_BRANCH_NAME.toLowerCase().take(7)
-                SERVICES_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
+                SERVICES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                 HELM_DEPLOY_NAMESPACE = GIT_BRANCH_NAME_LOWER
                 // update values for the variables if this is the develop branch build
                 if ("${env.BRANCH_NAME}" == "develop") {
@@ -174,34 +177,19 @@ timestamps {
                 dir('Palisade-common') {
                     git branch: 'develop', url: 'https://github.com/gchq/Palisade-common.git'
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        COMMON_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
-                        container('docker-cmds') {
-                            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -s ${MAVEN_SETTINGS} -P quick -D revision=${COMMON_REVISION} install"
-                            }
-                        }
+                        COMMON_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                     }
                 }
                 dir('Palisade-readers') {
                     git branch: 'develop', url: 'https://github.com/gchq/Palisade-readers.git'
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        READERS_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
-                        container('docker-cmds') {
-                            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -s ${MAVEN_SETTINGS} -P quick -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} install"
-                            }
-                        }
+                        READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                     }
                 }
                 dir('Palisade-examples') {
                     git branch: 'develop', url: 'https://github.com/gchq/Palisade-examples.git'
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        EXAMPLES_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
-                        container('docker-cmds') {
-                            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -s ${MAVEN_SETTINGS} -P quick -pl hr-data-generator/ -D revision=${EXAMPLES_REVISION} -D common.revision=${COMMON_REVISION} install"
-                            }
-                        }
+                        EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                     }
                 }
             }
@@ -211,7 +199,11 @@ timestamps {
                     git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                     container('docker-cmds') {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
+//                             if (IS_PR == "true") {
+//                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+//                             } else {
+                                sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
+//                             }
                         }
                     }
                 }
@@ -224,7 +216,7 @@ timestamps {
                 dir('Palisade-integration-tests') {
                     git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
                     if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        INTEGRATION_REVISION = "${GIT_BRANCH_NAME_LOWER}-BRANCH-SNAPSHOT"
+                        INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                     }
                     container('docker-cmds') {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
@@ -263,16 +255,6 @@ timestamps {
                 }
             }
 
-            stage('Maven deploy') {
-                dir('Palisade-services') {
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh "mvn -s ${MAVEN_SETTINGS} -P quick -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
-                        }
-                    }
-                }
-            }
-
             stage('Hadolinting') {
                 dir('Palisade-services') {
                     container('hadolint') {
@@ -285,42 +267,44 @@ timestamps {
                  dir('Palisade-services') {
                      container('maven') {
                          configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                             if (("${GIT_BRANCH_NAME}" != "develop") &&
-                                     ("${GIT_BRANCH_NAME}" != "main")) {
-                                if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
-                                    sh 'echo namespace create succeeded'
-                                } else {
-                                    error("Could not create namespace")
-                                }
-                             }
-                             sh 'palisade-login'
-                             //now extract the public IP addresses that this will be open on
-                             sh 'extract-addresses'
-                             // Push containers to the registry so they are available to helm
-                             sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl palisade-service  -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             sh "mvn -s ${MAVEN_SETTINGS} -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                             //deploy application to the cluster
-                             if (sh(script: "helm upgrade --install palisade . " +
-                                     "--set global.hosting=aws  " +
-                                     "--set traefik.install=false,dashboard.install=false " +
-                                     "--set global.repository=${ECR_REGISTRY} " +
-                                     "--set global.hostname=${EGRESS_ELB} " +
-                                     "--set global.deployment=example " +
-                                     "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                     "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                     "--set global.redisClusterEnabled=true " +
-                                     "--set global.redis.install=false " +
-                                     "--set global.redis-cluster.install=true " +
-                                     "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
-                                 echo("successfully deployed")
-                             } else {
-                                 error("Build failed because of failed maven deploy")
+                             if (IS_PR == "true") {
+                                 sh 'palisade-login'
+                                 //now extract the public IP addresses that this will be open on
+                                 sh 'extract-addresses'
+                                 // Push containers to the registry so they are available to helm
+                                 if (("${GIT_BRANCH_NAME}" != "develop") &&
+                                          ("${GIT_BRANCH_NAME}" != "main")) {
+                                     if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
+                                         sh 'echo namespace create succeeded'
+                                     } else {
+                                         error("Could not create namespace")
+                                     }
+                                 }
+                                 sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl palisade-service  -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
+                                 //deploy application to the cluster
+                                 if (sh(script: "helm upgrade --install palisade . " +
+                                         "--set global.hosting=aws  " +
+                                         "--set traefik.install=false,dashboard.install=false " +
+                                         "--set global.repository=${ECR_REGISTRY} " +
+                                         "--set global.hostname=${EGRESS_ELB} " +
+                                         "--set global.deployment=example " +
+                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
+                                         "--set global.redisClusterEnabled=true " +
+                                         "--set global.redis.install=false " +
+                                         "--set global.redis-cluster.install=true " +
+                                         "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
+                                     echo("successfully deployed")
+                                 } else {
+                                     error("Build failed because of failed maven deploy")
+                                 }
                              }
                          }
                      }
