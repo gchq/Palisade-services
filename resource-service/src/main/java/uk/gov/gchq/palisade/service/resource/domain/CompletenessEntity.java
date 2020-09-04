@@ -33,6 +33,11 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the Id_pair_hash is the ID
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
 @Entity
 @Table(name = "completeness",
         indexes = {
@@ -59,6 +64,13 @@ public class CompletenessEntity implements Serializable {
     public CompletenessEntity() {
     }
 
+    /**
+     * Constructor used for the Database that takes a {@link EntityType} and EntityId
+     * Used for inserting objects into the backing store
+     *
+     * @param entityType The Entity type enum object.
+     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     */
     @PersistenceConstructor
     public CompletenessEntity(final EntityType entityType, final String entityId) {
         this.entityType = entityType;

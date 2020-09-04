@@ -16,6 +16,10 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+/**
+ * Enum for creating EntityType which consists of a Resource, Type and Format.
+ * Used when persisting information about resources into a backing store
+ */
 public enum EntityType {
     RESOURCE,
     TYPE,
