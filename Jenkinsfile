@@ -193,124 +193,119 @@ timestamps {
                     }
                 }
             }
-
-            stage('Install, Unit Tests, Checkstyle') {
-                dir('Palisade-services') {
-                    git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-//                             if (IS_PR == "true") {
-//                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
-//                             } else {
-                                sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
-//                             }
-                        }
-                    }
-                }
-            }
-
-            stage('Integration Tests') {
-                // Always run some sort of integration test
-                // If this branch name exists in integration-tests, use that
-                // Otherwise, default to integration-tests/develop
-                dir('Palisade-integration-tests') {
-                    git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                    if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                    }
-                    container('docker-cmds') {
-                        configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                            sh "mvn -s ${MAVEN_SETTINGS} -D revision=${INTEGRATION_REVISION} -D common.revision=${COMMON_REVISION} -D services.revision=${SERVICES_REVISION} -D examples.revision=${EXAMPLES_REVISION} install"
-                        }
-                    }
-                }
-            }
-
-            stage('SonarQube Analysis') {
-                dir('Palisade-services') {
-                    container('docker-cmds') {
-                        withCredentials([string(credentialsId: "${env.SQ_WEB_HOOK}", variable: 'SONARQUBE_WEBHOOK'),
-                                         string(credentialsId: "${env.SQ_KEY_STORE_PASS}", variable: 'KEYSTORE_PASS'),
-                                         file(credentialsId: "${env.SQ_KEY_STORE}", variable: 'KEYSTORE')]) {
-                            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                withSonarQubeEnv(installationName: 'sonar') {
-                                        sh "mvn -s ${MAVEN_SETTINGS} org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=Palisade-Services-${GIT_BRANCH_NAME} -Dsonar.projectName=Palisade-Services-${GIT_BRANCH_NAME} -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS"
+            parallel (
+                Install: {
+                    stage('Install, Unit Tests, Checkstyle') {
+                        dir('Palisade-services') {
+                            git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
+                            container('docker-cmds') {
+                                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
                                 }
                             }
                         }
                     }
-                }
-            }
 
-            stage("SonarQube Quality Gate") {
-                // Wait for SonarQube to prepare the report
-                sleep(time: 10, unit: 'SECONDS')
-                // Just in case something goes wrong, pipeline will be killed after a timeout
-                timeout(time: 5, unit: 'MINUTES') {
-                    // Reuse taskId previously collected by withSonarQubeEnv
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                    stage('Integration Tests') {
+                        // Always run some sort of integration test
+                        // If this branch name exists in integration-tests, use that
+                        // Otherwise, default to integration-tests/develop
+                        dir('Palisade-integration-tests') {
+                            git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                            if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                                INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                            }
+                            container('docker-cmds') {
+                                configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${INTEGRATION_REVISION} -D common.revision=${COMMON_REVISION} -D services.revision=${SERVICES_REVISION} -D examples.revision=${EXAMPLES_REVISION} install"
+                                }
+                            }
+                        }
+                    }
+
+                    stage('SonarQube Analysis') {
+                        dir('Palisade-services') {
+                            container('docker-cmds') {
+                                withCredentials([string(credentialsId: "${env.SQ_WEB_HOOK}", variable: 'SONARQUBE_WEBHOOK'),
+                                                 string(credentialsId: "${env.SQ_KEY_STORE_PASS}", variable: 'KEYSTORE_PASS'),
+                                                 file(credentialsId: "${env.SQ_KEY_STORE}", variable: 'KEYSTORE')]) {
+                                    configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                        withSonarQubeEnv(installationName: 'sonar') {
+                                                sh "mvn -s ${MAVEN_SETTINGS} org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=Palisade-Services-${GIT_BRANCH_NAME} -Dsonar.projectName=Palisade-Services-${GIT_BRANCH_NAME} -Dsonar.webhooks.project=$SONARQUBE_WEBHOOK -Djavax.net.ssl.trustStore=$KEYSTORE -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASS"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    stage("SonarQube Quality Gate") {
+                        // Wait for SonarQube to prepare the report
+                        sleep(time: 10, unit: 'SECONDS')
+                        // Just in case something goes wrong, pipeline will be killed after a timeout
+                        timeout(time: 5, unit: 'MINUTES') {
+                            // Reuse taskId previously collected by withSonarQubeEnv
+                            def qg = waitForQualityGate()
+                            if (qg.status != 'OK') {
+                                error "Pipeline aborted due to SonarQube quality gate failure: ${qg.status}"
+                            }
+                        }
                     }
                 }
-            }
 
-            stage('Hadolinting') {
-                dir('Palisade-services') {
-                    container('hadolint') {
-                        sh 'hadolint */Dockerfile'
+                Hadolint: {
+                    stage('Hadolinting') {
+                        dir('Palisade-services') {
+                            container('hadolint') {
+                                sh 'hadolint */Dockerfile'
+                            }
+                        }
                     }
                 }
-            }
 
-             stage('Helm deploy') {
-                 dir('Palisade-services') {
-                     container('maven') {
-                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                             if (IS_PR == "true") {
-                                 sh 'palisade-login'
-                                 //now extract the public IP addresses that this will be open on
-                                 sh 'extract-addresses'
-                                 // Push containers to the registry so they are available to helm
-                                 if (("${GIT_BRANCH_NAME}" != "develop") &&
-                                          ("${GIT_BRANCH_NAME}" != "main")) {
-                                     if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
-                                         sh 'echo namespace create succeeded'
-                                     } else {
-                                         error("Could not create namespace")
+                Deploy: {
+                     stage('Helm deploy') {
+                         dir('Palisade-services') {
+                             container('maven') {
+                                 configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                     if (IS_PR == "true") {
+                                         sh 'palisade-login'
+                                         //now extract the public IP addresses that this will be open on
+                                         sh 'extract-addresses'
+                                         // Push containers to the registry so they are available to helm
+                                         if (("${GIT_BRANCH_NAME}" != "develop") &&
+                                                  ("${GIT_BRANCH_NAME}" != "main")) {
+                                             if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
+                                                 sh 'echo namespace create succeeded'
+                                             } else {
+                                                 error("Could not create namespace")
+                                             }
+                                         }
+                                         sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+                                         //deploy application to the cluster
+                                         if (sh(script: "helm upgrade --install palisade . " +
+                                                 "--set global.hosting=aws  " +
+                                                 "--set traefik.install=false,dashboard.install=false " +
+                                                 "--set global.repository=${ECR_REGISTRY} " +
+                                                 "--set global.hostname=${EGRESS_ELB} " +
+                                                 "--set global.deployment=example " +
+                                                 "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                                 "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
+                                                 "--set global.redisClusterEnabled=true " +
+                                                 "--set global.redis.install=false " +
+                                                 "--set global.redis-cluster.install=true " +
+                                                 "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
+                                             echo("successfully deployed")
+                                         } else {
+                                             error("Build failed because of failed maven deploy")
+                                         }
                                      }
-                                 }
-                                 sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl audit-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl create-kafka-queues -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl data-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl palisade-service  -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl policy-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl resource-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-//                                  sh "mvn -s ${MAVEN_SETTINGS} -pl user-service -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} dockerfile:push"
-                                 //deploy application to the cluster
-                                 if (sh(script: "helm upgrade --install palisade . " +
-                                         "--set global.hosting=aws  " +
-                                         "--set traefik.install=false,dashboard.install=false " +
-                                         "--set global.repository=${ECR_REGISTRY} " +
-                                         "--set global.hostname=${EGRESS_ELB} " +
-                                         "--set global.deployment=example " +
-                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                         "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                         "--set global.redisClusterEnabled=true " +
-                                         "--set global.redis.install=false " +
-                                         "--set global.redis-cluster.install=true " +
-                                         "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
-                                     echo("successfully deployed")
-                                 } else {
-                                     error("Build failed because of failed maven deploy")
                                  }
                              }
                          }
                      }
-                 }
-             }
+                }
+            )
         }
     }
-
 }
