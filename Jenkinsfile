@@ -250,7 +250,7 @@ timestamps {
                         }
                     }
                 }
-            }
+            },
 
             Hadolint: {
                 stage('Hadolinting') {
@@ -260,7 +260,7 @@ timestamps {
                         }
                     }
                 }
-            }
+            },
 
             Deploy: {
                  stage('Helm deploy') {
@@ -297,6 +297,10 @@ timestamps {
                                          echo("successfully deployed")
                                      } else {
                                          error("Build failed because of failed maven deploy")
+                                     }
+                                     if (("${GIT_BRANCH_NAME}" != "develop") &&
+                                           ("${GIT_BRANCH_NAME}" != "main")) {
+                                         sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
                                      }
                                  }
                              }
