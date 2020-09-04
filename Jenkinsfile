@@ -193,7 +193,7 @@ timestamps {
                     }
                 }
             }
-            parallel Install: {
+            parallel Test: {
                 stage('Install, Unit Tests, Checkstyle') {
                     dir('Palisade-services') {
                         git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
