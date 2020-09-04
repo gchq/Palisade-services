@@ -268,6 +268,7 @@ timestamps {
                          container('maven') {
                              configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                                  if (IS_PR == "true") {
+                                     git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                                      sh 'palisade-login'
                                      //now extract the public IP addresses that this will be open on
                                      sh 'extract-addresses'
