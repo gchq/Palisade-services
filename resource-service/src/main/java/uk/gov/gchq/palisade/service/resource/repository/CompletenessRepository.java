@@ -41,7 +41,7 @@ public interface CompletenessRepository extends CrudRepository<CompletenessEntit
     boolean existsById(Integer id);
 
     /**
-     * Saves or inserts the object into the backing store via a {@link CrudRepository}
+     * Saves (aka inserts) the object into the backing store via a {@link CrudRepository}
      *
      * @param entityType Information about the resource Object
      * @param entityId   The Id of the entity
