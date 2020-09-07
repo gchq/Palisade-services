@@ -43,8 +43,7 @@ global:
   redis:
     # install: install redis persistence and caching data storage platform
     install: true
-    # config: configure services to connect to (previously installed?) redis (if unset, use install value)
-    # config: true
+    # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
       nameOverride: "redis"
     master:
@@ -54,8 +53,6 @@ global:
   redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
-    # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
-    # config: false
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
       nameOverride: "redis"
@@ -100,14 +97,17 @@ global:
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
       name: palisade-classpath-jars
+      # storageClassName: the name of the storage-class to use for the given "hosting" type
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: efs-sc
+      # provisioning: [static | dynamic] whether to use static or dynamic provisioning
       provisioning:
         _default: static
         local: static
         aws: static
+      # mode: [ReadOnlyMany | ReadWriteOnce | ReadWriteMany] access permissions for the created pv
       mode:
         _default: ReadWriteOnce
         local: ReadWriteMany
@@ -196,7 +196,7 @@ global:
         volumeHandle: null
         volumePath: "/"
 
-    # redis: Store used by redis and redis-cluster for persistence and caching
+    # redisMaster: Writeable store used by redis master node for persistence and caching
     redisMaster:
       name: redis-persistence-master
       storageClassName:
@@ -218,6 +218,7 @@ global:
         volumeHandle: null
         volumePath: "/"
 
+    # redisSlave: Readable store used by redis slave nodes for persistence and caching
     redisSlave:
       name: redis-persistence-slave
       storageClassName:
@@ -239,6 +240,7 @@ global:
         volumeHandle: null
         volumePath: "/"
 
+    # redisCluster: Read/writeable store used by redis cluster nodes for persistence and caching
     redisCluster:
       name: redis-persistence-cluster
       storageClassName:
@@ -259,7 +261,6 @@ global:
       aws:
         volumeHandle: null
         volumePath: "/"
-
 
     # global.persistence.statefulSet.pv.enabled: Global variable that controls the generation of statefulSet pv/pvc(s)
     statefulSet:
