@@ -31,12 +31,12 @@ kind: PersistentVolume
 metadata:
   name: {{ $name }}-{{ $namespace }}
   labels:
-  {{- if eq $sc "ebs-sc" }}
-    type: amazonEBS
-  {{- else if eq $sc "efs-sc" }}
-    type: amazonEFS
-  {{- end }}
     selectorFilter: {{ $name }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
+    type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:

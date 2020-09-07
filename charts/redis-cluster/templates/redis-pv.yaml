@@ -17,14 +17,18 @@
 {{- $config := .Values.global.persistence.redisCluster }}
 {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
 {{- if eq $provisioning "static" }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (.Values.cluster.nodes | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
   labels:
-    {{- if eq $.Values.global.hosting "aws" }}
+    selectorFilter: {{ $config.name }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
     {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
