@@ -70,7 +70,6 @@
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
     </properties>
 
@@ -310,7 +309,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
                 <configuration>
-                    <destFile>${sonar.coverage.jacoco.xmlReportPaths}</destFile>
+                    <destFile>${project.basedir}/../target/site/jacoco/jacoco.xml</destFile>
                     <append>true</append>
                 </configuration>
                 <executions>
