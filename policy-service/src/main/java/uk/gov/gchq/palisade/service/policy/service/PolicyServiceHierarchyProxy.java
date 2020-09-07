@@ -94,7 +94,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         return inheritedRules.map(iRules -> newRules.map(nRules -> mergeRules(iRules, nRules)).or(() -> inheritedRules)).orElse(newRules);
     }
 
-    private <T extends Serializable> Rules<T> mergeRules(final Rules<T> inheritedRules, final Rules<T> newRules) {
+    private static <T extends Serializable> Rules<T> mergeRules(final Rules<T> inheritedRules, final Rules<T> newRules) {
         LOGGER.debug("inheritedRules and newRules both present\n MessageInherited: {}\n MessageNew: {}\n RulesInherited: {}\n RulesNew: {}",
                 inheritedRules.getMessage(), newRules.getMessage(), inheritedRules.getRules(), newRules.getRules());
         Rules<T> mergedRules = new Rules<>();
