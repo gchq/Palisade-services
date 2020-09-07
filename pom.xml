@@ -308,10 +308,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
-                <configuration>
-                    <destFile>${project.basedir}/../target/site/jacoco/jacoco.xml</destFile>
-                    <append>true</append>
-                </configuration>
                 <executions>
                     <execution>
                         <id>agent</id>
@@ -324,7 +320,6 @@
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>report</goal>
-                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
                 </executions>
