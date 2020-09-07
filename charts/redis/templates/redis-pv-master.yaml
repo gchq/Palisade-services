@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if .Values.global.persistence.statefulSet.pv.enabled }}
+
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis.fullname" . }}
+{{- if .Values.global.persistence.statefulSet.pv.enabled }}
 {{- $config := $.Values.global.persistence.redisMaster }}
-{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
-{{- if eq $auto false }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+{{- if eq $provisioning "static" }}
 {{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (1 | int) }}
 apiVersion: v1

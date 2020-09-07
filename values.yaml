@@ -99,19 +99,19 @@ global:
 
     # classpathJars: Store used by all services within palisade to dynamically load datatypes (Users, Resources, Policies/Rules, Serialisers)
     classpathJars:
+      name: palisade-classpath-jars
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: efs-sc
-      auto:
-        _default: false
-        local: false
-        aws: false
+      provisioning:
+        _default: static
+        local: static
+        aws: static
       mode:
         _default: ReadWriteOnce
         local: ReadWriteMany
         aws: ReadWriteMany
-      name: palisade-classpath-jars
       # mountPath: internal mountpoint for classpath jars directory, see Dockerfile ENTRYPOINT -Dloader.path and PodSpec.containers.volumeMounts.mountPath
       mountPath: "/usr/share"
       # storage: storage size for this volume and its claims
@@ -136,10 +136,10 @@ global:
           _default: hostpath
           local: hostpath
           aws: efs-sc
-        auto:
-          _default: false
-          local: false
-          aws: false
+        provisioning:
+          _default: static
+          local: static
+          aws: static
         mode:
           _default: ReadWriteOnce
           local: ReadWriteMany
@@ -154,15 +154,15 @@ global:
 
     # kafka: Store used by kafka for persisting stream logs
     kafka:
+      name: kafka-persistence
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: ebs-sc
-      name: kafka-persistence
-      auto:
-        _default: true
-        local: true
-        aws: true
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
       mode:
         _default: ReadWriteOnce
         local: ReadWriteOnce
@@ -176,15 +176,15 @@ global:
 
     # zookeeper: Store used by zookeeper for persisting stream logs
     zookeeper:
+      name: zookeeper-persistence
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: ebs-sc
-      name: zookeeper-persistence
-      auto:
-        _default: true
-        local: true
-        aws: true
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
       mode:
         _default: ReadWriteOnce
         local: ReadWriteOnce
@@ -198,15 +198,15 @@ global:
 
     # redis: Store used by redis and redis-cluster for persistence and caching
     redisMaster:
+      name: redis-persistence-master
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: ebs-sc
-      name: redis-persistence-master
-      auto:
-        _default: true
-        local: true
-        aws: true
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
       mode:
         _default: ReadWriteOnce
         local: ReadWriteOnce
@@ -219,15 +219,15 @@ global:
         volumePath: "/"
 
     redisSlave:
+      name: redis-persistence-slave
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: ebs-sc
-      name: redis-persistence-slave
-      auto:
-        _default: true
-        local: true
-        aws: true
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
       mode:
         _default: ReadWriteOnce
         local: ReadWriteOnce
@@ -240,15 +240,15 @@ global:
         volumePath: "/"
 
     redisCluster:
+      name: redis-persistence-cluster
       storageClassName:
         _default: hostpath
         local: hostpath
         aws: ebs-sc
-      name: redis-persistence-cluster
-      auto:
-        _default: true
-        local: true
-        aws: true
+      provisioning:
+        _default: dynamic
+        local: dynamic
+        aws: dynamic
       mode:
         _default: ReadWriteOnce
         local: ReadWriteOnce
