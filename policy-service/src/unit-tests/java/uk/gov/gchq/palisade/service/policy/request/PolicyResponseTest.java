@@ -15,44 +15,43 @@
  */
 package uk.gov.gchq.palisade.service.policy.request;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.request.PolicyResponse.Builder;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(SpringRunner.class)
 @JsonTest
-public class PolicyRequestTest {
+public class PolicyResponseTest {
 
     @Autowired
-    private JacksonTester<PolicyRequest> jacksonTester;
+    private JacksonTester<PolicyResponse> jacksonTester;
 
     /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link PolicyRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link PolicyResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantPolicyRequestSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantPolicyResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -60,33 +59,38 @@ public class PolicyRequestTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        PolicyRequest policyRequest = PolicyRequest.Builder.create()
+        Rules rules = new Rules<>();
+
+        PolicyResponse policyResponse = Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("originalResourceID")
                 .withContext(context)
                 .withUser(user)
-                .withResource(resource);
+                .withResource(resource)
+                .withRules(rules);
 
-        JsonContent<PolicyRequest> policyRequestJsonContent = jacksonTester.write(policyRequest);
-        ObjectContent<PolicyRequest> policyRequestObjectContent = jacksonTester.parse(policyRequestJsonContent.getJson());
-        PolicyRequest policyRequestMessageObject = policyRequestObjectContent.getObject();
+        JsonContent<PolicyResponse> policyResponseJsonContent = jacksonTester.write(policyResponse);
+        ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(policyResponseJsonContent.getJson());
+        PolicyResponse policyResponseMessageObject = policyResponseObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
-                        () -> assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
-                        () -> assertThat(policyRequestJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format")
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("originalResourceID"),
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
+                        () -> assertThat(policyResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(policyRequestMessageObject.getUser()).isEqualTo(policyRequest.getUser()),
-                        () -> assertThat(policyRequestMessageObject.getContext()).isEqualTo(policyRequest.getContext()),
-                        () -> assertThat(policyRequestMessageObject.getResource()).isEqualTo(policyRequest.getResource())
+                        () -> assertThat(policyResponseMessageObject.getUser()).isEqualTo(policyResponse.getUser()),
+                        () -> assertThat(policyResponseMessageObject.getContext()).isEqualTo(policyResponse.getContext()),
+                        () -> assertThat(policyResponseMessageObject.getResource()).isEqualTo(policyResponse.getResource()),
+                        () -> assertThat(policyResponseMessageObject.rules).isEqualTo(policyResponse.rules)
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(policyRequestMessageObject.equals(policyRequest))
+                        () -> assertThat(policyResponseMessageObject).usingRecursiveComparison().isEqualTo(policyResponse)
                 )
         );
     }

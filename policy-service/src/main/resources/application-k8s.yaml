@@ -13,11 +13,10 @@
 # limitations under the License.
 #
 
-# TODO: replace caffeine with redis
 spring:
   profiles:
     include:
-    - caffeine
+    - redis
     - k8s-config
 
 ---

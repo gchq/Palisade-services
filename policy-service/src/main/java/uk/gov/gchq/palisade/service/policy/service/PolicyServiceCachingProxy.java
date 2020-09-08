@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -67,7 +68,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
     @Override
     @CachePut(value = "resourcePolicy", key = "#resource.id")
     @CacheEvict(value = "accessPolicy")
-    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, policy);
         LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), policy.getMessage());
         return service.setResourcePolicy(resource, policy);
@@ -76,7 +77,7 @@ public class PolicyServiceCachingProxy implements PolicyService {
     @Override
     @CachePut(value = "typePolicy", key = "#type")
     @CacheEvict(value = "accessPolicy")
-    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         LOGGER.debug("Type {} with policy {} added to cache", type, policy);
         LOGGER.info("Cache add for type {} with policy message {}", type, policy.getMessage());
         return service.setTypePolicy(type, policy);
