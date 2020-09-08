@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
@@ -82,7 +83,7 @@ public interface PolicyService extends Service {
      * @param <T>      the record type for this resource
      * @return the {@link Policy} that was added (may be different to what was requested)
      */
-    <T> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
+    <T extends Serializable> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
 
     /**
      * This method allows for the setting of a policy to a resource type.
@@ -92,5 +93,5 @@ public interface PolicyService extends Service {
      * @param <T>    the record type for this resource
      * @return the {@link Policy} that was added (may be different to what was requested)
      */
-    <T> Policy<T> setTypePolicy(String type, Policy<T> policy);
+    <T extends Serializable> Policy<T> setTypePolicy(String type, Policy<T> policy);
 }

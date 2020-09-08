@@ -290,7 +290,7 @@ spec:
                                  sh 'mvn -s $MAVEN_SETTINGS -pl user-service dockerfile:push'
                                  //deploy application to the cluster
                                  if (sh(script: "helm upgrade --install palisade . " +
-                                         "--set global.hosting=aws  " +
+                                         "--set global.hosting=aws " +
                                          "--set traefik.install=false,dashboard.install=false " +
                                          "--set global.repository=${ECR_REGISTRY} " +
                                          "--set global.hostname=${EGRESS_ELB} " +
