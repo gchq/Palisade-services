@@ -21,10 +21,31 @@ import org.springframework.data.repository.CrudRepository;
 import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 
-public interface CompletenessRepository extends CrudRepository<CompletenessEntity, String> {
+/**
+ * Low-level requirement for a database used for persistence, see {@link CompletenessEntity}
+ * for more details
+ */
+public interface CompletenessRepository extends CrudRepository<CompletenessEntity, Integer> {
 
-    boolean existsByEntityTypeAndEntityId(EntityType entityType, String entityId);
+    /**
+     * Boolean value returned based on whether a resource exits in the backing store by hashing the entityType and Id
+     *
+     * @param entityType Information about the resource object
+     * @param entityId   the Id of the entity
+     * @return true/false based on if the object exists in the backing store
+     */
+    default boolean compositeExistsByEntityTypeAndEntityId(EntityType entityType, String entityId) {
+        return existsById(new CompletenessEntity(entityType, entityId).hashCode());
+    }
 
+    boolean existsById(Integer id);
+
+    /**
+     * Saves (aka inserts) the object into the backing store via a {@link CrudRepository}
+     *
+     * @param entityType Information about the resource Object
+     * @param entityId   The Id of the entity
+     */
     default void save(EntityType entityType, String entityId) {
         save(new CompletenessEntity(entityType, entityId));
     }

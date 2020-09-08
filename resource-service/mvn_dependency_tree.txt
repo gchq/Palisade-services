@@ -64,6 +64,20 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  +- org.springframework:spring-orm:jar:5.2.7.RELEASE:compile
 |  |  \- org.springframework:spring-tx:jar:5.2.7.RELEASE:compile
 |  \- org.springframework:spring-aspects:jar:5.2.7.RELEASE:compile
++- org.springframework.boot:spring-boot-starter-data-redis:jar:2.3.1.RELEASE:compile
+|  +- org.springframework.data:spring-data-redis:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework.data:spring-data-keyvalue:jar:2.3.1.RELEASE:compile
+|  |  +- org.springframework:spring-oxm:jar:5.2.7.RELEASE:compile
+|  |  \- org.springframework:spring-context-support:jar:5.2.7.RELEASE:compile
+|  \- io.lettuce:lettuce-core:jar:5.3.1.RELEASE:compile
+|     +- io.netty:netty-common:jar:4.1.50.Final:compile
+|     +- io.netty:netty-handler:jar:4.1.50.Final:compile
+|     |  +- io.netty:netty-resolver:jar:4.1.50.Final:compile
+|     |  +- io.netty:netty-buffer:jar:4.1.50.Final:compile
+|     |  \- io.netty:netty-codec:jar:4.1.50.Final:compile
+|     +- io.netty:netty-transport:jar:4.1.50.Final:compile
+|     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
+|        \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 +- org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-starter:jar:2.2.2.RELEASE:compile
 |  |  \- org.springframework.security:spring-security-rsa:jar:1.0.9.RELEASE:compile
@@ -114,11 +128,8 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |  |  \- io.reactivex:rxjava:jar:1.3.8:compile
 |  +- org.springframework.cloud:spring-cloud-starter-loadbalancer:jar:2.2.2.RELEASE:compile
 |  |  +- org.springframework.cloud:spring-cloud-loadbalancer:jar:2.2.2.RELEASE:compile
-|  |  |  +- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
-|  |  |  |  \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 |  |  |  \- io.projectreactor.addons:reactor-extra:jar:3.3.3.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot-starter-cache:jar:2.3.1.RELEASE:compile
-|  |  |  \- org.springframework:spring-context-support:jar:5.2.7.RELEASE:compile
 |  |  \- com.stoyanr:evictor:jar:1.0.0:compile
 |  +- com.netflix.ribbon:ribbon-eureka:jar:2.3.0:compile
 |  \- com.thoughtworks.xstream:xstream:jar:1.4.11.1:compile
