@@ -63,6 +63,8 @@ spec:
         env:
         - name: "LOADER_PATH"
           value: {{ include "resource-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "resource-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}
@@ -71,11 +73,16 @@ spec:
         volumeMounts:
         - name: {{ include "resource-service.deployment.fullname" . }}
           mountPath: {{ include "resource-service.deployment.path" . }}
+        - name: config-volume
+          mountPath: {{ include "resource-service.config.path" . }}
       volumes:
       - name: {{ include "resource-service.deployment.fullname" . }}
         persistentVolumeClaim:
           claimName: {{ include "resource-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "resource-service.name" . }}-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -76,6 +76,9 @@ spec:
         persistentVolumeClaim:
           claimName: {{ include "policy-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "policy-service.name" . }}-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
