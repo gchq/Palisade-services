@@ -26,6 +26,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
@@ -70,7 +71,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
      * @return An optional {@link Rules} object, which contains the list of rules found
      *         that need to be applied to the resource.
      */
-    private <T> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
+    private <T extends Serializable> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
         LOGGER.debug("Getting the applicable rules: {}", resource);
         Optional<Rules<T>> inheritedRules;
         if (resource instanceof ChildResource) {
@@ -93,7 +94,7 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         return inheritedRules.map(iRules -> newRules.map(nRules -> mergeRules(iRules, nRules)).or(() -> inheritedRules)).orElse(newRules);
     }
 
-    private <T> Rules<T> mergeRules(final Rules<T> inheritedRules, final Rules<T> newRules) {
+    private static <T extends Serializable> Rules<T> mergeRules(final Rules<T> inheritedRules, final Rules<T> newRules) {
         LOGGER.debug("inheritedRules and newRules both present\n MessageInherited: {}\n MessageNew: {}\n RulesInherited: {}\n RulesNew: {}",
                 inheritedRules.getMessage(), newRules.getMessage(), inheritedRules.getRules(), newRules.getRules());
         Rules<T> mergedRules = new Rules<>();
@@ -121,19 +122,19 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
 
     @Override
     public Optional<Policy> getPolicy(final Resource resource) {
-        Optional<Rules<Object>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
+        Optional<Rules<Serializable>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
         return optionalRules.map(rules -> new Policy<>().recordRules(rules));
     }
 
     @Override
-    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         requireNonNull(resource, "type cannot be null");
         LOGGER.debug("Setting Resource policy {} to resource {}", policy, resource);
         return service.setResourcePolicy(resource, policy);
     }
 
     @Override
-    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         requireNonNull(type, "type cannot be null");
         LOGGER.debug("Setting Type policy {} to data type {}", policy, type);
         return service.setTypePolicy(type, policy);
