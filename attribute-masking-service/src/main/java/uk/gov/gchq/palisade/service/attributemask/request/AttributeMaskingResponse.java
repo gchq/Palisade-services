@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.attributemask.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +30,8 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * AttributeMaskingResponse represents the output for attribute-masking-service which will include redacted data schema that is to be
@@ -53,17 +56,17 @@ public final class AttributeMaskingResponse {
      */
     public final JsonNode resource; // Masked resource metadata
 
-    @JsonCreator
+    @JsonCreator(mode = Mode.PROPERTIES)
     private AttributeMaskingResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("resource") JsonNode resource) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
+        this.userId = requireNonNull(userId);
+        this.resourceId = requireNonNull(resourceId);
+        this.context = requireNonNull(context);
+        this.resource = requireNonNull(resource);
     }
 
     @Generated
@@ -112,18 +115,17 @@ public final class AttributeMaskingResponse {
          * @param request message that was sent to the attribute-masking-service
          * @return interface  {@link IResourceId} for the next step in the build.
          */
-        public static AttributeMaskingResponse create(final AttributeMaskingRequest request) {
+        public static IResource create(final AttributeMaskingRequest request) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode())
-                    .withResourceNode(request.getResourceNode());
+                    .withContextNode(request.getContextNode());
         }
 
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -136,7 +138,7 @@ public final class AttributeMaskingResponse {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -149,7 +151,7 @@ public final class AttributeMaskingResponse {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -172,7 +174,7 @@ public final class AttributeMaskingResponse {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *

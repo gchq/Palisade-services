@@ -19,11 +19,12 @@ package uk.gov.gchq.palisade.service.attributemask.web;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,41 +35,46 @@ class AttributeMaskingControllerTest {
     ErrorHandlingService mockErrorHandler = Mockito.mock(ErrorHandlingService.class);
 
     @Test
-    void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
-        // given
+    void testControllerDelegatesToService() throws IOException {
+        // given some test data
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
+        Mockito.when(mockAttributeMaskingService.maskResourceAttributes(any())).thenReturn(ApplicationTestData.LEAF_RESOURCE);
 
-        // when
-        attributeMaskingController.storeRequestResult(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
+        // when the controller is called
+        attributeMaskingController.serviceMaskAttributes(
+                ApplicationTestData.REQUEST_TOKEN,
                 null,
-                Optional.of(AttributeMaskingApplicationTestData.REQUEST)
+                Optional.of(ApplicationTestData.REQUEST)
         );
 
-        // then
-        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).storeRequestResult(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
-                AttributeMaskingApplicationTestData.USER,
-                AttributeMaskingApplicationTestData.LEAF_RESOURCE,
-                AttributeMaskingApplicationTestData.CONTEXT,
-                AttributeMaskingApplicationTestData.RULES
+        // then the service.storeAuthorisedRequest method is called
+        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).storeAuthorisedRequest(
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
+        );
+
+        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).maskResourceAttributes(
+                ApplicationTestData.LEAF_RESOURCE
         );
     }
 
     @Test
-    void testStreamMarkerBypassesServiceDelegation() {
+    void testStreamMarkerBypassesServiceDelegation() throws IOException {
         // given
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
 
         // when
-        attributeMaskingController.storeRequestResult(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
+        attributeMaskingController.serviceMaskAttributes(
+                ApplicationTestData.REQUEST_TOKEN,
                 StreamMarker.START_OF_STREAM,
                 Optional.empty()
         );
 
         // then
-        Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeRequestResult(
+        Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeAuthorisedRequest(
                 any(),
                 any(),
                 any(),
@@ -77,14 +83,14 @@ class AttributeMaskingControllerTest {
         );
 
         // when
-        attributeMaskingController.storeRequestResult(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
+        attributeMaskingController.restMaskAttributes(
+                ApplicationTestData.REQUEST_TOKEN,
                 StreamMarker.END_OF_STREAM,
                 Optional.empty()
         );
 
         // then
-        Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeRequestResult(
+        Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeAuthorisedRequest(
                 any(),
                 any(),
                 any(),

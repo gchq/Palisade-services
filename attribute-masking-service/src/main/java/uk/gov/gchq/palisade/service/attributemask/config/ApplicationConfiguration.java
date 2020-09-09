@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
+import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
@@ -47,8 +49,9 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    @Primary
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        return JSONSerialiser.createDefaultMapper();
     }
 
 }

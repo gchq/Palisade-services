@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,9 +37,9 @@ class RulesConverterTest {
         // given - rules
 
         // when
-        String databaseColumn = rulesConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.RULES);
+        String databaseColumn = rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES);
         // then
-        assertThat(rulesConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.RULES)).isEqualTo(databaseColumn);
+        assertThat(rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES)).isEqualTo(databaseColumn);
 
         // when
         Rules<?> convertedRules = rulesConverter.convertToEntityAttribute(databaseColumn);
@@ -52,11 +52,11 @@ class RulesConverterTest {
         // given - rules
 
         // when
-        String databaseColumn = rulesConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.RULES);
+        String databaseColumn = rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES);
         Rules<?> convertedRules = rulesConverter.convertToEntityAttribute(databaseColumn);
         // then
-        assertThat(convertedRules).isEqualTo(AttributeMaskingApplicationTestData.RULES);
-        LOGGER.info("{} -> {}", AttributeMaskingApplicationTestData.RULES, databaseColumn);
+        assertThat(convertedRules).isEqualTo(ApplicationTestData.RULES);
+        LOGGER.info("{} -> {}", ApplicationTestData.RULES, databaseColumn);
     }
 
     @Test

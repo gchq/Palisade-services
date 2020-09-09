@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,9 +37,9 @@ class ContextConverterTest {
         // given - context
 
         // when
-        String databaseColumn = contextConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.CONTEXT);
+        String databaseColumn = contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT);
         // then
-        assertThat(contextConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.CONTEXT)).isEqualTo(databaseColumn);
+        assertThat(contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT)).isEqualTo(databaseColumn);
 
         // when
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
@@ -52,11 +52,11 @@ class ContextConverterTest {
         // given - context
 
         // when
-        String databaseColumn = contextConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.CONTEXT);
+        String databaseColumn = contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT);
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
         // then
-        assertThat(convertedContext).isEqualTo(AttributeMaskingApplicationTestData.CONTEXT);
-        LOGGER.info("{} -> {}", AttributeMaskingApplicationTestData.CONTEXT, databaseColumn);
+        assertThat(convertedContext).isEqualTo(ApplicationTestData.CONTEXT);
+        LOGGER.info("{} -> {}", ApplicationTestData.CONTEXT, databaseColumn);
     }
 
     @Test

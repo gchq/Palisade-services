@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,9 +37,9 @@ class UserConverterTest {
         // given - user
 
         // when
-        String databaseColumn = userConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.USER);
+        String databaseColumn = userConverter.convertToDatabaseColumn(ApplicationTestData.USER);
         // then
-        assertThat(userConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.USER)).isEqualTo(databaseColumn);
+        assertThat(userConverter.convertToDatabaseColumn(ApplicationTestData.USER)).isEqualTo(databaseColumn);
 
         // when
         User convertedUser = userConverter.convertToEntityAttribute(databaseColumn);
@@ -52,11 +52,11 @@ class UserConverterTest {
         // given - user
 
         // when
-        String databaseColumn = userConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.USER);
+        String databaseColumn = userConverter.convertToDatabaseColumn(ApplicationTestData.USER);
         User convertedUser = userConverter.convertToEntityAttribute(databaseColumn);
         // then
-        assertThat(convertedUser).isEqualTo(AttributeMaskingApplicationTestData.USER);
-        LOGGER.info("{} -> {}", AttributeMaskingApplicationTestData.USER, databaseColumn);
+        assertThat(convertedUser).isEqualTo(ApplicationTestData.USER);
+        LOGGER.info("{} -> {}", ApplicationTestData.USER, databaseColumn);
     }
 
     @Test

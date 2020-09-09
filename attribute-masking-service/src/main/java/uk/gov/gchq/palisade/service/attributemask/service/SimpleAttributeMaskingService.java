@@ -25,6 +25,8 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
+import java.io.IOException;
+
 public class SimpleAttributeMaskingService implements AttributeMaskingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAttributeMaskingService.class);
 
@@ -35,13 +37,12 @@ public class SimpleAttributeMaskingService implements AttributeMaskingService {
     }
 
     @Override
-    public boolean storeRequestResult(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+    public void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException {
         try {
             this.persistenceLayer.put(token, user, resource, context, rules);
-            return true;
         } catch (RuntimeException ex) {
-            LOGGER.error("Caught error while writing to persistence store: ", ex);
-            return false;
+            LOGGER.warn("Caught error while writing to persistence store: ", ex);
+            throw new IOException(ex);
         }
     }
 

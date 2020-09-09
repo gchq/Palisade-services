@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask;
+package uk.gov.gchq.palisade.contract.attributemask;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingReques
 
 import java.io.Serializable;
 
-public class AttributeMaskingApplicationTestData {
+public class ApplicationTestData {
     /**
      * Common test data for all classes
      */

@@ -19,33 +19,35 @@ package uk.gov.gchq.palisade.service.attributemask.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
+
+import java.io.IOException;
 
 class SimpleAttributeMaskingServiceTest {
 
     JpaPersistenceLayer mockPersistenceLayer = Mockito.mock(JpaPersistenceLayer.class);
 
     @Test
-    void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
+    void testAttributeMaskingServiceDelegatesToPersistenceLayer() throws IOException {
         // given
         AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
 
         // when
-        attributeMaskingService.storeRequestResult(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
-                AttributeMaskingApplicationTestData.USER,
-                AttributeMaskingApplicationTestData.LEAF_RESOURCE,
-                AttributeMaskingApplicationTestData.CONTEXT,
-                AttributeMaskingApplicationTestData.RULES
+        attributeMaskingService.storeAuthorisedRequest(
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
         );
 
         Mockito.verify(mockPersistenceLayer, Mockito.atLeastOnce()).put(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
-                AttributeMaskingApplicationTestData.USER,
-                AttributeMaskingApplicationTestData.LEAF_RESOURCE,
-                AttributeMaskingApplicationTestData.CONTEXT,
-                AttributeMaskingApplicationTestData.RULES
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
         );
     }
 

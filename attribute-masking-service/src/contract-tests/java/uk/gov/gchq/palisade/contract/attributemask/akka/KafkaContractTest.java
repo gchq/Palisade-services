@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.service;
+package uk.gov.gchq.palisade.contract.attributemask.akka;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import java.io.IOException;
+import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 
-public interface AttributeMaskingService {
-
-    void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException;
-
-    LeafResource maskResourceAttributes(final LeafResource resource);
-
+@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+public class KafkaContractTest {
+    // Test kafka stuff
 }

@@ -27,8 +27,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData.PassThroughRule;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.PassThroughRule;
 import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 
@@ -64,11 +64,11 @@ class JpaPersistenceLayerTest {
     void testPutAndGetReturnsExpectedEntity() {
         // given
         persistenceLayer.put(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
-                AttributeMaskingApplicationTestData.USER,
-                AttributeMaskingApplicationTestData.LEAF_RESOURCE,
-                AttributeMaskingApplicationTestData.CONTEXT,
-                AttributeMaskingApplicationTestData.RULES
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
         );
 
         // when
@@ -76,19 +76,19 @@ class JpaPersistenceLayerTest {
 
         // then
         AuthorisedRequestEntity expected = new AuthorisedRequestEntity(
-                AttributeMaskingApplicationTestData.REQUEST_TOKEN,
-                AttributeMaskingApplicationTestData.USER,
-                AttributeMaskingApplicationTestData.LEAF_RESOURCE,
-                AttributeMaskingApplicationTestData.CONTEXT,
-                AttributeMaskingApplicationTestData.RULES
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
         );
         assertThat(authorisedRequests)
                 .hasSize(1)
-                .allMatch(requestEntity -> requestEntity.getToken().equals(AttributeMaskingApplicationTestData.REQUEST_TOKEN))
-                .allMatch(requestEntity -> requestEntity.getResourceId().equals(AttributeMaskingApplicationTestData.RESOURCE_ID))
-                .allMatch(requestEntity -> requestEntity.getUser().equals(AttributeMaskingApplicationTestData.USER))
-                .allMatch(requestEntity -> requestEntity.getLeafResource().equals(AttributeMaskingApplicationTestData.LEAF_RESOURCE))
-                .allMatch(requestEntity -> requestEntity.getContext().equals(AttributeMaskingApplicationTestData.CONTEXT))
-                .allMatch(requestEntity -> requestEntity.getRules().getRules().get(AttributeMaskingApplicationTestData.RULE_MESSAGE).getClass().equals(PassThroughRule.class));
+                .allMatch(requestEntity -> requestEntity.getToken().equals(ApplicationTestData.REQUEST_TOKEN))
+                .allMatch(requestEntity -> requestEntity.getResourceId().equals(ApplicationTestData.RESOURCE_ID))
+                .allMatch(requestEntity -> requestEntity.getUser().equals(ApplicationTestData.USER))
+                .allMatch(requestEntity -> requestEntity.getLeafResource().equals(ApplicationTestData.LEAF_RESOURCE))
+                .allMatch(requestEntity -> requestEntity.getContext().equals(ApplicationTestData.CONTEXT))
+                .allMatch(requestEntity -> requestEntity.getRules().getRules().get(ApplicationTestData.RULE_MESSAGE).getClass().equals(PassThroughRule.class));
     }
 }

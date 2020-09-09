@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.lang.NonNull;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -33,6 +34,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * The AttributeMaskingRequest is the input for attribute-masking-service for preliminary processing and routing of the data.
@@ -56,19 +59,19 @@ public final class AttributeMaskingRequest {
 
     @JsonCreator
     private AttributeMaskingRequest(
-            final @JsonProperty("userId") String userId,
-            final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resource") JsonNode resource,
-            final @JsonProperty("rules") JsonNode rules) {
+            final @NonNull @JsonProperty("userId") String userId,
+            final @NonNull @JsonProperty("resourceId") String resourceId,
+            final @NonNull @JsonProperty("context") JsonNode context,
+            final @NonNull @JsonProperty("user") JsonNode user,
+            final @NonNull @JsonProperty("resource") JsonNode resource,
+            final @NonNull @JsonProperty("rules") JsonNode rules) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.user = Optional.ofNullable(user).orElseThrow(() -> new RuntimeException("User cannot be null"));
-        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
-        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new RuntimeException("Rules cannot be null"));
+        this.userId = requireNonNull(userId);
+        this.resourceId = requireNonNull(resourceId);
+        this.context = requireNonNull(context);
+        this.user = requireNonNull(user);
+        this.resource = requireNonNull(resource);
+        this.rules = requireNonNull(rules);
     }
 
     @Generated

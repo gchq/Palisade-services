@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,9 +37,9 @@ class LeafResourceConverterTest {
         // given - leafResource
 
         // when
-        String databaseColumn = leafResourceConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.LEAF_RESOURCE);
+        String databaseColumn = leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE);
         // then
-        assertThat(leafResourceConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.LEAF_RESOURCE)).isEqualTo(databaseColumn);
+        assertThat(leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE)).isEqualTo(databaseColumn);
 
         // when
         LeafResource convertedLeafResource = leafResourceConverter.convertToEntityAttribute(databaseColumn);
@@ -52,11 +52,11 @@ class LeafResourceConverterTest {
         // given - leafResource
 
         // when
-        String databaseColumn = leafResourceConverter.convertToDatabaseColumn(AttributeMaskingApplicationTestData.LEAF_RESOURCE);
+        String databaseColumn = leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE);
         LeafResource convertedLeafResource = leafResourceConverter.convertToEntityAttribute(databaseColumn);
         // then
-        assertThat(convertedLeafResource).isEqualTo(AttributeMaskingApplicationTestData.LEAF_RESOURCE);
-        LOGGER.info("{} -> {}", AttributeMaskingApplicationTestData.LEAF_RESOURCE, databaseColumn);
+        assertThat(convertedLeafResource).isEqualTo(ApplicationTestData.LEAF_RESOURCE);
+        LOGGER.info("{} -> {}", ApplicationTestData.LEAF_RESOURCE, databaseColumn);
     }
 
     @Test
