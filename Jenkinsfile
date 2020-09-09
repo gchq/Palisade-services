@@ -187,7 +187,7 @@ timestamps {
                         READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                     }else{
                          if (COMMON_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
-                            sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} deploy"
+                            sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} -P quick deploy"
                             READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                          }
                     }
@@ -202,21 +202,26 @@ timestamps {
                          if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                             CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                          }else{
-                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
                              CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                          }
-                         sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D clients.revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+                         sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D clients.revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
                          EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                      }
                 }
             }
+
             parallel Test: {
                 stage('Install, Unit Tests, Checkstyle') {
                     dir('Palisade-services') {
                         git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
+                                if (IS_PR == "true") {
+                                    sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
+                                } else {
+                                    sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION}  install"
+                                }
                             }
                         }
                     }
