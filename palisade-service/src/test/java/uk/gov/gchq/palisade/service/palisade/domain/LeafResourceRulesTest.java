@@ -34,8 +34,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import javax.sql.rowset.serial.SerialArray;
-
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 

@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+
 import uk.gov.gchq.palisade.Generated;
 
 import javax.persistence.Column;
@@ -23,7 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
@@ -31,29 +33,49 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the Id_pair_hash is the ID which is created by creating a hash of the entity_type object and entity_id
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
 @Entity
-@IdClass(CompletenessEntity.CompletenessId.class)
 @Table(name = "completeness",
         indexes = {
+                @Index(name = "id_pair_hash", columnList = "id_pair_hash", unique = true),
                 @Index(name = "entity_type", columnList = "entity_type"),
                 @Index(name = "entity_id", columnList = "entity_id"),
         })
-public class CompletenessEntity {
+@RedisHash("CompletenessEntity")
+public class CompletenessEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
+    @org.springframework.data.annotation.Id
+    @Column(name = "id_pair_hash", columnDefinition = "integer", nullable = false)
+    private Integer id;
+
     @Column(name = "entity_type", columnDefinition = "integer", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     protected EntityType entityType;
 
-    @Id
     @Column(name = "entity_id", columnDefinition = "varchar(255)", nullable = false)
     protected String entityId;
 
     public CompletenessEntity() {
     }
 
+    /**
+     * Constructor used for the Database that takes a {@link EntityType} and EntityId
+     * Used for inserting objects into the backing store
+     *
+     * @param entityType The Entity type enum object.
+     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     */
+    @PersistenceConstructor
     public CompletenessEntity(final EntityType entityType, final String entityId) {
         this.entityType = entityType;
         this.entityId = entityId;
+        this.id = Objects.hash(entityType, entityId);
     }
 
     @Generated
@@ -66,6 +88,31 @@ public class CompletenessEntity {
         return entityId;
     }
 
+    public Integer getId() {
+        this.id = hashCode();
+        return id;
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CompletenessEntity)) {
+            return false;
+        }
+        final CompletenessEntity that = (CompletenessEntity) o;
+        return entityType == that.entityType &&
+                Objects.equals(entityId, that.entityId);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(entityType, entityId);
+    }
+
     @Override
     @Generated
     public String toString() {
@@ -74,38 +121,5 @@ public class CompletenessEntity {
                 .add("entityId='" + entityId + "'")
                 .add(super.toString())
                 .toString();
-    }
-
-    public static class CompletenessId implements Serializable {
-        private EntityType entityType;
-        private String entityId;
-
-        public CompletenessId() {
-        }
-
-        public CompletenessId(final EntityType entityType, final String entityId) {
-            this.entityType = entityType;
-            this.entityId = entityId;
-        }
-
-        @Override
-        @Generated
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof CompletenessId)) {
-                return false;
-            }
-            final CompletenessId that = (CompletenessId) o;
-            return entityType == that.entityType &&
-                    Objects.equals(entityId, that.entityId);
-        }
-
-        @Override
-        @Generated
-        public int hashCode() {
-            return Objects.hash(entityType, entityId);
-        }
     }
 }
