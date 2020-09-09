@@ -20,6 +20,7 @@ import org.springframework.data.repository.CrudRepository;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
@@ -27,6 +28,22 @@ import java.util.stream.Stream;
  */
 public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
-    Stream<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
+    /**
+     * Returns a stream of {@link SerialisedFormatEntity} from a backing store by a serialisedFormat
+     *
+     * @param serialisedFormat the format of the resource
+     * @return a stream of SerialisedFormatEntity from the backing store
+     */
+    default Stream<SerialisedFormatEntity> streamFindAllBySerialisedFormat(String serialisedFormat) {
+        return StreamSupport.stream(findAllBySerialisedFormat(serialisedFormat).spliterator(), false);
+    }
+
+    /**
+     * Iterable used to create a stream of resources by serialisedFormat
+     *
+     * @param serialisedFormat the format of the Resource
+     * @return a list of SerialisedFormatEntity from the backing store
+     */
+    Iterable<SerialisedFormatEntity> findAllBySerialisedFormat(String serialisedFormat);
 
 }

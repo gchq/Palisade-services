@@ -47,7 +47,7 @@ public class StdResourceConfiguration implements ResourceConfiguration {
      * Constructor with 1 argument for a standard implementation
      * of the {@link ResourceConfiguration} interface
      *
-     * @param resources     a list of objects implementing the {@link ResourcePrepopulationFactory} interface
+     * @param resources a list of objects implementing the {@link ResourcePrepopulationFactory} interface
      */
     public StdResourceConfiguration(final List<StdResourcePrepopulationFactory> resources) {
         this.resources = List.copyOf(resources);
