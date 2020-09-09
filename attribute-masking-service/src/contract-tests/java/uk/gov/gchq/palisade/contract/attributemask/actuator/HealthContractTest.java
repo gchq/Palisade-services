@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
@@ -35,9 +36,9 @@ class HealthContractTest {
 
     @Test
     void serviceIsHealthy() {
-        final String health = restTemplate.getForObject("/actuator/health", String.class);
+        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
-        assertThat(health).isEqualTo("{\"status\":\"UP\"}");
+        assertThat(health.getStatusCodeValue()).isEqualTo(200);
     }
 
 }
