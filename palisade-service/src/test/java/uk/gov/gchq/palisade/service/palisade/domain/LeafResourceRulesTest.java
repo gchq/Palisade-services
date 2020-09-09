@@ -34,6 +34,9 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.palisade.repository.LeafResourceRulesRepository;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import javax.sql.rowset.serial.SerialArray;
+
+import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -46,7 +49,7 @@ import static org.junit.Assert.assertThat;
 @ActiveProfiles("dbtest")
 public class LeafResourceRulesTest {
 
-    private static class Employee {
+    private static class Employee implements Serializable {
         private String name;
         private String telephone;
         private String postcode;
