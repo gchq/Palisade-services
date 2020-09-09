@@ -24,7 +24,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
