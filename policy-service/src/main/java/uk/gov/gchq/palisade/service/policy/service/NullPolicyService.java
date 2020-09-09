@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -42,14 +43,13 @@ public class NullPolicyService implements PolicyService {
         return Optional.empty();
     }
 
-    @Override
-    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         // Policies cannot be stored, but pretend that they are (they will be cached)
         return policy;
     }
 
     @Override
-    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         // Policies cannot be stored, but pretend that they are (they will be cached)
         throw new RuntimeException(String.format("%s::setTypePolicy not implemented", this.getClass()));
     }

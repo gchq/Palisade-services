@@ -16,6 +16,10 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+
 import uk.gov.gchq.palisade.Generated;
 
 import javax.persistence.Column;
@@ -24,24 +28,43 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import java.io.Serializable;
 import java.util.StringJoiner;
 
+/**
+ * The Database uses this as the object that will be stored in the backing store linked by an ID
+ * In this case the ResourceID and SerialisedFormat make up the key
+ * This contains all objects that will be go into the database, including how they are serialised and indexed
+ */
 @Entity
 @Table(name = "serialised_formats",
         indexes = {
                 @Index(name = "serialised_format", columnList = "serialised_format"),
         })
-public class SerialisedFormatEntity {
+@RedisHash("SerialisedFormatEntity")
+public class SerialisedFormatEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
+    @org.springframework.data.annotation.Id
     @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
     private String resourceId;
 
+    @Indexed
     @Column(name = "serialised_format", columnDefinition = "varchar(255)", nullable = false)
     private String serialisedFormat;
 
     public SerialisedFormatEntity() {
     }
 
+    /**
+     * Constructor used for the Database
+     * Used for inserting objects into the backing store
+     *
+     * @param serialisedFormat the serialised format of the resource that will be inserted into the backing store
+     * @param resourceId       the id of the resource that will be inserted into the backing store
+     */
+    @PersistenceConstructor
     public SerialisedFormatEntity(final String serialisedFormat, final String resourceId) {
         this.serialisedFormat = serialisedFormat;
         this.resourceId = resourceId;

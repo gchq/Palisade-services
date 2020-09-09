@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.request.Policy;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,13 +59,13 @@ public class SimplePolicyService implements PolicyService {
     }
 
     @Override
-    public <T> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         policyMap.put(resource, policy);
         return policyMap.get(resource);
     }
 
     @Override
-    public <T> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
+    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         return null;
     }
 }
