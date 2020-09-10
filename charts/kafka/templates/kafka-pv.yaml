@@ -54,7 +54,7 @@ spec:
     driver: efs.csi.aws.com
     volumeHandle: {{ required  "A valid AWS EFS volume handle must be specified" $config.aws.volumeHandle }}:{{ $config.aws.volumePath }}/kafka/{{ $namespace }}/{{ $index }}
   {{- end }}
-{{- end }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}
