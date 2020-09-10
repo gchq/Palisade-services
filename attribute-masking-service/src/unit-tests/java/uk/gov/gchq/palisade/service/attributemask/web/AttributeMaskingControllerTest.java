@@ -36,11 +36,11 @@ class AttributeMaskingControllerTest {
 
     @Test
     void testControllerDelegatesToService() throws IOException {
-        // given some test data
+        // given some test data, and a mocked service behind the controller
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
         Mockito.when(mockAttributeMaskingService.maskResourceAttributes(any())).thenReturn(ApplicationTestData.LEAF_RESOURCE);
 
-        // when the controller is called
+        // when the controller is called with a request
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
                 null,
@@ -56,6 +56,7 @@ class AttributeMaskingControllerTest {
                 ApplicationTestData.RULES
         );
 
+        // then the service.maskResourceAttributes method is called
         Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).maskResourceAttributes(
                 ApplicationTestData.LEAF_RESOURCE
         );
@@ -63,17 +64,17 @@ class AttributeMaskingControllerTest {
 
     @Test
     void testStreamMarkerBypassesServiceDelegation() throws IOException {
-        // given
+        // given some test data, and a mocked service behind the controller
         AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
 
-        // when
+        // when the controller is called with a stream marker
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
-                StreamMarker.START_OF_STREAM,
+                StreamMarker.START,
                 Optional.empty()
         );
 
-        // then
+        // then the storeAuthorisedRequest is not called
         Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeAuthorisedRequest(
                 any(),
                 any(),
@@ -82,19 +83,8 @@ class AttributeMaskingControllerTest {
                 any()
         );
 
-        // when
-        attributeMaskingController.restMaskAttributes(
-                ApplicationTestData.REQUEST_TOKEN,
-                StreamMarker.END_OF_STREAM,
-                Optional.empty()
-        );
-
-        // then
-        Mockito.verify(mockAttributeMaskingService, Mockito.never()).storeAuthorisedRequest(
-                any(),
-                any(),
-                any(),
-                any(),
+        // then the maskResourceAttributes is not called
+        Mockito.verify(mockAttributeMaskingService, Mockito.never()).maskResourceAttributes(
                 any()
         );
     }

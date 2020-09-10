@@ -32,14 +32,12 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse.Builder;
-import uk.gov.gchq.palisade.service.attributemask.request.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.request.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Optional;
 
 @RestController
@@ -74,9 +72,7 @@ public class AttributeMaskingController {
         } catch (IOException ex) {
             // Audit error appropriately (REST-fully)
             // If we failed with a StreamMarker message, there's no real way to audit it, so throw NoSuchElementException
-            final AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request.orElseThrow(), Collections.emptyMap())
-                    .withError(ex);
-            errorHandler.reportError(token, errorMessage);
+            errorHandler.reportError(token, request.orElseThrow(), ex);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 

@@ -34,40 +34,40 @@ class RulesConverterTest {
 
     @Test
     void testRulesConverterIsConsistent() {
-        // given - rules
+        // given we have a Rules object
 
-        // when
+        // when converted to a database column
         String databaseColumn = rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES);
-        // then
+        // then if converted to a column again, the result is identical
         assertThat(rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES)).isEqualTo(databaseColumn);
 
-        // when
+        // when the database column is converted back to a Rules object
         Rules<?> convertedRules = rulesConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then if converted to a Rules object again, the result is identical
         assertThat(rulesConverter.convertToEntityAttribute(databaseColumn)).isEqualTo(convertedRules);
     }
 
     @Test
     void testRulesConverterIsCorrect() {
-        // given - rules
+        // given we have a Rules object
 
-        // when
+        // when converted to and from a database
         String databaseColumn = rulesConverter.convertToDatabaseColumn(ApplicationTestData.RULES);
         Rules<?> convertedRules = rulesConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then the returned Rules object is identical to the original
         assertThat(convertedRules).isEqualTo(ApplicationTestData.RULES);
         LOGGER.info("{} -> {}", ApplicationTestData.RULES, databaseColumn);
     }
 
     @Test
     void testRulesConverterHandlesNulls() {
-        // given - nothing
+        // given the Rules object being processed is null
 
-        // when
+        // when converted to and from a database
         String databaseColumn = rulesConverter.convertToDatabaseColumn(null);
         Rules<?> convertedRules = rulesConverter.convertToEntityAttribute(databaseColumn);
 
-        // then
+        // then no errors are thrown and the Rules object is still null
         assertThat(convertedRules).isNull();
     }
 

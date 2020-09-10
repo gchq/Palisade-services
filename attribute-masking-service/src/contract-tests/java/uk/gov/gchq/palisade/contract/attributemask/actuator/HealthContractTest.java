@@ -35,8 +35,12 @@ class HealthContractTest {
 
     @Test
     void serviceIsHealthy() {
+        // Given that the service is running (and presumably healthy)
+
+        // When we GET the /actuator/health REST endpoint (used by k8s)
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
+        // Then the service reports itself to be healthy
         assertThat(health.getStatusCodeValue()).isEqualTo(200);
     }
 

@@ -24,6 +24,10 @@ import javax.persistence.AttributeConverter;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Convert between Java {@link User} objects and serialised {@link String}s stored in a database
+ * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s
+ */
 public class UserConverter implements AttributeConverter<User, String> {
     private final ObjectMapper objectMapper;
 

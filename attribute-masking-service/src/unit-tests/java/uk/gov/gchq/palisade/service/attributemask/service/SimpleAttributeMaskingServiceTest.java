@@ -19,10 +19,13 @@ package uk.gov.gchq.palisade.service.attributemask.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SimpleAttributeMaskingServiceTest {
 
@@ -30,10 +33,10 @@ class SimpleAttributeMaskingServiceTest {
 
     @Test
     void testAttributeMaskingServiceDelegatesToPersistenceLayer() throws IOException {
-        // given
+        // given we have a simpleAttributeMaskingService with a mocked persistenceLayer
         AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
 
-        // when
+        // when we request to store some data
         attributeMaskingService.storeAuthorisedRequest(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.USER,
@@ -42,6 +45,7 @@ class SimpleAttributeMaskingServiceTest {
                 ApplicationTestData.RULES
         );
 
+        // then the persistence layer was requested to store the data
         Mockito.verify(mockPersistenceLayer, Mockito.atLeastOnce()).put(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.USER,
@@ -49,6 +53,19 @@ class SimpleAttributeMaskingServiceTest {
                 ApplicationTestData.CONTEXT,
                 ApplicationTestData.RULES
         );
+    }
+
+    @Test
+    void testAttributeMaskingServiceMasksResource() {
+        // given we have a simpleAttributeMaskingService with a mocked persistenceLayer
+        AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
+
+        // when we request to mask a resource
+        LeafResource resource = attributeMaskingService.maskResourceAttributes(ApplicationTestData.LEAF_RESOURCE);
+
+        // then the resource is masked appropriately
+        // here, we expect nothing to have been done, but other implementations will apply some transformation on it
+        assertThat(resource).isEqualTo(ApplicationTestData.LEAF_RESOURCE);
     }
 
 }

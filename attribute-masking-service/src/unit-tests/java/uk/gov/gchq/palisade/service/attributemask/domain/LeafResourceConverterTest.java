@@ -34,40 +34,40 @@ class LeafResourceConverterTest {
 
     @Test
     void testLeafResourceConverterIsConsistent() {
-        // given - leafResource
+        // given we have a LeafResource object
 
-        // when
+        // when converted to a database column
         String databaseColumn = leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE);
-        // then
+        // then if converted to a column again, the result is identical
         assertThat(leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE)).isEqualTo(databaseColumn);
 
-        // when
+        // when the database column is converted back to a LeafResource object
         LeafResource convertedLeafResource = leafResourceConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then if converted to a LeafResource object again, the result is identical
         assertThat(leafResourceConverter.convertToEntityAttribute(databaseColumn)).isEqualTo(convertedLeafResource);
     }
 
     @Test
     void testLeafResourceConverterIsCorrect() {
-        // given - leafResource
+        // given we have a LeafResource object
 
-        // when
+        // when converted to and from a database
         String databaseColumn = leafResourceConverter.convertToDatabaseColumn(ApplicationTestData.LEAF_RESOURCE);
         LeafResource convertedLeafResource = leafResourceConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then the returned LeafResource object is identical to the original
         assertThat(convertedLeafResource).isEqualTo(ApplicationTestData.LEAF_RESOURCE);
         LOGGER.info("{} -> {}", ApplicationTestData.LEAF_RESOURCE, databaseColumn);
     }
 
     @Test
     void testLeafResourceConverterHandlesNulls() {
-        // given - nothing
+        // given the LeafResource object being processed is null
 
-        // when
+        // when converted to and from a database
         String databaseColumn = leafResourceConverter.convertToDatabaseColumn(null);
         LeafResource convertedLeafResource = leafResourceConverter.convertToEntityAttribute(databaseColumn);
 
-        // then
+        // then no errors are thrown and the LeafResource object is still null
         assertThat(convertedLeafResource).isNull();
     }
 

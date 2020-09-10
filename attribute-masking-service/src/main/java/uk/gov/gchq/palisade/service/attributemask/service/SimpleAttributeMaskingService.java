@@ -23,16 +23,25 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 
 import java.io.IOException;
 
+/**
+ * Simple implementation of the core of the attribute-masking-service.
+ * Authorised requests are stored in the persistence layer, resources are not masked in any way.
+ */
 public class SimpleAttributeMaskingService implements AttributeMaskingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAttributeMaskingService.class);
 
-    private final JpaPersistenceLayer persistenceLayer;
+    private final PersistenceLayer persistenceLayer;
 
-    public SimpleAttributeMaskingService(final JpaPersistenceLayer persistenceLayer) {
+    /**
+     * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
+     *
+     * @param persistenceLayer the implementation of a PersistenceLayer to use
+     */
+    public SimpleAttributeMaskingService(final PersistenceLayer persistenceLayer) {
         this.persistenceLayer = persistenceLayer;
     }
 

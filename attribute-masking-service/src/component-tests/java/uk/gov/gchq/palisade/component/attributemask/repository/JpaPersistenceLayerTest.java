@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.repository;
+package uk.gov.gchq.palisade.component.attributemask.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.PassThroughRule;
+import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
+import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(ApplicationConfiguration.class)
+@ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, JpaPersistenceLayer.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("dbtest")
@@ -53,16 +51,15 @@ class JpaPersistenceLayerTest {
 
     @Test
     void testSpringDiscoversJpaPersistenceLayer() {
-        // When the spring application is started
-        // Then
+        // when the spring application is started
+        // then the autowired persistence layer and repository are non-null
         assertThat(persistenceLayer).isNotNull();
         assertThat(requestsRepository).isNotNull();
     }
 
     @Test
-    @Transactional
     void testPutAndGetReturnsExpectedEntity() {
-        // given
+        // given the persistence layer has something stored in it
         persistenceLayer.put(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.USER,
@@ -71,17 +68,10 @@ class JpaPersistenceLayerTest {
                 ApplicationTestData.RULES
         );
 
-        // when
-        Set<AuthorisedRequestEntity> authorisedRequests = StreamSupport.stream(requestsRepository.findAll().spliterator(), false).collect(Collectors.toSet());
+        // when all entities are retrieved from the repository
+        Iterable<AuthorisedRequestEntity> authorisedRequests = requestsRepository.findAll();
 
-        // then
-        AuthorisedRequestEntity expected = new AuthorisedRequestEntity(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.USER,
-                ApplicationTestData.LEAF_RESOURCE,
-                ApplicationTestData.CONTEXT,
-                ApplicationTestData.RULES
-        );
+        // then the persistence layer has persisted the entity in the repository
         assertThat(authorisedRequests)
                 .hasSize(1)
                 .allMatch(requestEntity -> requestEntity.getToken().equals(ApplicationTestData.REQUEST_TOKEN))

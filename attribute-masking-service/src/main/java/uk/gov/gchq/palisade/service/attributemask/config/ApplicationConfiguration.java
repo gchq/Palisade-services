@@ -29,28 +29,35 @@ import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.attributemask.service.SimpleAttributeMaskingService;
 
+/**
+ * Bean configuration and dependency injection graph
+ */
 @Configuration
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public JpaPersistenceLayer persistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
+    JpaPersistenceLayer persistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
         return new JpaPersistenceLayer(authorisedRequestsRepository);
     }
 
     @Bean
-    public SimpleAttributeMaskingService simpleQueryScopeService(final JpaPersistenceLayer persistenceLayer) {
+    SimpleAttributeMaskingService simpleQueryScopeService(final JpaPersistenceLayer persistenceLayer) {
         return new SimpleAttributeMaskingService(persistenceLayer);
     }
 
+    // TODO: Replace this with a proper error handling mechanism (ie. kafka error queue)
     @Bean
-    public ErrorHandlingService nullAuditService() {
-        return (token, message) -> LOGGER.warn("This is the null audit service - it does nothing");
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (token, request, error) -> {
+            LOGGER.error("Token {} and request {} threw exception {}", token, request, error);
+        };
     }
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 

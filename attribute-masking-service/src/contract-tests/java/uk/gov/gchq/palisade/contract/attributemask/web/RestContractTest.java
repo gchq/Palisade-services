@@ -45,16 +45,16 @@ class RestContractTest {
 
     @Test
     void postToServiceReturnsMaskedResource() throws JsonProcessingException {
-        // Given - request
+        // Given we have some request data (not a stream marker)
         AttributeMaskingRequest request = ApplicationTestData.REQUEST;
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
 
-        // When - post to service
+        // When the request is POSTed to the service's REST endpoint
         HttpEntity<AttributeMaskingRequest> requestWithHeaders = new HttpEntity<>(request, headers);
         AttributeMaskingResponse response = restTemplate.postForObject("/stream-api/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
 
-        // Then - response is as expected
+        // Then the response is as expected
         // LeafResource is 'masked' by the service
         assertThat(response.getResource())
                 .isEqualTo(service.maskResourceAttributes(request.getResource()));
@@ -66,20 +66,23 @@ class RestContractTest {
 
     @Test
     void streamMarkerIsSkippedByService() {
-        // Given - request
+        // Given we have some request data (a stream marker)
         AttributeMaskingRequest request = null;
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
-        headers.add(StreamMarker.HEADER, StreamMarker.START_OF_STREAM.toString());
+        headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        // When - post to service
+        // When the request is POSTed to the service's REST endpoint
         HttpEntity<AttributeMaskingRequest> requestWithHeaders = new HttpEntity<>(request, headers);
-        AttributeMaskingResponse response = restTemplate.postForObject("/stream-api/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
+        HttpEntity<AttributeMaskingResponse> response = restTemplate.postForEntity("/stream-api/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
 
-        // Then - response is as expected
-        // LeafResource is 'masked' by the service
-        assertThat(response).isNull();
+        // Then the response is as expected
+        // Body is null
+        assertThat(response.getBody()).isNull();
+        // Token header and StreamMarker header are unchanged
+        assertThat(response.getHeaders().get(Token.HEADER)).isEqualTo(headers.get(Token.HEADER));
+        assertThat(response.getHeaders().get(StreamMarker.HEADER)).isEqualTo(headers.get(StreamMarker.HEADER));
     }
 
 }

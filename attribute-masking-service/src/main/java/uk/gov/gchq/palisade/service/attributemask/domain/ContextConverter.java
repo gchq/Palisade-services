@@ -24,6 +24,10 @@ import javax.persistence.AttributeConverter;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Convert between Java {@link Context} objects and serialised {@link String}s stored in a database
+ * Simply wraps an {@link ObjectMapper}, elevating any {@link JsonProcessingException}s to {@link RuntimeException}s
+ */
 public class ContextConverter implements AttributeConverter<Context, String> {
     private final ObjectMapper objectMapper;
 

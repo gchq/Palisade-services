@@ -16,10 +16,32 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
+import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.request.AuditErrorMessage;
 
+import java.util.Map;
+
+/**
+ * In the case that any error is thrown by the application and is not caught, this acts as the
+ * final catch-all that will forward the details of failure to the appropriate location.
+ * Provides a default creator for error messages, wrapping the {@link AuditErrorMessage} builder.
+ * Care must be taken to avoid reporting errors from this service leading to a feedback loop.
+ * If eg. the kafka error queue is unavailable, alternative actions must be taken instead.
+ */
 public interface ErrorHandlingService {
 
-    void reportError(final String token, final AuditErrorMessage message);
+    /**
+     * Report the error through the appropriate channels.
+     *
+     * @param token   the token for this request - used to notify the client of failures
+     * @param request the request input that led to failure - the original request is extracted from this message
+     * @param error   the error thrown in processing
+     */
+    void reportError(final String token, final AttributeMaskingRequest request, final Throwable error);
+
+    default AuditErrorMessage createErrorMessage(final AttributeMaskingRequest request, final Throwable error, final Map<String, Object> attributes) {
+        return AuditErrorMessage.Builder.create(request, attributes)
+                .withError(error);
+    }
 
 }

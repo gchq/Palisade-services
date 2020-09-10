@@ -34,6 +34,10 @@ public class ApplicationTestData {
      * Common test data for all classes
      */
 
+    private ApplicationTestData() {
+        // hide the constructor, this is just a collection of statics
+    }
+
     public static final String REQUEST_TOKEN = "test-request-token";
 
     public static final UserId USER_ID = new UserId().id("test-user-id");

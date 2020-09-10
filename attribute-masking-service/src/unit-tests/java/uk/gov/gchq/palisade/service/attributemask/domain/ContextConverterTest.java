@@ -34,40 +34,40 @@ class ContextConverterTest {
 
     @Test
     void testContextConverterIsConsistent() {
-        // given - context
+        // given we have a Context object
 
-        // when
+        // when converted to a database column
         String databaseColumn = contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT);
-        // then
+        // then if converted to a column again, the result is identical
         assertThat(contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT)).isEqualTo(databaseColumn);
 
-        // when
+        // when the database column is converted back to a Context object
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then if converted to a Context object again, the result is identical
         assertThat(contextConverter.convertToEntityAttribute(databaseColumn)).isEqualTo(convertedContext);
     }
 
     @Test
     void testContextConverterIsCorrect() {
-        // given - context
+        // given we have a Context object
 
-        // when
+        // when converted to and from a database
         String databaseColumn = contextConverter.convertToDatabaseColumn(ApplicationTestData.CONTEXT);
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then the returned Context object is identical to the original
         assertThat(convertedContext).isEqualTo(ApplicationTestData.CONTEXT);
         LOGGER.info("{} -> {}", ApplicationTestData.CONTEXT, databaseColumn);
     }
 
     @Test
     void testContextConverterHandlesNulls() {
-        // given - nothing
+        // given the Context object being processed is null
 
-        // when
+        // when converted to and from a database
         String databaseColumn = contextConverter.convertToDatabaseColumn(null);
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
 
-        // then
+        // then no errors are thrown and the Context object is still null
         assertThat(convertedContext).isNull();
     }
 

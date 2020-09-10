@@ -70,6 +70,7 @@ class ControllerJpaComponentTest {
                 .get()
                 .isEqualTo(service.maskResourceAttributes(ApplicationTestData.LEAF_RESOURCE));
 
+        // Then the request was persisted
         assertThat(repository.findAll())
                 .hasSize(1)
                 .allSatisfy(entity -> assertThat(entity.getToken()).isEqualTo(ApplicationTestData.REQUEST_TOKEN))

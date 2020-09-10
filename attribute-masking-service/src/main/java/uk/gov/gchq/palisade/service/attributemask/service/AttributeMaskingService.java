@@ -23,6 +23,15 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 import java.io.IOException;
 
+/**
+ * The attribute-masking-service is the final transformation the palisade system applies
+ * to resources before they are returned.
+ * The service performs two functions:
+ * - Store the full details of the authorised request in a persistence store, to be later
+ * retrieved by the data-service
+ * - Mask the leafResource, removing any sensitive information - this may later include
+ * applying a separate set of attributeRules, distinct from resourceRules and recordRules
+ */
 public interface AttributeMaskingService {
 
     void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException;

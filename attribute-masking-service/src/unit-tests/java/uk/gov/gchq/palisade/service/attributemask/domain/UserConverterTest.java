@@ -34,40 +34,40 @@ class UserConverterTest {
 
     @Test
     void testUserConverterIsConsistent() {
-        // given - user
+        // given we have a User object
 
-        // when
+        // when converted to a database column
         String databaseColumn = userConverter.convertToDatabaseColumn(ApplicationTestData.USER);
-        // then
+        // then if converted to a column again, the result is identical
         assertThat(userConverter.convertToDatabaseColumn(ApplicationTestData.USER)).isEqualTo(databaseColumn);
 
-        // when
+        // when the database column is converted back to a User object
         User convertedUser = userConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then if converted to a User object again, the result is identical
         assertThat(userConverter.convertToEntityAttribute(databaseColumn)).isEqualTo(convertedUser);
     }
 
     @Test
     void testUserConverterIsCorrect() {
-        // given - user
+        // given we have a User object
 
-        // when
+        // when converted to and from a database
         String databaseColumn = userConverter.convertToDatabaseColumn(ApplicationTestData.USER);
         User convertedUser = userConverter.convertToEntityAttribute(databaseColumn);
-        // then
+        // then the returned User object is identical to the original
         assertThat(convertedUser).isEqualTo(ApplicationTestData.USER);
         LOGGER.info("{} -> {}", ApplicationTestData.USER, databaseColumn);
     }
 
     @Test
     void testUserConverterHandlesNulls() {
-        // given - nothing
+        // given the User object being processed is null
 
-        // when
+        // when converted to and from a database
         String databaseColumn = userConverter.convertToDatabaseColumn(null);
         User convertedUser = userConverter.convertToEntityAttribute(databaseColumn);
 
-        // then
+        // then no errors are thrown and the User object is still null
         assertThat(convertedUser).isNull();
     }
 

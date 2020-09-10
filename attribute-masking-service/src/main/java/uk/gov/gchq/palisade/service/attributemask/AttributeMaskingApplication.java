@@ -32,7 +32,8 @@ public class AttributeMaskingApplication {
      */
     public static void main(final String[] args) {
         LOGGER.debug("AttributeMaskingApplication started with: {} {} {}", AttributeMaskingApplication.class, "main", args);
-        new SpringApplicationBuilder(AttributeMaskingApplication.class).web(WebApplicationType.SERVLET)
+        new SpringApplicationBuilder(AttributeMaskingApplication.class)
+                .web(WebApplicationType.SERVLET)
                 .run(args);
     }
 }

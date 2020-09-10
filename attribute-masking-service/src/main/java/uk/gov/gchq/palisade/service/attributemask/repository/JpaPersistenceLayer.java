@@ -27,11 +27,20 @@ import javax.transaction.Transactional;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Java JPA implementation of a {@link PersistenceLayer} for the attribute-masking-service.
+ * Delegates to a CrudRepository save method.
+ */
 public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
 
     private final AuthorisedRequestsRepository authorisedRequestsRepository;
 
+    /**
+     * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
+     *
+     * @param authorisedRequestsRepository the appropriate CrudRepository implementation
+     */
     public JpaPersistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
         this.authorisedRequestsRepository = requireNonNull(authorisedRequestsRepository, "AuthorisedRequestsRepository cannot be null");
     }
