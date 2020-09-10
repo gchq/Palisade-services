@@ -54,8 +54,6 @@ global:
   redis-cluster:
     # install: install clustered redis persistence and caching data storage platform
     install: false
-    # config: configure services to connect to (previously installed?) redis-cluster (if unset, use install value)
-    # config: false
     # imported from sub-chart, default values here are overridden by sub-chart values
     exports:
       nameOverride: "redis"
