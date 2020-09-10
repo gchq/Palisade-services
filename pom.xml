@@ -53,9 +53,7 @@
         <revision>SNAPSHOT</revision>
         <clients.revision>SNAPSHOT</clients.revision>
         <common.revision>SNAPSHOT</common.revision>
-        <examples.revision>SNAPSHOT</examples.revision>
         <readers.revision>SNAPSHOT</readers.revision>
-        <integration.revision>SNAPSHOT</integration.revision>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <encoding>UTF-8</encoding>
