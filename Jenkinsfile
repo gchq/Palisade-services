@@ -340,7 +340,9 @@ timestamps {
                                                  "--set traefik.install=true,dashboard.install=true " +
                                                  "--set global.repository=${ECR_REGISTRY} " +
                                                  "--set global.hostname=${EGRESS_ELB} " +
+                                                 "--set global.deployment=example " +
                                                  "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                                 "--set global.redisClusterEnabled=true " +
                                                  "--set global.redis.install=false " +
                                                  "--set global.redis-cluster.install=true " +
                                                  "--namespace dev", returnStatus: true) == 0) {
