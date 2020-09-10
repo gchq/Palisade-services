@@ -296,8 +296,7 @@ timestamps {
                                      //now extract the public IP addresses that this will be open on
                                      sh 'extract-addresses'
                                      // Push containers to the registry so they are available to helm
-                                     if (("${GIT_BRANCH_NAME}" != "develop") &&
-                                              ("${GIT_BRANCH_NAME}" != "main")) {
+                                     if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
                                          if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
                                              sh 'echo namespace create succeeded'
                                          } else {
@@ -322,33 +321,34 @@ timestamps {
                                      } else {
                                          error("Build failed because of failed maven deploy")
                                      }
-                                     if (("${GIT_BRANCH_NAME}" != "develop") &&
-                                           ("${GIT_BRANCH_NAME}" != "main")) {
+                                     if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
                                          sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
                                      }
-                                 } else if (("${env.BRANCH_NAME}" == "develop") ||
-                                                ("${env.BRANCH_NAME}" == "main")) {
+                                 } else if (("${env.BRANCH_NAME}" == "develop") || ("${env.BRANCH_NAME}" == "main")) {
                                      sh 'palisade-login'
                                      //now extract the public IP addresses that this will be open on
                                      sh 'extract-addresses'
                                      sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+
                                      //deploy application to the cluster
-                             if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
-                                 sh 'echo namespace create succeeded'
-                                 sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                                 //create the branch namespace
-                                 if (sh(script: "helm upgrade --install palisade . " +
-                                         "--set global.hosting=aws  " +
-                                         "--set traefik.install=true,dashboard.install=true " +
-                                         "--set global.repository=${ECR_REGISTRY} " +
-                                         "--set global.hostname=${EGRESS_ELB} " +
-                                         "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                         "--set global.redis.install=false " +
-                                         "--set global.redis-cluster.install=true " +
-                                         "--namespace dev", returnStatus: true) == 0) {
-                                     echo("successfully deployed")
-                                 } else {
-                                     error("Build failed because of failed maven deploy")
+                                     if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
+                                         sh 'echo namespace create succeeded'
+                                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                                         //create the branch namespace
+                                         if (sh(script: "helm upgrade --install palisade . " +
+                                                 "--set global.hosting=aws  " +
+                                                 "--set traefik.install=true,dashboard.install=true " +
+                                                 "--set global.repository=${ECR_REGISTRY} " +
+                                                 "--set global.hostname=${EGRESS_ELB} " +
+                                                 "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                                 "--set global.redis.install=false " +
+                                                 "--set global.redis-cluster.install=true " +
+                                                 "--namespace dev", returnStatus: true) == 0) {
+                                             echo("successfully deployed")
+                                         } else {
+                                             error("Build failed because of failed maven deploy")
+                                         }
+                                     }
                                  }
                              }
                          }
@@ -357,5 +357,4 @@ timestamps {
             }
         }
     }
-}
 }
