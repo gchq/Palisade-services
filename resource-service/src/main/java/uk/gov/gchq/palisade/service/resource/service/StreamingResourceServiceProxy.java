@@ -186,7 +186,7 @@ public class StreamingResourceServiceProxy {
                     resources = persistence.withPersistenceById(rootResource.getId(), resources);
                     resources = persistence.withPersistenceByType(leafResource.getType(), resources);
                     resources = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resources);
-                    resources.forEach(x -> {
+                    resources.forEach((LeafResource x) -> {
                     });
                 });
     }
