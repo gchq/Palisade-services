@@ -16,6 +16,8 @@
 
 package uk.gov.gchq.palisade.service.attributemask;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -26,6 +28,9 @@ import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.request.Token;
 
 import java.io.Serializable;
 
@@ -35,7 +40,7 @@ public class ApplicationTestData {
      */
 
     private ApplicationTestData() {
-        // hide the constructor, this is just a collection of statics
+        // hide the constructor, this is just a collection of static objects
     }
 
     public static final String REQUEST_TOKEN = "test-request-token";
@@ -77,4 +82,22 @@ public class ApplicationTestData {
             .withResource(LEAF_RESOURCE)
             .withRules(RULES);
 
+    public static final AttributeMaskingResponse RESPONSE = AttributeMaskingResponse.Builder.create(REQUEST)
+            .withResource(LEAF_RESOURCE);
+
+    public static final ProducerRecord<String, AttributeMaskingRequest> START = new ProducerRecord<>("rule", 0, null, null);
+
+    public static final ProducerRecord<String, AttributeMaskingRequest> RECORD = new ProducerRecord<>("rule", 0, null, REQUEST);
+
+    public static final ProducerRecord<String, AttributeMaskingRequest> END = new ProducerRecord<>("rule", 0, null, null);
+
+    static {
+        START.headers().add(StreamMarker.HEADER, StreamMarker.START.toString().getBytes());
+        START.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
+
+        RECORD.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
+
+        END.headers().add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
+        END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
+    }
 }

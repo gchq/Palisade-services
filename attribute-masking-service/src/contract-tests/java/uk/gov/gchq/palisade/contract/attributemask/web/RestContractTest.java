@@ -25,7 +25,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
-import uk.gov.gchq.palisade.contract.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
