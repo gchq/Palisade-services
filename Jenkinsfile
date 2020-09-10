@@ -173,41 +173,42 @@ timestamps {
             }
 
             stage('Prerequisites') {
-
-                dir('Palisade-common') {
-                    git branch: 'develop', url: 'https://github.com/gchq/Palisade-common.git'
-                    if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        COMMON_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
+                    dir('Palisade-common') {
+                        git branch: 'develop', url: 'https://github.com/gchq/Palisade-common.git'
+                        if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                            COMMON_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                        }
                     }
-                }
 
-                dir('Palisade-readers') {
-                    git branch: 'develop', url: 'https://github.com/gchq/Palisade-readers.git'
-                    if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                    }else{
-                         if (COMMON_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
-                            sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} -P quick deploy"
+                    dir('Palisade-readers') {
+                        git branch: 'develop', url: 'https://github.com/gchq/Palisade-readers.git'
+                        if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
                             READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                         }
+                        }else{
+                             if (COMMON_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
+                                sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} -P quick deploy"
+                                READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                             }
+                        }
                     }
-                }
 
-                dir('Palisade-examples') {
-                    git branch: 'develop', url: 'https://github.com/gchq/Palisade-examples.git'
-                    if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                        EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                    }else{
-                         git branch: 'develop', url: 'https://github.com/gchq/Palisade-clients.git'
-                         if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                            CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                         }else{
-                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
-                             CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                             sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D clients.revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
-                             EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                         }
+                    dir('Palisade-examples') {
+                        git branch: 'develop', url: 'https://github.com/gchq/Palisade-examples.git'
+                        if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                            EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                        }else{
+                             git branch: 'develop', url: 'https://github.com/gchq/Palisade-clients.git'
+                             if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                                CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                             }else{
+                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
+                                 CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D clients.revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
+                                 EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                             }
 
+                        }
                     }
                 }
             }
@@ -331,25 +332,22 @@ timestamps {
                                      sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
 
                                      //deploy application to the cluster
-                                     if (sh(script: "namespace-create dev", returnStatus: true) == 0) {
-                                         sh 'echo namespace create succeeded'
-                                         sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
-                                         //create the branch namespace
-                                         if (sh(script: "helm upgrade --install palisade . " +
-                                                 "--set global.hosting=aws  " +
-                                                 "--set traefik.install=true,dashboard.install=true " +
-                                                 "--set global.repository=${ECR_REGISTRY} " +
-                                                 "--set global.hostname=${EGRESS_ELB} " +
-                                                 "--set global.deployment=example " +
-                                                 "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                                 "--set global.redisClusterEnabled=true " +
-                                                 "--set global.redis.install=false " +
-                                                 "--set global.redis-cluster.install=true " +
-                                                 "--namespace dev", returnStatus: true) == 0) {
-                                             echo("successfully deployed")
-                                         } else {
-                                             error("Build failed because of failed maven deploy")
-                                         }
+                                     sh 'mvn -s $MAVEN_SETTINGS deploy -Dmaven.test.skip=true'
+                                     //create the branch namespace
+                                     if (sh(script: "helm upgrade --install palisade . " +
+                                             "--set global.hosting=aws  " +
+                                             "--set traefik.install=true,dashboard.install=true " +
+                                             "--set global.repository=${ECR_REGISTRY} " +
+                                             "--set global.hostname=${EGRESS_ELB} " +
+                                             "--set global.deployment=example " +
+                                             "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                             "--set global.redisClusterEnabled=true " +
+                                             "--set global.redis.install=false " +
+                                             "--set global.redis-cluster.install=true " +
+                                             "--namespace dev", returnStatus: true) == 0) {
+                                         echo("successfully deployed")
+                                     } else {
+                                         error("Build failed because of failed maven deploy")
                                      }
                                  }
                              }
