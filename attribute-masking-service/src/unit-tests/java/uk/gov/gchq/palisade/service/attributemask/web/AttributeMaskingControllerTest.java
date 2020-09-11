@@ -43,7 +43,7 @@ class AttributeMaskingControllerTest {
         // when the controller is called with a request
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
-                null,
+                Optional.empty(),
                 Optional.of(ApplicationTestData.REQUEST)
         );
 
