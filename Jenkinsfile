@@ -328,11 +328,10 @@ timestamps {
                                      } else {
                                          error("Build failed because of failed maven deploy")
                                      }
-                                     if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
+                                     /* if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
                                          sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
                                          sh "kubectl delete pvc --all --namespace ${HELM_DEPLOY_NAMESPACE}"
-                                         sh "kubectl delete pv --all --namespace ${HELM_DEPLOY_NAMESPACE}"
-                                     }
+                                     } */
                                  } else if (("${env.BRANCH_NAME}" == "develop") || ("${env.BRANCH_NAME}" == "main")) {
                                      sh 'palisade-login'
                                      //now extract the public IP addresses that this will be open on
