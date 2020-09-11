@@ -29,19 +29,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse.Builder;
-import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.request.Token;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse.Builder;
+import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.message.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * A REST interface mimicking the Kafka API to the service.
+ * Intended for debugging only.
+ */
 @RestController
-@RequestMapping(path = "/stream-api")
+@RequestMapping(path = "/streamApi")
 public class AttributeMaskingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeMaskingController.class);
 

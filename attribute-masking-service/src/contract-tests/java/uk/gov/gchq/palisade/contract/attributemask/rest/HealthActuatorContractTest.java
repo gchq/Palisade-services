@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.attributemask.actuator;
+package uk.gov.gchq.palisade.contract.attributemask.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,21 @@ import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
-class HealthContractTest {
+/**
+ * An external requirement of the service is to keep-alive in k8s.
+ * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
+ * This should return 200 OK if the service is healthy.
+ */
+@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Test
+    void contextLoads() {
+        assertThat(restTemplate).isNotNull();
+    }
 
     @Test
     void serviceIsHealthy() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.request;
+package uk.gov.gchq.palisade.service.attributemask.message;
 
 /**
  * Simply stores the expected header key for Tokens

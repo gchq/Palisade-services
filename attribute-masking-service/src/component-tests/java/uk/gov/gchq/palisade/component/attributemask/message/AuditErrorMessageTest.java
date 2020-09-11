@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.attributemask.request;
+package uk.gov.gchq.palisade.component.attributemask.message;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,11 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,10 +35,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
+@ContextConfiguration(classes = {AttributeMaskingApplication.class})
 public class AuditErrorMessageTest {
 
     @Autowired
     private JacksonTester<AuditErrorMessage> jsonTester;
+
+    @Test
+    void contextLoads() {
+        assertThat(jsonTester).isNotNull();
+    }
 
     /**
      * Grouped assertion test

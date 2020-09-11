@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.attributemask.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
@@ -28,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ContextConverterTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContextConverterTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final ContextConverter contextConverter = new ContextConverter(MAPPER);
 
@@ -56,7 +53,6 @@ class ContextConverterTest {
         Context convertedContext = contextConverter.convertToEntityAttribute(databaseColumn);
         // then the returned Context object is identical to the original
         assertThat(convertedContext).isEqualTo(ApplicationTestData.CONTEXT);
-        LOGGER.info("{} -> {}", ApplicationTestData.CONTEXT, databaseColumn);
     }
 
     @Test

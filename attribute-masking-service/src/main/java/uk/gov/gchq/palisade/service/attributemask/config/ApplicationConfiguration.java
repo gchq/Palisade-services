@@ -42,7 +42,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    SimpleAttributeMaskingService simpleQueryScopeService(final JpaPersistenceLayer persistenceLayer) {
+    SimpleAttributeMaskingService simpleAttributeMaskingService(final JpaPersistenceLayer persistenceLayer) {
         return new SimpleAttributeMaskingService(persistenceLayer);
     }
 

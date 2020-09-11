@@ -15,6 +15,9 @@
 spring:
   application:
     name: attribute-masking-service
+  output:
+    ansi:
+      enabled: always
   main:
     allow-bean-definition-overriding: true
   data:
@@ -23,7 +26,7 @@ spring:
         enabled: false
 
 server:
-  port: 8088
+  port: 8091
 
 management:
   endpoints:

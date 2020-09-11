@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.attributemask.request;
+package uk.gov.gchq.palisade.service.attributemask.message;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,7 +54,7 @@ public final class AttributeMaskingResponse {
      */
     public final JsonNode resource; // Masked resource metadata
 
-    @JsonCreator(mode = Mode.PROPERTIES)
+    @JsonCreator
     private AttributeMaskingResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.request;
+package uk.gov.gchq.palisade.service.attributemask.message;
 
 /**
  * Marks the start or end of a stream of messages.

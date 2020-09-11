@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -39,20 +37,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, JpaPersistenceLayer.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("dbtest")
 class JpaPersistenceLayerTest {
-    // No DirtiesContext between methods as a restart is slow
+
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
     @Autowired
     private AuthorisedRequestsRepository requestsRepository;
 
-
     @Test
-    void testSpringDiscoversJpaPersistenceLayer() {
-        // when the spring application is started
-        // then the autowired persistence layer and repository are non-null
+    void contextLoads() {
         assertThat(persistenceLayer).isNotNull();
         assertThat(requestsRepository).isNotNull();
     }

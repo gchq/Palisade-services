@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.attributemask.request;
+package uk.gov.gchq.palisade.component.attributemask.message;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -29,6 +30,8 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 
 import java.io.IOException;
 
@@ -36,10 +39,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
+@ContextConfiguration(classes = {AttributeMaskingApplication.class})
 public class AttributeMaskingRequestTest {
 
     @Autowired
-    private JacksonTester<AttributeMaskingRequest> jacksonTester;
+    private JacksonTester<AttributeMaskingRequest> jsonTester;
+
+    @Test
+    void contextLoads() {
+        assertThat(jsonTester).isNotNull();
+    }
 
     /**
      * Grouped assertion test
@@ -68,8 +77,8 @@ public class AttributeMaskingRequestTest {
                 .withResource(resource)
                 .withRules(rules);
 
-        JsonContent<AttributeMaskingRequest> attributeMaskingResponseJsonContent = jacksonTester.write(attributeMaskingRequest);
-        ObjectContent<AttributeMaskingRequest> attributeMaskingResponseObjectContent = jacksonTester.parse(attributeMaskingResponseJsonContent.getJson());
+        JsonContent<AttributeMaskingRequest> attributeMaskingResponseJsonContent = jsonTester.write(attributeMaskingRequest);
+        ObjectContent<AttributeMaskingRequest> attributeMaskingResponseObjectContent = jsonTester.parse(attributeMaskingResponseJsonContent.getJson());
         AttributeMaskingRequest attributeMaskingResponseMessageObject = attributeMaskingResponseObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",

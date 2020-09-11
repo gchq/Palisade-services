@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.attributemask.akka;
+package uk.gov.gchq.palisade.contract.attributemask.kafka;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -34,12 +34,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -51,7 +52,15 @@ import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+/**
+ * An external requirement of the service is to connect to a pair of kafka topics.
+ * The upstream "rule" topic is written to by the policy-service and read by this service.
+ * The downstream "filtered-resource" topic is written to by this service and read by the filtered-resource-service.
+ * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
+ */
+@Disabled
+@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dbtest")
 class KafkaContractTest {
 
     public static class AttributeMaskingRequestSerialiser extends JsonSerializer<AttributeMaskingRequest> {
@@ -107,7 +116,6 @@ class KafkaContractTest {
     }
 
     @Test
-    @Disabled
     void sendAndReceiveTest() throws ExecutionException, InterruptedException {
         // Given a message is available on the upstream topic
         try (KafkaProducer<String, AttributeMaskingRequest> producer = new KafkaProducer<>(producerProperties)) {
@@ -128,11 +136,13 @@ class KafkaContractTest {
                 .hasSize(3);
 
         // Then the first message is a START stream marker
-        // Then the last message is a END stream marker
-        assertThat(List.of(resultsList.getFirst(), resultsList.getLast()))
-                .extracting(ConsumerRecord::headers)
-                .isEqualTo(List.of(ApplicationTestData.START.headers(), ApplicationTestData.END.headers()));
+        assertThat(resultsList.getFirst().headers())
+                .isEqualTo(ApplicationTestData.START.headers());
         resultsList.removeFirst();
+
+        // Then the last message is a END stream marker
+        assertThat(resultsList.getLast().headers())
+                .isEqualTo(ApplicationTestData.END.headers());
         resultsList.removeLast();
 
         // Then all middle messages are mapped from request to response appropriately
@@ -143,4 +153,3 @@ class KafkaContractTest {
     }
 
 }
-

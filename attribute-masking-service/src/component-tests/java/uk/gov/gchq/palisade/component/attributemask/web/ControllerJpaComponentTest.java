@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.component.attributemask.web;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, AttributeMaskingController.class})
+@ActiveProfiles("dbtest")
 class ControllerJpaComponentTest {
 
     @Autowired
@@ -47,11 +49,6 @@ class ControllerJpaComponentTest {
 
     @Test
     void contextLoads() {
-        // Given the spring boot application has been started
-
-        // When various beans are autowired
-
-        // Then the beans were found and wired successfully
         assertThat(controller).isNotNull();
         assertThat(service).isNotNull();
         assertThat(repository).isNotNull();

@@ -16,8 +16,8 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.request.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
 
 import java.util.Map;
 

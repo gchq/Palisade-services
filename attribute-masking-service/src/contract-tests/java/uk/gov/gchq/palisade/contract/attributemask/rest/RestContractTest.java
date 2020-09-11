@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.attributemask.web;
+package uk.gov.gchq.palisade.contract.attributemask.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
@@ -24,24 +24,37 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.request.Token;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.message.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+/**
+ * An external requirement of the service is to have a set of rest endpoints mimicking the Kafka API.
+ * These are used for debugging purposes only.
+ * These endpoints should respond similarly to kafka upon receiving REST POST requests.
+ */
+@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dbtest")
 class RestContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private AttributeMaskingService service;
+
+    @Test
+    void contextLoads() {
+        assertThat(restTemplate).isNotNull();
+        assertThat(service).isNotNull();
+    }
 
     @Test
     void postToServiceReturnsMaskedResource() throws JsonProcessingException {
@@ -52,7 +65,7 @@ class RestContractTest {
 
         // When the request is POSTed to the service's REST endpoint
         HttpEntity<AttributeMaskingRequest> requestWithHeaders = new HttpEntity<>(request, headers);
-        AttributeMaskingResponse response = restTemplate.postForObject("/stream-api/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
+        AttributeMaskingResponse response = restTemplate.postForObject("/streamApi/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
 
         // Then the response is as expected
         // LeafResource is 'masked' by the service
@@ -75,7 +88,7 @@ class RestContractTest {
 
         // When the request is POSTed to the service's REST endpoint
         HttpEntity<AttributeMaskingRequest> requestWithHeaders = new HttpEntity<>(request, headers);
-        HttpEntity<AttributeMaskingResponse> response = restTemplate.postForEntity("/stream-api/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
+        HttpEntity<AttributeMaskingResponse> response = restTemplate.postForEntity("/streamApi/maskAttributes", requestWithHeaders, AttributeMaskingResponse.class);
 
         // Then the response is as expected
         // Body is null

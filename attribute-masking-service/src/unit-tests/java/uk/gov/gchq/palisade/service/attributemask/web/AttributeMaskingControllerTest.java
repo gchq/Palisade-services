@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
-import uk.gov.gchq.palisade.service.attributemask.request.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
