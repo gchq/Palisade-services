@@ -17,14 +17,12 @@
 package uk.gov.gchq.palisade.service.attributemask.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 
 import javax.persistence.AttributeConverter;
