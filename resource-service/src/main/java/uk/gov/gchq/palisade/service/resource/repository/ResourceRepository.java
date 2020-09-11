@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
@@ -28,8 +29,30 @@ import java.util.stream.Stream;
  */
 public interface ResourceRepository extends CrudRepository<ResourceEntity, String> {
 
+    /**
+     * Find resource in backing store by ResourceId
+     *
+     * @param resourceId the resource id of the resource in the backing store
+     * @return Optional value of ResourceEntity stored in the backing store
+     */
     Optional<ResourceEntity> findByResourceId(String resourceId);
 
-    Stream<ResourceEntity> findAllByParentId(String parentId);
+    /**
+     * Returns a stream of Resources from a backing store by ParentId
+     *
+     * @param parentId the parent id of the Resource
+     * @return a stream of ResourceEntity resources from the backing store
+     */
+    default Stream<ResourceEntity> streamFindAllByParentId(String parentId) {
+        return StreamSupport.stream(findAllByParentId(parentId).spliterator(), false);
+    }
+
+    /**
+     * Iterable used to create a stream of resources by parentId
+     *
+     * @param parentId the parent id of the Resource
+     * @return a list of ResourceEntity resources from the backing store
+     */
+    Iterable<ResourceEntity> findAllByParentId(String parentId);
 
 }

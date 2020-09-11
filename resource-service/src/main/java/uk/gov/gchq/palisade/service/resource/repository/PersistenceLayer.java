@@ -34,7 +34,7 @@ public interface PersistenceLayer {
      *
      * @param resourceId the resource id to query
      * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     *         Optional.empty if no such information has been persisted
+     * Optional.empty if no such information has been persisted
      * nb. the {@link Stream} may still be empty if this resourceId is an empty directory
      */
     Optional<Stream<LeafResource>> getResourcesById(String resourceId);
@@ -44,7 +44,7 @@ public interface PersistenceLayer {
      *
      * @param type the type to query
      * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     *         Optional.empty if no such information has been persisted
+     * Optional.empty if no such information has been persisted
      * nb. the {@link Stream} may still be empty if this type simply has no resources matching it
      */
     Optional<Stream<LeafResource>> getResourcesByType(String type);
@@ -54,7 +54,7 @@ public interface PersistenceLayer {
      *
      * @param serialisedFormat the serialised format to query
      * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     *         Optional.empty if no such information has been persisted
+     * Optional.empty if no such information has been persisted
      * nb. the {@link Stream} may still be empty if this serialised format simply has no resources matching it
      */
     Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
@@ -94,7 +94,6 @@ public interface PersistenceLayer {
      * Add a new resource that has been created during runtime to the persistence store
      * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method)
      * Used for updating the persistence store when the source of 'truth' has changed
-     *
      * As long as this is called for every new resource created and added to the resource-service,
      * this should guarantee consistency between persistence and resource-service
      *
