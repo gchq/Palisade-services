@@ -48,7 +48,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterIsConsistent(AttributeConverter<T, String> converter, T object) {
+    <T> void testContextConverterIsConsistent(final AttributeConverter<T, String> converter, final T object) {
         // given we have an object
 
         // when converted to a database column
@@ -66,7 +66,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterIsCorrect(AttributeConverter<T, String> converter, T object) {
+    <T> void testContextConverterIsCorrect(final AttributeConverter<T, String> converter, final T object) {
         // given we have an object
 
         // when converted to and from a database column
@@ -80,7 +80,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterHandlesNulls(AttributeConverter<T, String> converter, T ignored) {
+    <T> void testContextConverterHandlesNulls(final AttributeConverter<T, String> converter, final T ignored) {
         // given the Context object being processed is null
 
         // when converted to and from a database
