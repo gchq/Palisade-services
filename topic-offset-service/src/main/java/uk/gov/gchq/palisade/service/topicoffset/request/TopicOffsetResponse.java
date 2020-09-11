@@ -45,6 +45,35 @@ public final class TopicOffsetResponse {
         return commitOffset;
     }
 
+    /**
+     * Builder class for the creation of instances of the TopicOffsetResponse.  This is a variant of the Fluent Builder
+     * which will use Java Objects or JsonNodes equivalents for the components in the build.
+     */
+    public static class Builder {
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * TopicOffsetResponse class.
+         *
+         * @return interface {@link TopicOffsetRequest.Builder.IUserId} for the next step in the build.
+         */
+        public static CommitOffset create() {
+            return commitOffset -> new TopicOffsetResponse(commitOffset);
+        }
+
+        /**
+         * Adds the offset information to the message.
+         */
+        public interface CommitOffset {
+            /**
+             * Adds the offset for the message.
+             *
+             * @param commitOffset commit offset for the message.
+             * @return interface {@link TopicOffsetResponse} for the completed class from the builder.
+             */
+            TopicOffsetResponse withOffset(Long commitOffset);
+        }
+    }
+
     @Override
     @Generated
     public boolean equals(final Object o) {
