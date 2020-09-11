@@ -34,8 +34,8 @@
         <testcontainers.version>1.14.3</testcontainers.version>
         <!-- Testing configuration -->
         <unit-test.skip>false</unit-test.skip>
-        <component-test.skip>true</component-test.skip>
-        <contract-test.skip>true</contract-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
@@ -80,14 +80,6 @@
     </dependencies>
 
     <profiles>
-        <profile>
-            <id>test-all</id>
-            <properties>
-                <unit-test.skip>false</unit-test.skip>
-                <component-test.skip>false</component-test.skip>
-                <contract-test.skip>false</contract-test.skip>
-            </properties>
-        </profile>
         <profile>
             <id>pi</id>
             <build>
