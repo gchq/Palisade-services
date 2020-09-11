@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -128,6 +129,31 @@ public class AuthorisedRequestEntity implements Serializable {
     @Generated
     public Rules<?> getRules() {
         return rules;
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuthorisedRequestEntity)) {
+            return false;
+        }
+        final AuthorisedRequestEntity that = (AuthorisedRequestEntity) o;
+        return Objects.equals(uniqueId, that.uniqueId) &&
+                Objects.equals(token, that.token) &&
+                Objects.equals(resourceId, that.resourceId) &&
+                Objects.equals(user, that.user) &&
+                Objects.equals(leafResource, that.leafResource) &&
+                Objects.equals(context, that.context) &&
+                Objects.equals(rules, that.rules);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(uniqueId, token, resourceId, user, leafResource, context, rules);
     }
 
     @Override

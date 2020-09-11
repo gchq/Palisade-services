@@ -20,11 +20,13 @@ import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 
+import java.util.Optional;
+
 /**
  * Mimic an external connection to the same database used by our service
  */
 public interface AuthorisedRequestsRepositoryExternalConnection extends CrudRepository<AuthorisedRequestEntity, String> {
 
-    AuthorisedRequestEntity getAllByTokenAndResourceId(String token, String resourceId);
+    Optional<AuthorisedRequestEntity> findByTokenAndResourceId(String token, String resourceId);
 
 }

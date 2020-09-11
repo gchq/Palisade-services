@@ -18,8 +18,9 @@ package uk.gov.gchq.palisade.component.attributemask.web;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, AttributeMaskingController.class})
-@ActiveProfiles("dbtest")
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 class ControllerJpaComponentTest {
 
     @Autowired

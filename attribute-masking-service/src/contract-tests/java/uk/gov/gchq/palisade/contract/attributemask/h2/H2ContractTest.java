@@ -23,9 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 
+import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
+
+import java.io.IOException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * An external requirement of the service is to write to an external persistence store.
  * This store will then be read by the data-service to apply rules for a data-read.
  * Upon storing an authorised request with the service, an external entity should be able to retrieve it.
+ *
+ * The key distinction between this and the JpaPersistenceLayerTest is while the aforementioned inspects
+ * its own instance of the database, this test creates two distinct, separate connections.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackageClasses = {AuthorisedRequestsRepositoryExternalConnection.class, AuthorisedRequestsRepository.class})
@@ -40,19 +48,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 class H2ContractTest {
 
     @Autowired
-    private AttributeMaskingService service;
+    private AttributeMaskingService attributeMaskingService;
 
     @Autowired
     private AuthorisedRequestsRepositoryExternalConnection externalRepositoryConnection;
 
     @Test
     void contextLoads() {
-        assertThat(service).isNotNull();
+        assertThat(attributeMaskingService).isNotNull();
         assertThat(externalRepositoryConnection).isNotNull();
     }
 
     @Test
-    void storedAuthorisedRequestsAreRetrievableExternally() {
+    void storedAuthorisedRequestsAreRetrievableExternally() throws IOException {
+        // Given a request is stored by the service
+        attributeMaskingService.storeAuthorisedRequest(
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES
+        );
+
+        // When the "data-service" (this test class) retrieves this stored request
+        Optional<AuthorisedRequestEntity> persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.RESOURCE_ID);
+
+        // Then an entity is found and it is equivalent to the request stored
+        assertThat(persistedEntity).isPresent();
+        assertThat(persistedEntity).get()
+                .isEqualTo(new AuthorisedRequestEntity(
+                        ApplicationTestData.REQUEST_TOKEN,
+                        ApplicationTestData.USER,
+                        ApplicationTestData.LEAF_RESOURCE,
+                        ApplicationTestData.CONTEXT,
+                        ApplicationTestData.RULES));
     }
 
 }
