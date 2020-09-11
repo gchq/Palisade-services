@@ -45,7 +45,7 @@ public interface ErrorHandlingService {
      * @param request    original request input to the service
      * @param error      error thrown by the service at runtime
      * @param attributes map of additional attributes to add to the error message
-     * @return
+     * @return an error message containing the given details
      */
     default AuditErrorMessage createErrorMessage(final AttributeMaskingRequest request, final Throwable error, final Map<String, Object> attributes) {
         return AuditErrorMessage.Builder.create(request, attributes)
