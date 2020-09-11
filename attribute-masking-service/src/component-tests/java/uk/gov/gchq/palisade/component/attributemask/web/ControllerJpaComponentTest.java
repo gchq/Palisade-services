@@ -60,7 +60,7 @@ class ControllerJpaComponentTest {
         // Given some application test data
 
         // When a request comes in to the controller
-        Optional<LeafResource> maskedResource = controller.serviceMaskAttributes(ApplicationTestData.REQUEST_TOKEN, null, Optional.of(ApplicationTestData.REQUEST));
+        Optional<LeafResource> maskedResource = controller.serviceMaskAttributes(ApplicationTestData.REQUEST_TOKEN, Optional.empty(), Optional.of(ApplicationTestData.REQUEST));
 
         // Then it is masked as per the service
         assertThat(maskedResource)

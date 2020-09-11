@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO replace h2 with redis
 spring:
   profiles:
     include:
-    - redis
+    - h2
     - k8s-config
 
 ---

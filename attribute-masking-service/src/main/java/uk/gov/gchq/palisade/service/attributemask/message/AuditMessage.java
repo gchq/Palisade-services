@@ -44,7 +44,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "query-scope-service";
+    public static final String SERVICE_NAME = "attribute-masking-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -127,7 +127,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public String getServerHostName() {
+    public String getServerHostname() {
         return serverHostname;
     }
 
