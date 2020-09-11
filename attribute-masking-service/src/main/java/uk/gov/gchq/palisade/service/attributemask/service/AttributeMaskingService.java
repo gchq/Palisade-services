@@ -34,8 +34,26 @@ import java.io.IOException;
  */
 public interface AttributeMaskingService {
 
+    /**
+     * Store the full details of the authorised request in a persistence store, to be later
+     * retrieved by the data-service.
+     *
+     * @param token    the token {@link String} for the client request as a whole, created by the palisade-service
+     * @param user     the {@link User} as authorised and returned by the user-service
+     * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service
+     * @param context  the {@link Context} as originally supplied by the client
+     * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
+
+     * @throws IOException if a failure occurred writing to the persistence store.
+     */
     void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException;
 
+    /**
+     * Mask any sensitive attributes on a resource, possibly by applying attribute-level rules.
+     *
+     * @param resource the (sensitive) resource to be returned to the client
+     * @return a copy of the resource with sensitive data masked or redacted
+     */
     LeafResource maskResourceAttributes(final LeafResource resource);
 
 }

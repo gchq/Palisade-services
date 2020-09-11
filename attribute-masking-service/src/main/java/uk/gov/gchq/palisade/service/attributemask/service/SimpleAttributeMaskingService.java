@@ -50,8 +50,7 @@ public class SimpleAttributeMaskingService implements AttributeMaskingService {
         try {
             this.persistenceLayer.put(token, user, resource, context, rules);
         } catch (RuntimeException ex) {
-            LOGGER.warn("Caught error while writing to persistence store: ", ex);
-            throw new IOException(ex);
+            throw new IOException("Error encountered while writing to persistence store: ", ex);
         }
     }
 

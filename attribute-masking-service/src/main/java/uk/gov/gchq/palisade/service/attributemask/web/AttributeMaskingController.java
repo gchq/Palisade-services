@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -57,33 +55,44 @@ public class AttributeMaskingController {
         this.errorHandler = errorHandler;
     }
 
+    /**
+     * REST endpoint for debugging and playing with the service, mimicking the Kafka API.
+     * At least one of the streamMarker or request must be present. If both are present, the headers take precedent
+     * over the body (treated as streamMarker rather than request).
+     *
+     * @param token           the token for the client's request, stored in headers
+     * @param streamMarker    the (optional) start/end of stream marker for the client's request, stored in headers
+     * @param optionalRequest the (optional) request itself
+     * @return the response from the service, or an error if one occurred
+     */
     @PostMapping(value = "/maskAttributes", consumes = "application/json", produces = "application/json")
     public ResponseEntity<AttributeMaskingResponse> restMaskAttributes(
             final @RequestHeader(Token.HEADER) String token,
             final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
-            final @RequestBody Optional<AttributeMaskingRequest> request) {
+            final @RequestBody Optional<AttributeMaskingRequest> optionalRequest) {
         // Assume success
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
+        Optional<StreamMarker> optionalStreamMarker = Optional.ofNullable(streamMarker);
         Optional<LeafResource> optionalMaskedResource = Optional.empty();
 
         try {
             // Try to store with service
             optionalMaskedResource = this.serviceMaskAttributes(
                     token,
-                    streamMarker,
-                    request
+                    optionalStreamMarker,
+                    optionalRequest
             );
         } catch (IOException ex) {
             // Audit error appropriately (REST-fully)
             // If we failed with a StreamMarker message, there's no real way to audit it, so throw NoSuchElementException
-            errorHandler.reportError(token, request.orElseThrow(), ex);
+            errorHandler.reportError(token, optionalRequest.orElseThrow(), ex);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         // Prepare body
         final LeafResource maskedResource = optionalMaskedResource
                 .orElse(null);
-        final AttributeMaskingResponse responseBody = request
+        final AttributeMaskingResponse responseBody = optionalRequest
                 .map(Builder::create)
                 .map(x -> x.withResource(maskedResource))
                 .orElse(null);
@@ -99,12 +108,21 @@ public class AttributeMaskingController {
         return new ResponseEntity<>(responseBody, responseHeaders, httpStatus);
     }
 
+    /**
+     * Common service interface between Kafka and the REST API.
+     *
+     * @param token           the token for the client's request, stored in headers
+     * @param streamMarker    the (optional) start/end of stream marker for the client's request, stored in headers
+     * @param optionalRequest the (optional) request itself
+     * @return the response from the service
+     * @throws IOException if an error occurred (as well as RuntimeExceptions)
+     */
     public Optional<LeafResource> serviceMaskAttributes(
-            final @NonNull String token,
-            final @Nullable StreamMarker streamMarker,
+            final String token,
+            final Optional<StreamMarker> streamMarker,
             final Optional<AttributeMaskingRequest> optionalRequest) throws IOException {
         // Only process if no stream marker
-        if (streamMarker == null) {
+        if (streamMarker.isEmpty()) {
             final AttributeMaskingRequest request = optionalRequest.orElseThrow(() -> new IllegalArgumentException("One of " + StreamMarker.HEADER + " and body must be non-null"));
             // Store authorised request with service
             LOGGER.info("Storing request result for token {} and resourceId {}", token, request.getResource().getId());

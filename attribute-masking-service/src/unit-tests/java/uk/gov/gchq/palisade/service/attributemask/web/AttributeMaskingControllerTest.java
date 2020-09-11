@@ -70,7 +70,7 @@ class AttributeMaskingControllerTest {
         // when the controller is called with a stream marker
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
-                StreamMarker.START,
+                Optional.of(StreamMarker.START),
                 Optional.empty()
         );
 

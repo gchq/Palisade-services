@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
@@ -50,9 +51,7 @@ public class ApplicationConfiguration {
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (token, request, error) -> {
-            LOGGER.error("Token {} and request {} threw exception {}", token, request, error);
-        };
+        return (String token, AttributeMaskingRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
     }
 
     @Bean
