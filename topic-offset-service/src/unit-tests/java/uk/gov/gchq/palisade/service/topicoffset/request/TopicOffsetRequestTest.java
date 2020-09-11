@@ -50,7 +50,7 @@ class TopicOffsetRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
+    public void testTopicOffsetRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
