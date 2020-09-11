@@ -326,6 +326,7 @@ timestamps {
                                              "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
                                          echo("successfully deployed")
                                      } else {
+                                         sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
                                          error("Build failed because of failed maven deploy")
                                      }
                                      if (("${GIT_BRANCH_NAME}" != "develop") && ("${GIT_BRANCH_NAME}" != "main")) {
