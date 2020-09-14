@@ -77,6 +77,7 @@
         <module>audit-service</module>
         <module>data-service</module>
         <module>discovery-service</module>
+        <module>filtered-resource-service</module>
         <module>palisade-service</module>
         <module>policy-service</module>
         <module>query-scope-service</module>
