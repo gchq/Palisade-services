@@ -331,7 +331,7 @@ timestamps {
                                     } else {
                                         error("Build failed because of failed maven deploy")
                                     }
-                                    if (FEATURE_BRANCH == "false") {
+                                    if (FEATURE_BRANCH == "true") {
                                         sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
                                         sh "kubectl delete pvc --all --namespace ${HELM_DEPLOY_NAMESPACE}"
                                     }
