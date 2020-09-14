@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingServic
 import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -43,8 +42,8 @@ class AttributeMaskingControllerTest {
         // when the controller is called with a request
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
-                Optional.empty(),
-                Optional.of(ApplicationTestData.REQUEST)
+                null,
+                ApplicationTestData.REQUEST
         );
 
         // then the service.storeAuthorisedRequest method is called
@@ -70,8 +69,8 @@ class AttributeMaskingControllerTest {
         // when the controller is called with a stream marker
         attributeMaskingController.serviceMaskAttributes(
                 ApplicationTestData.REQUEST_TOKEN,
-                Optional.of(StreamMarker.START),
-                Optional.empty()
+                StreamMarker.START,
+                null
         );
 
         // then the storeAuthorisedRequest is not called

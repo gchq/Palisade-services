@@ -16,25 +16,27 @@
 
 package uk.gov.gchq.palisade.component.attributemask.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingController;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @DataJpaTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, AttributeMaskingController.class})
@@ -60,12 +62,19 @@ class ControllerJpaComponentTest {
         // Given some application test data
 
         // When a request comes in to the controller
-        Optional<LeafResource> maskedResource = controller.serviceMaskAttributes(ApplicationTestData.REQUEST_TOKEN, Optional.empty(), Optional.of(ApplicationTestData.REQUEST));
+        ResponseEntity<AttributeMaskingResponse> maskedResource = controller.restMaskAttributes(ApplicationTestData.REQUEST_TOKEN, null, ApplicationTestData.REQUEST);
 
         // Then it is masked as per the service
         assertThat(maskedResource)
-                .isPresent()
-                .get()
+                .extracting(ResponseEntity::getBody)
+                .extracting(attributeMaskingResponse -> {
+                    try {
+                        return attributeMaskingResponse.getResource();
+                    } catch (JsonProcessingException e) {
+                        fail(e.getMessage());
+                        return null;
+                    }
+                })
                 .isEqualTo(service.maskResourceAttributes(ApplicationTestData.LEAF_RESOURCE));
 
         // Then the request was persisted

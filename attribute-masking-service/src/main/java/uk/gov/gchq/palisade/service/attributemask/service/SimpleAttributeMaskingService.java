@@ -16,9 +16,6 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -32,8 +29,6 @@ import java.io.IOException;
  * Authorised requests are stored in the persistence layer, resources are not masked in any way.
  */
 public class SimpleAttributeMaskingService implements AttributeMaskingService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAttributeMaskingService.class);
-
     private final PersistenceLayer persistenceLayer;
 
     /**
