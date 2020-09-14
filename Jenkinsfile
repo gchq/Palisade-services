@@ -179,7 +179,7 @@ timestamps {
             }
 
             stage('Prerequisites') {
-                if (FEATURE_BRANCH == "false") {
+                if (FEATURE_BRANCH == "true") {
                     dir('Palisade-common') {
                         git branch: 'develop', url: 'https://github.com/gchq/Palisade-common.git'
                         if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
