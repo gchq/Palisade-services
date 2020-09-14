@@ -24,12 +24,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTopicOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TopicOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TopicOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterDaemon;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
-import uk.gov.gchq.palisade.service.filteredresource.service.SimpleTopicOffsetDaemon;
+import uk.gov.gchq.palisade.service.filteredresource.service.SimpleTokenOffsetDaemon;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -41,8 +43,8 @@ public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    JpaTopicOffsetPersistenceLayer jpaTopicOffsetPersistenceLayer(final TopicOffsetRepository repository) {
-        return new JpaTopicOffsetPersistenceLayer(repository);
+    JpaTokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository) {
+        return new JpaTokenOffsetPersistenceLayer(repository);
     }
 
     @Bean
@@ -51,8 +53,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    SimpleTopicOffsetDaemon simpleTopicOffsetDaemon(final TopicOffsetPersistenceLayer persistenceLayer) {
-        return new SimpleTopicOffsetDaemon(persistenceLayer);
+    SimpleTokenOffsetDaemon simpleTokenOffsetDaemon(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return new SimpleTokenOffsetDaemon(persistenceLayer);
     }
 
     @Bean
@@ -61,6 +63,13 @@ public class ApplicationConfiguration {
             LOGGER.info("Spawned a logging process for token {}", token);
             return null;
         });
+    }
+
+    // TODO: Replace this with a proper error handling mechanism (ie. kafka error queue)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
     }
 
     @Bean

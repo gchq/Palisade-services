@@ -27,22 +27,22 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.filteredresource.domain.TopicOffsetEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTopicOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TopicOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
+import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {FilteredResourceApplication.class, ApplicationConfiguration.class, JpaTopicOffsetPersistenceLayer.class})
+@ContextConfiguration(classes = {FilteredResourceApplication.class, ApplicationConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("dbtest")
-class JpaTopicOffsetPersistenceLayerTest {
+class JpaTokenOffsetPersistenceLayerTest {
 
     @Autowired
-    private JpaTopicOffsetPersistenceLayer persistenceLayer;
+    private JpaTokenOffsetPersistenceLayer persistenceLayer;
     @Autowired
-    private TopicOffsetRepository offsetsRepository;
+    private TokenOffsetRepository offsetsRepository;
 
     @Test
     void contextLoads() {
@@ -59,7 +59,7 @@ class JpaTopicOffsetPersistenceLayerTest {
         );
 
         // when all entities are retrieved from the repository
-        Iterable<TopicOffsetEntity> authorisedRequests = offsetsRepository.findAll();
+        Iterable<TokenOffsetEntity> authorisedRequests = offsetsRepository.findAll();
 
         // then the persistence layer has persisted the entity in the repository
         assertThat(authorisedRequests)
