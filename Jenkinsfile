@@ -234,9 +234,9 @@ timestamps {
             parallel Test: {
                 stage('Install, Unit Tests, Checkstyle') {
                     dir('Palisade-services') {
-                        git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                                 // only going to install here as the deploy will happen in the deploy parallel build if it is not a feature branch or if it is a PR build
                                 sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
                             }
@@ -249,12 +249,12 @@ timestamps {
                     // If this branch name exists in integration-tests, use that
                     // Otherwise, default to integration-tests/develop
                     dir('Palisade-integration-tests') {
-                        git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                        if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                            INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
-                        }
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
+                                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                                    INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                }
                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${INTEGRATION_REVISION} -D common.revision=${COMMON_REVISION} -D services.revision=${SERVICES_REVISION} -D examples.revision=${EXAMPLES_REVISION} install"
                             }
                         }
@@ -300,50 +300,50 @@ timestamps {
             },
 
             Deploy: {
-                 stage('Helm deploy') {
-                     dir('Palisade-services-deploy') {
-                         container('maven') {
-                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                 if (IS_PR == "true" || FEATURE_BRANCH == "false") {
-                                     git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
-                                     sh 'palisade-login'
-                                     //now extract the public IP addresses that this will be open on
-                                     sh 'extract-addresses'
-                                     // Push containers to the registry so they are available to helm
-                                     if (FEATURE_BRANCH == "false") {
-                                         if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
-                                             sh 'echo namespace create succeeded'
-                                         } else {
-                                             error("Could not create namespace")
-                                         }
-                                     }
-                                     sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
-                                     //deploy application to the cluster
-                                     if (sh(script: "helm upgrade --install palisade . " +
-                                             "--set global.hosting=aws  " +
-                                             "--set traefik.install=false,dashboard.install=false " +
-                                             "--set global.repository=${ECR_REGISTRY} " +
-                                             "--set global.hostname=${EGRESS_ELB} " +
-                                             "--set global.deployment=example " +
-                                             "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
-                                             "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                             "--set global.redisClusterEnabled=true " +
-                                             "--set global.redis.install=false " +
-                                             "--set global.redis-cluster.install=true " +
-                                             "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
-                                         echo("successfully deployed")
-                                     } else {
-                                         error("Build failed because of failed maven deploy")
-                                     }
-                                     if (FEATURE_BRANCH == "false") {
-                                         sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
-                                         sh "kubectl delete pvc --all --namespace ${HELM_DEPLOY_NAMESPACE}"
-                                     }
-                                 }
-                             }
-                         }
-                     }
-                 }
+                stage('Helm deploy') {
+                    dir('Palisade-services-deploy') {
+                        container('maven') {
+                            configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
+                                if (IS_PR == "true" || FEATURE_BRANCH == "false") {
+                                    git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
+                                    sh 'palisade-login'
+                                    //now extract the public IP addresses that this will be open on
+                                    sh 'extract-addresses'
+                                    // Push containers to the registry so they are available to helm
+                                    if (FEATURE_BRANCH == "true") {
+                                        if (sh(script: "namespace-create ${GIT_BRANCH_NAME_LOWER}", returnStatus: true) == 0) {
+                                            sh 'echo namespace create succeeded'
+                                        } else {
+                                            error("Could not create namespace")
+                                        }
+                                    }
+                                    sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
+                                    //deploy application to the cluster
+                                    if (sh(script: "helm upgrade --install palisade . " +
+                                            "--set global.hosting=aws  " +
+                                            "--set traefik.install=false,dashboard.install=false " +
+                                            "--set global.repository=${ECR_REGISTRY} " +
+                                            "--set global.hostname=${EGRESS_ELB} " +
+                                            "--set global.deployment=example " +
+                                            "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
+                                            "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
+                                            "--set global.redisClusterEnabled=true " +
+                                            "--set global.redis.install=false " +
+                                            "--set global.redis-cluster.install=true " +
+                                            "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
+                                        echo("successfully deployed")
+                                    } else {
+                                        error("Build failed because of failed maven deploy")
+                                    }
+                                    if (FEATURE_BRANCH == "false") {
+                                        sh "helm delete palisade --namespace ${HELM_DEPLOY_NAMESPACE}"
+                                        sh "kubectl delete pvc --all --namespace ${HELM_DEPLOY_NAMESPACE}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
