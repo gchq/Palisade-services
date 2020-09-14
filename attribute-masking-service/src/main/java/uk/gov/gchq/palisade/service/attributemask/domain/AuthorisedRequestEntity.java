@@ -42,14 +42,14 @@ import java.util.StringJoiner;
 @Table(
         name = "authorised_requests",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "uniqueId"),
+                @UniqueConstraint(columnNames = "unique_id"),
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
 public class AuthorisedRequestEntity implements Serializable {
 
     @Id
-    @Column(name = "uniqueId", columnDefinition = "varchar(255)")
+    @Column(name = "unique_id", columnDefinition = "varchar(255)")
     private String uniqueId;
 
     @Column(name = "token", columnDefinition = "varchar(255)")
