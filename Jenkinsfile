@@ -292,9 +292,7 @@ timestamps {
                         }
                     }
                 }
-            },
 
-            Hadolint: {
                 stage('Hadolinting') {
                     dir('Palisade-services') {
                         container('hadolint') {
