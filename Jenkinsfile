@@ -149,7 +149,7 @@ timestamps {
                     IS_PR = "false"
                 }
                 // set default values for the variables
-                NOT_FEATURE_BRANCH = "true"
+                FEATURE_BRANCH = "true"
                 COMMON_REVISION = "SNAPSHOT"
                 READERS_REVISION = "SNAPSHOT"
                 CLIENTS_REVISION = "SNAPSHOT"
@@ -173,13 +173,13 @@ timestamps {
                     EXAMPLES_REVISION = "RELEASE"
                     INTEGRATION_REVISION = "RELEASE"
                     HELM_DEPLOY_NAMESPACE = "release"
-                    NOT_FEATURE_BRANCH = "false"
+                    FEATURE_BRANCH = "false"
                 }
                 echo sh(script: 'env | sort', returnStdout: true)
             }
 
             stage('Prerequisites') {
-                if (NOT_FEATURE_BRANCH == "false") {
+                if (FEATURE_BRANCH == "false") {
                     dir('Palisade-common') {
                         git branch: 'develop', url: 'https://github.com/gchq/Palisade-common.git'
                         if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
