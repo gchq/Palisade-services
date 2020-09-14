@@ -237,11 +237,8 @@ timestamps {
                         git branch: GIT_BRANCH_NAME, url: 'https://github.com/gchq/Palisade-services.git'
                         container('docker-cmds') {
                             configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
-                                if (IS_PR == "true" || FEATURE_BRANCH == "false") {
-                                    sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} deploy"
-                                } else {
-                                    sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
-                                }
+                                // only going to install here as the deploy will happen in the deploy parallel build if it is not a feature branch or if it is a PR build
+                                sh "mvn -s ${MAVEN_SETTINGS} -D dockerfile.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} install"
                             }
                         }
                     }
