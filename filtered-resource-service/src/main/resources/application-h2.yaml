@@ -14,7 +14,7 @@
 
 spring:
   datasource:
-    url: jdbc:h2:file:./query-scope-cache-h2;LOCK_TIMEOUT=10000
+    url: jdbc:h2:file:./filtered-resource-cache-h2;LOCK_TIMEOUT=10000
     username:
     password:
     initialization-mode: always
