@@ -34,8 +34,6 @@ import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
-import java.util.Optional;
-
 
 /**
  * REST Controller for Topic Offset Service.

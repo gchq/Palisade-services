@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 
-import java.util.Optional;
-
 /**
  * Simple Implementation of the Topic Offset Service contract.
  */
