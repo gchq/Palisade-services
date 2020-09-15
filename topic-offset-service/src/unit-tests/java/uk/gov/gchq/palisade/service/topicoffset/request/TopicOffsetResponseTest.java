@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 
 import java.io.IOException;
 

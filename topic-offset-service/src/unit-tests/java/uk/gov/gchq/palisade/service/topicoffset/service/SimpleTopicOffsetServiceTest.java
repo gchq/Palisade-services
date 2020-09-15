@@ -1,8 +1,8 @@
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.gchq.palisade.service.topicoffset.request.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetResponse;
+import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 
 import java.util.Optional;
 

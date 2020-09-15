@@ -25,10 +25,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.gchq.palisade.service.topicoffset.request.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.request.Token;
-import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetRequest;
-import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetResponse;
+
+import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.message.Token;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 

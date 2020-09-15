@@ -23,6 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.topicoffset.message.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -56,14 +57,14 @@ class AuditErrorMessageTest {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23, Skidoo");
 
-        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
+        AuditErrorMessage originalAuditErrorMessage = AuditErrorMessage.Builder.create()
                 .withUserId("originalUserID")
                 .withResourceId("testResourceId")
                 .withContext(context)
                 .withAttributes(attributes)
                 .withError(new InternalError("Something went wrong!"));
 
-        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
+        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(originalAuditErrorMessage);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
@@ -77,18 +78,18 @@ class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message").isEqualTo("Something went wrong!")
                 ),
                 () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditErrorMessageObject.getUserId()).isEqualTo(auditErrorMessage.getUserId()),
-                        () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(auditErrorMessage.getResourceId()),
-                        () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(auditErrorMessage.getContext().getPurpose()),
-                        () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
-                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
-                        () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
+                        () -> assertThat(auditErrorMessageObject.getUserId()).isEqualTo(originalAuditErrorMessage.getUserId()),
+                        () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(originalAuditErrorMessage.getResourceId()),
+                        () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(originalAuditErrorMessage.getContext().getPurpose()),
+                        () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(originalAuditErrorMessage.getServiceName()),
+                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(originalAuditErrorMessage.getServerIP()),
+                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(originalAuditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(originalAuditErrorMessage.getTimestamp()),
+                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(originalAuditErrorMessage.getError().getMessage())
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditErrorMessageObject.equals(auditErrorMessage))
+                        () -> assertThat(auditErrorMessageObject.equals(originalAuditErrorMessage))
                 )
         );
     }
