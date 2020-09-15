@@ -7,6 +7,7 @@ List of third-party dependencies grouped by their license type
 * project ':json-path' ([com.jayway.jsonpath:json-path:2.4.0](https://github.com/jayway/JsonPath))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
 * event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
+* embedded-redis ([it.ozimov:embedded-redis:0.7.3](https://github.com/ozimov/embedded-redis))
 * Apache Commons Compress ([org.apache.commons:commons-compress:1.19](https://commons.apache.org/proper/commons-compress/))
 * Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
 * spring-boot-configuration-processor ([org.springframework.boot:spring-boot-configuration-processor:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
@@ -38,6 +39,10 @@ List of third-party dependencies grouped by their license type
 ### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
 * JUnit ([junit:junit:4.13](http://junit.org))
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
+
+### [Eclipse Public License v2.0](./licenses/not recognised):
+* JUnit Jupiter API ([org.junit.jupiter:junit-jupiter-api:5.6.2](https://junit.org/junit5/))
+* JUnit Jupiter Engine ([org.junit.jupiter:junit-jupiter-engine:5.6.2](https://junit.org/junit5/))
 
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
