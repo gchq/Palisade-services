@@ -44,33 +44,17 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
-    public static final String SERVICE_NAME = "topic-offset-service";
-
     protected static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.
-
-    @JsonProperty("resourceId")
     protected final String resourceId;  //Resource Id that is being asked to access.
-
-    @JsonProperty("context")
     protected final JsonNode context;   //Relevant context information about the request.
-
-    @JsonProperty("serviceName")
     protected String serviceName = SERVICE_NAME;  //service that sent the message
-
-    @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
-
-    @JsonProperty("serverIP")
     protected final String serverIP;  //the server IP address for the service
-
-    @JsonProperty("serverHostname")
     protected final String serverHostname;  //the hostname of the server hosting the service
-
-    @JsonProperty("attributes")
     protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
+
+    public static final String SERVICE_NAME = "topic-offset-service";
 
     @JsonCreator
     protected AuditMessage(
