@@ -18,6 +18,11 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Interface for the filtered resource service.
+ * Upon receiving a connection for a websocket with a given token, spawn a process to return results
+ * for this token, as well as any errors that may have occurred.
+ */
 public interface FilteredResourceService {
 
     CompletableFuture<Void> spawnProcessorForToken(final String token);

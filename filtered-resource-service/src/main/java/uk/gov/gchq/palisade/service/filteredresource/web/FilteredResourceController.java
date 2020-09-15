@@ -32,6 +32,10 @@ import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterDaemon
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
 import uk.gov.gchq.palisade.service.filteredresource.service.TokenOffsetDaemon;
 
+/**
+ * A REST interface mimicking the Kafka API to the service.
+ * Intended for debugging only.
+ */
 @RestController
 @RequestMapping("/streamApi")
 public class FilteredResourceController {
@@ -45,6 +49,13 @@ public class FilteredResourceController {
         this.service = service;
     }
 
+    /**
+     * REST endpoint for the error reporter subsystem
+     *
+     * @param token the token for which an error was thrown
+     * @param error the error thrown while processing a message
+     * @return Whether or not the reporting of the error completed successfully
+     */
     @PostMapping("/reportError")
     public ResponseEntity<Void> reportError(
             final @RequestHeader(Token.HEADER) String token,
@@ -54,6 +65,13 @@ public class FilteredResourceController {
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
+    /**
+     * REST endpoint for the topic token offset subsystem
+     *
+     * @param token         a token for which there are filtered resources available on a kafka queue
+     * @param offsetMessage the offset for the START_OF_STREAM message for this token
+     * @return Whether or not the storing of the offset completed successfully
+     */
     @PostMapping("/topicOffset")
     public ResponseEntity<Void> storeTopicOffset(
             final @RequestHeader(Token.HEADER) String token,
@@ -63,6 +81,15 @@ public class FilteredResourceController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    /**
+     * REST endpoint for pushing a filtered resource to the service, as if from kafka.
+     * Messages with a stream marker will not be returned, but are used for control flow
+     *
+     * @param token           the token for the request
+     * @param streamMarker    the (optional) stream marker for this message
+     * @param resourceRequest the request to the service containing a leafResource id
+     * @return Whether or not the message was processed successfully
+     */
     @PostMapping("/acceptFilteredResource")
     public ResponseEntity<Void> acceptFilteredResource(
             final @RequestHeader(Token.HEADER) String token,

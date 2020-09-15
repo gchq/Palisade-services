@@ -16,6 +16,13 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
+/**
+ * Interface for the topic token offset subsystem.
+ * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
+ * This queue declares the commit-offsets for the starts of result sets for a given token.
+ * When such a message is received, it will be persisted.
+ * It will be later retrieved for a client's websocket.
+ */
 public interface TokenOffsetDaemon {
 
     void storeTokenOffset(final String token, final Long offset);

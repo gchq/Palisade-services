@@ -21,6 +21,10 @@ import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 
 import java.util.Optional;
 
+/**
+ * Persist and retrieve topic offsets for a given request token.
+ * This allows creating a new kafka reader per request token and fast-forwarding to the start of the results.
+ */
 public interface TokenOffsetRepository extends CrudRepository<TokenOffsetEntity, String> {
 
     default void save(final String token, final Long offset) {

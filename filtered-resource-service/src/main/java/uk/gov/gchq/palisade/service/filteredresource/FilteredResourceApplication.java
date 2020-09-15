@@ -37,3 +37,4 @@ public class FilteredResourceApplication {
                 .run(args);
     }
 }
+

@@ -21,7 +21,7 @@ import java.util.Optional;
 
 /**
  * Java JPA implementation of a {@link TokenOffsetPersistenceLayer} for the filtered-resource-service.
- * Delegates to a CrudRepository save method.
+ * Persist and retrieve topic offsets for a given request token.
  */
 public class JpaTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLayer {
     private final TokenOffsetRepository repository;

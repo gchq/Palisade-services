@@ -20,6 +20,10 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 
+/**
+ * Simple implementation of the {@link TokenOffsetDaemon}.
+ * Stores a token and an offset in either redis or h2.
+ */
 @Service
 public class SimpleTokenOffsetDaemon implements TokenOffsetDaemon {
     private final TokenOffsetPersistenceLayer persistenceLayer;
