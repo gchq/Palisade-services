@@ -27,6 +27,10 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the evaluating the TopicOffsetResponse and the related seralising to a JSon string
+ * and deseralising back to an object.
+ */
 @JsonTest
 class TopicOffsetResponseTest {
 
