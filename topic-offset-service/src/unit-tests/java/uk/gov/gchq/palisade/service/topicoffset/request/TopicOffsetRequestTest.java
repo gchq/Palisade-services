@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset.message;
+package uk.gov.gchq.palisade.service.topicoffset.request;
 
 
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
 
 import java.io.IOException;
 

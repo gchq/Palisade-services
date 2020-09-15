@@ -33,6 +33,6 @@ public interface TopicOffsetService {
      * @param streamMarker {@link StreamMarker}  indicator of the type of message marker.
      * @return  message indicating the offset in the message queue.
      */
-    Optional<TopicOffsetResponse> createTopicOffsetResponse(StreamMarker streamMarker);
+    TopicOffsetResponse createTopicOffsetResponse(StreamMarker streamMarker);
 }
 

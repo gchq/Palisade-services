@@ -26,9 +26,7 @@ class SimpleTopicOffsetServiceTest {
     void testTopicOffsetServiceWithAStart() throws Exception {
 
         SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        Optional<TopicOffsetResponse> topicOffsetOptional = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.START);
-        TopicOffsetResponse topicOffsetResponse =topicOffsetOptional.orElseThrow(() -> new RuntimeException("Should have produced a TopicOffsetResponse"));
-
+        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.START);
         assertThat(topicOffsetResponse.getCommitOffset()).isNotZero();
 
     }
@@ -41,8 +39,8 @@ class SimpleTopicOffsetServiceTest {
     void testTopicOffsetServiceWithAnEnd() throws Exception {
 
         SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        Optional<TopicOffsetResponse> topicOffsetOptional = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.END);
-        assertThat(topicOffsetOptional.isEmpty());
+        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.END);
+        assertThat(Optional.ofNullable(topicOffsetResponse));
 
     }
 
@@ -54,8 +52,8 @@ class SimpleTopicOffsetServiceTest {
     void testTopicOffsetServiceWithoutAnyStreamMarker() throws Exception {
 
         SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        Optional<TopicOffsetResponse> topicOffsetOptional = simpleTopicOffsetService.createTopicOffsetResponse(null);
-        assertThat(topicOffsetOptional.isEmpty());
+        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(null);
+        assertThat(Optional.ofNullable(topicOffsetResponse));
 
     }
 }

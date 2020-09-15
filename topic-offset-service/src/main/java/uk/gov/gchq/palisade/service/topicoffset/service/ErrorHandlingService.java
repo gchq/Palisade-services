@@ -38,6 +38,14 @@ public interface ErrorHandlingService {
      */
     void reportError(final String token, final TopicOffsetRequest request, final Throwable error);
 
+    /**
+     * Helper method for mapping requests to errors.
+     *
+     * @param request    original request input to the service
+     * @param error      error thrown by the service at runtime
+     * @param attributes map of additional attributes to add to the error message
+     * @return an error message containing the given details
+     */
     default AuditErrorMessage createErrorMessage(final TopicOffsetRequest request, final Throwable error, final Map<String, Object> attributes) {
         return AuditErrorMessage.Builder.create(request, attributes)
                 .withError(error);

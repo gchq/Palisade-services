@@ -35,13 +35,13 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      * request
      */
     @Override
-    public Optional<TopicOffsetResponse> createTopicOffsetResponse(final StreamMarker streamMarker) {
+    public TopicOffsetResponse createTopicOffsetResponse(final StreamMarker streamMarker) {
         TopicOffsetResponse response = null;
 
         //where do we get the offset?
         if ((streamMarker != null) && (streamMarker == StreamMarker.START)) {
             response = TopicOffsetResponse.Builder.create().withOffset(11111111L);
         }
-        return Optional.ofNullable(response);
+        return response;
     }
 }

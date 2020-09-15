@@ -84,7 +84,7 @@ public class TopicOffsetControllerRestfulTest {
         headers.add(Token.HEADER, "test-request-token");
         headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(Optional.of(startResponse));
+        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(startResponse);
 
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
@@ -103,7 +103,7 @@ public class TopicOffsetControllerRestfulTest {
 
     /**
      * This permutation is for a request that comes in for a start of messages indicator, StreamMarker is set to END.
-     * Test should accept an incoming request including TopicOffsetRequest, Token, and a StreamMarker as a Post at
+     * Test should accept an incoming request including TopicOffsetRequest, Token, and a StreamMarker as a Post to
      * the the URL "/stream-api/topicOffset" as a Json String. Response should be a null.
      *
      * @throws Exception if it fails to process the request
@@ -118,7 +118,7 @@ public class TopicOffsetControllerRestfulTest {
         headers.add(Token.HEADER, "test-request-token");
         headers.add(StreamMarker.HEADER, StreamMarker.END.toString());
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(Optional.empty());
+        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(null);
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +151,7 @@ public class TopicOffsetControllerRestfulTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, "test-request-token");
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(Optional.empty());
+        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(null);
 
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)

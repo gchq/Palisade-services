@@ -36,6 +36,7 @@ import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
 import java.util.Optional;
 
+
 /**
  * REST Controller for Topic Offset Service.
  * Handles incoming requests to process start of the stream messages, the first of the set of messages for a
@@ -48,13 +49,12 @@ public class TopicOffsetController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopicOffsetController.class);
 
     private final TopicOffsetService topicOffsetService;
-    private final ErrorHandlingService errorHandlingService;
+    private final ErrorHandlingService errorHandler;
 
 
-
-    public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandlingService) {
+    public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandler) {
         this.topicOffsetService = topicOffsetService;
-        this.errorHandlingService = errorHandlingService;
+        this.errorHandler = errorHandler;
     }
 
 
@@ -70,10 +70,9 @@ public class TopicOffsetController {
     public ResponseEntity<TopicOffsetResponse> serviceTopicOffset(
             final @RequestHeader(Token.HEADER) String token,
             final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
-            final @RequestBody Optional<TopicOffsetRequest> request) {
+            final @RequestBody(required = false) TopicOffsetRequest request) {
 
-        //*****************temp code
-        Optional<TopicOffsetResponse> responseBody = null;
+        TopicOffsetResponse responseBody = null;
         HttpHeaders responseHeaders = null;
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
 
@@ -81,10 +80,9 @@ public class TopicOffsetController {
         try {
             responseBody = topicOffsetService.createTopicOffsetResponse(streamMarker);
 
-        } catch (Throwable ex) {
-            //later
+        } catch (Exception ex) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            //errorHandlingService
+            errorHandler.reportError(token, request, ex);
         }
 
         responseHeaders = new HttpHeaders();
@@ -93,9 +91,7 @@ public class TopicOffsetController {
         }
         responseHeaders.add(Token.HEADER, token);
 
-        //fix later- ResponserEntity is not optional, responseBody is
-        return new ResponseEntity(responseBody, responseHeaders, httpStatus);
-        //*****************temp code
+        return new ResponseEntity<>(responseBody, responseHeaders, httpStatus);
 
     }
 
