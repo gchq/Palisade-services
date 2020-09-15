@@ -15,6 +15,24 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
+import uk.gov.gchq.palisade.service.topicoffset.request.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetResponse;
+
+import java.util.Optional;
+
+/**
+ * Service contract for the Topic Offset Service.
+ */
 public interface TopicOffsetService {
 
+    /**
+     * Creates a Topic Offset Response - a start message with an offset to indicate the location in a message queue.
+     * If the {@link StreamMarker} is found to be a start message, the response will be a {@link TopicOffsetResponse}
+     * with th offset information.  For messages that have an end marker or are messages with resource data,
+     * it will not create a response.
+     * @param {@link streamMarker}  indicator of the type of message marker.
+     * @return  message indicating the offset in the message queue.
+     */
+    Optional<TopicOffsetResponse> createTopicOffsetResponse(StreamMarker streamMarker);
 }
+

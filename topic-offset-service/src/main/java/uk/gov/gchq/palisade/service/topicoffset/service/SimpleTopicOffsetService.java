@@ -15,5 +15,33 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-public class SimpleTopicOffsetService implements TopicOffsetService{
+import uk.gov.gchq.palisade.service.topicoffset.request.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetResponse;
+
+import java.util.Optional;
+
+/**
+ * Simple Implementation of the Topic Offset Service contract.
+ */
+public class SimpleTopicOffsetService implements TopicOffsetService {
+
+    /**
+     * Creates a Topic Offset Response when there is a {@link StreamMarker} for a start of the messages related
+     * to a specific data request.
+     * At the moment it is hardcoded and needs to be updated.
+     *
+     * @param streamMarker {@link StreamMarker} indicator of the type of message marker.
+     * @return class {@link TopicOffsetResponse} a message indicating the start of the set of messages for a data
+     * request
+     */
+    @Override
+    public Optional<TopicOffsetResponse> createTopicOffsetResponse(final StreamMarker streamMarker) {
+        TopicOffsetResponse response = null;
+
+        //where do we get the offset?
+        if ((streamMarker != null) && (streamMarker == StreamMarker.START)) {
+            response = TopicOffsetResponse.Builder.create().withOffset(11111111L);
+        }
+        return Optional.ofNullable(response);
+    }
 }
