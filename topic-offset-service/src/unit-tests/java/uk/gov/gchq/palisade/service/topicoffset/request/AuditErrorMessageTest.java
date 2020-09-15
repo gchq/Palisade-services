@@ -83,7 +83,7 @@ class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(originalAuditErrorMessage.getContext().getPurpose()),
                         () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(originalAuditErrorMessage.getServiceName()),
                         () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(originalAuditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(originalAuditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getServerHostname()).isEqualTo(originalAuditErrorMessage.getServerHostname()),
                         () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(originalAuditErrorMessage.getTimestamp()),
                         () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(originalAuditErrorMessage.getError().getMessage())
                 ),
