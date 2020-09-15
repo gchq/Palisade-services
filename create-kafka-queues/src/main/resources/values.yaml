@@ -18,24 +18,24 @@ service:
   port: 80
 
 kafkaCreateTopics:
-  - name: palisade
-    replicationFactor: 1
-    partitions: 1
-  - name: user
-    replicationFactor: 1
-    partitions: 1
-  - name: resource
-    replicationFactor: 1
-    partitions: 1
-  - name: policy
-    replicationFactor: 1
-    partitions: 1
-  - name: query-scope
-    replicationFactor: 1
-    partitions: 1
-  - name: results-controller
-    replicationFactor: 1
-    partitions: 1
+  - name: requests
+    replicationFactor: 2
+    partitions: 2
+  - name: users
+    replicationFactor: 2
+    partitions: 2
+  - name: resources
+    replicationFactor: 2
+    partitions: 2
+  - name: rules
+    replicationFactor: 2
+    partitions: 2
+  - name: filtered-resources
+    replicationFactor: 2
+    partitions: 2
+  - name: topic-offset
+    replicationFactor: 2
+    partitions: 2
 
 image:
   name: @artifactId@

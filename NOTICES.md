@@ -39,6 +39,10 @@ List of third-party dependencies grouped by their license type
 * JUnit ([junit:junit:4.13](http://junit.org))
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
 
+### [Eclipse Public License v2.0](./licenses/not recognised):
+* JUnit Jupiter API ([org.junit.jupiter:junit-jupiter-api:5.6.2](https://junit.org/junit5/))
+* JUnit Jupiter Engine ([org.junit.jupiter:junit-jupiter-engine:5.6.2](https://junit.org/junit5/))
+
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
 
