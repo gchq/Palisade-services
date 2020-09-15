@@ -41,12 +41,19 @@ import uk.gov.gchq.palisade.service.filteredresource.service.TokenOffsetDaemon;
 public class FilteredResourceController {
     private final ErrorReporterDaemon errorReporterDaemon;
     private final TokenOffsetDaemon tokenOffsetDaemon;
-    private final FilteredResourceService service;
+    private final FilteredResourceService filteredResourceService;
 
-    public FilteredResourceController(final ErrorReporterDaemon errorReporterDaemon, final TokenOffsetDaemon tokenOffsetDaemon, final FilteredResourceService service) {
+    /**
+     * Default constructor will be autowired by spring
+     *
+     * @param errorReporterDaemon     the error-reporter-daemon to push REST requests to
+     * @param tokenOffsetDaemon       the topic-token-offset-daemon to push REST requests to
+     * @param filteredResourceService the filtered-resource-service to push REST requests to
+     */
+    public FilteredResourceController(final ErrorReporterDaemon errorReporterDaemon, final TokenOffsetDaemon tokenOffsetDaemon, final FilteredResourceService filteredResourceService) {
         this.errorReporterDaemon = errorReporterDaemon;
         this.tokenOffsetDaemon = tokenOffsetDaemon;
-        this.service = service;
+        this.filteredResourceService = filteredResourceService;
     }
 
     /**
@@ -95,7 +102,7 @@ public class FilteredResourceController {
             final @RequestHeader(Token.HEADER) String token,
             final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
             final @RequestBody(required = false) FilteredResourceRequest resourceRequest) {
-        service.spawnProcessorForToken(token);
+        filteredResourceService.spawnProcessorForToken(token);
 
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
