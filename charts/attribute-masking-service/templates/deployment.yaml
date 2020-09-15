@@ -40,12 +40,12 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
-            containerPort: 8088
+            containerPort: 8091
             protocol: TCP
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8088
+            port: 8091
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
@@ -53,7 +53,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health
-            port: 8088
+            port: 8091
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
