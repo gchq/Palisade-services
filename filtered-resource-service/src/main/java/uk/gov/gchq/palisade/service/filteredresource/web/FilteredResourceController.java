@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.message.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.message.Token;
-import uk.gov.gchq.palisade.service.filteredresource.message.TokenOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.message.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterDaemon;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
 import uk.gov.gchq.palisade.service.filteredresource.service.TokenOffsetDaemon;
@@ -54,10 +54,10 @@ public class FilteredResourceController {
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    @PostMapping("/tokenOffset")
-    public ResponseEntity<Void> storeTokenOffset(
+    @PostMapping("/topicOffset")
+    public ResponseEntity<Void> storeTopicOffset(
             final @RequestHeader(Token.HEADER) String token,
-            final @RequestBody TokenOffsetMessage offsetMessage) {
+            final @RequestBody TopicOffsetMessage offsetMessage) {
         tokenOffsetDaemon.storeTokenOffset(token, offsetMessage.queuePointer);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

@@ -32,6 +32,7 @@
 
     <properties>
         <testcontainers.version>1.14.3</testcontainers.version>
+        <embedded-redis.version>0.7.3</embedded-redis.version>
         <!-- Testing configuration -->
         <unit-test.skip>false</unit-test.skip>
         <component-test.skip>false</component-test.skip>
@@ -68,6 +69,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>${embedded-redis.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

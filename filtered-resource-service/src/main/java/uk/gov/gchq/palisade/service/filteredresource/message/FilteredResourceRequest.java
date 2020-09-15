@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * The FilteredResourceRequest is the input for results-service where the resource is queued-up ready for the client's request
  * to retrieve the Resource.
- * TokenOffsetMessage is the output for this service which will be send the client the information needed to
+ * TopicOffsetMessage is the output for this service which will be send the client the information needed to
  * retrieve this data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse is the output from the attribute-masking-service.

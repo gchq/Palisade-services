@@ -46,8 +46,7 @@ class MessageSerialisationTest {
                             ApplicationTestData.REQUEST,
                             Collections.emptyMap())
                             .withError(new Throwable("test exception"))),
-                    Arguments.of(TokenOffsetMessage.Builder.create()
-                            .withQueuePointer(ApplicationTestData.OFFSET))
+                    Arguments.of(ApplicationTestData.OFFSET_MESSAGE)
             );
         }
     }

@@ -40,12 +40,12 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
-            containerPort: 8089
+            containerPort: 8092
             protocol: TCP
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8089
+            port: 8092
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
@@ -53,7 +53,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health
-            port: 8089
+            port: 8092
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
@@ -71,11 +71,16 @@ spec:
         volumeMounts:
         - name: {{ include "filtered-resource-service.deployment.fullname" . }}
           mountPath: {{ include "filtered-resource-service.deployment.path" . }}
+        - name: config-volume
+          mountPath: {{ include "filtered-resource-service.config.path" . }}
       volumes:
       - name: {{ include "filtered-resource-service.deployment.fullname" . }}
         persistentVolumeClaim:
           claimName: {{ include "filtered-resource-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "filtered-resource-service.name" . }}-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

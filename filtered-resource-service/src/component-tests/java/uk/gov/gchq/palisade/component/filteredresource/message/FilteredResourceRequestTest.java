@@ -71,34 +71,37 @@ class FilteredResourceRequestTest {
                 .withContext(context)
                 .withResource(resource);
 
-        JsonContent<FilteredResourceRequest> attributeMaskingResponseJsonContent = jsonTester.write(attributeMaskingRequest);
-        ObjectContent<FilteredResourceRequest> attributeMaskingResponseObjectContent = jsonTester.parse(attributeMaskingResponseJsonContent.getJson());
-        FilteredResourceRequest attributeMaskingResponseMessageObject = attributeMaskingResponseObjectContent.getObject();
+        JsonContent<FilteredResourceRequest> filteredResourceRequestJsonContent = jsonTester.write(attributeMaskingRequest);
+        ObjectContent<FilteredResourceRequest> filteredResourceRequestObjectContent = jsonTester.parse(filteredResourceRequestJsonContent.getJson());
+        FilteredResourceRequest filteredResourceRequestMessageObject = filteredResourceRequestObjectContent.getObject();
 
         assertAll("FilteredResourceSerialisingDeseralisingAndComparison",
                 () -> assertAll("FilteredResourceSerialisingComparedToString",
-                        () -> assertThat(attributeMaskingResponseJsonContent)
+                        () -> assertThat(filteredResourceRequestJsonContent)
                                 .extractingJsonPathStringValue("$.userId")
                                 .isEqualTo("originalUserID"),
-                        () -> assertThat(attributeMaskingResponseJsonContent)
+
+                        () -> assertThat(filteredResourceRequestJsonContent)
                                 .extractingJsonPathStringValue("$.resourceId")
                                 .isEqualTo("originalResourceID"),
-                        () -> assertThat(attributeMaskingResponseJsonContent)
+
+                        () -> assertThat(filteredResourceRequestJsonContent)
                                 .extractingJsonPathStringValue("$.context.contents.purpose")
                                 .isEqualTo("testContext"),
-                        () -> assertThat(attributeMaskingResponseJsonContent)
+
+                        () -> assertThat(filteredResourceRequestJsonContent)
                                 .extractingJsonPathStringValue("$.resource.id")
                                 .isEqualTo("/test/file.format")
                 ),
                 () -> assertAll("FilteredResourceDeserialisingComparedToObject",
-                        () -> assertThat(attributeMaskingResponseMessageObject.getContext())
+                        () -> assertThat(filteredResourceRequestMessageObject.getContext())
                                 .isEqualTo(attributeMaskingRequest.getContext()),
-                        () -> assertThat(attributeMaskingResponseMessageObject.getResource())
+
+                        () -> assertThat(filteredResourceRequestMessageObject.getResource())
                                 .isEqualTo(attributeMaskingRequest.getResource())
                 ),
                 () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(attributeMaskingResponseMessageObject)
+                        () -> assertThat(filteredResourceRequestMessageObject)
                                 .isEqualTo(attributeMaskingRequest)
                 )
         );

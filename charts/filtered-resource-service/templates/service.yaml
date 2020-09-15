@@ -24,7 +24,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 8089
+      targetPort: 8092
       protocol: TCP
       name: web
   selector:

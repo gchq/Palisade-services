@@ -26,34 +26,34 @@ import java.util.StringJoiner;
 
 
 /**
- * TokenOffsetMessage represents the output for result-service which will be forwarded to the client provide the
+ * TopicOffsetMessage represents the output for result-service which will be forwarded to the client provide the
  * information needed to retrieve the data for this Resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class TokenOffsetMessage {
+public final class TopicOffsetMessage {
 
     /**
      * {@link String} reference to where the data is located
      */
     public final Long queuePointer; //pointer reference for the request given to the client
 
-    private TokenOffsetMessage(final @JsonProperty("queuePointer") Long queuePointer) {
+    private TopicOffsetMessage(final @JsonProperty("queuePointer") Long queuePointer) {
         this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new RuntimeException("Queue pointer cannot be null"));
     }
 
     /**
-     * Builder class for the creation of instances of the TokenOffsetMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the TopicOffsetMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * TokenOffsetMessage class.
+         * TopicOffsetMessage class.
          *
          * @return interface  {@link IQueuePointer} for the next step in the build.
          */
         public static IQueuePointer create() {
-            return TokenOffsetMessage::new;
+            return TopicOffsetMessage::new;
         }
 
         /**
@@ -65,9 +65,9 @@ public final class TokenOffsetMessage {
              * Adds the queue pointer to the message.
              *
              * @param queuePointer reference to the results for the request.
-             * @return class {@link TokenOffsetMessage} for the completed class from the builder.
+             * @return class {@link TopicOffsetMessage} for the completed class from the builder.
              */
-            TokenOffsetMessage withQueuePointer(Long queuePointer);
+            TopicOffsetMessage withQueuePointer(Long queuePointer);
         }
     }
 
@@ -77,10 +77,10 @@ public final class TokenOffsetMessage {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof TokenOffsetMessage)) {
+        if (!(o instanceof TopicOffsetMessage)) {
             return false;
         }
-        TokenOffsetMessage that = (TokenOffsetMessage) o;
+        TopicOffsetMessage that = (TopicOffsetMessage) o;
         return queuePointer.equals(that.queuePointer);
     }
 
@@ -93,7 +93,7 @@ public final class TokenOffsetMessage {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", TokenOffsetMessage.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", TopicOffsetMessage.class.getSimpleName() + "[", "]")
                 .add("queuePointer='" + queuePointer + "'")
                 .add(super.toString())
                 .toString();
