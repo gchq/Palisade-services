@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset.request;
+package uk.gov.gchq.palisade.service.topicoffset.message;
 
 /**
- * Marks the start or end of a stream of messages.
- * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
- * Will not be present for all other (content-ful) messages.
+ * Simply stores the expected header key for Tokens
+ * Since the content of tokens are strings, there is no need for further implementation
+ * If desired, this could extend eg. UUID if more meaningful Token processing was desired
  */
-public enum StreamMarker {
-    START,
-    END;
+public final class Token {
+    public static final String HEADER = "X-Request-Token";
 
-    public static final String HEADER = "X-Stream-Marker";
+    private Token() {
+        // Tokens are just strings, no need to actually have a class for them
+    }
 }
+
