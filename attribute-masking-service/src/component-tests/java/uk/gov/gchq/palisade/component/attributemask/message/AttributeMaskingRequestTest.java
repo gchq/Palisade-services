@@ -59,7 +59,7 @@ public class AttributeMaskingRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantQueryScopeRequestSerialisingAndDeserialising() throws IOException {
+    public void testGroupedDependantAttributeMaskingRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")

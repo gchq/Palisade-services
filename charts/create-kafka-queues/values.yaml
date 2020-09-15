@@ -30,7 +30,7 @@ kafkaCreateTopics:
   - name: policy
     replicationFactor: 1
     partitions: 1
-  - name: query-scope
+  - name: attribute-masking
     replicationFactor: 1
     partitions: 1
   - name: results-controller

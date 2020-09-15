@@ -36,10 +36,10 @@ import java.util.StringJoiner;
 
 /**
  * PolicyResponse represents the output for policy-service which will include the Rules to implement with this Resource.
- * This will be forwarded to the query-scope-service for preliminary processing and routing of the data.
+ * This will be forwarded to the attribute-masking-service for preliminary processing and routing of the data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
+ * uk.gov.gchq.palisade.service.queryscope.request.AttributeMaskingRequest is the input for the attribute-masking-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PolicyResponse {
