@@ -27,16 +27,20 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.service.topicoffset.request.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.request.Token;
-import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetRequest;
-import uk.gov.gchq.palisade.service.topicoffset.request.TopicOffsetResponse;
+import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.message.Token;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
+import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
 import java.util.Optional;
 
-
+/**
+ * REST Controller for Topic Offset Service.
+ * Handles incoming requests to process start of the stream messages, the first of the set of messages for a
+ * specific client's data query.
+ */
 @RestController
 @RequestMapping(path = "/stream-api")
 public class TopicOffsetController {
@@ -46,13 +50,24 @@ public class TopicOffsetController {
     private final TopicOffsetService topicOffsetService;
     private final ErrorHandlingService errorHandlingService;
 
+
+
     public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandlingService) {
         this.topicOffsetService = topicOffsetService;
         this.errorHandlingService = errorHandlingService;
     }
 
+
+    /**
+     * Takes the incoming RESTful request and evaluates if it is a start of the stream message.  If it is, a response
+     * is created that will be forwarded to indicate to allocate resources for the start of a new client request.
+     * @param token unique identifier for all of the messages related to a client's request
+     * @param streamMarker  indicator of this being either a start or end of stream
+     * @param request the body of the request with the information from the request plus the related processed data.
+     * @return message with the marker for the topic offset.
+     */
     @PostMapping(value = "/topicOffset", consumes = "application/json", produces = "application/json")
-    public Optional<ResponseEntity<TopicOffsetResponse>> serviceTopicOffset(
+    public ResponseEntity<TopicOffsetResponse> serviceTopicOffset(
             final @RequestHeader(Token.HEADER) String token,
             final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
             final @RequestBody Optional<TopicOffsetRequest> request) {
@@ -79,7 +94,7 @@ public class TopicOffsetController {
         responseHeaders.add(Token.HEADER, token);
 
         //fix later- ResponserEntity is not optional, responseBody is
-        return Optional.of(new ResponseEntity(responseBody, responseHeaders, httpStatus));
+        return new ResponseEntity(responseBody, responseHeaders, httpStatus);
         //*****************temp code
 
     }
