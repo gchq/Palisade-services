@@ -194,8 +194,8 @@ timestamps {
                                 READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                             } else {
                                  if (COMMON_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
-                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} -P quick deploy"
-                                    READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                     READERS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                     sh "mvn -s ${MAVEN_SETTINGS} -D revision=${READERS_REVISION} -D common.revision=${COMMON_REVISION} -P quick deploy"
                                  }
                             }
                         }
@@ -206,8 +206,8 @@ timestamps {
                                 CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                             } else {
                                  if (READERS_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
-                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
-                                    CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                     CLIENTS_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                     sh "mvn -s ${MAVEN_SETTINGS} -D revision=${CLIENTS_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -P quick deploy"
                                  }
                             }
                         }
@@ -218,8 +218,8 @@ timestamps {
                                 EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                             } else {
                                 if (CLIENTS_REVISION == "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT") {
-                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -D clients.revision=${CLIENTS_REVISION} -P quick deploy"
                                     EXAMPLES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                    sh "mvn -s ${MAVEN_SETTINGS} -D revision=${EXAMPLES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -D clients.revision=${CLIENTS_REVISION} -P quick deploy"
                                 }
                             }
                         }
