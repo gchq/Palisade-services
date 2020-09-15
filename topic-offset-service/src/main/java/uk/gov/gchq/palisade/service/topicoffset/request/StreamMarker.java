@@ -15,9 +15,14 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.request;
 
+/**
+ * Marks the start or end of a stream of messages.
+ * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
+ * Will not be present for all other (content-ful) messages.
+ */
 public enum StreamMarker {
-    START_OF_STREAM,
-    END_OF_STREAM;
+    START,
+    END;
 
     public static final String HEADER = "X-Stream-Marker";
 }

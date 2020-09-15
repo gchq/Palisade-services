@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset.service;
+package uk.gov.gchq.palisade.service.topicoffset.request;
 
-import uk.gov.gchq.palisade.service.topicoffset.request.AuditErrorMessage;
+/**
+ * Simply stores the expected header key for Tokens
+ * Since the content of tokens are strings, there is no need for further implementation
+ * If desired, this could extend eg. UUID if more meaningful Token processing was desired
+ */
+public final class Token {
+    public static final String HEADER = "X-Request-Token";
 
-public interface AuditService {
-
-    void auditError(final String token, final AuditErrorMessage message);
-
-
+    private Token() {
+        // Tokens are just strings, no need to actually have a class for them
+    }
 }
+
