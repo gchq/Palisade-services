@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dbtest")
-class RestContractTest {
+class StreamApiContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
