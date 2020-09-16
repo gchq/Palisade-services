@@ -89,8 +89,7 @@ public class AuditMessage {
 
         try {
             InetAddress inetAddress = InetAddress.getLocalHost();
-            this.
-                    serverHostname = inetAddress.getHostName();
+            this.serverHostname = inetAddress.getHostName();
             this.serverIP = inetAddress.getHostAddress();
         } catch (UnknownHostException e) {
             throw new PalisadeRuntimeException("Failed to get server host and IP address", e);

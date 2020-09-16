@@ -38,7 +38,7 @@ import java.util.StringJoiner;
  * retrieve this data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse is the output from the attribute-masking-service.
- * uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest is the input for the results-service.
+ * uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest is the input for the filtered-resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class FilteredResourceRequest {

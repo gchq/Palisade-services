@@ -15,11 +15,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "user-service.name" . }}-configmap
+  name: {{ include "filtered-resource-service.name" . }}-configmap
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    app.kubernetes.io/name: {{ include "user-service.name" . }}
-    helm.sh/chart: {{ include "user-service.chart" . }}
+    app.kubernetes.io/name: {{ include "filtered-resource-service.name" . }}
+    helm.sh/chart: {{ include "filtered-resource-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:

@@ -26,7 +26,7 @@ import java.util.StringJoiner;
 
 
 /**
- * TopicOffsetMessage represents the output for result-service which will be forwarded to the client provide the
+ * TopicOffsetMessage represents the output of the filtered-resource-service which will be forwarded to the client provide the
  * information needed to retrieve the data for this Resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
