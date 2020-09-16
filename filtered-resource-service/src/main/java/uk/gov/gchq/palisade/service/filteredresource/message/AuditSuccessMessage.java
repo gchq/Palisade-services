@@ -53,7 +53,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("leafResourceId") String leafResourceId) {
 
         super(userId, resourceId, context, attributes);
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Leaf Resource ID cannot be null"));
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("Leaf Resource ID cannot be null"));
     }
 
     @Generated

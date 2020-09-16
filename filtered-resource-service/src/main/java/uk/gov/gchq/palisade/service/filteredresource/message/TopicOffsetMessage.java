@@ -38,7 +38,7 @@ public final class TopicOffsetMessage {
     public final Long queuePointer; //pointer reference for the request given to the client
 
     private TopicOffsetMessage(final @JsonProperty("queuePointer") Long queuePointer) {
-        this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new RuntimeException("Queue pointer cannot be null"));
+        this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new IllegalArgumentException("Queue pointer cannot be null"));
     }
 
     /**

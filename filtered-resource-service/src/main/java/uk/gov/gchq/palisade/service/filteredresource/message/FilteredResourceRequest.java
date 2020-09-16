@@ -28,9 +28,8 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * The FilteredResourceRequest is the input for results-service where the resource is queued-up ready for the client's request
@@ -57,10 +56,11 @@ public final class FilteredResourceRequest {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("resource") JsonNode resource) {
-        this.userId = requireNonNull(userId);
-        this.resourceId = requireNonNull(resourceId);
-        this.context = requireNonNull(context);
-        this.resource = requireNonNull(resource);
+
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
     }
 
     @Generated
