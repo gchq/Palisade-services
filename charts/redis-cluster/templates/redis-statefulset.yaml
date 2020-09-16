@@ -331,6 +331,13 @@ spec:
         resources:
           requests:
             storage: {{ .Values.global.persistence.redisCluster.storage | quote }}
+        {{- $config := .Values.global.persistence.redisCluster }}
+        {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+        {{- if eq $provisioning "static" }}
+        selector:
+          matchLabels:
+            selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+        {{- end }}
   {{- end }}
   updateStrategy:
     type: {{ .Values.statefulset.updateStrategy }}

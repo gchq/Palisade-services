@@ -47,6 +47,16 @@ spec:
         requests:
           storage: {{ $.Values.global.persistence.redisMaster.storage }}
       storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.redisMaster.storageClassName | first | default .Values.global.persistence.redisMaster.storageClassName._default }}
+      {{- $config := .Values.global.persistence.redisMaster }}
+      {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+      selector:
+        {{- if eq $provisioning "static" }}
+        matchLabels:
+          selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+        {{- end }}
+        {{- if .Values.master.persistence.matchExpressions }}
+        matchExpressions: {{- toYaml .Values.master.persistence.matchExpressions | nindent 12 }}
+        {{- end }}
   {{- end }}
   serviceName: {{ template "redis.fullname" . }}-headless
   template:

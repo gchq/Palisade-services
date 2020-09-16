@@ -18,7 +18,7 @@ service:
   port: 80
 
 kafkaCreateTopics:
-  - name: palisade
+  - name: request
     replicationFactor: 1
     partitions: 1
   - name: user
@@ -27,19 +27,19 @@ kafkaCreateTopics:
   - name: resource
     replicationFactor: 1
     partitions: 1
-  - name: policy
+  - name: rule
     replicationFactor: 1
     partitions: 1
-  - name: query-scope
+  - name: masked-resource
     replicationFactor: 1
     partitions: 1
-  - name: results-controller
+  - name: masked-resource-offset
     replicationFactor: 1
     partitions: 1
 
 image:
   name: create-kafka-queues
-  tag: 8804a78-SNAPSHOT
+  tag: SNAPSHOT-b7f2e8a
   pullPolicy: IfNotPresent
 
 resources:
