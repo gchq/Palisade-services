@@ -15,7 +15,6 @@
 # Originally based on: https://github.com/bitnami/charts/tree/780db91641bf4e1f98c6e020e1fd971e4d2abc90/bitnami/redis
 
 {{ if .Values.cluster.enabled }}
-  {{- $auto := pluck $.Values.global.hosting .Values.global.persistence.redisSlave.auto | first | default .Values.global.persistence.redisSlave.auto._default }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -408,10 +407,10 @@ spec:
           emptyDir: {}
         - name: redis-tmp-conf
           emptyDir: {}
-    {{- if not .Values.slave.persistence.enabled }}
+  {{- if not .Values.slave.persistence.enabled }}
         - name: redis-data
           emptyDir: {}
-    {{- else }}
+  {{- else }}
   volumeClaimTemplates:
     - metadata:
         name: {{ .Values.global.persistence.redisSlave.name }}
@@ -427,15 +426,16 @@ spec:
         resources:
           requests:
             storage: {{ $.Values.global.persistence.redisSlave.storage }}
-        {{ include "redis.slave.storageClass" . }}
-        {{- if eq $auto false }}
+        {{- $config := .Values.global.persistence.redisSlave }}
+        {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
         selector:
+          {{- if eq $provisioning "static" }}
           matchLabels:
-            selectorFilter: {{ .Values.global.persistence.redisSlave.name }}-{{ include "palisade.namespace" . }}
-        {{- if .Values.slave.persistence.matchExpressions }}
+            selectorFilter: {{ $config.name }}-{{ include "palisade.namespace" . }}
+          {{- end }}
+          {{- if .Values.slave.persistence.matchExpressions }}
           matchExpressions: {{- toYaml .Values.slave.persistence.matchExpressions | nindent 12 }}
-        {{- end -}}
-        {{- end }}
+          {{- end -}}
   {{- end }}
   updateStrategy:
     type: {{ .Values.slave.statefulset.updateStrategy }}
