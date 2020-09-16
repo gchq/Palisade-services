@@ -14,11 +14,14 @@
 #
 FROM openjdk:8-alpine
 
-#RUN apk update
-#Search for a particular version of curl
+RUN apk update
+#Search for a particular version of dependancies
+#RUN apk search -v 'vim*'
 #RUN apk search -v 'curl*'
+#RUN apk search -v 'bash*'
+
 RUN apk --no-cache add vim=8.1.1365-r0
-RUN apk --no-cache add curl=7.64.0-r3
+RUN apk --no-cache add curl=7.64.0-r4
 RUN apk --no-cache add bash=4.4.19-r1
 
 RUN curl -LO  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz \
