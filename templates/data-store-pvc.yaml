@@ -28,7 +28,7 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
-{{- $auto := pluck $.Values.global.hosting $value.auto | first | default $value.auto._default }}
+{{- $provisioning := pluck $.Values.global.hosting $value.provisioning | first | default $value.provisioning._default }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -45,7 +45,7 @@ spec:
     requests:
       storage: {{ $value.storage }}
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
-  {{- if eq $auto false }}
+  {{- if eq $provisioning "static" }}
   selector:
     matchLabels:
       selectorFilter: {{ $name }}-{{ $namespace }}
