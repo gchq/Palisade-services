@@ -159,7 +159,7 @@ timestamps {
                 SERVICES_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
                 HELM_DEPLOY_NAMESPACE = GIT_BRANCH_NAME_LOWER
                 // update values for the variables if this is the develop branch build
-                if ("${env.BRANCH_NAME}" == "develop") {
+                if ("${env.BRANCH_NAME}" == "PAL-827-hotfix") {
                     SERVICES_REVISION = "SNAPSHOT"
                     HELM_DEPLOY_NAMESPACE = "dev"
                     FEATURE_BRANCH = "false"
