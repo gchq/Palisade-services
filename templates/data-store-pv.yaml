@@ -42,7 +42,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
     storage: 4Gi
