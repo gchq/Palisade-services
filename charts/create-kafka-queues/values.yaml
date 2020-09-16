@@ -18,28 +18,28 @@ service:
   port: 80
 
 kafkaCreateTopics:
-  - name: requests
+  - name: request
     replicationFactor: 1
     partitions: 1
-  - name: users
+  - name: user
     replicationFactor: 1
     partitions: 1
-  - name: resources
+  - name: resource
     replicationFactor: 1
     partitions: 1
-  - name: rules
+  - name: rule
     replicationFactor: 1
     partitions: 1
-  - name: filtered-resources
+  - name: filtered-resource
     replicationFactor: 1
     partitions: 1
-  - name: offsets
+  - name: offset
     replicationFactor: 1
     partitions: 1
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-b4ad8e8
+  tag: SNAPSHOT-fc34d9c
   pullPolicy: IfNotPresent
 
 resources:
