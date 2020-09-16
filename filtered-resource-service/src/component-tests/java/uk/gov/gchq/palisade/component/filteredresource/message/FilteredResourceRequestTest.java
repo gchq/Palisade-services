@@ -93,14 +93,11 @@ class FilteredResourceRequestTest {
                                 .extractingJsonPathStringValue("$.resource.id")
                                 .isEqualTo("/test/file.format")
                 ),
-                () -> assertAll("FilteredResourceDeserialisingComparedToObject",
-                        () -> assertThat(filteredResourceRequestMessageObject.getContext())
-                                .isEqualTo(attributeMaskingRequest.getContext()),
-
-                        () -> assertThat(filteredResourceRequestMessageObject.getResource())
-                                .isEqualTo(attributeMaskingRequest.getResource())
-                ),
                 () -> assertAll("ObjectComparison",
+                        () -> assertThat(filteredResourceRequestMessageObject)
+                                .usingRecursiveComparison()
+                                .isEqualTo(attributeMaskingRequest),
+
                         () -> assertThat(filteredResourceRequestMessageObject)
                                 .isEqualTo(attributeMaskingRequest)
                 )

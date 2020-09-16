@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.component.filteredresource.message;
 
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -70,6 +71,9 @@ class AuditErrorMessageTest {
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
+        RecursiveComparisonConfiguration ignoreThrowableComparisonConfiguration = new RecursiveComparisonConfiguration();
+        ignoreThrowableComparisonConfiguration.ignoreFieldsOfTypes(Throwable.class);
+
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
                         () -> assertThat(auditErrorMessageJsonContent)
@@ -92,32 +96,11 @@ class AuditErrorMessageTest {
                                 .extractingJsonPathStringValue("$.error.message")
                                 .isEqualTo("Something went wrong!")
                 ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditErrorMessageObject.getUserId())
-                                .isEqualTo(auditErrorMessage.getUserId()),
-
-                        () -> assertThat(auditErrorMessageObject.getResourceId())
-                                .isEqualTo(auditErrorMessage.getResourceId()),
-
-                        () -> assertThat(auditErrorMessageObject.getContext().getPurpose())
-                                .isEqualTo(auditErrorMessage.getContext().getPurpose()),
-
-                        () -> assertThat(auditErrorMessageObject.getServiceName())
-                                .isEqualTo(auditErrorMessage.getServiceName()),
-
-                        () -> assertThat(auditErrorMessageObject.getServerIP())
-                                .isEqualTo(auditErrorMessage.getServerIP()),
-
-                        () -> assertThat(auditErrorMessageObject.getServerHostname())
-                                .isEqualTo(auditErrorMessage.getServerHostname()),
-
-                        () -> assertThat(auditErrorMessageObject.getTimestamp())
-                                .isEqualTo(auditErrorMessage.getTimestamp()),
-
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage())
-                                .isEqualTo(auditErrorMessage.getError().getMessage())
-                ),
                 () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditErrorMessageObject)
+                                .usingRecursiveComparison(ignoreThrowableComparisonConfiguration)
+                                .isEqualTo(auditErrorMessage),
+
                         () -> assertThat(auditErrorMessageObject)
                                 .isEqualTo(auditErrorMessage)
                 )

@@ -66,11 +66,11 @@ class TopicOffsetMessageTest {
                                 .extractingJsonPathNumberValue("$.queuePointer")
                                 .isEqualTo(42)
                 ),
-                () -> assertAll("TopicOffsetDeserialisingComparedToObject",
-                        () -> assertThat(topicOffsetMessageObject.queuePointer)
-                                .isEqualTo(topicOffsetMessage.queuePointer)
-                ),
                 () -> assertAll("ObjectComparison",
+                        () -> assertThat(topicOffsetMessageObject)
+                                .usingRecursiveComparison()
+                                .isEqualTo(topicOffsetMessage),
+
                         () -> assertThat(topicOffsetMessageObject)
                                 .isEqualTo(topicOffsetMessage)
                 )

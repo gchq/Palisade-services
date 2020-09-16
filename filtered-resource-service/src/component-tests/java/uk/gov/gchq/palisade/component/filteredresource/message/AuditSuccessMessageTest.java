@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.component.filteredresource.message;
 
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -71,9 +72,15 @@ class AuditSuccessMessageTest {
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jsonTester.parse(auditSuccessMessageJsonContent.getJson());
         AuditSuccessMessage auditSuccessMessageObject = auditSuccessMessageObjectContent.getObject();
 
+        RecursiveComparisonConfiguration ignoreThrowableComparisonConfiguration = new RecursiveComparisonConfiguration();
+        ignoreThrowableComparisonConfiguration.ignoreFieldsOfTypes(Throwable.class);
+
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditSuccessMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
+                        () -> assertThat(auditSuccessMessageJsonContent)
+                                .extractingJsonPathStringValue("$.userId")
+                                .isEqualTo("originalUserID"),
+
                         () -> assertThat(auditSuccessMessageJsonContent)
                                 .extractingJsonPathStringValue("$.resourceId")
                                 .isEqualTo("testResourceId"),
@@ -94,32 +101,11 @@ class AuditSuccessMessageTest {
                                 .extractingJsonPathStringValue("$.leafResourceId")
                                 .isEqualTo("testResourceId/leaf")
                 ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditSuccessMessageObject.getUserId())
-                                .isEqualTo(auditSuccessMessage.getUserId()),
-
-                        () -> assertThat(auditSuccessMessageObject.getResourceId())
-                                .isEqualTo(auditSuccessMessage.getResourceId()),
-
-                        () -> assertThat(auditSuccessMessageObject.getContext().getPurpose())
-                                .isEqualTo(auditSuccessMessage.getContext().getPurpose()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServiceName())
-                                .isEqualTo(auditSuccessMessage.getServiceName()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServerIP())
-                                .isEqualTo(auditSuccessMessage.getServerIP()),
-
-                        () -> assertThat(auditSuccessMessageObject.getServerHostname())
-                                .isEqualTo(auditSuccessMessage.getServerHostname()),
-
-                        () -> assertThat(auditSuccessMessageObject.getTimestamp())
-                                .isEqualTo(auditSuccessMessage.getTimestamp()),
-
-                        () -> assertThat(auditSuccessMessageObject.getLeafResourceId())
-                                .isEqualTo(auditSuccessMessage.getLeafResourceId())
-                ),
                 () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditSuccessMessageObject)
+                                .usingRecursiveComparison(ignoreThrowableComparisonConfiguration)
+                                .isEqualTo(auditSuccessMessage),
+
                         () -> assertThat(auditSuccessMessageObject)
                                 .isEqualTo(auditSuccessMessage)
                 )
