@@ -15,9 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.web;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,20 +31,23 @@ import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
+import java.util.Map;
+
 
 /**
  * REST Controller for Topic Offset Service.
- * Handles incoming requests to process start of the stream messages, the first of the set of messages for a
- * specific client's data query.
+ * Handles incoming requests to process message that are the start of a set of response messages for a specific request.
+ * The commit offset associated with this start message will be used in an optimisation process later when it is needed
+ * to start retreiving the data for the client.
  */
 @RestController
 @RequestMapping(path = "/stream-api")
 public class TopicOffsetController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TopicOffsetController.class);
-
     private final TopicOffsetService topicOffsetService;
     private final ErrorHandlingService errorHandler;
+
+    private static final long TEMP = 123L;
 
 
     public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandler) {
@@ -57,38 +57,36 @@ public class TopicOffsetController {
 
 
     /**
-     * Takes the incoming RESTful request and evaluates if it is a start of the stream message.  If it is, a response
-     * is created that will be forwarded to indicate to allocate resources for the start of a new client request.
-     * @param token unique identifier for all of the messages related to a client's request
-     * @param streamMarker  indicator of this being either a start or end of stream
-     * @param request the body of the request with the information from the request plus the related processed data.
-     * @return message with the marker for the topic offset.
+     * Takes the incoming RESTful request and evaluates if it is a start of a set of response messages for a specific
+     * request.  If it is, a response message is forwarded that will contain the commit offset associated with this start
+     * message.
+     *
+     * @param headers headers for the incoming request
+     * @param request body {@link TopicOffsetRequest} of the request message
+     * @return resonse {@link TopicOffsetResponse} with the commit offset for this client request
      */
     @PostMapping(value = "/topicOffset", consumes = "application/json", produces = "application/json")
     public ResponseEntity<TopicOffsetResponse> serviceTopicOffset(
-            final @RequestHeader(Token.HEADER) String token,
-            final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
+            final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) TopicOffsetRequest request) {
 
         TopicOffsetResponse responseBody = null;
         HttpHeaders responseHeaders = null;
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
 
-
         try {
-            responseBody = topicOffsetService.createTopicOffsetResponse(streamMarker);
+            if (topicOffsetService.isOffsetForTopic(headers)) {
+                responseHeaders = new HttpHeaders();
+                responseHeaders.add(StreamMarker.HEADER, StreamMarker.START.toString());
+                responseHeaders.add(Token.HEADER, headers.get(Token.HEADER));
+                responseBody = TopicOffsetResponse.Builder.create().withOffset(TEMP);
+            }
 
         } catch (Exception ex) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            errorHandler.reportError(token, request, ex);
-        }
+            errorHandler.reportError(headers.get(Token.HEADER), request, ex);
 
-        responseHeaders = new HttpHeaders();
-        if (streamMarker != null) {
-            responseHeaders.add(StreamMarker.HEADER, streamMarker.toString());
         }
-        responseHeaders.add(Token.HEADER, token);
-
         return new ResponseEntity<>(responseBody, responseHeaders, httpStatus);
 
     }
