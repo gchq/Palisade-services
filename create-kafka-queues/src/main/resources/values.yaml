@@ -33,7 +33,7 @@ kafkaCreateTopics:
   - name: filtered-resources
     replicationFactor: 1
     partitions: 1
-  - name: topic-offset
+  - name: offsets
     replicationFactor: 1
     partitions: 1
 

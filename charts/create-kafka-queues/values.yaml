@@ -33,13 +33,13 @@ kafkaCreateTopics:
   - name: filtered-resources
     replicationFactor: 1
     partitions: 1
-  - name: topic-offset
+  - name: offsets
     replicationFactor: 1
     partitions: 1
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-026cffd
+  tag: SNAPSHOT-b4ad8e8
   pullPolicy: IfNotPresent
 
 resources:
