@@ -19,13 +19,22 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-
+/**
+ * Topic Offset Service is a performance optimisation for the stream message process.  The service will look for the
+ * indication that this message is the first of a set of response messages for a specific request. It will
+ * be watching for a Kafka header with the message {Stream-Marker=Start, RequestId=xxxx-xxxx-xxxx}. It will take this
+ * information along with the commit offset of this stream and this will be written to the downstream queue.  This can
+ * then be used to optimise the start up client connections by the results-service.
+ */
 @SpringBootApplication
 @ComponentScan
 public class TopicOffsetApplication {
 
-
+    /**
+     * Starts the Topic Offset Service
+     * @param args required input for the main method
+     */
     public static void main(final String[] args) {
-        SpringApplication.run(TopicOffsetApplication.class, null);
+        SpringApplication.run(TopicOffsetApplication.class, args);
     }
 }
