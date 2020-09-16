@@ -43,9 +43,8 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("error") Throwable error) {
-
         super(userId, resourceId, context, attributes);
-        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("error cannot be null"));
 
     }
 

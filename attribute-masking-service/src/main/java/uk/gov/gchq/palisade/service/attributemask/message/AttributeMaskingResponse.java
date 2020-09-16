@@ -27,6 +27,7 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -60,11 +61,10 @@ public final class AttributeMaskingResponse {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("resource") JsonNode resource) {
-
-        this.userId = requireNonNull(userId);
-        this.resourceId = requireNonNull(resourceId);
-        this.context = requireNonNull(context);
-        this.resource = requireNonNull(resource);
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("userId cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("resourceId cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("context cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("resource cannot be null"));
     }
 
     @Generated

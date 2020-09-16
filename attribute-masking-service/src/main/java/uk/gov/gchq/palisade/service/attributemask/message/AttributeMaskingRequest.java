@@ -32,6 +32,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -58,19 +59,18 @@ public final class AttributeMaskingRequest {
 
     @JsonCreator
     private AttributeMaskingRequest(
-            final @NonNull @JsonProperty("userId") String userId,
-            final @NonNull @JsonProperty("resourceId") String resourceId,
-            final @NonNull @JsonProperty("context") JsonNode context,
-            final @NonNull @JsonProperty("user") JsonNode user,
-            final @NonNull @JsonProperty("resource") JsonNode resource,
-            final @NonNull @JsonProperty("rules") JsonNode rules) {
-
-        this.userId = requireNonNull(userId);
-        this.resourceId = requireNonNull(resourceId);
-        this.context = requireNonNull(context);
-        this.user = requireNonNull(user);
-        this.resource = requireNonNull(resource);
-        this.rules = requireNonNull(rules);
+            final @JsonProperty("userId") String userId,
+            final @JsonProperty("resourceId") String resourceId,
+            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("user") JsonNode user,
+            final @JsonProperty("resource") JsonNode resource,
+            final @JsonProperty("rules") JsonNode rules) {
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("userId cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("resourceId cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("context cannot be null"));
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("user cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("resource cannot be null"));
+        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new IllegalArgumentException("rules cannot be null"));
     }
 
     @Generated
