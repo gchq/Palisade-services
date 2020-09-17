@@ -36,8 +36,8 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
     @Override
     public boolean isOffsetForTopic(final Map<String, String> headers) {
         boolean found = false;
-        if(headers.containsKey(StreamMarker.HEADER) && (headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString()))){
-            found =true;
+        if (headers.containsKey(StreamMarker.HEADER) && (headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString()))) {
+            found = true;
         }
       return found;
     }
