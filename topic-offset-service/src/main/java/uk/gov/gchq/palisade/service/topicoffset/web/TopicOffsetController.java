@@ -38,7 +38,7 @@ import java.util.Map;
  * REST Controller for Topic Offset Service.
  * Handles incoming requests to process message that are the start of a set of response messages for a specific request.
  * The commit offset associated with this start message will be used in an optimisation process later when it is needed
- * to start retreiving the data for the client.
+ * to start retrieving the data for the client.
  */
 @RestController
 @RequestMapping(path = "/stream-api")
@@ -47,7 +47,7 @@ public class TopicOffsetController {
     private final TopicOffsetService topicOffsetService;
     private final ErrorHandlingService errorHandler;
 
-    private static final long TEMP = 123L;
+    private static final long TEMP = 123L;  //temp value until I get the offset code in place
 
 
     public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandler) {
@@ -88,8 +88,6 @@ public class TopicOffsetController {
 
         }
         return new ResponseEntity<>(responseBody, responseHeaders, httpStatus);
-
     }
-
 
 }
