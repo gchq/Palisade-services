@@ -18,7 +18,7 @@ service:
   port: 80
 
 kafkaCreateTopics:
-  - name: palisade
+  - name: request
     replicationFactor: 1
     partitions: 1
   - name: user
@@ -27,19 +27,19 @@ kafkaCreateTopics:
   - name: resource
     replicationFactor: 1
     partitions: 1
-  - name: policy
+  - name: rule
     replicationFactor: 1
     partitions: 1
-  - name: attribute-masking
+  - name: masked-resource
     replicationFactor: 1
     partitions: 1
-  - name: results-controller
+  - name: masked-resource-offset
     replicationFactor: 1
     partitions: 1
 
 image:
   name: @artifactId@
-  tag: @git.commit.id.abbrev@-@revision@
+  tag: @revision@-@git.commit.id.abbrev@
   pullPolicy: IfNotPresent
 
 resources:
