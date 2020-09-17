@@ -1,59 +1,69 @@
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
+import uk.gov.gchq.palisade.service.topicoffset.message.Token;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Set of tests that cover three possible uses of the SimpleTopicOffsetService method createTopicOffsetResponse.
  * Consists of:
- * 1) Indicator which is for the start of a set of messages for a specific request.
+ * 1) Indicator which is for the start of a set of messages for a specific request
  * 2) Indicator which is for the end of a set of messages for a specific request
- * 3) No Indicator which is for the messages in-between (and have the data)
+ * 3) No Indicator which is for the messages with data
  */
 class SimpleTopicOffsetServiceTest {
 
+    private SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
+
+    public static final String REQUEST_TOKEN = "test-request-token";
+
+    private Map<String, String> headers;
+
+    @BeforeEach
+    void startUP() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Token.HEADER, REQUEST_TOKEN);
+    }
+
     /**
-     * Tests the createTopicOffsetResponse method with the start message.  Only one that should produce a
-     * TopicOffsetResponse as a response.
+     * Tests the simpleTopicOffsetService method isOffsetForTopic will return true when the {@link StreamMarker} is
+     * set to the start value
+     *
      * @throws Exception fails to produce the expected results.
      */
     @Test
     void testTopicOffsetServiceWithAStart() throws Exception {
 
-        SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.START);
-        assertThat(topicOffsetResponse.getCommitOffset()).isNotZero();
+        headers.put(StreamMarker.HEADER, StreamMarker.START.toString());
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isTrue();
 
     }
 
     /**
-     * Tests the createTopicOffsetResponse method with the end message.  Should not produce a TopicOffsetResponse.
+     * Tests the simpleTopicOffsetService method isOffsetForTopic will return false when the {@link StreamMarker} is
+     * set to the end value
      * @throws Exception fails to produce the expected results.
      */
     @Test
     void testTopicOffsetServiceWithAnEnd() throws Exception {
 
-        SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(StreamMarker.END);
-        assertThat(Optional.ofNullable(topicOffsetResponse));
-
+        headers.put(StreamMarker.HEADER, StreamMarker.END.toString());
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
     }
 
     /**
-     * Tests the createTopicOffsetResponse method without any kind of marker.  Should not produce a TopicOffsetResponse.
+     * Tests the simpleTopicOffsetService method isOffsetForTopic will return false when there is no stream marker
      * @throws Exception fails to produce the expected results.
      */
     @Test
     void testTopicOffsetServiceWithoutAnyStreamMarker() throws Exception {
 
-        SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
-        TopicOffsetResponse topicOffsetResponse = simpleTopicOffsetService.createTopicOffsetResponse(null);
-        assertThat(Optional.ofNullable(topicOffsetResponse));
-
+        assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
     }
 }
