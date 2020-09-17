@@ -27,7 +27,7 @@ class SimpleTopicOffsetServiceTest {
 
     @BeforeEach
     void startUP() {
-        Map<String, String> headers = new HashMap<>();
+        headers = new HashMap<>();
         headers.put(Token.HEADER, REQUEST_TOKEN);
     }
 
