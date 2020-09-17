@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.topicoffset.web;
+package uk.gov.gchq.palisade.service.topicoffset.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -26,6 +26,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.message.Token;
 import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
@@ -39,9 +44,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -50,7 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * and optionally a StreamMarker is sent.  The response will either be a {@link TopicOffsetResponse} or null
  */
 @WebMvcTest(TopicOffsetController.class)
-public class TopicOffsetControllerRestfulTest {
+ class TopicOffsetControllerRestfulTest {
 
     @Autowired
     private ObjectMapper mapper;
@@ -64,7 +72,7 @@ public class TopicOffsetControllerRestfulTest {
     @MockBean
     private ErrorHandlingService errorHandlingService;
 
-    public static final TopicOffsetResponse startResponse = TopicOffsetResponse.Builder.create().withOffset(1111L);
+    public static final TopicOffsetResponse startResponse = TopicOffsetResponse.Builder.create().withOffset(123L);
 
     public static final String SERVICE_ENDPOINT_URL = "/stream-api/topicOffset";
 
@@ -85,25 +93,26 @@ public class TopicOffsetControllerRestfulTest {
         headers.add(Token.HEADER, "test-request-token");
         headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(startResponse);
+        Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(true);
 
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(headers))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isAccepted())  //a H2XX status
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andReturn();
 
-        TopicOffsetResponse response = mapper.readValue(result.getResponse().getContentAsString(), TopicOffsetResponse.class);
+        TopicOffsetResponse response = mapper.readValue(result.getResponse().getContentAsString(),
+                TopicOffsetResponse.class);
         assertThat(response.getCommitOffset()).isEqualTo(startResponse.getCommitOffset());
     }
 
 
     /**
-     * This permutation is for a request that comes in for a start of messages indicator, StreamMarker is set to END.
+     * This permutation is for a request that comes in for an end of messages indicator, StreamMarker is set to END.
      * Test should accept an incoming request including TopicOffsetRequest, Token, and a StreamMarker as a Post to
      * the the URL "/stream-api/topicOffset" as a Json String. Response should be a null.
      *
@@ -119,27 +128,26 @@ public class TopicOffsetControllerRestfulTest {
         headers.add(Token.HEADER, "test-request-token");
         headers.add(StreamMarker.HEADER, StreamMarker.END.toString());
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(null);
+        Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(headers))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath( "$.keyToNull").doesNotExist()) //no message
                 .andReturn();
 
-        TopicOffsetResponse response = mapper.readValue(result.getResponse().getContentAsString(), TopicOffsetResponse.class);
-
-        assertThat(response).isNull();
     }
+
 
     /**
      * This permutation is for a request that comes in for a standard message, containing the data related to the
      * client's request and no StreamMarker in the headers.
-     * Test should accept an incoming request including TopicOffsetRequest, Token, and no StreamMarker as a Post at
-     * the the URL "/stream-api/topicOffset" as a Json String. Response should be a null.
+     * Test should accept an incoming request including (optionally) TopicOffsetRequest, Token, and no StreamMarker
+     * as a Post at the the URL "/stream-api/topicOffset" as a Json String. Response should be a null with HTTP code for
+     * message accepted.
      *
      * @throws Exception if it fails to process the request
      */
@@ -152,19 +160,70 @@ public class TopicOffsetControllerRestfulTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, "test-request-token");
 
-        Mockito.when(topicOffsetService.createTopicOffsetResponse(any())).thenReturn(null);
+        Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
 
 
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(headers))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isAccepted())  // a HTTP 200
                 .andDo(print())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath( "$.keyToNull").doesNotExist())  //no message
                 .andReturn();
 
-        TopicOffsetResponse response = mapper.readValue(result.getResponse().getContentAsString(), TopicOffsetResponse.class);
-        assertThat(response).isNull();
+    }
+
+    /**
+     * This permutation is for a request that throws an error during the processing of the request.
+     * Test should accept an incoming request including (optionally) TopicOffsetRequest, Token, and no StreamMarker as a
+     * POST message to the the URL "/stream-api/topicOffset" as a Json String. Response should be a null with HTTP code for
+     * server error and the ErrorHandlingService's reportError method should be called.
+     *
+     * @throws Exception if it fails to process the request
+     */
+    @Test
+    void testControllerErrorHandling() throws Exception {
+
+        TopicOffsetController topicOffsetController = new TopicOffsetController(topicOffsetService, errorHandlingService);
+
+       String RESOURCE_ID = "/test/resourceId";
+       String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
+       String RESOURCE_FORMAT = "avro";
+       String DATA_SERVICE_NAME = "test-data-service";
+       String RESOURCE_PARENT = "/test";
+
+        LeafResource leafResource = new FileResource()
+                .id(RESOURCE_ID)
+                .type(RESOURCE_TYPE)
+                .serialisedFormat(RESOURCE_FORMAT)
+                .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
+                .parent(new SystemResource().id(RESOURCE_PARENT));
+
+        TopicOffsetRequest requestBody = TopicOffsetRequest.
+                Builder.create().
+                withUserId("testUserId")
+                .withResourceId(RESOURCE_ID)
+                .withContext(new Context().purpose("testPurpose"))
+                .withResource(leafResource);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(Token.HEADER, "test-request-token");
+
+        RuntimeException somethingWentWrong =  new RuntimeException("Something went wrong");
+        Mockito.when(topicOffsetService.isOffsetForTopic(any()))
+                .thenThrow(somethingWentWrong);
+
+
+        MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8.name())
+                .headers(headers)
+                .content(mapper.writeValueAsString(requestBody)))
+                .andExpect(status().is5xxServerError()) //a 500 server error
+                .andDo(print())
+                .andExpect(jsonPath( "$.keyToNull").doesNotExist()) //no message
+                .andReturn();
+
+        verify(errorHandlingService, times(1)).reportError(any(),any(), any());
     }
 }
