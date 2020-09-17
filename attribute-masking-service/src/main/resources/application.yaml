@@ -36,3 +36,7 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+logging:
+  level:
+    org.apache.kafka: INFO

@@ -1,0 +1,172 @@
+package uk.gov.gchq.palisade.service.attributemask.stream;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigValueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.lang.NonNull;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements EnvironmentAware, InitializingBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesConfigurer.class);
+    private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
+    private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
+
+    private String[] locations;
+    private final ResourceLoader rl;
+    private Environment environment;
+
+    public PropertiesConfigurer(final ResourceLoader rl, final Environment environment) {
+        this.rl = rl;
+        this.environment = environment;
+    }
+
+    @Override
+    public void setEnvironment(final @NonNull Environment environment) {
+        this.environment = environment;
+        super.setEnvironment(environment);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
+        envPropSources.forEach(propertySource -> {
+            if (propertySource.containsProperty("application.properties.locations")) {
+                locations = ((String) propertySource.getProperty("application.properties.locations"))
+                        .split(",");
+                Arrays.stream(locations)
+                        .forEach(filename -> loadProperties(filename)
+                                .forEach(envPropSources::addFirst));
+            }
+        });
+    }
+
+    private List<PropertySource<?>> loadProperties(final String filename) {
+        YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
+        try {
+            final Resource[] possiblePropertiesResources = ResourcePatternUtils.getResourcePatternResolver(rl).getResources(filename);
+            return Arrays.stream(possiblePropertiesResources)
+                    .filter(Resource::exists)
+                    .map(resource1 -> {
+                        try {
+                            LOGGER.info("Loading config file: {}", resource1.getFilename());
+                            return loader.load(resource1.getFilename(), resource1);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Map<String, String> getAllActiveProperties() {
+        return StreamSupport.stream(((AbstractEnvironment) environment).getPropertySources().spliterator(), false)
+                .filter(ps -> ps instanceof EnumerablePropertySource).map(ps -> (EnumerablePropertySource<?>) ps)
+                .map(EnumerablePropertySource::getPropertyNames)
+                .flatMap(Arrays::stream)
+                .distinct()
+                .filter(t -> !t.startsWith("="))
+                .filter(jv -> !jv.startsWith("java."))
+                .collect(Collectors.toMap(Function.identity(), environment::getProperty));
+    }
+
+    public Config toHoconConfig(final Map<String, String> props) {
+        final Map<String, String> std = props.entrySet().stream()
+                .filter(entry -> !entry.getKey().matches(INDEXED_PROPERTY_PATTERN.pattern()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        final Map<String, String> array = props.entrySet().stream()
+                .filter(entry -> entry.getKey().matches(INDEXED_PROPERTY_PATTERN.pattern()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Config config = ConfigFactory.parseMap(std);
+
+        List<String> keys = array.keySet().stream()
+                .map(this::reductionKey)
+                .distinct()
+                .collect(Collectors.toList());
+        for (String key : keys) {
+            Map<String, String> values = array.entrySet().stream()
+                    .filter(entry -> entry.getKey().startsWith(key))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            config = toConfig(config, key, values);
+        }
+        return config;
+    }
+
+    private Config toConfig(final Config orig, final String key, final Map<String, String> config) {
+        // Map or list?
+        Matcher mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
+        if (mat.find()) {
+            Map<String, String> node = new HashMap<>();
+            config.forEach((mapKey, value) -> {
+                Matcher fieldNameKeyMatcher = FIELD_NAME_PATTERN.matcher(mapKey);
+                if (fieldNameKeyMatcher.matches()) {
+                    node.put(fieldNameKeyMatcher.group(1), value);
+                }
+            });
+            ConfigObject configItem = ConfigValueFactory.fromMap(node);
+            ArrayList<ConfigObject> list = new ArrayList<>();
+            list.add(configItem);
+            return orig.withValue(key, ConfigValueFactory.fromIterable(list));
+        } else {
+            List<String> node = new ArrayList<>(config.values());
+            ConfigList configList = ConfigValueFactory.fromIterable(node);
+            return orig.withValue(key, configList);
+        }
+    }
+
+    private String reductionKey(final String key) {
+        Matcher mat = INDEXED_PROPERTY_PATTERN.matcher(key);
+        if (mat.matches() && mat.groupCount() > 2) {
+            String root = mat.group(1);
+            String index = mat.group(2);
+            mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(3));
+            while (mat.matches()) {
+                String prevIndex = mat.group(2);
+                root = String.format("%s[%s].%s", root, index, mat.group(1));
+                mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(3));
+                if (mat.matches()) {
+                    if (mat.group(1).isEmpty())
+                        return root;
+                    else {
+                        root = String.format("%s[%s].%s", root, prevIndex, mat.group(1));
+                        mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(1));
+                    }
+                }
+            }
+            return root;
+        } else {
+            return "";
+        }
+    }
+
+}

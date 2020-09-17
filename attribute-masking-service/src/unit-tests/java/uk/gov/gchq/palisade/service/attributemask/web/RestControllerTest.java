@@ -22,25 +22,23 @@ import org.mockito.Mockito;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
-import uk.gov.gchq.palisade.service.attributemask.service.ErrorHandlingService;
 
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
 
-class AttributeMaskingControllerTest {
+class RestControllerTest {
 
     AttributeMaskingService mockAttributeMaskingService = Mockito.mock(AttributeMaskingService.class);
-    ErrorHandlingService mockErrorHandler = Mockito.mock(ErrorHandlingService.class);
 
     @Test
     void testControllerDelegatesToService() throws IOException {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
+        RestController restController = new RestController(mockAttributeMaskingService);
         Mockito.when(mockAttributeMaskingService.maskResourceAttributes(any())).thenReturn(ApplicationTestData.LEAF_RESOURCE);
 
         // when the controller is called with a request
-        attributeMaskingController.serviceMaskAttributes(
+        restController.processRequestOrStreamMarker(
                 ApplicationTestData.REQUEST_TOKEN,
                 null,
                 ApplicationTestData.REQUEST
@@ -64,10 +62,10 @@ class AttributeMaskingControllerTest {
     @Test
     void testStreamMarkerBypassesServiceDelegation() throws IOException {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingController attributeMaskingController = new AttributeMaskingController(mockAttributeMaskingService, mockErrorHandler);
+        RestController restController = new RestController(mockAttributeMaskingService);
 
         // when the controller is called with a stream marker
-        attributeMaskingController.serviceMaskAttributes(
+        restController.processRequestOrStreamMarker(
                 ApplicationTestData.REQUEST_TOKEN,
                 StreamMarker.START,
                 null

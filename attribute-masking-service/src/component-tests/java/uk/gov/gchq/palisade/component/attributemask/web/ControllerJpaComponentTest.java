@@ -31,7 +31,7 @@ import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguratio
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
-import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingController;
+import uk.gov.gchq.palisade.service.attributemask.web.RestController;
 
 import java.io.IOException;
 
@@ -39,12 +39,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 @DataJpaTest
-@ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, AttributeMaskingController.class})
+@ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, RestController.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ControllerJpaComponentTest {
 
     @Autowired
-    private AttributeMaskingController controller;
+    private RestController controller;
     @Autowired
     private AttributeMaskingService service;
     @Autowired
@@ -62,7 +62,7 @@ class ControllerJpaComponentTest {
         // Given some application test data
 
         // When a request comes in to the controller
-        ResponseEntity<AttributeMaskingResponse> maskedResource = controller.restMaskAttributes(ApplicationTestData.REQUEST_TOKEN, null, ApplicationTestData.REQUEST);
+        ResponseEntity<AttributeMaskingResponse> maskedResource = controller.maskAttributes(ApplicationTestData.REQUEST_TOKEN, null, ApplicationTestData.REQUEST);
 
         // Then it is masked as per the service
         assertThat(maskedResource)

@@ -16,39 +16,47 @@
 
 package uk.gov.gchq.palisade.contract.attributemask.kafka;
 
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import akka.actor.ActorSystem;
+import akka.kafka.ConsumerSettings;
+import akka.kafka.ProducerSettings;
+import akka.kafka.Subscriptions;
+import akka.kafka.javadsl.Consumer;
+import akka.kafka.javadsl.Producer;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Source;
+import akka.stream.testkit.TestSubscriber.Probe;
+import akka.stream.testkit.javadsl.TestSink;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.KafkaContainer;
+import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,9 +66,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The downstream "filtered-resource" topic is written to by this service and read by the filtered-resource-service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
-@Disabled
-@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("dbtest")
+@SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
+@Import(KafkaTestConfiguration.class)
+@ActiveProfiles({"dbtest", "akkatest"})
 class KafkaContractTest {
 
     public static class AttributeMaskingRequestSerialiser extends JsonSerializer<AttributeMaskingRequest> {
@@ -69,87 +77,64 @@ class KafkaContractTest {
     public static class AttributeMaskingResponseDeserialiser extends JsonDeserializer<AttributeMaskingResponse> {
     }
 
-    public static <R> CompletableFuture<LinkedList<ConsumerRecord<String, R>>> consumeWithTimeout(final KafkaConsumer<String, R> consumer, final Duration timeout) {
+    public static <R> CompletableFuture<LinkedList<ConsumerRecord<String, R>>> consumeWithTimeout(final KafkaConsumer<String, R> consumer, final Duration timeout, final int numberExpected) {
         return CompletableFuture.supplyAsync(() -> {
                     LinkedList<ConsumerRecord<String, R>> collected = new LinkedList<>();
-                    consumer.poll(timeout).forEach(collected::add);
+                    while (collected.size() < numberExpected) {
+                        consumer.poll(timeout).forEach(collected::add);
+                    }
                     return collected;
                 }
-        );
+        ).orTimeout(timeout.getSeconds(), TimeUnit.SECONDS);
     }
 
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1");
-    private static Map<String, Object> producerProperties;
-    private static Map<String, Object> consumerProperties;
     private static final Duration TIMEOUT_SECONDS = Duration.ofSeconds(15);
 
-    @BeforeAll
-    static void startTestcontainers() {
-        KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-        KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-        KAFKA_CONTAINER.start();
-
-        Map<String, Object> adminClientProperties = Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers());
-        try (AdminClient adminClient = AdminClient.create(adminClientProperties)) {
-            List<NewTopic> newTopicsConfig = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("filtered-resource", 3, (short) 1));
-            adminClient.createTopics(newTopicsConfig);
-        }
-
-        producerProperties = Map.of(
-                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers(),
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, AttributeMaskingRequestSerialiser.class);
-        consumerProperties = Map.of(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers(),
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
-                ConsumerConfig.GROUP_ID_CONFIG, "test.group",
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, AttributeMaskingResponseDeserialiser.class);
-    }
-
-    @AfterAll
-    static void stopTestcontainers() {
-        KAFKA_CONTAINER.stop();
-    }
+    @Autowired
+    private KafkaContainer kafkaContainer;
+    @Autowired
+    private ActorSystem akkaActorSystem;
+    @Autowired
+    private Materializer akkaMaterializer;
+    @Autowired
+    private ConsumerTopicConfiguration consumerTopicConfiguration;
+    @Autowired
+    private ProducerTopicConfiguration producerTopicConfiguration;
 
     @Test
-    void sendAndReceiveTest() throws ExecutionException, InterruptedException {
-        // Given a message is available on the upstream topic
-        try (KafkaProducer<String, AttributeMaskingRequest> producer = new KafkaProducer<>(producerProperties)) {
-            producer.send(ApplicationTestData.START);
-            producer.send(ApplicationTestData.RECORD);
-            producer.send(ApplicationTestData.END);
-        }
+    void testSingleRequest() {
+        final List<ProducerRecord<String, AttributeMaskingRequest>> requests = Stream
+                .of(ApplicationTestData.START,
+                        ApplicationTestData.START,
+                        ApplicationTestData.END,
+                        ApplicationTestData.END,
+                        ApplicationTestData.RECORD)
+                .collect(Collectors.toList());
 
-        // When we read all messages from the downstream topic
-        LinkedList<ConsumerRecord<String, AttributeMaskingResponse>> resultsList;
-        try (KafkaConsumer<String, AttributeMaskingResponse> consumer = new KafkaConsumer<>(consumerProperties)) {
-            consumer.subscribe(Collections.singletonList("filtered-resource"));
-            resultsList = consumeWithTimeout(consumer, TIMEOUT_SECONDS).get();
-        }
+        // Given - we are already listening to the output
+        ConsumerSettings<String, AttributeMaskingResponse> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new AttributeMaskingResponseDeserialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
-        // Then there are three messages: START, RESPONSE, END
-        assertThat(resultsList)
-                .hasSize(3);
+        Probe<ConsumerRecord<String, AttributeMaskingResponse>> probe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
-        // Then the first message is a START stream marker
-        assertThat(resultsList.getFirst().headers())
-                .isEqualTo(ApplicationTestData.START.headers());
-        resultsList.removeFirst();
+        // When - we write to the input
+        ProducerSettings<String, AttributeMaskingRequest> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new AttributeMaskingRequestSerialiser())
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
-        // Then the last message is a END stream marker
-        assertThat(resultsList.getLast().headers())
-                .isEqualTo(ApplicationTestData.END.headers());
-        resultsList.removeLast();
+        Source.fromIterator(requests::iterator)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
-        // Then all middle messages are mapped from request to response appropriately
-        assertThat(resultsList)
-                .extracting(ConsumerRecord::value)
-                .hasSize(1)
-                .containsExactly(ApplicationTestData.RESPONSE);
+        // When - results are pulled from the output stream
+        Probe<ConsumerRecord<String, AttributeMaskingResponse>> resultSeq = probe.request(requests.size());
+        LinkedList<ConsumerRecord<String, AttributeMaskingResponse>> results = IntStream.range(0, requests.size())
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(requests.size(), TimeUnit.MINUTES)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        assertThat(results).hasSize(requests.size());
     }
 
 }
