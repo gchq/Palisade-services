@@ -20,7 +20,7 @@ service:
 
 image:
   name: @artifactId@
-  tag: @git.commit.id.abbrev@-@revision@
+  tag: @revision@-@git.commit.id.abbrev@
   pullPolicy: IfNotPresent
   codeRelease: @project.parent.version@
 
@@ -32,6 +32,6 @@ resources:
     cpu: 250m
     memory: 512Mi
 
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }
+nodeSelector: {}
+tolerations: []
+affinity: {}

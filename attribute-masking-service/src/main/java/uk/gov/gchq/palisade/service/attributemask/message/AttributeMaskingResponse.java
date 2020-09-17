@@ -30,8 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * AttributeMaskingResponse represents the output for attribute-masking-service which will include redacted data schema that is to be
  * provided to the client.
