@@ -15,16 +15,20 @@
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis-cluster.fullname" . }}
 {{- $config := .Values.global.persistence.redisCluster }}
-{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
-{{- if eq $auto false }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+{{- if eq $provisioning "static" }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{ range $index := until (.Values.cluster.nodes | int) }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $config.name }}-{{ $namespace }}-{{ $index }}
   labels:
-    {{- if eq $.Values.global.hosting "aws" }}
+    selectorFilter: {{ $config.name }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
     type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
     {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"

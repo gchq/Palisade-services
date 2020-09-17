@@ -27,7 +27,7 @@ spring:
   profiles: example-perf-config
 
 example:
-  version: ${app.version}
+  version: '@examples.app.version@'
   path: ../Palisade-examples
   perf: ${example.path}/performance/target/performance-${example.version}-exec.jar
   service-profiles: &profiles

@@ -25,7 +25,7 @@ spring:
   profiles: example-model-config
 
 example:
-  version: ${app.version}
+  version: '@examples.app.version@'
   path: ../Palisade-examples
   model: ${example.path}/example-model/target/example-model-${example.version}-exec.jar
 
