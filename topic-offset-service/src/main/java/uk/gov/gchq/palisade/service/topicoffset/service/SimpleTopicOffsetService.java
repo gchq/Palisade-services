@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
