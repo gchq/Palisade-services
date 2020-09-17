@@ -176,7 +176,7 @@ public final class AuditErrorMessage extends AuditMessage {
             return false;
         }
         AuditErrorMessage that = (AuditErrorMessage) o;
-        return error.equals(that.error);
+        return error.getMessage().equals(that.error.getMessage());
     }
 
     @Override
