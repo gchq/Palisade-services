@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -26,7 +27,7 @@ import java.util.function.Predicate;
  */
 public class SimpleTopicOffsetService implements TopicOffsetService {
 
-    private final Predicate<Map<String, String>> predicate = headers -> headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString());
+    //private final Predicate<Map<String, String>> predicate = headers -> headers.get(StreamMarker.HEADER)).equals(StreamMarker.START.toString());
 
     /**
      * Checks for the presence of the start marker in the collection of headers.
@@ -36,6 +37,10 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      */
     @Override
     public boolean isOffsetForTopic(final Map<String, String> headers) {
-        return predicate.test(headers);
+        boolean found = false;
+        if(headers.containsKey(StreamMarker.HEADER) && (headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString()))){
+            found =true;
+        }
+      return found;
     }
 }
