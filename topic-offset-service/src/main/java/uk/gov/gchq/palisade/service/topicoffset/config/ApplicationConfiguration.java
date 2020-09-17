@@ -41,7 +41,7 @@ public class ApplicationConfiguration {
 
 
     @Bean
-    ErrorHandlingService loggingErrorHandler() {
+    ErrorHandlingService loggingErrorHandlerService() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
         return (String token, TopicOffsetRequest request, Throwable error)
                 -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
