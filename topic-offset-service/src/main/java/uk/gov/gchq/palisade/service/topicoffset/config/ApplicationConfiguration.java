@@ -25,9 +25,14 @@ import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.SimpleTopicOffsetService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
+
+/**
+ * Spring configuration of the Topic Offset Service.  Used to define Spring Beans needed in the service.
+ */
 @Configuration
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
 
     @Bean
     TopicOffsetService topicOffsetService() {
@@ -38,7 +43,8 @@ public class ApplicationConfiguration {
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, TopicOffsetRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
+        return (String token, TopicOffsetRequest request, Throwable error)
+                -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
     }
 
 }
