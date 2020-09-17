@@ -16,30 +16,26 @@
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
 import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
+
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
- * Simple Implementation of the Topic Offset Service contract.
+ * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
+ * start marker in the collection of headers. If this condition is met, the response will be to return true.
  */
 public class SimpleTopicOffsetService implements TopicOffsetService {
 
+    private final Predicate<Map<String, String>> predicate = headers -> headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString());
+
     /**
-     * Creates a Topic Offset Response when there is a {@link StreamMarker} for a start of the messages related
-     * to a specific data request.
-     * At the moment it is hardcoded and needs to be updated.
+     * Checks for the presence of the start marker in the collection of headers.
      *
-     * @param streamMarker {@link StreamMarker} indicator of the type of message marker.
-     * @return class {@link TopicOffsetResponse} a message indicating the start of the set of messages for a data
-     * request
+     * @param headers map of headers submitted for evaluation.
+     * @return boolean true if there is a start marker in the header.
      */
     @Override
-    public TopicOffsetResponse createTopicOffsetResponse(final StreamMarker streamMarker) {
-        TopicOffsetResponse response = null;
-
-        //where do we get the offset?
-        if ((streamMarker != null) && (streamMarker == StreamMarker.START)) {
-            response = TopicOffsetResponse.Builder.create().withOffset(11111111L);
-        }
-        return response;
+    public boolean isOffsetForTopic(final Map<String, String> headers) {
+        return predicate.test(headers);
     }
 }
