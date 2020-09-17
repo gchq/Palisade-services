@@ -30,6 +30,15 @@ import uk.gov.gchq.palisade.resource.Resource;
 
 import java.util.Optional;
 
+/**
+ * The TopicOffsetRequest is the input for topic-offset-service.  This is used to optimise the later retrieval of the
+ * data for the client. TopicOffsetResponse is the output for this service.
+ * Note there are three classes that effectively represent the same data but represent a different stage of the process.
+ * uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse is the output from the policy-service.
+ * uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest is the input for this the topic-offset-service.
+ * uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest is the input for this the
+ * filtered-resource-service.
+ */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class TopicOffsetRequest {
 
@@ -47,10 +56,10 @@ public final class TopicOffsetRequest {
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("resource") JsonNode resource) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
     }
 
     @Generated

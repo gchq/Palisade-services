@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.topicoffset.message;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Generated;
 
@@ -26,18 +25,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * The TopicOffsetResponse is the output for topic-offset-service.  It will only be created if the request message was
+ * found to be the start of the messages for a specific client request.  It will will contain the offset in the message
+ * queue for this first message. This is forwarded to the masked-resource-offset stream where it is used to prepare for
+ * the client request to retrieve the data.
+ */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class TopicOffsetResponse {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private final Long commitOffset;  //Kafka commit offset of a start-of-stream marker
+    private final Long commitOffset;  //Kafka commit offset of a start-of-stream message
 
     @JsonCreator
     private TopicOffsetResponse(
             final @JsonProperty("commitOffset") Long commitOffset) {
 
-        this.commitOffset = Optional.ofNullable(commitOffset).orElseThrow(() -> new RuntimeException("Commit offset cannot be null"));
+        this.commitOffset = Optional.ofNullable(commitOffset).orElseThrow(()
+                -> new IllegalArgumentException("Commit offset cannot be null"));
     }
 
     @Generated
@@ -57,7 +61,7 @@ public final class TopicOffsetResponse {
          * @return interface {@link TopicOffsetRequest.Builder.IUserId} for the next step in the build.
          */
         public static CommitOffset create() {
-            return commitOffset -> new TopicOffsetResponse(commitOffset);
+            return TopicOffsetResponse::new;
         }
 
         /**

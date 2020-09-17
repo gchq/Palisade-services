@@ -16,15 +16,13 @@
 package uk.gov.gchq.palisade.service.topicoffset.message;
 
 /**
- * Simply stores the expected header key for Tokens
- * Since the content of tokens are strings, there is no need for further implementation
- * If desired, this could extend eg. UUID if more meaningful Token processing was desired
+ * Stores the expected header key for Tokens.  Since the content of tokens are strings, there is no need for further
+ * implementation.
  */
 public final class Token {
     public static final String HEADER = "X-Request-Token";
 
     private Token() {
-        // Tokens are just strings, no need to actually have a class for them
     }
 }
 
