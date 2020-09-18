@@ -84,11 +84,6 @@
         ~ Spring Boot
         -->
         <dependency>
-            <!-- Useful Spring Kafka integrations -->
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-        <dependency>
             <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>

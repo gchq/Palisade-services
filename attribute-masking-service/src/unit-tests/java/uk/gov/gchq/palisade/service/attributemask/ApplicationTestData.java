@@ -33,6 +33,8 @@ import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.message.Token;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ApplicationTestData {
     /**
@@ -100,4 +102,24 @@ public class ApplicationTestData {
         END.headers().add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
         END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
+
+    public static final Supplier<Stream<ProducerRecord<String, AttributeMaskingRequest>>> RECORD_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> AttributeMaskingRequest.Builder.create()
+                    .withUserId(USER_ID.getId())
+                    .withResourceId(RESOURCE_ID)
+                    .withContext(CONTEXT)
+                    .withUser(USER)
+                    .withResource(new FileResource()
+                            .id(RESOURCE_ID + i.toString())
+                            .type(RESOURCE_TYPE)
+                            .serialisedFormat(RESOURCE_FORMAT)
+                            .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
+                            .parent(new SystemResource().id(RESOURCE_PARENT)))
+                    .withRules(RULES))
+            .map(request -> new ProducerRecord<>(
+                    "rule",
+                    0,
+                    "",
+                    request,
+                    RECORD.headers()));
 }

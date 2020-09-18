@@ -39,4 +39,4 @@ management:
 
 logging:
   level:
-    org.apache.kafka: INFO
+    org.apache.kafka: WARN

@@ -76,7 +76,7 @@ public class AttributeMaskingApplication {
         LOGGER.info("Started {} runner threads", runnerThreads.size());
 
         Config conf = system.settings().config().getConfig("akka");
-        conf.entrySet().forEach(val -> LOGGER.info("{} = {}", val.getKey(), val.getValue()));
+        conf.entrySet().forEach(val -> LOGGER.debug("{} = {}", val.getKey(), val.getValue()));
         runnerThreads.forEach(CompletableFuture::join);
     }
 

@@ -51,7 +51,9 @@ public class KafkaController extends MarkedStreamController {
             final ConsumerRecord<K, AttributeMaskingRequest> requestRecord,
             final Topic producerTopic) {
         String token = new String(requestRecord.headers().lastHeader(Token.HEADER).value());
-        StreamMarker streamMarker = StreamMarker.valueOf(new String(requestRecord.headers().lastHeader(StreamMarker.HEADER).value()));
+        StreamMarker streamMarker = Optional.ofNullable(requestRecord.headers().lastHeader(StreamMarker.HEADER))
+                .map(header -> StreamMarker.valueOf(new String(header.value())))
+                .orElse(null);
         AttributeMaskingRequest request = requestRecord.value();
 
         Optional<AttributeMaskingResponse> optionalResponse = Optional.empty();
