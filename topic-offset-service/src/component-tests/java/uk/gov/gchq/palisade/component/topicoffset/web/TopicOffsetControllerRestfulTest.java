@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset.web;
+package uk.gov.gchq.palisade.component.topicoffset.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,6 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
-import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
