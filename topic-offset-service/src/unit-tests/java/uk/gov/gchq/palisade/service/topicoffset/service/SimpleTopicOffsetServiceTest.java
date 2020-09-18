@@ -2,8 +2,8 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.message.Token;
+import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 
 import java.util.HashMap;
 import java.util.Map;

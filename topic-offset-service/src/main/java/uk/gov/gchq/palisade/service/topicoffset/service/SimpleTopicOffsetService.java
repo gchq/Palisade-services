@@ -15,7 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 
 import java.util.Map;
 

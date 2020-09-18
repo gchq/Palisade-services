@@ -15,8 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-import uk.gov.gchq.palisade.service.topicoffset.message.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
+import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 
 import java.util.Map;
 

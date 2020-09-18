@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.service.topicoffset.message.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.message.Token;
-import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest;
-import uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetResponse;
+import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.model.Token;
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
 
