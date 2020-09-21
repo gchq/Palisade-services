@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.gchq.palisade.service.attributemask.stream;
 
 import akka.Done;
@@ -15,13 +31,19 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import com.typesafe.config.Config;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Default boilerplate templates for creating Akka {@link Sink}s and {@link Source}s
+ * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
+ *
+ * @param <K> generic Key type
+ * @param <V> generic Value type
+ */
 public class StreamComponents<K, V> {
 
     public ProducerSettings<K, V> producerSettings(final ActorSystem system, final Serializer<K> keySerializer, final Serializer<V> valueSerializer) {
@@ -57,11 +79,6 @@ public class StreamComponents<K, V> {
             final ConsumerSettings<K, V> consumerSettings,
             final String topic) {
         return Consumer.committableSource(consumerSettings, Subscriptions.topics(topic));
-    }
-
-    public Source<ConsumerRecord<K, V>, Consumer.Control> plainConsumer(
-            final ConsumerSettings<K, V> consumerSettings, String topic) {
-        return Consumer.plainSource(consumerSettings, Subscriptions.topics(topic));
     }
 
 }

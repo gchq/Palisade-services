@@ -29,7 +29,6 @@ import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
@@ -45,7 +44,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
@@ -54,13 +52,10 @@ import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.LinkedList;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -82,6 +77,7 @@ class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
 
+    // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<AttributeMaskingRequest> {
         @Override
         public byte[] serialize(final String s, final AttributeMaskingRequest attributeMaskingRequest) {
@@ -93,6 +89,7 @@ class KafkaContractTest {
         }
     }
 
+    // Deserialiser for downstream test output
     static class ResponseDeserializer implements Deserializer<AttributeMaskingResponse> {
         @Override
         public AttributeMaskingResponse deserialize(final String s, final byte[] attributeMaskingResponse) {
@@ -104,17 +101,6 @@ class KafkaContractTest {
         }
     }
 
-    public static <R> CompletableFuture<LinkedList<ConsumerRecord<String, R>>> consumeWithTimeout(final KafkaConsumer<String, R> consumer, final Duration timeout, final int numberExpected) {
-        return CompletableFuture.supplyAsync(() -> {
-                    LinkedList<ConsumerRecord<String, R>> collected = new LinkedList<>();
-                    while (collected.size() < numberExpected) {
-                        consumer.poll(timeout).forEach(collected::add);
-                    }
-                    return collected;
-                }
-        ).orTimeout(timeout.getSeconds(), TimeUnit.SECONDS);
-    }
-
     @Autowired
     private KafkaContainer kafkaContainer;
     @Autowired
@@ -122,14 +108,13 @@ class KafkaContractTest {
     @Autowired
     private Materializer akkaMaterializer;
     @Autowired
-    private ConsumerTopicConfiguration consumerTopicConfiguration;
-    @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
     @ParameterizedTest
     @ValueSource(longs = {1, 10, 100, 1000, 10000})
     @DirtiesContext
     void testVariousRequestSets(final long requestCount) {
+        // Create a variable number of requests
         final Stream<ProducerRecord<String, AttributeMaskingRequest>> requests = Stream
                 .of(
                         Stream.of(ApplicationTestData.START),

@@ -33,6 +33,9 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Message-system-agnostic wrapper around the service, handling tokens, stream-markers and skipping messages where appropriate
+ */
 public class MarkedStreamController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkedStreamController.class);
 

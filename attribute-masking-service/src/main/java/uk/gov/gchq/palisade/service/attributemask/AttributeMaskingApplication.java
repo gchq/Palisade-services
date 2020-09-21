@@ -60,14 +60,18 @@ public class AttributeMaskingApplication {
         this.executor = executor;
     }
 
-    public static void main(String[] args) {
-        SpringApplication app = new SpringApplicationBuilder(AttributeMaskingApplication.class)
+    public static void main(final String[] args) {
+        final SpringApplication app = new SpringApplicationBuilder(AttributeMaskingApplication.class)
                 .web(WebApplicationType.SERVLET)
                 .build();
         app.setAdditionalProfiles("akka");
         app.run(args);
     }
 
+    /**
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
         Set<CompletableFuture<?>> runnerThreads = runners.stream()

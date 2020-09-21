@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.gchq.palisade.contract.attributemask.kafka;
 
 import akka.actor.ActorSystem;
@@ -41,7 +57,7 @@ public class KafkaTestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    static PropertiesConfigurer propertiesConfigurer(ResourceLoader resourceLoader, Environment environment) {
+    static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
         return new PropertiesConfigurer(resourceLoader, environment);
     }
 
@@ -59,27 +75,27 @@ public class KafkaTestConfiguration {
 
     @Bean
     @Primary
-    Materializer getMaterializer(ActorSystem system) {
+    Materializer getMaterializer(final ActorSystem system) {
         return Materializer.createMaterializer(system);
     }
 
     @Bean
     @Primary
-    ActorSystem actorSystem(PropertiesConfigurer props, KafkaContainer kafka, ConfigurableApplicationContext context) {
+    ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
         return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                 props.getAllActiveProperties().entrySet().stream(),
                 Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
     }
 
-    static void createTopics(List<NewTopic> newTopics, KafkaContainer kafka) throws ExecutionException, InterruptedException {
+    static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
         try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, getKafkaBrokers(kafka)))) {
             admin.createTopics(newTopics);
             LOGGER.info("created topics: " + admin.listTopics().names().get());
         }
     }
 
-    static String getKafkaBrokers(KafkaContainer kafka) {
+    static String getKafkaBrokers(final KafkaContainer kafka) {
         Integer mappedPort = kafka.getFirstMappedPort();
         String brokers = String.format("%s:%d", "localhost", mappedPort);
         LOGGER.info("brokers: " + brokers);

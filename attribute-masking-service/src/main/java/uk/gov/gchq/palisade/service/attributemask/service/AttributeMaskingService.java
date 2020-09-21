@@ -43,7 +43,6 @@ public interface AttributeMaskingService {
      * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service
      * @param context  the {@link Context} as originally supplied by the client
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
-
      * @throws IOException if a failure occurred writing to the persistence store.
      */
     void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException;

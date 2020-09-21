@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.gchq.palisade.service.attributemask.stream.config;
 
 import akka.Done;
@@ -11,11 +27,13 @@ import akka.kafka.ProducerSettings;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;
@@ -26,6 +44,7 @@ import java.util.concurrent.CompletionStage;
 public class AkkaTransformerConfig {
     private static final StreamComponents<String, AttributeMaskingRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AttributeMaskingResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
     Source<CommittableMessage<String, AttributeMaskingRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
@@ -46,5 +65,15 @@ public class AkkaTransformerConfig {
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
+    }
+
+    @Bean
+    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.errorKeySerializer(),
+                SerDesConfig.errorValueSerializer());
+
+        return ERROR_COMPONENTS.plainProducer(producerSettings);
     }
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.gchq.palisade.service.attributemask.stream;
 
 import com.typesafe.config.Config;
@@ -35,10 +51,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * Parse and convert Spring maps and lists to Akka configs
+ */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements EnvironmentAware, InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesConfigurer.class);
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
+    private static final String LIST_ITEM_SEPERATOR = ",";
 
     private String[] locations;
     private final ResourceLoader rl;
@@ -61,7 +81,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         envPropSources.forEach(propertySource -> {
             if (propertySource.containsProperty("application.properties.locations")) {
                 locations = ((String) propertySource.getProperty("application.properties.locations"))
-                        .split(",");
+                        .split(LIST_ITEM_SEPERATOR);
                 Arrays.stream(locations)
                         .forEach(filename -> loadProperties(filename)
                                 .forEach(envPropSources::addFirst));
@@ -155,9 +175,9 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                 root = String.format("%s[%s].%s", root, index, mat.group(1));
                 mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(3));
                 if (mat.matches()) {
-                    if (mat.group(1).isEmpty())
+                    if (mat.group(1).isEmpty()) {
                         return root;
-                    else {
+                    } else {
                         root = String.format("%s[%s].%s", root, prevIndex, mat.group(1));
                         mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(1));
                     }

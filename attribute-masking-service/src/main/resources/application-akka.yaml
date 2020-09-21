@@ -69,5 +69,5 @@ akka:
       services:
         kafka:
           endpoints:
-            - host: "localhost"
-              port: 9092
+          - host: "localhost"
+            port: 9092

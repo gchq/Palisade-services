@@ -44,7 +44,7 @@ class JpaPersistenceLayerTest {
     private AuthorisedRequestsRepository requestsRepository;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(persistenceLayer).isNotNull();
         assertThat(requestsRepository).isNotNull();
     }

@@ -51,13 +51,13 @@ class StreamApiContractTest {
     private AttributeMaskingService service;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(restTemplate).isNotNull();
         assertThat(service).isNotNull();
     }
 
     @Test
-    void postToServiceReturnsMaskedResource() throws JsonProcessingException {
+    void testPostToServiceReturnsMaskedResource() throws JsonProcessingException {
         // Given we have some request data (not a stream marker)
         AttributeMaskingRequest request = ApplicationTestData.REQUEST;
         HttpHeaders headers = new HttpHeaders();
@@ -78,7 +78,7 @@ class StreamApiContractTest {
     }
 
     @Test
-    void streamMarkerIsSkippedByService() {
+    void testStreamMarkerIsSkippedByService() {
         // Given we have some request data (a stream marker)
         AttributeMaskingRequest request = null;
         HttpHeaders headers = new HttpHeaders();

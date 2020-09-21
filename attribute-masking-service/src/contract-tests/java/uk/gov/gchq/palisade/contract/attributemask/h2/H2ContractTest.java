@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * An external requirement of the service is to write to an external persistence store.
  * This store will then be read by the data-service to apply rules for a data-read.
  * Upon storing an authorised request with the service, an external entity should be able to retrieve it.
- *
  * The key distinction between this and the JpaPersistenceLayerTest is while the aforementioned inspects
  * its own instance of the database, this test creates two distinct, separate connections.
  */
@@ -54,13 +53,13 @@ class H2ContractTest {
     private AuthorisedRequestsRepositoryExternalConnection externalRepositoryConnection;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(attributeMaskingService).isNotNull();
         assertThat(externalRepositoryConnection).isNotNull();
     }
 
     @Test
-    void storedAuthorisedRequestsAreRetrievableExternally() throws IOException {
+    void testStoredAuthorisedRequestsAreRetrievableExternally() throws IOException {
         // Given a request is stored by the service
         attributeMaskingService.storeAuthorisedRequest(
                 ApplicationTestData.REQUEST_TOKEN,

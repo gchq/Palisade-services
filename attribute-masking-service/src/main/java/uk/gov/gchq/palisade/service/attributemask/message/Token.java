@@ -25,6 +25,6 @@ public final class Token {
     public static final String HEADER = "X-Request-Token";
 
     private Token() {
-        // Tokens are just strings, no need to actually have a class for them
+        // Tokens are just strings, no need to instantiate a class for them
     }
 }

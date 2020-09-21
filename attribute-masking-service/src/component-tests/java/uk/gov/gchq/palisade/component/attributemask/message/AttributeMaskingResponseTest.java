@@ -38,13 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class})
-public class AttributeMaskingResponseTest {
+class AttributeMaskingResponseTest {
 
     @Autowired
     private JacksonTester<AttributeMaskingResponse> jsonTester;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(jsonTester).isNotNull();
     }
 
@@ -57,7 +57,7 @@ public class AttributeMaskingResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantAttributeMaskingResponseSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantAttributeMaskingResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")

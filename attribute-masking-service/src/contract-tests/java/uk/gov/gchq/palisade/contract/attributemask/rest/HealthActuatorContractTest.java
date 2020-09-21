@@ -39,12 +39,12 @@ class HealthActuatorContractTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(restTemplate).isNotNull();
     }
 
     @Test
-    void serviceIsHealthy() {
+    void testServiceIsHealthy() {
         // Given that the service is running (and presumably healthy)
 
         // When we GET the /actuator/health REST endpoint (used by k8s)

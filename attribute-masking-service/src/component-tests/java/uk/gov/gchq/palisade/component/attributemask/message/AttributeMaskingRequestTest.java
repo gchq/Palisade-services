@@ -40,13 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AttributeMaskingApplication.class})
-public class AttributeMaskingRequestTest {
+class AttributeMaskingRequestTest {
 
     @Autowired
     private JacksonTester<AttributeMaskingRequest> jsonTester;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(jsonTester).isNotNull();
     }
 
@@ -59,7 +59,7 @@ public class AttributeMaskingRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantAttributeMaskingRequestSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantAttributeMaskingRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")
@@ -67,7 +67,7 @@ public class AttributeMaskingRequestTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules<>();
+        Rules<?> rules = new Rules<>();
 
         AttributeMaskingRequest attributeMaskingRequest = AttributeMaskingRequest.Builder.create()
                 .withUserId("originalUserID")
