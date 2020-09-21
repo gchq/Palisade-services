@@ -45,13 +45,13 @@ class RedisPersistenceContractTest {
     private RedisTemplate<String, String> redisTemplate;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(controller).isNotNull();
         assertThat(redisTemplate).isNotNull();
     }
 
     @Test
-    void topicOffsetsAreStoredInRedis() {
+    void testTopicOffsetsAreStoredInRedis() {
         // Given we have some request data
         String token = ApplicationTestData.REQUEST_TOKEN;
         TopicOffsetMessage request = ApplicationTestData.OFFSET_MESSAGE;

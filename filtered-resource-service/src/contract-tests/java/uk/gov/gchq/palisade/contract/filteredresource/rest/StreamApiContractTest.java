@@ -41,12 +41,12 @@ class StreamApiContractTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(restTemplate).isNotNull();
     }
 
     @Test
-    void postTopicOffsetReturnsAccepted() {
+    void testPostTopicOffsetReturnsAccepted() {
         // Given we have some request data
         TopicOffsetMessage request = ApplicationTestData.OFFSET_MESSAGE;
         HttpHeaders headers = new HttpHeaders();

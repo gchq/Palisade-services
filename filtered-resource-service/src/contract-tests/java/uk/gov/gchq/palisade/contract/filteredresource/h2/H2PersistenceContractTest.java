@@ -41,13 +41,13 @@ class H2PersistenceContractTest {
     private TokenOffsetRepository tokenOffsetRepository;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(controller).isNotNull();
         assertThat(tokenOffsetRepository).isNotNull();
     }
 
     @Test
-    void topicOffsetsAreStoredInH2() {
+    void testTopicOffsetsAreStoredInH2() {
         // Given we have some request data
         String token = ApplicationTestData.REQUEST_TOKEN;
         TopicOffsetMessage request = ApplicationTestData.OFFSET_MESSAGE;

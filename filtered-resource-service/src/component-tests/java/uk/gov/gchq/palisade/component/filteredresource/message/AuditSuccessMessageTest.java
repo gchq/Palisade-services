@@ -43,7 +43,7 @@ class AuditSuccessMessageTest {
     private JacksonTester<AuditSuccessMessage> jsonTester;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(jsonTester).isNotNull();
     }
 
