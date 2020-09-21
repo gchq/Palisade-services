@@ -103,6 +103,7 @@ public class ApplicationTestData {
         END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
 
+    // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
     public static final Supplier<Stream<ProducerRecord<String, AttributeMaskingRequest>>> RECORD_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> AttributeMaskingRequest.Builder.create()
                     .withUserId(USER_ID.getId())
@@ -111,7 +112,7 @@ public class ApplicationTestData {
                     .withUser(USER)
                     .withResource(new FileResource()
                             .id(RESOURCE_ID + i.toString())
-                            .type(RESOURCE_TYPE)
+                            .type(i.toString())
                             .serialisedFormat(RESOURCE_FORMAT)
                             .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
                             .parent(new SystemResource().id(RESOURCE_PARENT)))
@@ -119,7 +120,7 @@ public class ApplicationTestData {
             .map(request -> new ProducerRecord<>(
                     "rule",
                     0,
-                    "",
+                    (String) null,
                     request,
                     RECORD.headers()));
 }

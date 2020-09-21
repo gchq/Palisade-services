@@ -52,9 +52,13 @@ public class KafkaController extends MarkedStreamController {
         ConsumerRecord<?, AttributeMaskingRequest> request = exception.getRequest();
         AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request.value(), Collections.emptyMap())
                 .withError(exception.getCause());
-        return new ProducerRecord<>(errorTopic.getName(), errorMessage);
-    }
 
+        // Prepare partition keying
+        String token = new String(request.headers().lastHeader(Token.HEADER).value());
+        int partition = Math.floorMod(token.hashCode(), errorTopic.getPartitions());
+
+        return new ProducerRecord<>(errorTopic.getName(), partition, (K) null, errorMessage, request.headers());
+    }
 
     /**
      * Connect the MarkedStreamController to Kafka, converting between Kafka Records and Headers to POJOs

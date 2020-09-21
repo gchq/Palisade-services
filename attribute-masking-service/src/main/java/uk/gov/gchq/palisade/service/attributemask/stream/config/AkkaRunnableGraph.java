@@ -25,6 +25,7 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
@@ -69,6 +70,7 @@ public class AkkaRunnableGraph {
     }
 
     static Function1<Throwable, Directive> auditSupervisor(
+            final Materializer materializer,
             final KafkaController controller,
             final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorSink,
             final Topic errorTopic) {
@@ -76,21 +78,24 @@ public class AkkaRunnableGraph {
             LOGGER.warn("Received {} exception, supervising now", ex.getClass());
             if (ex instanceof AuditableException) {
                 try {
-                    LOGGER.info("Exception was auditable with cause {}, auditing now", ex.getCause().getClass());
+                    LOGGER.info("Exception was auditable with cause {}, auditing and resuming", ex.getCause().getClass());
                     Source.single(controller.<String>auditError((AuditableException) ex, errorTopic))
-                            .to(errorSink);
+                            .runWith(errorSink, materializer);
+                    return Supervision.resumingDecider().apply(ex);
                 } catch (Exception e) {
                     LOGGER.error("Error occurred while auditing, stopping now!", e);
                     return Supervision.stoppingDecider().apply(e);
                 }
+            } else {
+                LOGGER.warn("Exception {} was not auditable, attempting to resume", ex.getClass());
+                return Supervision.resumingDecider().apply(ex);
             }
-            LOGGER.warn("Exception not auditable, attempting to resume");
-            return Supervision.resumingDecider().apply(ex);
         };
     }
 
     @Bean
     RunnableGraph<DrainingControl<Done>> runner(
+            final Materializer materializer,
             final Source<CommittableMessage<String, AttributeMaskingRequest>, Control> source,
             final Sink<Envelope<String, AttributeMaskingResponse, Committable>, CompletionStage<Done>> sink,
             final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorSink,
@@ -101,7 +106,7 @@ public class AkkaRunnableGraph {
 
         return source
                 .map(committableMessage -> committableConverter(committableMessage, controller, outputTopic))
-                .withAttributes(ActorAttributes.supervisionStrategy(auditSupervisor(controller, errorSink, errorTopic)))
+                .withAttributes(ActorAttributes.supervisionStrategy(auditSupervisor(materializer, controller, errorSink, errorTopic)))
                 .toMat(sink, Consumer::createDrainingControl);
     }
 

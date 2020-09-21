@@ -53,7 +53,8 @@ public class KafkaTestConfiguration {
 
     private final List<NewTopic> topics = List.of(
             new NewTopic("rule", 3, (short) 1),
-            new NewTopic("masked-resource", 3, (short) 1));
+            new NewTopic("masked-resource", 3, (short) 1),
+            new NewTopic("error", 3, (short) 1));
 
     @Bean
     @ConditionalOnMissingBean
