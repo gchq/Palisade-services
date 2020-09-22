@@ -39,7 +39,7 @@ import java.util.StringJoiner;
  * This will be forwarded to the attribute-masking-service for preliminary processing and routing of the data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.queryscope.request.AttributeMaskingRequest is the input for the attribute-masking-service.
+ * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the attribute-masking-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PolicyResponse {
