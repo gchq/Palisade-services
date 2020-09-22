@@ -23,6 +23,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -31,12 +32,14 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
+import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -56,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * A request of type {@link TopicOffsetRequest} as a Json string, and HTTP header with a required Token
  * and optionally a StreamMarker is sent.  The response will either be a {@link TopicOffsetResponse} or null
  */
+@ContextConfiguration(classes=TopicOffsetApplication.class)
 @WebMvcTest(TopicOffsetController.class)
  class TopicOffsetControllerRestfulTest {
 
@@ -74,6 +78,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     public static final TopicOffsetResponse startResponse = TopicOffsetResponse.Builder.create().withOffset(123L);
 
     public static final String SERVICE_ENDPOINT_URL = "/stream-api/topicOffset";
+    public static final String TEST_REQUEST_TOKEN ="test-request-token";
+    public static final String USER_ID = "testUserId";
+    public static final String RESOURCE_ID ="/test/resourceId";
+    public static final String KEY_NULL_VALUE = "$.keyToNull";
+    public static final String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
+    public static final String RESOURCE_FORMAT ="avro";
+    public static final String RESOURCE_CONNECTION = "test-data-service";
+    public static final String RESOURCE_PARENT_ID = "/test";
+    public static final String CONTEXT_PURPOSE = "testPurpose";
 
     /**
      * This permutation is for a request that comes in for a start of messages indicator, StreamMarker is set to START.
@@ -85,11 +98,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @Test
     void testControllerWithAStartMessage() throws Exception {
 
-        TopicOffsetController topicOffsetController = new TopicOffsetController(topicOffsetService, errorHandlingService);
 
-        Optional<TopicOffsetRequest> requestBody = null;
+        Optional<TopicOffsetRequest> requestBody = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, "test-request-token");
+        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
         headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
 
         Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(true);
@@ -98,7 +110,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .headers(headers))
+                .headers(headers)
+                .content(mapper.writeValueAsString(requestBody)))
                 .andExpect(status().isAccepted())  //a H2XX status
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -120,22 +133,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @Test
     void testControllerWithAnEndMessage() throws Exception {
 
-        TopicOffsetController topicOffsetController = new TopicOffsetController(topicOffsetService, errorHandlingService);
 
-        Optional<TopicOffsetRequest> requestBody = null;
+        Optional<TopicOffsetRequest> requestBody = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, "test-request-token");
+        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
         headers.add(StreamMarker.HEADER, StreamMarker.END.toString());
 
         Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
 
-        MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+         this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .headers(headers))
-                .andExpect(status().isAccepted()) //a HTTP 2XX
+                .headers(headers)
+                 .content(mapper.writeValueAsString(requestBody)))
+                 .andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(jsonPath( "$.keyToNull").doesNotExist()) //no message
+                .andExpect(jsonPath( KEY_NULL_VALUE).doesNotExist()) //no message
                 .andReturn();
 
     }
@@ -153,24 +166,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @Test
     void testControllerWithAnStardardMessage() throws Exception {
 
-        TopicOffsetController topicOffsetController = new TopicOffsetController(topicOffsetService, errorHandlingService);
 
-        Optional<TopicOffsetRequest> requestBody = null;
+        Optional<TopicOffsetRequest> requestBody = Optional.empty();
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, "test-request-token");
+        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
 
         Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
 
 
-        MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+        this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .headers(headers))
+                .headers(headers)
+                .content(mapper.writeValueAsString(requestBody)))
                 .andExpect(status().isAccepted())  // a HTTP 200
                 .andDo(print())
-                .andExpect(jsonPath( "$.keyToNull").doesNotExist())  //no message
+                .andExpect(jsonPath( KEY_NULL_VALUE).doesNotExist())  //no message
                 .andReturn();
-
     }
 
     /**
@@ -184,43 +196,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     @Test
     void testControllerErrorHandling() throws Exception {
 
-        TopicOffsetController topicOffsetController = new TopicOffsetController(topicOffsetService, errorHandlingService);
-
-       String RESOURCE_ID = "/test/resourceId";
-       String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
-       String RESOURCE_FORMAT = "avro";
-       String DATA_SERVICE_NAME = "test-data-service";
-       String RESOURCE_PARENT = "/test";
-
         LeafResource leafResource = new FileResource()
                 .id(RESOURCE_ID)
                 .type(RESOURCE_TYPE)
                 .serialisedFormat(RESOURCE_FORMAT)
-                .connectionDetail(new SimpleConnectionDetail().serviceName(DATA_SERVICE_NAME))
-                .parent(new SystemResource().id(RESOURCE_PARENT));
+                .connectionDetail(new SimpleConnectionDetail().serviceName(RESOURCE_CONNECTION))
+                .parent(new SystemResource().id(RESOURCE_PARENT_ID));
 
         TopicOffsetRequest requestBody = TopicOffsetRequest.
                 Builder.create().
-                withUserId("testUserId")
+                withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
-                .withContext(new Context().purpose("testPurpose"))
+                .withContext(new Context().purpose(CONTEXT_PURPOSE))
                 .withResource(leafResource);
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, "test-request-token");
+        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
 
         RuntimeException somethingWentWrong =  new RuntimeException("Something went wrong");
         Mockito.when(topicOffsetService.isOffsetForTopic(any()))
                 .thenThrow(somethingWentWrong);
 
 
-        MvcResult result = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+         this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(headers)
                 .content(mapper.writeValueAsString(requestBody)))
                 .andExpect(status().is5xxServerError()) //a 500 server error
                 .andDo(print())
-                .andExpect(jsonPath( "$.keyToNull").doesNotExist()) //no message
+                .andExpect(jsonPath( KEY_NULL_VALUE).doesNotExist()) //no message
                 .andReturn();
 
         verify(errorHandlingService, times(1)).reportError(any(),any(), any());

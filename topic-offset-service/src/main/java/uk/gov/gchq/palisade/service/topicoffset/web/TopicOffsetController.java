@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.topicoffset.web;
-
+package uk.gov.gchq.palisade.service.topicoffset.web;
+        //uk.gov.gchq.palisade.service.topicoffset.config
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
