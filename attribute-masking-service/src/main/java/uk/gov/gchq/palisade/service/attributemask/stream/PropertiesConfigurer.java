@@ -38,6 +38,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.NonNull;
 
+import uk.gov.gchq.palisade.service.attributemask.exception.PropertyLoadingException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,12 +102,14 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                             LOGGER.info("Loading config file: {}", resource1.getFilename());
                             return loader.load(resource1.getFilename(), resource1);
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            String message = loader.getClass().getSimpleName() + " failed to load file " + resource1.getFilename();
+                            throw new PropertyLoadingException(message, e);
                         }
                     }).flatMap(Collection::stream)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            String message = this.getClass().getSimpleName() + " failed to load file " + filename;
+            throw new PropertyLoadingException(message, e);
         }
     }
 
@@ -116,7 +120,8 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                 .flatMap(Arrays::stream)
                 .distinct()
                 .filter(t -> !t.startsWith("="))
-                .filter(jv -> !jv.startsWith("java."))
+                .filter(java -> !java.startsWith("java."))
+                .filter(git -> !git.startsWith("git."))
                 .collect(Collectors.toMap(Function.identity(), environment::getProperty));
     }
 

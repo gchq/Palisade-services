@@ -51,7 +51,7 @@ public class AkkaSystemConfig {
     @ConditionalOnMissingBean
     ActorSystem getActorSystem(final PropertiesConfigurer propertiesConfigurer) {
         propertiesConfigurer.getAllActiveProperties()
-                .forEach((key, value) -> LOGGER.info("{} = {}", key, value));
+                .forEach((key, value) -> LOGGER.debug("{} = {}", key, value));
         return ActorSystem.create("SpringAkkaStreamsSystem", propertiesConfigurer.toHoconConfig(propertiesConfigurer.getAllActiveProperties()));
     }
 

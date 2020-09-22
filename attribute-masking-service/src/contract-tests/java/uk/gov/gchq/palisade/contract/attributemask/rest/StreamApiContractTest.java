@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * These endpoints should respond similarly to kafka upon receiving REST POST requests.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("dbtest")
+@ActiveProfiles({"dbtest", "akkatest"})
 class StreamApiContractTest {
 
     @Autowired

@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 
 import java.io.IOException;
@@ -39,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = {AttributeMaskingApplication.class})
+@ContextConfiguration(classes = {AttributeMaskingRequestTest.class})
 class AttributeMaskingRequestTest {
 
     @Autowired

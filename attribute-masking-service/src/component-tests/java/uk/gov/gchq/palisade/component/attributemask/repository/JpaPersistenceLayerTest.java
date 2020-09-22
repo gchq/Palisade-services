@@ -18,14 +18,13 @@ package uk.gov.gchq.palisade.component.attributemask.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData.PassThroughRule;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
@@ -34,8 +33,9 @@ import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {AttributeMaskingApplication.class, ApplicationConfiguration.class, JpaPersistenceLayer.class})
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@ContextConfiguration(classes = {ApplicationConfiguration.class})
+@EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
+@EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
 class JpaPersistenceLayerTest {
 
     @Autowired

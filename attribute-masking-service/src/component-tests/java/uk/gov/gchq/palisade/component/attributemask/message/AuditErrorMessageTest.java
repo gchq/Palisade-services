@@ -24,7 +24,6 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = {AttributeMaskingApplication.class})
+@ContextConfiguration(classes = {AuditErrorMessageTest.class})
 class AuditErrorMessageTest {
 
     @Autowired

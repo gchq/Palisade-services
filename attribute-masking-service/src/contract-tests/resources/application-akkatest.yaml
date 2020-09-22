@@ -70,6 +70,7 @@ akka:
         kafka:
           endpoints:
           - host: "localhost"
+
 logging:
   level:
     org.apache.kafka: WARN

@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackageClasses = {AuthorisedRequestsRepositoryExternalConnection.class, AuthorisedRequestsRepository.class})
-@ActiveProfiles("dbtest")
+@ActiveProfiles({"dbtest", "akkatest"})
 class H2ContractTest {
 
     @Autowired

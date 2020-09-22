@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This should return 200 OK if the service is healthy.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"dbtest", "akkatest"})
 class HealthActuatorContractTest {
 
     @Autowired

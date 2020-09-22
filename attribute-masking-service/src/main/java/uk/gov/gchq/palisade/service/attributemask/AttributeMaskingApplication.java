@@ -22,7 +22,6 @@ import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -61,11 +60,9 @@ public class AttributeMaskingApplication {
     }
 
     public static void main(final String[] args) {
-        final SpringApplication app = new SpringApplicationBuilder(AttributeMaskingApplication.class)
-                .web(WebApplicationType.SERVLET)
-                .build();
-        app.setAdditionalProfiles("akka");
-        app.run(args);
+        LOGGER.debug("AttributeMaskingApplication started with: {}", (Object) args);
+        new SpringApplicationBuilder(AttributeMaskingApplication.class).web(WebApplicationType.SERVLET)
+                .run(args);
     }
 
     /**
