@@ -84,10 +84,11 @@ public class RestController extends MarkedStreamController {
         } catch (IOException ex) {
             // Audit error appropriately (REST-fully)
             String nullableResourceId = Optional.ofNullable(request)
-                    .flatMap(attributeMaskingRequest -> {
+                    .flatMap((AttributeMaskingRequest attributeMaskingRequest) -> {
                         try {
                             return Optional.of(attributeMaskingRequest.getResource());
                         } catch (JsonProcessingException e) {
+                            LOGGER.error("Failed to deserialise request resource object:", e);
                             return Optional.empty();
                         }
                     })
