@@ -250,8 +250,10 @@ timestamps {
                         configFileProvider([configFile(fileId: "${env.CONFIG_FILE}", variable: 'MAVEN_SETTINGS')]) {
                             dir('Palisade-integration-tests') {
                                 git branch: 'develop', url: 'https://github.com/gchq/Palisade-integration-tests.git'
-                                if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
-                                    INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                if (FEATURE_BRANCH == "true") {
+                                    if (sh(script: "git checkout ${GIT_BRANCH_NAME}", returnStatus: true) == 0) {
+                                        INTEGRATION_REVISION = "BRANCH-${GIT_BRANCH_NAME_LOWER}-SNAPSHOT"
+                                    }
                                 }
                                 sh "mvn -s ${MAVEN_SETTINGS} -D revision=${INTEGRATION_REVISION} -D common.revision=${COMMON_REVISION} -D services.revision=${SERVICES_REVISION} -D examples.revision=${EXAMPLES_REVISION} install"
                             }
@@ -315,7 +317,7 @@ timestamps {
                                             error("Could not create namespace")
                                         }
                                     }
-                                    sh "mvn -s ${MAVEN_SETTINGS} -Dmaven.test.skip=true -P pi -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -D examples.revision=${EXAMPLES_REVISION} deploy"
+                                    sh "mvn -s ${MAVEN_SETTINGS} -P pi -D maven.test.skip=true -D revision=${SERVICES_REVISION} -D common.revision=${COMMON_REVISION} -D readers.revision=${READERS_REVISION} -D examples.revision=${EXAMPLES_REVISION} deploy"
                                     //deploy application to the cluster
                                     if (sh(script: "helm upgrade --install palisade . " +
                                             "--set global.hosting=aws  " +

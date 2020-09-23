@@ -23,26 +23,26 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- range $name, $value := .Values.global.persistence.dataStores }}
+{{- $provisioning := pluck $.Values.global.hosting $value.provisioning | first | default $value.provisioning._default }}
+{{- if eq $provisioning "static" }}
 {{- $sc := pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
-{{- $auto := pluck $.Values.global.hosting $value.auto | first | default $value.auto._default }}
-{{- if eq $auto false }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ $name }}-{{ $namespace }}
   labels:
-  {{- if eq $sc "ebs-sc" }}
-    type: amazonEBS
-  {{- else if eq $sc "efs-sc" }}
-    type: amazonEFS
-  {{- end }}
     selectorFilter: {{ $name }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
+    type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck $.Values.global.hosting $value.storageClassName | first | default $value.storageClassName._default }}
   capacity:
     storage: 4Gi

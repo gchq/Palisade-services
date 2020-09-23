@@ -12,36 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
-#however, the CSI driver's plugin GetVolumeHandle method determines whether
-#the volume is actually used by other pods as a different mode
-#there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
-#as to the slightly anomalous behaviour
+# N.B The classpathjars would theoretically only need accessMode ReadOnlyMany
+# however, the CSI driver's plugin GetVolumeHandle method determines whether
+# the volume is actually used by other pods as a different mode
+# there is quite a good explanation here: https://github.com/kubernetes-sigs/aws-efs-csi-driver/issues/100
+# as to the slightly anomalous behaviour
 
-{{- $config := .Values.global.persistence.classpathJars }}
-{{- $auto := pluck .Values.global.hosting $config.auto | first | default $config.auto._default }}
-{{- if eq $auto false }}
-{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 {{- $namespace := include "palisade.namespace" . }}
+{{- $config := .Values.global.persistence.classpathJars }}
+{{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
+{{- if eq $provisioning "static" }}
+{{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
-  {{- if eq $sc "ebs-sc" }}
-  labels:
-    type: amazonEBS
-  {{- else if eq $sc "efs-sc" }}
-  labels:
-    type: amazonEFS
-  {{- end }}
   labels:
     selectorFilter: {{ include "palisade.deployment.fullname" . }}-{{ $namespace }}
+    {{- if eq $sc "ebs-sc" }}
+    type: amazonEBS
+    {{- else if eq $sc "efs-sc" }}
+    type: amazonEFS
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install"
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
