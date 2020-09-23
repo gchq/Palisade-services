@@ -39,7 +39,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ pluck .Values.global.hosting .Values.global.persistence.classpathJars.storageClassName | first | default .Values.global.persistence.classpathJars.storageClassName._default }}
   capacity:
     storage: {{ .Values.global.persistence.classpathJars.storage }}
