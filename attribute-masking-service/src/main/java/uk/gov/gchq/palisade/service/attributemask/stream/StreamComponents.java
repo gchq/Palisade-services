@@ -46,12 +46,28 @@ import java.util.concurrent.CompletionStage;
  */
 public class StreamComponents<K, V> {
 
+    /**
+     * Construct an Akka Kafka ProducerSettings from the given config and serialisers
+     *
+     * @param system          the application's actor system to use to load config values
+     * @param keySerializer   the stream's key serialiser
+     * @param valueSerializer the stream's value serialiser
+     * @return a {@link ProducerSettings} object for creating Akka {@link Sink}s
+     */
     public ProducerSettings<K, V> producerSettings(final ActorSystem system, final Serializer<K> keySerializer, final Serializer<V> valueSerializer) {
         Config config = system.settings().config().getConfig("akka.kafka.producer");
         return ProducerSettings.create(config, keySerializer, valueSerializer)
                 .withEnrichCompletionStage(DiscoverySupport.producerBootstrapServers(config, system));
     }
 
+    /**
+     * Construct an Akka Kafka ConsumerSettings from the given config and deserialisers
+     *
+     * @param system            the application's actor system to use to load config values
+     * @param keyDeserializer   the stream's key deserialiser
+     * @param valueDeserializer the stream's value deserialiser
+     * @return a {@link ProducerSettings} object for creating Akka {@link Source}s
+     */
     public ConsumerSettings<K, V> consumerSettings(final ActorSystem system, final Deserializer<K> keyDeserializer, final Deserializer<V> valueDeserializer) {
         Config config = system.settings().config().getConfig("akka.kafka.consumer");
         return ConsumerSettings.create(config, keyDeserializer, valueDeserializer)
@@ -59,22 +75,48 @@ public class StreamComponents<K, V> {
                 .withEnrichCompletionStage(DiscoverySupport.consumerBootstrapServers(config, system));
     }
 
+    /**
+     * Construct an Akka Kafka CommitterSettings from the given config
+     *
+     * @param system the application's actor system to use to load config values
+     * @return a {@link CommitterSettings} object for controlling Kafka commits
+     */
     public CommitterSettings committerSettings(final ActorSystem system) {
         Config config = system.settings().config().getConfig("akka.kafka.committer");
         return CommitterSettings.create(config);
     }
 
+    /**
+     * Construct a Kafka Committable Sink for Akka streams
+     *
+     * @param producerSettings  the producer settings for kafka
+     * @param committerSettings the committer settings for kafka
+     * @return a Kafka-connected Committable Sink for Akka streams
+     */
     public Sink<ProducerMessage.Envelope<K, V, ConsumerMessage.Committable>, CompletionStage<Done>> committableProducer(
             final ProducerSettings<K, V> producerSettings,
             final CommitterSettings committerSettings) {
         return Producer.committableSink(producerSettings, committerSettings);
     }
 
+    /**
+     * Construct a Kafka Plain Sink for Akka streams (no control over Kafka commits)
+     *
+     * @param producerSettings the producer settings for kafka
+     * @return a Kafka-connected Sink for Akka streams
+     */
     public Sink<ProducerRecord<K, V>, CompletionStage<Done>> plainProducer(
             final ProducerSettings<K, V> producerSettings) {
         return Producer.plainSink(producerSettings);
     }
 
+    /**
+     * Construct a Kafka Committable Source for Akka streams (no need for committer settings)
+     *
+     * @param consumerSettings the committer settings for kafka
+     * @param topic            the topic name to subscribe to
+     * @return a Kafka-connected Source for Akka streams
+     */
     public Source<ConsumerMessage.CommittableMessage<K, V>, Consumer.Control> committableConsumer(
             final ConsumerSettings<K, V> consumerSettings,
             final String topic) {

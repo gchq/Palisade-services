@@ -79,6 +79,10 @@ public class ProducerTopicConfiguration {
         this.topics = topics;
     }
 
+    /**
+     * Configuration for Kafka topics, comprised of topic name and partitions
+     * Note that a service should not be aware of topic replication factor
+     */
     public static class Topic {
         private String name;
         private Integer partitions;

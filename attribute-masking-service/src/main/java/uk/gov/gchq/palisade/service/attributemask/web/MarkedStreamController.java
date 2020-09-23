@@ -35,13 +35,14 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Message-system-agnostic wrapper around the service, handling tokens, stream-markers and skipping messages where appropriate
+ * Intended to be inherited and extended by a technology-specific controller (REST, Kafka, etc...)
  */
-public class MarkedStreamController {
+class MarkedStreamController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkedStreamController.class);
 
     private final AttributeMaskingService attributeMaskingService;
 
-    public MarkedStreamController(final AttributeMaskingService attributeMaskingService) {
+    protected MarkedStreamController(final AttributeMaskingService attributeMaskingService) {
         this.attributeMaskingService = attributeMaskingService;
     }
 
@@ -89,7 +90,7 @@ public class MarkedStreamController {
         return attributeMaskingService.maskResourceAttributes(request.getResource());
     }
 
-    private void processStreamMarker(final String token, final StreamMarker streamMarker) {
+    private static void processStreamMarker(final String token, final StreamMarker streamMarker) {
         // Nothing to do if this is a stream marker, transparently pass on the message
         LOGGER.debug("Observed stream-marker {} for token {}", streamMarker, token);
     }

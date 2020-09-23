@@ -33,6 +33,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfigurat
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -43,22 +44,35 @@ import java.util.stream.Collectors;
 public class AttributeMaskingApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeMaskingApplication.class);
 
-    private final Collection<RunnableGraph<?>> runners;
+    private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
     private final ActorSystem system;
 
+    /**
+     * Autowire Akka objects in constructor for application ready event
+     *
+     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param system       the Akka {@link ActorSystem} configured to be used
+     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     */
     public AttributeMaskingApplication(
             final Collection<RunnableGraph<?>> runners,
             final ActorSystem system,
             final Materializer materializer,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
-        this.runners = runners;
+        this.runners = new HashSet<>(runners);
         this.system = system;
         this.materializer = materializer;
         this.executor = executor;
     }
 
+    /**
+     * Application entrypoint, creates and runs a spring application, passing in the given command-line args
+     *
+     * @param args command-line arguments passed to the application
+     */
     public static void main(final String[] args) {
         LOGGER.debug("AttributeMaskingApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(AttributeMaskingApplication.class).web(WebApplicationType.SERVLET)

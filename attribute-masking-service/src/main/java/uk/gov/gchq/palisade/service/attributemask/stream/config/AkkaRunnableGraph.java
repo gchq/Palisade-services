@@ -74,7 +74,7 @@ public class AkkaRunnableGraph {
             final KafkaController controller,
             final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorSink,
             final Topic errorTopic) {
-        return ex -> {
+        return (Throwable ex) -> {
             LOGGER.warn("Received {} exception, supervising now", ex.getClass());
             if (ex instanceof AuditableException) {
                 try {
@@ -82,7 +82,7 @@ public class AkkaRunnableGraph {
                     Source.single(controller.<String>auditError((AuditableException) ex, errorTopic))
                             .runWith(errorSink, materializer);
                     return Supervision.resumingDecider().apply(ex);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOGGER.error("Error occurred while auditing, stopping now!", e);
                     return Supervision.stoppingDecider().apply(e);
                 }

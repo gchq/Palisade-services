@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRespon
 import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Static configuration for kafka key/value serialisers/deserialisers
@@ -36,33 +37,53 @@ import java.io.IOException;
  * - Each output has a pair of key/value serialisers
  * In general, the keys are not used so the choice of serialiser is not important
  */
-public class SerDesConfig {
+public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
     }
 
+    /**
+     * Kafka key deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate key deserialiser for the topic's message content
+     */
     public static Deserializer<String> keyDeserializer() {
         return new StringDeserializer();
     }
 
+    /**
+     * Kafka value deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate value deserialiser for the topic's message content (AttributeMaskingRequest)
+     */
     public static Deserializer<AttributeMaskingRequest> valueDeserializer() {
-        return (ignored, attributeMaskingRequest) -> {
+        return (String ignored, byte[] attributeMaskingRequest) -> {
             try {
                 return MAPPER.readValue(attributeMaskingRequest, AttributeMaskingRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingRequest), e);
+                throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingRequest, Charset.defaultCharset()), e);
             }
         };
     }
 
+    /**
+     * Kafka key serialiser for downstream messages going out as output
+     *
+     * @return an appropriate key serialiser for the topic's message content
+     */
     public static Serializer<String> keySerializer() {
         return new StringSerializer();
     }
 
+    /**
+     * Kafka value serialiser for downstream messages going out as output
+     *
+     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
+     */
     public static Serializer<AttributeMaskingResponse> valueSerializer() {
-        return (ignored, attributeMaskingResponse) -> {
+        return (String ignored, AttributeMaskingResponse attributeMaskingResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(attributeMaskingResponse);
             } catch (JsonProcessingException e) {
@@ -71,13 +92,22 @@ public class SerDesConfig {
         };
     }
 
-
+    /**
+     * Kafka key serialiser for downstream messages going out as errors
+     *
+     * @return an appropriate key serialiser for the topic's message content
+     */
     public static Serializer<String> errorKeySerializer() {
         return new StringSerializer();
     }
 
+    /**
+     * Kafka value serialiser for downstream messages going out as errors
+     *
+     * @return an appropriate value serialiser for the topic's message content (AuditMessage)
+     */
     public static Serializer<AuditErrorMessage> errorValueSerializer() {
-        return (ignored, auditErrorMessage) -> {
+        return (String ignored, AuditErrorMessage auditErrorMessage) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {

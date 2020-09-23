@@ -16,10 +16,15 @@
 
 package uk.gov.gchq.palisade.service.attributemask.exception;
 
+/**
+ * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
+ * Should only be thrown by a {@link uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer}
+ * when loading Spring YAML config and converting to Akka HOCON config
+ */
 public class PropertyLoadingException extends RuntimeException {
 
     /**
-     * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions
+     * Elevate thrown IOExceptions when loading spring/akka config to RuntimeExceptions.
      *
      * @param message message describing what action caused the exception
      * @param cause   the thrown (non-Runtime) Exception

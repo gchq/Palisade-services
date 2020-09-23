@@ -40,8 +40,11 @@ import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;
 
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Configuration for all kafka connections for the application
+ */
 @Configuration
-public class AkkaTransformerConfig {
+public class AkkaComponentsConfig {
     private static final StreamComponents<String, AttributeMaskingRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AttributeMaskingResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();

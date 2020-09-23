@@ -31,6 +31,8 @@ import uk.gov.gchq.palisade.service.attributemask.message.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -41,10 +43,23 @@ import java.util.Optional;
 public class KafkaController extends MarkedStreamController {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaController.class);
 
+    /**
+     * Autowired constructor for Kafka Controller, supplying the underlying service implementation
+     *
+     * @param attributeMaskingService an implementation of the {@link AttributeMaskingService}
+     */
     public KafkaController(final AttributeMaskingService attributeMaskingService) {
         super(attributeMaskingService);
     }
 
+    /**
+     * Given an (Auditable)Exception, produce an AuditErrorMessage ProducerRecord for writing to Kafka
+     *
+     * @param exception an exception wrapping the cause and original request to be audited
+     * @param errorTopic the topic to write to
+     * @param <K> the type of the kafka error-topic key
+     * @return a Kafka ProducerRecord with appropriate topic, partition, value and headers
+     */
     public <K> ProducerRecord<K, AuditErrorMessage> auditError(
             final AuditableException exception,
             final Topic errorTopic) {
@@ -54,7 +69,7 @@ public class KafkaController extends MarkedStreamController {
                 .withError(exception.getCause());
 
         // Prepare partition keying
-        String token = new String(request.headers().lastHeader(Token.HEADER).value());
+        String token = new String(request.headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
         int partition = Math.floorMod(token.hashCode(), errorTopic.getPartitions());
 
         return new ProducerRecord<>(errorTopic.getName(), partition, (K) null, errorMessage, request.headers());
@@ -78,9 +93,9 @@ public class KafkaController extends MarkedStreamController {
             AttributeMaskingRequest request = requestRecord.value();
 
             // Get Token and StreamMarker from headers
-            String token = new String(requestRecord.headers().lastHeader(Token.HEADER).value());
+            String token = new String(requestRecord.headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
             StreamMarker streamMarker = Optional.ofNullable(requestRecord.headers().lastHeader(StreamMarker.HEADER))
-                    .map(header -> StreamMarker.valueOf(new String(header.value())))
+                    .map(header -> StreamMarker.valueOf(new String(header.value(), Charset.defaultCharset())))
                     .orElse(null);
 
             // Try to store with service
@@ -92,7 +107,7 @@ public class KafkaController extends MarkedStreamController {
             // Return result
             return new ProducerRecord<>(producerTopic.getName(), partition, requestRecord.key(), optionalResponse.orElse(null), requestRecord.headers());
 
-        } catch (Exception ex) {
+        } catch (RuntimeException | IOException ex) {
             // Bind request to exception object, to be caught and audited appropriately
             throw new AuditableException(requestRecord, ex);
         }

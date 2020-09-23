@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
@@ -39,7 +43,13 @@ import java.util.Optional;
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(path = "/streamApi")
 public class RestController extends MarkedStreamController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestController.class);
 
+    /**
+     * Autowired constructor for REST Controller, supplying the underlying service implementation
+     *
+     * @param attributeMaskingService an implementation of the {@link AttributeMaskingService}
+     */
     public RestController(final AttributeMaskingService attributeMaskingService) {
         super(attributeMaskingService);
     }
@@ -73,6 +83,17 @@ public class RestController extends MarkedStreamController {
             );
         } catch (IOException ex) {
             // Audit error appropriately (REST-fully)
+            String nullableResourceId = Optional.ofNullable(request)
+                    .flatMap(attributeMaskingRequest -> {
+                        try {
+                            return Optional.of(attributeMaskingRequest.getResource());
+                        } catch (JsonProcessingException e) {
+                            return Optional.empty();
+                        }
+                    })
+                    .map(Resource::getId)
+                    .orElse(null);
+            LOGGER.error("Exception thrown while processing token {}, streamMarker {} and requestId {}", token, streamMarker, nullableResourceId, ex);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 

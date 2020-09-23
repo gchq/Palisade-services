@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -56,18 +55,29 @@ import java.util.stream.StreamSupport;
 /**
  * Parse and convert Spring maps and lists to Akka configs
  */
-public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements EnvironmentAware, InitializingBean {
+public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesConfigurer.class);
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
+    private static final int PROPERTY_PATH = 1;
+    private static final int PROPERTY_INDEX = 2;
+    private static final int PROPERTY_TAIL = 3;
     private static final Pattern FIELD_NAME_PATTERN = Pattern.compile(".*\\]\\.(.*?)$");
     private static final String LIST_ITEM_SEPERATOR = ",";
 
     private String[] locations;
-    private final ResourceLoader rl;
+    private final ResourceLoader resourceLoader;
     private Environment environment;
 
-    public PropertiesConfigurer(final ResourceLoader rl, final Environment environment) {
-        this.rl = rl;
+    /**
+     * Autowired constructor for a PropertiesConfigurer, requiring the Spring resourceLoader and environment
+     * used when starting the application.
+     * This will then convert the Spring YAML maps and lists to Akka HOCON format.
+     *
+     * @param resourceLoader the Spring application {@link ResourceLoader} for reading resources
+     * @param environment    the Spring application {@link Environment} for reading active profiles and mutable property sources
+     */
+    public PropertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
+        this.resourceLoader = resourceLoader;
         this.environment = environment;
     }
 
@@ -80,7 +90,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     @Override
     public void afterPropertiesSet() {
         MutablePropertySources envPropSources = ((ConfigurableEnvironment) this.environment).getPropertySources();
-        envPropSources.forEach(propertySource -> {
+        envPropSources.forEach((PropertySource<?> propertySource) -> {
             if (propertySource.containsProperty("application.properties.locations")) {
                 locations = ((String) propertySource.getProperty("application.properties.locations"))
                         .split(LIST_ITEM_SEPERATOR);
@@ -94,15 +104,15 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
     private List<PropertySource<?>> loadProperties(final String filename) {
         YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
         try {
-            final Resource[] possiblePropertiesResources = ResourcePatternUtils.getResourcePatternResolver(rl).getResources(filename);
+            final Resource[] possiblePropertiesResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(filename);
             return Arrays.stream(possiblePropertiesResources)
                     .filter(Resource::exists)
-                    .map(resource1 -> {
+                    .map((Resource resource) -> {
                         try {
-                            LOGGER.info("Loading config file: {}", resource1.getFilename());
-                            return loader.load(resource1.getFilename(), resource1);
+                            LOGGER.info("Loading config file: {}", resource.getFilename());
+                            return loader.load(resource.getFilename(), resource);
                         } catch (IOException e) {
-                            String message = loader.getClass().getSimpleName() + " failed to load file " + resource1.getFilename();
+                            String message = loader.getClass().getSimpleName() + " failed to load file " + resource.getFilename();
                             throw new PropertyLoadingException(message, e);
                         }
                     }).flatMap(Collection::stream)
@@ -125,6 +135,12 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                 .collect(Collectors.toMap(Function.identity(), environment::getProperty));
     }
 
+    /**
+     * Convert a Spring key:value YAML-style map to an Akka Config
+     *
+     * @param props the property map to convert
+     * @return an equivalent Akka config to the given properties, converting maps and arrays appropriately
+     */
     public Config toHoconConfig(final Map<String, String> props) {
         final Map<String, String> std = props.entrySet().stream()
                 .filter(entry -> !entry.getKey().matches(INDEXED_PROPERTY_PATTERN.pattern()))
@@ -135,7 +151,7 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         Config config = ConfigFactory.parseMap(std);
 
         List<String> keys = array.keySet().stream()
-                .map(this::reductionKey)
+                .map(PropertiesConfigurer::reductionKey)
                 .distinct()
                 .collect(Collectors.toList());
         for (String key : keys) {
@@ -147,12 +163,12 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         return config;
     }
 
-    private Config toConfig(final Config orig, final String key, final Map<String, String> config) {
+    private static Config toConfig(final Config orig, final String key, final Map<String, String> config) {
         // Map or list?
         Matcher mat = FIELD_NAME_PATTERN.matcher(config.keySet().stream().findFirst().orElse(""));
         if (mat.find()) {
             Map<String, String> node = new HashMap<>();
-            config.forEach((mapKey, value) -> {
+            config.forEach((String mapKey, String value) -> {
                 Matcher fieldNameKeyMatcher = FIELD_NAME_PATTERN.matcher(mapKey);
                 if (fieldNameKeyMatcher.matches()) {
                     node.put(fieldNameKeyMatcher.group(1), value);
@@ -169,22 +185,22 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
         }
     }
 
-    private String reductionKey(final String key) {
+    private static String reductionKey(final String key) {
         Matcher mat = INDEXED_PROPERTY_PATTERN.matcher(key);
-        if (mat.matches() && mat.groupCount() > 2) {
-            String root = mat.group(1);
-            String index = mat.group(2);
-            mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(3));
+        if (mat.matches() && mat.groupCount() > PROPERTY_INDEX) {
+            String root = mat.group(PROPERTY_PATH);
+            String index = mat.group(PROPERTY_INDEX);
+            mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
             while (mat.matches()) {
-                String prevIndex = mat.group(2);
-                root = String.format("%s[%s].%s", root, index, mat.group(1));
-                mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(3));
+                String prevIndex = mat.group(PROPERTY_INDEX);
+                root = String.format("%s[%s].%s", root, index, mat.group(PROPERTY_PATH));
+                mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
                 if (mat.matches()) {
-                    if (mat.group(1).isEmpty()) {
+                    if (mat.group(PROPERTY_PATH).isEmpty()) {
                         return root;
                     } else {
-                        root = String.format("%s[%s].%s", root, prevIndex, mat.group(1));
-                        mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(1));
+                        root = String.format("%s[%s].%s", root, prevIndex, mat.group(PROPERTY_PATH));
+                        mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_PATH));
                     }
                 }
             }
