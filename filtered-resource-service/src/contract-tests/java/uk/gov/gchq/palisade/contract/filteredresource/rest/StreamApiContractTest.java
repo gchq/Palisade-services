@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,10 +29,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
+import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.message.Token;
-import uk.gov.gchq.palisade.service.filteredresource.message.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,14 +48,16 @@ class StreamApiContractTest {
     }
 
     @Test
-    void testPostTopicOffsetReturnsAccepted() {
+    void testPostTopicOffsetReturnsAccepted() throws JsonProcessingException {
         // Given we have some request data
-        TopicOffsetMessage request = ApplicationTestData.OFFSET_MESSAGE;
+        JsonNode request = ContractTestData.TOPIC_OFFSET_MSG_JSON_NODE;
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        headers.add(Token.HEADER, ContractTestData.REQUEST_TOKEN);
+
+        System.out.println(new ObjectMapper().writeValueAsString(request));
 
         // When the request is POSTed to the service's REST endpoint
-        HttpEntity<TopicOffsetMessage> requestWithHeaders = new HttpEntity<>(request, headers);
+        HttpEntity<JsonNode> requestWithHeaders = new HttpEntity<>(request, headers);
         ResponseEntity<Void> response = restTemplate.postForEntity("/streamApi/topicOffset", requestWithHeaders, Void.class);
 
         // Then the response is as expected

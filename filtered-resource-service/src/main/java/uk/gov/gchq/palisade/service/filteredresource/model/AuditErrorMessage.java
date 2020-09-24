@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.message;
+package uk.gov.gchq.palisade.service.filteredresource.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -30,35 +28,30 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * Represents information for a successful processing of a request which is forwarded to the audit-service.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
+ * Represents information for an error that has occurred during the processing of a request. This information is
+ * forwarded to the audit-service.
+ * Note all of the services can potentially send an error message.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class AuditSuccessMessage extends AuditMessage {
+public final class AuditErrorMessage extends AuditMessage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @JsonProperty("leafResourceId")
-    private final String leafResourceId;  //leafResource ID for the resource
+    private final Throwable error;  //Error that occurred
 
     @JsonCreator
-    private AuditSuccessMessage(
+    private AuditErrorMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
-            final @JsonProperty("leafResourceId") String leafResourceId) {
+            final @JsonProperty("error") Throwable error) {
 
         super(userId, resourceId, context, attributes);
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("Leaf Resource ID cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
+
     }
 
     @Generated
-    public String getLeafResourceId() {
-        return leafResourceId;
+    public Throwable getError() {
+        return error;
     }
 
     /**
@@ -73,20 +66,20 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> attributes -> leafResource ->
-                    new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource);
+            return userId -> resourceId -> context -> attributes -> error ->
+                    new AuditErrorMessage(userId, resourceId, context, attributes, error);
         }
 
         /**
          * Starter method for the Builder class that uses a FilteredResourceRequest for the request specific part of the Audit message.
          * This method is called followed by the call to add resource with the IResource interface to create the
-         * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
+         * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request    the request message that was sent to the data-service
          * @param attributes optional information stored in a Map
-         * @return interface {@link ILeafResourceId} for the next step in the build.
+         * @return interface {@link IError} for the next step in the build.
          */
-        public static ILeafResourceId create(final FilteredResourceRequest request, final Map<String, Object> attributes) {
+        public static IError create(final FilteredResourceRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
@@ -151,22 +144,22 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the attributes for the message.
              *
              * @param attributes timestamp for the request.
-             * @return interface {@link ILeafResourceId} for the next step in the build.
+             * @return interface {@link IError} for the next step in the build.
              */
-            ILeafResourceId withAttributes(Map<String, Object> attributes);
+            IError withAttributes(Map<String, Object> attributes);
         }
 
         /**
-         * Adds the leaf resource ID for the message.
+         * Adds the error that occurred.
          */
-        public interface ILeafResourceId {
+        public interface IError {
             /**
-             * Adds the leaf resource ID for the message.
+             * Adds the error for the message.
              *
-             * @param leafResource leaf resource ID.
-             * @return class {@link AuditSuccessMessage} for the completed class from the builder.
+             * @param error that occurred.
+             * @return class  {@link AuditErrorMessage} for the completed class from the builder.
              */
-            AuditSuccessMessage withLeafResourceId(String leafResource);
+            AuditErrorMessage withError(Throwable error);
         }
     }
 
@@ -176,27 +169,27 @@ public final class AuditSuccessMessage extends AuditMessage {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditSuccessMessage)) {
+        if (!(o instanceof AuditErrorMessage)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        AuditSuccessMessage that = (AuditSuccessMessage) o;
-        return leafResourceId.equals(that.leafResourceId);
+        AuditErrorMessage that = (AuditErrorMessage) o;
+        return error.getMessage().equals(that.error.getMessage());
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), leafResourceId);
+        return Objects.hash(super.hashCode(), error);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditSuccessMessage.class.getSimpleName() + "[", "]")
-                .add("leafResourceId='" + leafResourceId + "'")
+        return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
+                .add("error=" + error)
                 .add(super.toString())
                 .toString();
     }

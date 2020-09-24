@@ -16,8 +16,8 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import uk.gov.gchq.palisade.service.filteredresource.message.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 
 import java.util.Map;
 

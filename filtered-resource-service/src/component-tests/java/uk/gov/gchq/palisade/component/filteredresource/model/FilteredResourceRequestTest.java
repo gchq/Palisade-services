@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.filteredresource.message;
+package uk.gov.gchq.palisade.component.filteredresource.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 
 import java.io.IOException;
 

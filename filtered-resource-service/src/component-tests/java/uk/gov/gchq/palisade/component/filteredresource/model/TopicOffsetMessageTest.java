@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.filteredresource.message;
+package uk.gov.gchq.palisade.component.filteredresource.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.message.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 
 import java.io.IOException;
 

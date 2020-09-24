@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.filteredresource.message;
+package uk.gov.gchq.palisade.component.filteredresource.model;
 
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.message.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 
 import java.io.IOException;
 import java.util.HashMap;

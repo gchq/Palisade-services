@@ -22,9 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
+import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
-import uk.gov.gchq.palisade.service.filteredresource.message.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.web.FilteredResourceController;
 
@@ -49,8 +49,8 @@ class H2PersistenceContractTest {
     @Test
     void testTopicOffsetsAreStoredInH2() {
         // Given we have some request data
-        String token = ApplicationTestData.REQUEST_TOKEN;
-        TopicOffsetMessage request = ApplicationTestData.OFFSET_MESSAGE;
+        String token = ContractTestData.REQUEST_TOKEN;
+        TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
         controller.storeTopicOffset(token, request);
