@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.attributemask.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 
@@ -40,7 +41,7 @@ public class ContextConverter implements AttributeConverter<Context, String> {
         try {
             return this.objectMapper.writeValueAsString(context);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert context to json string", e);
+            throw new SerializationFailedException("Could not convert context to json string", e);
         }
     }
 
@@ -49,7 +50,7 @@ public class ContextConverter implements AttributeConverter<Context, String> {
         try {
             return this.objectMapper.readValue(attribute, Context.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert json string to context", e);
+            throw new SerializationFailedException("Could not convert json string to context", e);
         }
     }
 }

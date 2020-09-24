@@ -35,6 +35,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
@@ -52,11 +53,11 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.message.Token;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 
@@ -220,6 +221,7 @@ class KafkaContractTest {
         );
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(longs = {1, 10, 100})
     @DirtiesContext

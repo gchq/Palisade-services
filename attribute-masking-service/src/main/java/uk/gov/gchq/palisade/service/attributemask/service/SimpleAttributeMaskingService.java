@@ -16,13 +16,15 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
+import org.springframework.lang.NonNull;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Simple implementation of the core of the attribute-masking-service.
@@ -30,27 +32,27 @@ import java.io.IOException;
  */
 public class SimpleAttributeMaskingService implements AttributeMaskingService {
     private final PersistenceLayer persistenceLayer;
+    private final LeafResourceMasker resourceMasker;
 
     /**
      * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
+     * as well as the appropriate masking function
      *
      * @param persistenceLayer the implementation of a PersistenceLayer to use
+     * @param resourceMasker   the implementation of a LeafResourceMasker to use
      */
-    public SimpleAttributeMaskingService(final PersistenceLayer persistenceLayer) {
+    public SimpleAttributeMaskingService(final PersistenceLayer persistenceLayer, final LeafResourceMasker resourceMasker) {
         this.persistenceLayer = persistenceLayer;
+        this.resourceMasker = resourceMasker;
     }
 
     @Override
-    public void storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) throws IOException {
-        try {
-            this.persistenceLayer.put(token, user, resource, context, rules);
-        } catch (RuntimeException ex) {
-            throw new IOException("Error encountered while writing to persistence store: ", ex);
-        }
+    public CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @NonNull User user, final @NonNull LeafResource resource, final @NonNull Context context, final @NonNull Rules<?> rules) {
+        return this.persistenceLayer.putAsync(token, user, resource, context, rules);
     }
 
     @Override
-    public LeafResource maskResourceAttributes(final LeafResource resource) {
-        return resource;
+    public LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+        return resourceMasker.apply(resource);
     }
 }

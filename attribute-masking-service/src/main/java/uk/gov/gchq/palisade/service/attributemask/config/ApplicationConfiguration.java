@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Primary;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
 import uk.gov.gchq.palisade.service.attributemask.service.SimpleAttributeMaskingService;
 
 /**
@@ -38,8 +40,14 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    SimpleAttributeMaskingService simpleAttributeMaskingService(final JpaPersistenceLayer persistenceLayer) {
-        return new SimpleAttributeMaskingService(persistenceLayer);
+    LeafResourceMasker simpleLeafResourceMasker() {
+        // TODO: Replace with a proper masker
+        return x -> x;
+    }
+
+    @Bean
+    SimpleAttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, LeafResourceMasker resourceMasker) {
+        return new SimpleAttributeMaskingService(persistenceLayer, resourceMasker);
     }
 
     @Bean

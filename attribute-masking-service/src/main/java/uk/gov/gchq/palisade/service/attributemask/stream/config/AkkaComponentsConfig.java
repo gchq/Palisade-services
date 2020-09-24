@@ -31,9 +31,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;

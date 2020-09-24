@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackageClasses = {AuthorisedRequestsRepositoryExternalConnection.class, AuthorisedRequestsRepository.class})
-@ActiveProfiles({"dbtest", "akkatest"})
+@ActiveProfiles({"dbtest", "akka"})
 class H2ContractTest {
 
     @Autowired
@@ -59,28 +58,25 @@ class H2ContractTest {
     }
 
     @Test
-    void testStoredAuthorisedRequestsAreRetrievableExternally() throws IOException {
+    void testStoredAuthorisedRequestsAreRetrievableExternally() {
         // Given a request is stored by the service
         attributeMaskingService.storeAuthorisedRequest(
                 ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.USER,
-                ApplicationTestData.LEAF_RESOURCE,
-                ApplicationTestData.CONTEXT,
-                ApplicationTestData.RULES
-        );
+                ApplicationTestData.REQUEST
+        ).join();
 
         // When the "data-service" (this test class) retrieves this stored request
         Optional<AuthorisedRequestEntity> persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.RESOURCE_ID);
 
         // Then an entity is found and it is equivalent to the request stored
-        assertThat(persistedEntity).isPresent();
-        assertThat(persistedEntity).get()
-                .isEqualTo(new AuthorisedRequestEntity(
-                        ApplicationTestData.REQUEST_TOKEN,
-                        ApplicationTestData.USER,
-                        ApplicationTestData.LEAF_RESOURCE,
-                        ApplicationTestData.CONTEXT,
-                        ApplicationTestData.RULES));
+        assertThat(persistedEntity)
+                .isPresent()
+                .get().isEqualTo(new AuthorisedRequestEntity(
+                ApplicationTestData.REQUEST_TOKEN,
+                ApplicationTestData.USER,
+                ApplicationTestData.LEAF_RESOURCE,
+                ApplicationTestData.CONTEXT,
+                ApplicationTestData.RULES));
     }
 
 }

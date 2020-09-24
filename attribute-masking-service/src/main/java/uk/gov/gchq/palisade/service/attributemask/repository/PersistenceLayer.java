@@ -20,6 +20,8 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface PersistenceLayer {
 
     /**
@@ -31,6 +33,6 @@ public interface PersistenceLayer {
      * @param context  the {@link Context} as originally supplied by the client
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      */
-    void put(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules);
+    CompletableFuture<Void> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules);
 
 }

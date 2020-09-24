@@ -25,6 +25,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 import javax.transaction.Transactional;
 
+import java.util.concurrent.CompletableFuture;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -47,9 +49,11 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     @Transactional
-    public void put(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
-        this.authorisedRequestsRepository.save(token, user, resource, context, rules);
-
-        LOGGER.debug("Persisted authorised request for unique pair {}-{}", token, resource.getId());
+    public CompletableFuture<Void> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+        LOGGER.debug("Persisting authorised request for unique pair {}-{}", token, resource.getId());
+        return CompletableFuture.supplyAsync(() -> {
+            this.authorisedRequestsRepository.save(token, user, resource, context, rules);
+            return null;
+        });
     }
 }

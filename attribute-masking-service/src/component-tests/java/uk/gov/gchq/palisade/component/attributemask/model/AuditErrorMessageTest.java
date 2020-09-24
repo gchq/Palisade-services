@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.attributemask.message;
+package uk.gov.gchq.palisade.component.attributemask.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.attributemask.message.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;

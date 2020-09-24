@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.attributemask.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.User;
 
@@ -40,7 +41,7 @@ public class UserConverter implements AttributeConverter<User, String> {
         try {
             return this.objectMapper.writeValueAsString(user);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert user to json string", e);
+            throw new SerializationFailedException("Could not convert user to json string", e);
         }
     }
 
@@ -49,7 +50,7 @@ public class UserConverter implements AttributeConverter<User, String> {
         try {
             return this.objectMapper.readValue(attribute, User.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert json string to user", e);
+            throw new SerializationFailedException("Could not convert json string to user", e);
         }
     }
 }

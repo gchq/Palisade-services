@@ -27,10 +27,10 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
-import uk.gov.gchq.palisade.service.attributemask.message.StreamMarker;
-import uk.gov.gchq.palisade.service.attributemask.message.Token;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.model.Token;
 
 import java.io.Serializable;
 import java.util.function.Supplier;

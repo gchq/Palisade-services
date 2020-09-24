@@ -28,15 +28,17 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
-import uk.gov.gchq.palisade.service.attributemask.message.Token;
+import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
-import uk.gov.gchq.palisade.service.attributemask.web.RestController;
+import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
-@WebMvcTest(controllers = {RestController.class})
-@ContextConfiguration(classes = {ControllerWebMvcTest.class, RestController.class})
+@WebMvcTest(controllers = {AttributeMaskingRestController.class})
+@ContextConfiguration(classes = {ControllerWebMvcTest.class, AttributeMaskingRestController.class})
 class ControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -44,7 +46,7 @@ class ControllerWebMvcTest {
     private AttributeMaskingService mockService;
 
     @Autowired
-    private RestController controller;
+    private AttributeMaskingRestController controller;
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,7 +59,10 @@ class ControllerWebMvcTest {
     @Test
     void testControllerPersistsAndMasks() throws Exception {
         // Given some application test data
-        Mockito.when(mockService.maskResourceAttributes(any())).thenReturn(ApplicationTestData.LEAF_RESOURCE);
+        Mockito.when(mockService.maskResourceAttributes(any()))
+                .thenReturn(ApplicationTestData.RESPONSE);
+        Mockito.when(mockService.storeAuthorisedRequest(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/streamApi/maskAttributes")

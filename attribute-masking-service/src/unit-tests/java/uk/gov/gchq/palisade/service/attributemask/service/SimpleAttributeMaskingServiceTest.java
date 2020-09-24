@@ -16,37 +16,35 @@
 
 package uk.gov.gchq.palisade.service.attributemask.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 
 class SimpleAttributeMaskingServiceTest {
 
     JpaPersistenceLayer mockPersistenceLayer = Mockito.mock(JpaPersistenceLayer.class);
+    LeafResourceMasker mockMasker = Mockito.mock(LeafResourceMasker.class);
+    AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer, mockMasker);
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(mockPersistenceLayer, mockMasker);
+    }
 
     @Test
-    void testAttributeMaskingServiceDelegatesToPersistenceLayer() throws IOException {
+    void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
         // given we have a simpleAttributeMaskingService with a mocked persistenceLayer
-        AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
 
         // when we request to store some data
-        attributeMaskingService.storeAuthorisedRequest(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.USER,
-                ApplicationTestData.LEAF_RESOURCE,
-                ApplicationTestData.CONTEXT,
-                ApplicationTestData.RULES
-        );
+        attributeMaskingService.storeAuthorisedRequest(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.REQUEST);
 
         // then the persistence layer was requested to store the data
-        Mockito.verify(mockPersistenceLayer, Mockito.atLeastOnce()).put(
+        Mockito.verify(mockPersistenceLayer, Mockito.atLeastOnce()).putAsync(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.USER,
                 ApplicationTestData.LEAF_RESOURCE,
@@ -56,16 +54,42 @@ class SimpleAttributeMaskingServiceTest {
     }
 
     @Test
-    void testAttributeMaskingServiceMasksResource() {
+    void testAttributeMaskingServiceStoreIgnoresNulls() {
         // given we have a simpleAttributeMaskingService with a mocked persistenceLayer
-        AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer);
+
+        // when we request to store a null
+        attributeMaskingService.storeAuthorisedRequest(ApplicationTestData.REQUEST_TOKEN, null);
+
+        // then it did not request to store with the persistence layer
+        Mockito.verify(mockPersistenceLayer, Mockito.never()).putAsync(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    void testAttributeMaskingServiceMasksResource() {
+        // given we have a simpleAttributeMaskingService with a mocked resourceMasker
 
         // when we request to mask a resource
-        LeafResource resource = attributeMaskingService.maskResourceAttributes(ApplicationTestData.LEAF_RESOURCE);
+        attributeMaskingService.maskResourceAttributes(ApplicationTestData.REQUEST);
 
-        // then the resource is masked appropriately
-        // here, we expect nothing to have been done, but other implementations will apply some transformation on it
-        assertThat(resource).isEqualTo(ApplicationTestData.LEAF_RESOURCE);
+        // then the leaf resource masker was called
+        Mockito.verify(mockMasker, Mockito.atLeastOnce()).apply(ApplicationTestData.LEAF_RESOURCE);
+    }
+
+    @Test
+    void testAttributeMaskingServiceMaskAllowsNulls() {
+        // given we have a simpleAttributeMaskingService with a mocked resourceMasker
+
+        // when we request to mask a resource
+        attributeMaskingService.maskResourceAttributes(null);
+
+        // then the leaf resource masker was called
+        Mockito.verify(mockMasker, Mockito.never()).apply(any());
     }
 
 }

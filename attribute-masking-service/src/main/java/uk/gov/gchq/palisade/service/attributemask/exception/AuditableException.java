@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.attributemask.exception;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 
 /**
  * Capture a thrown exception and a kafka consumer record, wrapping them in a message to be caught by the supervisor.

@@ -52,13 +52,13 @@ class JpaPersistenceLayerTest {
     @Test
     void testPutAndGetReturnsExpectedEntity() {
         // given the persistence layer has something stored in it
-        persistenceLayer.put(
+        persistenceLayer.putAsync(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.USER,
                 ApplicationTestData.LEAF_RESOURCE,
                 ApplicationTestData.CONTEXT,
                 ApplicationTestData.RULES
-        );
+        ).join();
 
         // when all entities are retrieved from the repository
         Iterable<AuthorisedRequestEntity> authorisedRequests = requestsRepository.findAll();

@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.attributemask.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 
@@ -40,7 +41,7 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
         try {
             return this.objectMapper.writeValueAsString(leafResource);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert leaf resource to json string", e);
+            throw new SerializationFailedException("Could not convert leaf resource to json string", e);
         }
     }
 
@@ -49,7 +50,7 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
         try {
             return this.objectMapper.readValue(attribute, LeafResource.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Could not convert json string to leaf resource", e);
+            throw new SerializationFailedException("Could not convert json string to leaf resource", e);
         }
     }
 }

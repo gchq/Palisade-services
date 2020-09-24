@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.message;
+package uk.gov.gchq.palisade.service.attributemask.service;
+
+import uk.gov.gchq.palisade.resource.LeafResource;
+
+import java.util.function.UnaryOperator;
 
 /**
- * Marks the start or end of a stream of messages.
- * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
- * Will not be present for all other (content-ful) messages.
+ * Mask the leafResource, removing any sensitive information - this may later include
+ * applying a separate set of attributeRules, distinct from resourceRules and recordRules.
+ * For now, it simply extends a  UnaryOperator interface
  */
-public enum StreamMarker {
-    START,
-    END;
-
-    public static final String HEADER = "X-Stream-Marker";
+public interface LeafResourceMasker extends UnaryOperator<LeafResource> {
 }

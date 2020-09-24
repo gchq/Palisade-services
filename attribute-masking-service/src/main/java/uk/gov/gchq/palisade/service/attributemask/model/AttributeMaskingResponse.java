@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.attributemask.message;
+package uk.gov.gchq.palisade.service.attributemask.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,49 +24,45 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The AttributeMaskingRequest is the input for attribute-masking-service for preliminary processing and routing of the data.
- * AttributeMaskingResponse is the output for this service which will have the redacted data schema that is to be
+ * AttributeMaskingResponse represents the output for attribute-masking-service which will include redacted data schema that is to be
  * provided to the client.
+ * This will be forwarded to the filtered-resource-service in preparation for the client's request for the related Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.attributemasking.message.AttributeMaskingRequest is the input for the attribute-masking-service.
+ * uk.gov.gchq.palisade.service.attributemask.request.AttributeMaskingResponse is the output from the attribute-masking-service.
+ * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the filtered-resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class AttributeMaskingRequest {
+public final class AttributeMaskingResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String userId;  //Unique identifier for the user
     private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
-    private final JsonNode user;  //Json Node representation of the User
-    private final JsonNode resource; // Json Node representation of the Resources
-    private final JsonNode rules; // Json Node representation of the Rules
+
+    /**
+     * Resource after it has been processed.  This will be information that has been
+     * redacted.
+     */
+    public final JsonNode resource; // Masked resource metadata
 
     @JsonCreator
-    private AttributeMaskingRequest(
+    private AttributeMaskingResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resource") JsonNode resource,
-            final @JsonProperty("rules") JsonNode rules) {
+            final @JsonProperty("resource") JsonNode resource) {
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("userId cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("resourceId cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("context cannot be null"));
-        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("user cannot be null"));
         this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("resource cannot be null"));
-        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new IllegalArgumentException("rules cannot be null"));
     }
 
     @Generated
@@ -86,52 +81,41 @@ public final class AttributeMaskingRequest {
     }
 
     @Generated
-    @JsonIgnore
-    public JsonNode getContextNode() {
-        return context;
-    }
-
-    @Generated
-    public User getUser() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.user, User.class);
-    }
-
-    @Generated
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
-    @Generated
-    @JsonIgnore
-    public JsonNode getResourceNode() {
-        return resource;
-    }
-
-    @Generated
-    public Rules getRules() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.rules, Rules.class);
-    }
-
-    @Generated
-    @JsonIgnore
-    public JsonNode getRulesNode() {
-        return rules;
-    }
-
     /**
-     * Builder class for the creation of instances of the AttributeMaskingRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AttributeMaskingResponse.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * AttributeMaskingRequest class.
+         * AttributeMaskingResponse class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> user -> resource -> rules ->
-                    new AttributeMaskingRequest(userId, resourceId, context, user, resource, rules);
+            return userId -> resourceId -> context -> resource ->
+                    new AttributeMaskingResponse(userId, resourceId, context, resource);
+        }
+
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * AttributeMaskingResponse class.
+         * Starter method for the Builder class that uses a AttributeMaskingRequest and appends the redacted version of the resource.
+         * This method is called followed by the call to add user with the IUserId interface to create the
+         * AttributeMaskingResponse class.
+         *
+         * @param request message that was sent to the attribute-masking-service
+         * @return interface  {@link IResourceId} for the next step in the build.
+         */
+        public static IResource create(final AttributeMaskingRequest request) {
+            return create()
+                    .withUserId(request.getUserId())
+                    .withResourceId(request.getResourceId())
+                    .withContextNode(request.getContextNode());
         }
 
         /**
@@ -160,7 +144,6 @@ public final class AttributeMaskingRequest {
             IContext withResourceId(String resourceId);
         }
 
-
         /**
          * Adds the user context information to the message.
          */
@@ -169,9 +152,9 @@ public final class AttributeMaskingRequest {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link IUser} for the next step in the build.
+             * @return interface {@link IResource} for the next step in the build.
              */
-            default IUser withContext(Context context) {
+            default IResource withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -179,32 +162,9 @@ public final class AttributeMaskingRequest {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return interface {@link IUser} for the next step in the build.
+             * @return interface {@link IResource} for the next step in the build.
              */
-            IUser withContextNode(JsonNode context);
-        }
-
-        /**
-         * Adds the user information to the message.
-         */
-        public interface IUser {
-            /**
-             * Adds the user user information.
-             *
-             * @param user for the request.
-             * @return class {@link IResource} for the next step in the build.
-             */
-            default IResource withUser(User user) {
-                return withUserNode(MAPPER.valueToTree(user));
-            }
-
-            /**
-             * Adds the user user information.  Uses a JsonNode string form of the information.
-             *
-             * @param user for the request.
-             * @return class {@link IResource} for the next step in the build.
-             */
-            IResource withUserNode(JsonNode user);
+            IResource withContextNode(JsonNode context);
         }
 
         /**
@@ -215,42 +175,19 @@ public final class AttributeMaskingRequest {
              * Adds the resource that has been requested to access.
              *
              * @param resource that is requested to access.
-             * @return interface {@link IRules} for the next step in the build.
+             * @return class {@link AttributeMaskingResponse} for the completed class from the builder.
              */
-            default IRules withResource(Resource resource) {
+            default AttributeMaskingResponse withResource(LeafResource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
             /**
-             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
+             * Adds the Resource information. Uses a JsonNode String form of the information
              *
-             * @param resource that is requested to access.
-             * @return interface {@link IRules} for the next step in the build.
+             * @param resource resource that has been requested to access
+             * @return class {@link AttributeMaskingResponse} for the completed class from the builder
              */
-            IRules withResourceNode(JsonNode resource);
-        }
-
-        /**
-         * Adds the rules associated with this request.
-         */
-        public interface IRules {
-            /**
-             * Adds the rules that specify the access.
-             *
-             * @param rules that apply to this request.
-             * @return class {@link AttributeMaskingRequest} for the completed class from the builder.
-             */
-            default AttributeMaskingRequest withRules(Rules rules) {
-                return withRulesNode(MAPPER.valueToTree(rules));
-            }
-
-            /**
-             * Adds the rules that specify the access.  Uses a JsonNode string form of the information.
-             *
-             * @param rules that apply to this request.
-             * @return class {@link AttributeMaskingRequest} for the completed class from the builder.
-             */
-            AttributeMaskingRequest withRulesNode(JsonNode rules);
+            AttributeMaskingResponse withResourceNode(JsonNode resource);
         }
     }
 
@@ -260,34 +197,30 @@ public final class AttributeMaskingRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AttributeMaskingRequest)) {
+        if (!(o instanceof AttributeMaskingResponse)) {
             return false;
         }
-        AttributeMaskingRequest that = (AttributeMaskingRequest) o;
+        AttributeMaskingResponse that = (AttributeMaskingResponse) o;
         return userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
                 context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                rules.equals(that.rules);
+                resource.equals(that.resource);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource, rules);
+        return Objects.hash(userId, resourceId, context, resource);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AttributeMaskingRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AttributeMaskingResponse.class.getSimpleName() + "[", "]")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
-                .add("user=" + user)
-                .add("resources=" + resource)
-                .add("rules=" + rules)
+                .add("resource=" + resource)
                 .add(super.toString())
                 .toString();
     }
