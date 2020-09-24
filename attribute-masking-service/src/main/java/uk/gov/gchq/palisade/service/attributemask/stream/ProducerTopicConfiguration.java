@@ -89,7 +89,7 @@ public class ProducerTopicConfiguration {
     public static class Topic {
         private String name;
         private Integer partitions;
-        private Optional<Integer> assignment;
+        private Integer assignment;
 
         public static class TopicAssignment {
             private Integer partition;
@@ -129,12 +129,12 @@ public class ProducerTopicConfiguration {
         }
 
         @Generated
-        public Optional<Integer> getAssignment() {
+        public Integer getAssignment() {
             return assignment;
         }
 
         @Generated
-        public void setAssignment(final Optional<Integer> assignment) {
+        public void setAssignment(final Integer assignment) {
             requireNonNull(assignment);
             this.assignment = assignment;
         }

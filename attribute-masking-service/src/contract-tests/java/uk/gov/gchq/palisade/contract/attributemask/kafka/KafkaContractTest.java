@@ -138,6 +138,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSets(final long messageCount) {
         // Create a variable number of requests
+        // The ApplicationTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, AttributeMaskingRequest>> requests = Stream.of(
                 Stream.of(ApplicationTestData.START),
                 ApplicationTestData.RECORD_FACTORY.get().limit(messageCount),

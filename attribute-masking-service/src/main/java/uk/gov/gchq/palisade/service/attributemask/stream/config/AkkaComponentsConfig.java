@@ -42,6 +42,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ public class AkkaComponentsConfig {
                 SerDesConfig.valueDeserializer());
 
         Topic topic = configuration.getTopics().get("input-topic");
-        Subscription subscription = topic.getAssignment()
+        Subscription subscription = Optional.ofNullable(topic.getAssignment())
                 .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
                 .orElse(Subscriptions.topics(topic.getName()));
 
