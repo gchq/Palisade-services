@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package uk.gov.gchq.palisade.service.topicoffset.web;
-        //uk.gov.gchq.palisade.service.topicoffset.config
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

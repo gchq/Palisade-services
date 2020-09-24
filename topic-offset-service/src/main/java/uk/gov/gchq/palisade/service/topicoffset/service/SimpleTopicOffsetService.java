@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public class SimpleTopicOffsetService implements TopicOffsetService {
 
-    //private final Predicate<Map<String, String>> predicate = headers -> headers.get(StreamMarker.HEADER)).equals(StreamMarker.START.toString());
-
     /**
      * Checks for the presence of the start marker in the collection of headers.
      *
