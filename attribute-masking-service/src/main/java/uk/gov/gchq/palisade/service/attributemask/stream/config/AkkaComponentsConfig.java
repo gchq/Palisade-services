@@ -43,9 +43,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Configuration for all kafka connections for the application

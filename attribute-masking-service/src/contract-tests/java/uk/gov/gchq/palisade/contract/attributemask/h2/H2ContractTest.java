@@ -23,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
@@ -61,22 +61,16 @@ class H2ContractTest {
     void testStoredAuthorisedRequestsAreRetrievableExternally() {
         // Given a request is stored by the service
         attributeMaskingService.storeAuthorisedRequest(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.REQUEST
+                ContractTestData.REQUEST_TOKEN,
+                ContractTestData.REQUEST_OBJ
         ).join();
 
         // When the "data-service" (this test class) retrieves this stored request
-        Optional<AuthorisedRequestEntity> persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.RESOURCE_ID);
+        Optional<AuthorisedRequestEntity> persistedEntity = externalRepositoryConnection.findByTokenAndResourceId(ContractTestData.REQUEST_TOKEN, ContractTestData.RESOURCE_ID);
 
-        // Then an entity is found and it is equivalent to the request stored
+        // Then an entity is found
         assertThat(persistedEntity)
-                .isPresent()
-                .get().isEqualTo(new AuthorisedRequestEntity(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.USER,
-                ApplicationTestData.LEAF_RESOURCE,
-                ApplicationTestData.CONTEXT,
-                ApplicationTestData.RULES));
+                .isPresent();
     }
 
 }

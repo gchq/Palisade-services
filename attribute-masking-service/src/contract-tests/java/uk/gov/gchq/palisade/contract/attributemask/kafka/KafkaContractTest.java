@@ -27,6 +27,7 @@ import akka.stream.javadsl.Source;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -50,11 +51,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
@@ -86,9 +84,9 @@ class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<AttributeMaskingRequest> {
+    static class RequestSerializer implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final AttributeMaskingRequest attributeMaskingRequest) {
+        public byte[] serialize(final String s, final JsonNode attributeMaskingRequest) {
             try {
                 return MAPPER.writeValueAsBytes(attributeMaskingRequest);
             } catch (JsonProcessingException e) {
@@ -98,11 +96,11 @@ class KafkaContractTest {
     }
 
     // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<AttributeMaskingResponse> {
+    static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
-        public AttributeMaskingResponse deserialize(final String s, final byte[] attributeMaskingResponse) {
+        public JsonNode deserialize(final String s, final byte[] attributeMaskingResponse) {
             try {
-                return MAPPER.readValue(attributeMaskingResponse, AttributeMaskingResponse.class);
+                return MAPPER.readTree(attributeMaskingResponse);
             } catch (IOException e) {
                 throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingResponse), e);
             }
@@ -138,11 +136,11 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSets(final long messageCount) {
         // Create a variable number of requests
-        // The ApplicationTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
-        final Stream<ProducerRecord<String, AttributeMaskingRequest>> requests = Stream.of(
-                Stream.of(ApplicationTestData.START),
-                ApplicationTestData.RECORD_FACTORY.get().limit(messageCount),
-                Stream.of(ApplicationTestData.END))
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
+                Stream.of(ContractTestData.START_RECORD),
+                ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
+                Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
         final long recordCount = messageCount + 2;
 
@@ -150,17 +148,17 @@ class KafkaContractTest {
         Mockito.reset(service);
 
         // Given - we are already listening to the output
-        ConsumerSettings<String, AttributeMaskingResponse> consumerSettings = ConsumerSettings
+        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Probe<ConsumerRecord<String, AttributeMaskingResponse>> probe = Consumer
+        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we write to the input
-        ProducerSettings<String, AttributeMaskingRequest> producerSettings = ProducerSettings
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
@@ -168,8 +166,8 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, AttributeMaskingResponse>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, AttributeMaskingResponse>> results = LongStream.range(0, recordCount)
+        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
+        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, recordCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -183,7 +181,7 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes()))
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
@@ -205,19 +203,12 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())),
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertThat(results.stream()
                         .map(ConsumerRecord::value)
-                        .map(response -> {
-                            try {
-                                return response.getResource();
-                            } catch (JsonProcessingException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        })
-                        .map(LeafResource::getType)
-                        .map(Integer::valueOf).collect(Collectors.toList()))
+                        .map(response -> response.get("resource").get("type").asInt())
+                        .collect(Collectors.toList()))
                         .isSorted()
         );
     }
@@ -228,10 +219,10 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSetsWithErrors(final long messageCount) {
         // Create a variable number of requests
-        final Stream<ProducerRecord<String, AttributeMaskingRequest>> requests = Stream.of(
-                Stream.of(ApplicationTestData.START),
-                ApplicationTestData.RECORD_FACTORY.get().limit(messageCount),
-                Stream.of(ApplicationTestData.END))
+        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
+                Stream.of(ContractTestData.START_RECORD),
+                ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
+                Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
         // Only expect 90% of records to be returned (excluding START/END markers)
         final long recordCount = messageCount + 2;
@@ -245,11 +236,11 @@ class KafkaContractTest {
                 .thenThrow(serviceSpyException);
 
         // Given - we are already listening to the output
-        ConsumerSettings<String, AttributeMaskingResponse> consumerSettings = ConsumerSettings
+        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
-        Probe<ConsumerRecord<String, AttributeMaskingResponse>> probe = Consumer
+        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
@@ -263,7 +254,7 @@ class KafkaContractTest {
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we write to the input
-        ProducerSettings<String, AttributeMaskingRequest> producerSettings = ProducerSettings
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
 
@@ -287,17 +278,17 @@ class KafkaContractTest {
                                 assertAll("Error records all satisfy requirements",
                                         // All messages have the original request preserved
                                         () -> assertThat(error.headers().lastHeader(Token.HEADER).value())
-                                                .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes()),
+                                                .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()),
 
                                         // The original request was preserved
                                         () -> assertThat(error.value().getUserId())
-                                                .isEqualTo(ApplicationTestData.USER_ID.getId()),
+                                                .isEqualTo(ContractTestData.USER_ID.getId()),
 
                                         () -> assertThat(error.value().getResourceId())
-                                                .isEqualTo(ApplicationTestData.RESOURCE_ID),
+                                                .isEqualTo(ContractTestData.RESOURCE_ID),
 
                                         () -> assertThat(error.value().getContext())
-                                                .isEqualTo(ApplicationTestData.CONTEXT),
+                                                .isEqualTo(ContractTestData.CONTEXT),
 
                                         // The error was reported successfully
                                         () -> assertThat(error.value().getError().getMessage())
@@ -307,8 +298,8 @@ class KafkaContractTest {
         );
 
         // When - results are pulled from the output stream, pulling only 90% of the total
-        Probe<ConsumerRecord<String, AttributeMaskingResponse>> resultSeq = probe.request(recordCount - errorCount);
-        LinkedList<ConsumerRecord<String, AttributeMaskingResponse>> results = LongStream.range(0, recordCount - errorCount)
+        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount - errorCount);
+        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, recordCount - errorCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -321,7 +312,7 @@ class KafkaContractTest {
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes()))
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header

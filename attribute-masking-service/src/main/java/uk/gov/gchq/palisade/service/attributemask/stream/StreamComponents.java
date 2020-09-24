@@ -24,7 +24,6 @@ import akka.kafka.ConsumerSettings;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
-import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.DiscoverySupport;
 import akka.kafka.javadsl.Producer;
@@ -33,7 +32,6 @@ import akka.stream.javadsl.Source;
 import com.typesafe.config.Config;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
@@ -116,7 +114,7 @@ public class StreamComponents<K, V> {
      * Construct a Kafka Committable Source for Akka streams (no need for committer settings)
      *
      * @param consumerSettings the committer settings for kafka
-     * @param topicPartition   the topic name to subscribe to
+     * @param subscription     the topic name (and partitions) to subscribe to
      * @return a Kafka-connected Source for Akka streams
      */
     public Source<ConsumerMessage.CommittableMessage<K, V>, Consumer.Control> committableConsumer(

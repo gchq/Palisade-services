@@ -26,7 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
+import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
@@ -55,9 +55,9 @@ class StreamApiContractTest {
     @Test
     void testPostToServiceReturnsMaskedResource() throws JsonProcessingException {
         // Given we have some request data (not a stream marker)
-        AttributeMaskingRequest request = ApplicationTestData.REQUEST;
+        AttributeMaskingRequest request = ContractTestData.REQUEST_OBJ;
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        headers.add(Token.HEADER, ContractTestData.REQUEST_TOKEN);
 
         // When the request is POSTed to the service's REST endpoint
         HttpEntity<AttributeMaskingRequest> requestWithHeaders = new HttpEntity<>(request, headers);
@@ -76,7 +76,7 @@ class StreamApiContractTest {
     void testStreamMarkerIsSkippedByService() {
         // Given we have some request data (a stream marker)
         HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        headers.add(Token.HEADER, ContractTestData.REQUEST_TOKEN);
         headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
 
