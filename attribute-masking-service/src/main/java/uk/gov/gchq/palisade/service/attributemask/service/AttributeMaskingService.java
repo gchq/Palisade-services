@@ -109,7 +109,8 @@ public class AttributeMaskingService {
      * @param nullableRequest the request to the service
      * @return a nullable response, with a masked resource if appropriate
      */
-    public @Nullable AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
+    @Nullable
+    public AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map(request -> {
                     try {
