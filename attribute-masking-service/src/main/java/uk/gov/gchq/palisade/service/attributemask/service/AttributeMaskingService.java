@@ -27,8 +27,8 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,7 +41,21 @@ import java.util.concurrent.CompletableFuture;
  * - Mask the leafResource, removing any sensitive information - this may later include
  * applying a separate set of attributeRules, distinct from resourceRules and recordRules
  */
-public interface AttributeMaskingService {
+public class AttributeMaskingService {
+    private final PersistenceLayer persistenceLayer;
+    private final LeafResourceMasker resourceMasker;
+
+    /**
+     * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
+     * as well as the appropriate masking function
+     *
+     * @param persistenceLayer the implementation of a PersistenceLayer to use
+     * @param resourceMasker   the implementation of a LeafResourceMasker to use
+     */
+    public AttributeMaskingService(final PersistenceLayer persistenceLayer, final LeafResourceMasker resourceMasker) {
+        this.persistenceLayer = persistenceLayer;
+        this.resourceMasker = resourceMasker;
+    }
 
     /**
      * Store the full details of the authorised request in a persistence store, to be later
@@ -53,11 +67,19 @@ public interface AttributeMaskingService {
      * @param context  the {@link Context} as originally supplied by the client
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      * @return a completable future representing the asynchronous completion of the storage operation
-     * @throws IOException if a failure occurred writing to the persistence store.
      */
-    CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @NonNull User user, final @NonNull LeafResource resource, final @NonNull Context context, final @NonNull Rules<?> rules);
+    CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @NonNull User user, final @NonNull LeafResource resource, final @NonNull Context context, final @NonNull Rules<?> rules) {
+        return this.persistenceLayer.putAsync(token, user, resource, context, rules);
+    }
 
-    default CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
+    /**
+     * Given a nullable request, unwrap and store the request if it is non-null, ignore it if it is null
+     *
+     * @param token           the token for the client request as a whole
+     * @param nullableRequest the request to the service
+     * @return a completable future representing the asynchronous completion of the storage operation
+     */
+    public CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map(request -> {
                     try {
@@ -77,9 +99,17 @@ public interface AttributeMaskingService {
      * @param resource the (sensitive) resource to be returned to the client
      * @return a copy of the resource with sensitive data masked or redacted
      */
-    LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules);
+    LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+        return resourceMasker.apply(resource);
+    }
 
-    default AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
+    /**
+     * Given a nullable request, unwrap the request and mask the resource if it is non-null, ignore it if it is null
+     *
+     * @param nullableRequest the request to the service
+     * @return a nullable response, with a masked resource if appropriate
+     */
+    public @Nullable AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map(request -> {
                     try {
@@ -91,5 +121,4 @@ public interface AttributeMaskingService {
                 })
                 .orElse(null);
     }
-
 }

@@ -32,7 +32,7 @@ akka:
       eos-draining-check-interval: 30ms
       partition-handler-warning: 5s
       kafka-clients:
-        group.id: test-group
+        group.id: attribute-masking-service
         enable.auto.commit: true
       connection-checker:
         enable: true

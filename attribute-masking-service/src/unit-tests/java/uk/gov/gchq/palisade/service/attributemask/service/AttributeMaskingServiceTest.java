@@ -25,11 +25,11 @@ import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer
 
 import static org.mockito.ArgumentMatchers.any;
 
-class SimpleAttributeMaskingServiceTest {
+class AttributeMaskingServiceTest {
 
     JpaPersistenceLayer mockPersistenceLayer = Mockito.mock(JpaPersistenceLayer.class);
     LeafResourceMasker mockMasker = Mockito.mock(LeafResourceMasker.class);
-    AttributeMaskingService attributeMaskingService = new SimpleAttributeMaskingService(mockPersistenceLayer, mockMasker);
+    AttributeMaskingService attributeMaskingService = new AttributeMaskingService(mockPersistenceLayer, mockMasker);
 
     @AfterEach
     void tearDown() {

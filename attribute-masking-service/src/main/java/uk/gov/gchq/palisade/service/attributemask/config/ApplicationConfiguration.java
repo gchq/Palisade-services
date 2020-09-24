@@ -22,11 +22,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
-import uk.gov.gchq.palisade.service.attributemask.service.SimpleAttributeMaskingService;
+
+import java.util.Collections;
 
 /**
  * Bean configuration and dependency injection graph
@@ -42,12 +45,19 @@ public class ApplicationConfiguration {
     @Bean
     LeafResourceMasker simpleLeafResourceMasker() {
         // TODO: Replace with a proper masker
-        return x -> x;
+        // Delete all additional attributes (if a FileResource)
+        return x -> {
+            if (x instanceof FileResource) {
+                return ((FileResource) x).attributes(Collections.emptyMap());
+            } else {
+                return x;
+            }
+        };
     }
 
     @Bean
-    SimpleAttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, LeafResourceMasker resourceMasker) {
-        return new SimpleAttributeMaskingService(persistenceLayer, resourceMasker);
+    AttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, LeafResourceMasker resourceMasker) {
+        return new AttributeMaskingService(persistenceLayer, resourceMasker);
     }
 
     @Bean
