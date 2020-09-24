@@ -25,13 +25,14 @@ import java.util.concurrent.CompletableFuture;
 public interface PersistenceLayer {
 
     /**
-     * Persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
+     * Asynchronously persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
      *
      * @param token    the token {@link String} for the client request as a whole, created by the palisade-service
      * @param user     the {@link User} as authorised and returned by the user-service
      * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service
      * @param context  the {@link Context} as originally supplied by the client
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
+     * @return a completable future representing the completion of the put operation
      */
     CompletableFuture<Void> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules);
 

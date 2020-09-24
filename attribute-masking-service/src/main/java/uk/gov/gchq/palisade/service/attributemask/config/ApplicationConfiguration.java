@@ -56,7 +56,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    AttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, LeafResourceMasker resourceMasker) {
+    AttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, final LeafResourceMasker resourceMasker) {
         return new AttributeMaskingService(persistenceLayer, resourceMasker);
     }
 

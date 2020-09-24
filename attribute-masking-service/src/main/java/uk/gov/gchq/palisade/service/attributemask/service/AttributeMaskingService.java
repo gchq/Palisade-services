@@ -97,7 +97,10 @@ public class AttributeMaskingService {
     /**
      * Mask any sensitive attributes on a resource, possibly by applying attribute-level rules.
      *
-     * @param resource the (sensitive) resource to be returned to the client
+     * @param user     the {@link User} as authorised and returned by the user-service
+     * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service, to be masked
+     * @param context  the {@link Context} as originally supplied by the client
+     * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      * @return a copy of the resource with sensitive data masked or redacted
      */
     LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
