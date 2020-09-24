@@ -54,7 +54,7 @@ public class AttributeMaskingRestController {
     }
 
     /**
-     * REST endpoint for debugging and playing with the service, mimicking the Kafka API.
+     * REST endpoint for debugging the service, mimicking the Kafka API.
      *
      * @param headers a multi-value map of http request headers
      * @param request the (optional) request itself
@@ -81,7 +81,7 @@ public class AttributeMaskingRestController {
     }
 
     /**
-     * REST endpoint for debugging and playing with the service, mimicking the Kafka API.
+     * REST endpoint for debugging the service, mimicking the Kafka API.
      * Takes a list of requests and processes each of them with the given headers
      *
      * @param headers  a multi-value map of http request headers
