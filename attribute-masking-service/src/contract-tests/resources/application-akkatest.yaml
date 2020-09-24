@@ -43,8 +43,7 @@ akka:
         input-topic:
           name: rule
           partitons: 1
-          assignments:
-          - partition: 1
+          assignment: 1
     producer:
       discovery-method: akka.discovery
       service-name: kafka

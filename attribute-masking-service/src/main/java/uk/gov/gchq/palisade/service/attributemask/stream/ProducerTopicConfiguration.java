@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -88,7 +89,7 @@ public class ProducerTopicConfiguration {
     public static class Topic {
         private String name;
         private Integer partitions;
-        private List<TopicAssignment> assignments = Collections.emptyList();
+        private Optional<Integer> assignment;
 
         public static class TopicAssignment {
             private Integer partition;
@@ -128,14 +129,14 @@ public class ProducerTopicConfiguration {
         }
 
         @Generated
-        public List<TopicAssignment> getAssignments() {
-            return assignments;
+        public Optional<Integer> getAssignment() {
+            return assignment;
         }
 
         @Generated
-        public void setAssignments(final List<TopicAssignment> assignments) {
-            requireNonNull(assignments);
-            this.assignments = assignments;
+        public void setAssignment(final Optional<Integer> assignment) {
+            requireNonNull(assignment);
+            this.assignment = assignment;
         }
     }
 

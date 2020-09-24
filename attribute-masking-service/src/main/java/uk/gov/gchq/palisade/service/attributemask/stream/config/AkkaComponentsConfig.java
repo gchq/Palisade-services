@@ -63,17 +63,10 @@ public class AkkaComponentsConfig {
                 SerDesConfig.valueDeserializer());
 
         Topic topic = configuration.getTopics().get("input-topic");
-        Subscription subscription;
-        if (topic.getAssignments().isEmpty()) {
-            // Auto partition if no manual assignments specified
-            subscription = Subscriptions.topics(topic.getName());
-        } else {
-            // Manually set consumer partitions
-            Set<TopicPartition> topicPartitionSet = topic.getAssignments().stream()
-                    .map(assignment -> new TopicPartition(topic.getName(), assignment.getPartition()))
-                    .collect(Collectors.toSet());
-            subscription = Subscriptions.assignment(topicPartitionSet);
-        }
+        Subscription subscription = topic.getAssignment()
+                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
+                .orElse(Subscriptions.topics(topic.getName()));
+
         return INPUT_COMPONENTS.committableConsumer(consumerSettings, subscription);
     }
 
