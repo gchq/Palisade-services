@@ -68,7 +68,7 @@ public class AttributeMaskingService {
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      * @return a completable future representing the asynchronous completion of the storage operation
      */
-    CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @NonNull User user, final @NonNull LeafResource resource, final @NonNull Context context, final @NonNull Rules<?> rules) {
+    CompletableFuture<Void> storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
         return this.persistenceLayer.putAsync(token, user, resource, context, rules);
     }
 
@@ -79,6 +79,7 @@ public class AttributeMaskingService {
      * @param nullableRequest the request to the service
      * @return a completable future representing the asynchronous completion of the storage operation
      */
+    @NonNull
     public CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map(request -> {
