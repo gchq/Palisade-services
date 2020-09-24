@@ -20,7 +20,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
@@ -86,6 +88,22 @@ public class ProducerTopicConfiguration {
     public static class Topic {
         private String name;
         private Integer partitions;
+        private List<TopicAssignment> assignments = Collections.emptyList();
+
+        public static class TopicAssignment {
+            private Integer partition;
+
+            @Generated
+            public Integer getPartition() {
+                return partition;
+            }
+
+            @Generated
+            public void setPartition(final Integer partition) {
+                requireNonNull(partition);
+                this.partition = partition;
+            }
+        }
 
         @Generated
         public String getName() {
@@ -107,6 +125,17 @@ public class ProducerTopicConfiguration {
         public void setPartitions(final Integer partitions) {
             requireNonNull(partitions);
             this.partitions = partitions;
+        }
+
+        @Generated
+        public List<TopicAssignment> getAssignments() {
+            return assignments;
+        }
+
+        @Generated
+        public void setAssignments(final List<TopicAssignment> assignments) {
+            requireNonNull(assignments);
+            this.assignments = assignments;
         }
     }
 

@@ -24,10 +24,13 @@ import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
 import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.ProducerSettings;
+import akka.kafka.Subscription;
+import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,10 +38,13 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.StreamComponents;
 
+import java.util.Set;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
  * Configuration for all kafka connections for the application
@@ -56,7 +62,19 @@ public class AkkaComponentsConfig {
                 SerDesConfig.keyDeserializer(),
                 SerDesConfig.valueDeserializer());
 
-        return INPUT_COMPONENTS.committableConsumer(consumerSettings, configuration.getTopics().get("input-topic").getName());
+        Topic topic = configuration.getTopics().get("input-topic");
+        Subscription subscription;
+        if (topic.getAssignments().isEmpty()) {
+            // Auto partition if no manual assignments specified
+            subscription = Subscriptions.topics(topic.getName());
+        } else {
+            // Manually set consumer partitions
+            Set<TopicPartition> topicPartitionSet = topic.getAssignments().stream()
+                    .map(assignment -> new TopicPartition(topic.getName(), assignment.getPartition()))
+                    .collect(Collectors.toSet());
+            subscription = Subscriptions.assignment(topicPartitionSet);
+        }
+        return INPUT_COMPONENTS.committableConsumer(consumerSettings, subscription);
     }
 
     @Bean
