@@ -16,9 +16,7 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,13 +46,11 @@ class StreamApiContractTest {
     }
 
     @Test
-    void testPostTopicOffsetReturnsAccepted() throws JsonProcessingException {
+    void testPostTopicOffsetReturnsAccepted() {
         // Given we have some request data
         JsonNode request = ContractTestData.TOPIC_OFFSET_MSG_JSON_NODE;
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, ContractTestData.REQUEST_TOKEN);
-
-        System.out.println(new ObjectMapper().writeValueAsString(request));
 
         // When the request is POSTed to the service's REST endpoint
         HttpEntity<JsonNode> requestWithHeaders = new HttpEntity<>(request, headers);
