@@ -16,6 +16,11 @@
 
 package uk.gov.gchq.palisade.service.attributemask.web;
 
+import akka.Done;
+import akka.actor.ActorSystem;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,39 +28,42 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
-import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
-import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
+import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.LinkedList;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class AttributeMaskingRestControllerTest {
 
-    AttributeMaskingService mockAttributeMaskingService = Mockito.mock(AttributeMaskingService.class);
+    private LinkedList<ProducerRecord<String, AttributeMaskingRequest>> sinkAggregation = new LinkedList<>();
+    private final Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> aggregatorSink = Sink.foreach(sinkAggregation::addLast);
+    private final ConsumerTopicConfiguration mockTopicConfig = Mockito.mock(ConsumerTopicConfiguration.class);
+    private final Topic mockTopic = Mockito.mock(Topic.class);
+    private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(mockAttributeMaskingService);
+        Mockito.reset(mockTopicConfig, mockTopic);
+        sinkAggregation = new LinkedList<>();
     }
 
     @Test
-    void testControllerDelegatesToService() {
+    void testControllerDelegatesToAkkaSink() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(mockAttributeMaskingService);
-        Mockito.when(mockAttributeMaskingService.maskResourceAttributes(any()))
-                .thenReturn(ApplicationTestData.RESPONSE);
-        Mockito.when(mockAttributeMaskingService.storeAuthorisedRequest(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(null));
+        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(aggregatorSink, mockTopicConfig, materializer);
+        Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
+        Mockito.when(mockTopic.getName()).thenReturn("upstream-topic");
+        Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
         // when the controller is called with a request
-
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(
                 Collections.singletonMap(Token.HEADER, Collections.singletonList(ApplicationTestData.REQUEST_TOKEN)));
         attributeMaskingRestController.maskAttributes(
@@ -63,45 +71,51 @@ class AttributeMaskingRestControllerTest {
                 ApplicationTestData.REQUEST
         );
 
-        // then the service.storeAuthorisedRequest method is called
-        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).storeAuthorisedRequest(
-                ApplicationTestData.REQUEST_TOKEN,
-                ApplicationTestData.REQUEST
-        );
+        // Then the sink aggregated the request
+        assertThat(sinkAggregation)
+                .hasSize(1)
+                .first().satisfies(record -> assertAll("Test Record Headers and Value",
+                () -> assertThat(record)
+                        .extracting(ProducerRecord::value)
+                        .isEqualTo(ApplicationTestData.REQUEST),
 
-        // then the service.maskResourceAttributes method is called
-        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).maskResourceAttributes(
-                ApplicationTestData.REQUEST
+                () -> assertThat(record)
+                        .extracting(ProducerRecord::headers)
+                        .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
+                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
+                )
         );
     }
 
     @Test
-    void testControllerHandlesNullRequests() {
+    void testControllerAcceptsNulls() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(mockAttributeMaskingService);
-        Mockito.when(mockAttributeMaskingService.storeAuthorisedRequest(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(null));
+        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(aggregatorSink, mockTopicConfig, materializer);
+        Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
+        Mockito.when(mockTopic.getName()).thenReturn("upstream-topic");
+        Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
-        // when the controller is called with a stream marker
+        // when the controller is called with a request
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(
-                Stream.of(
-                        new SimpleImmutableEntry<>(Token.HEADER, Collections.singletonList(ApplicationTestData.REQUEST_TOKEN)),
-                        new SimpleImmutableEntry<>(StreamMarker.HEADER, Collections.singletonList(StreamMarker.START.toString())))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                Collections.singletonMap(Token.HEADER, Collections.singletonList(ApplicationTestData.REQUEST_TOKEN)));
         attributeMaskingRestController.maskAttributes(
                 headers,
                 null
         );
 
-        // then the storeAuthorisedRequest is called
-        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).storeAuthorisedRequest(
-                any(),
-                any()
-        );
+        // Then the sink aggregated the request
+        assertThat(sinkAggregation)
+                .hasSize(1)
+                .first().satisfies(record -> assertAll("Test Record Headers and Value",
+                () -> assertThat(record)
+                        .extracting(ProducerRecord::value)
+                        .isNull(),
 
-        // then the maskResourceAttributes is called
-        Mockito.verify(mockAttributeMaskingService, Mockito.atLeastOnce()).maskResourceAttributes(
-                any()
+                () -> assertThat(record)
+                        .extracting(ProducerRecord::headers)
+                        .extracting(kHeaders -> kHeaders.lastHeader(Token.HEADER).value())
+                        .isEqualTo(ApplicationTestData.REQUEST_TOKEN.getBytes())
+                )
         );
     }
 

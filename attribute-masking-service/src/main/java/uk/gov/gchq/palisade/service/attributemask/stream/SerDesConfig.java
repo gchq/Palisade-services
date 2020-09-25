@@ -45,11 +45,37 @@ public final class SerDesConfig {
     }
 
     /**
+     * Kafka key serialiser for upstream messages coming in as input
+     * Used by the Rest Controller to insert requests onto the topic
+     *
+     * @return an appropriate key serialiser for the topic's message content
+     */
+    public static Serializer<String> ruleKeySerializer() {
+        return new StringSerializer();
+    }
+
+    /**
+     * Kafka value serialiser for upstream messages coming in as input
+     * Used by the Rest Controller to insert requests onto the topic
+     *
+     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingRequest)
+     */
+    public static Serializer<AttributeMaskingRequest> ruleValueSerializer() {
+        return (String ignored, AttributeMaskingRequest attributeMaskingRequest) -> {
+            try {
+                return MAPPER.writeValueAsBytes(attributeMaskingRequest);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to serialize " + attributeMaskingRequest.toString(), e);
+            }
+        };
+    }
+
+    /**
      * Kafka key deserialiser for upstream messages coming in as input
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> keyDeserializer() {
+    public static Deserializer<String> ruleKeyDeserializer() {
         return new StringDeserializer();
     }
 
@@ -58,7 +84,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (AttributeMaskingRequest)
      */
-    public static Deserializer<AttributeMaskingRequest> valueDeserializer() {
+    public static Deserializer<AttributeMaskingRequest> ruleValueDeserializer() {
         return (String ignored, byte[] attributeMaskingRequest) -> {
             try {
                 return MAPPER.readValue(attributeMaskingRequest, AttributeMaskingRequest.class);
@@ -73,7 +99,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> keySerializer() {
+    public static Serializer<String> maskedResourceKeySerializer() {
         return new StringSerializer();
     }
 
@@ -82,7 +108,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
      */
-    public static Serializer<AttributeMaskingResponse> valueSerializer() {
+    public static Serializer<AttributeMaskingResponse> maskedResourceValueSerializer() {
         return (String ignored, AttributeMaskingResponse attributeMaskingResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(attributeMaskingResponse);

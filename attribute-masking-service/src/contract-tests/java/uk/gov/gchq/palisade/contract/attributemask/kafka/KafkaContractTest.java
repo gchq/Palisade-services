@@ -37,6 +37,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
@@ -44,23 +45,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.serializer.support.SerializationFailedException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.attributemask.ContractTestData;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
+import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
+import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -123,11 +135,15 @@ class KafkaContractTest {
     private AttributeMaskingService service;
 
     @Autowired
+    private TestRestTemplate restTemplate;
+    @Autowired
     private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
     private Materializer akkaMaterializer;
+    @Autowired
+    private ConsumerTopicConfiguration consumerTopicConfiguration;
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
@@ -210,6 +226,51 @@ class KafkaContractTest {
                         .map(response -> response.get("resource").get("type").asInt())
                         .collect(Collectors.toList()))
                         .isSorted()
+        );
+    }
+
+    @Test
+    @DirtiesContext
+    void testRestEndpoint() {
+        // Given - we are already listening to the service input
+        ConsumerSettings<String, AttributeMaskingRequest> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, SerDesConfig.ruleKeyDeserializer(), SerDesConfig.ruleValueDeserializer())
+                .withGroupId("test-group")
+                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        Probe<ConsumerRecord<String, AttributeMaskingRequest>> probe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
+        // When - we POST to the rest endpoint
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        HttpEntity<AttributeMaskingRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        ResponseEntity<Void> response = restTemplate.postForEntity("/streamApi/maskAttributes", entity, Void.class);
+
+        // Then - the REST request was accepted
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+
+        // When - results are pulled from the output stream
+        Probe<ConsumerRecord<String, AttributeMaskingRequest>> resultSeq = probe.request(1);
+        LinkedList<ConsumerRecord<String, AttributeMaskingRequest>> results = LongStream.range(0, 1)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then - the results are as expected
+        // The request was written with the correct header
+        assertAll("Records returned are correct",
+                () -> assertThat(results)
+                        .hasSize(1),
+
+                () -> assertThat(results)
+                        .allSatisfy(result -> {
+                            assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
+
+                            assertThat(result.value())
+                                    .isEqualTo(ContractTestData.REQUEST_OBJ);
+                        })
         );
     }
 

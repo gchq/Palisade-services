@@ -55,11 +55,21 @@ public class AkkaComponentsConfig {
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
+    Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AttributeMaskingRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.ruleKeySerializer(),
+                SerDesConfig.ruleValueSerializer());
+
+        return INPUT_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
     Source<CommittableMessage<String, AttributeMaskingRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AttributeMaskingRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.keyDeserializer(),
-                SerDesConfig.valueDeserializer());
+                SerDesConfig.ruleKeyDeserializer(),
+                SerDesConfig.ruleValueDeserializer());
 
         Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
@@ -73,8 +83,8 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, AttributeMaskingResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, AttributeMaskingResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.keySerializer(),
-                SerDesConfig.valueSerializer());
+                SerDesConfig.maskedResourceKeySerializer(),
+                SerDesConfig.maskedResourceValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);

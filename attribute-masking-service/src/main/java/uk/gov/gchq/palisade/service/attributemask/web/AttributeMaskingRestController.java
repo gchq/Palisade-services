@@ -15,7 +15,14 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.web;
 
-import org.springframework.http.HttpEntity;
+import akka.Done;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -26,32 +33,44 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
-import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
+import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
  * A REST interface mimicking the Kafka API to the service.
+ * POSTs to the controller write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
  * Intended for debugging only.
  */
 @RestController
 @RequestMapping(path = "/streamApi")
 public class AttributeMaskingRestController {
-    private final AttributeMaskingService service;
+    private final Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> upstreamSink;
+    private final ConsumerTopicConfiguration upstreamConfig;
+    private final Materializer materializer;
 
     /**
-     * Autowired constructor for REST Controller, supplying the underlying service implementation
+     * Autowired constructor for the rest controller
      *
-     * @param service an implementation of the {@link AttributeMaskingService}
+     * @param upstreamSink   a sink to the upstream topic
+     * @param upstreamConfig the config for the topic (name, partitions, ...)
+     * @param materializer   the akka system materializer
      */
-    public AttributeMaskingRestController(final AttributeMaskingService service) {
-        this.service = service;
+    public AttributeMaskingRestController(
+            final Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> upstreamSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        this.upstreamSink = upstreamSink;
+        this.upstreamConfig = upstreamConfig;
+        this.materializer = materializer;
     }
 
     /**
@@ -62,23 +81,14 @@ public class AttributeMaskingRestController {
      * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/maskAttributes", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<AttributeMaskingResponse> maskAttributes(
+    public ResponseEntity<Void> maskAttributes(
             final @RequestHeader MultiValueMap<String, String> headers,
             final @RequestBody(required = false) AttributeMaskingRequest request) {
-        // Get token from headers
-        String token = Optional.ofNullable(headers.get(Token.HEADER))
-                .orElseThrow(() -> new NoSuchElementException("No token specified in headers"))
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Token specified in headers mapped to empty list"));
-
-        // Process request
-        AttributeMaskingResponse response = service.storeAuthorisedRequest(token, request)
-                .thenApply(ignored -> service.maskResourceAttributes(request))
-                .join();
+        // Process request as singleton list
+        this.maskAttributesMulti(headers, Collections.singletonList(request));
 
         // Return result
-        return new ResponseEntity<>(response, headers, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     /**
@@ -90,17 +100,36 @@ public class AttributeMaskingRestController {
      * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/maskAttributes/multi", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<List<AttributeMaskingResponse>> maskAttributesMulti(
+    public ResponseEntity<Void> maskAttributesMulti(
             final @RequestHeader MultiValueMap<String, String> headers,
             final @RequestBody List<AttributeMaskingRequest> requests) {
-        // Process requests
-        List<AttributeMaskingResponse> responses = requests.stream()
-                .map(request -> maskAttributes(headers, request))
-                .map(HttpEntity::getBody)
+        // Get token from headers
+        String token = Optional.ofNullable(headers.get(Token.HEADER))
+                .orElseThrow(() -> new NoSuchElementException("No token specified in headers"))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Token specified in headers mapped to empty list"));
+
+        // Get topic and calculate partition
+        Topic topic = this.upstreamConfig.getTopics().get("input-topic");
+        int partition = Math.floorMod(token.hashCode(), topic.getPartitions());
+
+        // Convert headers to kafka style
+        List<Header> kafkaHeaders = headers.entrySet().stream()
+                .flatMap(entries -> entries.getValue().stream().map(value -> new RecordHeader(entries.getKey(), value.getBytes())))
                 .collect(Collectors.toList());
 
+        // Process requests
+        // Akka reactive streams can't have null elements, so map to and from optional
+        Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
+                .map(request -> new ProducerRecord<String, AttributeMaskingRequest>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .toMat(this.upstreamSink, Keep.right())
+                .run(this.materializer)
+                .toCompletableFuture()
+                .join();
+
         // Return results
-        return new ResponseEntity<>(responses, headers, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 }

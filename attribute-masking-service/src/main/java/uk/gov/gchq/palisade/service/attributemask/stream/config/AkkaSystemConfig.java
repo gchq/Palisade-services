@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.attributemask.stream.config;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,7 +54,10 @@ public class AkkaSystemConfig {
     ActorSystem getActorSystem(final PropertiesConfigurer propertiesConfigurer) {
         propertiesConfigurer.getAllActiveProperties()
                 .forEach((key, value) -> LOGGER.debug("{} = {}", key, value));
-        return ActorSystem.create("SpringAkkaStreamsSystem", propertiesConfigurer.toHoconConfig(propertiesConfigurer.getAllActiveProperties()));
+        Config config = propertiesConfigurer
+                .toHoconConfig(propertiesConfigurer.getAllActiveProperties())
+                .withFallback(ConfigFactory.load());
+        return ActorSystem.create("SpringAkkaStreamsSystem", config);
     }
 
     @Bean
