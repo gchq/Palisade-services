@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "attribute-masking-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
@@ -24,6 +24,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "attribute-masking-service.fullname" . }}-headless
+  podManagementPolicy: "Parallel"
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
@@ -61,6 +63,10 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
+        - name: "STATEFULSET_INDEX"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['spec.pod.beta.kubernetes.io/statefulset-index']
         - name: "LOADER_PATH"
           value: {{ include "attribute-masking-service.deployment.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
@@ -71,11 +77,16 @@ spec:
         volumeMounts:
         - name: {{ include "attribute-masking-service.deployment.fullname" . }}
           mountPath: {{ include "attribute-masking-service.deployment.path" . }}
+        - name: config-volume
+          mountPath: {{ include "attribute-masking-service.config.path" . }}
       volumes:
       - name: {{ include "attribute-masking-service.deployment.fullname" . }}
         persistentVolumeClaim:
           claimName: {{ include "attribute-masking-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "attribute-masking-service.name" . }}-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

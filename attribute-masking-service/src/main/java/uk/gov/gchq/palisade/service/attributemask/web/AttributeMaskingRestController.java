@@ -110,9 +110,9 @@ public class AttributeMaskingRestController {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Token specified in headers mapped to empty list"));
 
-        // Get topic and calculate partition
+        // Get topic and calculate partition, unless this service has been assigned a partition
         Topic topic = this.upstreamConfig.getTopics().get("input-topic");
-        int partition = Math.floorMod(token.hashCode(), topic.getPartitions());
+        int partition = Optional.ofNullable(topic.getAssignment()).orElseGet(() -> Math.floorMod(token.hashCode(), topic.getPartitions()));
 
         // Convert headers to kafka style
         List<Header> kafkaHeaders = headers.entrySet().stream()

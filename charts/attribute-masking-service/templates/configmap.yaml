@@ -13,19 +13,20 @@
 # limitations under the License.
 
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: {{ include "attribute-masking-service.name" . }}
+  name: {{ include "user-service.name" . }}-configmap
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    {{- include "attribute-masking-service.labels" . | nindent 4 }}
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - name: web
-    port: {{ .Values.service.port }}
-    targetPort: 8091
-    protocol: TCP
-  selector:
-    app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
+    app.kubernetes.io/name: {{ include "user-service.name" . }}
+    helm.sh/chart: {{ include "user-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  application-akka.yaml: |
+    akka:
+      kafka.consumer.topics.input-topic:
+        assignment: ${HOSTNAME##*}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "kafka.fullname" . }}-headless
+        port: 9092
