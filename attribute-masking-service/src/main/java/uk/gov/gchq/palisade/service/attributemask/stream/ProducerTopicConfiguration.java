@@ -88,21 +88,6 @@ public class ProducerTopicConfiguration {
         private Integer partitions;
         private Integer assignment;
 
-        public static class TopicAssignment {
-            private Integer partition;
-
-            @Generated
-            public Integer getPartition() {
-                return partition;
-            }
-
-            @Generated
-            public void setPartition(final Integer partition) {
-                requireNonNull(partition);
-                this.partition = partition;
-            }
-        }
-
         @Generated
         public String getName() {
             return name;

@@ -82,7 +82,7 @@ public class AttributeMaskingService {
     @NonNull
     public CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
-                .map(request -> {
+                .map((AttributeMaskingRequest request) -> {
                     try {
                         return storeAuthorisedRequest(token, request.getUser(), request.getResource(), request.getContext(), request.getRules());
                     } catch (JsonProcessingException e) {
@@ -116,7 +116,7 @@ public class AttributeMaskingService {
     @Nullable
     public AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
-                .map(request -> {
+                .map((AttributeMaskingRequest request) -> {
                     try {
                         LeafResource maskedResource = maskResourceAttributes(request.getUser(), request.getResource(), request.getContext(), request.getRules());
                         return AttributeMaskingResponse.Builder.create(request).withResource(maskedResource);

@@ -27,7 +27,7 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
  * These exceptions are elevated to {@link RuntimeException}s.
  */
 public class AuditableException extends RuntimeException {
-    private final transient ConsumerRecord<?, AttributeMaskingRequest> request;
+    private final transient ConsumerRecord<String, AttributeMaskingRequest> request;
 
     /**
      * Capture a thrown exception and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
@@ -36,13 +36,13 @@ public class AuditableException extends RuntimeException {
      * @param request the original request to the service that caused the exception
      * @param cause   the exception that was thrown
      */
-    public AuditableException(final ConsumerRecord<?, AttributeMaskingRequest> request, final Exception cause) {
+    public AuditableException(final ConsumerRecord<String, AttributeMaskingRequest> request, final Exception cause) {
         super(cause);
         this.request = request;
     }
 
     @Generated
-    public ConsumerRecord<?, AttributeMaskingRequest> getRequest() {
+    public ConsumerRecord<String, AttributeMaskingRequest> getRequest() {
         return request;
     }
 }

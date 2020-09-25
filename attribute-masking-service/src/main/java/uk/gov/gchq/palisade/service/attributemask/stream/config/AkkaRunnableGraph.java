@@ -75,7 +75,7 @@ public class AkkaRunnableGraph {
                 // Extract token from message
                 .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
                 // Store authorised request in persistence
-                .mapAsync(PARALLELISM, messageAndToken -> {
+                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, AttributeMaskingRequest>, String> messageAndToken) -> {
                     AttributeMaskingRequest request = messageAndToken.first().record().value();
                     return service.storeAuthorisedRequest(messageAndToken.second(), request)
                             .thenApply(ignored -> new Pair<>(messageAndToken.first(), request));
@@ -83,7 +83,7 @@ public class AkkaRunnableGraph {
                 // Mask resource attributes
                 .map(messageAndRequest -> new Pair<>(messageAndRequest.first(), service.maskResourceAttributes(messageAndRequest.second())))
                 // Build producer record
-                .map(messageAndResponse -> {
+                .map((Pair<CommittableMessage<String, AttributeMaskingRequest>, AttributeMaskingResponse> messageAndResponse) -> {
                     ConsumerRecord<String, AttributeMaskingRequest> record = messageAndResponse.first().record();
                     return new Pair<>(messageAndResponse.first(), new ProducerRecord<>(outputTopic.getName(), record.partition(), record.key(), messageAndResponse.second(), record.headers()));
                 })

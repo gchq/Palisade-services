@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
