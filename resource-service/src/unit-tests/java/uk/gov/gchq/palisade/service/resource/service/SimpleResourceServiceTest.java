@@ -47,7 +47,7 @@ public class SimpleResourceServiceTest {
         // Given
         Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
         DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
-        DirectoryResource srcTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/test/java").getCanonicalFile().toURI());
+        DirectoryResource srcTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
 
         // When
         Stream<LeafResource> sourceFiles = service.getResourcesById(srcMainJava.getId());
@@ -61,7 +61,7 @@ public class SimpleResourceServiceTest {
     @Test
     public void canFindTestResourceAvro() throws IOException {
         // Given
-        URI avroFileURI = new File("./src/test/resources/test_resource.avro").getCanonicalFile().toURI();
+        URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
         FileResource testResourceAvro = (FileResource) ResourceBuilder.create(avroFileURI);
         DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
 
