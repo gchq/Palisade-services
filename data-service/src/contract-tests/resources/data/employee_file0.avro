@@ -1,0 +1,1 @@
+Objavro.schema�{"type":"record","name":"Employee","namespace":"uk.gov.gchq.palisade.contract.data.rest.model","fields":[{"name":"name","type":["null","string"],"default":null},{"name":"number","type":["null","int"],"default":null}]} ��]����U��_�*"the only employee��]����U��_�
