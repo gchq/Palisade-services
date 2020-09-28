@@ -50,12 +50,12 @@ The masking operation may in the future apply attribute-level `Rule`s using the 
 
 The application exposes two REST endpoints:
 * `POST /streamApi/maskAttributes`
-  - takes an `x-request-token` `String` header and `AttributeMaskingRequest` body
-  - returns a `202 ACCEPTED` and an `AttributeMaskingResponse` body
+  - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
+  - returns a `202 ACCEPTED` after writing the headers and body to kafka
   
 * `POST /streamApi/maskAttributes/multi`
-  - takes an `x-request-token` `String` header and a `List` of `AttributeMaskingRequest`s body
-  - returns a `202 ACCEPTED` and a `List` of `AttributeMaskingResponse`s body
+  - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
+  - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
 
 
 ## Kafka Interface
@@ -66,7 +66,7 @@ The `x-request-token` is sent in the Kafka headers.
 In case of errors, the original request and thrown exception are both captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
 
 
-## Example JSON Request Payload
+## Example JSON Request
 ```
 {
   "userId": "test-user-id",
@@ -108,7 +108,7 @@ In case of errors, the original request and thrown exception are both captured i
 ```
 
 
-## Example JSON Response Payload
+## Example JSON Response
 ```
 {
   "userId": "test-user-id",
