@@ -384,9 +384,6 @@
                         </goals>
                         <configuration>
                             <dataFile>${sonar.jacoco.reportPath}</dataFile>
-                            <includes>
-                                <include>uk/gov/gchq/palisade/service/**</include>
-                            </includes>
                         </configuration>
                     </execution>
                     <execution>
@@ -401,16 +398,12 @@
                     </execution>
                     <execution>
                         <id>post-integration-test</id>
-                        <phase>post-integration-test</phase>
+                        <phase>integration-test</phase>
                         <goals>
                             <goal>report-integration</goal>
                         </goals>
                         <configuration>
                             <dataFile>${sonar.jacoco-it.reportPath}</dataFile>
-                            <includes>
-                                <include>uk/gov/gchq/palisade/component/**</include>
-                                <include>uk/gov/gchq/palisade/contract/**</include>
-                            </includes>
                         </configuration>
                     </execution>
                 </executions>
