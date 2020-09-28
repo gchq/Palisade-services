@@ -21,8 +21,6 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValueFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -56,7 +54,6 @@ import java.util.stream.StreamSupport;
  * Parse and convert Spring maps and lists to Akka configs
  */
 public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer implements InitializingBean {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesConfigurer.class);
     private static final Pattern INDEXED_PROPERTY_PATTERN = Pattern.compile("^\\s*(?<path>\\w+(?:\\.\\w+)*)\\[(?<index>\\d+)\\]\\.*(.*?)$");
     private static final int PROPERTY_PATH = 1;
     private static final int PROPERTY_INDEX = 2;
@@ -109,7 +106,6 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
                     .filter(Resource::exists)
                     .map((Resource resource) -> {
                         try {
-                            LOGGER.info("Loading config file: {}", resource.getFilename());
                             return loader.load(resource.getFilename(), resource);
                         } catch (IOException e) {
                             String message = loader.getClass().getSimpleName() + " failed to load file " + resource.getFilename();
@@ -185,27 +181,31 @@ public class PropertiesConfigurer extends PropertySourcesPlaceholderConfigurer i
 
     private static String reductionKey(final String key) {
         Matcher mat = INDEXED_PROPERTY_PATTERN.matcher(key);
-        if (mat.matches() && mat.groupCount() > PROPERTY_INDEX) {
-            String root = mat.group(PROPERTY_PATH);
-            String index = mat.group(PROPERTY_INDEX);
-            mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
-            while (mat.matches()) {
-                String prevIndex = mat.group(PROPERTY_INDEX);
-                root = String.format("%s[%s].%s", root, index, mat.group(PROPERTY_PATH));
-                mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
-                if (mat.matches()) {
-                    if (mat.group(PROPERTY_PATH).isEmpty()) {
-                        return root;
-                    } else {
-                        root = String.format("%s[%s].%s", root, prevIndex, mat.group(PROPERTY_PATH));
-                        mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_PATH));
-                    }
-                }
-            }
-            return root;
-        } else {
+        // Early return if this is a simple key/value property
+        if (!mat.matches() || mat.groupCount() <= PROPERTY_INDEX) {
             return "";
         }
+        // Parse the index if the property was a list
+        String root = mat.group(PROPERTY_PATH);
+        String index = mat.group(PROPERTY_INDEX);
+        // Match on the tail (nested objects)
+        mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
+        while (mat.matches()) {
+            String prevIndex = mat.group(PROPERTY_INDEX);
+            root = String.format("%s[%s].%s", root, index, mat.group(PROPERTY_PATH));
+            // "Recursively" match on the tail until there are no more nested lists
+            mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_TAIL));
+            if (mat.matches()) {
+                if (mat.group(PROPERTY_PATH).isEmpty()) {
+                    return root;
+                } else {
+                    // Re-insert the previous index into the root string
+                    root = String.format("%s[%s].%s", root, prevIndex, mat.group(PROPERTY_PATH));
+                    mat = INDEXED_PROPERTY_PATTERN.matcher(mat.group(PROPERTY_PATH));
+                }
+            }
+        }
+        return root;
     }
 
 }

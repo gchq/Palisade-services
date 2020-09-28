@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -116,7 +117,7 @@ public class AttributeMaskingRestController {
 
         // Convert headers to kafka style
         List<Header> kafkaHeaders = headers.entrySet().stream()
-                .flatMap(entries -> entries.getValue().stream().map(value -> new RecordHeader(entries.getKey(), value.getBytes())))
+                .flatMap(entries -> entries.getValue().stream().map(value -> new RecordHeader(entries.getKey(), value.getBytes(Charset.defaultCharset()))))
                 .collect(Collectors.toList());
 
         // Process requests

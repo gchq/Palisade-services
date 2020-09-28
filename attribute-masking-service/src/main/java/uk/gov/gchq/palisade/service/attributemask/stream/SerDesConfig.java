@@ -39,6 +39,8 @@ import java.nio.charset.Charset;
  */
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
+    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
@@ -65,7 +67,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(attributeMaskingRequest);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to serialize " + attributeMaskingRequest.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + attributeMaskingRequest.toString(), e);
             }
         };
     }
@@ -89,7 +91,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.readValue(attributeMaskingRequest, AttributeMaskingRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(attributeMaskingRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -113,7 +115,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(attributeMaskingResponse);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + attributeMaskingResponse.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + attributeMaskingResponse.toString(), e);
             }
         };
     }
@@ -137,7 +139,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditErrorMessage);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
             }
         };
     }
