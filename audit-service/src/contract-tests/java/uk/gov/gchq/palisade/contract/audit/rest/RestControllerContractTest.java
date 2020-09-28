@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
@@ -62,9 +64,9 @@ public class RestControllerContractTest extends AuditTestCommon {
 
     @Test
     public void isUp() {
-        final String health = restTemplate.getForObject("/actuator/health", String.class);
+        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
-        assertThat(health, is(equalTo("{\"status\":\"UP\"}")));
+        assertThat(health.getStatusCode(), is(equalTo(HttpStatus.OK)));
     }
 
     @Test
