@@ -55,7 +55,6 @@ public class ApplicationConfigurationTest {
     @Test
     public void auditServicesLoaded() {
         assertThat(auditServices).isNotNull();
-        //assertThat(auditServices, not(equalTo(nullValue())));
     }
 
     @Test
