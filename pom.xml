@@ -80,8 +80,8 @@
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportDir>${project.basedir}/../target/coverage-reports/</sonar.jacoco.reportDir>
-        <sonar.jacoco.reportPath>${sonar.jacoco.reportDir}/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco-it.reportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco-it.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
 
@@ -372,6 +372,9 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <destFile>${sonar.jacoco.reportPath}</destFile>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>post-unit-test</id>
@@ -381,7 +384,6 @@
                         </goals>
                         <configuration>
                             <dataFile>${sonar.jacoco.reportPath}</dataFile>
-                            <outputDirectory>${sonar.jacoco.reportDir}</outputDirectory>
                             <includes>
                                 <include>uk/gov/gchq/palisade/service/**</include>
                             </includes>
@@ -393,6 +395,9 @@
                         <goals>
                             <goal>prepare-agent-integration</goal>
                         </goals>
+                        <configuration>
+                            <destFile>${sonar.jacoco-it.reportPath}</destFile>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>post-integration-test</id>
@@ -401,6 +406,7 @@
                             <goal>report-integration</goal>
                         </goals>
                         <configuration>
+                            <dataFile>${sonar.jacoco-it.reportPath}</dataFile>
                             <includes>
                                 <include>uk/gov/gchq/palisade/component/**</include>
                                 <include>uk/gov/gchq/palisade/contract/**</include>
