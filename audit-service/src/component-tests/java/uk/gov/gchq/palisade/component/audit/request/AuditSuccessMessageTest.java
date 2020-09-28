@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.audit.request;
+package uk.gov.gchq.palisade.component.audit.request;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +24,11 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage;
 
 import java.io.IOException;
 import java.time.ZoneOffset;
@@ -40,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(classes = {AuditSuccessMessageTest.class})
 public class AuditSuccessMessageTest {
 
     @Autowired

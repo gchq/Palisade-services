@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.audit.config;
+package uk.gov.gchq.palisade.component.audit.config;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
@@ -42,10 +43,9 @@ import static org.hamcrest.Matchers.nullValue;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ApplicationConfiguration.class)
-@ActiveProfiles(profiles = "")
 public class ApplicationConfigurationTest {
 
-    private static final Set<Class> EXPECTED_AUDITS = new HashSet<>();
+    private static final Set<Class<? extends AuditService>> EXPECTED_AUDITS = new HashSet<>();
 
     static {
         EXPECTED_AUDITS.add(LoggerAuditService.class);
