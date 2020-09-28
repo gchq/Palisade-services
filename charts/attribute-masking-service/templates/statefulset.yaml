@@ -39,6 +39,14 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        command:
+          - bash
+          - "-c"
+          - |
+            [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+            ordinal=${BASH_REMATCH[1]}
+            java -jar /usr/share/attribute-masking-service/attribute-masking-service.jar \
+              {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal{{ end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
@@ -63,12 +71,10 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
-        - name: "STATEFULSET_INDEX"
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.annotations['spec.pod.beta.kubernetes.io/statefulset-index']
         - name: "LOADER_PATH"
           value: {{ include "attribute-masking-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "attribute-masking-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}

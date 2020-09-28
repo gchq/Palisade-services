@@ -36,7 +36,6 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

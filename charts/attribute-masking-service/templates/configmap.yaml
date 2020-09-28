@@ -15,18 +15,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "user-service.name" . }}-configmap
+  name: {{ include "attribute-masking-service.name" . }}-configmap
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    app.kubernetes.io/name: {{ include "user-service.name" . }}
-    helm.sh/chart: {{ include "user-service.chart" . }}
+    app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
+    helm.sh/chart: {{ include "attribute-masking-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
   application-akka.yaml: |
     akka:
-      kafka.consumer.topics.input-topic:
-        assignment: ${HOSTNAME##*}
+      kafka.consumer.topics.input-topic.partitions: {{ .Values.replicaCount }}
       discovery.config.services.kafka.endpoints:
-      - host: {{ include "kafka.fullname" . }}-headless
+      - host: {{ include "palisade.kafka.fullname" . }}-headless
         port: 9092

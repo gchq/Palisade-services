@@ -31,6 +31,8 @@ import org.springframework.core.io.ResourceLoader;
 
 import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 
+import java.util.Map.Entry;
+
 /**
  * Convert Spring YAML configuration to Akka HOCON configuration and provide core Akka beans
  */
@@ -53,7 +55,8 @@ public class AkkaSystemConfig {
     @ConditionalOnMissingBean
     ActorSystem getActorSystem(final PropertiesConfigurer propertiesConfigurer) {
         propertiesConfigurer.getAllActiveProperties()
-                .forEach((key, value) -> LOGGER.debug("{} = {}", key, value));
+                .entrySet().stream().sorted(Entry.comparingByKey())
+                .forEach(entry -> LOGGER.debug("{} = {}", entry.getKey(), entry.getValue()));
         Config config = propertiesConfigurer
                 .toHoconConfig(propertiesConfigurer.getAllActiveProperties())
                 .withFallback(ConfigFactory.load());

@@ -84,7 +84,8 @@ public class KafkaTestConfiguration {
     @Primary
     ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
         return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
-                props.getAllActiveProperties().entrySet().stream(),
+                props.getAllActiveProperties().entrySet().stream()
+                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
                 Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
     }

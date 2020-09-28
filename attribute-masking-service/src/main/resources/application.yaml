@@ -14,7 +14,14 @@
 
 spring:
   profiles:
-    active: akka
+    include:
+    - akka
+    - default-config
+
+---
+
+spring:
+  profiles: default-config
   application:
     name: attribute-masking-service
   output:

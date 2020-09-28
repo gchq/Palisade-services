@@ -18,10 +18,8 @@ package uk.gov.gchq.palisade.component.attributemask.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -29,16 +27,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
-import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaComponentsConfig;
 import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
 
-import java.util.concurrent.CompletableFuture;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 
 @WebMvcTest(controllers = {AttributeMaskingRestController.class})
 @ContextConfiguration(classes = {ControllerWebMvcTest.class, AttributeMaskingRestController.class, AkkaComponentsConfig.class, AkkaSystemConfig.class, ConsumerTopicConfiguration.class})

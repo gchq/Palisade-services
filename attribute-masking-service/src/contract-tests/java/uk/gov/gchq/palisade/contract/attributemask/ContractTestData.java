@@ -98,9 +98,9 @@ public class ContractTestData {
 
     public static final String REQUEST_TOKEN = "test-request-token";
 
-    public static final Headers START_HEADERS = new RecordHeaders(new Header[] {new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes())});
-    public static final Headers REQUEST_HEADERS = new RecordHeaders(new Header[] {new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes())});
-    public static final Headers END_HEADERS = new RecordHeaders(new Header[] {new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.END.toString().getBytes())});
+    public static final Headers START_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes())});
+    public static final Headers REQUEST_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes())});
+    public static final Headers END_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes()), new RecordHeader(StreamMarker.HEADER, StreamMarker.END.toString().getBytes())});
 
     public static final ProducerRecord<String, JsonNode> START_RECORD = new ProducerRecord<String, JsonNode>("rule", 0, null, null, START_HEADERS);
     public static final ProducerRecord<String, JsonNode> END_RECORD = new ProducerRecord<String, JsonNode>("rule", 0, null, null, END_HEADERS);

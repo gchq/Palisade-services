@@ -15,10 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.attributemask;
 
-import akka.actor.ActorSystem;
 import akka.stream.Materializer;
 import akka.stream.javadsl.RunnableGraph;
-import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,23 +45,19 @@ public class AttributeMaskingApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
-    private final ActorSystem system;
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param system       the Akka {@link ActorSystem} configured to be used
      * @param materializer the Akka {@link Materializer} configured to be used
      * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public AttributeMaskingApplication(
             final Collection<RunnableGraph<?>> runners,
-            final ActorSystem system,
             final Materializer materializer,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
-        this.system = system;
         this.materializer = materializer;
         this.executor = executor;
     }
