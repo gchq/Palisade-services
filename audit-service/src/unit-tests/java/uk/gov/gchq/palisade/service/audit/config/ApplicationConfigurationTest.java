@@ -33,11 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -58,7 +54,8 @@ public class ApplicationConfigurationTest {
 
     @Test
     public void auditServicesLoaded() {
-        assertThat(auditServices, not(equalTo(nullValue())));
+        assertThat(auditServices).isNotNull();
+        //assertThat(auditServices, not(equalTo(nullValue())));
     }
 
     @Test
@@ -66,7 +63,7 @@ public class ApplicationConfigurationTest {
         // Given - expectedAudits
         // Then
         for (AuditService auditService : auditServices.values()) {
-            assertThat(auditService.getClass(), isIn(EXPECTED_AUDITS));
+            assertThat(auditService.getClass()).isIn(EXPECTED_AUDITS);
         }
     }
 }

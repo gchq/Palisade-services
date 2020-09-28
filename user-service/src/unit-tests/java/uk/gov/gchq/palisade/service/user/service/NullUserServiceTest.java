@@ -21,8 +21,7 @@ import org.junit.Test;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NullUserServiceTest {
     NullUserService nullUserService = new NullUserService();
@@ -37,6 +36,6 @@ public class NullUserServiceTest {
     public void addUser() {
         User user = new User().userId("testUser");
         User actual = nullUserService.addUser(user);
-        assertThat(user, is(actual));
+        assertThat(actual.getUserId().getId()).isEqualTo(user.getUserId().getId());
     }
 }
