@@ -47,7 +47,7 @@ public class AkkaSystemConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
+    static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
         return new PropertiesConfigurer(resourceLoader, environment);
     }
 
