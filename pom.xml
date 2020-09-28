@@ -80,12 +80,14 @@
         <!-- Sonar -->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>${project.basedir}/../target/coverage-reports/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.reportDir>${project.basedir}/../target/coverage-reports/</sonar.jacoco.reportDir>
+        <sonar.jacoco.reportPath>${sonar.jacoco.reportDir}/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
 
     <modules>
         <module>audit-service</module>
+        <!--
         <module>data-service</module>
         <module>discovery-service</module>
         <module>palisade-service</module>
@@ -96,6 +98,7 @@
         <module>user-service</module>
         <module>services-manager</module>
         <module>create-kafka-queues</module>
+        -->
     </modules>
 
     <profiles>
@@ -377,6 +380,8 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
+                            <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                            <outputDirectory>${sonar.jacoco.reportDir}</outputDirectory>
                             <includes>
                                 <include>uk/gov/gchq/palisade/service/**</include>
                             </includes>
