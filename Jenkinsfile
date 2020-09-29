@@ -330,7 +330,7 @@ timestamps {
                                             "--set global.redisClusterEnabled=true " +
                                             "--set global.redis.install=false " +
                                             "--set global.redis-cluster.install=true " +
-                                            "--timeout 300s" +
+                                            "--timeout 300s " +
                                             "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
                                         echo("successfully deployed")
                                     } else {
