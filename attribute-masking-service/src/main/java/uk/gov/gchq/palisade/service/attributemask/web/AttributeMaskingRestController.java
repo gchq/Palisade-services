@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  * Intended for debugging only.
  */
 @RestController
-@RequestMapping(path = "/streamApi")
+@RequestMapping(path = "/api")
 public class AttributeMaskingRestController {
     private final Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
@@ -81,7 +81,7 @@ public class AttributeMaskingRestController {
      * @param request the (optional) request itself
      * @return the response from the service, or an error if one occurred
      */
-    @PostMapping(value = "/maskAttributes", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/mask", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> maskAttributes(
             final @RequestHeader MultiValueMap<String, String> headers,
             final @RequestBody(required = false) AttributeMaskingRequest request) {
@@ -100,7 +100,7 @@ public class AttributeMaskingRestController {
      * @param requests a list of requests
      * @return the response from the service, or an error if one occurred
      */
-    @PostMapping(value = "/maskAttributes/multi", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/mask/multi", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> maskAttributesMulti(
             final @RequestHeader MultiValueMap<String, String> headers,
             final @RequestBody List<AttributeMaskingRequest> requests) {
@@ -113,7 +113,8 @@ public class AttributeMaskingRestController {
 
         // Get topic and calculate partition, unless this service has been assigned a partition
         Topic topic = this.upstreamConfig.getTopics().get("input-topic");
-        int partition = Optional.ofNullable(topic.getAssignment()).orElseGet(() -> Math.floorMod(token.hashCode(), topic.getPartitions()));
+        int partition = Optional.ofNullable(topic.getAssignment())
+                .orElseGet(() -> Token.toPartition(token, topic.getPartitions()));
 
         // Convert headers to kafka style
         List<Header> kafkaHeaders = headers.entrySet().stream()

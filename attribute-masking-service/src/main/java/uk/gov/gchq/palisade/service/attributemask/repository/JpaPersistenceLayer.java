@@ -27,8 +27,7 @@ import javax.transaction.Transactional;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import static java.util.Objects.requireNonNull;
+import java.util.concurrent.Executor;
 
 /**
  * Java JPA implementation of a {@link PersistenceLayer} for the attribute-masking-service.
@@ -38,15 +37,19 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
 
     private final AuthorisedRequestsRepository authorisedRequestsRepository;
+    private final Executor executor;
 
     /**
      * Constructor expected to be called by the ApplicationConfiguration, autowiring in the appropriate implementation of the repository (h2/redis/...)
      *
      * @param authorisedRequestsRepository the appropriate CrudRepository implementation
+     * @param executor                     an async executor for running the put request
      */
-    public JpaPersistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
+    public JpaPersistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository, final Executor executor) {
         this.authorisedRequestsRepository = Optional.ofNullable(authorisedRequestsRepository)
                 .orElseThrow(() -> new IllegalArgumentException("authorisedRequestsRepository cannot be null"));
+        this.executor = Optional.ofNullable(executor)
+                .orElseThrow(() -> new IllegalArgumentException("executor cannot be null"));
     }
 
     @Override
@@ -56,6 +59,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         return CompletableFuture.supplyAsync(() -> {
             this.authorisedRequestsRepository.save(token, user, resource, context, rules);
             return null;
-        });
+        }, this.executor);
     }
 }

@@ -17,15 +17,13 @@ kind: Service
 metadata:
   name: {{ include "attribute-masking-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
-  labels:
-    {{- include "attribute-masking-service.labels" . | nindent 4 }}
+  labels: {{- include "attribute-masking-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
   - name: web
     port: {{ .Values.service.port }}
     targetPort: 8091
-    protocol: TCP
   selector:
     app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

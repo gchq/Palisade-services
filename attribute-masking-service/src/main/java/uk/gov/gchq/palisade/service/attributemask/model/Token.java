@@ -24,6 +24,10 @@ package uk.gov.gchq.palisade.service.attributemask.model;
 public final class Token {
     public static final String HEADER = "x-request-token";
 
+    public static int toPartition(final String token, final int partitions) {
+        return Math.floorMod(token.hashCode(), partitions);
+    }
+
     private Token() {
         // Tokens are just strings, no need to instantiate a class for them
     }

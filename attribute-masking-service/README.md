@@ -49,11 +49,11 @@ The masking operation may in the future apply attribute-level `Rule`s using the 
 ## REST Interface
 
 The application exposes two REST endpoints:
-* `POST /streamApi/maskAttributes`
+* `POST /api/mask`
   - takes an `x-request-token` `String` header, any number of extra headers, and an `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and body to kafka
   
-* `POST /streamApi/maskAttributes/multi`
+* `POST /api/mask/multi`
   - takes an `x-request-token` `String` header, any number of extra headers, and a `List` of `AttributeMaskingRequest` body
   - returns a `202 ACCEPTED` after writing the headers and bodies to kafka
 
@@ -68,7 +68,8 @@ In case of errors, the original request and thrown exception are both captured i
 
 ## Example JSON Request
 ```
-{
+curl -X POST attribute-masking-service-headless/api/mask -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
+'{
   "userId": "test-user-id",
   "resourceId": "/test/resourceId",
   "context": {
@@ -104,7 +105,7 @@ In case of errors, the original request and thrown exception are both captured i
     "message": "no rules set",
     "rules": {}
   }
-}
+}'
 ```
 
 

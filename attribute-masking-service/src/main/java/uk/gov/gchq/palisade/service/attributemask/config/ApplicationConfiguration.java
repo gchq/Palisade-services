@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.attributemask.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -31,6 +32,7 @@ import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingServic
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
 
 import java.util.Collections;
+import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
@@ -39,8 +41,8 @@ import java.util.Collections;
 public class ApplicationConfiguration {
 
     @Bean
-    JpaPersistenceLayer persistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
-        return new JpaPersistenceLayer(authorisedRequestsRepository);
+    JpaPersistenceLayer persistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository, final @Qualifier("applicationTaskExecutor") Executor executor) {
+        return new JpaPersistenceLayer(authorisedRequestsRepository, executor);
     }
 
     @Bean

@@ -69,31 +69,27 @@ kubectl config use-context <name>
 
 Example first deployment to a local cluster (from the project root directory):
 ```  
- helm upgrade --install palisade . \
-  --set global.persistence.statefulSet.pv.enabled=true \
-  --set global.persistence.classpathJars.local.hostPath=$(pwd) \
-  --set global.persistence.dataStores.palisade-data-store.local.hostPath=$(pwd) \
-  --set global.persistence.kafka.local.hostPath=$(pwd) \
-  --set global.persistence.redisMaster.local.hostPath=$(pwd) \
-  --set global.persistence.redisSlave.local.hostPath=$(pwd) \
-  --set global.persistence.zookeeper.local.hostPath=$(pwd) \
-  --set traefik.install=true \
-  --set kafka.install=true \
-  --set redis.install=true \
-  --set global.hosting=local \
-  --set redis-cluster.install=false \
+helm upgrade --install palisade . \
+  --set global.persistence.dataStores.palisade-data-store.local.hostPath=${pwd}  \
+  --set global.persistence.classpathJars.local.hostPath.volumeHandle=${pwd}  \
   --timeout=200s
 ```
-This will deploy the traefik ingress controller and install Palisade with a deployment name of "palisade" into the default namespace.
-The application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
-The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars and for kafka/redis persistence.
+The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars.
+Kafka and redis persistence is mounted using the `/tmp` directory by default.
+
+An example second deployment may want to use traefik to enable access into the cluster.
+This can be done by adding the additional flag:
+```
+  --set trefik.install=true
+```
+This will deploy the traefik ingress controller - the application will be available at `http://localhost/palisade` and the traefik dashboard will be available at `http://localhost:8080/dashboard/#/`.
 
 Multiple instances of Palisade may be deployed on the same cluster, separated by namespace.
 The ingress controller will be configured to provide a route via that namespace.
 It is required that the namespace exists prior to the installation:
 ```
 kubectl create namespace testing
-helm upgrade --install test . --namespace testing
+helm upgrade --install test . --namespace testing --set traefik.install=true
 ```
 
 This will deploy an additional instance of Palisade called `test` which may be accessed at `http://localhost/testing/palisade`

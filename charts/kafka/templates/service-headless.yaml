@@ -17,7 +17,6 @@ kind: Service
 metadata:
   name: {{ include "kafka.fullname" . }}-headless
   namespace: {{ include "palisade.namespace" . }}
-
   labels:
   {{- include "kafka.broker.labels" . | nindent 4 }}
   annotations:

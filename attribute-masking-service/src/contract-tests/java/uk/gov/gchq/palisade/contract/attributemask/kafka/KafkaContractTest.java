@@ -246,7 +246,7 @@ class KafkaContractTest {
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AttributeMaskingRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity("/streamApi/maskAttributes", entity, Void.class);
+        ResponseEntity<Void> response = restTemplate.postForEntity("/api/mask", entity, Void.class);
 
         // Then - the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);

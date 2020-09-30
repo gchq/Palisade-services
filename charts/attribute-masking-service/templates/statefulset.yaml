@@ -24,7 +24,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  serviceName: {{ include "attribute-masking-service.fullname" . }}-headless
+  serviceName: {{ include "attribute-masking-service.name" . }}-headless
   podManagementPolicy: "Parallel"
   selector:
     matchLabels:
@@ -51,7 +51,6 @@ spec:
         ports:
           - name: web
             containerPort: 8091
-            protocol: TCP
         livenessProbe:
           httpGet:
             path: /actuator/health
