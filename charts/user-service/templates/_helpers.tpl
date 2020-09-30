@@ -84,7 +84,6 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 {{- end }}
 
-
 {{/*
 Calculate the service config location
 */}}
