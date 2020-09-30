@@ -30,6 +30,10 @@
     <url>https://github.com/gchq/Palisade-services/tree/develop/user-service</url>
     <!--  *********** Aritfact ID ***********    -->
 
+    <properties>
+        <embedded-redis.version>0.7.3</embedded-redis.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -91,6 +95,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>${embedded-redis.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
