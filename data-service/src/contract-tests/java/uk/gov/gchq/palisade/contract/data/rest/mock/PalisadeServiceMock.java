@@ -48,10 +48,8 @@ public class PalisadeServiceMock {
         return new WireMockRule(options().port(8084).notifier(new ConsoleNotifier(true)));
     }
 
-    public static DataRequestConfig getDataRequestConfig() {
+    public static DataRequestConfig getDataRequestConfig(final LeafResource resource) {
         Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
-        URI path = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toAbsolutePath().normalize().toUri();
-        FileResource resource = (FileResource) ResourceBuilder.create(path);
         Rules<Employee> rules = new Rules<Employee>().addRule("Test Rule", new PassThroughRule<>());
         leafResourceToRules.put(resource, rules);
 
@@ -64,11 +62,9 @@ public class PalisadeServiceMock {
         return response;
     }
 
-    public static void stubRule(final WireMockRule serviceMock, final ObjectMapper serializer) throws JsonProcessingException {
+    public static void stubRule(final WireMockRule serviceMock, final ObjectMapper serializer, final LeafResource resource) throws JsonProcessingException {
         serviceMock.stubFor(post(urlEqualTo("/getDataRequestConfig"))
-                .willReturn(
-                        okJson(serializer.writeValueAsString(getDataRequestConfig()))
-                ));
+                .willReturn(okJson(serializer.writeValueAsString(getDataRequestConfig(resource)))));
     }
 
 }

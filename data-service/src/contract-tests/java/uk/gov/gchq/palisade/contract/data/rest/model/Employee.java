@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.contract.data.rest.model;
 import uk.gov.gchq.palisade.Generated;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -40,7 +41,6 @@ public class Employee implements Serializable {
 
     @Generated
     public void setName(final String name) {
-        requireNonNull(name);
         this.name = name;
     }
 
@@ -51,7 +51,22 @@ public class Employee implements Serializable {
 
     @Generated
     public void setNumber(final Integer number) {
-        requireNonNull(number);
         this.number = number;
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employee)) return false;
+        final Employee employee = (Employee) o;
+        return Objects.equals(name, employee.name) &&
+                Objects.equals(number, employee.number);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(name, number);
     }
 }

@@ -32,4 +32,5 @@ public class DataTestConfiguration {
     public DataClientWrapper dataClientWrapper(final DataClient client, final DataService service) {
         return new DataClientWrapper(client, service);
     }
+
 }

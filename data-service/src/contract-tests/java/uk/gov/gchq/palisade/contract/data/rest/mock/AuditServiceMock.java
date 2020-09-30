@@ -37,7 +37,7 @@ public class AuditServiceMock {
     }
 
     public static void stubRule(final WireMockRule serviceMock, final ObjectMapper serializer) throws JsonProcessingException {
-        serviceMock.stubFor(post(urlEqualTo("/audit"))
+        serviceMock.stubFor(post(urlEqualTo("http://localhost:8089/audit"))
                 .willReturn(
                         okJson(serializer.writeValueAsString(getAuditResult()))
                 ));

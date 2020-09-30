@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.request;
+package uk.gov.gchq.palisade.component.data.request;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -31,14 +30,15 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.data.request.DataResponse;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(SpringRunner.class)
 @JsonTest
+@ContextConfiguration(classes = {DataResponseTest.class})
 public class DataResponseTest {
 
     @Autowired
@@ -61,7 +61,7 @@ public class DataResponseTest {
                 .serialisedFormat("format")
                 .connectionDetail(new SimpleConnectionDetail().serviceName("test-service"))
                 .parent(new SystemResource().id("/test"));
-        Rules rules = new Rules<>();
+        Rules<?> rules = new Rules<>();
 
         DataResponse dataResponse = DataResponse.Builder.create()
                 .withContext(context)
@@ -73,15 +73,15 @@ public class DataResponseTest {
         ObjectContent<DataResponse> dataRequestObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
         DataResponse dataResponseMessageObject = dataRequestObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
+        assertAll("DataResponseSerialisingDeseralisingAndComparison",
+                () -> assertAll("DataResponseSerialisingComparedToString",
                         () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.user.userId.id").isEqualTo("testUserId"),
                         () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
                         () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.resource.id").isEqualTo("/test/file.format"),
                         () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.resource.connectionDetail.serviceName").isEqualTo("test-service"),
                         () -> assertThat(dataResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set")
                 ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
+                () -> assertAll("DataResponseDeserialisingComparedToObject",
                         () -> assertThat(dataResponseMessageObject.getUser()).isEqualTo(dataResponse.getUser()),
                         () -> assertThat(dataResponseMessageObject.getContext().getPurpose()).isEqualTo(dataResponse.getContext().getPurpose()),
                         () -> assertThat(dataResponseMessageObject.getContext()).isEqualTo(dataResponse.getContext()),
@@ -89,8 +89,7 @@ public class DataResponseTest {
                         () -> assertThat(dataResponseMessageObject.getRules()).isEqualTo(dataResponse.getRules())
                 ),
                 () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(dataResponseMessageObject.equals(dataResponse))
+                        () -> assertThat(dataResponseMessageObject).isEqualTo(dataResponse)
                 )
         );
     }
