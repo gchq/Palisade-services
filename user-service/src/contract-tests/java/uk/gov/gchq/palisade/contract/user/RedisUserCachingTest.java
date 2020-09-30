@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.contract.user;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("redis")
+@Ignore
 @SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 public class RedisUserCachingTest {
 
