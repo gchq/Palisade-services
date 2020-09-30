@@ -23,7 +23,7 @@ spec:
   ports:
   - name: web
     port: {{ .Values.service.port }}
-    targetPort: 8091
+    targetPort: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

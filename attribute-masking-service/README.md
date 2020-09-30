@@ -68,7 +68,7 @@ In case of errors, the original request and thrown exception are both captured i
 
 ## Example JSON Request
 ```
-curl -X POST attribute-masking-service-headless/api/mask -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
+curl -X POST attribute-masking-service/api/mask -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
 '{
   "userId": "test-user-id",
   "resourceId": "/test/resourceId",

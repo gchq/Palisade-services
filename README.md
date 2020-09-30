@@ -71,7 +71,7 @@ Example first deployment to a local cluster (from the project root directory):
 ```  
 helm upgrade --install palisade . \
   --set global.persistence.dataStores.palisade-data-store.local.hostPath=${pwd}  \
-  --set global.persistence.classpathJars.local.hostPath.volumeHandle=${pwd}  \
+  --set global.persistence.classpathJars.local.hostPath=${pwd}  \
   --timeout=200s
 ```
 The working directory from `$(pwd)` will be used as the mount-point for the data-service, as well as for finding classpath-jars.

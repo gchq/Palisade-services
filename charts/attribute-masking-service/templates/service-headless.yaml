@@ -24,8 +24,7 @@ spec:
   publishNotReadyAddresses: true
   ports:
     - name: broker
-      port: {{ .Values.service.port }}
-      targetPort: web
+      port: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "attribute-masking-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
