@@ -33,7 +33,7 @@ import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, ExecutorTestConfiguration.class})
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
 class JpaPersistenceLayerTest {
