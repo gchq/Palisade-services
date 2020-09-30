@@ -22,8 +22,7 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Optional;
 
 /**
  * Configuration for Akka Kafka producer
@@ -42,8 +41,8 @@ public class ProducerTopicConfiguration {
 
     @Generated
     public void setDiscoveryMethod(final String discoveryMethod) {
-        requireNonNull(discoveryMethod);
-        this.discoveryMethod = discoveryMethod;
+        this.discoveryMethod = Optional.ofNullable(discoveryMethod)
+                .orElseThrow(() -> new IllegalArgumentException("discoveryMethod cannot be null"));
     }
 
     @Generated
@@ -53,8 +52,8 @@ public class ProducerTopicConfiguration {
 
     @Generated
     public void setServiceName(final String serviceName) {
-        requireNonNull(serviceName);
-        this.serviceName = serviceName;
+        this.serviceName = Optional.ofNullable(serviceName)
+                .orElseThrow(() -> new IllegalArgumentException("serviceName cannot be null"));
     }
 
     @Generated
@@ -64,8 +63,8 @@ public class ProducerTopicConfiguration {
 
     @Generated
     public void setParallelism(final Integer parallelism) {
-        requireNonNull(parallelism);
-        this.parallelism = parallelism;
+        this.parallelism = Optional.ofNullable(parallelism)
+                .orElseThrow(() -> new IllegalArgumentException("parallelism cannot be null"));
     }
 
     @Generated
@@ -75,8 +74,8 @@ public class ProducerTopicConfiguration {
 
     @Generated
     public void setTopics(final Map<String, Topic> topics) {
-        requireNonNull(topics);
-        this.topics = topics;
+        this.topics = Optional.ofNullable(topics)
+                .orElseThrow(() -> new IllegalArgumentException("topics cannot be null"));
     }
 
     /**
@@ -95,8 +94,8 @@ public class ProducerTopicConfiguration {
 
         @Generated
         public void setName(final String name) {
-            requireNonNull(name);
-            this.name = name;
+            this.name = Optional.ofNullable(name)
+                    .orElseThrow(() -> new IllegalArgumentException("name cannot be null"));
         }
 
         @Generated
@@ -106,8 +105,8 @@ public class ProducerTopicConfiguration {
 
         @Generated
         public void setPartitions(final Integer partitions) {
-            requireNonNull(partitions);
-            this.partitions = partitions;
+            this.partitions = Optional.ofNullable(partitions)
+                    .orElseThrow(() -> new IllegalArgumentException("partitions cannot be null"));
         }
 
         @Generated
@@ -117,8 +116,8 @@ public class ProducerTopicConfiguration {
 
         @Generated
         public void setAssignment(final Integer assignment) {
-            requireNonNull(assignment);
-            this.assignment = assignment;
+            this.assignment = Optional.ofNullable(assignment)
+                    .orElseThrow(() -> new IllegalArgumentException("assignment cannot be null"));
         }
     }
 

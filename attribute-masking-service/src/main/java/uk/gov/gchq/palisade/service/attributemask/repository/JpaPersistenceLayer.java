@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 import javax.transaction.Transactional;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
@@ -44,7 +45,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param authorisedRequestsRepository the appropriate CrudRepository implementation
      */
     public JpaPersistenceLayer(final AuthorisedRequestsRepository authorisedRequestsRepository) {
-        this.authorisedRequestsRepository = requireNonNull(authorisedRequestsRepository, "AuthorisedRequestsRepository cannot be null");
+        this.authorisedRequestsRepository = Optional.ofNullable(authorisedRequestsRepository)
+                .orElseThrow(() -> new IllegalArgumentException("authorisedRequestsRepository cannot be null"));
     }
 
     @Override

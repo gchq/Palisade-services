@@ -23,8 +23,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Optional;
 
 /**
  * Configuration for Akka Kafka consumer
@@ -45,8 +44,8 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setDiscoveryMethod(final String discoveryMethod) {
-        requireNonNull(discoveryMethod);
-        this.discoveryMethod = discoveryMethod;
+        this.discoveryMethod = Optional.ofNullable(discoveryMethod)
+                .orElseThrow(() -> new IllegalArgumentException("discoveryMethod cannot be null"));
     }
 
     @Generated
@@ -56,8 +55,8 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setServiceName(final String serviceName) {
-        requireNonNull(serviceName);
-        this.serviceName = serviceName;
+        this.serviceName = Optional.ofNullable(serviceName)
+                .orElseThrow(() -> new IllegalArgumentException("serviceName cannot be null"));
     }
 
     @Generated
@@ -67,8 +66,8 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setUseDispatcher(final String useDispatcher) {
-        requireNonNull(useDispatcher);
-        this.useDispatcher = useDispatcher;
+        this.useDispatcher = Optional.ofNullable(useDispatcher)
+                .orElseThrow(() -> new IllegalArgumentException("useDispatcher cannot be null"));
     }
 
     @Generated
@@ -78,8 +77,8 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setKafkaClients(final Map<String, String> kafkaClients) {
-        requireNonNull(kafkaClients);
-        this.kafkaClients = kafkaClients;
+        this.kafkaClients = Optional.ofNullable(kafkaClients)
+                .orElseThrow(() -> new IllegalArgumentException("kafkaClients cannot be null"));
     }
 
     @Generated
@@ -89,8 +88,8 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setConnectionChecker(final Map<String, String> connectionChecker) {
-        requireNonNull(connectionChecker);
-        this.connectionChecker = connectionChecker;
+        this.connectionChecker = Optional.ofNullable(connectionChecker)
+                .orElseThrow(() -> new IllegalArgumentException("connectionChecker cannot be null"));
     }
 
     @Generated
@@ -100,7 +99,7 @@ public class ConsumerTopicConfiguration {
 
     @Generated
     public void setTopics(final Map<String, Topic> topics) {
-        requireNonNull(topics);
-        this.topics = topics;
+        this.topics = Optional.ofNullable(topics)
+                .orElseThrow(() -> new IllegalArgumentException("topics cannot be null"));
     }
 }

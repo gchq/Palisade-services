@@ -23,7 +23,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 
 import javax.persistence.AttributeConverter;
 
-import static java.util.Objects.requireNonNull;
+import java.util.Optional;
 
 /**
  * Convert between Java {@link LeafResource} objects and serialised {@link String}s stored in a database
@@ -33,7 +33,8 @@ public class LeafResourceConverter implements AttributeConverter<LeafResource, S
     private final ObjectMapper objectMapper;
 
     public LeafResourceConverter(final ObjectMapper objectMapper) {
-        this.objectMapper = requireNonNull(objectMapper, "objectMapper");
+        this.objectMapper = Optional.ofNullable(objectMapper)
+                .orElseThrow(() -> new IllegalArgumentException("objectMapper cannot be null"));
     }
 
     @Override
