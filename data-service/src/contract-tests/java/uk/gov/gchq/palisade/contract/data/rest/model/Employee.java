@@ -21,8 +21,6 @@ import uk.gov.gchq.palisade.Generated;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static java.util.Objects.requireNonNull;
-
 public class Employee implements Serializable {
     private static final long serialVersionUID = 1;
 
@@ -57,8 +55,12 @@ public class Employee implements Serializable {
     @Override
     @Generated
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Employee)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Employee)) {
+            return false;
+        }
         final Employee employee = (Employee) o;
         return Objects.equals(name, employee.name) &&
                 Objects.equals(number, employee.number);

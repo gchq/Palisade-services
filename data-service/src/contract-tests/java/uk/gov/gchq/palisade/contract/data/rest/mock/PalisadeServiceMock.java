@@ -27,13 +27,9 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.data.rest.model.Employee;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
