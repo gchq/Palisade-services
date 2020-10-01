@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -50,18 +52,18 @@ public class UserControllerContractTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void contextLoads() {
-        assertNotNull(controller);
+    public void testContextLoads() {
+        assertNotNull("controller should not be null", controller);
     }
 
     @Test
-    public void isUp() {
-        final String health = restTemplate.getForObject("/actuator/health", String.class);
-        assertThat(health, is(equalTo("{\"status\":\"UP\"}")));
+    public void testIsUp() {
+        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
+        assertThat(health.getStatusCode(), is(equalTo(HttpStatus.OK)));
     }
 
     @Test
-    public void addedUserIsRetrievable() {
+    public void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("rest-added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
