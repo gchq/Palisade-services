@@ -90,7 +90,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-       public  interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -103,7 +103,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-      public   interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -139,7 +139,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-       public  interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -152,7 +152,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the error that occurred.
          */
-       public  interface IError {
+        public interface IError {
             /**
              * Adds the error for the message.
              *
