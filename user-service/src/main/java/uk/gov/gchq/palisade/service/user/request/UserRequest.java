@@ -107,7 +107,7 @@ public final class UserRequest {
         /**
          * Adds the user ID information for the request.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user's ID.
              *
@@ -120,7 +120,7 @@ public final class UserRequest {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource ID.
              *
@@ -133,7 +133,7 @@ public final class UserRequest {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
