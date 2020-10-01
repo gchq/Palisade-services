@@ -80,18 +80,16 @@
 
     <modules>
         <!-- Core service packages -->
+        <module>attribute-masking-service</module>
         <module>audit-service</module>
         <module>data-service</module>
         <module>discovery-service</module>
-        <module>filtered-resource-service</module>
         <module>palisade-service</module>
         <module>policy-service</module>
-        <module>query-scope-service</module>
         <module>resource-service</module>
         <module>user-service</module>
-        <!-- Non-core helper packages -->
-        <module>create-kafka-queues</module>
         <module>services-manager</module>
+        <module>create-kafka-queues</module>
     </modules>
 
     <profiles>
