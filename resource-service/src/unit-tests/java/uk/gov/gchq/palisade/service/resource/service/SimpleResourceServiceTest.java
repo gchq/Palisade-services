@@ -49,14 +49,14 @@ public class SimpleResourceServiceTest {
         Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
         DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
         DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
-        //DirectoryResource compTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/component-tests/java").getCanonicalFile().toURI());
+        DirectoryResource compTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/component-tests/java").getCanonicalFile().toURI());
         DirectoryResource ctractTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/contract-tests/java").getCanonicalFile().toURI());
 
         // When
         Stream<LeafResource> sourceFiles = service.getResourcesById(srcMainJava.getId());
         Stream<LeafResource> testFiles = Stream.of(
                 service.getResourcesById(unitTestJava.getId()),
-                //service.getResourcesById(compTestJava.getId()),
+                service.getResourcesById(compTestJava.getId()),
                 service.getResourcesById(ctractTestJava.getId()))
                 .flatMap(Function.identity());
         Set<LeafResource> srcAndTestJavaFiles = Stream.concat(sourceFiles, testFiles).collect(Collectors.toSet());

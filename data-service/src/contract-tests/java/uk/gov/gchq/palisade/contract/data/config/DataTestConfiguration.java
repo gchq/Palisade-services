@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.resource.config;
+package uk.gov.gchq.palisade.contract.data.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClient;
-import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClientWrapper;
+import uk.gov.gchq.palisade.contract.data.config.web.DataClient;
+import uk.gov.gchq.palisade.contract.data.config.web.DataClientWrapper;
+import uk.gov.gchq.palisade.service.data.service.DataService;
 
 @Configuration
 @EnableAutoConfiguration
-public class ResourceTestConfiguration {
+public class DataTestConfiguration {
 
-     @Bean
-     public ResourceClientWrapper resourceClientWrapper(final ResourceClient client, final ObjectMapper objectMapper) {
-          return new ResourceClientWrapper(client, objectMapper);
-     }
+    @Bean
+    public DataClientWrapper dataClientWrapper(final DataClient client, final DataService service) {
+        return new DataClientWrapper(client, service);
+    }
 
 }

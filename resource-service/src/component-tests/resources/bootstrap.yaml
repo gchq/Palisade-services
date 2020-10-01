@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-web:
-  client:
-    data-service: "http://localhost:8082"
-    resource-service: "http://localhost:${server.port}"
-
-async:
-  webMvcTimeout: 1000
+spring:
+  application:
+    name: resource-service
+  cloud:
+    config:
+      enabled: false
