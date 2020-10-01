@@ -17,6 +17,8 @@
 package uk.gov.gchq.palisade.service.attributemask.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -42,6 +44,7 @@ import java.util.concurrent.CompletableFuture;
  * applying a separate set of attributeRules, distinct from resourceRules and recordRules
  */
 public class AttributeMaskingService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AttributeMaskingService.class);
     private final PersistenceLayer persistenceLayer;
     private final LeafResourceMasker resourceMasker;
 
@@ -69,6 +72,7 @@ public class AttributeMaskingService {
      * @return a completable future representing the asynchronous completion of the storage operation
      */
     CompletableFuture<Void> storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+        LOGGER.info("Storing authorised request for token {} and leaf resource id {}", token, resource.getId());
         return this.persistenceLayer.putAsync(token, user, resource, context, rules);
     }
 
@@ -104,6 +108,7 @@ public class AttributeMaskingService {
      * @return a copy of the resource with sensitive data masked or redacted
      */
     LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+        LOGGER.info("Masking resource attributes for leaf resource id {}", resource.getId());
         return resourceMasker.apply(resource);
     }
 

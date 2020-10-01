@@ -34,13 +34,10 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
@@ -49,7 +46,6 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -58,7 +54,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
     private static final int PARALLELISM = 1;
 
     @Bean
@@ -84,9 +79,6 @@ public class AkkaRunnableGraph {
                 // Store authorised request in persistence, keeping track of original message and token
                 .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, AttributeMaskingRequest>, String> messageAndToken) -> {
                     AttributeMaskingRequest request = messageAndToken.first().record().value();
-                    LOGGER.info("Processing message with token {} and leafResourceId {}",
-                            messageAndToken.second(),
-                            Optional.ofNullable(request).map(AttributeMaskingRequest::getResource).map(LeafResource::getId).orElse(null));
                     return service.storeAuthorisedRequest(messageAndToken.second(), request)
                             .thenApply(ignored -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), request));
                 })
