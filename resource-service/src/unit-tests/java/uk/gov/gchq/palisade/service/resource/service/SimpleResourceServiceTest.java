@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,11 +48,17 @@ public class SimpleResourceServiceTest {
         // Given
         Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
         DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
-        DirectoryResource srcTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/test/java").getCanonicalFile().toURI());
+        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
+        //DirectoryResource compTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/component-tests/java").getCanonicalFile().toURI());
+        DirectoryResource ctractTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/contract-tests/java").getCanonicalFile().toURI());
 
         // When
         Stream<LeafResource> sourceFiles = service.getResourcesById(srcMainJava.getId());
-        Stream<LeafResource> testFiles = service.getResourcesById(srcTestJava.getId());
+        Stream<LeafResource> testFiles = Stream.of(
+                service.getResourcesById(unitTestJava.getId()),
+                //service.getResourcesById(compTestJava.getId()),
+                service.getResourcesById(ctractTestJava.getId()))
+                .flatMap(Function.identity());
         Set<LeafResource> srcAndTestJavaFiles = Stream.concat(sourceFiles, testFiles).collect(Collectors.toSet());
 
         // Then
@@ -61,7 +68,7 @@ public class SimpleResourceServiceTest {
     @Test
     public void canFindTestResourceAvro() throws IOException {
         // Given
-        URI avroFileURI = new File("./src/test/resources/test_resource.avro").getCanonicalFile().toURI();
+        URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
         FileResource testResourceAvro = (FileResource) ResourceBuilder.create(avroFileURI);
         DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
 
