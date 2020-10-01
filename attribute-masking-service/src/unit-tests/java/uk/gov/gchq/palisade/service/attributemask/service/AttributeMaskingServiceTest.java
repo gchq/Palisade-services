@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
@@ -27,13 +28,20 @@ import static org.mockito.ArgumentMatchers.any;
 
 class AttributeMaskingServiceTest {
 
+    public static class IdentityMasker implements LeafResourceMasker {
+        @Override
+        public LeafResource apply(final LeafResource resource) {
+            return resource;
+        }
+    }
+
     JpaPersistenceLayer mockPersistenceLayer = Mockito.mock(JpaPersistenceLayer.class);
-    LeafResourceMasker mockMasker = Mockito.mock(LeafResourceMasker.class);
-    AttributeMaskingService attributeMaskingService = new AttributeMaskingService(mockPersistenceLayer, mockMasker);
+    LeafResourceMasker spyMasker = Mockito.spy(new IdentityMasker());
+    AttributeMaskingService attributeMaskingService = new AttributeMaskingService(mockPersistenceLayer, spyMasker);
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(mockPersistenceLayer, mockMasker);
+        Mockito.reset(mockPersistenceLayer, spyMasker);
     }
 
     @Test
@@ -78,7 +86,7 @@ class AttributeMaskingServiceTest {
         attributeMaskingService.maskResourceAttributes(ApplicationTestData.REQUEST);
 
         // then the leaf resource masker was called
-        Mockito.verify(mockMasker, Mockito.atLeastOnce()).apply(ApplicationTestData.LEAF_RESOURCE);
+        Mockito.verify(spyMasker, Mockito.atLeastOnce()).apply(ApplicationTestData.LEAF_RESOURCE);
     }
 
     @Test
@@ -89,7 +97,7 @@ class AttributeMaskingServiceTest {
         attributeMaskingService.maskResourceAttributes(null);
 
         // then the leaf resource masker was called
-        Mockito.verify(mockMasker, Mockito.never()).apply(any());
+        Mockito.verify(spyMasker, Mockito.never()).apply(any());
     }
 
 }

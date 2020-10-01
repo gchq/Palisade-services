@@ -17,9 +17,13 @@
 package uk.gov.gchq.palisade.component.attributemask.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -28,20 +32,38 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {AttributeMaskingRestController.class})
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, AttributeMaskingRestController.class, AkkaSystemConfig.class, ConsumerTopicConfiguration.class})
+@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, AttributeMaskingRestController.class, AkkaSystemConfig.class})
 class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    @SpyBean
+    ConsumerTopicConfiguration topicConfiguration;
     @Autowired
     private AttributeMaskingRestController controller;
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        Topic topic = new Topic();
+        topic.setPartitions(1);
+        topic.setName("input-topic");
+        Mockito.when(topicConfiguration.getTopics()).thenReturn(Collections.singletonMap("input-topic", topic));
+    }
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(topicConfiguration);
+    }
 
     @Test
     void testContextLoads() {
