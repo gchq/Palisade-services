@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.request;
+package uk.gov.gchq.palisade.service.policy.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -90,7 +90,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+       public  interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -103,7 +103,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+      public   interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -116,7 +116,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -139,7 +139,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-        interface IAttributes {
+       public  interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -152,7 +152,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the error that occurred.
          */
-        interface IError {
+       public  interface IError {
             /**
              * Adds the error for the message.
              *
@@ -176,7 +176,7 @@ public final class AuditErrorMessage extends AuditMessage {
             return false;
         }
         AuditErrorMessage that = (AuditErrorMessage) o;
-        return error.equals(that.error);
+        return error.getMessage().equals(that.error.getMessage());
     }
 
     @Override
