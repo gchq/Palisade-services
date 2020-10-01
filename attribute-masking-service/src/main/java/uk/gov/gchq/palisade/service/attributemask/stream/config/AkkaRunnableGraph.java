@@ -94,11 +94,11 @@ public class AkkaRunnableGraph {
                 // Mask resource attributes, keeping track of original message and token
                 .map(messageTokenRequest -> new Tuple3<>(messageTokenRequest.t1(), messageTokenRequest.t2(), service.maskResourceAttributes(messageTokenRequest.t3())))
 
-                // Build producer record, recalculating the partition and consuming the token, keeping track of original message
+                // Build producer record, copying the partition, keeping track of original message
                 .map((Tuple3<CommittableMessage<String, AttributeMaskingRequest>, String, AttributeMaskingResponse> messageTokenResponse) -> {
                     ConsumerRecord<String, AttributeMaskingRequest> requestRecord = messageTokenResponse.t1().record();
-                    int partition = Token.toPartition(messageTokenResponse.t2(), outputTopic.getPartitions());
-                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), partition, requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
+                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
+                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
                 })
 
                 // Build producer message, applying the committable pass-thru consuming the original message
