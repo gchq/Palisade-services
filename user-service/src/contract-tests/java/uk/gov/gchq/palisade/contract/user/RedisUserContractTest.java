@@ -15,14 +15,12 @@
  */
 package uk.gov.gchq.palisade.contract.user;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -37,9 +35,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.fail;
 
-@RunWith(SpringRunner.class)
+@Import(RedisTestConfiguration.class)
 @ActiveProfiles("redis")
-@Ignore
 @SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 public class RedisUserContractTest {
 
@@ -47,7 +44,7 @@ public class RedisUserContractTest {
     private UserServiceProxy userService;
 
     @Test
-    public void addedUserIsRetrievable() {
+    public void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
@@ -63,7 +60,7 @@ public class RedisUserContractTest {
     }
 
     @Test(expected = NoSuchUserIdException.class)
-    public void nonExistentUserRetrieveFails() {
+    public void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
@@ -73,7 +70,7 @@ public class RedisUserContractTest {
     }
 
     @Test
-    public void updateUserTest() {
+    public void testUpdateUserTest() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -89,7 +86,7 @@ public class RedisUserContractTest {
     }
 
     @Test(expected = NoSuchUserIdException.class)
-    public void ttlTest() {
+    public void testTtlTest() {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);

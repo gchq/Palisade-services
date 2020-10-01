@@ -27,6 +27,7 @@ import javax.annotation.PreDestroy;
 @Configuration
 @EnableAutoConfiguration
 public class RedisTestConfiguration {
+
     private final RedisServer redisServer;
 
     public RedisTestConfiguration(final RedisProperties redisProperties) {
