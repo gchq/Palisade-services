@@ -16,15 +16,13 @@
 
 package uk.gov.gchq.palisade.service.resource.repository;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -41,7 +39,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("dbtest")
@@ -52,7 +49,7 @@ public class JpaPersistenceLayerTest {
     private JpaPersistenceLayer persistenceLayer;
     private LeafResource resource;
 
-    @Before
+    @BeforeEach
     @Transactional
     public void setUp() {
         // Given
@@ -62,9 +59,12 @@ public class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> { });
-        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> { });
-        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> { });
+        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> {
+        });
+        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> {
+        });
+        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> {
+        });
     }
 
     @Test
