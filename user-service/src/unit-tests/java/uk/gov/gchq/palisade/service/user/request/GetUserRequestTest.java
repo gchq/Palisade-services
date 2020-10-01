@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -55,6 +57,7 @@ public class GetUserRequestTest {
 
     @Before
     public void setup() {
+        LoggingSystem.get(ClassLoader.getSystemClassLoader()).setLogLevel(Logger.ROOT_LOGGER_NAME, LogLevel.DEBUG);
         logger = (Logger) LoggerFactory.getLogger(GetUserRequest.class);
         appender = new ListAppender<>();
         appender.start();
