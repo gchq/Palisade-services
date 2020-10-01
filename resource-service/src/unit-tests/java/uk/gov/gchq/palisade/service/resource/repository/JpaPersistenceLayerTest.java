@@ -97,19 +97,19 @@ public class JpaPersistenceLayerTest {
         // When
         Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
         // Then
-        Stream<LeafResource> resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(persistenceResponse).isPresent();
+        assertThat(persistenceResponse.get()).contains(resource);
 
         // When
         persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
         // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(persistenceResponse).isPresent();
+        assertThat(persistenceResponse.get()).contains(resource);
 
         // When
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
         // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(persistenceResponse).isPresent();
+        assertThat(persistenceResponse.get()).contains(resource);
     }
 }

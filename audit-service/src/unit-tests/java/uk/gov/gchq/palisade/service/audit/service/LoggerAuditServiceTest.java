@@ -144,8 +144,8 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(rules.toString())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.toString())),
                 () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.READ_REQUEST_COMPLETE)),
-                () -> assertThat(logCaptor.getAllValues().contains(TEST_NUMBER_OF_RECORDS_RETURNED)),
-                () -> assertThat(logCaptor.getAllValues().contains(TEST_NUMBER_OF_RECORDS_PROCESSED))
+                () -> assertThat(logCaptor.getAllValues().contains(String.valueOf(TEST_NUMBER_OF_RECORDS_RETURNED))),
+                () -> assertThat(logCaptor.getAllValues().contains(String.valueOf(TEST_NUMBER_OF_RECORDS_PROCESSED)))
         );
     }
 
@@ -172,5 +172,4 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.READ_REQUEST_EXCEPTION))
         );
     }
-
 }

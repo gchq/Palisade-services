@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -62,11 +61,9 @@ public class DataRequestTest {
         this.dataRequestRepository.save(entity);
         final DataRequestEntity subject = this.dataRequestRepository.getByRequestId("identifier-x");
 
-        assertAll(
-                () -> assertThat(subject.getUser().getUserId().getId().equals("archibald")),
-                () -> assertThat(subject.getRequestId().equals("identifier-x")),
-                () -> assertThat(subject.getContext().get("testing repo").equals("this"))
-        );
+        assertThat(subject.getUser().getUserId().getId()).isEqualTo("archibald");
+        assertThat(subject.getRequestId()).isEqualTo("identifier-x");
+        assertThat(subject.getContext().get("testing repo")).isEqualTo("this");
     }
 
 }
