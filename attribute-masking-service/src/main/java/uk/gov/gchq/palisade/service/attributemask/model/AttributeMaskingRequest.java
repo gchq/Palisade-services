@@ -51,7 +51,7 @@ public final class AttributeMaskingRequest {
     private final String resourceId;  //Resource ID that that is being asked to access
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
-    private final JsonNode resource; // Json Node representation of the Resources
+    private final LeafResource resource; // Leaf Resource that will be masked by the service
     private final JsonNode rules; // Json Node representation of the Rules
 
     @JsonCreator
@@ -60,7 +60,7 @@ public final class AttributeMaskingRequest {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resource") JsonNode resource,
+            final @JsonProperty("resource") LeafResource resource,
             final @JsonProperty("rules") JsonNode rules) {
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("userId cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("resourceId cannot be null"));
@@ -97,13 +97,7 @@ public final class AttributeMaskingRequest {
     }
 
     @Generated
-    public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resource, LeafResource.class);
-    }
-
-    @Generated
-    @JsonIgnore
-    public JsonNode getResourceNode() {
+    public LeafResource getResource() {
         return resource;
     }
 
@@ -217,17 +211,7 @@ public final class AttributeMaskingRequest {
              * @param resource that is requested to access.
              * @return interface {@link IRules} for the next step in the build.
              */
-            default IRules withResource(Resource resource) {
-                return withResourceNode(MAPPER.valueToTree(resource));
-            }
-
-            /**
-             * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
-             *
-             * @param resource that is requested to access.
-             * @return interface {@link IRules} for the next step in the build.
-             */
-            IRules withResourceNode(JsonNode resource);
+            IRules withResource(LeafResource resource);
         }
 
         /**

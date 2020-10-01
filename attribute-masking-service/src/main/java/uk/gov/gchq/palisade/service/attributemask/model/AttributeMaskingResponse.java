@@ -51,14 +51,14 @@ public final class AttributeMaskingResponse {
      * Resource after it has been processed.  This will be information that has been
      * redacted.
      */
-    public final JsonNode resource; // Masked resource metadata
+    private final LeafResource resource; // Masked resource metadata
 
     @JsonCreator
     private AttributeMaskingResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("resource") JsonNode resource) {
+            final @JsonProperty("resource") LeafResource resource) {
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("userId cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("resourceId cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("context cannot be null"));
@@ -81,8 +81,8 @@ public final class AttributeMaskingResponse {
     }
 
     @Generated
-    public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resource, LeafResource.class);
+    public LeafResource getResource() {
+        return resource;
     }
 
     /**
@@ -177,17 +177,7 @@ public final class AttributeMaskingResponse {
              * @param resource that is requested to access.
              * @return class {@link AttributeMaskingResponse} for the completed class from the builder.
              */
-            default AttributeMaskingResponse withResource(LeafResource resource) {
-                return withResourceNode(MAPPER.valueToTree(resource));
-            }
-
-            /**
-             * Adds the Resource information. Uses a JsonNode String form of the information
-             *
-             * @param resource resource that has been requested to access
-             * @return class {@link AttributeMaskingResponse} for the completed class from the builder
-             */
-            AttributeMaskingResponse withResourceNode(JsonNode resource);
+            AttributeMaskingResponse withResource(LeafResource resource);
         }
     }
 

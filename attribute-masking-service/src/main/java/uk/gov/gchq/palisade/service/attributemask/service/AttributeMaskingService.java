@@ -17,6 +17,8 @@
 package uk.gov.gchq.palisade.service.attributemask.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
