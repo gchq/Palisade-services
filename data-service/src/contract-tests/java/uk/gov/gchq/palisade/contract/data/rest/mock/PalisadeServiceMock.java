@@ -25,11 +25,12 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.data.rest.model.Employee;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public class PalisadeServiceMock {
+
+    public static class PassThroughRule<T extends Serializable> implements PredicateRule<T> {
+        @Override
+        public boolean test(final T record, final User user, final Context context) {
+            return true;
+        }
+    }
 
     public static WireMockRule getRule() {
         return new WireMockRule(options().port(8084).notifier(new ConsoleNotifier(true)));
