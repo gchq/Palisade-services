@@ -25,7 +25,8 @@ metadata:
 data:
   application-akka.yaml: |
     akka:
-      kafka.consumer.topics.input-topic.partitions: {{ .Values.replicaCount }}
+      kafka.consumer.topics:
+        input-topic.partitions: {{ .Values.replicaCount }}
       kafka.producer.topics:
         output-topic.partitions: {{ .Values.replicaCount }}
         error-topic.partitions: {{ .Values.replicaCount }}
