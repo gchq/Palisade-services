@@ -13,24 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.gok.gchq.palisade.component.policy.config;
 
-package uk.gov.gchq.palisade.contract.data.rest.config;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Configuration;
+import redis.embedded.RedisServer;
 
-import uk.gov.gchq.palisade.contract.data.rest.web.DataClient;
-import uk.gov.gchq.palisade.contract.data.rest.web.DataClientWrapper;
-import uk.gov.gchq.palisade.service.data.service.DataService;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 
 @Configuration
 @EnableAutoConfiguration
-public class DataTestConfiguration {
+public class RedisTestConfiguration {
 
-    @Bean
-    public DataClientWrapper dataClientWrapper(final DataClient client, final DataService service) {
-        return new DataClientWrapper(client, service);
+    private final RedisServer redisServer;
+
+    public RedisTestConfiguration(final RedisProperties redisProperties) {
+        this.redisServer = new RedisServer(redisProperties.getPort());
     }
 
+    @PostConstruct
+    public void postConstruct() {
+        redisServer.start();
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        redisServer.stop();
+    }
 }

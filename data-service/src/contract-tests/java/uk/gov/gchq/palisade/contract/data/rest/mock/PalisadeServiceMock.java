@@ -25,15 +25,12 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.data.rest.model.Employee;
-import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.net.URI;
-import java.nio.file.Paths;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,16 +41,20 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 
 public class PalisadeServiceMock {
 
+    public static class PassThroughRule<T extends Serializable> implements PredicateRule<T> {
+        @Override
+        public boolean test(final T record, final User user, final Context context) {
+            return true;
+        }
+    }
+
     public static WireMockRule getRule() {
         return new WireMockRule(options().port(8084).notifier(new ConsoleNotifier(true)));
     }
 
-    public static DataRequestConfig getDataRequestConfig() {
+    public static DataRequestConfig getDataRequestConfig(final LeafResource resource) {
         Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
-        URI path = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toAbsolutePath().normalize().toUri();
-        FileResource resource = (FileResource) ResourceBuilder.create(path);
-        Rules<Employee> rules = new Rules<Employee>().addRule("Test Rule", new PassThroughRule<>());
-        leafResourceToRules.put(resource, rules);
+        leafResourceToRules.put(resource, new Rules<Employee>().addRule("Test Rule", new PassThroughRule<>()));
 
         DataRequestConfig response = new DataRequestConfig()
                 .user(new User().userId("userId").auths("auths").roles("roles"))
@@ -64,11 +65,9 @@ public class PalisadeServiceMock {
         return response;
     }
 
-    public static void stubRule(final WireMockRule serviceMock, final ObjectMapper serializer) throws JsonProcessingException {
+    public static void stubRule(final WireMockRule serviceMock, final ObjectMapper serializer, final LeafResource resource) throws JsonProcessingException {
         serviceMock.stubFor(post(urlEqualTo("/getDataRequestConfig"))
-                .willReturn(
-                        okJson(serializer.writeValueAsString(getDataRequestConfig()))
-                ));
+                .willReturn(okJson(serializer.writeValueAsString(getDataRequestConfig(resource)))));
     }
 
 }

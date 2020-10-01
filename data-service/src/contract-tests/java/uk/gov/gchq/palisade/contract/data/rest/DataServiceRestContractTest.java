@@ -21,16 +21,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import feign.Response;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.rest.config.DataTestConfiguration;
@@ -59,30 +57,45 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 @EnableFeignClients
-@RunWith(SpringRunner.class)
 @Import(DataTestConfiguration.class)
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 public class DataServiceRestContractTest {
-    private final ObjectMapper objectMapper = JSONSerialiser.createDefaultMapper();
+    private static final ObjectMapper MAPPER = JSONSerialiser.createDefaultMapper();
+
+    private static final String CURRENT_PATH = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toUri().toString();
+    private static final FileResource RESOURCE = ((FileResource) ResourceBuilder.create(CURRENT_PATH))
+            .type(Employee.class.getTypeName())
+            .serialisedFormat("avro");
 
     @Autowired
     private Map<String, DataService> serviceMap;
     @Autowired
     private DataClientWrapper client;
 
-    @Rule
-    public WireMockRule auditMock = AuditServiceMock.getRule();
-    @Rule
-    public WireMockRule palisadeMock = PalisadeServiceMock.getRule();
+    private final WireMockRule auditMock = AuditServiceMock.getRule();
+    private final WireMockRule palisadeMock = PalisadeServiceMock.getRule();
 
     private AvroSerialiser<Employee> avroSerialiser;
 
-    @Before
+    @BeforeEach
     public void setUp() throws JsonProcessingException {
-        AuditServiceMock.stubRule(auditMock, objectMapper);
-        PalisadeServiceMock.stubRule(palisadeMock, objectMapper);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        AuditServiceMock.stubRule(auditMock, MAPPER);
+        auditMock.start();
+
+        PalisadeServiceMock.stubRule(palisadeMock, MAPPER, RESOURCE);
+        palisadeMock.start();
+
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         avroSerialiser = new AvroSerialiser<>(Employee.class);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        auditMock.stop();
+        auditMock.resetAll();
+
+        palisadeMock.stop();
+        palisadeMock.resetAll();
     }
 
     @Test
@@ -100,9 +113,7 @@ public class DataServiceRestContractTest {
     @Test
     public void readChunkedTest() {
         // Given - ReadRequest created
-        String currentPath = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toUri().toString();
-        FileResource resource = ((FileResource) ResourceBuilder.create(currentPath)).type(Employee.class.getTypeName()).serialisedFormat("avro");
-        ReadRequest readRequest = new ReadRequest().token("token").resource(resource);
+        ReadRequest readRequest = new ReadRequest().token("token").resource(RESOURCE);
         readRequest.setOriginalRequestId(new RequestId().id("original"));
 
         // Given - AvroSerialiser added to Data-service

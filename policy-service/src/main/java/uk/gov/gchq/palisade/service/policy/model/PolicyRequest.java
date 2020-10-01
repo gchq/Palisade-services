@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.request;
+package uk.gov.gchq.palisade.service.policy.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,22 +27,20 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-
 /**
- * PolicyResponse represents the output for policy-service which will include the Rules to implement with this Resource.
- * This will be forwarded to the query-scope-service for preliminary processing and routing of the data.
+ * The PolicyRequest is the input for policy-service to identify the Policy associated with the given Resource and User.
+ * PolicyResponse is the output for this service which will include the Rules to implement with this Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.policy.response.PolicyResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.queryscope.request.QueryScopeRequest is the input for the query-scope-service.
+ * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
+ * uk.gov.gchq.palisade.service.policy.model.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class PolicyResponse {
+public final class PolicyRequest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -52,26 +50,19 @@ public final class PolicyResponse {
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
 
-    /**
-     * Holds all of the Rules applicable to this request
-     */
-    public final Rules rules;
-
     @JsonCreator
-    private PolicyResponse(
+    private PolicyRequest(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("user") JsonNode user,
-            final @JsonProperty("resource") JsonNode resource,
-            final @JsonProperty("rules") Rules rules) {
+            final @JsonProperty("resource") JsonNode resource) {
 
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
         this.user = Optional.ofNullable(user).orElseThrow(() -> new RuntimeException("User cannot be null"));
         this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
-        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new RuntimeException("Rules cannot be null"));
     }
 
     @Generated
@@ -84,60 +75,54 @@ public final class PolicyResponse {
         return resourceId;
     }
 
-
     @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(this.context, Context.class);
     }
 
     @Generated
+    JsonNode getContextNode() {
+        return this.context;
+    }
+
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(this.user, User.class);
     }
 
     @Generated
+    JsonNode getUserNode() {
+        return this.user;
+    }
+
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
+    @Generated
+    JsonNode getResourceNode() {
+        return this.resource;
+    }
 
     /**
-     * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the PolicyRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PolicyResponse class.
+         * PolicyRequest class.
          *
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> user -> resource -> rules ->
-                    new PolicyResponse(userId, resourceId, context, user, resource, rules);
-        }
-
-        /**
-         * Starter method for the Builder class that uses a PolicyRequest and appends the Rules.
-         * This method is called followed by the call to add rules with the IRules interface to create the
-         * PolicyResponse class.
-         *
-         * @param request message that has been sent to the policy-service
-         * @return interface {@link IRules} for the next step in the build.
-         */
-        public static IRules create(final PolicyRequest request) {
-            return create()
-                    .withUserId(request.getUserId())
-                    .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode())
-                    .withUserNode(request.getUserNode())
-                    .withResourceNode(request.getResourceNode());
+            return userId -> resourceId -> context -> user -> resource ->
+                    new PolicyRequest(userId, resourceId, context, user, resource);
         }
 
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -150,7 +135,7 @@ public final class PolicyResponse {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -163,7 +148,7 @@ public final class PolicyResponse {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -175,7 +160,7 @@ public final class PolicyResponse {
             }
 
             /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
+             * Adds the user context information.
              *
              * @param context user context for the request.
              * @return interface {@link IUser} for the next step in the build.
@@ -186,7 +171,7 @@ public final class PolicyResponse {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user user information.
              *
@@ -209,14 +194,14 @@ public final class PolicyResponse {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *
              * @param resource that is requested to access
-             * @return class {@link IRules} for the next step in the build.
+             * @return class {@link PolicyRequest} for the completed class from the builder.
              */
-            default IRules withResource(Resource resource) {
+            default PolicyRequest withResource(Resource resource) {
                 return withResourceNode(MAPPER.valueToTree(resource));
             }
 
@@ -224,22 +209,9 @@ public final class PolicyResponse {
              * Adds the resource that has been requested to access.  Uses a JsonNode string form of the information.
              *
              * @param resource that is requested to access
-             * @return class {@link IRules} for the next step in the build.
+             * @return class {@link PolicyRequest} for the completed class from the builder.
              */
-            IRules withResourceNode(JsonNode resource);
-        }
-
-        /**
-         * Adds the rules to this message.
-         */
-        interface IRules {
-            /**
-             * Adds the rules that has apply to this request.
-             *
-             * @param rules that apply to this request.
-             * @return class {@link PolicyResponse} for the completed class from the builder.
-             */
-            PolicyResponse withRules(Rules rules);
+            PolicyRequest withResourceNode(JsonNode resource);
         }
     }
 
@@ -249,34 +221,32 @@ public final class PolicyResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PolicyResponse)) {
+        if (!(o instanceof PolicyRequest)) {
             return false;
         }
-        PolicyResponse that = (PolicyResponse) o;
+        PolicyRequest that = (PolicyRequest) o;
         return userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
                 context.equals(that.context) &&
                 user.equals(that.user) &&
-                resource.equals(that.resource) &&
-                rules.equals(that.rules);
+                resource.equals(that.resource);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource, rules);
+        return Objects.hash(userId, resourceId, context, user, resource);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", PolicyResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
                 .add("user=" + user)
                 .add("resource=" + resource)
-                .add("rules=" + rules)
                 .add(super.toString())
                 .toString();
     }

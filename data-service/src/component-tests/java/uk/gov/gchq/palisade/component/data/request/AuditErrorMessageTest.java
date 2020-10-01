@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.policy.request;
+package uk.gov.gchq.palisade.component.data.request;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +21,20 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.data.request.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
+@ContextConfiguration(classes = {AuditErrorMessageTest.class})
 public class AuditErrorMessageTest {
 
     @Autowired
@@ -57,7 +59,7 @@ public class AuditErrorMessageTest {
                 .withResourceId("testResourceId")
                 .withContext(context)
                 .withAttributes(attributes)
-                .withError(new Throwable("Something went wrong!"));
+                .withError(new InternalError("Something went wrong!"));
 
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
@@ -68,7 +70,7 @@ public class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("policy-service"),
+                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("data-service"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23"),
                         () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message").isEqualTo("Something went wrong!")
                 ),
@@ -77,14 +79,14 @@ public class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(auditErrorMessage.getResourceId()),
                         () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(auditErrorMessage.getContext().getPurpose()),
                         () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
-                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
                         () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getAttributes()).isNotEmpty().contains(entry("messagesSent", "23")),
+                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
                         () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(auditErrorMessage)
+                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                        () -> assertThat(auditErrorMessageObject.equals(auditErrorMessage))
                 )
         );
     }

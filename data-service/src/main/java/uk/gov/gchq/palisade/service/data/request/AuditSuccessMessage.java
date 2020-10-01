@@ -107,7 +107,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -120,7 +120,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -133,7 +133,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -156,7 +156,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-        interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -169,7 +169,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the leaf resource ID for the message.
          */
-        interface ILeafResourceId {
+        public interface ILeafResourceId {
             /**
              * Adds the leaf resource ID for the message.
              *
@@ -182,7 +182,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the Number of Records Processed.
          */
-        interface IRecordsProcessed {
+        public interface IRecordsProcessed {
             /**
              * Adds the number of records processed
              *
@@ -195,7 +195,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the Number of records returned.
          */
-        interface IRecordsReturned {
+        public interface IRecordsReturned {
             /**
              * Adds the Number of records returned.
              *

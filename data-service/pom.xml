@@ -33,7 +33,7 @@
 
     <properties>
         <wiremock.version>2.20.0</wiremock.version>
-    </properties>>
+    </properties>
 
     <dependencies>
         <!-- Spring automatically picks up either gson or jackson
