@@ -17,7 +17,7 @@
 package uk.gov.gchq.palisade.contract.resource;
 
 import feign.Response;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,13 +44,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 @EnableFeignClients
-@RunWith(SpringRunner.class)
 @Import(ResourceTestConfiguration.class)
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles("h2")
-public class ResourceComponentTest {
+@ActiveProfiles({"h2", "web"})
+class ResourceComponentTest {
 
     @Autowired
     private Map<String, ResourceService> serviceMap;
@@ -59,13 +58,13 @@ public class ResourceComponentTest {
     private ResourceClientWrapper client;
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertNotNull(serviceMap);
         assertNotEquals(serviceMap, Collections.emptyMap());
     }
 
     @Test
-    public void isUp() {
+    void isUp() {
         Response health = client.getHealth();
 
         assertThat(health.status(), equalTo(200));

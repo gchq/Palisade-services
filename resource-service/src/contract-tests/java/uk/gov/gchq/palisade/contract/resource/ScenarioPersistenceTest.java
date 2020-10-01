@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles("h2")
+@ActiveProfiles({"h2", "web"})
 class ScenarioPersistenceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceTest.class);
 

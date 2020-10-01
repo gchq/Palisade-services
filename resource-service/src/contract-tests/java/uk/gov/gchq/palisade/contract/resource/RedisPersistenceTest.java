@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles("redis")
+@ActiveProfiles({"redis", "web"})
 class RedisPersistenceTest {
 
     @Autowired
@@ -95,7 +95,7 @@ class RedisPersistenceTest {
 
     @BeforeEach
     @Transactional
-    public void setup() {
+    void setup() {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Stream<LeafResource> fileStream = Stream.of(file);
             fileStream = persistenceLayer.withPersistenceById(SYSTEM_ROOT.getId(), fileStream);

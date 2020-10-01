@@ -54,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles("h2")
+@ActiveProfiles({"h2", "web"})
 class H2PersistenceTest {
 
     @Autowired
