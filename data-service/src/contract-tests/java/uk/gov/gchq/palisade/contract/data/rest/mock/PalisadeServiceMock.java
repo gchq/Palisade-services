@@ -54,8 +54,7 @@ public class PalisadeServiceMock {
 
     public static DataRequestConfig getDataRequestConfig(final LeafResource resource) {
         Map<LeafResource, Rules> leafResourceToRules = new HashMap<>();
-        Rules<Employee> rules = new Rules<Employee>().addRule("Test Rule", new PassThroughRule<>());
-        leafResourceToRules.put(resource, rules);
+        leafResourceToRules.put(resource, new Rules<Employee>().addRule("Test Rule", new PassThroughRule<>()));
 
         DataRequestConfig response = new DataRequestConfig()
                 .user(new User().userId("userId").auths("auths").roles("roles"))
