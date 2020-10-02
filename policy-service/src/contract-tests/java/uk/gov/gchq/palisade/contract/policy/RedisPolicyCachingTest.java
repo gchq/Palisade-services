@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gok.gchq.palisade.component.policy;
+package uk.gov.gchq.palisade.contract.policy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gok.gchq.palisade.component.policy.config.PolicyTestConfiguration;
-import uk.gok.gchq.palisade.component.policy.config.RedisTestConfiguration;
 
+import uk.gov.gchq.palisade.contract.policy.config.PolicyTestConfiguration;
+import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;

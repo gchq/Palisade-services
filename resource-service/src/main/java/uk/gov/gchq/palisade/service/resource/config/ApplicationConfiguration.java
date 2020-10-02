@@ -17,22 +17,14 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -42,7 +34,6 @@ import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
-import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
@@ -57,7 +48,6 @@ import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServicePro
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -66,19 +56,17 @@ import java.util.stream.Collectors;
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableAsync
-@EnableWebMvc
-public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+@EnableConfigurationProperties({ResourceServiceConfigProperties.class})
+public class ApplicationConfiguration {
+
+    private final ResourceServiceConfigProperties resourceServiceConfigProperties;
+
+    public ApplicationConfiguration(final ResourceServiceConfigProperties resourceServiceConfigProperties) {
+        this.resourceServiceConfigProperties = resourceServiceConfigProperties;
+    }
 
     @Value("${web.client.data-service:data-service}")
     private String dataServiceName;
-    @Value("${resource.defaultType}")
-    private String defaultResourceType;
-    @Value("${async.webMvcTimeout:60000}")
-    private Integer webMvcTimeout;
-    @Value("${async.corePoolSize:6}")
-    private Integer corePoolSize;
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
@@ -145,7 +133,6 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
      *
      * @return a new instance of ResourceConverter
      */
-
     @Bean
     public ResourceConverter resourceConverter() {
         return new ResourceConverter();
@@ -181,7 +168,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
     @Qualifier("impl")
     public ResourceService simpleResourceService() {
-        return new SimpleResourceService(dataServiceName, defaultResourceType);
+        return new SimpleResourceService(dataServiceName, resourceServiceConfigProperties.getDefaultType());
     }
 
     /**
@@ -199,7 +186,7 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     }
 
     /**
-     * a bean for the HadoopConfiguration used when creating the hadoopResourceService
+     * A bean for the HadoopConfiguration used when creating the hadoopResourceService
      *
      * @return a {@link org.apache.hadoop.conf.Configuration}
      */
@@ -217,27 +204,6 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @Primary
     public ObjectMapper jacksonObjectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Override
-    @Bean("threadPoolTaskExecutor")
-    public ThreadPoolTaskExecutor getAsyncExecutor() {
-        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
-        ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(corePoolSize);
-        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        return ex;
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
-    }
-
-    @Override
-    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
-        configurer.setDefaultTimeout(webMvcTimeout);
     }
 
 }

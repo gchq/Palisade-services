@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditSuccessMessageTest.class})
-public class AuditSuccessMessageTest {
+class AuditSuccessMessageTest {
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
@@ -49,7 +49,7 @@ public class AuditSuccessMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");
@@ -89,8 +89,7 @@ public class AuditSuccessMessageTest {
                         () -> assertThat(auditSuccessMessageObject.getLeafResourceId()).isEqualTo(auditSuccessMessage.getLeafResourceId())
                 ),
                 () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditSuccessMessageObjectContent.equals(auditSuccessMessage))
+                        () -> assertThat(auditSuccessMessageObject).isEqualTo(auditSuccessMessage)
                 )
         );
     }

@@ -14,7 +14,7 @@
 #
 spring:
   application:
-    name: data-service
+    name: policy-service
   output:
     ansi:
       enabled: always
@@ -22,7 +22,7 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8082
+  port: 8085
 
 eureka:
   client:
@@ -33,24 +33,11 @@ management:
     web:
       exposure:
         include: "*"
-    loggers:
+  endpoint:
+    shutdown:
       enabled: true
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 60000
-        loggerLevel: basic
-    default-config: default
-
-web:
-  client:
-    audit-service: http://localhost:8089
-    data-service: http://localhost:${server.port}
-    palisade-service: http://localhost:8084
-
-async:
-  corePoolSize: 6
-  webMvcTimeout: 60000
+population:
+  policyProvider: std
+  userProvider: std
+  resourceProvider: std
