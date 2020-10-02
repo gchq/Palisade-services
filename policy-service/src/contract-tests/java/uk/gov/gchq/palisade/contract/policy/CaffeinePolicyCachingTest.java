@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gok.gchq.palisade.component.policy;
+package uk.gov.gchq.palisade.contract.policy;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;

@@ -38,6 +38,9 @@
         <caffeine.version>2.8.1</caffeine.version>
         <embedded-redis.version>0.7.3</embedded-redis.version>
         <wiremock.version>2.20.0</wiremock.version>
+        <unit-test.skip>false</unit-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
@@ -344,6 +347,44 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/unit-tests/java</source>
+                                <source>src/component-tests/java</source>
+                                <source>src/contract-tests/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <filtering>true</filtering>
+                                    <directory>src/unit-tests/resources</directory>
+                                    <directory>src/component-tests/resources</directory>
+                                    <directory>src/contract-tests/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

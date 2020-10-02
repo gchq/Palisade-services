@@ -73,7 +73,6 @@ public class PolicyComponentTest extends PolicyTestCommon {
     @Test
     public void isUp() {
         Response health = policyClient.getActuatorHealth();
-
         assertThat(health.status(), equalTo(200));
     }
 
