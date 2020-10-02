@@ -47,7 +47,7 @@ import java.util.StringJoiner;
         }
 )
 public class AuthorisedRequestEntity implements Serializable {
-    static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1;
 
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
