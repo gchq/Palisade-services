@@ -311,7 +311,8 @@ timestamps {
                                             "--set global.redisClusterEnabled=true " +
                                             "--set global.redis.install=false " +
                                             "--set global.redis-cluster.install=true " +
-                                            "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
+                                            "--namespace ${HELM_DEPLOY_NAMESPACE} " +
+                                            "--timeout 200s", returnStatus: true) == 0) {
                                         echo("successfully deployed")
                                     } else {
                                         error("Build failed because of failed maven deploy")

@@ -86,6 +86,7 @@
     </properties>
 
     <modules>
+        <module>attribute-masking-service</module>
         <module>audit-service</module>
         <module>data-service</module>
 <!--        <module>discovery-service</module>-->
