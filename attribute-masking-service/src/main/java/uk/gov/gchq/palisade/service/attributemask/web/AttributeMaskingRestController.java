@@ -38,6 +38,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfigurat
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class AttributeMaskingRestController {
     @PostMapping(value = "/mask/multi", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> maskAttributesMulti(
             final @RequestHeader Map<String, String> headers,
-            final @RequestBody List<AttributeMaskingRequest> requests) {
+            final @RequestBody Collection<AttributeMaskingRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
