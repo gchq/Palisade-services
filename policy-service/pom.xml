@@ -39,17 +39,12 @@
         <embedded-redis.version>0.7.3</embedded-redis.version>
         <wiremock.version>2.20.0</wiremock.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>it.ozimov</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>0.7.3</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
@@ -114,6 +109,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         <dependency>
@@ -139,11 +139,6 @@
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
             <version>${slf4j-test}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-openfeign-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
