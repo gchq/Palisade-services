@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,12 +64,8 @@ class AttributeMaskingRestControllerTest {
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
         // when the controller is called with a request
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(
-                Collections.singletonMap(Token.HEADER, Collections.singletonList(ApplicationTestData.REQUEST_TOKEN)));
-        attributeMaskingRestController.maskAttributes(
-                headers,
-                ApplicationTestData.REQUEST
-        );
+        Map<String, String> headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        attributeMaskingRestController.maskAttributes(headers, ApplicationTestData.REQUEST);
 
         // Then the sink aggregated the request
         assertThat(sinkAggregation)
@@ -95,12 +92,8 @@ class AttributeMaskingRestControllerTest {
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
 
         // when the controller is called with a request
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(
-                Collections.singletonMap(Token.HEADER, Collections.singletonList(ApplicationTestData.REQUEST_TOKEN)));
-        attributeMaskingRestController.maskAttributes(
-                headers,
-                null
-        );
+        Map<String, String> headers = Collections.singletonMap(Token.HEADER, ApplicationTestData.REQUEST_TOKEN);
+        attributeMaskingRestController.maskAttributes(headers, null);
 
         // Then the sink aggregated the request
         assertThat(sinkAggregation)

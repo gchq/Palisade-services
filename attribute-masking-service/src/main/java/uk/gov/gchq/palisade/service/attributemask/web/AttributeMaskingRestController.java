@@ -40,6 +40,7 @@ import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfigurat
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -83,7 +84,7 @@ public class AttributeMaskingRestController {
      */
     @PostMapping(value = "/mask", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> maskAttributes(
-            final @RequestHeader MultiValueMap<String, String> headers,
+            final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) AttributeMaskingRequest request) {
         // Process request as singleton list
         this.maskAttributesMulti(headers, Collections.singletonList(request));
@@ -102,14 +103,11 @@ public class AttributeMaskingRestController {
      */
     @PostMapping(value = "/mask/multi", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> maskAttributesMulti(
-            final @RequestHeader MultiValueMap<String, String> headers,
+            final @RequestHeader Map<String, String> headers,
             final @RequestBody List<AttributeMaskingRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
-                .orElseThrow(() -> new NoSuchElementException("No token specified in headers"))
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Token specified in headers mapped to empty list"));
+                .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
 
         // Get topic and calculate partition, unless this service has been assigned a partition
         Topic topic = this.upstreamConfig.getTopics().get("input-topic");
@@ -118,7 +116,7 @@ public class AttributeMaskingRestController {
 
         // Convert headers to kafka style
         List<Header> kafkaHeaders = headers.entrySet().stream()
-                .flatMap(entries -> entries.getValue().stream().map(value -> new RecordHeader(entries.getKey(), value.getBytes(Charset.defaultCharset()))))
+                .map(entry -> new RecordHeader(entry.getKey(), entry.getValue().getBytes(Charset.defaultCharset())))
                 .collect(Collectors.toList());
 
         // Process requests
