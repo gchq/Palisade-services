@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import feign.Response;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
@@ -56,7 +58,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -109,9 +110,9 @@ class RestContractTest {
     }
 
     @Test
-    void isUp() {
+    void testIsUp() {
         Response health = client.getHealth();
-        assertThat(health.status(), equalTo(200));
+        assertThat(health.status()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
