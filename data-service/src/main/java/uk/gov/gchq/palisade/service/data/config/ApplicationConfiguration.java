@@ -18,23 +18,15 @@ package uk.gov.gchq.palisade.service.data.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
-import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.PalisadeService;
@@ -43,21 +35,13 @@ import uk.gov.gchq.palisade.service.data.web.AuditClient;
 import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableAsync
-@EnableWebMvc
-public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigurer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-    @Value("${async.webMvcTimeout:60000}")
-    private Integer webMvcTimeout;
-    @Value("${async.corePoolSize:6}")
-    private Integer corePoolSize;
+public class ApplicationConfiguration {
 
     /**
      * Simple data service bean created with instances of auditService, palisadeService and dataReader
@@ -94,8 +78,8 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
      * @return the palisade service
      */
     @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient) {
-        return new PalisadeService(palisadeClient, getAsyncExecutor());
+    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+        return new PalisadeService(palisadeClient, executor);
     }
 
     /**
@@ -114,27 +98,6 @@ public class ApplicationConfiguration implements AsyncConfigurer, WebMvcConfigur
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Override
-    @Bean("threadPoolTaskExecutor")
-    public ThreadPoolTaskExecutor getAsyncExecutor() {
-        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
-        ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(corePoolSize);
-        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        return ex;
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
-    }
-
-    @Override
-    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-        configurer.setTaskExecutor(Objects.requireNonNull(getAsyncExecutor()));
-        configurer.setDefaultTimeout(webMvcTimeout);
     }
 
 }
