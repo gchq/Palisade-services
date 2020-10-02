@@ -35,7 +35,6 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -83,13 +82,12 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).info(logCaptor.capture());
-        final String log = logCaptor.getValue();
 
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(user.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.REGISTER_REQUEST_COMPLETE))
+        assertThat(logCaptor.getValue()).contains(
+                user.toString(),
+                context.toString(),
+                requestId.toString(),
+                LoggerAuditService.REGISTER_REQUEST_COMPLETE
         );
     }
 
@@ -108,15 +106,14 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).error(logCaptor.capture());
-        final String log = logCaptor.getValue();
 
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(exception.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.REGISTER_REQUEST_EXCEPTION))
+        assertThat(logCaptor.getValue()).contains(
+                userId.toString(),
+                context.toString(),
+                requestId.toString(),
+                resource.getId(),
+                exception.toString(),
+                LoggerAuditService.REGISTER_REQUEST_EXCEPTION
         );
     }
 
@@ -136,16 +133,15 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).info(logCaptor.capture());
-        final String log = logCaptor.getValue();
 
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(user.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(rules.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.READ_REQUEST_COMPLETE)),
-                () -> assertThat(logCaptor.getAllValues().contains(String.valueOf(TEST_NUMBER_OF_RECORDS_RETURNED))),
-                () -> assertThat(logCaptor.getAllValues().contains(String.valueOf(TEST_NUMBER_OF_RECORDS_PROCESSED)))
+        assertThat(logCaptor.getValue()).contains(
+                user.toString(),
+                context.toString(),
+                rules.toString(),
+                resource.toString(),
+                LoggerAuditService.READ_REQUEST_COMPLETE,
+                String.valueOf(TEST_NUMBER_OF_RECORDS_RETURNED),
+                String.valueOf(TEST_NUMBER_OF_RECORDS_PROCESSED)
         );
     }
 
@@ -163,13 +159,12 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
 
         // Then
         verify(logger, atLeastOnce()).error(logCaptor.capture());
-        final String log = logCaptor.getValue();
 
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(exception.toString())),
-                () -> assertThat(logCaptor.getAllValues().contains(LoggerAuditService.READ_REQUEST_EXCEPTION))
+        assertThat(logCaptor.getValue()).contains(
+                requestId.toString(),
+                resource.toString(),
+                exception.toString(),
+                LoggerAuditService.READ_REQUEST_EXCEPTION
         );
     }
 }
