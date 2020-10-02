@@ -327,7 +327,7 @@ timestamps {
                                             "--set global.deployment=example " +
                                             "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
                                             "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                            "--timeout 300s " +
+                                            "--timeout 200s " +
                                             "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
                                         echo("successfully deployed")
                                     } else {

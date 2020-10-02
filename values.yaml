@@ -39,6 +39,8 @@ global:
   kafka:
     # install: install kafka streaming platform
     install: true
+    exports:
+      nameOverride: "kafka"
 
   redis:
     # install: install redis persistence and caching data storage platform
