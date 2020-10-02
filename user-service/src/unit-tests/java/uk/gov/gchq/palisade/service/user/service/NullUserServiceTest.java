@@ -16,24 +16,31 @@
 
 package uk.gov.gchq.palisade.service.user.service;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NullUserServiceTest {
     NullUserService nullUserService = new NullUserService();
 
-    @Test(expected = NoSuchUserIdException.class)
-    public void getUser() {
+    @Test
+    public void testGetUser() {
+        //Given the new user is not added to the service
         User user = new User().userId("testUser");
-        nullUserService.getUser(user.getUserId());
+
+        //When we go to get the user
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> nullUserService.getUser(user.getUserId()), "No user found");
+
+        //Then an error is thrown
+        assertThat("No userId matching UserId[id='testUser'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 
     @Test
-    public void addUser() {
+    public void testAddUser() {
         User user = new User().userId("testUser");
         User actual = nullUserService.addUser(user);
         assertThat(user).isEqualTo(actual);
