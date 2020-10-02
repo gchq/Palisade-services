@@ -15,13 +15,11 @@
  */
 package uk.gov.gchq.palisade.contract.user;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -31,12 +29,11 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles("redis")
 @SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 public class RedisUserContractTest {
@@ -52,22 +49,25 @@ public class RedisUserContractTest {
         // When
         User addedUser = userService.addUser(user);
         // Then
-        assertThat(addedUser, equalTo(user));
+        assertThat(addedUser).isEqualTo(user);
 
         // When
         User getUser = userService.getUser(user.getUserId());
         // Then
-        assertThat(getUser, equalTo(user));
+        assertThat(getUser).isEqualTo(user);
     }
 
-    @Test(expected = NoSuchUserIdException.class)
+    @Test
     public void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
         // When
-        userService.getUser(userId);
-        // Then - throw
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "testMaxSizeTest should throw noSuchIdException");
+
+        // Then - it is no longer found, it has been evicted
+        // ie. throw NoSuchUserIdException
+        assertThat("No userId matching UserId[id='definitely-not-a-real-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 
     @Test
@@ -83,26 +83,22 @@ public class RedisUserContractTest {
         User updatedUser = userService.getUser(user.getUserId());
 
         // Then
-        assertThat(updatedUser, equalTo(update));
+        assertThat(updatedUser).isEqualTo(update);
     }
 
-    @Test(expected = NoSuchUserIdException.class)
-    public void testTtlTest() {
+    @Test
+    public void testTtlTest() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        TimeUnit.MILLISECONDS.sleep(1000);
 
         // When - we try to access stale cache data
-        User notFound = userService.getUser(user.getUserId());
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        fail("Got user \"" + notFound.toString() + "\" from cache, but it should have been evicted");
+        assertThat("No userId matching UserId[id='ttl-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 }

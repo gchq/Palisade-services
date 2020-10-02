@@ -16,14 +16,12 @@
 package uk.gov.gchq.palisade.contract.user;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -32,13 +30,13 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
 import java.util.Collections;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
 public class CaffeineUserContractTest {
@@ -50,37 +48,39 @@ public class CaffeineUserContractTest {
     private CacheManager cacheManager;
 
     private void forceCleanUp() {
-        ((Cache<?, ?>) cacheManager.getCache("users").getNativeCache()).cleanUp();
+        ((Cache<?, ?>) Objects.requireNonNull(cacheManager.getCache("users")).getNativeCache()).cleanUp();
     }
 
     @Test
-    public void addedUserIsRetrievable() {
+    public void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
         // When
         User addedUser = userService.addUser(user);
         // Then
-        assertThat(addedUser, equalTo(user));
+        assertThat(addedUser).isEqualTo(user);
 
         // When
         User getUser = userService.getUser(user.getUserId());
         // Then
-        assertThat(getUser, equalTo(user));
+        assertThat(getUser).isEqualTo(user);
     }
 
-    @Test(expected = NoSuchUserIdException.class)
-    public void nonExistentUserRetrieveFails() {
+    @Test
+    public void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
         // When
-        userService.getUser(userId);
-        // Then - throw
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "NonExistentUser should throw noSuchIdException");
+
+        //Then
+        assertThat("No userId matching UserId[id='definitely-not-a-real-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 
     @Test
-    public void updateUserTest() {
+    public void testUpdateUserTest() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -92,11 +92,11 @@ public class CaffeineUserContractTest {
         User updatedUser = userService.getUser(user.getUserId());
 
         // Then
-        assertThat(updatedUser, equalTo(update));
+        assertThat(updatedUser).isEqualTo(update);
     }
 
-    @Test(expected = NoSuchUserIdException.class)
-    public void maxSizeTest() {
+    @Test
+    public void testMaxSizeTest() {
         // Given - many users are added and cached (cache size set to 100 in application.yaml)
         Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
         for (int count = 0; count <= 150; ++count) {
@@ -105,27 +105,27 @@ public class CaffeineUserContractTest {
 
         // When - we try to get the first (now-evicted) user to be added
         forceCleanUp();
-        User notFound = userService.getUser(makeUser.apply(0).getUserId());
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(makeUser.apply(0).getUserId()), "testMaxSizeTest should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        fail("Got user \"" + notFound.toString() + "\" from cache, but it should have been evicted");
+        assertThat("No userId matching UserId[id='max-size-0-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 
-    @Test(expected = NoSuchUserIdException.class)
-    public void ttlTest() throws InterruptedException {
+    @Test
+    public void testTtlTest() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);
 
-        Thread.sleep(1000);
+        TimeUnit.MILLISECONDS.sleep(1000);
 
         // When - we try to access stale cache data
         forceCleanUp();
-        User notFound = userService.getUser(user.getUserId());
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        fail("Got user \"" + notFound.toString() + "\" from cache, but it should have been evicted");
+        assertThat("No userId matching UserId[id='ttl-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 }

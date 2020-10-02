@@ -118,7 +118,7 @@ public class AbstractLdapUserServiceTest {
         assertThat(roles).isEqualTo(user.getRoles());
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertThat(0).isNotEqualTo(debugMessages.size());
+        assertThat(debugMessages).isNotEmpty();
         assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("was not in the cache. Fetching details from LDAP")

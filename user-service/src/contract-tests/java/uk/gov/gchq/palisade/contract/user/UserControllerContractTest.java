@@ -16,8 +16,7 @@
 
 package uk.gov.gchq.palisade.contract.user;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -36,12 +34,8 @@ import uk.gov.gchq.palisade.service.user.web.UserController;
 
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 public class UserControllerContractTest {
@@ -53,13 +47,13 @@ public class UserControllerContractTest {
 
     @Test
     public void testContextLoads() {
-        assertNotNull("controller should not be null", controller);
+        assertThat(controller).isNotNull();
     }
 
     @Test
     public void testIsUp() {
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-        assertThat(health.getStatusCode(), is(equalTo(HttpStatus.OK)));
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -71,12 +65,12 @@ public class UserControllerContractTest {
         AddUserRequest addUserRequest = AddUserRequest.create(new RequestId().id("addUserRequest")).withUser(user);
         Boolean addUserResponse = restTemplate.postForObject("/addUser", addUserRequest, Boolean.class);
         // Then
-        assertThat(addUserResponse, is(equalTo(true)));
+        assertThat(addUserResponse).isTrue();
 
         // When
         GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("getUserRequest")).withUserId(user.getUserId());
         User getUserResponse = restTemplate.postForObject("/getUser", getUserRequest, User.class);
         // Then
-        assertThat(getUserResponse, is(equalTo(user)));
+        assertThat(getUserResponse).isEqualTo(user);
     }
 }

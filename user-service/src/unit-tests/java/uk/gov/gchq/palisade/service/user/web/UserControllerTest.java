@@ -22,9 +22,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
@@ -81,7 +81,7 @@ public class UserControllerTest {
         assertThat(user).isEqualTo(expected);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
-        assertThat(0).isNotEqualTo(debugMessages.size());
+        assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Invoking AddUserRequest:"),
                 Matchers.anyOf(
