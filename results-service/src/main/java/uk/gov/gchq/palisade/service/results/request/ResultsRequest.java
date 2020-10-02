@@ -36,7 +36,7 @@ import java.util.StringJoiner;
  * ResultsResponse is the output for this service which will be send the client the information needed to
  * retrieve this data.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.queryscope.response.QueryScopeResponse is the output from the query-scope-service.
+ * uk.gov.gchq.palisade.service.attributemasking.response.AttributeMaskingResponse is the output from the attribute-masking-service.
  * uk.gov.gchq.palisade.service.results.request.ResultsRequest is the input for the results-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
