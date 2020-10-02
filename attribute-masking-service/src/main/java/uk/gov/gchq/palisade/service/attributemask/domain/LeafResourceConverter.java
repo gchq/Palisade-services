@@ -32,6 +32,10 @@ import java.util.Optional;
 public class LeafResourceConverter implements AttributeConverter<LeafResource, String> {
     private final ObjectMapper objectMapper;
 
+    /**
+     * Default constructor specifying the object mapper for (de)serializing objects
+     * @param objectMapper the object mapper for reading and writing columns and objects
+     */
     public LeafResourceConverter(final ObjectMapper objectMapper) {
         this.objectMapper = Optional.ofNullable(objectMapper)
                 .orElseThrow(() -> new IllegalArgumentException("objectMapper cannot be null"));
