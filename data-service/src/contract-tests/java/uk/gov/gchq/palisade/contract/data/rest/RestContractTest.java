@@ -34,9 +34,9 @@ import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
 import uk.gov.gchq.palisade.contract.data.config.mock.AuditServiceMock;
 import uk.gov.gchq.palisade.contract.data.config.mock.PalisadeServiceMock;
-import uk.gov.gchq.palisade.contract.data.model.Employee;
 import uk.gov.gchq.palisade.contract.data.config.web.DataClient;
 import uk.gov.gchq.palisade.contract.data.config.web.DataClientWrapper;
+import uk.gov.gchq.palisade.contract.data.model.Employee;
 import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
@@ -46,7 +46,6 @@ import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -56,10 +55,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 @EnableFeignClients(basePackageClasses = {DataClient.class})
 @Import(DataTestConfiguration.class)
@@ -132,7 +131,7 @@ class RestContractTest {
 
         // Then
         for (Employee result : readResult) {
-            assertThat(result, equalTo(new Employee()));
+            assertThat(result).isEqualTo(new Employee());
         }
     }
 }
