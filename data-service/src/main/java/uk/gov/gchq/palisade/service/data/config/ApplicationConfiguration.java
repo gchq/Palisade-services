@@ -72,7 +72,8 @@ public class ApplicationConfiguration {
      * Palisade service bean created with a palisadeClient which uses Feign to send rest requests to the Palisade Service
      * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
-     * @param palisadeClient the palisade client
+     * @param palisadeClient the feign palisade client
+     * @param executor       the asynchronous executor to use for futures
      * @return the palisade service
      */
     @Bean
@@ -84,7 +85,7 @@ public class ApplicationConfiguration {
      * Audit service bean created with an auditClient which uses Feign to send rest requests to the Audit Service
      * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
      *
-     * @param auditClient the audit client
+     * @param auditClient the feign audit client
      * @return the audit service
      */
     @Bean
