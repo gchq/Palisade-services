@@ -77,27 +77,24 @@
         <surefire.plugin.version>2.22.1</surefire.plugin.version>
         <failsafe.plugin.version>2.22.1</failsafe.plugin.version>
 
-        <!-- Sonar -->
+        <!-- JaCoCo/Sonar -->
+        <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
-        <sonar.language>java</sonar.language>
     </properties>
 
     <modules>
-        <module>attribute-masking-service</module>
-        <!--
-        <module>audit-service</module>
-        <module>data-service</module>
-        <module>discovery-service</module>
-        <module>palisade-service</module>
-        <module>policy-service</module>
-        <module>resource-service</module>
-        <module>results-service</module>
+        <!--<module>attribute-masking-service</module>-->
+        <!--<module>audit-service</module>-->
+        <!--<module>data-service</module>-->
+        <!--<module>discovery-service</module>-->
+        <!--<module>palisade-service</module>-->
+        <!--<module>policy-service</module>-->
+        <!--<module>resource-service</module>-->
+        <!--<module>results-service</module>-->
         <module>user-service</module>
-        <module>services-manager</module>
-        <module>create-kafka-queues</module>
-        -->
+        <!--<module>services-manager</module>-->
+        <!--<module>create-kafka-queues</module>-->
     </modules>
 
     <profiles>
@@ -365,50 +362,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
-                <configuration>
-                    <destFile>${sonar.jacoco.report}</destFile>
-                    <append>true</append>
-                </configuration>
                 <executions>
                     <execution>
-                        <id>pre-unit-test</id>
-                        <phase>process-test-classes</phase>
                         <goals>
                             <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${sonar.jacoco.reportPath}</destFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
                             <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${sonar.jacoco.reportPath}</dataFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
                             <goal>prepare-agent-integration</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${sonar.jacoco.reportPath}</destFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>post-integration-test</id>
-                        <phase>integration-test</phase>
-                        <goals>
                             <goal>report-integration</goal>
                         </goals>
-                        <configuration>
-                            <dataFile>${sonar.jacoco.reportPath}</dataFile>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
