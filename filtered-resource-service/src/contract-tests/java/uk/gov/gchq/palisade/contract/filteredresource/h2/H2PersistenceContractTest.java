@@ -24,9 +24,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.service.TopicOffsetService;
 import uk.gov.gchq.palisade.service.filteredresource.web.FilteredResourceController;
+
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class H2PersistenceContractTest {
 
     @Autowired
-    private FilteredResourceController controller;
+    private TopicOffsetService controller;
 
     @Autowired
     private TokenOffsetRepository tokenOffsetRepository;
@@ -53,7 +57,7 @@ class H2PersistenceContractTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        controller.storeTopicOffset(token, request);
+        controller.storeTokenOffset(token, request.queuePointer);
 
         // Then the offset is persisted in redis
         assertThat(tokenOffsetRepository.findByToken(token)).isPresent();

@@ -16,14 +16,14 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
- * Upon receiving a connection for a websocket with a given token, spawn a process to return results
- * for this token, as well as any errors that may have occurred.
+ * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
+ * This queue declares any errors and exceptions thrown by any other palisade service.
+ * When such a message is received, it will be persisted.
+ * It will be later retrieved for a client's websocket, or may be reported directly to an actor thread.
  */
-public interface FilteredResourceService {
+public interface ErrorReporterService {
 
-    CompletableFuture<Void> spawnProcessorForToken(final String token);
+    void reportError(final String token, final Throwable exception);
 
 }

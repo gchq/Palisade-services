@@ -29,9 +29,9 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPe
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterDaemon;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterService;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
-import uk.gov.gchq.palisade.service.filteredresource.service.SimpleTokenOffsetDaemon;
+import uk.gov.gchq.palisade.service.filteredresource.service.TopicOffsetService;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -48,15 +48,16 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    ErrorReporterDaemon loggingErrorReporterDaemon() {
+    ErrorReporterService loggingErrorReporterDaemon() {
         return (String token, Throwable exception) -> LOGGER.error("An error was reported for token {}:", token, exception);
     }
 
     @Bean
-    SimpleTokenOffsetDaemon simpleTokenOffsetDaemon(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return new SimpleTokenOffsetDaemon(persistenceLayer);
+    TopicOffsetService simpleTokenOffsetDaemon(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return new TopicOffsetService(persistenceLayer);
     }
 
+    // TODO: Replace this with a proper filtered resource service (websockets etc.)
     @Bean
     FilteredResourceService loggingFilteredResourceService() {
         return (String token) -> CompletableFuture.supplyAsync(() -> {

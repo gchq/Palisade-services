@@ -24,86 +24,82 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
-import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
-import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterDaemon;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterService;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
-import uk.gov.gchq.palisade.service.filteredresource.service.TokenOffsetDaemon;
+import uk.gov.gchq.palisade.service.filteredresource.service.TopicOffsetService;
+
+import java.util.Map;
 
 /**
  * A REST interface mimicking the Kafka API to the service.
  * Intended for debugging only.
  */
 @RestController
-@RequestMapping("/streamApi")
+@RequestMapping("/api")
 public class FilteredResourceController {
-    private final ErrorReporterDaemon errorReporterDaemon;
-    private final TokenOffsetDaemon tokenOffsetDaemon;
+    private final ErrorReporterService errorReporterService;
+    private final TopicOffsetService topicOffsetService;
     private final FilteredResourceService filteredResourceService;
 
     /**
      * Default constructor will be autowired by spring
      *
-     * @param errorReporterDaemon     the error-reporter-daemon to push REST requests to
-     * @param tokenOffsetDaemon       the topic-token-offset-daemon to push REST requests to
+     * @param errorReporterService    the error-reporter-daemon to push REST requests to
+     * @param topicOffsetService      the topic-token-offset-daemon to push REST requests to
      * @param filteredResourceService the filtered-resource-service to push REST requests to
      */
-    public FilteredResourceController(final ErrorReporterDaemon errorReporterDaemon, final TokenOffsetDaemon tokenOffsetDaemon, final FilteredResourceService filteredResourceService) {
-        this.errorReporterDaemon = errorReporterDaemon;
-        this.tokenOffsetDaemon = tokenOffsetDaemon;
+    public FilteredResourceController(final ErrorReporterService errorReporterService, final TopicOffsetService topicOffsetService, final FilteredResourceService filteredResourceService) {
+        this.errorReporterService = errorReporterService;
+        this.topicOffsetService = topicOffsetService;
         this.filteredResourceService = filteredResourceService;
     }
 
     /**
      * REST endpoint for the error reporter subsystem
      *
-     * @param token the token for which an error was thrown
-     * @param error the error thrown while processing a message
+     * @param headers the REST headers containing the token for the request
+     * @param error   the error thrown while processing a message
      * @return Whether or not the reporting of the error completed successfully
      */
-    @PostMapping("/reportError")
+    @PostMapping("/error")
     public ResponseEntity<Void> reportError(
-            final @RequestHeader(Token.HEADER) String token,
-            final @RequestBody Throwable error) {
-        errorReporterDaemon.reportError(token, error);
-
+            final @RequestHeader Map<String, String> headers,
+            final @RequestBody AuditErrorMessage error) {
+        // TODO: Write this message to the upstream kafka queue
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     /**
      * REST endpoint for the topic token offset subsystem
      *
-     * @param token         a token for which there are filtered resources available on a kafka queue
+     * @param headers       the REST headers containing the token for the request
      * @param offsetMessage the offset for the START_OF_STREAM message for this token
      * @return Whether or not the storing of the offset completed successfully
      */
-    @PostMapping("/topicOffset")
+    @PostMapping("/offset")
     public ResponseEntity<Void> storeTopicOffset(
-            final @RequestHeader(Token.HEADER) String token,
+            final @RequestHeader Map<String, String> headers,
             final @RequestBody TopicOffsetMessage offsetMessage) {
-        tokenOffsetDaemon.storeTokenOffset(token, offsetMessage.queuePointer);
-
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        // TODO: Write this message to the upstream kafka queue
+        return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     /**
      * REST endpoint for pushing a filtered resource to the service, as if from kafka.
      * Messages with a stream marker will not be returned, but are used for control flow
      *
-     * @param token           the token for the request
-     * @param streamMarker    the (optional) stream marker for this message
+     * @param headers         the REST headers containing the token for the request
      * @param resourceRequest the request to the service containing a leafResource id
      * @return Whether or not the message was processed successfully
      */
-    @PostMapping("/acceptFilteredResource")
+    @PostMapping("/resource")
     public ResponseEntity<Void> acceptFilteredResource(
-            final @RequestHeader(Token.HEADER) String token,
-            final @RequestHeader(value = StreamMarker.HEADER, required = false) StreamMarker streamMarker,
+            final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) FilteredResourceRequest resourceRequest) {
-        filteredResourceService.spawnProcessorForToken(token);
-
+        // TODO: Write this message to the upstream kafka queue
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
