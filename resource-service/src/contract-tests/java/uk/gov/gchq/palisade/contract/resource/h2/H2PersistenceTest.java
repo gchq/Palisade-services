@@ -27,7 +27,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.contract.resource.config.ResourceTestConfiguration;
@@ -67,11 +66,10 @@ class H2PersistenceTest {
 
     /**
      * Scenario as follows, where (F)iles, (D)irectories and (S)ystems are annotated respectively
-     *
-     *     S
-     *     |
-     *     D
-     *   / | \
+     * S
+     * |
+     * D
+     * / | \
      * F   F  F
      */
 
@@ -98,12 +96,13 @@ class H2PersistenceTest {
     @BeforeEach
     @Transactional
     void setup() {
-        for (FileResource file: Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
+        for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Stream<LeafResource> fileStream = Stream.of(file);
             fileStream = persistenceLayer.withPersistenceById(SYSTEM_ROOT.getId(), fileStream);
             fileStream = persistenceLayer.withPersistenceByType(file.getType(), fileStream);
             fileStream = persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat(), fileStream);
-            fileStream.forEach(x -> { });
+            fileStream.forEach(x -> {
+            });
         }
     }
 

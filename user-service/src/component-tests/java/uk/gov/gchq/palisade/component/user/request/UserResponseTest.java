@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.request;
+package uk.gov.gchq.palisade.component.user.request;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +22,12 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.service.user.request.UserResponse;
 
 import java.io.IOException;
 
@@ -34,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @JsonTest
+@ContextConfiguration(classes = {UserResponseTest.class})
 public class UserResponseTest {
 
     @Autowired
