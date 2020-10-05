@@ -1,8 +1,5 @@
 uk.gov.gchq.palisade:palisade-service:jar:0.5.0-SNAPSHOT
 +- com.h2database:h2:jar:1.4.200:runtime
-+- com.fasterxml.jackson.core:jackson-databind:jar:2.10.4:compile
-|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
-|  \- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 +- org.apache.commons:commons-compress:jar:1.19:compile
 +- org.springframework.boot:spring-boot-configuration-processor:jar:2.3.1.RELEASE:compile
 +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
@@ -66,7 +63,9 @@ uk.gov.gchq.palisade:palisade-service:jar:0.5.0-SNAPSHOT
 +- org.springframework.cloud:spring-cloud-config-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-commons:jar:2.2.2.RELEASE:compile
 |  |  \- org.springframework.security:spring-security-crypto:jar:5.3.3.RELEASE:compile
-|  \- org.springframework.cloud:spring-cloud-context:jar:2.2.2.RELEASE:compile
+|  +- org.springframework.cloud:spring-cloud-context:jar:2.2.2.RELEASE:compile
+|  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.11.0:compile
+|  \- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
 +- org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-starter:jar:2.2.2.RELEASE:compile
 |  |  \- org.springframework.security:spring-security-rsa:jar:1.0.9.RELEASE:compile
@@ -146,6 +145,7 @@ uk.gov.gchq.palisade:palisade-service:jar:0.5.0-SNAPSHOT
 |  \- io.github.openfeign:feign-hystrix:jar:10.7.4:compile
 |     \- com.netflix.hystrix:hystrix-core:jar:1.5.18:compile
 +- uk.gov.gchq.palisade:common:jar:0.5.0-SNAPSHOT:compile
+|  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
 |  +- commons-io:commons-io:jar:2.6:compile

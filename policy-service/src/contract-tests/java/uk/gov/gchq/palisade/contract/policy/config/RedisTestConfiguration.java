@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.contract.policy.config;
 
-
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,6 @@ import redis.embedded.RedisServer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 
 @Configuration
 @EnableAutoConfiguration

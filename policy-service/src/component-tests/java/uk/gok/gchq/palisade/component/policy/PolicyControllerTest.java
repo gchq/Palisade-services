@@ -16,9 +16,8 @@
 package uk.gok.gchq.palisade.component.policy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,7 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gok.gchq.palisade.component.policy.config.PolicyTestConfiguration;
@@ -47,10 +45,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -64,12 +60,10 @@ import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockResource;
 import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockResources;
 import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockUser;
 
-@RunWith(SpringRunner.class)
 @Import(PolicyTestConfiguration.class)
 @ContextConfiguration(classes = PolicyApplication.class)
 @WebMvcTest(PolicyController.class)
 public class PolicyControllerTest {
-
 
     public static final String CAN_ACCESS_REQUEST_URL = "/canAccess";
     public static final String GET_POLICY_SYNC_URL = "/getPolicySync";
@@ -86,12 +80,10 @@ public class PolicyControllerTest {
     @Autowired
     private ObjectMapper mapper;
 
-
-    @Before
+    @BeforeEach
     public void setUp() {
         Mockito.when(policyService.canAccess(mockUser(), mockContext(), mockResource())).thenReturn(Optional.of(mockResource()));
     }
-
 
     /**
      * Tests the PolicyController for the service endpoint "/canAccess"
@@ -106,7 +98,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void shouldReturnCanAccess() throws Exception {
+    public void testShouldReturnCanAccess() throws Exception {
         //GIVEN
         CanAccessRequest canAccessRequest = (new CanAccessRequest())
                 .context(mockContext())
@@ -128,7 +120,7 @@ public class PolicyControllerTest {
 
         //THEN
         Mockito.verify(policyService, times(1)).canAccess(mockUser(), mockContext(), mockResource());
-        assertThat(response.getCanAccessResources(), hasItem(mockResource()));
+        assertThat(response.getCanAccessResources()).contains(mockResource());
     }
 
     /**
@@ -143,7 +135,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void shouldReturnPolicySync() throws Exception {
+    public void testShouldReturnPolicySync() throws Exception {
 
         //GIVEN
         GetPolicyRequest getPolicyRequest = (new GetPolicyRequest())
@@ -166,7 +158,7 @@ public class PolicyControllerTest {
         //THEN
         Mockito.verify(policyService, times(1)).getPolicy(mockResource());
         Map<LeafResource, Rules> response = mapper.readValue(result.getResponse().getContentAsString(), Map.class);
-        assertNotNull(response);
+        assertThat(response).isNotNull();
     }
 
     /**
@@ -180,7 +172,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void shouldSetResourcePolicyAsync() throws Exception {
+    public void testShouldSetResourcePolicyAsync() throws Exception {
         //GIVEN
         SetResourcePolicyRequest getSetResourcePolicyRequest = (new SetResourcePolicyRequest())
                 .policy(mockPolicy())
@@ -207,7 +199,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void shouldSetTypePolicyAsync() throws Exception {
+    public void testShouldSetTypePolicyAsync() throws Exception {
         //GIVEN
         SetTypePolicyRequest setTypePolicyRequest = (new SetTypePolicyRequest())
                 .policy(mockPolicy())

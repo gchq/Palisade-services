@@ -1,15 +1,5 @@
 uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 +- com.github.tomakehurst:wiremock-standalone:jar:2.20.0:compile
-+- it.ozimov:embedded-redis:jar:0.7.3:test
-|  +- com.google.guava:guava:jar:28.2-android:runtime
-|  |  +- com.google.guava:failureaccess:jar:1.0.1:runtime
-|  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:runtime
-|  |  +- com.google.code.findbugs:jsr305:jar:3.0.2:runtime
-|  |  +- org.checkerframework:checker-compat-qual:jar:2.5.5:runtime
-|  |  \- com.google.j2objc:j2objc-annotations:jar:1.3:runtime
-|  +- commons-io:commons-io:jar:2.5:compile
-|  +- org.slf4j:slf4j-simple:jar:1.7.30:test
-|  \- commons-logging:commons-logging:jar:1.2:test
 +- com.github.ben-manes.caffeine:caffeine:jar:2.8.1:compile
 |  +- org.checkerframework:checker-qual:jar:3.1.0:compile
 |  \- com.google.errorprone:error_prone_annotations:jar:2.3.4:compile
@@ -125,6 +115,7 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  +- com.fasterxml.jackson.core:jackson-core:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.11.0:compile
 |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.11.0:compile
+|  +- commons-io:commons-io:jar:2.6:compile
 |  +- org.apache.commons:commons-lang3:jar:3.10:compile
 |  +- org.slf4j:slf4j-api:jar:1.7.30:compile
 |  \- org.apache.avro:avro:jar:1.8.2:compile
@@ -135,6 +126,22 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |     +- org.apache.commons:commons-compress:jar:1.8.1:compile
 |     \- org.tukaani:xz:jar:1.5:compile
 +- uk.gov.gchq.palisade:common:jar:tests:0.5.0-SNAPSHOT:test
++- it.ozimov:embedded-redis:jar:0.7.3:test
+|  +- com.google.guava:guava:jar:28.2-android:runtime
+|  |  +- com.google.guava:failureaccess:jar:1.0.1:runtime
+|  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:runtime
+|  |  +- com.google.code.findbugs:jsr305:jar:3.0.2:runtime
+|  |  +- org.checkerframework:checker-compat-qual:jar:2.5.5:runtime
+|  |  \- com.google.j2objc:j2objc-annotations:jar:1.3:runtime
+|  +- org.slf4j:slf4j-simple:jar:1.7.30:test
+|  \- commons-logging:commons-logging:jar:1.2:test
++- org.springframework.cloud:spring-cloud-openfeign-core:jar:2.2.2.RELEASE:test
+|  +- org.springframework.cloud:spring-cloud-netflix-ribbon:jar:2.2.2.RELEASE:compile
+|  +- org.springframework.boot:spring-boot-starter-aop:jar:2.3.1.RELEASE:compile
+|  |  \- org.aspectj:aspectjweaver:jar:1.9.5:compile
+|  \- io.github.openfeign.form:feign-form-spring:jar:3.8.0:test
+|     +- io.github.openfeign.form:feign-form:jar:3.8.0:test
+|     \- commons-fileupload:commons-fileupload:jar:1.4:test
 +- org.springframework.cloud:spring-cloud-starter-openfeign:jar:2.2.2.RELEASE:compile
 |  +- io.github.openfeign:feign-core:jar:10.7.4:compile
 |  +- io.github.openfeign:feign-slf4j:jar:10.7.4:compile
@@ -170,14 +177,7 @@ uk.gov.gchq.palisade:policy-service:jar:0.5.0-SNAPSHOT
 |  \- org.junit.platform:junit-platform-commons:jar:1.6.2:test
 +- org.junit.jupiter:junit-jupiter-engine:jar:5.6.2:test
 |  \- org.junit.platform:junit-platform-engine:jar:1.6.2:test
-+- uk.org.lidalia:slf4j-test:jar:1.1.0:test
-|  +- uk.org.lidalia:lidalia-lang:jar:1.0.0:test
-|  +- uk.org.lidalia:lidalia-slf4j-ext:jar:1.0.0:test
-|  \- joda-time:joda-time:jar:2.2:runtime
-\- org.springframework.cloud:spring-cloud-openfeign-core:jar:2.2.2.RELEASE:test
-   +- org.springframework.cloud:spring-cloud-netflix-ribbon:jar:2.2.2.RELEASE:compile
-   +- org.springframework.boot:spring-boot-starter-aop:jar:2.3.1.RELEASE:compile
-   |  \- org.aspectj:aspectjweaver:jar:1.9.5:compile
-   \- io.github.openfeign.form:feign-form-spring:jar:3.8.0:test
-      +- io.github.openfeign.form:feign-form:jar:3.8.0:test
-      \- commons-fileupload:commons-fileupload:jar:1.4:test
+\- uk.org.lidalia:slf4j-test:jar:1.1.0:test
+   +- uk.org.lidalia:lidalia-lang:jar:1.0.0:test
+   +- uk.org.lidalia:lidalia-slf4j-ext:jar:1.0.0:test
+   \- joda-time:joda-time:jar:2.2:runtime

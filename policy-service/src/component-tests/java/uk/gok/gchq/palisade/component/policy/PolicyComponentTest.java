@@ -17,8 +17,7 @@ package uk.gok.gchq.palisade.component.policy;
 
 
 import feign.Response;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.HttpStatus;
 import uk.gok.gchq.palisade.component.policy.config.PolicyTestConfiguration;
 import uk.gok.gchq.palisade.component.policy.web.PolicyClient;
 
@@ -45,13 +44,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @Import(PolicyTestConfiguration.class)
 @EnableFeignClients
 @SpringBootTest(classes = {PolicyApplication.class, PolicyController.class, PolicyConfiguration.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -65,19 +59,19 @@ public class PolicyComponentTest extends PolicyTestCommon {
     private PolicyClient policyClient;
 
     @Test
-    public void contextLoads() {
-        assertNotNull(serviceMap);
-        assertNotEquals(serviceMap, Collections.emptyMap());
+    public void testContextLoads() {
+        assertThat(serviceMap).isNotNull();
+        assertThat(serviceMap).isNotEmpty();
     }
 
     @Test
-    public void isUp() {
+    public void testIsUp() {
         Response health = policyClient.getActuatorHealth();
-        assertThat(health.status(), equalTo(200));
+        assertThat(health.status()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
-    public void componentTest() {
+    public void testComponentTest() {
         // Given there are resources and policies to be added
         Collection<LeafResource> resources = Collections.singleton(NEW_FILE);
 
@@ -89,7 +83,7 @@ public class PolicyComponentTest extends PolicyTestCommon {
         CanAccessRequest accessRequest = new CanAccessRequest().user(USER).resources(resources).context(CONTEXT);
         CanAccessResponse accessResponse = policyClient.canAccess(accessRequest);
         for (LeafResource resource : resources) {
-            assertThat(accessResponse.getCanAccessResources(), hasItem(resource));
+            assertThat(accessResponse.getCanAccessResources()).contains(resource);
         }
 
         // When the policies on the resource are requested
@@ -98,6 +92,6 @@ public class PolicyComponentTest extends PolicyTestCommon {
         LOGGER.info("Response: {}", getResponse);
 
         // Then the policy just added is found on the resource
-        assertThat(getResponse.get(NEW_FILE), equalTo(PASS_THROUGH_POLICY.getRecordRules()));
+        assertThat(getResponse.get(NEW_FILE)).isEqualTo(PASS_THROUGH_POLICY.getRecordRules());
     }
 }

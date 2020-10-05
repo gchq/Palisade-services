@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,7 +126,7 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
         assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
         // Given - a sufficient amount of time has passed
 
-        Thread.sleep(2500);
+        TimeUnit.MILLISECONDS.sleep(2500);
         forceCleanUp();
 
         // When - an old entry is requested

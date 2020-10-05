@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,7 +129,7 @@ public class RedisPolicyCachingTest extends PolicyTestCommon {
         assertThat(cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isNotNull();
 
         // Given - a sufficient amount of time has passed
-        Thread.sleep(2500);
+        TimeUnit.MILLISECONDS.sleep(2500);
 
         // When - an old entry is requested
         Optional<Policy> cachedPolicy = cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE);
