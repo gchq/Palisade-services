@@ -124,7 +124,7 @@ class RestContractTest {
         client.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), avroSerialiser);
 
         // Given - the file contains the expected data
-        avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
+        // avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
 
         // When
         Set<Employee> readResult = client.readChunked(readRequest).collect(Collectors.toSet());
