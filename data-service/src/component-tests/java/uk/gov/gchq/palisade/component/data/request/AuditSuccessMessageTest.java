@@ -89,7 +89,7 @@ class AuditSuccessMessageTest {
                         () -> assertThat(auditSuccessMessageObject.getLeafResourceId()).isEqualTo(auditSuccessMessage.getLeafResourceId())
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessageObject).isEqualTo(auditSuccessMessage)
+                        () -> assertThat(auditSuccessMessageObject).usingRecursiveComparison().isEqualTo(auditSuccessMessage)
                 )
         );
     }
