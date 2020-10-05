@@ -29,12 +29,8 @@ import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.contract.filteredresource.redis.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
-import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.service.TopicOffsetService;
-import uk.gov.gchq.palisade.service.filteredresource.web.FilteredResourceController;
-
-import java.util.Collections;
+import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RedisPersistenceContractTest {
 
     @Autowired
-    private TopicOffsetService service;
+    private OffsetEventService service;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;

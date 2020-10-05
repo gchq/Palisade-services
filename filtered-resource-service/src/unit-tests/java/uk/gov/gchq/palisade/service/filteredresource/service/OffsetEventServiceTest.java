@@ -16,23 +16,23 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 
-/**
- * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
- * This queue declares the commit-offsets for the starts of result sets for a given token.
- * When such a message is received, it will be persisted.
- * It will be later retrieved for a client's websocket.
- */
-public class TopicOffsetService {
-    private final TokenOffsetPersistenceLayer persistenceLayer;
+class OffsetEventServiceTest {
 
-    public TopicOffsetService(final TokenOffsetPersistenceLayer persistenceLayer) {
-        this.persistenceLayer = persistenceLayer;
+    @Test
+    void topicOffsetServicePutsToPersistence() {
+        // Given
+        TokenOffsetPersistenceLayer persistenceLayer = Mockito.mock(TokenOffsetPersistenceLayer.class);
+        OffsetEventService service = new OffsetEventService(persistenceLayer);
+
+        // When
+        service.storeTokenOffset("token", 1L);
+
+        // Then
+        Mockito.verify(persistenceLayer, Mockito.atLeastOnce()).putOffset("token", 1L);
     }
-
-    public void storeTokenOffset(final String token, final Long offset) {
-        this.persistenceLayer.putOffset(token, offset);
-    }
-
 }

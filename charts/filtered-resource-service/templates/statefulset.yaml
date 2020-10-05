@@ -13,7 +13,7 @@
 # limitations under the License.
 
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "filtered-resource-service.name" . }}
   namespace: {{ include "palisade.namespace" . }}
@@ -24,6 +24,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "filtered-resource-service.name" . }}-headless
+  podManagementPolicy: "Parallel"
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "filtered-resource-service.name" . }}
@@ -40,12 +42,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
-            containerPort: 8092
-            protocol: TCP
+            containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8092
+            port: {{ .Values.service.internalPort }}
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
@@ -53,7 +54,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health
-            port: 8092
+            port: {{ .Values.service.internalPort }}
           initialDelaySeconds: 10
           failureThreshold: 5
           periodSeconds: 20
@@ -63,6 +64,8 @@ spec:
         env:
         - name: "LOADER_PATH"
           value: {{ include "filtered-resource-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "filtered-resource-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}

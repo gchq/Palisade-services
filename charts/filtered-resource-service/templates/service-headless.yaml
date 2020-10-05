@@ -12,27 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-replicaCount: 1
-
-service:
-  port: 80
-  internalPort: 8092
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "filtered-resource-service.name" . }}-headless
+  namespace: {{ include "palisade.namespace" . }}
+  labels: {{- include "filtered-resource-service.labels" . | nindent 4 }}
+spec:
   type: ClusterIP
-
-image:
-  name: filtered-resource-service
-  tag: SNAPSHOT-6b65e06
-  pullPolicy: IfNotPresent
-  codeRelease: 0.5.0-SNAPSHOT
-
-resources:
-  limits:
-    cpu: 750m
-    memory: 1Gi
-  requests:
-    cpu: 250m
-    memory: 512Mi
-
-nodeSelector: { }
-tolerations: [ ]
-affinity: { }
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: broker
+      port: {{ .Values.service.internalPort }}
+  selector:
+    app.kubernetes.io/name: {{ include "filtered-resource-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -16,23 +16,14 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+/**
+ * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
+ * This queue declares any errors and exceptions thrown by any other palisade service.
+ * When such a message is received, it will be persisted.
+ * It will be later retrieved for a client's websocket, or may be reported directly to an actor thread.
+ */
+public interface ErrorEventService {
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+    void reportError(final String token, final Throwable exception);
 
-class TopicOffsetServiceTest {
-
-    @Test
-    void topicOffsetServicePutsToPersistence() {
-        // Given
-        TokenOffsetPersistenceLayer persistenceLayer = Mockito.mock(TokenOffsetPersistenceLayer.class);
-        TopicOffsetService service = new TopicOffsetService(persistenceLayer);
-
-        // When
-        service.storeTokenOffset("token", 1L);
-
-        // Then
-        Mockito.verify(persistenceLayer, Mockito.atLeastOnce()).putOffset("token", 1L);
-    }
 }

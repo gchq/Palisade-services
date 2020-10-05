@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.filteredresource.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -29,11 +30,12 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPe
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorReporterService;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
-import uk.gov.gchq.palisade.service.filteredresource.service.TopicOffsetService;
+import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
@@ -43,18 +45,21 @@ public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    JpaTokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository) {
-        return new JpaTokenOffsetPersistenceLayer(repository);
+    TokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(
+            final TokenOffsetRepository repository,
+            final @Qualifier("applicationTaskExecutor") Executor executor) {
+        return new JpaTokenOffsetPersistenceLayer(repository, executor);
     }
 
+    // TODO: Replace this with a proper error reporting service (akka actors etc.)
     @Bean
-    ErrorReporterService loggingErrorReporterDaemon() {
+    ErrorEventService loggingErrorReporterService() {
         return (String token, Throwable exception) -> LOGGER.error("An error was reported for token {}:", token, exception);
     }
 
     @Bean
-    TopicOffsetService simpleTokenOffsetDaemon(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return new TopicOffsetService(persistenceLayer);
+    OffsetEventService topicOffsetService(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return new OffsetEventService(persistenceLayer);
     }
 
     // TODO: Replace this with a proper filtered resource service (websockets etc.)
@@ -66,7 +71,7 @@ public class ApplicationConfiguration {
         });
     }
 
-    // TODO: Replace this with a proper error handling mechanism (ie. kafka error queue)
+    // TODO: Replace this with a proper error handling mechanism (kafka queues etc.)
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");

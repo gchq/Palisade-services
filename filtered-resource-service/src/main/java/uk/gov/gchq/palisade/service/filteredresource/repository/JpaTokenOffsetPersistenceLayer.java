@@ -18,25 +18,43 @@ package uk.gov.gchq.palisade.service.filteredresource.repository;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * Java JPA implementation of a {@link TokenOffsetPersistenceLayer} for the filtered-resource-service.
  * Persist and retrieve topic offsets for a given request token.
  */
 public class JpaTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLayer {
+    private static final CompletableFuture<Void> DONE = CompletableFuture.completedFuture(null);
+
     private final TokenOffsetRepository repository;
+    private final Executor executor;
 
-    public JpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository) {
+    public JpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository, final Executor executor) {
         this.repository = repository;
+        this.executor = executor;
     }
 
     @Override
-    public void overwriteOffset(final String token, final Long offset) {
-        repository.save(token, offset);
+    public CompletableFuture<Void> putOffset(final String token, final Long offset) {
+        return findOffset(token)
+                .thenComposeAsync((Optional<Long> existing) -> existing
+                                .map(ignored -> DONE)
+                                .orElseGet(() -> overwriteOffset(token, offset)),
+                        executor);
     }
 
     @Override
-    public Optional<Long> findOffset(final String token) {
-        return repository.findByToken(token).map(TokenOffsetEntity::getOffset);
+    public CompletableFuture<Void> overwriteOffset(final String token, final Long offset) {
+        return CompletableFuture.runAsync(() -> repository
+                .save(token, offset), executor);
+    }
+
+    @Override
+    public CompletableFuture<Optional<Long>> findOffset(final String token) {
+        return CompletableFuture.supplyAsync(() -> repository
+                .findByToken(token)
+                .map(TokenOffsetEntity::getOffset));
     }
 }

@@ -16,14 +16,25 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+
+import java.util.concurrent.CompletableFuture;
+
 /**
  * A thread will constantly monitor a kafka queue throughout the lifetime of the application.
- * This queue declares any errors and exceptions thrown by any other palisade service.
+ * This queue declares the commit-offsets for the starts of result sets for a given token.
  * When such a message is received, it will be persisted.
- * It will be later retrieved for a client's websocket, or may be reported directly to an actor thread.
+ * It will be later retrieved for a client's websocket.
  */
-public interface ErrorReporterService {
+public class OffsetEventService {
+    private final TokenOffsetPersistenceLayer persistenceLayer;
 
-    void reportError(final String token, final Throwable exception);
+    public OffsetEventService(final TokenOffsetPersistenceLayer persistenceLayer) {
+        this.persistenceLayer = persistenceLayer;
+    }
+
+    public CompletableFuture<Void> storeTokenOffset(final String token, final Long offset) {
+        return this.persistenceLayer.putOffset(token, offset);
+    }
 
 }

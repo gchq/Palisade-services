@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.filteredresource.repository;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Persist and retrieve topic offsets for a given request token.
@@ -23,14 +24,10 @@ import java.util.Optional;
  */
 public interface TokenOffsetPersistenceLayer {
 
-    default void putOffset(final String token, final Long offset) {
-        if (findOffset(token).isEmpty()) {
-            overwriteOffset(token, offset);
-        }
-    }
+    CompletableFuture<Void> putOffset(final String token, final Long offset);
 
-    void overwriteOffset(final String token, final Long offset);
+    CompletableFuture<Void> overwriteOffset(final String token, final Long offset);
 
-    Optional<Long> findOffset(final String token);
+    CompletableFuture<Optional<Long>> findOffset(final String token);
 
 }
