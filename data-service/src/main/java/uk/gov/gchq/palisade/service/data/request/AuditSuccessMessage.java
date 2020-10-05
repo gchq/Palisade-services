@@ -54,13 +54,20 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
-            final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("recordsProcessed") long recordsProcessed,
-            final @JsonProperty("recordsReturned") long recordsReturned) {
-
+            final @JsonProperty("leafResourceId") String leafResourceId) {
         super(userId, resourceId, context, attributes);
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Resource ID cannot be null"));
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID cannot be null"));
+    }
 
+    private AuditSuccessMessage(
+            final String userId,
+            final String resourceId,
+            final JsonNode context,
+            final Map<String, Object> attributes,
+            final String leafResourceId,
+            final Integer recordsProcessed,
+            final Integer recordsReturned) {
+        this(userId, resourceId, context, attributes, leafResourceId);
         attributes.put(RECORDS_PROCESSED, recordsProcessed);
         attributes.put(RECORDS_RETURNED, recordsReturned);
     }
@@ -189,7 +196,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param recordsProcessed recordsProcessed
              * @return interface  {@link IRecordsReturned} for the next step in the build.
              */
-            IRecordsReturned withNumberOfRecordsProcessed(long recordsProcessed);
+            IRecordsReturned withNumberOfRecordsProcessed(Integer recordsProcessed);
         }
 
         /**
@@ -202,7 +209,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param recordsReturned the number of records returned.
              * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
              */
-            AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
+            AuditSuccessMessage withNumberOfRecordsReturned(Integer recordsReturned);
         }
     }
 
