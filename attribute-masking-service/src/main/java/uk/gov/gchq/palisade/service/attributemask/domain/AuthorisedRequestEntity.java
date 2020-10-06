@@ -28,7 +28,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -46,8 +45,7 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
-public class AuthorisedRequestEntity implements Serializable {
-    static final long serialVersionUID = 1;
+public class AuthorisedRequestEntity {
 
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
