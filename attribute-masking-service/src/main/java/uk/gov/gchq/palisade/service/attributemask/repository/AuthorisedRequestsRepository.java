@@ -23,6 +23,9 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 
+/**
+ * Persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
+ */
 public interface AuthorisedRequestsRepository extends CrudRepository<AuthorisedRequestEntity, String> {
 
     /**

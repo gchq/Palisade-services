@@ -22,6 +22,9 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Asynchronously persist an authorised request. This is a write-only interface, while the data-service holds a read-only interface.
+ */
 public interface PersistenceLayer {
 
     /**
