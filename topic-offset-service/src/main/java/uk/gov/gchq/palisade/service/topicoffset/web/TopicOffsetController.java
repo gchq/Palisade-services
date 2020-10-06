@@ -15,6 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.web;
 
+import akka.Done;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +34,10 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
+import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
 
 import java.util.Map;
-
+import java.util.concurrent.CompletionStage;
 
 /**
  * REST Controller for Topic Offset Service.
@@ -43,16 +48,24 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "/stream-api")
 public class TopicOffsetController {
-
     private final TopicOffsetService topicOffsetService;
     private final ErrorHandlingService errorHandler;
+    private final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink;
+    private final ConsumerTopicConfiguration upstreamConfig;
+    private final Materializer materializer;
 
     private static final long TEMP = 123L;  //temp value until I get the offset code in place
 
-
-    public TopicOffsetController(final TopicOffsetService topicOffsetService, final ErrorHandlingService errorHandler) {
+    public TopicOffsetController(final TopicOffsetService topicOffsetService,
+                                 final ErrorHandlingService errorHandler,
+                                 final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink,
+                                 final ConsumerTopicConfiguration upstreamConfig,
+                                 final Materializer materializer) {
         this.topicOffsetService = topicOffsetService;
         this.errorHandler = errorHandler;
+        this.upstreamSink = upstreamSink;
+        this.upstreamConfig = upstreamConfig;
+        this.materializer = materializer;
     }
 
 
@@ -63,7 +76,7 @@ public class TopicOffsetController {
      *
      * @param headers headers for the incoming request
      * @param request body {@link TopicOffsetRequest} of the request message
-     * @return resonse {@link TopicOffsetResponse} with the commit offset for this client request
+     * @return response {@link TopicOffsetResponse} with the commit offset for this client request
      */
     @PostMapping(value = "/topicOffset", consumes = "application/json", produces = "application/json")
     public ResponseEntity<TopicOffsetResponse> serviceTopicOffset(

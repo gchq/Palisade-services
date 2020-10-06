@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.topicoffset.model;
+package uk.gov.gchq.palisade.service.topicoffset.message;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,15 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
+
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Unit tests for the evaluating the TopicOffsetResponse and the related seralising to a JSon string
+ * Unit tests for the evaluating the TopicOffsetResponse and the related seralising to a JSON string
  * and deseralising back to an object.
  */
 @JsonTest
@@ -47,8 +49,7 @@ class TopicOffsetResponseTest {
      */
     @Test
     public void testGroupedDependantQueryScopeResponseSerialisingAndDeserialising() throws IOException {
-
-        TopicOffsetResponse originalTopicOffsetResponse = TopicOffsetResponse.Builder.create().withOffset(Long.valueOf(101));
+        TopicOffsetResponse originalTopicOffsetResponse = TopicOffsetResponse.Builder.create().withOffset(101L);
 
         JsonContent<TopicOffsetResponse> topicOffsetResponseJsonContent = jsonTester.write(originalTopicOffsetResponse);
         ObjectContent<TopicOffsetResponse> offsetResponseObjectContent = jsonTester.parse(topicOffsetResponseJsonContent.getJson());

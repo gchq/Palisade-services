@@ -12,27 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO replace h2 with redis
 spring:
-  application:
-    name: topic-offset-service
-  output:
-    ansi:
-      enabled: always
-  main:
-    allow-bean-definition-overriding: true
-  data:
-    redis:
-      repositories:
-        enabled: false
+  profiles:
+    include:
+    - k8s-config
 
-server:
-  port: 8093
+---
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    shutdown:
-      enabled: true
+spring:
+  profiles: k8s-config

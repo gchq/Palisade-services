@@ -1,11 +1,11 @@
-package uk.gov.gchq.palisade.contract.topicoffset.kafka;
+package uk.gov.gchq.palisade.contract.topicoffset.kafka.old;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.testcontainers.containers.KafkaContainer;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -20,12 +20,10 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 import java.time.Duration;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ContractTestConfiguration {
     public static final String REQUEST_TOKEN = "test-request-token";
-
     public static final UserId USER_ID = new UserId().id("test-user-id");
     public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "/test/resourceId";
@@ -42,7 +40,6 @@ public class ContractTestConfiguration {
 
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
-
     public static final String RULE_MESSAGE = "test-rule";
 
     public static final TopicOffsetRequest REQUEST = TopicOffsetRequest.Builder.create()
@@ -51,14 +48,9 @@ public class ContractTestConfiguration {
             .withContext(CONTEXT)
             .withResource(LEAF_RESOURCE);
 
-
-
-    public static final ProducerRecord<String, TopicOffsetRequest> START = new ProducerRecord<>("rule", 0, null, null);
-
-    public static final ProducerRecord<String, TopicOffsetRequest> RECORD = new ProducerRecord<>("rule", 0, null, REQUEST);
-
-    public static final ProducerRecord<String, TopicOffsetRequest> END = new ProducerRecord<>("rule", 0, null, null);
-
+    public static final ProducerRecord<String, TopicOffsetRequest> START = new ProducerRecord<>("masked-resource", 0, null, null);
+    public static final ProducerRecord<String, TopicOffsetRequest> RECORD = new ProducerRecord<>("masked-resource", 0, null, REQUEST);
+    public static final ProducerRecord<String, TopicOffsetRequest> END = new ProducerRecord<>("masked-resource", 0, null, null);
 
     static {
         START.headers().add(StreamMarker.HEADER, StreamMarker.START.toString().getBytes());
@@ -69,7 +61,6 @@ public class ContractTestConfiguration {
         END.headers().add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
         END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
-
 
     public static class TopicOffsetRequestSerialiser extends JsonSerializer<TopicOffsetRequest> {
     }
@@ -85,6 +76,4 @@ public class ContractTestConfiguration {
                 }
         );
     }
-
-
 }

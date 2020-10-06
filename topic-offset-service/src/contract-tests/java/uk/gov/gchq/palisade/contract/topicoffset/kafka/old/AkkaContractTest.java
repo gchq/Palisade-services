@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.contract.topicoffset.kafka;
+package uk.gov.gchq.palisade.contract.topicoffset.kafka.old;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -23,7 +23,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.AfterAll;
@@ -32,36 +31,26 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.KafkaContainer;
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+
+import uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.TopicOffsetRequestSerialiser;
+import uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.TopicOffsetResponseDeserialiser;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
-import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
-import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
-
-//import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
-//import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingRequest;
-//import uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-//import static uk.gov.gchq.palisade.contract.topicoffset.kafka.ContractTestConfiguration.KAFKA_CONTAINER;
+import static uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.END;
+import static uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.RECORD;
+import static uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.START;
+//import static uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestConfiguration.KAFKA_CONTAINER;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
@@ -69,15 +58,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The downstream "/////" topic is written to by this service and read by the /////.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
-//@Disabled
-//@SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-//@ActiveProfiles("dbtest")
+@Disabled
+@SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dbtest")
 class AkkaContractTest {
 
-    /*
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1");
+    private static Map<String, Object> producerProperties;
+    private static Map<String, Object> consumerProperties;
+    private static final Duration TIMEOUT_SECONDS = Duration.ofSeconds(15);
 
     @BeforeAll
-    static void startTestcontainers() {
+    static void startTestContainers() {
         KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
         KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
         KAFKA_CONTAINER.start();
@@ -86,8 +78,8 @@ class AkkaContractTest {
                 AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CONTAINER.getBootstrapServers());
         try (AdminClient adminClient = AdminClient.create(adminClientProperties)) {
             List<NewTopic> newTopicsConfig = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("filtered-resource", 3, (short) 1));
+                    new NewTopic("masked-resource", 3, (short) 1),
+                    new NewTopic("masked-resource-offset", 3, (short) 1));
             adminClient.createTopics(newTopicsConfig);
         }
 
@@ -104,12 +96,12 @@ class AkkaContractTest {
     }
 
     @AfterAll
-    static void stopTestcontainers() {
+    static void stopTestContainers() {
         KAFKA_CONTAINER.stop();
     }
 
     @Test
-    void sendAndReceiveTest() throws ExecutionException, InterruptedException {
+    void testSendAndReceive() throws ExecutionException, InterruptedException {
         // Given a message is available on the upstream topic
         try (KafkaProducer<String, TopicOffsetRequest> producer = new KafkaProducer<>(producerProperties)) {
             producer.send(START);
@@ -120,8 +112,8 @@ class AkkaContractTest {
         // When we read all messages from the downstream topic
         LinkedList<ConsumerRecord<String, TopicOffsetResponseDeserialiser>> resultsList;
         try (KafkaConsumer<String, TopicOffsetResponse> consumer = new KafkaConsumer<>(consumerProperties)) {
-            consumer.subscribe(Collections.singletonList("filtered-resource"));
-            //     resultsList = consumeWithTimeout(consumer, TIMEOUT_SECONDS).get();
+            consumer.subscribe(Collections.singletonList("masked-resource-offset"));
+//                 resultsList = consumeWithTimeout(consumer, TIMEOUT_SECONDS).get();
         }
 
         // Then there are three messages: START, RESPONSE, END
@@ -144,6 +136,6 @@ class AkkaContractTest {
         //        .hasSize(1)
         //       .containsExactly(RESPONSE);
     }
-*/
+
 }
 

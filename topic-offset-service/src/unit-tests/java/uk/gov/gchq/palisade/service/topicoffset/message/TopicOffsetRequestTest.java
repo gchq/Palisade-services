@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
 /**
  * Unit tests for the evaluating the TopicOffsetRequest and the related seralising to a JSon string
  * and deseralising back to an object.
@@ -42,7 +43,6 @@ class TopicOffsetRequestTest {
 
     @Autowired
     private JacksonTester<TopicOffsetRequest> jsonTester;
-
 
     /**
      * Grouped assertion test
@@ -85,8 +85,7 @@ class TopicOffsetRequestTest {
                         () -> assertThat(topicOffsetRequest.getResourceId()).isEqualTo(originalTopicOffsetRequest.getResourceId())
                 ),
                 () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(topicOffsetRequest.equals(originalTopicOffsetRequest))
+                        () -> assertThat(topicOffsetRequest).usingRecursiveComparison().isEqualTo(originalTopicOffsetRequest)
                 )
         );
     }

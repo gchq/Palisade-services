@@ -15,9 +15,28 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset;
 
+import akka.stream.Materializer;
+import akka.stream.javadsl.RunnableGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.event.EventListener;
+
+import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetController;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * Topic Offset Service is a performance optimisation for the stream message process.  The service will look for the
@@ -27,14 +46,52 @@ import org.springframework.context.annotation.ComponentScan;
  * then be used to optimise the start up client connections by the results-service.
  */
 @SpringBootApplication
-@ComponentScan
+@ComponentScan(basePackageClasses = TopicOffsetController.class)
+@EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class TopicOffsetApplication {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TopicOffsetApplication.class);
+
+    private final Set<RunnableGraph<?>> runners;
+    private final Materializer materializer;
+    private final Executor executor;
+
+    /**
+     * Autowire Akka objects in constructor for application ready event
+     *
+     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     */
+    public TopicOffsetApplication(
+            final Collection<RunnableGraph<?>> runners,
+            final Materializer materializer,
+            @Qualifier("applicationTaskExecutor") final Executor executor) {
+        this.runners = new HashSet<>(runners);
+        this.materializer = materializer;
+        this.executor = executor;
+    }
 
     /**
      * Starts the Topic Offset Service
+     *
      * @param args required input for the main method
      */
     public static void main(final String[] args) {
         SpringApplication.run(TopicOffsetApplication.class, args);
+    }
+
+    /**
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void serveForever() {
+        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .collect(Collectors.toSet());
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+
+        runnerThreads.forEach(CompletableFuture::join);
     }
 }

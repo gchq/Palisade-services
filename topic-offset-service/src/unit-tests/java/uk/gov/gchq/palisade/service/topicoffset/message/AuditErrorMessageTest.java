@@ -87,8 +87,7 @@ class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(originalAuditErrorMessage.getError().getMessage())
                 ),
                 () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditErrorMessageObject.equals(originalAuditErrorMessage))
+                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().isEqualTo(originalAuditErrorMessage)
                 )
         );
     }

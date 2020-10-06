@@ -23,10 +23,9 @@ import java.util.Map;
  */
 public interface TopicOffsetService {
 
-
-
     /**
      * Determines if this is an offset for the topic.
+     *
      * @param headers map of headers
      * @return boolean if the conditions are met.
      */

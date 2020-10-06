@@ -2,6 +2,7 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 
@@ -19,10 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SimpleTopicOffsetServiceTest {
 
-    private SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
+    private final SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
 
     public static final String REQUEST_TOKEN = "test-request-token";
-
     private Map<String, String> headers;
 
     @BeforeEach
@@ -34,36 +34,28 @@ class SimpleTopicOffsetServiceTest {
     /**
      * Tests the simpleTopicOffsetService method isOffsetForTopic will return true when the {@link StreamMarker} is
      * set to the start value
-     *
-     * @throws Exception fails to produce the expected results.
      */
     @Test
-    void testTopicOffsetServiceWithAStart() throws Exception {
-
+    void testTopicOffsetServiceWithAStart() {
         headers.put(StreamMarker.HEADER, StreamMarker.START.toString());
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isTrue();
-
     }
 
     /**
      * Tests the simpleTopicOffsetService method isOffsetForTopic will return false when the {@link StreamMarker} is
      * set to the end value
-     * @throws Exception fails to produce the expected results.
      */
     @Test
-    void testTopicOffsetServiceWithAnEnd() throws Exception {
-
+    void testTopicOffsetServiceWithAnEnd() {
         headers.put(StreamMarker.HEADER, StreamMarker.END.toString());
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
     }
 
     /**
      * Tests the simpleTopicOffsetService method isOffsetForTopic will return false when there is no stream marker
-     * @throws Exception fails to produce the expected results.
      */
     @Test
-    void testTopicOffsetServiceWithoutAnyStreamMarker() throws Exception {
-
+    void testTopicOffsetServiceWithoutAnyStreamMarker() {
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
     }
 }
