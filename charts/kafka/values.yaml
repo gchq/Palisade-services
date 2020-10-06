@@ -18,6 +18,10 @@
 # Kafka:
 # ------------------------------------------------------------------------------
 
+exports:
+  nameOverride: "kafka"
+  # fullnameOverride:  "palisade-kafka"
+
 ## The StatefulSet installs 3 pods by default
 replicas: 1
 
@@ -70,7 +74,6 @@ podManagementPolicy: OrderedReady
 #     - user
 #     - pass
 #   mountPath: /opt/zookeeper/secret
-
 
 ## The subpath within the Kafka container's PV where logs will be stored.
 ## This is combined with `persistence.mountPath`, to create, by default: /opt/kafka/data/logs

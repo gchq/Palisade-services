@@ -45,15 +45,14 @@ velocity*
 # Previous helm packages
 Palisade-services-*.tgz
 # Add the directory for every service module here
+/attribute-masking-service/
+/audit-service/
 /discovery-service/
 /create-kafka-queues/
-/audit-service/
 /data-service/
 /palisade-service/
 /policy-service/
 /resource-service/
-/services-manager/
 /user-service/
-/query-scope-service/
 /results-service/
-/services-launcher/
+/services-manager/

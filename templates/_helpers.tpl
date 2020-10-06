@@ -116,7 +116,7 @@ Create the service name of the redis master
 {{- if .Values.global.redis.exports.fullnameOverride -}}
 {{- .Values.global.redis.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.global.redis.exports.nameOverride -}}
+{{- $name := default "redis" .Values.global.redis.exports.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -144,7 +144,23 @@ Create the service name of the redis cluster
 {{- if (index .Values.global "redis-cluster").exports.fullnameOverride -}}
 {{- (index .Values.global "redis-cluster").exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name (index .Values.global "redis-cluster").exports.nameOverride -}}
+{{- $name := default "redis-cluster" (index .Values.global "redis-cluster").exports.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the service name of kafka
+*/}}
+{{- define "palisade.kafka.fullname" -}}
+{{- if .Values.global.kafka.exports.fullnameOverride -}}
+{{- .Values.global.kafka.exports.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "kafka" .Values.global.kafka.exports.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
