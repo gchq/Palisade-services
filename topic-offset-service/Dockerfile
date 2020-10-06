@@ -17,8 +17,8 @@ VOLUME /tmp
 
 ARG JAR_FILE
 
-COPY $JAR_FILE /usr/share/attribute-masking-service/attribute-masking-service.jar
+COPY $JAR_FILE /usr/share/topic-offset-service/topic-offset-service.jar
 
-LABEL service="attribute-masking" project="palisade"
+LABEL service="topic-offset" project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/attribute-masking-service/attribute-masking-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/share/topic-offset-service/topic-offset-service.jar"]
