@@ -127,6 +127,7 @@
     </profiles>
 
     <build>
+        <testSourceDirectory>src/unit-tests/java</testSourceDirectory>
         <resources>
             <resource>
                 <filtering>true</filtering>
@@ -333,5 +334,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

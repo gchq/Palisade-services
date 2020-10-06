@@ -168,6 +168,7 @@
     </profiles>
 
     <build>
+        <testSourceDirectory>src/unit-tests/java</testSourceDirectory>
         <resources>
             <resource>
                 <filtering>true</filtering>
