@@ -36,6 +36,6 @@ public class NullUserServiceTest {
     public void addUser() {
         User user = new User().userId("testUser");
         User actual = nullUserService.addUser(user);
-        assertThat(actual.getUserId().getId()).isEqualTo(user.getUserId().getId());
+        assertThat(actual).isEqualTo(user);
     }
 }
