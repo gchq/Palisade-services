@@ -37,10 +37,6 @@
         <alpakka.version>2.0.4</alpakka.version>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <!-- Testing configuration -->
-        <unit-test.skip>false</unit-test.skip>
-        <component-test.skip>false</component-test.skip>
-        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
