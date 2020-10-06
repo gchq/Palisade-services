@@ -29,8 +29,8 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
