@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.palisade.repository.DataRequestRepository;
 import uk.gov.gchq.palisade.service.request.DataRequestConfig;
 
+import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class DataRequestTest {
 
     @Test
     public void storeAndRetrieveTest() {
-        final Context context = new Context(Stream.of(new SimpleEntry<String, Object>("testing repo", "this")).collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)));
+        final Context context = new Context(Stream.of(new SimpleEntry<String, Serializable>("testing repo", "this")).collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)));
         final DataRequestConfig dataRequestConfig = new DataRequestConfig();
         dataRequestConfig.setContext(context);
         dataRequestConfig.setUser(new User().userId("archibald"));
