@@ -59,7 +59,10 @@ public class SetResourcePolicyRequestTest {
         final Iterable<String> iterable = node::fieldNames;
 
         //That
-        assertThat(iterable).isNotEmpty().doesNotContainNull().contains("id", "resource", "policy");
+        assertThat(iterable)
+                .isNotEmpty()
+                .doesNotContainNull()
+                .contains("id", "resource", "policy");
     }
 
     @Test

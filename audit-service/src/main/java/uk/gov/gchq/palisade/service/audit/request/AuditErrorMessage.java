@@ -73,7 +73,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditErrorMessage class.
          *
-         * @return interface {@link IUserId} for the next step in the build.
+         * @return public interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
             return userId -> resourceId -> context -> serviceName -> timestamp -> serverIP -> serverHostname -> attributes -> error ->
@@ -83,12 +83,12 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
              * @param userId user ID for the request.
-             * @return interface {@link IResourceId} for the next step in the build.
+             * @return public interface {@link IResourceId} for the next step in the build.
              */
             IResourceId withUserId(String userId);
         }
@@ -96,12 +96,12 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
              * @param resourceId resource ID for the request.
-             * @return interface {@link IContext} for the next step in the build.
+             * @return public interface {@link IContext} for the next step in the build.
              */
             IContext withResourceId(String resourceId);
         }
@@ -109,12 +109,12 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link IServicename} for the next step in the build.
+             * @return public interface {@link IServicename} for the next step in the build.
              */
             default IServicename withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
@@ -124,7 +124,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return interface {@link IServicename} for the next step in the build.
+             * @return public interface {@link IServicename} for the next step in the build.
              */
             IServicename withContextNode(JsonNode context);
         }
@@ -132,13 +132,13 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the service name for the service that created this message.
          */
-        interface IServicename {
+        public interface IServicename {
 
             /**
              * Adds the service name.
              *
              * @param servicename name of the service that created the message.
-             * @return interface  {@link ITimestamp} for the next step in the build.
+             * @return public interface  {@link ITimestamp} for the next step in the build.
              */
             ITimestamp withServiceName(String servicename);
         }
@@ -146,13 +146,13 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the timestamp for when the service created this message.
          */
-        interface ITimestamp {
+        public interface ITimestamp {
 
             /**
              * Adds the timestamp for the message.
              *
              * @param timestamp timestamp for the request.
-             * @return interface {@link IServerIp} for the next step in the build.
+             * @return public interface {@link IServerIp} for the next step in the build.
              */
             IServerIp withTimestamp(String timestamp);
         }
@@ -160,13 +160,13 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the server IP information for the se.
          */
-        interface IServerIp {
+        public interface IServerIp {
 
             /**
              * Adds the server IP information for the message.
              *
              * @param serverIp where the message was created.
-             * @return interface  {@link IServerHostname} for the next step in the build.
+             * @return public interface  {@link IServerHostname} for the next step in the build.
              */
             IServerHostname withServerIp(String serverIp);
         }
@@ -174,12 +174,12 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the server host name for the message.
          */
-        interface IServerHostname {
+        public interface IServerHostname {
             /**
              * Adds the server host name for where the message was created.
              *
              * @param serverHostname server host name.
-             * @return interface  {@link IAttributes} for the next step in the build.
+             * @return public interface  {@link IAttributes} for the next step in the build.
              */
             IAttributes withServerHostname(String serverHostname);
         }
@@ -187,12 +187,12 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the server host name for the message.
          */
-        interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
              * @param attributes timestamp for the request.
-             * @return interface {@link IError} for the next step in the build.
+             * @return public interface {@link IError} for the next step in the build.
              */
             default IError withAttributes(Map<String, Object> attributes) {
                 return withAttributesNode(MAPPER.valueToTree(attributes));
@@ -202,7 +202,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the attributes for the message.  Uses a JsonNode string form of the information.
              *
              * @param attributes user context for the request.
-             * @return interface {@link IError} for the next step in the build.
+             * @return public interface {@link IError} for the next step in the build.
              */
             IError withAttributesNode(JsonNode attributes);
         }
@@ -210,7 +210,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the error that occurred.
          */
-        interface IError {
+        public interface IError {
             /**
              * Adds the error for the message.
              *

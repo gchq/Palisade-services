@@ -54,13 +54,20 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
-            final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("recordsProcessed") long recordsProcessed,
-            final @JsonProperty("recordsReturned") long recordsReturned) {
-
+            final @JsonProperty("leafResourceId") String leafResourceId) {
         super(userId, resourceId, context, attributes);
-        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Resource ID cannot be null"));
+        this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID cannot be null"));
+    }
 
+    private AuditSuccessMessage(
+            final String userId,
+            final String resourceId,
+            final JsonNode context,
+            final Map<String, Object> attributes,
+            final String leafResourceId,
+            final Integer recordsProcessed,
+            final Integer recordsReturned) {
+        this(userId, resourceId, context, attributes, leafResourceId);
         attributes.put(RECORDS_PROCESSED, recordsProcessed);
         attributes.put(RECORDS_RETURNED, recordsReturned);
     }
@@ -107,7 +114,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -120,7 +127,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -133,7 +140,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -156,7 +163,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-        interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -169,7 +176,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the leaf resource ID for the message.
          */
-        interface ILeafResourceId {
+        public interface ILeafResourceId {
             /**
              * Adds the leaf resource ID for the message.
              *
@@ -182,27 +189,27 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the Number of Records Processed.
          */
-        interface IRecordsProcessed {
+        public interface IRecordsProcessed {
             /**
              * Adds the number of records processed
              *
              * @param recordsProcessed recordsProcessed
              * @return interface  {@link IRecordsReturned} for the next step in the build.
              */
-            IRecordsReturned withNumberOfRecordsProcessed(long recordsProcessed);
+            IRecordsReturned withNumberOfRecordsProcessed(Integer recordsProcessed);
         }
 
         /**
          * Adds the Number of records returned.
          */
-        interface IRecordsReturned {
+        public interface IRecordsReturned {
             /**
              * Adds the Number of records returned.
              *
              * @param recordsReturned the number of records returned.
              * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
              */
-            AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
+            AuditSuccessMessage withNumberOfRecordsReturned(Integer recordsReturned);
         }
     }
 

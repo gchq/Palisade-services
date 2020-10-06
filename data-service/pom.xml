@@ -31,6 +31,10 @@
     <url>https://github.com/gchq/Palisade-services/tree/develop/data-service</url>
     <!--  *********** Aritfact ID ***********    -->
 
+    <properties>
+        <wiremock.version>2.20.0</wiremock.version>
+    </properties>
+
     <dependencies>
         <!-- Spring automatically picks up either gson or jackson
            ~ Hadoop already bundles gson, but an out-of-date version
@@ -76,6 +80,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -273,6 +283,44 @@
                         <goals>
                             <goal>clean</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/unit-tests/java</source>
+                                <source>src/component-tests/java</source>
+                                <source>src/contract-tests/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <filtering>true</filtering>
+                                    <directory>src/unit-tests/resources</directory>
+                                    <directory>src/component-tests/resources</directory>
+                                    <directory>src/contract-tests/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
