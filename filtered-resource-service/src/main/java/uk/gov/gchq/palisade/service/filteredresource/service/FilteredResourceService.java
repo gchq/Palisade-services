@@ -16,17 +16,14 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * The {@link FilteredResourceService} listens for incoming websocket connections, then sets up
  * the {@link WebsocketEventService} to handle the rest of the transaction between client and service.
- *
  * Upon receiving a connection for a websocket with a given token, spawn a process to return results
  * for this token, as well as reporting any errors that may have occurred during processing.
  */
 public interface FilteredResourceService {
 
-    CompletableFuture<Void> spawnProcessorForToken(final String token);
+    WebsocketEventService createWebsocketEventService(final String token);
 
 }
