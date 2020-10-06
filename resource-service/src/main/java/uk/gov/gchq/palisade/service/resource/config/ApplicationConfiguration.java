@@ -61,12 +61,17 @@ public class ApplicationConfiguration {
 
     private final ResourceServiceConfigProperties resourceServiceConfigProperties;
 
+    @Value("${web.client.data-service:data-service}")
+    private String dataServiceName;
+
+    /**
+     * Spring dependency-injection for dependant configs
+     *
+     * @param resourceServiceConfigProperties service-specific config
+     */
     public ApplicationConfiguration(final ResourceServiceConfigProperties resourceServiceConfigProperties) {
         this.resourceServiceConfigProperties = resourceServiceConfigProperties;
     }
-
-    @Value("${web.client.data-service:data-service}")
-    private String dataServiceName;
 
     /**
      * A wrapper around a {@link ResourceConfiguration} that dynamically resolves the configured {@link ConnectionDetail}
