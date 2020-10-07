@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
+import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 @RestController
@@ -48,7 +48,7 @@ public class UserController {
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
     public User getUserRequest(@RequestBody final GetUserRequest request) {
         LOGGER.info("Invoking GetUserRequest: {}", request);
-        return service.getUser(request.userId);
+        return service.getUser(request.userId.getId());
     }
 
     @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")

@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.config.StdUserConfiguration;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
+import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.service.MockUserService;
 
 import java.util.Collections;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.request;
+package uk.gov.gchq.palisade.service.user.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -152,7 +152,7 @@ public final class UserResponse {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -165,7 +165,7 @@ public final class UserResponse {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -178,7 +178,7 @@ public final class UserResponse {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
 
             /**
              * Adds the user context information.
@@ -202,7 +202,7 @@ public final class UserResponse {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user to this message.
              *

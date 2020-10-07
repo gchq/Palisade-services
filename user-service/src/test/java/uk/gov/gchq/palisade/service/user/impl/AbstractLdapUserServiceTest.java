@@ -87,7 +87,7 @@ public class AbstractLdapUserServiceTest {
     public void shouldFetchUserDetailsFromLdap() throws NamingException {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
-        final UserId userId = new UserId().id("user#01");
+        final String userId = "user#01";
         final LdapContext context = mock(LdapContext.class);
 
         final String[] attrNames = {"roles", "auths"};
@@ -248,12 +248,12 @@ public class AbstractLdapUserServiceTest {
         }
 
         @Override
-        protected Set<String> getAuths(final UserId userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException {
+        protected Set<String> getAuths(final String userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException {
             return mock.getAuths(userId, userAttrs, context);
         }
 
         @Override
-        protected Set<String> getRoles(final UserId userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException {
+        protected Set<String> getRoles(final String userId, final Map<String, Object> userAttrs, final LdapContext context) throws NamingException {
             return mock.getRoles(userId, userAttrs, context);
         }
 

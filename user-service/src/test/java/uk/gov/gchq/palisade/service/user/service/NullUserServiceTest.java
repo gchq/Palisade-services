@@ -30,7 +30,7 @@ public class NullUserServiceTest {
     @Test(expected = NoSuchUserIdException.class)
     public void getUser() {
         User user = new User().userId("testUser");
-        nullUserService.getUser(user.getUserId());
+        nullUserService.getUser(user.getUserId().getId());
     }
 
     @Test

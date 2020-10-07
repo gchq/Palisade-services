@@ -23,19 +23,18 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 
 @CacheConfig(cacheNames = {"users"})
 public class UserServiceProxy implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProxy.class);
-    private UserService service;
+    private final UserService service;
 
     public UserServiceProxy(final UserService service) {
         this.service = service;
     }
 
     @Cacheable(key = "#userId")
-    public User getUser(final UserId userId) {
+    public User getUser(final String userId) {
         LOGGER.info("Cache miss for userId {}", userId);
         return service.getUser(userId);
     }
