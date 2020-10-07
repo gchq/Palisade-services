@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 
-import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
 import java.util.Map.Entry;
 
