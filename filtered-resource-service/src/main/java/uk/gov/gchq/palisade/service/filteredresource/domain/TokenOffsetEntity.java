@@ -21,7 +21,7 @@ import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.filteredresource.config.RedisAdditionalConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +31,6 @@ import javax.persistence.Table;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Entity
 @Table(
@@ -71,7 +70,7 @@ public class TokenOffsetEntity implements Serializable {
     public TokenOffsetEntity(final String token, final Long offset) {
         this.token = token;
         this.offset = offset;
-        this.timeToLive = RedisAdditionalConfiguration.getTimeToLiveSeconds("TokenOffsetEntity");
+        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("TokenOffsetEntity");
     }
 
     @Generated

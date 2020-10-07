@@ -37,21 +37,21 @@ import java.util.concurrent.ConcurrentHashMap;
 )
 @Import({RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
 @EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP, basePackages = "uk.gov.gchq.palisade.service.filteredresource")
-@EnableConfigurationProperties(RedisAdditionalProperties.class)
-public class RedisAdditionalConfiguration {
+@EnableConfigurationProperties(RedisTtlProperties.class)
+public class RedisTtlConfiguration {
     protected static final Map<String, Long> KEYSPACE_TTL = new ConcurrentHashMap<>();
 
-    public static Long getTimeToLiveSeconds(String keyspace) {
-        return KEYSPACE_TTL.getOrDefault(keyspace, RedisAdditionalProperties.DEFAULT_TTL.toSeconds());
+    public static Long getTimeToLiveSeconds(final String keyspace) {
+        return KEYSPACE_TTL.getOrDefault(keyspace, RedisTtlProperties.DEFAULT_TTL.toSeconds());
     }
 
     @Bean
-    RedisAdditionalProperties additionalProperties() {
-        return new RedisAdditionalProperties();
+    RedisTtlProperties additionalProperties() {
+        return new RedisTtlProperties();
     }
 
     @Bean
-    Map<String, Long> redisTimeToLive(RedisAdditionalProperties additionalProperties) {
+    Map<String, Long> redisTimeToLive(final RedisTtlProperties additionalProperties) {
         additionalProperties.getTimeToLive().forEach((key, value) -> KEYSPACE_TTL.put(key, value.toSeconds()));
         return KEYSPACE_TTL;
     }
