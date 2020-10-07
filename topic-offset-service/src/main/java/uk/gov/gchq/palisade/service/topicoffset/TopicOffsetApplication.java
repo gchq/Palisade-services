@@ -20,18 +20,15 @@ import akka.stream.javadsl.RunnableGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
-import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetController;
 
 import java.util.Collection;
 import java.util.HashSet;

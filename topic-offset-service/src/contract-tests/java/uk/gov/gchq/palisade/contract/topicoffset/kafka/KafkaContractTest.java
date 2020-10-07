@@ -235,7 +235,7 @@ class KafkaContractTest {
     void testRestEndpoint() {
         // Given - we are already listening to the service input
         ConsumerSettings<String, TopicOffsetRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.ruleKeyDeserializer(), SerDesConfig.ruleValueDeserializer())
+                .create(akkaActorSystem, SerDesConfig.maskedResourceKeyDeserializer(), SerDesConfig.maskedResourceValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -247,7 +247,7 @@ class KafkaContractTest {
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<TopicOffsetRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity("/api/mask", entity, Void.class);
+        ResponseEntity<Void> response = restTemplate.postForEntity("/api/offset", entity, Void.class);
 
         // Then - the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);

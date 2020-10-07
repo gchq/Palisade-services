@@ -16,13 +16,29 @@
 package uk.gov.gchq.palisade.service.topicoffset.model;
 
 /**
- * Stores the expected header key for Tokens.  Since the content of tokens are strings, there is no need for further
- * implementation.
+ * Simply stores the expected header key for Tokens
+ * Since the content of tokens are strings, there is no need for further implementation
+ * If desired, this could extend eg. UUID if more meaningful Token processing was desired
  */
 public final class Token {
-    public static final String HEADER = "X-Request-Token";
+    public static final String HEADER = "x-request-token";
 
     private Token() {
+        // Tokens are just strings, no need to instantiate a class for them
     }
+
+    /**
+     * Map a token to a partition, given the maximum number of partitions on the topic.
+     * This ensures that all messages in a single request remain ordered, but allows for scaling
+     * across separate requests.
+     *
+     * @param token      the token string
+     * @param partitions the maximum number of partitions on the topic
+     * @return a partition number for the token, between 0 (inclusive) and partitions (exclusive)
+     */
+    public static int toPartition(final String token, final int partitions) {
+        return Math.floorMod(token.hashCode(), partitions);
+    }
+
 }
 

@@ -52,7 +52,7 @@ public class KafkaTestConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTestConfiguration.class);
 
     private final List<NewTopic> topics = List.of(
-            new NewTopic("topic-offset-service", 3, (short) 1),
+            new NewTopic("masked-resource", 3, (short) 1),
             new NewTopic("masked-resource-offset", 3, (short) 1),
             new NewTopic("error", 3, (short) 1));
 

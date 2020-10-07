@@ -23,7 +23,6 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
@@ -50,7 +49,7 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      * @return the topic offset response message object
      */
     @Override
-    public TopicOffsetResponse createTopicOffsetResponse(Long offset) {
+    public TopicOffsetResponse createTopicOffsetResponse(final Long offset) {
         return TopicOffsetResponse.Builder.create().withOffset(offset);
     }
 }

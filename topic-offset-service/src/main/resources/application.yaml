@@ -13,6 +13,15 @@
 # limitations under the License.
 
 spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+
+---
+
+spring:
+  profiles: default-config
   application:
     name: topic-offset-service
   output:
@@ -36,3 +45,7 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+logging:
+  level:
+    org.apache.kafka: WARN

@@ -1,5 +1,7 @@
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +25,12 @@ class SimpleTopicOffsetServiceTest {
     private final SimpleTopicOffsetService simpleTopicOffsetService = new SimpleTopicOffsetService();
 
     public static final String REQUEST_TOKEN = "test-request-token";
-    private Map<String, String> headers;
+    private Headers headers;
 
     @BeforeEach
     void startUP() {
-        headers = new HashMap<>();
-        headers.put(Token.HEADER, REQUEST_TOKEN);
+        headers = new RecordHeaders();
+        headers.add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
 
     /**
@@ -37,7 +39,7 @@ class SimpleTopicOffsetServiceTest {
      */
     @Test
     void testTopicOffsetServiceWithAStart() {
-        headers.put(StreamMarker.HEADER, StreamMarker.START.toString());
+        headers.add(StreamMarker.HEADER, StreamMarker.START.toString().getBytes());
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isTrue();
     }
 
@@ -47,7 +49,7 @@ class SimpleTopicOffsetServiceTest {
      */
     @Test
     void testTopicOffsetServiceWithAnEnd() {
-        headers.put(StreamMarker.HEADER, StreamMarker.END.toString());
+        headers.add(StreamMarker.HEADER, StreamMarker.END.toString().getBytes());
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
     }
 
