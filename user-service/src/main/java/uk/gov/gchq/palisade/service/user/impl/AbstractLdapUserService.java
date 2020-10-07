@@ -175,7 +175,7 @@ public abstract class AbstractLdapUserService implements UserService {
         final Map<String, Object> attributes = new HashMap<>();
         final String[] requestAttrs = getAttributeNames();
         if (null != requestAttrs && requestAttrs.length > 0) {
-            final Attributes userAttrs = context.getAttributes(formatInput(userId.getId()));
+            final Attributes userAttrs = context.getAttributes(formatInput(userId.getId()), requestAttrs);
             if (null != userAttrs) {
                 for (final String requestAttr : requestAttrs) {
                     final Attribute attribute = userAttrs.get(requestAttr);
