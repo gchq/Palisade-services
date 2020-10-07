@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
@@ -79,7 +80,7 @@ public class AkkaRunnableGraph {
                 // Get the user from the userId, keeping track of original message and token
                 .map((Pair<CommittableMessage<String, UserRequest>, String> messageAndToken) -> {
                     UserRequest request = messageAndToken.first().record().value();
-                    User user = service.getUser(request.getUserId());
+                    User user = service.getUser(new UserId().id(request.getUserId()));
                     return new Tuple3<>(messageAndToken.first(), messageAndToken.second(), UserResponse.Builder.create(request).withUser(user));
                 })
 

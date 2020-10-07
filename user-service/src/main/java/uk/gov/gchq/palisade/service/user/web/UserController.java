@@ -48,7 +48,7 @@ public class UserController {
     @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
     public User getUserRequest(@RequestBody final GetUserRequest request) {
         LOGGER.info("Invoking GetUserRequest: {}", request);
-        return service.getUser(request.userId.getId());
+        return service.getUser(request.userId);
     }
 
     @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")

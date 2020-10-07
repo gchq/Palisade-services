@@ -39,7 +39,7 @@ public interface UserService extends Service {
      * @return a {@link User} with the user details
      * @throws NoSuchUserIdException if the {@link UserId} could not be found
      */
-    User getUser(final String userId);
+    User getUser(final UserId userId);
 
     /**
      * Adds the user to the {@link UserService}. The {@link User} should be fully populated with all the necessary

@@ -23,6 +23,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 
 @CacheConfig(cacheNames = {"users"})
 public class UserServiceProxy implements UserService {
@@ -34,7 +35,7 @@ public class UserServiceProxy implements UserService {
     }
 
     @Cacheable(key = "#userId")
-    public User getUser(final String userId) {
+    public User getUser(final UserId userId) {
         LOGGER.info("Cache miss for userId {}", userId);
         return service.getUser(userId);
     }
