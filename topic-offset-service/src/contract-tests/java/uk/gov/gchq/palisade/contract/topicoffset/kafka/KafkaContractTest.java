@@ -57,7 +57,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.topicoffset.kafka.old.ContractTestData;
+import uk.gov.gchq.palisade.contract.topicoffset.ContractTestData;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 import uk.gov.gchq.palisade.service.topicoffset.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
