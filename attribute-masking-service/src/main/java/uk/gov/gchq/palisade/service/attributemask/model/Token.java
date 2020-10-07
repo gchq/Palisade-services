@@ -24,6 +24,10 @@ package uk.gov.gchq.palisade.service.attributemask.model;
 public final class Token {
     public static final String HEADER = "x-request-token";
 
+    private Token() {
+        // Tokens are just strings, no need to instantiate a class for them
+    }
+
     /**
      * Map a token to a partition, given the maximum number of partitions on the topic.
      * This ensures that all messages in a single request remain ordered, but allows for scaling
@@ -37,7 +41,4 @@ public final class Token {
         return Math.floorMod(token.hashCode(), partitions);
     }
 
-    private Token() {
-        // Tokens are just strings, no need to instantiate a class for them
-    }
 }
