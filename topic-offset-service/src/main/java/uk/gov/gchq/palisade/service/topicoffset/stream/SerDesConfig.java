@@ -64,11 +64,11 @@ public final class SerDesConfig {
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetRequest)
      */
     public static Serializer<TopicOffsetRequest> maskedResourceValueSerializer() {
-        return (String ignored, TopicOffsetRequest TopicOffsetRequest) -> {
+        return (String ignored, TopicOffsetRequest topicOffsetRequest) -> {
             try {
-                return MAPPER.writeValueAsBytes(TopicOffsetRequest);
+                return MAPPER.writeValueAsBytes(topicOffsetRequest);
             } catch (IOException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + TopicOffsetRequest.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + topicOffsetRequest.toString(), e);
             }
         };
     }
@@ -88,11 +88,11 @@ public final class SerDesConfig {
      * @return an appropriate value deserialiser for the topic's message content (TopicOffsetRequest)
      */
     public static Deserializer<TopicOffsetRequest> maskedResourceValueDeserializer() {
-        return (String ignored, byte[] TopicOffsetRequest) -> {
+        return (String ignored, byte[] topicOffsetRequest) -> {
             try {
-                return MAPPER.readValue(TopicOffsetRequest, TopicOffsetRequest.class);
+                return MAPPER.readValue(topicOffsetRequest, TopicOffsetRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(TopicOffsetRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(topicOffsetRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -112,11 +112,11 @@ public final class SerDesConfig {
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetResponse)
      */
     public static Serializer<TopicOffsetResponse> maskedResourceOffsetValueSerializer() {
-        return (String ignored, TopicOffsetResponse TopicOffsetResponse) -> {
+        return (String ignored, TopicOffsetResponse topicOffsetResponse) -> {
             try {
-                return MAPPER.writeValueAsBytes(TopicOffsetResponse);
+                return MAPPER.writeValueAsBytes(topicOffsetResponse);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + TopicOffsetResponse.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + topicOffsetResponse.toString(), e);
             }
         };
     }
