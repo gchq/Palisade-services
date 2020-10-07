@@ -27,9 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
-import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
-import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import java.util.Map;
 
@@ -40,22 +37,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class FilteredResourceController {
-    private final ErrorEventService errorEventService;
-    private final OffsetEventService offsetEventService;
-    private final FilteredResourceService filteredResourceService;
-
-    /**
-     * Default constructor will be autowired by spring
-     *
-     * @param errorEventService    the error-reporter-daemon to push REST requests to
-     * @param offsetEventService      the topic-token-offset-daemon to push REST requests to
-     * @param filteredResourceService the filtered-resource-service to push REST requests to
-     */
-    public FilteredResourceController(final ErrorEventService errorEventService, final OffsetEventService offsetEventService, final FilteredResourceService filteredResourceService) {
-        this.errorEventService = errorEventService;
-        this.offsetEventService = offsetEventService;
-        this.filteredResourceService = filteredResourceService;
-    }
 
     /**
      * REST endpoint for the error reporter subsystem

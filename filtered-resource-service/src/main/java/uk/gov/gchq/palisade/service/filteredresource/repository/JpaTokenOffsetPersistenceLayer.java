@@ -31,13 +31,20 @@ public class JpaTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLay
     private final TokenOffsetRepository repository;
     private final Executor executor;
 
+    /**
+     * Construct a new Jpa-style persistence layer from a CrudRepository and async executor.
+     * This simply wraps the repository methods with {@link CompletableFuture}s
+     *
+     * @param repository the CrudRepository of tokens and their kafka offsets
+     * @param executor an async executor to run the futures with
+     */
     public JpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository, final Executor executor) {
         this.repository = repository;
         this.executor = executor;
     }
 
     @Override
-    public CompletableFuture<Void> putOffset(final String token, final Long offset) {
+    public CompletableFuture<Void> putOffsetIfAbsent(final String token, final Long offset) {
         return findOffset(token)
                 .thenComposeAsync((Optional<Long> existing) -> existing
                                 .map(ignored -> DONE)

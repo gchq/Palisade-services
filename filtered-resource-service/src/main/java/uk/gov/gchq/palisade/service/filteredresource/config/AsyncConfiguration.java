@@ -25,6 +25,9 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+/**
+ * Spring bean configuration and dependency injection graph for setting up async {@link java.util.concurrent.Executor}s
+ */
 @Configuration
 @EnableAsync
 @EnableConfigurationProperties({AsyncConfigProperties.class})
@@ -33,6 +36,12 @@ public class AsyncConfiguration implements AsyncConfigurer {
 
     private final AsyncConfigProperties asyncConfigProperties;
 
+    /**
+     * Autowired constructor for injecting dependant bean.
+     * This can't be done through {@link Bean} method arguments as we are implementing the AsyncConfigurer interface.
+     *
+     * @param asyncConfigProperties spring config for async core pool size
+     */
     public AsyncConfiguration(final AsyncConfigProperties asyncConfigProperties) {
         this.asyncConfigProperties = asyncConfigProperties;
     }

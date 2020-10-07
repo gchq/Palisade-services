@@ -24,6 +24,12 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
  */
 public interface FilteredResourceService {
 
+    /**
+     * Create a new instance of a {@link WebsocketEventService} to serve the client with the given token
+     *
+     * @param token the client's token for their request
+     * @return a new {@link WebsocketEventService} to handle the rest of the interaction
+     */
     WebsocketEventService createWebsocketEventService(final String token);
 
 }

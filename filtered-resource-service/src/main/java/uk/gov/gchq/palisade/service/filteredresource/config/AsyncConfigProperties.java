@@ -20,20 +20,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+/**
+ * Spring configuration for async executor properties - core pool size etc.
+ */
 @ConfigurationProperties(prefix = "async")
 public class AsyncConfigProperties {
-    private int webMvcTimeout;
     private int corePoolSize;
-
-    @Generated
-    public int getWebMvcTimeout() {
-        return webMvcTimeout;
-    }
-
-    @Generated
-    public void setWebMvcTimeout(final int webMvcTimeout) {
-        this.webMvcTimeout = webMvcTimeout;
-    }
 
     @Generated
     public int getCorePoolSize() {

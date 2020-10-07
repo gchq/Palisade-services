@@ -24,6 +24,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Spring configuration for redis keyspace ttl properties - duration in seconds per keyspace name.
+ */
 @ConfigurationProperties("spring.data.redis.repositories")
 public class RedisTtlProperties {
     static final Duration DEFAULT_TTL = Duration.ofDays(1);

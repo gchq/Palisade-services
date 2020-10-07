@@ -29,6 +29,10 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Additional Redis configuration to set time-to-live on a per-keyspace basis.
+ * This must still be enabled in the domain entity with the {@link org.springframework.data.redis.core.TimeToLive} annotation.
+ */
 @Configuration
 @ConditionalOnProperty(
         prefix = "spring.data.redis.repositories",
@@ -41,6 +45,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RedisTtlConfiguration {
     protected static final Map<String, Long> KEYSPACE_TTL = new ConcurrentHashMap<>();
 
+    /**
+     * Get the time-to-live in seconds for a given keyspace name
+     *
+     * @param keyspace the name of the redis keyspace
+     * @return the configured time-to-live value for that keyspace in seconds
+     */
     public static Long getTimeToLiveSeconds(final String keyspace) {
         return KEYSPACE_TTL.getOrDefault(keyspace, RedisTtlProperties.DEFAULT_TTL.toSeconds());
     }

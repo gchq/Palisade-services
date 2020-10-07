@@ -24,10 +24,32 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface TokenOffsetPersistenceLayer {
 
-    CompletableFuture<Void> putOffset(final String token, final Long offset);
+    /**
+     * Put a token and its kafka offset into persistence if one does not exist.
+     * If one does exist, it will not be overridden.
+     *
+     * @param token  the unique request token
+     * @param offset the kafka commit offset for the start of results on the masked-resource input-topic
+     * @return a future representing the completion of the async put operation
+     */
+    CompletableFuture<Void> putOffsetIfAbsent(final String token, final Long offset);
 
+    /**
+     * Put a token and its kafka offset into persistence, overwriting any that already exists for the token.
+     *
+     * @param token  the unique request token
+     * @param offset the kafka commit offset for the start of results on the masked-resource input-topic
+     * @return a future representing the completion of the async put operation
+     */
     CompletableFuture<Void> overwriteOffset(final String token, final Long offset);
 
+    /**
+     * Find the offset of a given token if it is in the store.
+     * Returns an {@link Optional}, empty if the token was not found, otherwise containing the offset
+     *
+     * @param token the unique request token
+     * @return a future representing the completion of the async find operation
+     */
     CompletableFuture<Optional<Long>> findOffset(final String token);
 
 }

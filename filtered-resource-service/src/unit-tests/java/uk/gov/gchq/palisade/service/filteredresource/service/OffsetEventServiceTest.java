@@ -33,6 +33,6 @@ class OffsetEventServiceTest {
         service.storeTokenOffset("token", 1L);
 
         // Then
-        Mockito.verify(persistenceLayer, Mockito.atLeastOnce()).putOffset("token", 1L);
+        Mockito.verify(persistenceLayer, Mockito.atLeastOnce()).putOffsetIfAbsent("token", 1L);
     }
 }
