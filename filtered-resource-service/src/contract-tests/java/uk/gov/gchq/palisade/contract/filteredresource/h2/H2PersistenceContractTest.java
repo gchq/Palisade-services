@@ -35,14 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class H2PersistenceContractTest {
 
     @Autowired
-    private OffsetEventService controller;
+    private OffsetEventService service;
 
     @Autowired
     private TokenOffsetRepository tokenOffsetRepository;
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
+        assertThat(service).isNotNull();
         assertThat(tokenOffsetRepository).isNotNull();
     }
 
@@ -53,7 +53,7 @@ class H2PersistenceContractTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        controller.storeTokenOffset(token, request.queuePointer);
+        service.storeTokenOffset(token, request.queuePointer).join();
 
         // Then the offset is persisted in redis
         assertThat(tokenOffsetRepository.findByToken(token)).isPresent();

@@ -33,8 +33,8 @@ import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
@@ -47,7 +47,7 @@ public class ApplicationConfiguration {
     @Bean
     TokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(
             final TokenOffsetRepository repository,
-            final @Qualifier("applicationTaskExecutor") Executor executor) {
+            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
         return new JpaTokenOffsetPersistenceLayer(repository, executor);
     }
 
@@ -64,11 +64,11 @@ public class ApplicationConfiguration {
 
     // TODO: Replace this with a proper filtered resource service (websockets etc.)
     @Bean
-    FilteredResourceService loggingFilteredResourceService() {
-        return (String token) -> CompletableFuture.supplyAsync(() -> {
-            LOGGER.info("Spawned a logging process for token {}", token);
-            return null;
-        });
+    FilteredResourceService loggingFilteredResourceService(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return (String token) -> {
+            LOGGER.info("Ignoring token {} since there's no real websocketEventService", token);
+            return new WebsocketEventService(persistenceLayer);
+        };
     }
 
     // TODO: Replace this with a proper error handling mechanism (kafka queues etc.)

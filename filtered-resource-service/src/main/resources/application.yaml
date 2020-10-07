@@ -40,3 +40,6 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+async:
+  corePoolSize: 6

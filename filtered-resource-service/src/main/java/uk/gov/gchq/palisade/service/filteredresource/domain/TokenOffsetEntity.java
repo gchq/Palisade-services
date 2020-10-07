@@ -17,9 +17,11 @@ package uk.gov.gchq.palisade.service.filteredresource.domain;
 
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisAdditionalConfiguration;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,6 +31,7 @@ import javax.persistence.Table;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 @Table(
@@ -37,7 +40,7 @@ import java.util.Objects;
                 @Index(name = "message_token", columnList = "message_token", unique = true)
         }
 )
-@RedisHash("TokenOffsetEntity")
+@RedisHash(value = "TokenOffsetEntity", timeToLive = 6000L)
 public class TokenOffsetEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -49,6 +52,9 @@ public class TokenOffsetEntity implements Serializable {
 
     @Column(name = "commit_offset", columnDefinition = "long")
     protected Long offset;
+
+    @TimeToLive
+    protected Long timeToLive;
 
     public TokenOffsetEntity() {
         // no-args constructor
@@ -65,6 +71,7 @@ public class TokenOffsetEntity implements Serializable {
     public TokenOffsetEntity(final String token, final Long offset) {
         this.token = token;
         this.offset = offset;
+        this.timeToLive = RedisAdditionalConfiguration.getTimeToLiveSeconds("TokenOffsetEntity");
     }
 
     @Generated
@@ -75,6 +82,11 @@ public class TokenOffsetEntity implements Serializable {
     @Generated
     public Long getOffset() {
         return offset;
+    }
+
+    @Generated
+    public Long getTimeToLive() {
+        return timeToLive;
     }
 
     @Override

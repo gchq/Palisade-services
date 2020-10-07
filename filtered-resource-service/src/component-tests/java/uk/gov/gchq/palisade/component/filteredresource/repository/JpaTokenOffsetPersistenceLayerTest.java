@@ -27,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
@@ -34,7 +35,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepos
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {FilteredResourceApplication.class, ApplicationConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
+@ContextConfiguration(classes = {FilteredResourceApplication.class, ApplicationConfiguration.class, AsyncConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("dbtest")
 class JpaTokenOffsetPersistenceLayerTest {
@@ -56,7 +57,7 @@ class JpaTokenOffsetPersistenceLayerTest {
         persistenceLayer.overwriteOffset(
                 ApplicationTestData.REQUEST_TOKEN,
                 ApplicationTestData.OFFSET
-        );
+        ).join();
 
         // when all entities are retrieved from the repository
         Iterable<TokenOffsetEntity> authorisedRequests = offsetsRepository.findAll();

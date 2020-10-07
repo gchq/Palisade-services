@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.redis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,9 +31,15 @@ import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.NONE)
+@SpringBootTest(
+        classes = FilteredResourceApplication.class,
+        webEnvironment = WebEnvironment.NONE,
+        properties = "spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"
+)
 @Import(RedisTestConfiguration.class)
 @ActiveProfiles("redis")
 class RedisPersistenceContractTest {
@@ -52,16 +57,30 @@ class RedisPersistenceContractTest {
     }
 
     @Test
-    void testTopicOffsetsAreStoredInRedis() throws JsonProcessingException {
+    void testTopicOffsetsAreStoredInRedis() {
         // Given we have some request data
         String token = ContractTestData.REQUEST_TOKEN;
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        service.storeTokenOffset(token, request.queuePointer);
+        service.storeTokenOffset(token, request.queuePointer).join();
 
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys(TokenOffsetEntity.class.getSimpleName())).hasSize(1);
+        assertThat(redisTemplate.keys("TokenOffsetEntity:" + token)).hasSize(1);
+    }
+
+    @Test
+    void testTopicOffsetsAreEvictedAfterTtlExpires() throws InterruptedException {
+        // Given we have some request data
+        String token = ContractTestData.REQUEST_TOKEN;
+        TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
+
+        // When a request is made to store the topic offset for a given token
+        service.storeTokenOffset(token, request.queuePointer).join();
+        TimeUnit.SECONDS.sleep(1);
+
+        // Then the offset is persisted in redis
+        assertThat(redisTemplate.keys("TokenOffsetEntity:" + token)).isEmpty();
     }
 
 }

@@ -36,5 +36,6 @@ public class FilteredResourceApplication {
                 .web(WebApplicationType.SERVLET)
                 .run(args);
     }
+
 }
 
