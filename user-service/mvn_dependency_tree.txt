@@ -73,6 +73,7 @@ uk.gov.gchq.palisade:user-service:jar:0.5.0-SNAPSHOT
 |     |  \- io.netty:netty-codec:jar:4.1.50.Final:compile
 |     +- io.netty:netty-transport:jar:4.1.50.Final:compile
 |     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
+|        \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 +- org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:jar:2.2.2.RELEASE:compile
 |  +- org.springframework.cloud:spring-cloud-starter:jar:2.2.2.RELEASE:compile
 |  |  \- org.springframework.security:spring-security-rsa:jar:1.0.9.RELEASE:compile

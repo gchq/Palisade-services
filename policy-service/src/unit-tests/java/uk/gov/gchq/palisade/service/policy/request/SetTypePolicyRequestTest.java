@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +27,7 @@ import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class SetTypePolicyRequestTest {
@@ -53,7 +53,10 @@ public class SetTypePolicyRequestTest {
         final Iterable<String> iterable = node::fieldNames;
 
         //That
-        Assertions.assertThat(iterable).as("SetTypePolicyRequest not parsed to json").isNotEmpty().doesNotContainNull().contains("id", "type", "policy");
+        assertThat(iterable).as("SetTypePolicyRequest not parsed to json")
+                .isNotEmpty()
+                .doesNotContainNull()
+                .contains("id", "type", "policy");
     }
 
     @Test
@@ -68,9 +71,9 @@ public class SetTypePolicyRequestTest {
 
         // Then
         assertAll("DeserialisingComparedToObject",
-                () -> Assertions.assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
+                () -> assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
                         .isEqualTo(expected.getType()),
-                () -> Assertions.assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
+                () -> assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
                         .isEqualTo(expected.getPolicy().getOwner())
         );
     }
