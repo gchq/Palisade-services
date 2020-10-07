@@ -15,9 +15,15 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 
-import java.util.Map;
+import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
+
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
@@ -32,11 +38,19 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
      * @return boolean true if there is a start marker in the header.
      */
     @Override
-    public boolean isOffsetForTopic(final Map<String, String> headers) {
-        boolean found = false;
-        if (headers.containsKey(StreamMarker.HEADER) && (headers.get(StreamMarker.HEADER).equals(StreamMarker.START.toString()))) {
-            found = true;
-        }
-      return found;
+    public boolean isOffsetForTopic(final Headers headers) {
+        Header x = headers.lastHeader(StreamMarker.HEADER);
+        return ((x != null) && (Arrays.equals(x.value(), StreamMarker.START.toString().getBytes(Charset.defaultCharset()))));
+    }
+
+    /**
+     * Given an offset, calls the TopicOffsetResponse builder to create a response message
+     *
+     * @param offset the offset of the start marker in the topic
+     * @return the topic offset response message object
+     */
+    @Override
+    public TopicOffsetResponse createTopicOffsetResponse(Long offset) {
+        return TopicOffsetResponse.Builder.create().withOffset(offset);
     }
 }

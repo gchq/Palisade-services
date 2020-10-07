@@ -15,7 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.topicoffset.service;
 
-import java.util.Map;
+import org.apache.kafka.common.header.Headers;
+
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 /**
  * Service contract for topic-offset-service.  Implementations are expected to return true when the condition are met
@@ -29,6 +31,15 @@ public interface TopicOffsetService {
      * @param headers map of headers
      * @return boolean if the conditions are met.
      */
-    boolean isOffsetForTopic(Map<String, String> headers);
+    boolean isOffsetForTopic(Headers headers);
+
+
+    /**
+     * Given an offset, calls the TopicOffsetResponse builder to create a response message
+     *
+     * @param offset the offset of the start marker in the topic
+     * @return the topic offset response
+     */
+    TopicOffsetResponse createTopicOffsetResponse(Long offset);
 }
 

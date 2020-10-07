@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
@@ -46,7 +48,6 @@ import java.util.stream.Collectors;
  * then be used to optimise the start up client connections by the results-service.
  */
 @SpringBootApplication
-@ComponentScan(basePackageClasses = TopicOffsetController.class)
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class TopicOffsetApplication {
 
@@ -78,7 +79,9 @@ public class TopicOffsetApplication {
      * @param args required input for the main method
      */
     public static void main(final String[] args) {
-        SpringApplication.run(TopicOffsetApplication.class, args);
+        LOGGER.debug("TopicOffsetApplication started with: {}", (Object) args);
+        new SpringApplicationBuilder(TopicOffsetApplication.class).web(WebApplicationType.SERVLET)
+                .run(args);
     }
 
     /**

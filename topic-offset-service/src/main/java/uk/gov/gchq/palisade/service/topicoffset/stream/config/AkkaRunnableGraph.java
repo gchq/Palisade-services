@@ -17,16 +17,22 @@
 package uk.gov.gchq.palisade.service.topicoffset.stream.config;
 
 import akka.Done;
+import akka.japi.Pair;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
+import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerMessage.Envelope;
+import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
+import akka.stream.ActorAttributes;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -45,7 +51,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final int PARALLELISM = 1;
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -62,37 +67,24 @@ public class AkkaRunnableGraph {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
-        // Read messages from the stream source
-//        return source
-//                // Extract token from message, keeping track of original message
-//                .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
-//
-//                // Store authorised request in persistence, keeping track of original message and token
-//                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, TopicOffsetRequest>, String> messageAndToken) -> {
-//                    TopicOffsetRequest request = messageAndToken.first().record().value();
-//                    return service.storeAuthorisedRequest(messageAndToken.second(), request)
-//                            .thenApply(ignored -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), request));
-//                })
-//
-//                // Mask resource attributes, keeping track of original message and token
-//                .map(messageTokenRequest -> new Tuple3<>(messageTokenRequest.t1(), messageTokenRequest.t2(), service.maskResourceAttributes(messageTokenRequest.t3())))
-//
-//                // Build producer record, copying the partition, keeping track of original message
-//                .map((Tuple3<CommittableMessage<String, TopicOffsetRequest>, String, TopicOffsetResponse> messageTokenResponse) -> {
-//                    ConsumerRecord<String, TopicOffsetRequest> requestRecord = messageTokenResponse.t1().record();
-//                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-//                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
-//                })
-//
-//                // Build producer message, applying the committable pass-thru consuming the original message
-//                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
-//
-//                // Send errors to supervisor
-//                .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
-//
-//                // Materialize the stream, sending messages to the sink
-//                .toMat(sink, Consumer::createDrainingControl);
-        return null;
+        return source
+                .filter(committableMessage -> service.isOffsetForTopic(committableMessage.record().headers()))
+
+                .map(committableMessage -> new Pair<>(committableMessage, service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset())))
+
+                // Build producer record, copying the partition, keeping track of original message
+                .map((Pair<CommittableMessage<String, TopicOffsetRequest>, TopicOffsetResponse> messageAndResponse) -> {
+                    ConsumerRecord<String, ?> requestRecord = messageAndResponse.first().record();
+                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
+                    return new Pair<>(messageAndResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageAndResponse.second(), requestRecord.headers()));
+                })
+
+                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
+
+                // Send errors to supervisor
+                .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
+
+                .toMat(sink, Consumer::createDrainingControl);
     }
 
 }

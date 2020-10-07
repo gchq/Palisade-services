@@ -19,6 +19,7 @@ import akka.Done;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Headers;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,8 +55,6 @@ public class TopicOffsetController {
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
 
-    private static final long TEMP = 123L;  //temp value until I get the offset code in place
-
     public TopicOffsetController(final TopicOffsetService topicOffsetService,
                                  final ErrorHandlingService errorHandler,
                                  final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink,
@@ -68,7 +67,6 @@ public class TopicOffsetController {
         this.materializer = materializer;
     }
 
-
     /**
      * Takes the incoming RESTful request and evaluates if it is a start of a set of response messages for a specific
      * request.  If it is, a response message is forwarded that will contain the commit offset associated with this start
@@ -80,7 +78,7 @@ public class TopicOffsetController {
      */
     @PostMapping(value = "/topicOffset", consumes = "application/json", produces = "application/json")
     public ResponseEntity<TopicOffsetResponse> serviceTopicOffset(
-            final @RequestHeader Map<String, String> headers,
+            final @RequestHeader Headers headers,
             final @RequestBody(required = false) TopicOffsetRequest request) {
 
         TopicOffsetResponse responseBody = null;
@@ -92,7 +90,6 @@ public class TopicOffsetController {
                 responseHeaders = new HttpHeaders();
                 responseHeaders.add(StreamMarker.HEADER, StreamMarker.START.toString());
                 responseHeaders.add(Token.HEADER, headers.get(Token.HEADER));
-                responseBody = TopicOffsetResponse.Builder.create().withOffset(TEMP);
             }
 
         } catch (Exception ex) {
