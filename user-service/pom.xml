@@ -37,6 +37,10 @@
         <alpakka.version>2.0.4</alpakka.version>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
+        <!-- Testing configuration -->
+        <unit-test.skip>false</unit-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
@@ -145,11 +149,6 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
             <version>${alpakka.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
