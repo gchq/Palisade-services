@@ -16,31 +16,24 @@
 
 package uk.gov.gchq.palisade.contract.audit.rest;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = AuditApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 public class RestControllerContractTest extends AuditTestCommon {
 
@@ -57,25 +50,22 @@ public class RestControllerContractTest extends AuditTestCommon {
     );
 
     @Test
-    public void contextLoads() {
-        assertNotNull(serviceMap);
-        assertNotEquals(serviceMap, Collections.emptyMap());
+    public void testContextLoads() {
+        assertThat(serviceMap).isNotNull();
+        assertThat(serviceMap).isNotEmpty();
     }
 
     @Test
-    public void isUp() {
+    public void testIsUp() {
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        assertThat(health.getStatusCode(), is(equalTo(HttpStatus.OK)));
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void componentTest() {
+    public void testComponent() {
         requests.forEach(request -> {
             Boolean response = restTemplate.postForObject("/audit", request, Boolean.class);
-
-            assertThat(response, is(equalTo(true)));
+            assertThat(response).isTrue();
         });
     }
-
 }

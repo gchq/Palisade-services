@@ -15,14 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.results.request;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -35,7 +33,6 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(SpringRunner.class)
 @JsonTest
 public class ResultsRequestTest {
 
@@ -50,7 +47,6 @@ public class ResultsRequestTest {
      */
     @Test
     public void testResultsRequestSerialisingAndDeserialising() throws IOException {
-
         Context context = new Context().purpose("testContext");
         LeafResource resource = new FileResource().id("/test/file.format")
                 .type("java.lang.String")
@@ -82,7 +78,7 @@ public class ResultsRequestTest {
                         () -> assertThat(resultsRequest.getResource()).isEqualTo((resultsRequestObject.getResource()))
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(resultsRequest).isEqualTo(resultsRequestObject)
+                        () -> assertThat(resultsRequestObject).usingRecursiveComparison().isEqualTo(resultsRequest)
                 )
         );
     }

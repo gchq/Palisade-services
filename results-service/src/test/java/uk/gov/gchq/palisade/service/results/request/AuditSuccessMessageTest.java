@@ -15,14 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.results.request;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
 
@@ -36,10 +34,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(SpringRunner.class)
 @JsonTest
 public class AuditSuccessMessageTest {
-
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
@@ -53,7 +49,6 @@ public class AuditSuccessMessageTest {
      */
     @Test
     public void testSerialiseAuditSuccessMessageToJson() throws IOException {
-
         Context context = new Context().purpose("testContext");
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();
@@ -89,7 +84,7 @@ public class AuditSuccessMessageTest {
                         () -> assertThat(auditSuccessMessage.getLeafResourceId()).isEqualTo(auditSuccessMessageObject.getLeafResourceId())
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessage.equals(auditSuccessMessageObject))
+                        () -> assertThat(auditSuccessMessageObject).usingRecursiveComparison().isEqualTo(auditSuccessMessage)
                 )
         );
     }
