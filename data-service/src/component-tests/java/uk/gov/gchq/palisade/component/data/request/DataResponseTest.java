@@ -44,6 +44,14 @@ class DataResponseTest {
     @Autowired
     private JacksonTester<DataResponse> jacksonTester;
 
+    /**
+     * Grouped assertion test
+     * Create the object with the builder and then convert to the Json equivalent.
+     * Takes the JSON Object, deserialises and tests against the original Object
+     *
+     * @throws IOException throws if the {@link DataResponse} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or deserialise the string.
+     */
     @Test
     void testGroupedDependantDataResponseSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
@@ -81,7 +89,7 @@ class DataResponseTest {
                         () -> assertThat(dataResponseMessageObject.getRules()).isEqualTo(dataResponse.getRules())
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataResponseMessageObject).isEqualTo(dataResponse)
+                        () -> assertThat(dataResponseMessageObject).usingRecursiveComparison().isEqualTo(dataResponse)
                 )
         );
     }
