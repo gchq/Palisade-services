@@ -21,9 +21,9 @@ import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.test.PathUtils;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 
 import uk.gov.gchq.palisade.resource.ChildResource;
@@ -51,11 +51,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HadoopResourceServiceTest {
 
@@ -89,7 +86,7 @@ public class HadoopResourceServiceTest {
         return type + "_" + name + "." + format;
     }
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException, URISyntaxException {
         if (IS_WINDOWS) {
             System.setProperty("hadoop.home.dir", Paths.get("./src/test/resources/hadoop-3.2.1").toAbsolutePath().normalize().toString());
@@ -120,7 +117,7 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void getResourcesByIdTest() {
+    public void testGetResourcesById() {
         //given
 
         //when
@@ -128,26 +125,25 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = Collections.singleton(resource1);
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesById.collect(Collectors.toSet())).isEqualTo(expected);
     }
 
     @Test
-    public void shouldGetResourcesOutsideOfScope() throws URISyntaxException {
+    public void testShouldGetResourcesOutsideOfScope() throws URISyntaxException {
         //given
 
         //when
         final URI found = new URI(HDFS, "/unknownDir" + id1.getPath(), null);
-        try {
-            resourceService.getResourcesById(found.toString());
-            fail("exception expected");
-        } catch (Exception e) {
-            //then
-            assertThat(String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)), equalTo(e.getMessage()));
-        }
+
+        Exception expectedError = assertThrows(URISyntaxException.class, () -> resourceService.getResourcesById(found.toString()), "expect a URISyntaxException");
+        String errorMessage = String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY));
+
+        //Then an error is thrown
+        assertThat(errorMessage).isEqualTo(expectedError.getMessage());
     }
 
     @Test
-    public void shouldGetResourcesByIdOfAFolder() {
+    public void testShouldGetResourcesByIdOfAFolder() {
         //given
 
         //when
@@ -155,11 +151,11 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesById.collect(Collectors.toSet())).isEqualTo(expected);
     }
 
     @Test
-    public void shouldFilterOutIllegalFileName() throws Exception {
+    public void testShouldFilterOutIllegalFileName() throws Exception {
         //given
         writeFile(fs, dir.resolve("./I-AM-AN-ILLEGAL-FILENAME"));
 
@@ -168,11 +164,11 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesById.collect(Collectors.toSet())).isEqualTo(expected);
     }
 
     @Test
-    public void shouldGetResourcesByType() throws Exception {
+    public void testShouldGetResourcesByType() throws Exception {
         //given
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
         HadoopResourceDetails.addTypeSupport("not" + TYPE_VALUE, TYPE_CLASSNAME + ".not");
@@ -182,11 +178,11 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByType.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesByType.collect(Collectors.toSet())).isEqualTo(expected);
     }
 
     @Test
-    public void shouldGetResourcesByFormat() throws Exception {
+    public void testShouldGetResourcesByFormat() throws Exception {
         //given
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
 
@@ -195,12 +191,12 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet())).isEqualTo(expected);
 
     }
 
     @Test
-    public void shouldGetResourcesByResource() {
+    public void testShouldGetResourcesByResource() {
         //given
 
         //when
@@ -208,47 +204,47 @@ public class HadoopResourceServiceTest {
 
         //then
         Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByResource.collect(Collectors.toSet()), equalTo(expected));
+        assertThat(resourcesByResource.collect(Collectors.toSet())).isEqualTo(expected);
     }
 
     @Test
-    public void addResourceTest() {
+    public void testAddResource() {
         boolean success = resourceService.addResource(null);
-        assertFalse(success);
+        assertThat(success).isFalse();
     }
 
     @Test
-    public void shouldResolveParents() {
+    public void testShouldResolveParents() {
         final URI id = dir.resolve("folder1/folder2/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE));
         final FileResource fileResource = (FileResource) ResourceBuilder.create(id);
 
         final ParentResource parent1 = fileResource.getParent();
 
-        assertThat(dir.resolve("folder1/folder2/").toString(), equalTo(parent1.getId()));
-        assertTrue(parent1 instanceof ChildResource);
-        assertTrue(parent1 instanceof DirectoryResource);
+        assertThat(dir.resolve("folder1/folder2/").toString()).isEqualTo(parent1.getId());
+        assertThat(parent1).isInstanceOf(ChildResource.class);
+        assertThat(parent1).isInstanceOf(DirectoryResource.class);
 
         final ChildResource child = (ChildResource) parent1;
 
         final ParentResource parent2 = child.getParent();
 
-        assertThat(dir.resolve("folder1/").toString(), equalTo(parent2.getId()));
-        assertTrue(parent2 instanceof ChildResource);
-        assertTrue(parent2 instanceof DirectoryResource);
+        assertThat(dir.resolve("folder1/").toString()).isEqualTo(parent2.getId());
+        assertThat(parent2).isInstanceOf(ChildResource.class);
+        assertThat(parent2).isInstanceOf(DirectoryResource.class);
 
         final ChildResource child2 = (ChildResource) parent2;
 
         final ParentResource parent3 = child2.getParent();
 
-        assertThat(dir.toString(), equalTo(parent3.getId()));
-        assertTrue(parent3 instanceof ChildResource);
-        assertTrue(parent3 instanceof DirectoryResource);
+        assertThat(dir.toString()).isEqualTo(parent3.getId());
+        assertThat(parent3).isInstanceOf(ChildResource.class);
+        assertThat(parent3).isInstanceOf(DirectoryResource.class);
 
         final ChildResource child3 = (ChildResource) parent3;
 
         final ParentResource parent4 = child3.getParent();
 
-        assertThat(root.toString(), equalTo(parent4.getId()));
+        assertThat(root.toString()).isEqualTo(parent4.getId());
     }
 
     private Configuration createConf(final String fsDefaultName) throws URISyntaxException {
