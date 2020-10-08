@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * When a client connects via websocket, the {@link FilteredResourceService} spawns an instance of the
  * {@link WebsocketEventService} to handle the rest of the request.
- *
  * The service goes through the following steps while returning resources:
  * - get the topic offset for this token, defaulting to "now"
  * - send any "early" errors to the client (eg. user-service exceptions)
@@ -33,12 +32,28 @@ import java.util.concurrent.CompletableFuture;
 public class WebsocketEventService {
     private final TokenOffsetPersistenceLayer persistenceLayer;
 
+    /**
+     * Default constructor for a new WebsocketEventService, supplying the persistence layer for retrieving token offsets.
+     * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
+     * back to the client as required.
+     *
+     * @param persistenceLayer the persistence layer for retrieving token offsets
+     */
     public WebsocketEventService(final TokenOffsetPersistenceLayer persistenceLayer) {
         this.persistenceLayer = persistenceLayer;
     }
 
+    /**
+     * Retrieve the offset for a token from persistence, or default to kafka's 'now' offset for the partition.
+     *
+     * @param token the token to request an offset for
+     * @return a future representing the asynchronous completion of the request
+     * @apiNote the future should be completed before progressing further with the service's tasks
+     * or else it may cause a race condition where early messages in the stream are dropped and lost
+     */
     public CompletableFuture<Long> getTokenOffset(final String token) {
         return this.persistenceLayer.findOffset(token)
+                // TODO: get the kafka offset for 'now' instead of this placeholder value
                 .thenApply(offset -> offset.orElse(-1L));
     }
 

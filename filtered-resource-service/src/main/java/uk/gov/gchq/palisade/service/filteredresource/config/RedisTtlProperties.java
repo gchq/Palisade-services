@@ -29,12 +29,17 @@ import java.util.Map;
  */
 @ConfigurationProperties("spring.data.redis.repositories")
 public class RedisTtlProperties {
-    static final Duration DEFAULT_TTL = Duration.ofDays(1);
+    private static final Duration DEFAULT_TTL = Duration.ofDays(1);
     private Map<String, Duration> timeToLive = new HashMap<>();
 
     @Generated
     public Map<String, Duration> getTimeToLive() {
         return timeToLive;
+    }
+
+    @Generated
+    public static Duration getDefaultTtl() {
+        return DEFAULT_TTL;
     }
 
     @Generated

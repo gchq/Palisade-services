@@ -52,7 +52,7 @@ public class RedisTtlConfiguration {
      * @return the configured time-to-live value for that keyspace in seconds
      */
     public static Long getTimeToLiveSeconds(final String keyspace) {
-        return KEYSPACE_TTL.getOrDefault(keyspace, RedisTtlProperties.DEFAULT_TTL.toSeconds());
+        return KEYSPACE_TTL.getOrDefault(keyspace, RedisTtlProperties.getDefaultTtl().toSeconds());
     }
 
     @Bean
