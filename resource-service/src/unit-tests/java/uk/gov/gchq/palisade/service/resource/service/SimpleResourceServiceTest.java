@@ -16,9 +16,7 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
@@ -34,17 +32,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
 public class SimpleResourceServiceTest {
     private final SimpleResourceService service = new SimpleResourceService("data-service", "java.lang.String");
 
-
     @Test
-    public void javaFilesInSrcAndTest() throws IOException {
+    public void testJavaFilesInSrc() throws IOException {
         // Given
         Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
         DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
@@ -62,11 +56,11 @@ public class SimpleResourceServiceTest {
         Set<LeafResource> srcAndTestJavaFiles = Stream.concat(sourceFiles, testFiles).collect(Collectors.toSet());
 
         // Then
-        assertThat(javaFiles, equalTo(srcAndTestJavaFiles));
+        assertThat(javaFiles).isEqualTo(srcAndTestJavaFiles);
     }
 
     @Test
-    public void canFindTestResourceAvro() throws IOException {
+    public void testCanFindTestResourceAvro() throws IOException {
         // Given
         URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
         FileResource testResourceAvro = (FileResource) ResourceBuilder.create(avroFileURI);
@@ -81,15 +75,15 @@ public class SimpleResourceServiceTest {
                 .findFirst();
 
         // Then
-        assertTrue(resourcesById.isPresent());
-        assertThat(resourcesById.get(), equalTo(expectedAvroResource));
+        assertThat(resourcesById).isPresent();
+        assertThat(resourcesById.get()).isEqualTo(expectedAvroResource);
 
         // When
         Optional<LeafResource> resourcesByType = service.getResourcesBySerialisedFormat(expectedAvroResource.getSerialisedFormat())
                 .filter(expectedAvroResource::equals)
                 .findFirst();
 
-        assertTrue(resourcesByType.isPresent());
-        assertThat(resourcesByType.get(), equalTo(expectedAvroResource));
+        assertThat(resourcesByType).isPresent();
+        assertThat(resourcesByType.get()).isEqualTo(expectedAvroResource);
     }
 }

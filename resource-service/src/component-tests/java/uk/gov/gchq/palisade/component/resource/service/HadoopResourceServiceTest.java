@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.fail;
 
 public class HadoopResourceServiceTest {
 
@@ -134,12 +134,13 @@ public class HadoopResourceServiceTest {
 
         //when
         final URI found = new URI(HDFS, "/unknownDir" + id1.getPath(), null);
-
-        Exception expectedError = assertThrows(URISyntaxException.class, () -> resourceService.getResourcesById(found.toString()), "expect a URISyntaxException");
-        String errorMessage = String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY));
-
-        //Then an error is thrown
-        assertThat(errorMessage).isEqualTo(expectedError.getMessage());
+        try {
+            resourceService.getResourcesById(found.toString());
+            fail("exception expected");
+        } catch (Exception e) {
+            //then
+            assertThat(String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY))).isEqualTo((e.getMessage()));
+        }
     }
 
     @Test

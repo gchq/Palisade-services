@@ -85,7 +85,7 @@ public class AuditErrorMessageTest {
                         // Note Throwable equals does not override Object's equal so two Throwables are only equal if they are the same instance of an object.
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().isEqualTo((auditErrorMessage))
+                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo((auditErrorMessage))
                 )
         );
     }

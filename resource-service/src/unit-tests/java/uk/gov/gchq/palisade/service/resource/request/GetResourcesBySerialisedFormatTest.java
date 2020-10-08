@@ -16,29 +16,33 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.RequestId;
 
-@RunWith(JUnit4.class)
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class GetResourcesBySerialisedFormatTest {
 
     private final GetResourcesBySerialisedFormatRequest expected = new GetResourcesBySerialisedFormatRequest();
     private final RequestId originalId = new RequestId().id("Original");
 
-    @Before
+    @BeforeEach
     public void setup() {
         expected.setSerialisedFormat("format");
         expected.setOriginalRequestId(originalId);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void returnErrorWithNoSerialisedFormatTest() {
+    @Test
+    public void testReturnErrorWithNoSerialisedFormat() {
         GetResourcesBySerialisedFormatRequest actual = new GetResourcesBySerialisedFormatRequest();
 
-        actual.setSerialisedFormat(null);
+        //When
+        Exception nullPointerException = assertThrows(NullPointerException.class, () -> actual.setSerialisedFormat(null), "Null pointer should be thrown");
+
+        //Then an error is thrown
+        assertThat((String) null).isEqualTo(nullPointerException.getMessage());
     }
 }
