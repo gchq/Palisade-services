@@ -33,6 +33,9 @@ import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncException
 
 import java.util.Objects;
 
+/**
+ * WebMVC configuration class used to create a executor bean when launching the service
+ */
 @Configuration
 @EnableAsync
 @EnableWebMvc
@@ -42,6 +45,11 @@ public class AsyncWebMvcConfiguration implements AsyncConfigurer, WebMvcConfigur
 
     private final AsyncConfigProperties asyncConfigProperties;
 
+    /**
+     * Default constructor used including configClass
+     *
+     * @param asyncConfigProperties class containing webMVC properties
+     */
     public AsyncWebMvcConfiguration(final AsyncConfigProperties asyncConfigProperties) {
         this.asyncConfigProperties = asyncConfigProperties;
     }

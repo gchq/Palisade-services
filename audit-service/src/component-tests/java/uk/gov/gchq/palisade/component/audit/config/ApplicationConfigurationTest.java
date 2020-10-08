@@ -33,7 +33,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 public class ApplicationConfigurationTest {

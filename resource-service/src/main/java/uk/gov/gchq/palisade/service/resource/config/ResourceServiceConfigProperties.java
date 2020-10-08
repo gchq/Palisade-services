@@ -24,6 +24,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * ResourceService class containing default config properties about the resource service which is used when launching the service
+ */
 @ConfigurationProperties(prefix = "resource")
 public class ResourceServiceConfigProperties {
     private String implementation;
