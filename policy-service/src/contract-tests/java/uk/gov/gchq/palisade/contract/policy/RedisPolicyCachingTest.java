@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import org.springframework.test.context.ContextConfiguration;
 import uk.gov.gchq.palisade.contract.policy.config.PolicyTestConfiguration;
 import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
@@ -41,10 +42,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Import(PolicyTestConfiguration.class)
 @ActiveProfiles("redis")
-@SpringBootTest(classes = {PolicyApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
-@ComponentScan(basePackages = "uk.gov.gchq.palisade")
+@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.NONE)
+@ContextConfiguration(classes = {RedisTestConfiguration.class,  PolicyTestConfiguration.class})
 public class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Autowired
