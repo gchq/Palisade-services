@@ -37,9 +37,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -64,9 +63,11 @@ public class DataRequestTest {
         this.dataRequestRepository.save(entity);
         final DataRequestEntity subject = this.dataRequestRepository.getByRequestId("identifier-x");
 
-        assertThat("The user id is not preserved through persistence", subject.getUser().getUserId().getId(), is(equalTo("archibald")));
-        assertThat("The request id is not preserved through persistence", subject.getRequestId(), is(equalTo("identifier-x")));
-        assertThat("The context is not preserved through persistence", subject.getContext().get("testing repo"), is(equalTo("this")));
+        assertAll(
+                () -> assertThat(subject.getUser().getUserId().getId()).isEqualTo("archibald"),
+                () -> assertThat(subject.getRequestId()).isEqualTo("identifier-x"),
+                () -> assertThat(subject.getContext().get("testing repo")).isEqualTo("this")
+        );
     }
 
 }

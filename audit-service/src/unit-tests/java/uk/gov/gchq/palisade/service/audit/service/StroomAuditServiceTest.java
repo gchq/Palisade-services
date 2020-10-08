@@ -41,9 +41,7 @@ import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -99,16 +97,14 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_TYPE_ID),
-                containsString(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION),
-                containsString(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION))
+        );
     }
 
     @Test
@@ -126,17 +122,15 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId()),
-                containsString(resource.getId()),
-                containsString(resource.getType())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.REGISTER_REQUEST_COMPLETED_TYPE_ID),
-                containsString(StroomAuditService.REGISTER_REQUEST_COMPLETED_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_DESCRIPTION))
+        );
     }
 
     @Test
@@ -157,17 +151,15 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId()),
-                containsString(resource.getId())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID),
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION),
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION))
+        );
     }
 
     @Test
@@ -187,17 +179,16 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId()),
-                containsString(resource.getId())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID),
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION),
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION))
+        );
     }
 
     @Test
@@ -225,10 +216,10 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
             .contains(resource.getId())
             .contains(exception.getMessage());
 
-        assertThat(log, allOf(
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID),
-                containsString(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
+        );
     }
 
     @Test
@@ -249,18 +240,16 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(userId.getId()),
-                containsString(context.getPurpose()),
-                containsString(requestId.getId()),
-                containsString(resource.getId()),
-                containsString(resource.getType()),
-                containsString(rules.getMessage())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.READ_REQUEST_COMPLETED_TYPE_ID),
-                containsString(StroomAuditService.READ_REQUEST_COMPLETED_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
+                () -> assertThat(logCaptor.getAllValues().contains(rules.getMessage())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_DESCRIPTION))
+        );
     }
 
     @Test
@@ -279,16 +268,14 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(requestId.getId()),
-                containsString(resource.getId()),
-                containsString(resource.getType())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID),
-                containsString(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION),
-                containsString(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION))
+        );
     }
 
     @Test
@@ -306,15 +293,13 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
-        assertThat(log, allOf(
-                containsString(requestId.getId()),
-                containsString(resource.getId()),
-                containsString(resource.getType()),
-                containsString(exception.getMessage())
-        ));
-        assertThat(log, allOf(
-                containsString(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_TYPE_ID),
-                containsString(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION)
-        ));
+        assertAll(
+                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
+                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
+                () -> assertThat(logCaptor.getAllValues().contains(exception.getMessage())),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
+        );
     }
 }

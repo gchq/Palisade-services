@@ -42,6 +42,7 @@
         <eureka.version>1.9.16</eureka.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
+        <unit-test.skip>false</unit-test.skip>
     </properties>
 
     <dependencies>
@@ -343,6 +344,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
+                <configuration>
+                    <skipTests>${unit-test.skip}</skipTests>
+                    <includes>
+                        <include>**/palisade/service/**</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

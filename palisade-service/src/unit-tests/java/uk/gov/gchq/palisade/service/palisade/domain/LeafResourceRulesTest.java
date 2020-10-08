@@ -37,9 +37,8 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -75,9 +74,11 @@ public class LeafResourceRulesTest {
         this.leafResourceRulesRepository.save(entity);
         final SimpleImmutableEntry<LeafResource, Rules<?>> subject = this.leafResourceRulesRepository.getByRequestId("xxxx").stream().findFirst().orElse(new LeafResourceRulesEntity()).leafResourceRules();
 
-        assertThat("The file id is not preserved through persistence", subject.getKey().getId(), is(equalTo(fileResource.getId())));
-        assertThat("The rule id is not preserved through persistence", subject.getValue().getRules().keySet().stream().findFirst().orElse(""), is(equalTo("phone-rule")));
-        assertThat("The rule type is not preserved through persistence", subject.getValue().getRules().values().stream().findFirst().filter(r -> r instanceof PhoneRule).isPresent(), is(true));
+        assertAll(
+                () -> assertThat(subject.getKey().getId().equals(fileResource.getId())),
+                () -> assertThat(subject.getValue().getRules().keySet().stream().findFirst().orElse("").equals("phone-rule")),
+                () -> assertThat(subject.getValue().getRules().values().stream().findFirst().filter(r -> r instanceof PhoneRule).isPresent())
+        );
     }
 
 }

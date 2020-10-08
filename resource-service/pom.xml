@@ -35,6 +35,7 @@
         <jackson.version>2.10.4</jackson.version>
         <hadoop.version>3.2.1</hadoop.version>
         <embedded-redis.version>0.7.3</embedded-redis.version>
+        <unit-test.skip>false</unit-test.skip>
     </properties>
 
     <dependencies>
@@ -373,6 +374,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
+                <configuration>
+                    <skipTests>${unit-test.skip}</skipTests>
+                    <includes>
+                        <include>**/palisade/service/**</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
