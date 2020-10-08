@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gok.gchq.palisade.component.policy;
+package uk.gov.gchq.palisade.component.policy;
 
 
 import feign.Response;
@@ -26,8 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import uk.gok.gchq.palisade.component.policy.config.PolicyTestConfiguration;
-import uk.gok.gchq.palisade.component.policy.web.PolicyClient;
+import uk.gov.gchq.palisade.component.policy.config.PolicyTestConfiguration;
+import uk.gov.gchq.palisade.component.policy.web.PolicyClient;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;

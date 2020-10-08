@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gok.gchq.palisade.component.policy;
+package uk.gov.gchq.palisade.component.policy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gok.gchq.palisade.component.policy.config.PolicyTestConfiguration;
+import uk.gov.gchq.palisade.component.policy.config.PolicyTestConfiguration;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
@@ -53,12 +53,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockContext;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockOriginalRequestId;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockPolicy;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockResource;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockResources;
-import static uk.gok.gchq.palisade.component.policy.PolicyTestUtil.mockUser;
 
 @Import(PolicyTestConfiguration.class)
 @ContextConfiguration(classes = PolicyApplication.class)
@@ -82,7 +76,7 @@ public class PolicyControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.when(policyService.canAccess(mockUser(), mockContext(), mockResource())).thenReturn(Optional.of(mockResource()));
+        Mockito.when(policyService.canAccess(PolicyTestUtil.mockUser(), PolicyTestUtil.mockContext(), PolicyTestUtil.mockResource())).thenReturn(Optional.of(PolicyTestUtil.mockResource()));
     }
 
     /**
@@ -101,10 +95,10 @@ public class PolicyControllerTest {
     public void testShouldReturnCanAccess() throws Exception {
         //GIVEN
         CanAccessRequest canAccessRequest = (new CanAccessRequest())
-                .context(mockContext())
-                .user(mockUser())
-                .resources(mockResources());
-        canAccessRequest.originalRequestId(mockOriginalRequestId());
+                .context(PolicyTestUtil.mockContext())
+                .user(PolicyTestUtil.mockUser())
+                .resources(PolicyTestUtil.mockResources());
+        canAccessRequest.originalRequestId(PolicyTestUtil.mockOriginalRequestId());
 
         //WHEN
         MvcResult result = this.mockMvc.perform(post(CAN_ACCESS_REQUEST_URL)
@@ -119,8 +113,8 @@ public class PolicyControllerTest {
         CanAccessResponse response = mapper.readValue(result.getResponse().getContentAsString(), CanAccessResponse.class);
 
         //THEN
-        Mockito.verify(policyService, times(1)).canAccess(mockUser(), mockContext(), mockResource());
-        assertThat(response.getCanAccessResources()).contains(mockResource());
+        Mockito.verify(policyService, times(1)).canAccess(PolicyTestUtil.mockUser(), PolicyTestUtil.mockContext(), PolicyTestUtil.mockResource());
+        assertThat(response.getCanAccessResources()).contains(PolicyTestUtil.mockResource());
     }
 
     /**
@@ -139,10 +133,10 @@ public class PolicyControllerTest {
 
         //GIVEN
         GetPolicyRequest getPolicyRequest = (new GetPolicyRequest())
-                .context(mockContext())
-                .user(mockUser())
-                .resources(mockResources());
-        getPolicyRequest.originalRequestId((mockOriginalRequestId()));
+                .context(PolicyTestUtil.mockContext())
+                .user(PolicyTestUtil.mockUser())
+                .resources(PolicyTestUtil.mockResources());
+        getPolicyRequest.originalRequestId((PolicyTestUtil.mockOriginalRequestId()));
         String jsonGetPolicyRequestMessage = mapper.writeValueAsString(getPolicyRequest);
 
         //WHEN
@@ -156,7 +150,7 @@ public class PolicyControllerTest {
                 .andReturn();
 
         //THEN
-        Mockito.verify(policyService, times(1)).getPolicy(mockResource());
+        Mockito.verify(policyService, times(1)).getPolicy(PolicyTestUtil.mockResource());
         Map<LeafResource, Rules> response = mapper.readValue(result.getResponse().getContentAsString(), Map.class);
         assertThat(response).isNotNull();
     }
@@ -175,8 +169,8 @@ public class PolicyControllerTest {
     public void testShouldSetResourcePolicyAsync() throws Exception {
         //GIVEN
         SetResourcePolicyRequest getSetResourcePolicyRequest = (new SetResourcePolicyRequest())
-                .policy(mockPolicy())
-                .resource(mockResource());
+                .policy(PolicyTestUtil.mockPolicy())
+                .resource(PolicyTestUtil.mockResource());
         String jsonSetResourcePolicyRequestMessage = mapper.writeValueAsString(getSetResourcePolicyRequest);
 
         //WHEN
@@ -202,7 +196,7 @@ public class PolicyControllerTest {
     public void testShouldSetTypePolicyAsync() throws Exception {
         //GIVEN
         SetTypePolicyRequest setTypePolicyRequest = (new SetTypePolicyRequest())
-                .policy(mockPolicy())
+                .policy(PolicyTestUtil.mockPolicy())
                 .type("Test type");
         String jsonSetTypePolicyAsyncMessage = mapper.writeValueAsString(setTypePolicyRequest);
 
