@@ -375,18 +375,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.plugin.version}</version>
-                <configuration>
-                    <skipTests>${unit-test.skip}</skipTests>
-                    <includes>
-                        <include>**/palisade/service/**</include>
-                    </includes>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
 </project>
