@@ -38,9 +38,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class})
@@ -71,50 +70,50 @@ class JpaPersistenceLayerTest {
     }
 
     @Test
-    void springDiscoversJpaPersistenceLayerTest() {
+    void testSpringDiscoversJpaPersistenceLayer() {
         // When the spring application is started
         // Then
-        assertThat(persistenceLayer, notNullValue());
+        assertThat(persistenceLayer).isNotNull();
     }
 
     @Test
     @Transactional
-    public void emptyGetReturnsEmptyTest() {
+    public void testEmptyGetReturnsEmpty() {
         // When
         Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
         // Then
-        assertThat(persistenceResponse, equalTo(Optional.empty()));
+        assertThat(persistenceResponse).isEmpty();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE");
         // Then
-        assertThat(persistenceResponse, equalTo(Optional.empty()));
+        assertThat(persistenceResponse).isEmpty();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT");
         // Then
-        assertThat(persistenceResponse, equalTo(Optional.empty()));
+        assertThat(persistenceResponse).isEmpty();
     }
 
     @Test
     @Transactional
-    public void addAndGetReturnsResourceTest() {
+    public void testAddAndGetReturnsResource() {
         // When
         Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
         // Then
         Stream<LeafResource> resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet()), equalTo(Collections.singleton(resource)));
+        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
 
         // When
         persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
         // Then
         resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet()), equalTo(Collections.singleton(resource)));
+        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
 
         // When
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
         // Then
         resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet()), equalTo(Collections.singleton(resource)));
+        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
     }
 }
