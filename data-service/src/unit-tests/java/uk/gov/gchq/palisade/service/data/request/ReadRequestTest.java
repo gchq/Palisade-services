@@ -15,10 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.data.request;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,22 +24,21 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataServiceTest;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
 public class ReadRequestTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataServiceTest.class);
     ReadRequest readRequest = new ReadRequest();
 
-    @Before
+    @BeforeEach
     public void setup() {
         LOGGER.info("Simple Data Service created: {}", readRequest);
     }
 
 
     @Test
-    public void getToken() {
+    public void testGetToken() {
         //given
         String token = "token";
         readRequest.token(token);
@@ -50,11 +47,11 @@ public class ReadRequestTest {
         String readToken = readRequest.getToken();
 
         //then
-        assertEquals(readToken, token);
+        assertThat(readToken).isEqualTo(token);
     }
 
     @Test
-    public void getResource() {
+    public void testGetResource() {
         //given
         LeafResource resource = Mockito.mock(LeafResource.class);
         readRequest.resource(resource);
@@ -63,6 +60,6 @@ public class ReadRequestTest {
         LeafResource readResource = readRequest.getResource();
 
         //then
-        assertEquals(readResource, resource);
+        assertThat(readResource).isEqualTo(resource);
     }
 }
