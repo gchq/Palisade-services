@@ -28,8 +28,8 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.UserApplication;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
+import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.web.UserController;
 
 import java.util.Collections;

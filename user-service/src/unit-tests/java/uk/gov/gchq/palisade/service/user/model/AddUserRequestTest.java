@@ -24,11 +24,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
@@ -45,14 +43,13 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
 
-@RunWith(JUnit4.class)
-public class AddUserRequestTest {
+class AddUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
-    @Before
+    @BeforeEach
     public void setup() {
         logger = (Logger) LoggerFactory.getLogger(AddUserRequest.class);
         appender = new ListAppender<>();
@@ -60,7 +57,7 @@ public class AddUserRequestTest {
         logger.addAppender(appender);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
@@ -75,7 +72,7 @@ public class AddUserRequestTest {
 
 
     @Test
-    public void AddUserRequestTest() {
+    void testAddUserRequest() {
         final AddUserRequest subject = AddUserRequest.create(new RequestId().id("newId")).withUser(new User().userId("newUser"));
         assertThat("AddUserRequest not constructed", subject.user.getUserId().getId(), is(equalTo("newUser")));
 
@@ -89,7 +86,7 @@ public class AddUserRequestTest {
     }
 
     @Test
-    public void AddUserRequestToJsonTest() throws IOException {
+    void testAddUserRequestToJson() throws IOException {
         final AddUserRequest subject = AddUserRequest.create(new RequestId().id("newId"))
                 .withUser(new User().userId("user"));
 
@@ -100,7 +97,7 @@ public class AddUserRequestTest {
     }
 
     @Test
-    public void AddUserRequestFromJsonTest() throws IOException {
+    void testAddUserRequestFromJson() throws IOException {
         final AddUserRequest subject = AddUserRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"));
 

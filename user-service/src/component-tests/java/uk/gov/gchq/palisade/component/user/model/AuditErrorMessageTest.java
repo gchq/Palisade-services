@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.model;
+package uk.gov.gchq.palisade.component.user.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public class AuditErrorMessageTest {
      *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
-    public void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
+    void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");

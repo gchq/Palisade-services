@@ -25,11 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
@@ -46,14 +44,13 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
 
-@RunWith(JUnit4.class)
-public class GetUserRequestTest {
+class GetUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
-    @Before
+    @BeforeEach
     public void setup() {
         logger = (Logger) LoggerFactory.getLogger(GetUserRequest.class);
         appender = new ListAppender<>();
@@ -61,7 +58,7 @@ public class GetUserRequestTest {
         logger.addAppender(appender);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
@@ -75,7 +72,7 @@ public class GetUserRequestTest {
     }
 
     @Test
-    public void GetUserRequestTest() {
+    void testGetUserRequest() {
         final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId")).withUserId(new UserId().id("newUser"));
         assertThat("GetUserRequest not constructed", subject.userId.getId(), is(equalTo("newUser")));
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
@@ -88,7 +85,7 @@ public class GetUserRequestTest {
     }
 
     @Test
-    public void GetUserRequestToJsonTest() throws IOException {
+    void testGetUserRequestToJson() throws IOException {
         final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId"))
                 .withUserId(new UserId().id("user"));
 
@@ -106,7 +103,7 @@ public class GetUserRequestTest {
     }
 
     @Test
-    public void GetUserRequestFromJsonTest() throws IOException {
+    void testGetUserRequestFromJson() throws IOException {
         final GetUserRequest subject = GetUserRequest.create(new RequestId().id("123"))
                 .withUserId(new UserId().id("newUser"));
 
