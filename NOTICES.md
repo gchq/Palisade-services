@@ -18,6 +18,7 @@ List of third-party dependencies grouped by their license type
 * Apache Commons Compress ([org.apache.commons:commons-compress:1.19](https://commons.apache.org/proper/commons-compress/))
 * Apache Hadoop Common ([org.apache.hadoop:hadoop-common:3.2.1](no url defined))
 * Apache Hadoop Mini-Cluster ([org.apache.hadoop:hadoop-minicluster:3.2.1](no url defined))
+* Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
 * spring-boot-configuration-processor ([org.springframework.boot:spring-boot-configuration-processor:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter ([org.springframework.boot:spring-boot-starter:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * spring-boot-starter-actuator ([org.springframework.boot:spring-boot-starter-actuator:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
@@ -28,8 +29,10 @@ List of third-party dependencies grouped by their license type
 * spring-boot-starter-web ([org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
 * Spring Cloud Commons ([org.springframework.cloud:spring-cloud-commons:2.2.2.RELEASE](https://projects.spring.io/spring-cloud/spring-cloud-commons/))
 * Spring Cloud Config Client ([org.springframework.cloud:spring-cloud-config-client:2.2.2.RELEASE](https://spring.io))
+* Spring Cloud Netflix Eureka Client ([org.springframework.cloud:spring-cloud-netflix-eureka-client:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-netflix/spring-cloud-netflix-eureka-client))
 * Spring Cloud OpenFeign Core ([org.springframework.cloud:spring-cloud-openfeign-core:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-openfeign/spring-cloud-openfeign-core))
 * Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
+* Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * common ([uk.gov.gchq.palisade:common:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
 * hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
@@ -45,6 +48,7 @@ List of third-party dependencies grouped by their license type
 
 ### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
 * JUnit ([junit:junit:4.13](http://junit.org))
+* JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
 
 ### [Eclipse Public License 2.0](./licenses/eclipse_public_license_2.0.html):
 * JUnit Jupiter API ([org.junit.jupiter:junit-jupiter-api:5.6.2](https://junit.org/junit5/))
