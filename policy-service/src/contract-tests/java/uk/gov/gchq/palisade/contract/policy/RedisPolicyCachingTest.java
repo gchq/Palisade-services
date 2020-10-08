@@ -21,11 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.test.context.ContextConfiguration;
+
 import uk.gov.gchq.palisade.contract.policy.config.PolicyTestConfiguration;
 import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;

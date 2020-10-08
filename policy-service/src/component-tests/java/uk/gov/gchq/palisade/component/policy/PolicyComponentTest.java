@@ -24,21 +24,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+
 import uk.gov.gchq.palisade.component.policy.config.PolicyTestConfiguration;
 import uk.gov.gchq.palisade.component.policy.web.PolicyClient;
-
+import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
-import uk.gov.gchq.palisade.service.policy.web.PolicyController;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -46,9 +45,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Import(PolicyTestConfiguration.class)
 @EnableFeignClients
-@SpringBootTest(classes = {PolicyApplication.class, PolicyController.class, PolicyConfiguration.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
+@ContextConfiguration(classes = {RedisTestConfiguration.class,  PolicyTestConfiguration.class})
 public class PolicyComponentTest extends PolicyTestCommon {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyComponentTest.class);
 
