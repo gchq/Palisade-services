@@ -16,6 +16,8 @@
 package uk.gov.gchq.palisade.contract.policy.rest;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,9 +42,14 @@ import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,6 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {RedisTestConfiguration.class, PolicyTestConfiguration.class})
 class PolicyRestContractTest extends PolicyTestCommon {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyRestContractTest.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -60,16 +69,16 @@ class PolicyRestContractTest extends PolicyTestCommon {
         assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    public static interface LeafResourceRulesMap extends Map<LeafResource, Rules> {}
+    public static class LeafResourceRulesMap extends HashMap<LeafResource, Rules> {}
 
     @Test
-    void testComponentTest() {
+    void testRestEndpoint() {
         // Given there are resources and policies to be added
         Collection<LeafResource> resources = Collections.singleton(NEW_FILE);
 
         // When a resource is added
         SetResourcePolicyRequest addRequest = new SetResourcePolicyRequest().resource(NEW_FILE).policy(PASS_THROUGH_POLICY);
-        restTemplate.postForLocation("/setResourcePolicyAsync", addRequest);
+        restTemplate.put("/setResourcePolicyAsync", addRequest);
 
         // Given it is accessible
         CanAccessRequest accessRequest = new CanAccessRequest().user(USER).resources(resources).context(CONTEXT);
@@ -81,7 +90,6 @@ class PolicyRestContractTest extends PolicyTestCommon {
         // When the policies on the resource are requested
         GetPolicyRequest getRequest = new GetPolicyRequest().user(USER).resources(resources).context(CONTEXT);
         LeafResourceRulesMap getResponse = restTemplate.postForObject("/getPolicySync", getRequest, LeafResourceRulesMap.class);
-        LOGGER.info("Response: {}", getResponse);
 
         // Then the policy just added is found on the resource
         assertThat(getResponse).containsEntry(NEW_FILE, PASS_THROUGH_POLICY.getRecordRules());
