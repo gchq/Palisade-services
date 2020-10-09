@@ -6,6 +6,12 @@ List of third-party dependencies grouped by their license type
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * project ':json-path' ([com.jayway.jsonpath:json-path:2.4.0](https://github.com/jayway/JsonPath))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
+* akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
+* akka-slf4j ([com.typesafe.akka:akka-slf4j_2.13:2.6.8](https://akka.io/))
+* akka-stream-kafka-testkit ([com.typesafe.akka:akka-stream-kafka-testkit_2.13:2.0.4](https://doc.akka.io/docs/alpakka-kafka/current))
+* akka-stream-kafka ([com.typesafe.akka:akka-stream-kafka_2.13:2.0.4](https://doc.akka.io/docs/alpakka-kafka/current))
+* akka-stream-testkit ([com.typesafe.akka:akka-stream-testkit_2.13:2.6.8](https://akka.io/))
+* akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
 * event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
 * Apache Commons Compress ([org.apache.commons:commons-compress:1.19](https://commons.apache.org/proper/commons-compress/))
 * Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
@@ -48,6 +54,7 @@ List of third-party dependencies grouped by their license type
 
 ### [MIT License](./licenses/mit_license.txt):
 * mockito-core ([org.mockito:mockito-core:3.3.3](https://github.com/mockito/mockito))
+* Testcontainers :: Kafka ([org.testcontainers:kafka:1.14.3](https://testcontainers.org))
 * SLF4J Test ([uk.org.lidalia:slf4j-test:1.1.0](http://projects.lidalia.org.uk/slf4j-test))
 
 ### [Mozilla Public License 2.0 or Eclipse Public License 1.0](./licenses/mpl_2.0_or_epl_1.0.html):
