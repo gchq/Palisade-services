@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableFeignClients(basePackageClasses = {ResourceClient.class})
 @Import({ResourceTestConfiguration.class, RedisTestConfiguration.class})
-@SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles({"redis", "web"})
