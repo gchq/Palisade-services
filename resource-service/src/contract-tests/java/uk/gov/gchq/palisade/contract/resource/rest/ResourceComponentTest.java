@@ -35,7 +35,6 @@ import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClientWrapper;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
