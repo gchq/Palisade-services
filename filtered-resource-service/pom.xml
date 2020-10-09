@@ -31,8 +31,11 @@
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
+        <!-- Dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
         <embedded-redis.version>0.7.3</embedded-redis.version>
+        <!-- Test dependency versions -->
+        <testcontainers.version>1.14.3</testcontainers.version>
         <!-- Testing configuration -->
         <unit-test.skip>false</unit-test.skip>
         <component-test.skip>false</component-test.skip>
@@ -41,40 +44,48 @@
 
     <dependencies>
         <dependency>
+            <!-- H2 local persistence store -->
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
         <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <!-- REST controllers -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <!-- JPA persistence and CrudRepositories -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
+            <!-- Redis persistence -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
+            <!-- Common User, Resource, Context -->
             <groupId>uk.gov.gchq.palisade</groupId>
             <artifactId>common</artifactId>
             <version>0.5.0-${common.revision}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
+            <!-- SpringBootTest -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>it.ozimov</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>${embedded-redis.version}</version>
+            <!-- Redis contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

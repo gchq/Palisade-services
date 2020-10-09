@@ -16,32 +16,72 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.redis;
 
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
-import uk.gov.gchq.palisade.contract.filteredresource.redis.config.RedisTestConfiguration;
+import uk.gov.gchq.palisade.contract.filteredresource.redis.RedisPersistenceContractTest.Initializer;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = FilteredResourceApplication.class,
-        webEnvironment = WebEnvironment.NONE,
-        properties = "spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"
+        classes = {RedisPersistenceContractTest.class, FilteredResourceApplication.class},
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"}
 )
-@Import(RedisTestConfiguration.class)
 @ActiveProfiles("redis")
+@ContextConfiguration(initializers = Initializer.class)
+@EnableAutoConfiguration
 class RedisPersistenceContractTest {
+
+    private static final int REDIS_PORT = 6379;
+
+    protected void cleanCache() {
+        requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
+    }
+
+    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
+                .withExposedPorts(REDIS_PORT)
+                .withReuse(true);
+
+        @Override
+        public void initialize(@NotNull final ConfigurableApplicationContext context) {
+            // Start container
+            redis.start();
+
+            // Override Redis configuration
+            String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
+            // Configure the testcontainer random port
+            String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
+            // Override the configuration at runtime
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
+        }
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanCache();
+    }
 
     @Autowired
     private OffsetEventService service;
