@@ -79,7 +79,7 @@ class ResourceResponseTest {
                         () -> assertThat(resourceResponse.resource).isEqualTo((resourceResponseObject.resource))
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(resourceResponse).isEqualTo(resourceResponseObject)
+                        () -> assertThat(resourceResponse).usingRecursiveComparison().isEqualTo(resourceResponseObject)
                 )
         );
     }
