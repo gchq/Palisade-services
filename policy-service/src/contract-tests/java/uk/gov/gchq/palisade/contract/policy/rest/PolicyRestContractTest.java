@@ -15,8 +15,6 @@
  */
 package uk.gov.gchq.palisade.contract.policy.rest;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,14 +39,9 @@ import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,7 +61,8 @@ class PolicyRestContractTest extends PolicyTestCommon {
         assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    public static class LeafResourceRulesMap extends HashMap<LeafResource, Rules> {}
+    public static class LeafResourceRulesMap extends HashMap<LeafResource, Rules> {
+    }
 
     @Test
     void testRestEndpoint() {
