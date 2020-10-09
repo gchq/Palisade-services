@@ -36,13 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("redis")
 @SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
-public class RedisUserContractTest {
+class RedisUserContractTest {
 
     @Autowired
     private UserServiceProxy userService;
 
     @Test
-    public void testAddedUserIsRetrievable() {
+    void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
@@ -58,7 +58,7 @@ public class RedisUserContractTest {
     }
 
     @Test
-    public void testNonExistentUserRetrieveFails() {
+    void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
@@ -71,7 +71,7 @@ public class RedisUserContractTest {
     }
 
     @Test
-    public void testUpdateUserTest() {
+    void testUpdateUserTest() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -87,7 +87,7 @@ public class RedisUserContractTest {
     }
 
     @Test
-    public void testTtlTest() throws InterruptedException {
+    void testTtlTest() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);

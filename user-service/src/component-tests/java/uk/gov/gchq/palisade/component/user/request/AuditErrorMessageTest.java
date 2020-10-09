@@ -35,11 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditErrorMessageTest.class})
-public class AuditErrorMessageTest {
+class AuditErrorMessageTest {
 
     @Autowired
     private JacksonTester<AuditErrorMessage> jsonTester;
-
 
     /**
      * Tests the creation of the message type, AuditErrorMessage using the builder
@@ -49,7 +48,7 @@ public class AuditErrorMessageTest {
      *                     This equates to a failure to serialise or de-serialise the string.
      */
     @Test
-    public void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
+    void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("messagesSent", "23");

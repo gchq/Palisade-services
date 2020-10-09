@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
-public class CaffeineUserContractTest {
+class CaffeineUserContractTest {
 
     @Autowired
     private UserServiceProxy userService;
@@ -52,7 +52,7 @@ public class CaffeineUserContractTest {
     }
 
     @Test
-    public void testAddedUserIsRetrievable() {
+    void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
@@ -68,7 +68,7 @@ public class CaffeineUserContractTest {
     }
 
     @Test
-    public void testNonExistentUserRetrieveFails() {
+    void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
@@ -80,7 +80,7 @@ public class CaffeineUserContractTest {
     }
 
     @Test
-    public void testUpdateUserTest() {
+    void testUpdateUserTest() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -96,7 +96,7 @@ public class CaffeineUserContractTest {
     }
 
     @Test
-    public void testMaxSizeTest() {
+    void testMaxSizeTest() {
         // Given - many users are added and cached (cache size set to 100 in application.yaml)
         Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
         for (int count = 0; count <= 150; ++count) {
@@ -113,7 +113,7 @@ public class CaffeineUserContractTest {
     }
 
     @Test
-    public void testTtlTest() throws InterruptedException {
+    void testTtlTest() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);

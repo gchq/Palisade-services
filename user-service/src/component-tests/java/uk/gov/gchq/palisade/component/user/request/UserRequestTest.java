@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {UserRequestTest.class})
-public class UserRequestTest {
+class UserRequestTest {
 
     @Autowired
     private JacksonTester<UserRequest> jsonTester;
@@ -46,7 +46,7 @@ public class UserRequestTest {
      *                     This equates to a failure to serialise or deserialise the Json string.
      */
     @Test
-    public void testUserRequestSerialisingAndDeserialising() throws IOException {
+    void testUserRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         UserRequest userRequest = UserRequest.Builder.create()
                 .withUserId("testUserId")

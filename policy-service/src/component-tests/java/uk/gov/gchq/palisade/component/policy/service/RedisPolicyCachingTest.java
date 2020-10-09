@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.contract.policy;
+package uk.gov.gchq.palisade.component.policy.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.contract.policy.config.PolicyTestConfiguration;
-import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -42,8 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("redis")
 @SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.NONE)
-@ContextConfiguration(classes = {RedisTestConfiguration.class,  PolicyTestConfiguration.class})
-public class RedisPolicyCachingTest extends PolicyTestCommon {
+@ContextConfiguration(classes = {RedisTestConfiguration.class, PolicyTestConfiguration.class})
+class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
@@ -53,7 +53,7 @@ public class RedisPolicyCachingTest extends PolicyTestCommon {
     private PolicyService policyService;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Add the system resource to the policy service
         assertThat(cacheProxy.setResourcePolicy(TXT_SYSTEM, TXT_POLICY)).isEqualTo(TXT_POLICY);
 
@@ -68,27 +68,28 @@ public class RedisPolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testContextLoads() {
+    void testContextLoads() {
         assertThat(policyService).isNotNull();
         assertThat(cacheProxy).isNotNull();
     }
 
     @Test
-    public void testAddedPolicyIsRetrievable() {
+    void testAddedPolicyIsRetrievable() {
         // Given - resources have been added as above
         // Given there is no underlying policy storage (gets must be wholly cache-based)
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Policy policy = cacheProxy.getPolicy(resource).get();
+            Optional<Policy> policy = cacheProxy.getPolicy(resource);
 
             // Then
-            assertThat(policy).isNotNull();
+            assertThat(policy).isPresent()
+                    .get().isNotNull();
         }
     }
 
     @Test
-    public void testNonExistentPolicyRetrieveFails() {
+    void testNonExistentPolicyRetrieveFails() {
         // Given - the requested resource is not added
 
         // When
@@ -99,7 +100,7 @@ public class RedisPolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testUpdatePolicy() {
+    void testUpdatePolicy() {
         // Given I add a policy and resource
         final SystemResource systemResource = new SystemResource().id("/txt");
         final Policy policy = new Policy<>()
@@ -122,7 +123,7 @@ public class RedisPolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testCacheTtl() throws InterruptedException {
+    void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
         assertThat(cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isNotNull();
 

@@ -24,11 +24,11 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NullUserServiceTest {
+class NullUserServiceTest {
     NullUserService nullUserService = new NullUserService();
 
     @Test
-    public void testGetUser() {
+    void testGetUser() {
         //Given the new user is not added to the service
         User user = new User().userId("testUser");
 
@@ -40,7 +40,7 @@ public class NullUserServiceTest {
     }
 
     @Test
-    public void testAddUser() {
+    void testAddUser() {
         User user = new User().userId("testUser");
         User actual = nullUserService.addUser(user);
         assertThat(user).isEqualTo(actual);

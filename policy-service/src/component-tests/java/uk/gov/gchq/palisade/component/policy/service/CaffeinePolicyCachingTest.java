@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.contract.policy;
+package uk.gov.gchq.palisade.component.policy.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.StubResource;
@@ -45,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = PolicyApplication.class, webEnvironment = WebEnvironment.NONE)
-public class CaffeinePolicyCachingTest extends PolicyTestCommon {
+class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
     @Autowired
     private PolicyServiceCachingProxy policyService;
@@ -59,7 +60,7 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Add the system resource to the policy service
         assertThat(policyService.setResourcePolicy(TXT_SYSTEM, TXT_POLICY)).isEqualTo(TXT_POLICY);
 
@@ -74,12 +75,12 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testContextLoads() {
+    void testContextLoads() {
         assertThat(policyService).isNotNull();
     }
 
     @Test
-    public void testAddedPolicyIsRetrievable() {
+    void testAddedPolicyIsRetrievable() {
         // Given - resources have been added as above
         // Given there is no underlying policy storage (gets must be wholly cache-based)
 
@@ -93,7 +94,7 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testNonExistentPolicyRetrieveFails() {
+    void testNonExistentPolicyRetrieveFails() {
         // Given - the requested resource is not added
 
         // When
@@ -104,7 +105,7 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testCacheMaxSize() {
+    void testCacheMaxSize() {
         /// Given - the cache is overfilled
         Function<Integer, Resource> makeResource = i -> new StubResource(i.toString(), i.toString(), i.toString(), new SimpleConnectionDetail().serviceName(i.toString()));
         Function<Integer, Policy> makePolicy = i -> new Policy<>().resourceLevelRule(i.toString(), new PassThroughRule<>());
@@ -121,7 +122,7 @@ public class CaffeinePolicyCachingTest extends PolicyTestCommon {
     }
 
     @Test
-    public void testCacheTtl() throws InterruptedException {
+    void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
         assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
         // Given - a sufficient amount of time has passed

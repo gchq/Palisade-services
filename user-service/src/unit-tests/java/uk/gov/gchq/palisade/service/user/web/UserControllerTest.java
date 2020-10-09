@@ -41,14 +41,14 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserControllerTest {
-    public final UserController userController = new UserController(new MockUserService(), new StdUserConfiguration());
+class UserControllerTest {
+    final UserController userController = new UserController(new MockUserService(), new StdUserConfiguration());
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         logger = (Logger) LoggerFactory.getLogger(UserController.class);
         appender = new ListAppender<>();
         appender.start();
@@ -56,7 +56,7 @@ public class UserControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }
@@ -69,7 +69,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testAddAndGetUser() {
+    void testAddAndGetUser() {
         User user = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         AddUserRequest addUserRequest = AddUserRequest.create(new RequestId().id("addUserRequest")).withUser(user);
         Boolean addedUser = userController.addUserRequest(addUserRequest);

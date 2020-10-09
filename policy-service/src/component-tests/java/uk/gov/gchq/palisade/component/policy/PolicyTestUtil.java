@@ -40,7 +40,7 @@ import java.util.UUID;
  * Set of methods and classes used in construction of integration tests in this package.
  */
 public class PolicyTestUtil {
-    static List<ServiceInstance> listTestServiceInstance(final String[] services) {
+    public static List<ServiceInstance> listTestServiceInstance(final String[] services) {
         List<ServiceInstance> listServiceInstance = new ArrayList<>();
         for (String service : services) {
             listServiceInstance.add(new TestServiceInstance(service));
@@ -48,7 +48,7 @@ public class PolicyTestUtil {
         return listServiceInstance;
     }
 
-    static class TestServiceInstance implements ServiceInstance {
+    public static class TestServiceInstance implements ServiceInstance {
 
         private String serviceId = "Empty string";
 
@@ -96,24 +96,24 @@ public class PolicyTestUtil {
         }
     }
 
-    static User mockUser() {
+    public static User mockUser() {
         return (new User())
                 .userId("Alice")
                 .roles("HR")
                 .auths("private", "public");
     }
 
-    static Context mockContext() {
+    public static Context mockContext() {
         return (new Context())
                 .contents(new HashMap<String, Object>()).put("purpose", "SALARY")
                 .purpose("Testing");
     }
 
-    static RequestId mockOriginalRequestId() {
+    public static RequestId mockOriginalRequestId() {
         return (new RequestId()).id(UUID.randomUUID().toString());
     }
 
-    static LeafResource mockResource() {
+    public static LeafResource mockResource() {
         return new FileResource()
                 .id("TEST_RESOURCE_ID")
                 .type("data type of the resource, e.g. Employee")
@@ -125,13 +125,13 @@ public class PolicyTestUtil {
                                 .id("root")));
     }
 
-    static Collection<LeafResource> mockResources() {
+    public static Collection<LeafResource> mockResources() {
         List resources = new ArrayList<LeafResource>();
         resources.add(mockResource());
         return resources;
     }
 
-    static Policy mockPolicy() {
+    public static Policy mockPolicy() {
         return new Policy()
                 .owner(mockUser())
                 .resourceRules(new Rules<>())

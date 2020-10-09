@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.component.user.request;
-
+package uk.gov.gchq.palisade.service.user.request;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -28,15 +27,12 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 
 import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
+import uk.gov.gchq.palisade.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,8 +45,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
 
-@RunWith(JUnit4.class)
-public class GetUserRequestTest {
+public class AddUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
 
     private Logger logger;
@@ -59,7 +54,7 @@ public class GetUserRequestTest {
     @Before
     public void setup() {
         LoggingSystem.get(ClassLoader.getSystemClassLoader()).setLogLevel(Logger.ROOT_LOGGER_NAME, LogLevel.DEBUG);
-        logger = (Logger) LoggerFactory.getLogger(GetUserRequest.class);
+        logger = (Logger) LoggerFactory.getLogger(AddUserRequest.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
@@ -79,50 +74,40 @@ public class GetUserRequestTest {
     }
 
     @Test
-    public void GetUserRequestTest() {
-        final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId")).withUserId(new UserId().id("newUser"));
-        assertThat("GetUserRequest not constructed", subject.userId.getId(), is(equalTo("newUser")));
+    public void AddUserRequestTest() {
+        final AddUserRequest subject = AddUserRequest.create(new RequestId().id("newId")).withUser(new User().userId("newUser"));
+        assertThat("AddUserRequest not constructed", subject.user.getUserId().getId(), is(equalTo("newUser")));
+
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
         assertNotEquals(0, debugMessages.size());
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("GetUserRequest.create with requestId"),
+                Matchers.containsString("AddUserRequest.create with requestId"),
                 Matchers.anyOf(
-                        Matchers.containsString("GetUserRequest with requestId"))
+                        Matchers.containsString("AddUserRequest with originalRequestId"))
         ));
     }
 
     @Test
-    public void GetUserRequestToJsonTest() throws IOException {
-        final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId"))
-                .withUserId(new UserId().id("user"));
+    public void AddUserRequestToJsonTest() throws IOException {
+        final AddUserRequest subject = AddUserRequest.create(new RequestId().id("newId"))
+                .withUser(new User().userId("user"));
 
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;
 
-        assertThat("GetUserRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("id, originalRequestId, userId")));
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("GetUserRequest.create with requestId"),
-                Matchers.anyOf(
-                        Matchers.containsString("GetUserRequest with requestId"))
-        ));
+        assertThat("AddUserRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("originalRequestId, user, id")));
     }
 
     @Test
-    public void GetUserRequestFromJsonTest() throws IOException {
-        final GetUserRequest subject = GetUserRequest.create(new RequestId().id("123"))
-                .withUserId(new UserId().id("newUser"));
+    public void AddUserRequestFromJsonTest() throws IOException {
+        final AddUserRequest subject = AddUserRequest.create(new RequestId().id("123"))
+                .withUser(new User().userId("user"));
 
-        final String jsonString = "{\"id\":{\"id\":\"9b3b4751-d88d-4aad-9a59-022fb76e8474\"},\"originalRequestId\":{\"id\":\"123\"},\"userId\":{\"id\":\"newUser\"}}";
+        final String jsonString = "{\"id\":{\"id\":\"3c6324a2-3dfa-43c8-9d96-576b558e2169\"},\"originalRequestId\":{\"id\":\"123\"},\"user\":{\"userId\":{\"id\":\"user\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
+        final String asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject)).toString();
 
-        assertThat("GetUserRequest could not be parsed from json string", subject.userId, is(equalTo(new UserId().id("newUser"))));
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
-        MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("GetUserRequest.create with requestId"),
-                Matchers.anyOf(
-                        Matchers.containsString("GetUserRequest with requestId"))
-        ));
+        final AddUserRequest result = this.mapper.readValue(jsonString, AddUserRequest.class);
+
+        assertThat("AddUserRequest could not be parsed from json string", subject.user, is(equalTo(new User().userId("user"))));
     }
 }

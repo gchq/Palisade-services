@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.policy;
+package uk.gov.gchq.palisade.contract.policy.rest;
 
 
-import feign.Response;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.component.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.component.policy.config.PolicyTestConfiguration;
-import uk.gov.gchq.palisade.component.policy.web.PolicyClient;
-import uk.gov.gchq.palisade.contract.policy.config.RedisTestConfiguration;
+import uk.gov.gchq.palisade.component.policy.service.RedisTestConfiguration;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
@@ -37,7 +38,6 @@ import uk.gov.gchq.palisade.service.policy.request.CanAccessRequest;
 import uk.gov.gchq.palisade.service.policy.request.CanAccessResponse;
 import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,50 +47,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableFeignClients
 @SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(classes = {RedisTestConfiguration.class,  PolicyTestConfiguration.class})
-public class PolicyComponentTest extends PolicyTestCommon {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyComponentTest.class);
+@ContextConfiguration(classes = {RedisTestConfiguration.class, PolicyTestConfiguration.class})
+class PolicyRestContractTest extends PolicyTestCommon {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyRestContractTest.class);
 
     @Autowired
-    private Map<String, PolicyService> serviceMap;
-
-    @Autowired
-    private PolicyClient policyClient;
+    private TestRestTemplate restTemplate;
 
     @Test
-    public void testContextLoads() {
-        assertThat(serviceMap).isNotNull();
-        assertThat(serviceMap).isNotEmpty();
+    void testIsUp() {
+        ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    @Test
-    public void testIsUp() {
-        Response health = policyClient.getActuatorHealth();
-        assertThat(health.status()).isEqualTo(HttpStatus.OK.value());
-    }
+    public static interface LeafResourceRulesMap extends Map<LeafResource, Rules> {}
 
     @Test
-    public void testComponentTest() {
+    void testComponentTest() {
         // Given there are resources and policies to be added
         Collection<LeafResource> resources = Collections.singleton(NEW_FILE);
 
         // When a resource is added
         SetResourcePolicyRequest addRequest = new SetResourcePolicyRequest().resource(NEW_FILE).policy(PASS_THROUGH_POLICY);
-        policyClient.setResourcePolicyAsync(addRequest);
+        restTemplate.postForLocation("/setResourcePolicyAsync", addRequest);
 
         // Given it is accessible
         CanAccessRequest accessRequest = new CanAccessRequest().user(USER).resources(resources).context(CONTEXT);
-        CanAccessResponse accessResponse = policyClient.canAccess(accessRequest);
+        CanAccessResponse accessResponse = restTemplate.postForObject("/canAccess", accessRequest, CanAccessResponse.class);
         for (LeafResource resource : resources) {
             assertThat(accessResponse.getCanAccessResources()).contains(resource);
         }
 
         // When the policies on the resource are requested
         GetPolicyRequest getRequest = new GetPolicyRequest().user(USER).resources(resources).context(CONTEXT);
-        Map<LeafResource, Rules> getResponse = policyClient.getPolicySync(getRequest);
+        LeafResourceRulesMap getResponse = restTemplate.postForObject("/getPolicySync", getRequest, LeafResourceRulesMap.class);
         LOGGER.info("Response: {}", getResponse);
 
         // Then the policy just added is found on the resource
-        assertThat(getResponse.get(NEW_FILE)).isEqualTo(PASS_THROUGH_POLICY.getRecordRules());
+        assertThat(getResponse).containsEntry(NEW_FILE, PASS_THROUGH_POLICY.getRecordRules());
     }
 }

@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
-public class UserControllerContractTest {
+class UserControllerContractTest {
     @Autowired
     private UserController controller;
 
@@ -46,18 +46,18 @@ public class UserControllerContractTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void testContextLoads() {
+    void testContextLoads() {
         assertThat(controller).isNotNull();
     }
 
     @Test
-    public void testIsUp() {
+    void testIsUp() {
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
         assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void testAddedUserIsRetrievable() {
+    void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("rest-added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
 
