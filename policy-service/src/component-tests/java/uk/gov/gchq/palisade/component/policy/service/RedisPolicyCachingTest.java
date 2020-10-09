@@ -25,7 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
-import uk.gov.gchq.palisade.contract.policy.config.PolicyTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -41,8 +40,12 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("redis")
-@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.NONE)
-@ContextConfiguration(classes = {RedisTestConfiguration.class, PolicyTestConfiguration.class})
+@SpringBootTest(
+        classes = {PolicyApplication.class},
+        webEnvironment = WebEnvironment.NONE,
+        properties = {"spring.cache.redis.timeToLive=1s"}
+)
+@ContextConfiguration(classes = {RedisTestConfiguration.class})
 class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Autowired
@@ -128,7 +131,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         assertThat(cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isNotNull();
 
         // Given - a sufficient amount of time has passed
-        TimeUnit.MILLISECONDS.sleep(2500);
+        TimeUnit.SECONDS.sleep(1);
 
         // When - an old entry is requested
         Optional<Policy> cachedPolicy = cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE);

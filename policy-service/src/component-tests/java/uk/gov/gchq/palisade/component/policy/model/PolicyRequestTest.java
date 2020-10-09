@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PolicyRequestTest.class)
-public class PolicyRequestTest {
+class PolicyRequestTest {
 
     @Autowired
     private JacksonTester<PolicyRequest> jacksonTester;
@@ -52,7 +52,7 @@ public class PolicyRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantPolicyRequestSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantPolicyRequestSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         User user = new User().userId("testUserId");
         LeafResource resource = new FileResource().id("/test/file.format")

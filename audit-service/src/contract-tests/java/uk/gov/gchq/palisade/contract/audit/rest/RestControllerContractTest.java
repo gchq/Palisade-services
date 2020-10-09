@@ -34,8 +34,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@SpringBootTest(classes = AuditApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
-public class RestControllerContractTest extends AuditTestCommon {
+@SpringBootTest(classes = AuditApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+ class RestControllerContractTest extends AuditTestCommon {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -50,19 +50,19 @@ public class RestControllerContractTest extends AuditTestCommon {
     );
 
     @Test
-    public void testContextLoads() {
+     void testContextLoads() {
         assertThat(serviceMap).isNotNull();
         assertThat(serviceMap).isNotEmpty();
     }
 
     @Test
-    public void testIsUp() {
+     void testIsUp() {
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
         assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void testComponent() {
+     void testComponent() {
         requests.forEach(request -> {
             Boolean response = restTemplate.postForObject("/audit", request, Boolean.class);
             assertThat(response).isTrue();

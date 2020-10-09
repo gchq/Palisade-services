@@ -58,12 +58,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(PolicyTestConfiguration.class)
 @ContextConfiguration(classes = PolicyApplication.class)
 @WebMvcTest(PolicyController.class)
-public class PolicyControllerTest {
+class PolicyControllerTest {
 
-    public static final String CAN_ACCESS_REQUEST_URL = "/canAccess";
-    public static final String GET_POLICY_SYNC_URL = "/getPolicySync";
-    public static final String SET_RESOURCE_POLICY_ASYNC_URL = "/setResourcePolicyAsync";
-    public static final String SET_TYPE_POLICY_ASYNC_URL = "/setTypePolicyAsync";
+    static final String CAN_ACCESS_REQUEST_URL = "/canAccess";
+    static final String GET_POLICY_SYNC_URL = "/getPolicySync";
+    static final String SET_RESOURCE_POLICY_ASYNC_URL = "/setResourcePolicyAsync";
+    static final String SET_TYPE_POLICY_ASYNC_URL = "/setTypePolicyAsync";
 
     @MockBean
     @Qualifier("controller")
@@ -76,7 +76,7 @@ public class PolicyControllerTest {
     private ObjectMapper mapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Mockito.when(policyService.canAccess(PolicyTestUtil.mockUser(), PolicyTestUtil.mockContext(), PolicyTestUtil.mockResource())).thenReturn(Optional.of(PolicyTestUtil.mockResource()));
     }
 
@@ -93,7 +93,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void testShouldReturnCanAccess() throws Exception {
+    void testShouldReturnCanAccess() throws Exception {
         //GIVEN
         CanAccessRequest canAccessRequest = (new CanAccessRequest())
                 .context(PolicyTestUtil.mockContext())
@@ -130,7 +130,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void testShouldReturnPolicySync() throws Exception {
+    void testShouldReturnPolicySync() throws Exception {
 
         //GIVEN
         GetPolicyRequest getPolicyRequest = (new GetPolicyRequest())
@@ -167,7 +167,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void testShouldSetResourcePolicyAsync() throws Exception {
+    void testShouldSetResourcePolicyAsync() throws Exception {
         //GIVEN
         SetResourcePolicyRequest getSetResourcePolicyRequest = (new SetResourcePolicyRequest())
                 .policy(PolicyTestUtil.mockPolicy())
@@ -194,7 +194,7 @@ public class PolicyControllerTest {
      * @throws Exception if the test fails
      */
     @Test
-    public void testShouldSetTypePolicyAsync() throws Exception {
+    void testShouldSetTypePolicyAsync() throws Exception {
         //GIVEN
         SetTypePolicyRequest setTypePolicyRequest = (new SetTypePolicyRequest())
                 .policy(PolicyTestUtil.mockPolicy())

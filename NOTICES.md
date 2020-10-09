@@ -30,7 +30,6 @@ List of third-party dependencies grouped by their license type
 * Spring Cloud Commons ([org.springframework.cloud:spring-cloud-commons:2.2.2.RELEASE](https://projects.spring.io/spring-cloud/spring-cloud-commons/))
 * Spring Cloud Config Client ([org.springframework.cloud:spring-cloud-config-client:2.2.2.RELEASE](https://spring.io))
 * Spring Cloud Netflix Eureka Client ([org.springframework.cloud:spring-cloud-netflix-eureka-client:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-netflix/spring-cloud-netflix-eureka-client))
-* Spring Cloud OpenFeign Core ([org.springframework.cloud:spring-cloud-openfeign-core:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-openfeign/spring-cloud-openfeign-core))
 * Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
@@ -49,10 +48,6 @@ List of third-party dependencies grouped by their license type
 ### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
 * JUnit ([junit:junit:4.13](http://junit.org))
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
-
-### [Eclipse Public License 2.0](./licenses/eclipse_public_license_2.0.html):
-* JUnit Jupiter API ([org.junit.jupiter:junit-jupiter-api:5.6.2](https://junit.org/junit5/))
-* JUnit Jupiter Engine ([org.junit.jupiter:junit-jupiter-engine:5.6.2](https://junit.org/junit5/))
 
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))

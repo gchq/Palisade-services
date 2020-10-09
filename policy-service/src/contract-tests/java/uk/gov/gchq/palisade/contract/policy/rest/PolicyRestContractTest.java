@@ -13,24 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.contract.policy.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.component.policy.PolicyTestCommon;
-import uk.gov.gchq.palisade.component.policy.config.PolicyTestConfiguration;
-import uk.gov.gchq.palisade.component.policy.service.RedisTestConfiguration;
+import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
@@ -45,12 +41,10 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnableFeignClients
-@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(classes = {RedisTestConfiguration.class, PolicyTestConfiguration.class})
+@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = {PolicyTestConfiguration.class})
+@ActiveProfiles("caffeine")
 class PolicyRestContractTest extends PolicyTestCommon {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyRestContractTest.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     private TestRestTemplate restTemplate;

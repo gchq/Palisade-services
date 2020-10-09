@@ -37,7 +37,7 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("caffeine")
-@SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 class RestContractTest {
 
     @Autowired
