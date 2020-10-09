@@ -36,6 +36,11 @@ management:
   endpoint:
     shutdown:
       enabled: true
+  # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
+  # Once released, if spring-boot 2.4.x fixes the health-check bugs, re-enable the endpoint here
+  health:
+    redis:
+      enabled: false
 
 async:
   corePoolSize: 6
