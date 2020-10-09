@@ -33,7 +33,6 @@
 
     <properties>
         <wiremock.version>2.20.0</wiremock.version>
-        <unit-test.skip>false</unit-test.skip>
     </properties>
 
     <dependencies>

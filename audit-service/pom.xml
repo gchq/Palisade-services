@@ -42,7 +42,6 @@
         <eureka.version>1.9.16</eureka.version>
         <event-logging.version>v4.0.5_schema-v3.2.4</event-logging.version>
         <jaxb.version>2.3.0</jaxb.version>
-        <unit-test.skip>false</unit-test.skip>
     </properties>
 
     <dependencies>

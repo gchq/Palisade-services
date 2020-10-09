@@ -32,9 +32,6 @@
     <properties>
         <apache.commons.version>1.19</apache.commons.version>
         <jackson.version>2.10.4</jackson.version>
-        <unit-test.skip>false</unit-test.skip>
-        <component-test.skip>false</component-test.skip>
-        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
