@@ -80,7 +80,7 @@ class CaffeineUserContractTest {
     }
 
     @Test
-    void testUpdateUserTest() {
+    void testUpdateUser() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -96,7 +96,7 @@ class CaffeineUserContractTest {
     }
 
     @Test
-    void testMaxSizeTest() {
+    void testMaxSize() {
         // Given - many users are added and cached (cache size set to 100 in application.yaml)
         Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
         for (int count = 0; count <= 150; ++count) {
@@ -113,7 +113,7 @@ class CaffeineUserContractTest {
     }
 
     @Test
-    void testTtlTest() throws InterruptedException {
+    void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);

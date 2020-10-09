@@ -71,7 +71,7 @@ class RedisUserContractTest {
     }
 
     @Test
-    void testUpdateUserTest() {
+    void testUpdateUser() {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
@@ -87,7 +87,7 @@ class RedisUserContractTest {
     }
 
     @Test
-    void testTtlTest() throws InterruptedException {
+    void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         userService.addUser(user);
