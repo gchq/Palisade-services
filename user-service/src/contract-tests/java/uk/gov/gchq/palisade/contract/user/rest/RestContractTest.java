@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.user;
+package uk.gov.gchq.palisade.contract.user.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
-class UserControllerContractTest {
-    @Autowired
-    private UserController controller;
+class RestContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Test
     void testContextLoads() {
-        assertThat(controller).isNotNull();
+        assertThat(restTemplate).isNotNull();
     }
 
     @Test

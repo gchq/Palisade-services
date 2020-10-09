@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.contract.user;
+package uk.gov.gchq.palisade.component.user.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("caffeine")
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
-class CaffeineUserContractTest {
+class CaffeineUserCachingTest {
 
     @Autowired
     private UserServiceProxy userService;
