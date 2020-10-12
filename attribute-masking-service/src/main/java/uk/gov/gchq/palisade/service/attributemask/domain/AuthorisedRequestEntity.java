@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.domain;
 
+import org.springframework.data.redis.core.RedisHash;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
@@ -45,6 +46,7 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
+@RedisHash(value = "AuthorisedRequestEntity", timeToLive = 86400L)
 public class AuthorisedRequestEntity {
 
     @Id
