@@ -79,14 +79,15 @@
     </properties>
 
     <modules>
+        <!-- Core service packages -->
         <module>attribute-masking-service</module>
         <module>audit-service</module>
         <module>data-service</module>
         <module>discovery-service</module>
+        <module>filtered-resource-service</module>
         <module>palisade-service</module>
         <module>policy-service</module>
         <module>resource-service</module>
-        <module>results-service</module>
         <module>user-service</module>
         <module>services-manager</module>
         <module>create-kafka-queues</module>
@@ -254,8 +255,8 @@
                      Format is "<preferred license name> :: <file name>|<license name>|<license name>|..."
                     -->
                     <licenseMerges>
-                        <licenseMerge>Apache Software License 2.0 :: apache_software_license_2.0.txt|Apache Software License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache 2|Apache 2.0</licenseMerge>
-                        <licenseMerge>MIT License :: mit_license.txt|MIT License|The MIT License|MIT X11 License</licenseMerge>
+                        <licenseMerge>Apache Software License 2.0 :: apache_software_license_2.0.txt|Apache Software License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache 2|Apache 2.0|Apache-2.0</licenseMerge>
+                        <licenseMerge>MIT License :: mit_license.txt|MIT License|The MIT License|MIT X11 License|MIT</licenseMerge>
                         <licenseMerge>Eclipse Public License 1.0 :: eclipse_public_license_1.0.html|Eclipse Public License 1.0|The Eclipse Public License 1.0|Eclipse Public License - v 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
                         <licenseMerge>BSD License 3 :: bsd_license_3.html|BSD Licence 3</licenseMerge>
                         <licenseMerge>GNU Lesser General Public License 2.1 :: gnu_lgpl_2.1.html|GNU Lesser General Public License</licenseMerge>

@@ -327,11 +327,8 @@ timestamps {
                                             "--set global.deployment=example " +
                                             "--set global.persistence.dataStores.palisade-data-store.aws.volumeHandle=${VOLUME_HANDLE_DATA_STORE} " +
                                             "--set global.persistence.classpathJars.aws.volumeHandle=${VOLUME_HANDLE_CLASSPATH_JARS} " +
-                                            "--set global.redisClusterEnabled=true " +
-                                            "--set global.redis.install=false " +
-                                            "--set global.redis-cluster.install=true " +
-                                            "--namespace ${HELM_DEPLOY_NAMESPACE} " +
-                                            "--timeout 200s", returnStatus: true) == 0) {
+                                            "--timeout 200s " +
+                                            "--namespace ${HELM_DEPLOY_NAMESPACE}", returnStatus: true) == 0) {
                                         echo("successfully deployed")
                                     } else {
                                         error("Build failed because of failed maven deploy")
