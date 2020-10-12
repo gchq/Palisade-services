@@ -36,6 +36,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -267,12 +268,13 @@ class KafkaContractTest {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
 
-                            assertThat(result.value())
+                            assertThat(result.value()).usingRecursiveComparison()
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(longs = {1, 10, 100})
     @DirtiesContext
