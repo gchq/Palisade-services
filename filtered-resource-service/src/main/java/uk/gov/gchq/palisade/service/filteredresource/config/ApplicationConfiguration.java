@@ -51,7 +51,7 @@ public class ApplicationConfiguration {
         return new JpaTokenOffsetPersistenceLayer(repository, executor);
     }
 
-    // TODO: Replace this with a proper error reporting service (akka actors etc.)
+    // Replace this with a proper error reporting service (akka actors etc.)
     @Bean
     ErrorEventService loggingErrorReporterService() {
         return (String token, Throwable exception) -> LOGGER.error("An error was reported for token {}:", token, exception);
@@ -62,7 +62,7 @@ public class ApplicationConfiguration {
         return new OffsetEventService(persistenceLayer);
     }
 
-    // TODO: Replace this with a proper filtered resource service (websockets etc.)
+    // Replace this with a proper filtered resource service (websockets etc.)
     @Bean
     FilteredResourceService loggingFilteredResourceService(final TokenOffsetPersistenceLayer persistenceLayer) {
         return (String token) -> {
@@ -71,7 +71,7 @@ public class ApplicationConfiguration {
         };
     }
 
-    // TODO: Replace this with a proper error handling mechanism (kafka queues etc.)
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");

@@ -53,7 +53,7 @@ public class WebsocketEventService {
      */
     public CompletableFuture<Long> getTokenOffset(final String token) {
         return this.persistenceLayer.findOffset(token)
-                // TODO: get the kafka offset for 'now' instead of this placeholder value
+                // Get the kafka offset for 'now' instead of this placeholder value
                 .thenApply(offset -> offset.orElse(-1L));
     }
 

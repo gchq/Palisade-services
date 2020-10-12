@@ -49,7 +49,7 @@ public class FilteredResourceController {
     public ResponseEntity<Void> reportError(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody AuditErrorMessage error) {
-        // TODO: Write this message to the upstream kafka queue
+        // Write this message to the upstream kafka queue
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -64,7 +64,7 @@ public class FilteredResourceController {
     public ResponseEntity<Void> storeTopicOffset(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody TopicOffsetMessage offsetMessage) {
-        // TODO: Write this message to the upstream kafka queue
+        // Write this message to the upstream kafka queue
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -80,7 +80,7 @@ public class FilteredResourceController {
     public ResponseEntity<Void> acceptFilteredResource(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) FilteredResourceRequest resourceRequest) {
-        // TODO: Write this message to the upstream kafka queue
+        // Write this message to the upstream kafka queue
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
