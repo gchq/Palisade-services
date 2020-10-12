@@ -36,6 +36,7 @@ import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
@@ -102,7 +103,14 @@ class RedisPersistenceContractTest {
         service.storeTokenOffset(token, request.queuePointer).join();
 
         // Then the offset is persisted in redis
-        assertThat(redisTemplate.keys("TokenOffsetEntity:" + token)).hasSize(1);
+        final String redisKey = "TokenOffsetEntity:" + token;
+        assertThat(redisTemplate.keys(redisKey)).hasSize(1);
+
+        // Values for the entity are correct
+        final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
+        assertThat(redisHash)
+                .containsEntry("token", ContractTestData.REQUEST_TOKEN)
+                .containsEntry("offset", ContractTestData.TOPIC_OFFSET_MESSAGE.queuePointer.toString());
     }
 
     @Test
