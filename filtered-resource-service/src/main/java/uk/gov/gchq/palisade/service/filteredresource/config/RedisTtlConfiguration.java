@@ -17,12 +17,9 @@
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
@@ -41,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
         name = "enabled",
         havingValue = "true"
 )
-@Import({RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
 @EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP, basePackageClasses = {FilteredResourceApplication.class})
 @EnableConfigurationProperties(RedisTtlProperties.class)
 public class RedisTtlConfiguration {

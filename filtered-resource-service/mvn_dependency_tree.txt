@@ -1,4 +1,4 @@
-uk.gov.gchq.palisade:filtered-resource-service:war:0.5.0-SNAPSHOT
+uk.gov.gchq.palisade:filtered-resource-service:jar:0.5.0-SNAPSHOT
 +- com.h2database:h2:jar:1.4.200:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile

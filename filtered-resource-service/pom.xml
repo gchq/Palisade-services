@@ -25,19 +25,15 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <packaging>war</packaging>
-
     <!--  *********** Aritfact ID ***********    -->
     <artifactId>filtered-resource-service</artifactId>
     <url>https://github.com/gchq/Palisade-services/tree/develop/filtered-resource-service</url>
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
-        <!-- Dependency versions -->
-        <testcontainers.version>1.14.3</testcontainers.version>
-        <embedded-redis.version>0.7.3</embedded-redis.version>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
+        <embedded-redis.version>0.7.3</embedded-redis.version>
         <!-- Testing configuration -->
         <unit-test.skip>false</unit-test.skip>
         <component-test.skip>false</component-test.skip>
@@ -200,10 +196,28 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <layout>WAR</layout>
+                    <layout>ZIP</layout>
                 </configuration>
                 <executions>
                     <execution>
@@ -242,7 +256,7 @@
                     <tag>${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
-                        <WAR_FILE>target/${project.build.finalName}-exec.war</WAR_FILE>
+                        <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>
             </plugin>

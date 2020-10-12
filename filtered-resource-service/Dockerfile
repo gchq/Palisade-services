@@ -15,10 +15,10 @@
 FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
 VOLUME /tmp
 
-ARG WAR_FILE
+ARG JAR_FILE
 
-COPY $WAR_FILE /usr/share/filtered-resource-service/filtered-resource-service.war
+COPY $JAR_FILE /usr/share/filtered-resource-service/filtered-resource-service.jar
 
 LABEL service="filtered-resource" project="palisade"
 
-ENTRYPOINT ["java", "-jar", "/usr/share/filtered-resource-service/filtered-resource-service.war"]
+ENTRYPOINT ["java", "-jar", "/usr/share/filtered-resource-service/filtered-resource-service.jar"]
