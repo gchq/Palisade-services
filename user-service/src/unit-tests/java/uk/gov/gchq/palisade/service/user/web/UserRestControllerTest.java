@@ -35,11 +35,14 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.config.StdUserConfiguration;
 import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
 import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.MockUserService;
+import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
@@ -51,6 +54,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 class UserRestControllerTest {
     private final LinkedList<ProducerRecord<String, UserRequest>> sinkAggregation = new LinkedList<>();
@@ -58,16 +63,15 @@ class UserRestControllerTest {
     private final ConsumerTopicConfiguration mockTopicConfig = Mockito.mock(ConsumerTopicConfiguration.class);
     private final Topic mockTopic = Mockito.mock(Topic.class);
     private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
-    public final UserRestController userRestController = new UserRestController(
-            new MockUserService(), new StdUserConfiguration(),
-            aggregatorSink, mockTopicConfig, materializer);
+    private final UserService service = Mockito.mock(UserService.class);
+    private final UserServiceProxy proxy = new UserServiceProxy(service);
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
     public void setup() {
-        logger = (Logger) LoggerFactory.getLogger(UserRestController.class);
+        logger = (Logger) LoggerFactory.getLogger(UserServiceProxy.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
@@ -88,22 +92,25 @@ class UserRestControllerTest {
 
     @Test
     void testAddAndGetUser() {
-        User user = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        AddUserRequest addUserRequest = AddUserRequest.create(new RequestId().id("addUserRequest")).withUser(user);
-        Boolean addedUser = userRestController.addUserRequest(addUserRequest);
+        // Given
+        User expected = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        when(service.addUser(any(User.class))).thenReturn(expected);
+        when(service.getUser(any(UserId.class))).thenReturn(expected);
 
-        assertThat(addedUser).isTrue();
+        // When
+        User addedUser = proxy.addUser(expected);
+        // Then
+        assertThat(addedUser).isEqualTo(expected);
 
-        GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("getUserRequest")).withUserId(user.getUserId());
-        User expected = userRestController.getUserRequest(getUserRequest);
+        // When
+        User user = proxy.getUser(expected.getUserId());
+        // Then
         assertThat(user).isEqualTo(expected);
 
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
         assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Invoking AddUserRequest:"),
-                Matchers.anyOf(
-                        Matchers.containsString("Invoking GetUserRequest: GetUserRequest"))
+                Matchers.containsString("Added user")
         ));
     }
 }

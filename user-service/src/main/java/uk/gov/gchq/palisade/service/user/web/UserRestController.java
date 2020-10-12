@@ -23,11 +23,6 @@ import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,14 +31,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
@@ -58,39 +47,20 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "/")
+@RequestMapping(path = "/api")
 public class UserRestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserRestController.class);
     private final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
-    private UserService service;
-    private UserConfiguration userConfig;
 
     public UserRestController(
-            @Qualifier("userService") final UserService service,
-            @Qualifier("userConfiguration") final UserConfiguration configuration,
             final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
             final ConsumerTopicConfiguration upstreamConfig,
             final Materializer materializer) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
         this.materializer = materializer;
-        this.service = service;
-        this.userConfig = configuration;
-    }
-
-    @PostMapping(value = "/getUser", consumes = "application/json", produces = "application/json")
-    public User getUserRequest(@RequestBody final GetUserRequest request) {
-        LOGGER.info("Invoking GetUserRequest: {}", request);
-        return service.getUser(request.userId);
-    }
-
-    @PostMapping(value = "/addUser", consumes = "application/json", produces = "application/json")
-    public Boolean addUserRequest(@RequestBody final AddUserRequest request) {
-        LOGGER.info("Invoking AddUserRequest: {}", request);
-        return service.addUser(request.user).equals(request.user);
     }
 
     /**
@@ -100,18 +70,27 @@ public class UserRestController {
      * @param request the (optional) request itself
      * @return the response from the service, or an error if one occurred
      */
-    @PostMapping(value = "/request", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> userRequest(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) UserRequest request) {
 
         // Process the request and return results
-        return this.processRequest(headers, Collections.singletonList(request));
+        return this.userRequestMulti(headers, Collections.singletonList(request));
     }
 
-    private ResponseEntity<Void> processRequest(
-            final Map<String, String> headers,
-            final Collection<UserRequest> requests) {
+    /**
+     * REST endpoint for debugging the service, mimicking the Kafka API.
+     * Takes a list of requests and processes each of them with the given headers
+     *
+     * @param headers  a multi-value map of http request headers
+     * @param requests a list of requests
+     * @return the response from the service, or an error if one occurred
+     */
+    @PostMapping(value = "/user/multi", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Void> userRequestMulti(
+            final @RequestHeader Map<String, String> headers,
+            final @RequestBody Collection<UserRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
@@ -137,15 +116,5 @@ public class UserRestController {
 
         // Return results
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void initPostConstruct() {
-        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
-        // Add example users to the user-service cache
-        userConfig.getUsers().stream()
-                .map(UserPrepopulationFactory::build)
-                .peek(user -> LOGGER.debug(user.toString()))
-                .forEach(user -> service.addUser(user));
     }
 }

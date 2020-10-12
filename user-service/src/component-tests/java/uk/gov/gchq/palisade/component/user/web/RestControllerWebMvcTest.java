@@ -74,7 +74,7 @@ class RestControllerWebMvcTest {
     @Test
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
-        mockMvc.perform(MockMvcRequestBuilders.post("/request")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/user")
                 .header(Token.HEADER, ApplicationTestData.REQUEST_TOKEN)
                 .content(MAPPER.writeValueAsBytes(ApplicationTestData.REQUEST))
                 .contentType("application/json"))

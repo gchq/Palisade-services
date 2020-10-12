@@ -74,22 +74,19 @@ public class AkkaRunnableGraph {
 
         // Read messages from the stream source
         return source
-                // Extract token from message, keeping track of original message
-                .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
-
                 // Get the user from the userId, keeping track of original message and token
-                .map((Pair<CommittableMessage<String, UserRequest>, String> messageAndToken) -> {
-                    UserRequest request = messageAndToken.first().record().value();
+                .map((CommittableMessage<String, UserRequest> message) -> {
+                    UserRequest request = message.record().value();
                     User user = service.getUser(new UserId().id(request.getUserId()));
-                    return new Tuple3<>(messageAndToken.first(), messageAndToken.second(), UserResponse.Builder.create(request).withUser(user));
+                    return new Pair<>(message, UserResponse.Builder.create(request).withUser(user));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message
-                .map((Tuple3<CommittableMessage<String, UserRequest>, String, UserResponse> messageTokenResponse) -> {
-                    ConsumerRecord<String, UserRequest> requestRecord = messageTokenResponse.t1().record();
-                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
-                })
+                .map((Pair<CommittableMessage<String, UserRequest>, UserResponse> messageTokenResponse) -> {
+                    ConsumerRecord<String, UserRequest> requestRecord = messageTokenResponse.first().record();
+                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                            messageTokenResponse.second(), requestRecord.headers()));
+                    })
 
                 // Build producer message, applying the committable pass-thru consuming the original message
                 .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))

@@ -30,8 +30,13 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.event.EventListener;
 
+import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
+
+import javax.annotation.PostConstruct;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,6 +55,8 @@ public class UserApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
+    private final UserService service;
+    private final UserConfiguration userConfig;
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -61,7 +68,11 @@ public class UserApplication {
     public UserApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
+            @Qualifier("userService") final UserService service,
+            @Qualifier("userConfiguration") final UserConfiguration configuration,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
+        this.service = service;
+        this.userConfig = configuration;
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;
         this.executor = executor;
@@ -76,6 +87,16 @@ public class UserApplication {
         LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
+    }
+
+    @PostConstruct()
+    public void initPostConstruct() {
+        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
+        // Add example users to the user-service cache
+        userConfig.getUsers().stream()
+                .map(UserPrepopulationFactory::build)
+                .peek(user -> LOGGER.debug(user.toString()))
+                .forEach(service::addUser);
     }
 
     /**
