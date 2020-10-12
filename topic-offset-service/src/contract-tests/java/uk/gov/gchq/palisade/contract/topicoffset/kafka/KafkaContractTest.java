@@ -36,7 +36,6 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -89,7 +88,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * The downstream "masked-resource-offset" topic is written to by this service and read by the filtered-resource-service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
-@Disabled
 @SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
 @Import(KafkaTestConfiguration.class)
 @ActiveProfiles("akkatest")
@@ -235,7 +233,7 @@ class KafkaContractTest {
     void testRestEndpoint() {
         // Given - we are already listening to the service input
         ConsumerSettings<String, TopicOffsetRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.maskedResourceKeyDeserializer(), SerDesConfig.maskedResourceValueDeserializer())
+                .create(akkaActorSystem, SerDesConfig.topicOffsetRequestKeyDeserializer(), SerDesConfig.topicOffsetRequestValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -293,8 +291,8 @@ class KafkaContractTest {
         // Given - the service will throw exceptions for 10% of the requests (first of each ten, so [START, message, END] -> [START, error, END])
         final AtomicLong throwCounter = new AtomicLong(0);
         Mockito.reset(service);
-//        Mockito.when(service.maskResourceAttributes(Mockito.argThat(obj -> throwCounter.getAndIncrement() % 10 == 0)))
-//                .thenThrow(serviceSpyException);
+        Mockito.when(service.isOffsetForTopic(Mockito.argThat(obj -> throwCounter.getAndIncrement() % 10 == 0)))
+                .thenThrow(serviceSpyException);
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings

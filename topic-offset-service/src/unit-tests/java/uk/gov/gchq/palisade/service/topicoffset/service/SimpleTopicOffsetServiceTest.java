@@ -7,9 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
-
-import java.util.HashMap;
-import java.util.Map;
+import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +26,7 @@ class SimpleTopicOffsetServiceTest {
     private Headers headers;
 
     @BeforeEach
-    void startUP() {
+    void startUp() {
         headers = new RecordHeaders();
         headers.add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
@@ -59,5 +57,18 @@ class SimpleTopicOffsetServiceTest {
     @Test
     void testTopicOffsetServiceWithoutAnyStreamMarker() {
         assertThat(simpleTopicOffsetService.isOffsetForTopic(headers)).isFalse();
+    }
+
+    /**
+     * Tests the simpleTopicOffsetService method createTopicOffsetResponse will return the same
+     * TopicOffsetResponse object when passed the same offset
+     */
+    @Test
+    void testCreateTopicOffsetResponse() {
+        Long offset = 1L;
+        TopicOffsetResponse actual = simpleTopicOffsetService.createTopicOffsetResponse(offset);
+        TopicOffsetResponse expected = TopicOffsetResponse.Builder.create().withOffset(offset);
+
+        assertThat(actual).isEqualTo(expected);
     }
 }

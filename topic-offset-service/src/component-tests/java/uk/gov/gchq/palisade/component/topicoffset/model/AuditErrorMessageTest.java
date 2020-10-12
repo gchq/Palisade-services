@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Unit tests for the evaluating the AuditErrorMessage and the related seralising to a JSon string
+ * Tests for the evaluating the AuditErrorMessage and the related seralising to a JSon string
  * and deseralising back to an object.
  */
 @JsonTest

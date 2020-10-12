@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * Unit tests for the evaluating the TopicOffsetResponse and the related seralising to a JSON string
+ * Tests for the evaluating the TopicOffsetResponse and the related seralising to a JSON string
  * and deseralising back to an object.
  */
 @JsonTest
