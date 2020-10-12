@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
+import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
         havingValue = "true"
 )
 @Import({RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
-@EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP, basePackages = "uk.gov.gchq.palisade.service.filteredresource")
+@EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP, basePackageClasses = {FilteredResourceApplication.class})
 @EnableConfigurationProperties(RedisTtlProperties.class)
 public class RedisTtlConfiguration {
     protected static final Map<String, Long> KEYSPACE_TTL = new ConcurrentHashMap<>();

@@ -36,7 +36,7 @@ public class JpaTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLay
      * This simply wraps the repository methods with {@link CompletableFuture}s
      *
      * @param repository the CrudRepository of tokens and their kafka offsets
-     * @param executor an async executor to run the futures with
+     * @param executor   an async executor to run the futures with
      */
     public JpaTokenOffsetPersistenceLayer(final TokenOffsetRepository repository, final Executor executor) {
         this.repository = repository;
