@@ -24,9 +24,9 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.service.policy.request.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.policy.request.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.PolicyResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

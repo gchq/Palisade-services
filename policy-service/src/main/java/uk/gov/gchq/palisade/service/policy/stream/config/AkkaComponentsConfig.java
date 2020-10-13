@@ -34,9 +34,9 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.policy.request.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.policy.request.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.PolicyResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;

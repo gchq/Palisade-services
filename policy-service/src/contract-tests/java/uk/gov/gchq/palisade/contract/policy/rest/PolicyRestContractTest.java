@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = {PolicyTestConfiguration.class})
-@ActiveProfiles("caffeine")
+@ActiveProfiles({"caffeine", "akkatest"})
 class PolicyRestContractTest extends PolicyTestCommon {
 
     @Autowired

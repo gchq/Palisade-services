@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.policy.exception;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.policy.request.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 
 /**
  * Capture a thrown exception and a kafka consumer record, wrapping them in a message to be caught by the supervisor.

@@ -38,8 +38,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.service.policy.request.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.PolicyResponse;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
