@@ -32,6 +32,9 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Database entity storing a token and its kafka commit offset
+ */
 @Entity
 @Table(
         name = "token_offsets",
