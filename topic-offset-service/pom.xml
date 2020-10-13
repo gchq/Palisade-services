@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>service</artifactId>
+        <groupId>uk.gov.gchq.palisade</groupId>
+        <version>0.5.0-${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>topic-offset-service</artifactId>
+    <url>https://github.com/gchq/Palisade-services/tree/develop/topic-offset-service</url>
+
+    <properties>
+        <!-- Dependency versions -->
+        <scala.version>2.13</scala.version>
+        <akka.version>2.6.8</akka.version>
+        <alpakka.version>2.0.4</alpakka.version>
+        <testcontainers.version>1.14.3</testcontainers.version>
+        <!-- Testing configuration -->
+        <unit-test.skip>false</unit-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
+    </properties>
+
+    <dependencies>
+        <!-- Common types (User, Resource, Context) -->
+        <dependency>
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
+        </dependency>
+        <!--
+            Akka and Alpakka (Kafka)
+        -->
+        <dependency>
+            <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Alpakka Kafka connectors -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Akka/SLF4j logging connector -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Smarter discovery of Kafka servers -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-discovery_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!--
+        ~ Spring Boot
+        -->
+        <dependency>
+            <!-- Useful Spring Kafka integrations -->
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Rest controller -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!--
+        ~ Test Dependencies
+        -->
+        <dependency>
+            <!-- JUnit, Jupiter, SpringBootTest etc... -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <!-- Kafka contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-testkit_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka Kafka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <skipTests>${unit-test.skip}</skipTests>
+                    <includes>
+                        <include>**/palisade/service/**</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
+                <executions>
+                    <execution>
+                        <id>component-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipITs>${component-test.skip}</skipITs>
+                            <includes>
+                                <include>**/palisade/component/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>contract-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipITs>${contract-test.skip}</skipITs>
+                            <includes>
+                                <include>**/palisade/contract/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
