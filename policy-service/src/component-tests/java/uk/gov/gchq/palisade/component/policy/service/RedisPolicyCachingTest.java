@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.contract.policy.PolicyTestData;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = {"spring.cache.redis.timeToLive=1s"}
 )
 @ContextConfiguration(classes = {RedisTestConfiguration.class})
-class RedisPolicyCachingTest extends PolicyTestCommon {
+class RedisPolicyCachingTest extends PolicyTestData {
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;

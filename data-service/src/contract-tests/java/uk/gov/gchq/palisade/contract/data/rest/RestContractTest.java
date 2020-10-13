@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
@@ -58,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableFeignClients(basePackageClasses = {DataClient.class})
 @Import(DataTestConfiguration.class)
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("web")
 class RestContractTest {
     private static final ObjectMapper MAPPER = JSONSerialiser.createDefaultMapper();
 

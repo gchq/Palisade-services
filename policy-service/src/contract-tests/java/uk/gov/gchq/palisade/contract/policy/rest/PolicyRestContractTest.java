@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.contract.policy.PolicyTestData;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = {PolicyTestConfiguration.class})
 @ActiveProfiles("caffeine")
-class PolicyRestContractTest extends PolicyTestCommon {
+class PolicyRestContractTest extends PolicyTestData {
 
     @Autowired
     private TestRestTemplate restTemplate;

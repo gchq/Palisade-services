@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.filteredresource.model;
+package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -70,15 +70,15 @@ public final class AuditErrorMessage extends AuditMessage {
         }
 
         /**
-         * Starter method for the Builder class that uses a FilteredResourceRequest for the request specific part of the Audit message.
+         * Starter method for the Builder class that uses a PolicyRequest for the request specific part of the Audit message.
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request    the request message that was sent to the data-service
+         * @param request    the request message that was sent to the palisade-service
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final FilteredResourceRequest request, final Map<String, Object> attributes) {
+        public static IError create(final PolicyRequest request, final Map<String, Object> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())

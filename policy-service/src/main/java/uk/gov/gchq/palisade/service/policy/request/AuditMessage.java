@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.audit.request;
+
+package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,50 +25,75 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-
 /**
- * This is the parent class for Audit information.  It represents the common component of the data that has been
- * sent from each of the different services.
+ * This is the parent class for Audit information.  It represents the common component of the data that is to be
+ * sent to audit service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
+    public static final String SERVICE_NAME = "policy-service";
+
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
+    @JsonProperty("userId")
     protected final String userId; //Unique identifier for the user.
+
+    @JsonProperty("resourceId")
     protected final String resourceId;  //Resource that that is being asked to access.
+
+    @JsonProperty("context")
     protected final JsonNode context;   //Relevant context information about the request.
-    protected final String serviceName;  //service that sent the message
+
+    @JsonProperty("serviceName")
+    protected String serviceName = SERVICE_NAME;  //service that sent the message
+
+    @JsonProperty("timestamp")
     protected final String timestamp;  //when the message was created
+
+    @JsonProperty("serverIP")
     protected final String serverIP;  //the server IP address for the service
+
+    @JsonProperty("serverHostname")
     protected final String serverHostname;  //the hostname of the server hosting the service
-    protected final JsonNode attributes;  //JsonNode holding Map<String, Object> holding optional extra information
+
+    @JsonProperty("attributes")
+    protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
 
     @JsonCreator
     protected AuditMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("serviceName") String serviceName,
-            final @JsonProperty("timestamp") String timestamp,
-            final @JsonProperty("serverIP") String serverIP,
-            final @JsonProperty("serverHostname") String serverHostname,
-            final @JsonProperty("attributes") JsonNode attributes) {
+            final @JsonProperty("attributes") Map<String, Object> attributes) {
 
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
         this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
-        this.serviceName = Optional.ofNullable(serviceName).orElseThrow(() -> new IllegalArgumentException("Service Name cannot be null"));
-        this.timestamp = Optional.ofNullable(timestamp).orElseThrow(() -> new IllegalArgumentException("Timestamp cannot be null"));
-        this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new IllegalArgumentException("Server IP address cannot be null"));
-        this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new IllegalArgumentException("Server Hostname cannot be null"));
-        this.attributes = Optional.ofNullable(attributes).orElseThrow(() -> new IllegalArgumentException("Attributes cannot be null"));
+        this.attributes = Optional.ofNullable(attributes).orElseGet(HashMap::new);
+
+        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            this.serverHostname = inetAddress.getHostName();
+            this.serverIP = inetAddress.getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new PalisadeRuntimeException("Failed to get server host and IP address", e);
+        }
 
     }
 
@@ -107,8 +133,8 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map<String, Object> getAttributes() throws JsonProcessingException {
-        return MAPPER.treeToValue(attributes, Map.class);
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
     @Override

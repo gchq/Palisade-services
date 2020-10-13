@@ -51,8 +51,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     @Test
      void testContextLoads() {
-        assertThat(serviceMap).isNotNull();
-        assertThat(serviceMap).isNotEmpty();
+        assertThat(serviceMap)
+                .isNotNull()
+                .isNotEmpty();
     }
 
     @Test

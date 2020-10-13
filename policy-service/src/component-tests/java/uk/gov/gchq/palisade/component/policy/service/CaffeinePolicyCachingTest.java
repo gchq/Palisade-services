@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.contract.policy.PolicyTestData;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.StubResource;
@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.NONE,
         properties = "spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"
 )
-class CaffeinePolicyCachingTest extends PolicyTestCommon {
+class CaffeinePolicyCachingTest extends PolicyTestData {
 
     @Autowired
     private PolicyServiceCachingProxy policyService;
