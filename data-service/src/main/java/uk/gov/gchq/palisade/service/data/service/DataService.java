@@ -16,15 +16,19 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
+import org.springframework.data.util.Pair;
+
 import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.reader.exception.NoCapacityException;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.request.DataRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The core API for the data service.
@@ -40,30 +44,15 @@ import java.io.OutputStream;
  */
 public interface DataService extends Service {
 
-    /**
-     * This method is used by the client code to request the data from the list of
-     * resources or a subset of the resources that the palisade service responded
-     * with in the {@link uk.gov.gchq.palisade.service.request.DataRequestResponse}.
-     * This method will only work if the client has already registered the data
-     * request with the palisade service. If the data service is unable to serve the
-     * request due to not having the resources to do so, or if it is currently
-     * serving too many requests then it may throw a {@link NoCapacityException}.
-     *
-     * @param request       The {@link ReadRequest} that came from registering the
-     *                      request with the palisade service. The request can be
-     *                      altered to contain only a subset of the resources to be
-     *                      read by this data service instance.
-     * @param out           an {@link OutputStream} to sink the file into
-     *                      and then apply appropriate complete/exception auditing
-     * @throws IOException  The {@link Exception} thrown
-     */
-    void read(final ReadRequest request, final OutputStream out) throws IOException;
+    CompletableFuture<Optional<DataReaderRequest>> authoriseRequest(final DataRequest request);
+
+    Pair<Long, Long> read(final DataReaderRequest request, final OutputStream out);
 
     /**
      * Used to add a new serialiser to the data reader
      *
-     * @param dataFlavour   the {@link DataFlavour} to be added
-     * @param serialiser    the {@link Serialiser} to be added
+     * @param dataFlavour the {@link DataFlavour} to be added
+     * @param serialiser  the {@link Serialiser} to be added
      * @return a {@link Boolean} true/false on success/failure
      */
     Boolean addSerialiser(final DataFlavour dataFlavour, final Serialiser<?> serialiser);

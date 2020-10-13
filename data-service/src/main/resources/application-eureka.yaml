@@ -46,4 +46,3 @@ eureka:
 web:
   client:
     audit-service: ""
-    palisade-service: ""

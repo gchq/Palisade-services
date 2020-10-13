@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.exception;
+package uk.gov.gchq.palisade.service.data.repository;
 
-import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 
-public class NoPolicyException extends PalisadeRuntimeException {
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-    public NoPolicyException(final String e) {
-        super(e);
-    }
+public interface PersistenceLayer {
 
-    public NoPolicyException(final Throwable cause) {
-        super(cause);
-    }
+    CompletableFuture<Optional<AuthorisedRequestEntity>> getAsync(final String token, final String leafResourceId);
 
-    public NoPolicyException(final String e, final Throwable cause) {
-        super(e, cause);
-    }
 }

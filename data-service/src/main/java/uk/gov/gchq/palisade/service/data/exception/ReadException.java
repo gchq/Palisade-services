@@ -16,23 +16,27 @@
 
 package uk.gov.gchq.palisade.service.data.exception;
 
-import uk.gov.gchq.palisade.service.data.service.DataService;
+import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.io.IOException;
 
-/**
- * {@link RuntimeException} to be thrown by a {@link DataService} to indicate a failure while processing a request.
- * This failure should be caught and audited with the audit service.
- */
-public class ReadException extends IOException {
+public class ReadException extends RuntimeException {
+    private final DataReaderRequest readerRequest;
 
     /**
-     * Instantiates a new Read exception with a {@link Throwable} cause
-     * which will call super and throw a {@link RuntimeException}
+     * Specialised exception thrown by the data-service when an IOException occurred while reading
+     * from the data-reader, bundling the data-reader request that caused the exception.
      *
-     * @param cause the reason for throwing the exception
+     * @param cause   a {@link IOException} that caused the error
      */
-    public ReadException(final Throwable cause) {
-        super(cause);
+    public ReadException(final DataReaderRequest readerRequest, final IOException cause) {
+        super("An exception was thrown while reading from data-reader", cause);
+        this.readerRequest = readerRequest;
+    }
+
+    @Generated
+    public DataReaderRequest getReaderRequest() {
+        return readerRequest;
     }
 }

@@ -27,4 +27,3 @@ spring:
 web:
   client:
     audit-service: audit-service
-    palisade-service: palisade-service

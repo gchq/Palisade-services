@@ -27,9 +27,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import uk.gov.gchq.palisade.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.request.DataRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 @RestController
@@ -44,9 +45,9 @@ public class DataController {
     /**
      * Constructor for a {@link DataController} instance.
      *
-     * @param service                   a {@link DataService} instance that will process the requests.
-     * @param serialiserConfiguration   a {@link StdSerialiserConfiguration} that can be used to Pre-populate the {@link DataService}
-     *                                  with a {@link uk.gov.gchq.palisade.data.serialise.Serialiser}
+     * @param service                 a {@link DataService} instance that will process the requests.
+     * @param serialiserConfiguration a {@link StdSerialiserConfiguration} that can be used to Pre-populate the {@link DataService}
+     *                                with a {@link uk.gov.gchq.palisade.data.serialise.Serialiser}
      */
     public DataController(final DataService service,
                           final StdSerialiserConfiguration serialiserConfiguration) {
@@ -55,9 +56,13 @@ public class DataController {
     }
 
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
-    public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final ReadRequest request) {
-        LOGGER.info("Invoking read (chunked): {}", request);
-        StreamingResponseBody stream = outputStream -> service.read(request, outputStream);
+    public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final DataRequest dataRequest) {
+        LOGGER.info("Invoking read (chunked): {}", dataRequest);
+        StreamingResponseBody stream = outputStream -> service.authoriseRequest(dataRequest)
+                .thenApply(maybeReadRequest -> maybeReadRequest
+                        .orElseThrow(() -> new ForbiddenException(
+                                String.format("The token '%s' is not authorised to access the leafResource '%s'", dataRequest.getToken(), dataRequest.getLeafResourceId()))))
+                .thenApply(readRequest -> service.read(readRequest, outputStream));
 
         LOGGER.info("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);

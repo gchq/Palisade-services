@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 
 import java.util.Map;
 import java.util.Objects;
@@ -83,18 +84,18 @@ public final class AuditErrorMessage extends AuditMessage {
          */
 
 
-        public static IError create(final DataResponse request, final Map<String, Object> attributes) throws JsonProcessingException {
+        public static IError create(final AuthorisedRequestEntity requestEntity, final Map<String, Object> attributes) {
             return create()
-                    .withUserId(request.getUserId())
-                    .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode())
+                    .withUserId(requestEntity.getUser().getUserId().getId())
+                    .withResourceId(requestEntity.getResourceId())
+                    .withContext(requestEntity.getContext())
                     .withAttributes(attributes);
         }
 
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -107,7 +108,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -120,7 +121,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -143,7 +144,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-        interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -156,7 +157,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the error that occurred.
          */
-        interface IError {
+        public interface IError {
             /**
              * Adds the error for the message.
              *

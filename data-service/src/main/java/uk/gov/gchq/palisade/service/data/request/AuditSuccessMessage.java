@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 
 import java.util.Map;
 import java.util.Objects;
@@ -53,16 +54,11 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("leafResourceId") String leafResourceId,
-            final @JsonProperty("recordsProcessed") long recordsProcessed,
-            final @JsonProperty("recordsReturned") long recordsReturned) {
+            final @JsonProperty("attributes") Map<String, Object> attributes) {
 
         super(userId, resourceId, context, attributes);
         this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new RuntimeException("Resource ID cannot be null"));
-
-        attributes.put(RECORDS_PROCESSED, recordsProcessed);
-        attributes.put(RECORDS_RETURNED, recordsReturned);
     }
 
     @Generated
@@ -82,8 +78,8 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @return interface {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
-            return userId -> resourceId -> context -> attributes -> leafResource -> recordsProcessed -> recordsReturned ->
-                    new AuditSuccessMessage(userId, resourceId, context, attributes, leafResource, recordsProcessed, recordsReturned);
+            return userId -> resourceId -> context -> leafResource -> attributes ->
+                    new AuditSuccessMessage(userId, resourceId, context, leafResource, attributes);
         }
 
         /**
@@ -91,23 +87,20 @@ public final class AuditSuccessMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request    the request message that was sent to the data-service
-         * @param attributes optional information stored in a Map
          * @return interface {@link ILeafResourceId} for the next step in the build.
-         * @throws JsonProcessingException if there is a failure to parse information from the DataRequest.
          */
-        public static ILeafResourceId create(final DataResponse request, final Map<String, Object> attributes) throws JsonProcessingException {
+        public static IAttributes create(final AuthorisedRequestEntity requestEntity) {
             return create()
-                    .withUserId(request.getUserId())
-                    .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode())
-                    .withAttributes(attributes);
+                    .withUserId(requestEntity.getUser().getUserId().getId())
+                    .withResourceId(requestEntity.getResourceId())
+                    .withContext(requestEntity.getContext())
+                    .withLeafResourceId(requestEntity.getLeafResource().getId());
         }
 
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -120,7 +113,7 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -133,14 +126,13 @@ public final class AuditSuccessMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link IAttributes} for the next step in the build.
              */
-            default IAttributes withContext(Context context) {
+            default ILeafResourceId withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -148,62 +140,41 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return interface {@link IAttributes} for the next step in the build.
              */
-            IAttributes withContextNode(JsonNode context);
-        }
-
-        /**
-         * Adds the attributes for the message.
-         */
-        interface IAttributes {
-            /**
-             * Adds the attributes for the message.
-             *
-             * @param attributes timestamp for the request.
-             * @return interface {@link ILeafResourceId} for the next step in the build.
-             */
-            ILeafResourceId withAttributes(Map<String, Object> attributes);
+            ILeafResourceId withContextNode(JsonNode context);
         }
 
         /**
          * Adds the leaf resource ID for the message.
          */
-        interface ILeafResourceId {
+        public interface ILeafResourceId {
             /**
              * Adds the leaf resource ID for the message.
              *
              * @param leafResource leaf resource ID.
-             * @return interface  {@link IRecordsReturned} for the next step in the build.
              */
-            IRecordsProcessed withLeafResourceId(String leafResource);
+            IAttributes withLeafResourceId(String leafResource);
         }
 
         /**
-         * Adds the Number of Records Processed.
+         * Adds the attributes for the message.
          */
-        interface IRecordsProcessed {
+        public interface IAttributes {
             /**
-             * Adds the number of records processed
+             * Adds the attributes for the message.
              *
-             * @param recordsProcessed recordsProcessed
-             * @return interface  {@link IRecordsReturned} for the next step in the build.
+             * @param attributes timestamp for the request.
              */
-            IRecordsReturned withNumberOfRecordsProcessed(long recordsProcessed);
+            AuditSuccessMessage withAttributes(Map<String, Object> attributes);
+
+            default AuditSuccessMessage withRecordsProcessedAndReturned(final Long recordsProcessed, final Long recordsReturned) {
+                return withAttributes(Map.of(
+                        RECORDS_PROCESSED, recordsProcessed,
+                        RECORDS_RETURNED, recordsReturned
+                ));
+            }
         }
 
-        /**
-         * Adds the Number of records returned.
-         */
-        interface IRecordsReturned {
-            /**
-             * Adds the Number of records returned.
-             *
-             * @param recordsReturned the number of records returned.
-             * @return class  {@link AuditSuccessMessage} for the completed class from the builder.
-             */
-            AuditSuccessMessage withNumberOfRecordsReturned(long recordsReturned);
-        }
     }
 
     @Override
