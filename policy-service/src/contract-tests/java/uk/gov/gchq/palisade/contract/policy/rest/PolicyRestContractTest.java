@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.contract.policy.rest;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = {PolicyTestConfiguration.class})
 @ActiveProfiles({"caffeine", "akkatest"})
+@Disabled
 class PolicyRestContractTest extends PolicyTestCommon {
 
     @Autowired

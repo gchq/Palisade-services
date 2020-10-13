@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.policy.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,6 +82,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getContextNode() {
         return this.context;
     }
@@ -90,6 +92,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getUserNode() {
         return this.user;
     }
@@ -99,6 +102,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getResourceNode() {
         return this.resource;
     }
