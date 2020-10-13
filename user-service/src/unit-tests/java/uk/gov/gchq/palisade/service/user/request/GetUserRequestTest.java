@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.user.request;
 
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -28,9 +27,9 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.UserId;
@@ -46,7 +45,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
 
-@RunWith(JUnit4.class)
 public class GetUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
 
@@ -55,6 +53,7 @@ public class GetUserRequestTest {
 
     @Before
     public void setup() {
+        LoggingSystem.get(ClassLoader.getSystemClassLoader()).setLogLevel(Logger.ROOT_LOGGER_NAME, LogLevel.DEBUG);
         logger = (Logger) LoggerFactory.getLogger(GetUserRequest.class);
         appender = new ListAppender<>();
         appender.start();
@@ -78,6 +77,7 @@ public class GetUserRequestTest {
     public void GetUserRequestTest() {
         final GetUserRequest subject = GetUserRequest.create(new RequestId().id("newId")).withUserId(new UserId().id("newUser"));
         assertThat("GetUserRequest not constructed", subject.userId.getId(), is(equalTo("newUser")));
+
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
         assertNotEquals(0, debugMessages.size());
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(

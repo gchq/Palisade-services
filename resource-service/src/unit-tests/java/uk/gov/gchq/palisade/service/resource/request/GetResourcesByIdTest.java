@@ -16,29 +16,28 @@
 
 package uk.gov.gchq.palisade.service.resource.request;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.RequestId;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(JUnit4.class)
+
 public class GetResourcesByIdTest {
 
     private final GetResourcesByIdRequest expected = new GetResourcesByIdRequest();
     private final RequestId originalId = new RequestId().id("Original");
 
-    @Before
+    @BeforeEach
     public void setup() {
         expected.setResourceId("Test");
         expected.setOriginalRequestId(originalId);
     }
 
     @Test
-    public void returnRequestObjectTest() {
+    public void testReturnRequestObject() {
         //Given
         GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
 
@@ -46,15 +45,18 @@ public class GetResourcesByIdTest {
         actual.resourceId("Test");
 
         //Then
-        assertEquals(expected.getResourceId(), actual.getResourceId());
+        assertThat(expected.getResourceId()).isEqualTo(actual.getResourceId());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void returnErrorWithNoResourceIdTest() {
+    @Test
+    public void testReturnErrorWithNoResourceId() {
         //Given
         GetResourcesByIdRequest actual = new GetResourcesByIdRequest();
 
         //When
-        actual.setResourceId(null);
+        Exception nullPointerException = assertThrows(NullPointerException.class, () -> actual.setResourceId(null), "should throw nullPointerException");
+
+        //Then an error is thrown
+        assertThat((String) null).isEqualTo(nullPointerException.getMessage());
     }
 }

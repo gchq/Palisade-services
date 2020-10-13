@@ -16,14 +16,12 @@
 
 package uk.gov.gchq.palisade.service.palisade.domain;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -40,9 +38,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD) //reset db after each test
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+//reset db after each test
 @ActiveProfiles("dbtest")
 public class DataRequestTest {
 
@@ -50,7 +48,7 @@ public class DataRequestTest {
     private DataRequestRepository dataRequestRepository;
 
     @Test
-    public void storeAndRetrieveTest() {
+    public void testStoreAndRetrieve() {
         final Context context = new Context(Stream.of(new SimpleEntry<String, Serializable>("testing repo", "this")).collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)));
         final DataRequestConfig dataRequestConfig = new DataRequestConfig();
         dataRequestConfig.setContext(context);
@@ -69,5 +67,4 @@ public class DataRequestTest {
                 () -> assertThat(subject.getContext().get("testing repo")).isEqualTo("this")
         );
     }
-
 }

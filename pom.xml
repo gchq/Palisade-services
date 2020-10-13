@@ -48,7 +48,7 @@
     </licenses>
 
     <properties>
-        <!-- Versions -->
+        <!-- Project properties -->
         <java.version>11</java.version>
         <revision>SNAPSHOT</revision>
         <clients.revision>SNAPSHOT</clients.revision>
@@ -66,16 +66,21 @@
         <compiler.plugin.version>3.8.0</compiler.plugin.version>
         <javadoc.plugin.version>3.2.0</javadoc.plugin.version>
         <checkstyle.plugin.version>3.1.0</checkstyle.plugin.version>
-        <depends.maven.version>3.1.1</depends.maven.version>
+        <depends.plugin.version>3.1.1</depends.plugin.version>
 
         <!-- Testing properties -->
-        <surefire.plugin.version>2.22.1</surefire.plugin.version>
-        <failsafe.version>2.22.1</failsafe.version>
+        <unit-test.skip>false</unit-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
 
-        <!-- Sonar -->
+        <!-- Testing plugins -->
+        <surefire.plugin.version>2.22.1</surefire.plugin.version>
+        <failsafe.plugin.version>2.22.1</failsafe.plugin.version>
+
+        <!-- JaCoCo/Sonar -->
+        <sonar.language>java</sonar.language>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.language>java</sonar.language>
     </properties>
 
     <modules>
@@ -209,13 +214,8 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${depends.maven.version}</version>
+                <version>${depends.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>dependencies</id>
@@ -258,6 +258,7 @@
                         <licenseMerge>Apache Software License 2.0 :: apache_software_license_2.0.txt|Apache Software License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache License 2.0|Apache 2|Apache 2.0|Apache-2.0</licenseMerge>
                         <licenseMerge>MIT License :: mit_license.txt|MIT License|The MIT License|MIT X11 License|MIT</licenseMerge>
                         <licenseMerge>Eclipse Public License 1.0 :: eclipse_public_license_1.0.html|Eclipse Public License 1.0|The Eclipse Public License 1.0|Eclipse Public License - v 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
+                        <licenseMerge>Eclipse Public License 2.0 :: eclipse_public_license_2.0.html|Eclipse Public License v2.0</licenseMerge>
                         <licenseMerge>BSD License 3 :: bsd_license_3.html|BSD Licence 3</licenseMerge>
                         <licenseMerge>GNU Lesser General Public License 2.1 :: gnu_lgpl_2.1.html|GNU Lesser General Public License</licenseMerge>
                         <licenseMerge>Mozilla Public License 2.0 or Eclipse Public License 1.0 :: mpl_2.0_or_epl_1.0.html|MPL 2.0 or EPL 1.0</licenseMerge>
@@ -272,16 +273,20 @@
                     -->
                     <licenseUrlFileNameSanitizers>
                         <licenseUrlFileNameSanitizer>
-                            <regexp>.*apache.*license.*2.*</regexp>
+                            <regexp>.*apache.*2.*</regexp>
                             <replacement>apache_software_license_2.0</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
-                            <regexp>.*mit.*license.*</regexp>
+                            <regexp>.*mit.*</regexp>
                             <replacement>mit_license</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*eclipse.*license.*1.0.*</regexp>
                             <replacement>eclipse_public_license_1.0</replacement>
+                        </licenseUrlFileNameSanitizer>
+                        <licenseUrlFileNameSanitizer>
+                            <regexp>.*eclipse.*license.*2.0.*</regexp>
+                            <replacement>eclipse_public_license_2.0</replacement>
                         </licenseUrlFileNameSanitizer>
                         <licenseUrlFileNameSanitizer>
                             <regexp>.*bsd.*licence.*3.*</regexp>
@@ -311,21 +316,60 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <skipTests>${unit-test.skip}</skipTests>
+                    <includes>
+                        <include>uk/gov/gchq/palisade/service/**</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
+                <executions>
+                    <execution>
+                        <id>component-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipITs>${component-test.skip}</skipITs>
+                            <includes>
+                                <include>uk/gov/gchq/palisade/component/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>contract-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipITs>${contract-test.skip}</skipITs>
+                            <includes>
+                                <include>uk/gov/gchq/palisade/contract/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
                 <executions>
                     <execution>
-                        <id>agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
                             <goal>report</goal>
+                            <goal>prepare-agent-integration</goal>
+                            <goal>report-integration</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -340,8 +384,7 @@
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
-                    <headerLocation>code-style/licenseHeader.txt
-                    </headerLocation>
+                    <headerLocation>code-style/licenseHeader.txt</headerLocation>
                     <suppressionsLocation>code-style/checkstyle-suppressions.xml</suppressionsLocation>
                     <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                 </configuration>
@@ -354,11 +397,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${failsafe.version}</version>
             </plugin>
         </plugins>
     </build>

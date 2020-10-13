@@ -18,9 +18,7 @@ package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -41,27 +39,24 @@ import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
 public class AuditRequestTest {
 
     public final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void RegisterRequestCompleteAuditRequestTest() {
+    public void testRegisterRequestCompleteAuditRequest() {
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("456"))
                 .withUser(new User().userId("a user"))
                 .withLeafResources(Stream.of(new FileResource()).collect(toSet()))
                 .withContext(new Context(Stream.of(new SimpleImmutableEntry<String, Class<?>>("a string", String.class)).collect(toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue))));
 
-        assertThat("RegisterRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("a user")));
+        assertThat(subject.user.getUserId().getId()).isEqualTo("a user");
     }
 
     @Test
-    public void RegisterRequestCompleteAuditRequestToJsonTest() throws IOException {
+    public void testRegisterRequestCompleteAuditRequestToJson() throws IOException {
         final LeafResource leafResource = (LeafResource) ResourceBuilder.create("file:/usr/share/resource/test_resource");
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
@@ -71,11 +66,11 @@ public class AuditRequestTest {
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;
 
-        assertThat("RegisterRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResources, context, timestamp, serverIp, serverHostname")));
+        assertThat(StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", "))).isEqualTo("class, id, originalRequestId, user, leafResources, context, timestamp, serverIp, serverHostname");
     }
 
     @Test
-    public void RegisterRequestCompleteAuditRequestFromJsonTest() throws IOException {
+    public void testRegisterRequestCompleteAuditRequestFromJson() throws IOException {
         final AuditRequest.RegisterRequestCompleteAuditRequest subject = AuditRequest.RegisterRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("user"))
                 .withLeafResources(Stream.of(new FileResource().id("/usr/share/resource/test_resource").type("standard").serialisedFormat("none").parent(new DirectoryResource().id("resource").parent(new SystemResource().id("share")))).collect(toSet()))
@@ -85,7 +80,7 @@ public class AuditRequestTest {
 
         final AuditRequest.RegisterRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, AuditRequest.RegisterRequestCompleteAuditRequest.class);
 
-        assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
+        assertThat(subject.context.getContents().keySet().stream().findFirst().orElse("notFound")).isEqualTo("a string");
     }
 
 }

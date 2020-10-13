@@ -27,9 +27,9 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
@@ -45,7 +45,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
 
-@RunWith(JUnit4.class)
 public class AddUserRequestTest {
     public final ObjectMapper mapper = new ObjectMapper();
 
@@ -54,6 +53,7 @@ public class AddUserRequestTest {
 
     @Before
     public void setup() {
+        LoggingSystem.get(ClassLoader.getSystemClassLoader()).setLogLevel(Logger.ROOT_LOGGER_NAME, LogLevel.DEBUG);
         logger = (Logger) LoggerFactory.getLogger(AddUserRequest.class);
         appender = new ListAppender<>();
         appender.start();
@@ -72,7 +72,6 @@ public class AddUserRequestTest {
                 .map(ILoggingEvent::getFormattedMessage)
                 .collect(Collectors.toList());
     }
-
 
     @Test
     public void AddUserRequestTest() {
