@@ -13,6 +13,7 @@ List of third-party dependencies grouped by their license type
 * akka-stream-testkit ([com.typesafe.akka:akka-stream-testkit_2.13:2.6.8](https://akka.io/))
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
 * event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
+* embedded-redis ([it.ozimov:embedded-redis:0.7.3](https://github.com/ozimov/embedded-redis))
 * Apache Commons Compress ([org.apache.commons:commons-compress:1.19](https://commons.apache.org/proper/commons-compress/))
 * Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
 * spring-boot-configuration-processor ([org.springframework.boot:spring-boot-configuration-processor:2.3.1.RELEASE](https://spring.io/projects/spring-boot))
