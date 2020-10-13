@@ -32,14 +32,62 @@
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
+        <!-- Dependency versions -->
+        <scala.version>2.13</scala.version>
+        <akka.version>2.6.8</akka.version>
+        <alpakka.version>2.0.4</alpakka.version>
         <eureka.version>1.9.16</eureka.version>
         <spring-cloud-starter-ribbon.version>1.4.7.RELEASE</spring-cloud-starter-ribbon.version>
-        <slf4j-test>1.1.0</slf4j-test>
         <caffeine.version>2.8.1</caffeine.version>
+        <!-- Test dependency versions -->
+        <testcontainers.version>1.14.3</testcontainers.version>
+        <slf4j-test>1.1.0</slf4j-test>
+        <!-- Testing configuration -->
         <unit-test.skip>false</unit-test.skip>
+        <component-test.skip>false</component-test.skip>
+        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
+        <!--~ Palisade-->
+        <dependency>
+            <!-- Common types (User, Resource, Context) -->
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.gchq.palisade</groupId>
+            <artifactId>common</artifactId>
+            <version>0.5.0-${common.revision}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <!--~ Akka and Alpakka (Kafka)-->
+        <dependency>
+            <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Alpakka Kafka connectors -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Akka/SLF4j logging connector -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Smarter discovery of Kafka servers -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-discovery_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
@@ -78,20 +126,29 @@
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>common</artifactId>
-            <version>0.5.0-${common.revision}</version>
-            <classifier>tests</classifier>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <!-- Kafka contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-testkit_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka Kafka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
             <scope>test</scope>
         </dependency>
 

@@ -149,7 +149,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 
