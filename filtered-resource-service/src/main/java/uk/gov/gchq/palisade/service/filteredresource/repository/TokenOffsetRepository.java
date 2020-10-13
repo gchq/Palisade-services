@@ -27,10 +27,23 @@ import java.util.Optional;
  */
 public interface TokenOffsetRepository extends CrudRepository<TokenOffsetEntity, String> {
 
+    /**
+     * Put a token and its kafka offset into persistence.
+     * This is a ease-of-use wrapper around {@link CrudRepository#save}.
+     *
+     * @param token  the unique request token
+     * @param offset the kafka commit offset for the start of results on the masked-resource input-topic
+     */
     default void save(final String token, final Long offset) {
         save(new TokenOffsetEntity(token, offset));
     }
 
+    /**
+     * Find the entity (ie the kafka offset) for a token from persistence.
+     *
+     * @param token the unique request token
+     * @return an {@link Optional}, present if the token was found, empty otherwise
+     */
     Optional<TokenOffsetEntity> findByToken(final String token);
 
 }
