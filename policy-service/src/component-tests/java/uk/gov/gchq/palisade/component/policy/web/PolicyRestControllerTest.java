@@ -40,7 +40,7 @@ import uk.gov.gchq.palisade.service.policy.request.GetPolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetResourcePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.request.SetTypePolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
-import uk.gov.gchq.palisade.service.policy.web.PolicyController;
+import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -57,8 +57,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(PolicyTestConfiguration.class)
 @ContextConfiguration(classes = PolicyApplication.class)
-@WebMvcTest(PolicyController.class)
-class PolicyControllerTest {
+@WebMvcTest(PolicyRestController.class)
+class PolicyRestControllerTest {
 
     static final String CAN_ACCESS_REQUEST_URL = "/canAccess";
     static final String GET_POLICY_SYNC_URL = "/getPolicySync";

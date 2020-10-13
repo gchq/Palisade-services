@@ -32,6 +32,7 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,8 @@ import scala.Function1;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
@@ -76,24 +79,31 @@ public class AkkaRunnableGraph {
 
         // Read messages from the stream source
         return source
-                // Get the user from the userId, keeping track of original message and token
+                .map((CommittableMessage<String, PolicyRequest> message) -> {
+                    PolicyRequest request = message.record().value();
+                    try {
+                       return service.canAccess(request.getUser(), request.getContext(), request.getResource());
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                })
+
+                // Get the resource from the PolicyRequest, and then call the service to get the policies for that resource
                 .map((CommittableMessage<String, PolicyRequest> message) -> {
                     PolicyRequest request = message.record().value();
                     Optional<Policy> policies = service.getPolicy(request.getResource());
                     return new Pair<>(message, policies);
                 })
 
-                .filter()
-
                 // Build producer record, copying the partition, keeping track of original message
-                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
-                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
-                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                            messageTokenResponse.second(), requestRecord.headers()));
-                })
-
-                // Build producer message, applying the committable pass-thru consuming the original message
-                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
+//                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
+//                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
+//                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+//                            messageTokenResponse.second(), requestRecord.headers()));
+//                })
+//
+//                // Build producer message, applying the committable pass-thru consuming the original message
+//                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
 
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
