@@ -26,6 +26,7 @@ import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -50,8 +51,7 @@ public class SetResourcePolicyRequest extends Request {
      */
     @Generated
     public SetResourcePolicyRequest resource(final Resource resource) {
-        requireNonNull(resource, "The resource cannot be set to null.");
-        this.setResource(resource);
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
         return this;
     }
 
@@ -61,8 +61,7 @@ public class SetResourcePolicyRequest extends Request {
      */
     @Generated
     public SetResourcePolicyRequest policy(final Policy policy) {
-        requireNonNull(policy, "The policy cannot be set to null.");
-        this.setPolicy(policy);
+        this.policy = Optional.ofNullable(policy).orElseThrow(() -> new IllegalArgumentException("Policy cannot be null"));
         return this;
     }
 
@@ -73,8 +72,7 @@ public class SetResourcePolicyRequest extends Request {
 
     @Generated
     public void setResource(final Resource resource) {
-        requireNonNull(resource);
-        this.resource = resource;
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
     }
 
     @Generated
@@ -84,8 +82,7 @@ public class SetResourcePolicyRequest extends Request {
 
     @Generated
     public void setPolicy(final Policy policy) {
-        requireNonNull(policy);
-        this.policy = policy;
+        this.policy = Optional.ofNullable(policy).orElseThrow(() -> new IllegalArgumentException("Policy cannot be null"));
     }
 
     @Override

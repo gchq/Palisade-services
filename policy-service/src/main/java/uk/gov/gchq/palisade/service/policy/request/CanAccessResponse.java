@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import static java.util.Objects.requireNonNull;
@@ -37,8 +38,7 @@ public class CanAccessResponse {
 
     @Generated
     public CanAccessResponse canAccessResources(final Collection<LeafResource> canAccessResources) {
-        requireNonNull(canAccessResources, "The can access resources collection cannot be set to null.");
-        this.setCanAccessResources(canAccessResources);
+        this.canAccessResources = Optional.ofNullable(canAccessResources).orElseThrow(() -> new IllegalArgumentException("CanAccessResources cannot be null"));
         return this;
     }
 
@@ -49,8 +49,7 @@ public class CanAccessResponse {
 
     @Generated
     public void setCanAccessResources(final Collection<LeafResource> canAccessResources) {
-        requireNonNull(canAccessResources);
-        this.canAccessResources = canAccessResources;
+        this.canAccessResources = Optional.ofNullable(canAccessResources).orElseThrow(() -> new IllegalArgumentException("CanAccessResources cannot be null"));
     }
 
     @Override

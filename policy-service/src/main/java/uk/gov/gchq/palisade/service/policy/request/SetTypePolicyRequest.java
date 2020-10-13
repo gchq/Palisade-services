@@ -25,9 +25,8 @@ import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used in the request to set a {@link Policy} for a resource type.
@@ -47,8 +46,7 @@ public class SetTypePolicyRequest extends Request {
      */
     @Generated
     public SetTypePolicyRequest type(final String type) {
-        requireNonNull(type, "The type cannot be set to null.");
-        this.setType(type);
+        this.type = Optional.ofNullable(type).orElseThrow(() -> new IllegalArgumentException("Type cannot be null"));
         return this;
     }
 
@@ -58,8 +56,7 @@ public class SetTypePolicyRequest extends Request {
      */
     @Generated
     public SetTypePolicyRequest policy(final Policy policy) {
-        requireNonNull(policy, "The policy cannot be set to null.");
-        this.setPolicy(policy);
+        this.policy = Optional.ofNullable(policy).orElseThrow(() -> new IllegalArgumentException("Policy cannot be null"));
         return this;
     }
 
@@ -70,8 +67,7 @@ public class SetTypePolicyRequest extends Request {
 
     @Generated
     public void setType(final String type) {
-        requireNonNull(type);
-        this.type = type;
+        this.type = Optional.ofNullable(type).orElseThrow(() -> new IllegalArgumentException("Type cannot be null"));
     }
 
     @Generated
@@ -81,8 +77,7 @@ public class SetTypePolicyRequest extends Request {
 
     @Generated
     public void setPolicy(final Policy policy) {
-        requireNonNull(policy);
-        this.policy = policy;
+        this.policy = Optional.ofNullable(policy).orElseThrow(() -> new IllegalArgumentException("Policy cannot be null"));
     }
 
     @Override

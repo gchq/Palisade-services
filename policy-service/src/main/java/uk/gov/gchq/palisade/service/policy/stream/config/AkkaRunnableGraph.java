@@ -38,13 +38,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -68,38 +72,33 @@ public class AkkaRunnableGraph {
             final ProducerTopicConfiguration topicConfiguration,
             final PolicyService service) {
         // Get output topic from config
-//        Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         // Read messages from the stream source
-//        return source
-//                // Extract token from message, keeping track of original message
-//                .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
-//
-//                // Store authorised request in persistence, keeping track of original message and token
-//                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, String> messageAndToken) -> {
-//                    PolicyRequest request = messageAndToken.first().record().value();
-//                    return service.canAccess(messageAndToken.second(), request)
-//                            .thenApply(ignored -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), request));
-//                })
-//
-//                // Mask resource attributes, keeping track of original message and token
-//                .map(messageTokenRequest -> new Tuple3<>(messageTokenRequest.t1(), messageTokenRequest.t2(), service.maskResourceAttributes(messageTokenRequest.t3())))
-//
-//                // Build producer record, copying the partition, keeping track of original message
-//                .map((Tuple3<CommittableMessage<String, PolicyRequest>, String, PolicyRequest> messageTokenResponse) -> {
-//                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.t1().record();
-//                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-//                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
-//                })
-//
-//                // Build producer message, applying the committable pass-thru consuming the original message
-//                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
-//
-//                // Send errors to supervisor
-//                .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
-//
-//                // Materialize the stream, sending messages to the sink
-//                .toMat(sink, Consumer::createDrainingControl);
-        return null;
+        return source
+                // Get the user from the userId, keeping track of original message and token
+                .map((CommittableMessage<String, PolicyRequest> message) -> {
+                    PolicyRequest request = message.record().value();
+                    Optional<Policy> policies = service.getPolicy(request.getResource());
+                    return new Pair<>(message, policies);
+                })
+
+                .filter()
+
+                // Build producer record, copying the partition, keeping track of original message
+                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
+                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
+                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                            messageTokenResponse.second(), requestRecord.headers()));
+                })
+
+                // Build producer message, applying the committable pass-thru consuming the original message
+                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
+
+                // Send errors to supervisor
+                .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
+
+                // Materialize the stream, sending messages to the sink
+                .toMat(sink, Consumer::createDrainingControl);
     }
 }

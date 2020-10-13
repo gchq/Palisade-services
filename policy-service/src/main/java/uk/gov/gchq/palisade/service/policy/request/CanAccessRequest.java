@@ -24,9 +24,8 @@ import uk.gov.gchq.palisade.service.request.Request;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * This class is used to request whether a user can access a resource for a given context.
@@ -46,8 +45,7 @@ public class CanAccessRequest extends Request {
      */
     @Generated
     public CanAccessRequest resources(final Collection<LeafResource> resources) {
-        requireNonNull(resources, "The resources cannot be set to null.");
-        this.setResources(resources);
+        this.resources = Optional.ofNullable(resources).orElseThrow(() -> new IllegalArgumentException("Resources cannot be null"));
         return this;
     }
 
@@ -57,8 +55,7 @@ public class CanAccessRequest extends Request {
      */
     @Generated
     public CanAccessRequest user(final User user) {
-        requireNonNull(user, "The user cannot be set to null.");
-        this.setUser(user);
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
         return this;
     }
 
@@ -68,8 +65,7 @@ public class CanAccessRequest extends Request {
      */
     @Generated
     public CanAccessRequest context(final Context context) {
-        requireNonNull(context, "The context cannot be set to null.");
-        this.setContext(context);
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
         return this;
     }
 
@@ -80,8 +76,7 @@ public class CanAccessRequest extends Request {
 
     @Generated
     public void setUser(final User user) {
-        requireNonNull(user);
-        this.user = user;
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
     }
 
     @Generated
@@ -91,8 +86,7 @@ public class CanAccessRequest extends Request {
 
     @Generated
     public void setResources(final Collection<LeafResource> resources) {
-        requireNonNull(resources);
-        this.resources = resources;
+        this.resources = Optional.ofNullable(resources).orElseThrow(() -> new IllegalArgumentException("Resources cannot be null"));
     }
 
     @Generated
@@ -102,8 +96,7 @@ public class CanAccessRequest extends Request {
 
     @Generated
     public void setContext(final Context context) {
-        requireNonNull(context);
-        this.context = context;
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
     }
 
     @Override

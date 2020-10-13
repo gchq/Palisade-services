@@ -73,7 +73,7 @@ public class PolicyApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
-        LOGGER.debug("AttributeMaskingApplication started with: {}", (Object) args);
+        LOGGER.debug("PolicyApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(PolicyApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
