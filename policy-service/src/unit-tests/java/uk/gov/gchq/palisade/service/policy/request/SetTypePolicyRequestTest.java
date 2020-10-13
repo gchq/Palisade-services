@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,22 +28,21 @@ import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class SetTypePolicyRequestTest {
+class SetTypePolicyRequestTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final User testUser = new User().userId("TestUser");
     private Policy typePolicy;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         typePolicy = new Policy().owner(testUser).resourceLevelRule("Testing purpose", new IsTextResourceRule());
     }
 
     @Test
-    public void testSetTypePolicyRequestToJson() throws IOException {
+    void testSetTypePolicyRequestToJson() throws IOException {
         // Given
         final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 
@@ -53,14 +53,11 @@ public class SetTypePolicyRequestTest {
         final Iterable<String> iterable = node::fieldNames;
 
         //That
-        assertThat(iterable).as("SetTypePolicyRequest not parsed to json")
-                .isNotEmpty()
-                .doesNotContainNull()
-                .contains("id", "type", "policy");
+        Assertions.assertThat(iterable).as("SetTypePolicyRequest not parsed to json").isNotEmpty().doesNotContainNull().contains("id", "type", "policy");
     }
 
     @Test
-    public void testSetTypePolicyRequestFromJson() throws IOException {
+    void testSetTypePolicyRequestFromJson() throws IOException {
         // Given
         final SetTypePolicyRequest expected = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 
@@ -71,9 +68,9 @@ public class SetTypePolicyRequestTest {
 
         // Then
         assertAll("DeserialisingComparedToObject",
-                () -> assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
+                () -> Assertions.assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
                         .isEqualTo(expected.getType()),
-                () -> assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
+                () -> Assertions.assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
                         .isEqualTo(expected.getPolicy().getOwner())
         );
     }

@@ -16,12 +16,10 @@
 
 package uk.gov.gchq.palisade.component.audit.config;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import uk.gov.gchq.palisade.service.audit.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
@@ -33,14 +31,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ApplicationConfiguration.class)
 public class ApplicationConfigurationTest {
 
@@ -56,16 +49,16 @@ public class ApplicationConfigurationTest {
     private Map<String, AuditService> auditServices;
 
     @Test
-    public void auditServicesLoaded() {
-        assertThat(auditServices, not(equalTo(nullValue())));
+    public void testAuditServicesLoads() {
+        assertThat(auditServices).isNotNull();
     }
 
     @Test
-    public void configurationDefinesLoadedServices() {
+    public void testConfigurationDefinesLoadedServices() {
         // Given - expectedAudits
         // Then
         for (AuditService auditService : auditServices.values()) {
-            assertThat(auditService.getClass(), isIn(EXPECTED_AUDITS));
+            assertThat(EXPECTED_AUDITS).contains(auditService.getClass());
         }
     }
 }

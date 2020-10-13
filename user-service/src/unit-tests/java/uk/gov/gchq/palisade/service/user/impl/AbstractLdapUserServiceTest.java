@@ -56,13 +56,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class AbstractLdapUserServiceTest {
+class AbstractLdapUserServiceTest {
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         logger = (Logger) LoggerFactory.getLogger(AbstractLdapUserService.class);
         appender = new ListAppender<>();
         appender.start();
@@ -70,7 +70,7 @@ public class AbstractLdapUserServiceTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }
@@ -83,7 +83,7 @@ public class AbstractLdapUserServiceTest {
     }
 
     @Test
-    public void testShouldFetchUserDetailsFromLdap() throws NamingException {
+    void testShouldFetchUserDetailsFromLdap() throws NamingException {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final UserId userId = new UserId().id("user#01");
@@ -127,7 +127,7 @@ public class AbstractLdapUserServiceTest {
 
 
     @Test
-    public void testShouldPerformABasicSearch() throws NamingException {
+    void testShouldPerformABasicSearch() throws NamingException {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final UserId userId = new UserId().id("user01");
@@ -204,7 +204,7 @@ public class AbstractLdapUserServiceTest {
     }
 
     @Test
-    public void testShouldEscapeCharacters() {
+    void testShouldEscapeCharacters() {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final LdapContext context = mock(LdapContext.class);
@@ -230,14 +230,14 @@ public class AbstractLdapUserServiceTest {
         ));
     }
 
-    public static final class MockLdapUserService extends AbstractLdapUserService {
+    static final class MockLdapUserService extends AbstractLdapUserService {
         private AbstractLdapUserService mock;
 
-        public MockLdapUserService(final LdapContext context) {
+        MockLdapUserService(final LdapContext context) {
             super(context);
         }
 
-        public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
+        MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
             super(ldapConfigPath);
         }
 
@@ -256,7 +256,7 @@ public class AbstractLdapUserServiceTest {
             return mock.getRoles(userId, userAttrs, context);
         }
 
-        public void setMock(final AbstractLdapUserService mock) {
+        void setMock(final AbstractLdapUserService mock) {
             this.mock = mock;
         }
     }

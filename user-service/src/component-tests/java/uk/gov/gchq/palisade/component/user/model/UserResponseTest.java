@@ -34,11 +34,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {UserResponseTest.class})
-public class UserResponseTest {
+class UserResponseTest {
 
     @Autowired
     private JacksonTester<UserResponse> jsonTester;
-
 
     /**
      * Tests the creation of the message type, UserResponse using the builder
@@ -48,8 +47,7 @@ public class UserResponseTest {
      *                     This equates to a failure to serialise or de-serialise the Json string.
      */
     @Test
-    public void testUserResponseSerialisingAndDeserialising() throws IOException {
-
+    void testUserResponseSerialisingAndDeserialising() throws IOException {
         User user = new User().userId("testUserId");
 
         Context context = new Context().purpose("testContext");
@@ -79,7 +77,7 @@ public class UserResponseTest {
                 ),
 
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(userResponseObject).isEqualTo(userResponse)
+                        () -> assertThat(userResponseObject).usingRecursiveComparison().isEqualTo(userResponse)
                 )
         );
     }

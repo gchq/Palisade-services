@@ -49,14 +49,11 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 
 @EnableFeignClients(basePackageClasses = {DataClient.class})
 @Import(DataTestConfiguration.class)
@@ -101,9 +98,9 @@ class RestContractTest {
     }
 
     @Test
-    void contextLoads() {
-        assertNotNull(serviceMap);
-        assertNotEquals(serviceMap, Collections.emptyMap());
+    void testContextLoads() {
+        assertThat(serviceMap).isNotNull();
+        assertThat(serviceMap).isNotEmpty();
     }
 
     @Test
@@ -113,7 +110,7 @@ class RestContractTest {
     }
 
     @Test
-    void readChunkedTest() throws IOException {
+    void testReadChunked() throws IOException {
         // Given - ReadRequest created
         ReadRequest readRequest = new ReadRequest().token("token").resource(RESOURCE);
         readRequest.setOriginalRequestId(new RequestId().id("original"));

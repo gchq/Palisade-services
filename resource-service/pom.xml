@@ -35,6 +35,7 @@
         <jackson.version>2.10.4</jackson.version>
         <hadoop.version>3.2.1</hadoop.version>
         <embedded-redis.version>0.7.3</embedded-redis.version>
+        <unit-test.skip>false</unit-test.skip>
     </properties>
 
     <dependencies>

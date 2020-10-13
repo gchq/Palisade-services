@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {UserRequestTest.class})
-public class UserRequestTest {
+class UserRequestTest {
 
     @Autowired
     private JacksonTester<UserRequest> jsonTester;
@@ -70,10 +70,8 @@ public class UserRequestTest {
                         () -> assertThat(userRequestObject.getContext()).isEqualTo(userRequest.getContext())
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(userRequestObject).isEqualTo(userRequest)
+                        () -> assertThat(userRequestObject).usingRecursiveComparison().isEqualTo(userRequest)
                 )
         );
     }
-
-
 }

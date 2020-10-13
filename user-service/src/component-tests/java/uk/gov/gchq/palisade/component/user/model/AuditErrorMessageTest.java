@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditErrorMessageTest.class})
-public class AuditErrorMessageTest {
+class AuditErrorMessageTest {
 
     @Autowired
     private JacksonTester<AuditErrorMessage> jsonTester;
@@ -90,9 +90,8 @@ public class AuditErrorMessageTest {
                         // Note Throwable equals does not override Object's equal so two Throwables are only equal if they are the same instance of an object.
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject.equals(auditErrorMessage))
+                        () -> assertThat(auditErrorMessageObject).usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(auditErrorMessage)
                 )
         );
     }
-
 }

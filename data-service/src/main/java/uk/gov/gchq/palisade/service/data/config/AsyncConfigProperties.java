@@ -20,6 +20,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+/**
+ * webMVC config properties class used when configuring WebMVC as an executor when launching the service
+ */
 @ConfigurationProperties(prefix = "async")
 public class AsyncConfigProperties {
     private int webMvcTimeout;

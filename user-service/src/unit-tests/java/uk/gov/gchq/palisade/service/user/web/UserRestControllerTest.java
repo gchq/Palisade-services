@@ -78,7 +78,7 @@ class UserRestControllerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }

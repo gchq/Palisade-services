@@ -32,9 +32,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PolicyTestCommon {
-    static final User USER = new User().userId("testUser");
-    static final User SECRET_USER = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
-    static final Context CONTEXT = new Context().purpose("Testing");
+    public static final User USER = new User().userId("testUser");
+    public static final User SECRET_USER = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
+    public static final Context CONTEXT = new Context().purpose("Testing");
 
     /**
      * Setup a collection of resources with policies like so:
@@ -53,39 +53,39 @@ public class PolicyTestCommon {
      **/
 
     // A system that only allows text files to be seen
-    static final SystemResource TXT_SYSTEM = new SystemResource().id("/txt");
-    static final Policy TXT_POLICY = new Policy<>()
+    public static final SystemResource TXT_SYSTEM = new SystemResource().id("/txt");
+    public static final Policy TXT_POLICY = new Policy<>()
             .owner(USER)
             .resourceLevelRule("Resource serialised format is txt", new IsTextResourceRule());
 
     // A directory that only allows JSON types
-    static final DirectoryResource JSON_DIRECTORY = new DirectoryResource().id("/txt/json").parent(TXT_SYSTEM);
-    static final Policy JSON_POLICY = new Policy<>()
+    public static final DirectoryResource JSON_DIRECTORY = new DirectoryResource().id("/txt/json").parent(TXT_SYSTEM);
+    public static final Policy JSON_POLICY = new Policy<>()
             .owner(USER)
             .resourceLevelRule("Resource type is json", (PredicateRule<Resource>) (resource, user, context) -> resource instanceof LeafResource && ((LeafResource) resource).getType().equals("json"));
 
     // A text file containing json data - this should be accessible
-    static final FileResource ACCESSIBLE_JSON_TXT_FILE = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json").parent(JSON_DIRECTORY);
+    public static final FileResource ACCESSIBLE_JSON_TXT_FILE = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json").parent(JSON_DIRECTORY);
 
     // A secret directory that allows only secret authorised users
-    static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret").parent(TXT_SYSTEM);
-    static final Policy SECRET_POLICY = new Policy<>()
+    public static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret").parent(TXT_SYSTEM);
+    public static final Policy SECRET_POLICY = new Policy<>()
             .owner(SECRET_USER)
             .resourceLevelRule("Check user has 'Secret' auth", (PredicateRule<Resource>) (resource, user, context) -> user.getAuths().contains("Secret"))
             .recordLevelPredicateRule("Redact all with 'Testing' purpose", (record, user, context) -> !context.getPurpose().equals("Testing"));
 
     // A secret file - accessible only to the secret user
-    static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);
+    public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);
 
-    static final FileResource NEW_FILE = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
+    public static final FileResource NEW_FILE = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
 
     // A do-nothing policy to apply to leaf resources
-    static final Policy PASS_THROUGH_POLICY = new Policy<>()
+    public static final Policy PASS_THROUGH_POLICY = new Policy<>()
             .owner(USER)
             .resourceLevelRule("Does nothing", new PassThroughRule<>())
             .recordLevelRule("Does nothing", new PassThroughRule<>());
 
-    static final Set<DirectoryResource> DIRECTORY_RESOURCES = new HashSet<>(Arrays.asList(JSON_DIRECTORY, SECRET_DIRECTORY));
-    static final Set<FileResource> FILE_RESOURCES = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, SECRET_TXT_FILE));
+    public static final Set<DirectoryResource> DIRECTORY_RESOURCES = new HashSet<>(Arrays.asList(JSON_DIRECTORY, SECRET_DIRECTORY));
+    public static final Set<FileResource> FILE_RESOURCES = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, SECRET_TXT_FILE));
 }
 

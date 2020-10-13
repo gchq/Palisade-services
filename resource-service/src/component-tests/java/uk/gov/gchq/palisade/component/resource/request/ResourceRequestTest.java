@@ -68,10 +68,8 @@ class ResourceRequestTest {
                         () -> assertThat(resourceRequest.getUser()).isEqualTo((resourceRequestObject.getUser()))
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(resourceRequest).isEqualTo(resourceRequestObject)
+                        () -> assertThat(resourceRequest).usingRecursiveComparison().isEqualTo(resourceRequestObject)
                 )
         );
-
     }
-
 }

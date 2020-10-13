@@ -32,7 +32,6 @@ velocity*
 # Various IDEs
 .project
 .idea/
-*.iml
 *.tmproj
 .vscode/
 # Non-service directories
@@ -47,12 +46,13 @@ Palisade-services-*.tgz
 # Add the directory for every service module here
 /attribute-masking-service/
 /audit-service/
-/discovery-service/
 /create-kafka-queues/
 /data-service/
+/discovery-service/
+/filtered-resource-service/
 /palisade-service/
 /policy-service/
 /resource-service/
-/user-service/
 /results-service/
+/user-service/
 /services-manager/

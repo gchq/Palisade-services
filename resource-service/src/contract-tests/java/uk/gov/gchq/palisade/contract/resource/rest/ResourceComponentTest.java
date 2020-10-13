@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,13 +35,10 @@ import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClientWrapper;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 
-import java.util.Collections;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @EnableFeignClients(basePackageClasses = {ResourceClient.class})
 @Import(ResourceTestConfiguration.class)
@@ -57,16 +55,14 @@ class ResourceComponentTest {
     private ResourceClientWrapper client;
 
     @Test
-    void contextLoads() {
-        assertNotNull(serviceMap);
-        assertNotEquals(serviceMap, Collections.emptyMap());
+    void testContextLoads() {
+        assertThat(serviceMap).isNotNull();
+        assertThat(serviceMap).isNotEmpty();
     }
 
     @Test
-    void isUp() {
+    void testIsUp() {
         Response health = client.getHealth();
-
-        assertThat(health.status(), equalTo(200));
+        assertThat(health.status()).isEqualTo(HttpStatus.OK.value());
     }
-
 }
