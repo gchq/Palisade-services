@@ -59,6 +59,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.user.ContractTestData;
 import uk.gov.gchq.palisade.service.user.UserApplication;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.StreamMarker;
 import uk.gov.gchq.palisade.service.user.model.Token;
@@ -90,7 +91,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
-@Import(KafkaTestConfiguration.class)
+@Import({KafkaTestConfiguration.class, ApplicationConfiguration.class})
 @ActiveProfiles({"caffeine", "akkatest"})
 class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
