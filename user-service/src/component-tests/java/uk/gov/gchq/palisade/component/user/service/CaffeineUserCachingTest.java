@@ -25,7 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
@@ -37,8 +39,8 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles("caffeine")
-@SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
+@ActiveProfiles({"caffeine", "akkatest"})
+@SpringBootTest(classes = {UserApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 class CaffeineUserCachingTest {
 
     @Autowired

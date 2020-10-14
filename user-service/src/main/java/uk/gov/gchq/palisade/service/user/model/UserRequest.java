@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.user.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -82,6 +83,7 @@ public final class UserRequest {
         return MAPPER.treeToValue(context, Context.class);
     }
 
+    @JsonIgnore
     @Generated
     public JsonNode getContextNode() {
         return context;

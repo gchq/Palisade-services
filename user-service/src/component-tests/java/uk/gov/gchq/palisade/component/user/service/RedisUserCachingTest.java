@@ -23,9 +23,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.stream.config.AkkaComponentsConfig;
+import uk.gov.gchq.palisade.service.user.stream.config.AkkaRunnableGraph;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles("redis")
-@SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+@ActiveProfiles({"redis", "akkatest"})
+@SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 class RedisUserCachingTest {
 
     @Autowired

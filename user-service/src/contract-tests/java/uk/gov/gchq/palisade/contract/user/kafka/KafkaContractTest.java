@@ -148,18 +148,17 @@ class KafkaContractTest {
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
-    @ParameterizedTest
-    @ValueSource(longs = {1, 10, 100})
+    @Test
     @DirtiesContext
-    void testVariousRequestSets(final long messageCount) {
-        // Create a variable number of requests
+    void testRequestSet() {
+        // Only 1 request will be received by the user-service
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
+                ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
-        final long recordCount = messageCount + 2;
+        final long recordCount = 3;
 
         // Given - the service is not mocked
         Mockito.reset(service);
@@ -215,7 +214,7 @@ class KafkaContractTest {
         results.removeLast();
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
-                        .hasSize((int) messageCount),
+                        .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
