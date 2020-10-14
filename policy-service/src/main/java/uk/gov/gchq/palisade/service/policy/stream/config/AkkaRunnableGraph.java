@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.stream.config;
 
 import akka.Done;
 import akka.japi.Pair;
-import akka.japi.tuple.Tuple3;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
@@ -32,27 +31,25 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.request.Policy;
 
-import java.nio.charset.Charset;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
  * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.policy.PolicyApplication}
@@ -60,7 +57,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final int PARALLELISM = 1;
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -81,29 +77,28 @@ public class AkkaRunnableGraph {
         return source
                 .map((CommittableMessage<String, PolicyRequest> message) -> {
                     PolicyRequest request = message.record().value();
-                    try {
-                       return service.canAccess(request.getUser(), request.getContext(), request.getResource());
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
-                })
+                    Optional<LeafResource> resources = service.canAccess(request.getUser(), request.getContext(), request.getResource());
+                    /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
+                     * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
+                     * be record level rules. Either list may be empty, but they should at least be present
+                     */
+                    Map<LeafResource, Rules> mapMap = resources.stream()
+                            .map(resource -> service.getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy.getRecordRules())))
+                            .flatMap(Optional::stream)
+                            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
-                // Get the resource from the PolicyRequest, and then call the service to get the policies for that resource
-                .map((CommittableMessage<String, PolicyRequest> message) -> {
-                    PolicyRequest request = message.record().value();
-                    Optional<Policy> policies = service.getPolicy(request.getResource());
-                    return new Pair<>(message, policies);
+                    return new Pair<>(message, PolicyResponse.Builder.create(request).withRules((Rules) mapMap));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message
-//                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
-//                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
-//                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-//                            messageTokenResponse.second(), requestRecord.headers()));
-//                })
-//
-//                // Build producer message, applying the committable pass-thru consuming the original message
-//                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
+                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
+                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
+                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                            messageTokenResponse.second(), requestRecord.headers()));
+                })
+
+                // Build producer message, applying the committable pass-thru consuming the original message
+                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
 
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))

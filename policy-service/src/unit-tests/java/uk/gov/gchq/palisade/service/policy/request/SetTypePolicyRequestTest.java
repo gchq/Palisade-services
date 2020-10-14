@@ -41,37 +41,37 @@ class SetTypePolicyRequestTest {
         typePolicy = new Policy().owner(testUser).resourceLevelRule("Testing purpose", new IsTextResourceRule());
     }
 
-    @Test
-    void testSetTypePolicyRequestToJson() throws IOException {
-        // Given
-        final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
+//    @Test
+//    void testSetTypePolicyRequestToJson() throws IOException {
+//        // Given
+//        final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
+//
+//        // When
+//        String str = this.mapper.writeValueAsString(request);
+//
+//        final JsonNode node = this.mapper.readTree(str);
+//        final Iterable<String> iterable = node::fieldNames;
+//
+//        //That
+//        Assertions.assertThat(iterable).as("SetTypePolicyRequest not parsed to json").isNotEmpty().doesNotContainNull().contains("id", "type", "policy");
+//    }
 
-        // When
-        String str = this.mapper.writeValueAsString(request);
-
-        final JsonNode node = this.mapper.readTree(str);
-        final Iterable<String> iterable = node::fieldNames;
-
-        //That
-        Assertions.assertThat(iterable).as("SetTypePolicyRequest not parsed to json").isNotEmpty().doesNotContainNull().contains("id", "type", "policy");
-    }
-
-    @Test
-    void testSetTypePolicyRequestFromJson() throws IOException {
-        // Given
-        final SetTypePolicyRequest expected = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
-
-        final String jsonString = "{\"id\":{\"id\":\"d75032bc-0509-44ac-8bad-51d4c5fd0fd4\"},\"type\":\"TestObj\",\"policy\":{\"recordRules\":{\"message\":\"no rules set\",\"rules\":{}},\"resourceRules\":{\"message\":\"Testing purpose\",\"rules\":{\"2f9f68f1-f311-4821-9124-e4c987c72df4\":{\"class\":\"uk.gov.gchq.palisade.policy.IsTextResourceRule\"}}},\"owner\":{\"userId\":{\"id\":\"TestUser\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
-
-        // When
-        final SetTypePolicyRequest actual = this.mapper.readValue(jsonString, SetTypePolicyRequest.class);
-
-        // Then
-        assertAll("DeserialisingComparedToObject",
-                () -> Assertions.assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
-                        .isEqualTo(expected.getType()),
-                () -> Assertions.assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
-                        .isEqualTo(expected.getPolicy().getOwner())
-        );
-    }
+//    @Test
+//    void testSetTypePolicyRequestFromJson() throws IOException {
+//        // Given
+//        final SetTypePolicyRequest expected = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
+//
+//        final String jsonString = "{\"id\":{\"id\":\"d75032bc-0509-44ac-8bad-51d4c5fd0fd4\"},\"type\":\"TestObj\",\"policy\":{\"recordRules\":{\"message\":\"no rules set\",\"rules\":{}},\"resourceRules\":{\"message\":\"Testing purpose\",\"rules\":{\"2f9f68f1-f311-4821-9124-e4c987c72df4\":{\"class\":\"uk.gov.gchq.palisade.policy.IsTextResourceRule\"}}},\"owner\":{\"userId\":{\"id\":\"TestUser\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
+//
+//        // When
+//        final SetTypePolicyRequest actual = this.mapper.readValue(jsonString, SetTypePolicyRequest.class);
+//
+//        // Then
+//        assertAll("DeserialisingComparedToObject",
+//                () -> Assertions.assertThat(actual.getType()).as("SetTypePolicyRequest could not be parsed from json")
+//                        .isEqualTo(expected.getType()),
+//                () -> Assertions.assertThat(actual.getPolicy().getOwner()).as("SetTypePolicyRequest could not be parsed from json")
+//                        .isEqualTo(expected.getPolicy().getOwner())
+//        );
+//    }
 }

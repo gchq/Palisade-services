@@ -47,36 +47,36 @@ class SetResourcePolicyRequestTest {
         return ((FileResource) ResourceBuilder.create("file:/temp/TestObj_00" + i + ".txt")).type("TestObj" + i).serialisedFormat("txt");
     }
 
-    @Test
-    void testSetResourcePolicyRequestToJson() throws IOException {
-        // Given
-        final SetResourcePolicyRequest request = new SetResourcePolicyRequest().policy(resourcePolicy).resource(fileResource1);
+//    @Test
+//    void testSetResourcePolicyRequestToJson() throws IOException {
+//        // Given
+//        final SetResourcePolicyRequest request = new SetResourcePolicyRequest().policy(resourcePolicy).resource(fileResource1);
+//
+//        // When
+//        final JsonNode node = this.mapper.readTree(this.mapper.writeValueAsString(request));
+//        final Iterable<String> iterable = node::fieldNames;
+//
+//        //That
+//        assertThat(iterable).isNotEmpty().doesNotContainNull().contains("id", "resource", "policy");
+//    }
 
-        // When
-        final JsonNode node = this.mapper.readTree(this.mapper.writeValueAsString(request));
-        final Iterable<String> iterable = node::fieldNames;
-
-        //That
-        assertThat(iterable).isNotEmpty().doesNotContainNull().contains("id", "resource", "policy");
-    }
-
-    @Test
-    void testSetResourcePolicyRequestFromJson() throws IOException {
-        //Given
-        final String jsonString = "{\"id\":{\"id\":\"a423c74f-ea6c-44ed-bf21-0366e51462ce\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"File://temp/TestObj_001.txt\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"File://temp/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"File/\"}},\"serialisedFormat\":\"txt\",\"type\":\"TestObj1\"},\"policy\":{\"recordRules\":{\"message\":\"no rules set\",\"rules\":{}},\"resourceRules\":{\"message\":\"Purpose is testing\",\"rules\":{\"38e91906-53d4-4504-917b-46fabae6b7b8\":{\"class\":\"uk.gov.gchq.palisade.policy.HasTestingPurpose\"}}},\"owner\":{\"userId\":{\"id\":\"TestUser\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
-
-        // When
-        final SetResourcePolicyRequest actual = this.mapper.readValue(jsonString, SetResourcePolicyRequest.class);
-        Policy expected = new Policy().owner(testUser).resourceLevelRule("Purpose is testing", new HasTestingPurpose<>());
-
-        // Then
-        assertAll("DeserialisingComparedToObject",
-                () -> assertThat(actual.getPolicy().getResourceRules().getMessage()).as("SetResourcePolicyRequest could not be parsed from json string")
-                        .isEqualTo(expected.getResourceRules().getMessage()),
-                () -> assertThat(actual.getPolicy().getRecordRules()).as("SetResourcePolicyRequest could not be parsed from json string")
-                        .isEqualTo(expected.getRecordRules()),
-                () -> assertThat(actual.getPolicy().getOwner()).as("AddUserRequest could not be parsed from json string")
-                        .isEqualTo(expected.getOwner())
-        );
-    }
+//    @Test
+//    void testSetResourcePolicyRequestFromJson() throws IOException {
+//        //Given
+//        final String jsonString = "{\"id\":{\"id\":\"a423c74f-ea6c-44ed-bf21-0366e51462ce\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"File://temp/TestObj_001.txt\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"File://temp/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"File/\"}},\"serialisedFormat\":\"txt\",\"type\":\"TestObj1\"},\"policy\":{\"recordRules\":{\"message\":\"no rules set\",\"rules\":{}},\"resourceRules\":{\"message\":\"Purpose is testing\",\"rules\":{\"38e91906-53d4-4504-917b-46fabae6b7b8\":{\"class\":\"uk.gov.gchq.palisade.policy.HasTestingPurpose\"}}},\"owner\":{\"userId\":{\"id\":\"TestUser\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
+//
+//        // When
+//        final SetResourcePolicyRequest actual = this.mapper.readValue(jsonString, SetResourcePolicyRequest.class);
+//        Policy expected = new Policy().owner(testUser).resourceLevelRule("Purpose is testing", new HasTestingPurpose<>());
+//
+//        // Then
+//        assertAll("DeserialisingComparedToObject",
+//                () -> assertThat(actual.getPolicy().getResourceRules().getMessage()).as("SetResourcePolicyRequest could not be parsed from json string")
+//                        .isEqualTo(expected.getResourceRules().getMessage()),
+//                () -> assertThat(actual.getPolicy().getRecordRules()).as("SetResourcePolicyRequest could not be parsed from json string")
+//                        .isEqualTo(expected.getRecordRules()),
+//                () -> assertThat(actual.getPolicy().getOwner()).as("AddUserRequest could not be parsed from json string")
+//                        .isEqualTo(expected.getOwner())
+//        );
+//    }
 }

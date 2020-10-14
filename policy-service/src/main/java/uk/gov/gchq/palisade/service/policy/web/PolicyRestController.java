@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.request.Token;
+import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
@@ -126,4 +126,6 @@ public class PolicyRestController {
         // Return results
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
+
+
 }

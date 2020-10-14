@@ -32,7 +32,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.StreamMarker;
-import uk.gov.gchq.palisade.service.policy.request.Token;
+import uk.gov.gchq.palisade.service.policy.model.Token;
 
 import java.io.Serializable;
 import java.util.function.Function;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.request;
+package uk.gov.gchq.palisade.service.policy.model;
 
 /**
  * Simply stores the expected header key for Tokens
