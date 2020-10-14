@@ -48,11 +48,13 @@ import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -121,7 +123,7 @@ class RestContractTest {
         client.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), avroSerialiser);
 
         // Given - the file contains the expected data
-        // avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
+         avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
 
         // When
         Set<Employee> readResult = client.readChunked(readRequest).collect(Collectors.toSet());
