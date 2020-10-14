@@ -32,6 +32,8 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,27 +56,27 @@ class PolicyRestContractTest extends PolicyTestCommon {
     public static class LeafResourceRulesMap extends HashMap<LeafResource, Rules> {
     }
 
-//    @Test
-//    void testRestEndpoint() {
-//        // Given there are resources and policies to be added
-//        Collection<LeafResource> resources = Collections.singleton(NEW_FILE);
-//
-//        // When a resource is added
-//        SetResourcePolicyRequest addRequest = new SetResourcePolicyRequest().resource(NEW_FILE).policy(PASS_THROUGH_POLICY);
-//        restTemplate.put("/setResourcePolicyAsync", addRequest);
-//
-//        // Given it is accessible
-//        CanAccessRequest accessRequest = new CanAccessRequest().user(USER).resources(resources).context(CONTEXT);
-//        CanAccessResponse accessResponse = restTemplate.postForObject("/canAccess", accessRequest, CanAccessResponse.class);
-//        for (LeafResource resource : resources) {
-//            assertThat(accessResponse.getCanAccessResources()).contains(resource);
-//        }
-//
-//        // When the policies on the resource are requested
-//        GetPolicyRequest getRequest = new GetPolicyRequest().user(USER).resources(resources).context(CONTEXT);
-//        LeafResourceRulesMap getResponse = restTemplate.postForObject("/getPolicySync", getRequest, LeafResourceRulesMap.class);
-//
-//        // Then the policy just added is found on the resource
-//        assertThat(getResponse).containsEntry(NEW_FILE, PASS_THROUGH_POLICY.getRecordRules());
-//    }
+    @Test
+    void testRestEndpoint() {
+        // Given there are resources and policies to be added
+        Collection<LeafResource> resources = Collections.singleton(NEW_FILE);
+
+        // When a resource is added
+        SetResourcePolicyRequest addRequest = new SetResourcePolicyRequest().resource(NEW_FILE).policy(PASS_THROUGH_POLICY);
+        restTemplate.put("/setResourcePolicyAsync", addRequest);
+
+        // Given it is accessible
+        CanAccessRequest accessRequest = new CanAccessRequest().user(USER).resources(resources).context(CONTEXT);
+        CanAccessResponse accessResponse = restTemplate.postForObject("/canAccess", accessRequest, CanAccessResponse.class);
+        for (LeafResource resource : resources) {
+            assertThat(accessResponse.getCanAccessResources()).contains(resource);
+        }
+
+        // When the policies on the resource are requested
+        GetPolicyRequest getRequest = new GetPolicyRequest().user(USER).resources(resources).context(CONTEXT);
+        LeafResourceRulesMap getResponse = restTemplate.postForObject("/getPolicySync", getRequest, LeafResourceRulesMap.class);
+
+        // Then the policy just added is found on the resource
+        assertThat(getResponse).containsEntry(NEW_FILE, PASS_THROUGH_POLICY.getRecordRules());
+    }
 }

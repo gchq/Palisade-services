@@ -44,7 +44,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("caffeine")
+@ActiveProfiles({"caffeine", "akkatest"})
 @SpringBootTest(
         classes = PolicyApplication.class,
         webEnvironment = WebEnvironment.NONE,

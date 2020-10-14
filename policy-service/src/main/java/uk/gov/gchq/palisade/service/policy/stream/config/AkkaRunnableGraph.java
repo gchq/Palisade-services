@@ -87,7 +87,7 @@ public class AkkaRunnableGraph {
                             .flatMap(Optional::stream)
                             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
-                    return new Pair<>(message, PolicyResponse.Builder.create(request).withRules((Rules) mapMap));
+                    return new Pair<>(message, PolicyResponse.Builder.create(request).withRules((Rules) mapMap.values()));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message
