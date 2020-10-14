@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.attributemask.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import uk.gov.gchq.palisade.Generated;
 
 import java.time.Duration;
