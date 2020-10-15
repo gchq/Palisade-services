@@ -51,12 +51,15 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -197,8 +200,11 @@ class RedisPersistenceContractTest {
             @Primary
             ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
                 RedisPersistenceContractTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
-                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(
-                        props.getAllActiveProperties()));
+                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
+                        props.getAllActiveProperties().entrySet().stream()
+                                .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                        Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
             }
 
             @Bean
