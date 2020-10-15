@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.policy.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,11 +59,11 @@ public final class PolicyRequest {
             final @JsonProperty("user") JsonNode user,
             final @JsonProperty("resource") JsonNode resource) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.user = Optional.ofNullable(user).orElseThrow(() -> new RuntimeException("User cannot be null"));
-        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
     }
 
     @Generated
@@ -81,6 +82,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getContextNode() {
         return this.context;
     }
@@ -90,6 +92,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getUserNode() {
         return this.user;
     }
@@ -99,6 +102,7 @@ public final class PolicyRequest {
     }
 
     @Generated
+    @JsonIgnore
     JsonNode getResourceNode() {
         return this.resource;
     }
@@ -122,7 +126,7 @@ public final class PolicyRequest {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -135,7 +139,7 @@ public final class PolicyRequest {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -148,7 +152,7 @@ public final class PolicyRequest {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -171,7 +175,7 @@ public final class PolicyRequest {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user user information.
              *
@@ -194,7 +198,7 @@ public final class PolicyRequest {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *

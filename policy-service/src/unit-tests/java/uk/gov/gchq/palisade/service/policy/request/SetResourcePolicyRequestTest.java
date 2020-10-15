@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.HasTestingPurpose;
@@ -33,15 +32,14 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@JsonTest
-public class SetResourcePolicyRequestTest {
+class SetResourcePolicyRequestTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final FileResource fileResource1 = createTestFileResource(1);
     private final User testUser = new User().userId("TestUser");
     private Policy resourcePolicy;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         resourcePolicy = new Policy().owner(testUser).resourceLevelRule("Purpose is testing", new HasTestingPurpose<>());
     }
 
@@ -50,7 +48,7 @@ public class SetResourcePolicyRequestTest {
     }
 
     @Test
-    public void testSetResourcePolicyRequestToJson() throws IOException {
+    void testSetResourcePolicyRequestToJson() throws IOException {
         // Given
         final SetResourcePolicyRequest request = new SetResourcePolicyRequest().policy(resourcePolicy).resource(fileResource1);
 
@@ -63,7 +61,7 @@ public class SetResourcePolicyRequestTest {
     }
 
     @Test
-    public void testSetResourcePolicyRequestFromJson() throws IOException {
+    void testSetResourcePolicyRequestFromJson() throws IOException {
         //Given
         final String jsonString = "{\"id\":{\"id\":\"a423c74f-ea6c-44ed-bf21-0366e51462ce\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"File://temp/TestObj_001.txt\",\"attributes\":{},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"File://temp/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"File/\"}},\"serialisedFormat\":\"txt\",\"type\":\"TestObj1\"},\"policy\":{\"recordRules\":{\"message\":\"no rules set\",\"rules\":{}},\"resourceRules\":{\"message\":\"Purpose is testing\",\"rules\":{\"38e91906-53d4-4504-917b-46fabae6b7b8\":{\"class\":\"uk.gov.gchq.palisade.policy.HasTestingPurpose\"}}},\"owner\":{\"userId\":{\"id\":\"TestUser\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"}}}";
 

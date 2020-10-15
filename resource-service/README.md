@@ -18,6 +18,15 @@ limitations under the License.
 
 # Palisade Resource-Service
 
+## Hadoop and Windows
+
+Windows users will have problems with Hadoop integration testing.
+Included [here](../../Palisade-services/resource-service/src/contract-tests/test/resources/hadoop-3.2.1) is a Windows-compatible set of hadoop binaries.
+
+To 'install' on Windows, an additional step is required - copy the [hadoop.dll](../../Palisade-services/resource-service/src/contract-tests/test/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`.
+This should enable the `HadoopResourceServiceTest` to run correctly.
+
+
 ## Database Entities and Structuring
 ```
                             === CompletenessEntity ====

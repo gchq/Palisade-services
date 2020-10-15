@@ -125,7 +125,7 @@ public final class DataResponse {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -148,7 +148,7 @@ public final class DataResponse {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user information.
              *
@@ -171,7 +171,7 @@ public final class DataResponse {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *
@@ -194,7 +194,7 @@ public final class DataResponse {
         /**
          * Adds the rules associated with this request.
          */
-        interface IRules {
+        public interface IRules {
             /**
              * Adds the rules that specify the access.
              *
