@@ -33,14 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.service.user.config.StdUserConfiguration;
-import uk.gov.gchq.palisade.service.user.model.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.model.GetUserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.MockUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
