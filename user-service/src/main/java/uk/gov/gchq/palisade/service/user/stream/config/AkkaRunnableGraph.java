@@ -42,10 +42,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
+import uk.gov.gchq.palisade.service.user.model.UserResponse.Builder;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -74,9 +76,12 @@ public class AkkaRunnableGraph {
         return source
                 // Get the user from the userId, keeping track of original message and token
                 .map((CommittableMessage<String, UserRequest> message) -> {
-                    UserRequest request = message.record().value();
-                    User user = service.getUser(new UserId().id(request.getUserId()));
-                    return new Pair<>(message, UserResponse.Builder.create(request).withUser(user));
+                    Optional<UserRequest> optionalUserRequest = Optional.ofNullable(message.record().value());
+                    UserResponse userResponse = optionalUserRequest.map(request -> {
+                        User user = service.getUser(new UserId().id(request.getUserId()));
+                        return Builder.create(request).withUser(user);
+                    }).orElse(null);
+                    return new Pair<>(message, userResponse);
                 })
 
                 // Build producer record, copying the partition, keeping track of original message

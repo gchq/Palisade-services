@@ -27,8 +27,6 @@ import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
-import uk.gov.gchq.palisade.service.user.stream.config.AkkaComponentsConfig;
-import uk.gov.gchq.palisade.service.user.stream.config.AkkaRunnableGraph;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +34,11 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles({"redis", "akkatest"})
-@SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+@ActiveProfiles({"redistest", "akkatest"})
+@SpringBootTest(
+        classes = {UserApplication.class, RedisTestConfiguration.class, KafkaTestConfiguration.class},
+        webEnvironment = WebEnvironment.NONE
+)
 class RedisUserCachingTest {
 
     @Autowired
@@ -65,11 +66,13 @@ class RedisUserCachingTest {
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
         // When
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "testMaxSizeTest should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(userId), "testMaxSizeTest should throw noSuchIdException"
+        );
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat("No userId matching UserId[id='definitely-not-a-real-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='definitely-not-a-real-user'] found in cache");
     }
 
     @Test
@@ -97,10 +100,12 @@ class RedisUserCachingTest {
         TimeUnit.MILLISECONDS.sleep(1000);
 
         // When - we try to access stale cache data
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException"
+        );
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat("No userId matching UserId[id='ttl-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='ttl-test-user'] found in cache");
     }
 }

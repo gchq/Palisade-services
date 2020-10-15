@@ -44,7 +44,7 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("error") Throwable error) {
 
         super(userId, resourceId, context, attributes);
-        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
     }
 
     @Generated
@@ -88,7 +88,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -101,7 +101,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -114,7 +114,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -127,7 +127,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the attributes for the message.
          */
-        interface IAttributes {
+        public interface IAttributes {
             /**
              * Adds the attributes for the message.
              *
@@ -140,7 +140,7 @@ public final class AuditErrorMessage extends AuditMessage {
         /**
          * Adds the error that occurred.
          */
-        interface IError {
+        public interface IError {
             /**
              * Adds the error for the message.
              *
