@@ -21,6 +21,9 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+/**
+ * SpringBoot application entry-point method for the {@link FilteredResourceApplication} executable
+ */
 @SpringBootApplication
 public class FilteredResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteredResourceApplication.class);

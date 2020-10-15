@@ -17,10 +17,8 @@ package uk.gov.gchq.palisade.service.data.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -42,11 +40,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
 public class AuditRequestTest {
 
     private ObjectMapper mapper;
@@ -57,13 +52,13 @@ public class AuditRequestTest {
             .parent(new DirectoryResource().id("/docs").parent(new SystemResource().id("/")));
     private static Rules<Resource> rules = new Rules<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
         mapper = JSONSerialiser.createDefaultMapper();
     }
 
     @Test
-    public void ReadRequestCompleteAuditRequestTest() {
+    public void testReadRequestCompleteAuditRequest() {
         final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("456"))
                 .withUser(new User().userId("a user"))
                 .withLeafResource(resource)
@@ -72,11 +67,11 @@ public class AuditRequestTest {
                 .withNumberOfRecordsReturned(1L)
                 .withNumberOfRecordsProcessed(1L);
 
-        assertThat("RegisterRequestCompleteAuditRequest not constructed", subject.user.getUserId().getId(), is(equalTo("a user")));
+        assertThat(subject.user.getUserId().getId()).isEqualTo("a user");
     }
 
     @Test
-    public void ReadRequestCompleteAuditRequestToJsonTest() throws IOException {
+    public void testReadRequestCompleteAuditRequestToJson() throws IOException {
         final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("a user"))
                 .withLeafResource(resource)
@@ -88,11 +83,11 @@ public class AuditRequestTest {
         final JsonNode asNode = this.mapper.readTree(this.mapper.writeValueAsString(subject));
         final Iterable<String> iterable = asNode::fieldNames;
 
-        assertThat("RegisterRequestCompleteAuditRequest not parsed to json", StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", ")), is(equalTo("class, id, originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed, timestamp, serverIp, serverHostname")));
+        assertThat(StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.joining(", "))).isEqualTo("class, id, originalRequestId, user, leafResource, context, rulesApplied, numberOfRecordsReturned, numberOfRecordsProcessed, timestamp, serverIp, serverHostname");
     }
 
     @Test
-    public void ReadRequestCompleteAuditRequestFromJsonTest() throws IOException {
+    public void testReadRequestCompleteAuditRequestFromJson() throws IOException {
         final ReadRequestCompleteAuditRequest subject = AuditRequest.ReadRequestCompleteAuditRequest.create(new RequestId().id("123"))
                 .withUser(new User().userId("a user"))
                 .withLeafResource(resource)
@@ -105,17 +100,17 @@ public class AuditRequestTest {
 
         final ReadRequestCompleteAuditRequest result = this.mapper.readValue(jsonString, ReadRequestCompleteAuditRequest.class);
 
-        assertThat("RegisterRequestCompleteAuditRequest could not be parsed from json string", subject.context.getContents().keySet().stream().findFirst().orElse("notFound"), is(equalTo("a string")));
+        assertThat(subject.context.getContents().keySet().stream().findFirst().orElse("notFound")).isEqualTo("a string");
     }
 
     @Test
-    public void ReadRequestExceptionAuditRequestTest() {
+    public void testReadRequestExceptionAuditRequest() {
         final ReadRequestExceptionAuditRequest subject = ReadRequestExceptionAuditRequest.create(new RequestId().id("304958"))
                 .withToken("token")
                 .withLeafResource(resource)
                 .withException(new SecurityException("not allowed"));
 
-        assertThat("ReadRequestExceptionAuditRequest not constructed", subject.leafResource, is(equalTo(resource)));
+        assertThat(subject.leafResource).isEqualTo(resource);
     }
 
 }
