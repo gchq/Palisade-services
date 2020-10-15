@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -77,8 +78,12 @@ public final class PolicyRequest {
     }
 
     @Generated
-    public Context getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.context, Context.class);
+    public Context getContext() {
+        try {
+            return MAPPER.treeToValue(this.context, Context.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get Context", e);
+        }
     }
 
     @Generated
@@ -87,8 +92,12 @@ public final class PolicyRequest {
         return this.context;
     }
 
-    public User getUser() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.user, User.class);
+    public User getUser() {
+        try {
+            return MAPPER.treeToValue(this.user, User.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get User", e);
+        }
     }
 
     @Generated
@@ -97,14 +106,54 @@ public final class PolicyRequest {
         return this.user;
     }
 
-    public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resource, LeafResource.class);
+    public LeafResource getResource() {
+        try {
+            return MAPPER.treeToValue(this.resource, LeafResource.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get Resource", e);
+        }
     }
 
     @Generated
     @JsonIgnore
     JsonNode getResourceNode() {
         return this.resource;
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicyRequest)) {
+            return false;
+        }
+        PolicyRequest that = (PolicyRequest) o;
+        return userId.equals(that.userId) &&
+                resourceId.equals(that.resourceId) &&
+                context.equals(that.context) &&
+                user.equals(that.user) &&
+                resource.equals(that.resource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(userId, resourceId, context, user, resource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("user=" + user)
+                .add("resource=" + resource)
+                .add(super.toString())
+                .toString();
     }
 
     /**
@@ -217,41 +266,5 @@ public final class PolicyRequest {
              */
             PolicyRequest withResourceNode(JsonNode resource);
         }
-    }
-
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PolicyRequest)) {
-            return false;
-        }
-        PolicyRequest that = (PolicyRequest) o;
-        return userId.equals(that.userId) &&
-                resourceId.equals(that.resourceId) &&
-                context.equals(that.context) &&
-                user.equals(that.user) &&
-                resource.equals(that.resource);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(userId, resourceId, context, user, resource);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", PolicyRequest.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("resourceId='" + resourceId + "'")
-                .add("context=" + context)
-                .add("user=" + user)
-                .add("resource=" + resource)
-                .add(super.toString())
-                .toString();
     }
 }

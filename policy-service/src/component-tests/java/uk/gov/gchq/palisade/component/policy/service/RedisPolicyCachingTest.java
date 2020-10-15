@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.contract.policy.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -39,13 +39,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("redis")
-@SpringBootTest(
-        classes = {PolicyApplication.class},
-        webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s"}
-)
-@ContextConfiguration(classes = {RedisTestConfiguration.class})
+@ActiveProfiles({"redis", "akkatest"})
+@SpringBootTest(classes = {PolicyApplication.class, RedisTestConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Autowired

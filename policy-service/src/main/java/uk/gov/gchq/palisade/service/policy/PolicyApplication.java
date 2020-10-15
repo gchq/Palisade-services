@@ -61,7 +61,7 @@ public class PolicyApplication {
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
-            @Qualifier("applicationTaskExecutor") final Executor executor) {
+            @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;
         this.executor = executor;

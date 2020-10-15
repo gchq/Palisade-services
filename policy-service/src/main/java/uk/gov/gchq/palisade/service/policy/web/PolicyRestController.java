@@ -47,7 +47,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "/")
+@RequestMapping(path = "/api")
 public class PolicyRestController {
 
     private final Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> upstreamSink;
@@ -78,11 +78,11 @@ public class PolicyRestController {
      * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/policy", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Void> topicOffset(
+    public ResponseEntity<Void> policy(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody(required = false) PolicyRequest request) {
         // Process request as singleton list
-        this.topicOffsetMulti(headers, Collections.singletonList(request));
+        this.policyMulti(headers, Collections.singletonList(request));
 
         // Return result
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -97,7 +97,7 @@ public class PolicyRestController {
      * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/policy/multi", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Void> topicOffsetMulti(
+    public ResponseEntity<Void> policyMulti(
             final @RequestHeader Map<String, String> headers,
             final @RequestBody Collection<PolicyRequest> requests) {
         // Get token from headers

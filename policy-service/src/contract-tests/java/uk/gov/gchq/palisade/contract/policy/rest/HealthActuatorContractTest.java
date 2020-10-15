@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -34,9 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
  * This should return 200 OK if the service is healthy.
  */
-@SpringBootTest(classes = PolicyApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("akkatest")
-@Disabled
+@SpringBootTest(classes = {PolicyApplication.class, PolicyTestConfiguration.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"caffeine","akkatest"})
 class HealthActuatorContractTest {
 
     @Autowired
@@ -55,7 +55,7 @@ class HealthActuatorContractTest {
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
         // Then the service reports itself to be healthy
-        assertThat(health.getStatusCodeValue()).isEqualTo(200);
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
 }

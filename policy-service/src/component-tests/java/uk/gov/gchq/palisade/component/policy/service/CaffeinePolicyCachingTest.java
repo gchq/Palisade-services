@@ -25,6 +25,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.contract.policy.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.StubResource;
@@ -32,6 +33,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.request.Policy;
 
@@ -45,11 +47,8 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles({"caffeine", "akkatest"})
-@SpringBootTest(
-        classes = PolicyApplication.class,
-        webEnvironment = WebEnvironment.NONE,
-        properties = "spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"
-)
+@SpringBootTest(classes = {PolicyApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+
 class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
     @Autowired
