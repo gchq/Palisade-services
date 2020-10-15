@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.policy.request.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 
 import java.io.IOException;
 

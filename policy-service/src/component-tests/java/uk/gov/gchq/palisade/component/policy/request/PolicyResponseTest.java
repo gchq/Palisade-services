@@ -30,8 +30,8 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.policy.request.PolicyResponse;
-import uk.gov.gchq.palisade.service.policy.request.PolicyResponse.Builder;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse.Builder;
 
 import java.io.IOException;
 
