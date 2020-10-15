@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.data.serialise.Serialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import java.io.IOException;
@@ -49,10 +49,10 @@ public class DataClientWrapper implements Service {
     /**
      * Passes the request to the data-service to be processed
      *
-     * @param request   a {@link ReadRequest} containing the token and a {@link LeafResource} to be read
+     * @param request   a {@link DataRequest} containing the token and a {@link LeafResource} to be read
      * @return          a {@link Stream} of {@link Employee} objects
      */
-    public Stream<Employee> readChunked(final ReadRequest request) {
+    public Stream<Employee> readChunked(final DataRequest request) {
         LOGGER.debug("Reading request: {}", request);
         return getFromFeignResponse(() -> client.readChunked(request));
     }

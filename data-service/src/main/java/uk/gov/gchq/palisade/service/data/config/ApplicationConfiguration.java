@@ -18,53 +18,59 @@ package uk.gov.gchq.palisade.service.data.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
-import uk.gov.gchq.palisade.service.data.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
+import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.service.data.service.PalisadeService;
+import uk.gov.gchq.palisade.service.data.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
-import uk.gov.gchq.palisade.service.data.web.AuditClient;
-import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-public class ApplicationConfiguration {
+class ApplicationConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    /**
-     * Simple data service bean created with instances of auditService, palisadeService and dataReader
-     * which is used by a simple implementation of {@link DataService} to connect to different data storage technologies and deserialise the data
-     *
-     * @param auditService    the audit service
-     * @param palisadeService the palisade service
-     * @param dataReader      the data reader
-     * @return the simple data service
-     */
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
     @Bean
-    public SimpleDataService simpleDataService(final AuditService auditService,
-                                               final PalisadeService palisadeService,
-                                               final DataReader dataReader) {
-        return new SimpleDataService(auditService, palisadeService, dataReader);
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception {}", token, message.getResourceId(), message.getError());
+    }
+
+    // Replace this with a proper audit mechanism (kafka queues etc.)
+    @Bean
+    AuditService loggingAuditService() {
+        LOGGER.warn("Using a Logging-only auditor, this should be replaced by a proper implementation!");
+        return (String token, AuditSuccessMessage message) -> LOGGER.warn("Token {} and resourceId {} read leafResourceId {}", token, message.getResourceId(), message.getLeafResourceId());
+    }
+
+    @Bean
+    JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
+                                            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+        return new JpaPersistenceLayer(requestsRepository, executor);
+    }
+
+    @Bean
+    SimpleDataService simpleDataService(final PersistenceLayer persistenceLayer,
+                                        final DataReader dataReader) {
+        return new SimpleDataService(persistenceLayer, dataReader);
     }
 
     /**
@@ -74,13 +80,13 @@ public class ApplicationConfiguration {
      * @throws IOException ioException
      */
     @Bean
-    public DataReader hadoopDataReader() throws IOException {
+    DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
     }
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 

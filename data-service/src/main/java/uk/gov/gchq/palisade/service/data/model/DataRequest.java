@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.request;
+package uk.gov.gchq.palisade.service.data.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Generated;
 
@@ -43,8 +42,8 @@ public final class DataRequest {
 
     @JsonCreator
     private DataRequest(
-            final @JsonProperty("userId") String token,
-            final @JsonProperty("resourceId") String leafResourceId) {
+            final @JsonProperty("token") String token,
+            final @JsonProperty("leafResourceId") String leafResourceId) {
 
         this.token = Optional.ofNullable(token)
                 .orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
@@ -109,8 +108,12 @@ public final class DataRequest {
     @Override
     @Generated
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DataRequest)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DataRequest)) {
+            return false;
+        }
         final DataRequest that = (DataRequest) o;
         return Objects.equals(token, that.token) &&
                 Objects.equals(leafResourceId, that.leafResourceId);

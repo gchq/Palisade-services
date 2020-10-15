@@ -16,12 +16,9 @@
 
 package uk.gov.gchq.palisade.contract.data.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import feign.Response;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,21 +29,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
-import uk.gov.gchq.palisade.contract.data.config.mock.AuditServiceMock;
-import uk.gov.gchq.palisade.contract.data.config.mock.PalisadeServiceMock;
 import uk.gov.gchq.palisade.contract.data.config.web.DataClient;
 import uk.gov.gchq.palisade.contract.data.config.web.DataClientWrapper;
 import uk.gov.gchq.palisade.contract.data.model.Employee;
 import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.data.DataApplication;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -66,45 +58,26 @@ class RestContractTest {
     private static final ObjectMapper MAPPER = JSONSerialiser.createDefaultMapper();
 
     private static final String CURRENT_PATH = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toUri().toString();
-    private static final FileResource RESOURCE = ((FileResource) ResourceBuilder.create(CURRENT_PATH))
-            .type(Employee.class.getTypeName())
-            .serialisedFormat("avro");
 
     @Autowired
     private Map<String, DataService> serviceMap;
     @Autowired
     private DataClientWrapper client;
 
-    private final WireMockRule auditMock = AuditServiceMock.getRule();
-    private final WireMockRule palisadeMock = PalisadeServiceMock.getRule();
-
     private AvroSerialiser<Employee> avroSerialiser;
 
     @BeforeEach
-    void setUp() throws JsonProcessingException {
-        AuditServiceMock.stubRule(auditMock, MAPPER);
-        auditMock.start();
-
-        PalisadeServiceMock.stubRule(palisadeMock, MAPPER, RESOURCE);
-        palisadeMock.start();
-
+    void setUp() {
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         avroSerialiser = new AvroSerialiser<>(Employee.class);
     }
 
-    @AfterEach
-    void tearDown() {
-        auditMock.stop();
-        auditMock.resetAll();
-
-        palisadeMock.stop();
-        palisadeMock.resetAll();
-    }
-
     @Test
     void testContextLoads() {
-        assertThat(serviceMap).isNotNull();
-        assertThat(serviceMap).isNotEmpty();
+        assertThat(serviceMap)
+                .isNotNull()
+                .isNotEmpty();
+        assertThat(client).isNotNull();
     }
 
     @Test
@@ -115,15 +88,16 @@ class RestContractTest {
 
     @Test
     void testReadChunked() throws IOException {
-        // Given - ReadRequest created
-        ReadRequest readRequest = new ReadRequest().token("token").resource(RESOURCE);
-        readRequest.setOriginalRequestId(new RequestId().id("original"));
+        // Given - DataRequest created
+        DataRequest readRequest = DataRequest.Builder.create()
+                .withToken("token")
+                .withLeafResourceId(CURRENT_PATH);
 
         // Given - AvroSerialiser added to Data-service
         client.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), avroSerialiser);
 
         // Given - the file contains the expected data
-         avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
+        avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
 
         // When
         Set<Employee> readResult = client.readChunked(readRequest).collect(Collectors.toSet());

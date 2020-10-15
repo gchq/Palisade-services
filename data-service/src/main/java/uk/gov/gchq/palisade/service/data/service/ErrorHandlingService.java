@@ -17,8 +17,9 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 
-import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
-import uk.gov.gchq.palisade.service.data.request.AuditErrorMessage;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public interface ErrorHandlingService {
      * @param request the request input that led to failure - the original request is extracted from this message
      * @param error   the error thrown in processing
      */
-    void reportError(final String token, final AuthorisedRequestEntity request, final Throwable error);
+    void reportError(final String token, final AuditErrorMessage request);
 
     /**
      * Helper method for mapping requests to errors.
@@ -48,8 +49,9 @@ public interface ErrorHandlingService {
      * @param attributes map of additional attributes to add to the error message
      * @return an error message containing the given details
      */
-    default AuditErrorMessage createErrorMessage(final AuthorisedRequestEntity request, final Throwable error, final Map<String, Object> attributes) {
-        return AuditErrorMessage.Builder.create(request, attributes)
+    default AuditErrorMessage createErrorMessage(final DataRequest dataRequest, final DataReaderRequest readerRequest, final Throwable error, final Map<String, Object> attributes) {
+        return AuditErrorMessage.Builder.create(dataRequest, readerRequest)
+                .withAttributes(attributes)
                 .withError(error);
     }
 

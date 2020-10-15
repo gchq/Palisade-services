@@ -15,9 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.data.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 
 import java.util.Optional;
@@ -29,8 +26,6 @@ import java.util.concurrent.Executor;
  * Delegates to a CrudRepository save method.
  */
 public class JpaPersistenceLayer implements PersistenceLayer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
-
     private final AuthorisedRequestsRepository authorisedRequestsRepository;
     private final Executor executor;
 
@@ -49,6 +44,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     @Override
     public CompletableFuture<Optional<AuthorisedRequestEntity>> getAsync(final String token, final String leafResourceId) {
-        return CompletableFuture.supplyAsync(() -> authorisedRequestsRepository.find(token, leafResourceId), this.executor);
+        return CompletableFuture.supplyAsync(() -> authorisedRequestsRepository.find(token, leafResourceId), executor);
     }
 }

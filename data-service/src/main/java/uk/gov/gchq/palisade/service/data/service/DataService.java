@@ -23,9 +23,8 @@ import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.request.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,9 +29,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import uk.gov.gchq.palisade.exception.ForbiddenException;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.data.request.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 @RestController
@@ -39,30 +43,39 @@ public class DataController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
-    private final DataService service;
+    private final DataService dataService;
+    private final AuditService auditService;
     private final StdSerialiserConfiguration serialiserConfig;
 
     /**
      * Constructor for a {@link DataController} instance.
      *
-     * @param service                 a {@link DataService} instance that will process the requests.
+     * @param dataService             a {@link DataService} instance that will process the requests.
      * @param serialiserConfiguration a {@link StdSerialiserConfiguration} that can be used to Pre-populate the {@link DataService}
      *                                with a {@link uk.gov.gchq.palisade.data.serialise.Serialiser}
      */
-    public DataController(final DataService service,
+    public DataController(final DataService dataService,
+                          final AuditService auditService,
                           final StdSerialiserConfiguration serialiserConfiguration) {
-        this.service = service;
+        this.dataService = dataService;
+        this.auditService = auditService;
         this.serialiserConfig = serialiserConfiguration;
     }
 
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final DataRequest dataRequest) {
         LOGGER.info("Invoking read (chunked): {}", dataRequest);
-        StreamingResponseBody stream = outputStream -> service.authoriseRequest(dataRequest)
+        DataReaderRequest readerRequest = dataService.authoriseRequest(dataRequest)
                 .thenApply(maybeReadRequest -> maybeReadRequest
                         .orElseThrow(() -> new ForbiddenException(
                                 String.format("The token '%s' is not authorised to access the leafResource '%s'", dataRequest.getToken(), dataRequest.getLeafResourceId()))))
-                .thenApply(readRequest -> service.read(readRequest, outputStream));
+                .join();
+
+        StreamingResponseBody stream = outputStream -> {
+            Pair<Long, Long> recordsAudit = dataService.read(readerRequest, outputStream);
+            AuditSuccessMessage successMessage = auditService.createSuccessMessage(dataRequest, readerRequest, recordsAudit.getFirst(), recordsAudit.getSecond());
+            auditService.auditSuccess(dataRequest.getToken(), successMessage);
+        };
 
         LOGGER.info("Streaming response: {}", stream);
         return new ResponseEntity<>(stream, HttpStatus.OK);
@@ -79,7 +92,7 @@ public class DataController {
         serialiserConfig.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
                 .peek(entry -> LOGGER.debug(entry.toString()))
-                .forEach(entry -> service.addSerialiser(entry.getKey(), entry.getValue()));
+                .forEach(entry -> dataService.addSerialiser(entry.getKey(), entry.getValue()));
     }
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.data.request;
+package uk.gov.gchq.palisade.service.data.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.util.Map;
 import java.util.Objects;
@@ -76,19 +76,15 @@ public final class AuditErrorMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param request    the request message that was sent to the data-service
-         * @param attributes optional information stored in a Map
-         * @return interface {@link IError} for the next step in the build.
-         * @throws JsonProcessingException if there is a failure to parse information from the DataRequest.
+         * @param dataRequest   the client request received by the data-service
+         * @param readerRequest the authorised request stored by the attribute-masking-service
+         * @return interface {@link IAttributes} for the next step in the build.
          */
-
-
-        public static IError create(final AuthorisedRequestEntity requestEntity, final Map<String, Object> attributes) {
+        public static IAttributes create(final DataRequest dataRequest, final DataReaderRequest readerRequest) {
             return create()
-                    .withUserId(requestEntity.getUser().getUserId().getId())
-                    .withResourceId(requestEntity.getResourceId())
-                    .withContext(requestEntity.getContext())
-                    .withAttributes(attributes);
+                    .withUserId(readerRequest.getUser().getUserId().getId())
+                    .withResourceId(dataRequest.getLeafResourceId())
+                    .withContext(readerRequest.getContext());
         }
 
         /**

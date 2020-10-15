@@ -27,8 +27,8 @@ import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
-import uk.gov.gchq.palisade.service.data.request.DataRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -51,7 +51,7 @@ public class SimpleDataService implements DataService {
 
     public CompletableFuture<Optional<DataReaderRequest>> authoriseRequest(final DataRequest dataRequest) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
-        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
+        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = this.persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
         return futureRequestEntity.thenApply(maybeEntity -> maybeEntity.map(
                 entity -> new DataReaderRequest()
                         .context(entity.getContext())

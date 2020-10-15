@@ -28,7 +28,7 @@ public class ReadException extends RuntimeException {
      * Specialised exception thrown by the data-service when an IOException occurred while reading
      * from the data-reader, bundling the data-reader request that caused the exception.
      *
-     * @param cause   a {@link IOException} that caused the error
+     * @param cause a {@link IOException} that caused the error
      */
     public ReadException(final DataReaderRequest readerRequest, final IOException cause) {
         super("An exception was thrown while reading from data-reader", cause);

@@ -16,10 +16,17 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
-import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 public interface AuditService {
 
-    void auditSuccess(final AuthorisedRequestEntity requestEntity, final long recordsProcessed, final long recordsReturned);
+    void auditSuccess(final String token, final AuditSuccessMessage successMessage);
+
+    default AuditSuccessMessage createSuccessMessage(final DataRequest dataRequest, final DataReaderRequest readerRequest, final long recordsProcessed, final long recordsReturned) {
+        return AuditSuccessMessage.Builder.create(dataRequest, readerRequest)
+                .withRecordsProcessedAndReturned(recordsProcessed, recordsReturned);
+    }
 
 }
