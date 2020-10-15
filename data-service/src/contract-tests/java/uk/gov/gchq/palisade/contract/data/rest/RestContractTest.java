@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.RequestId;
 import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
@@ -47,17 +48,20 @@ import uk.gov.gchq.palisade.service.data.request.ReadRequest;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableFeignClients(basePackageClasses = {DataClient.class})
 @Import(DataTestConfiguration.class)
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("web")
 class RestContractTest {
     private static final ObjectMapper MAPPER = JSONSerialiser.createDefaultMapper();
 
@@ -119,7 +123,7 @@ class RestContractTest {
         client.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), avroSerialiser);
 
         // Given - the file contains the expected data
-        // avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
+         avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
 
         // When
         Set<Employee> readResult = client.readChunked(readRequest).collect(Collectors.toSet());

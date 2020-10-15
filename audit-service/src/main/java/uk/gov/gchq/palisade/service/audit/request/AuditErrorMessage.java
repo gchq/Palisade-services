@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.audit.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,7 +52,7 @@ public final class AuditErrorMessage extends AuditMessage {
             final @JsonProperty("error") JsonNode error) {
 
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
-        this.error = Optional.ofNullable(error).orElseThrow(() -> new RuntimeException("Error cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
     }
 
     @Generated
@@ -59,6 +60,7 @@ public final class AuditErrorMessage extends AuditMessage {
         return MAPPER.treeToValue(error, Throwable.class);
     }
 
+    @JsonIgnore
     @Generated
     public JsonNode getErrorNode() {
         return error;
@@ -114,9 +116,9 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return public interface {@link IServicename} for the next step in the build.
+             * @return public interface {@link IServiceName} for the next step in the build.
              */
-            default IServicename withContext(Context context) {
+            default IServiceName withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
             }
 
@@ -124,15 +126,15 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
-             * @return public interface {@link IServicename} for the next step in the build.
+             * @return public interface {@link IServiceName} for the next step in the build.
              */
-            IServicename withContextNode(JsonNode context);
+            IServiceName withContextNode(JsonNode context);
         }
 
         /**
          * Adds the service name for the service that created this message.
          */
-        public interface IServicename {
+        public interface IServiceName {
 
             /**
              * Adds the service name.

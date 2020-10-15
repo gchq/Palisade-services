@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-spring:
-  application:
-    name: user-service
-  cloud:
-    config:
-      enabled: false
+
+web:
+  client:
+    audit-service: http://localhost:8089
+    data-service: http://localhost:${server.port}
+    palisade-service: http://localhost:8084

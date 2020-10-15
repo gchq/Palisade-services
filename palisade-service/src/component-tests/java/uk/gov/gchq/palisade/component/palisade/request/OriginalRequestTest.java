@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.palisade.request;
+package uk.gov.gchq.palisade.component.palisade.request;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,10 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
+import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.palisade.request.OriginalRequest;
 
 import java.io.IOException;
 
@@ -30,7 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-public class OriginalRequestTest {
+@ContextConfiguration(classes = OriginalRequestTest.class)
+class OriginalRequestTest {
 
     @Autowired
     private JacksonTester<OriginalRequest> jsonTester;
@@ -44,7 +47,7 @@ public class OriginalRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         OriginalRequest originalRequest = OriginalRequest.Builder.create()
                 .withUserId("testUser")

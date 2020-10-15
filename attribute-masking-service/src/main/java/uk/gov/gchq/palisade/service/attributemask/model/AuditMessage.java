@@ -131,7 +131,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 

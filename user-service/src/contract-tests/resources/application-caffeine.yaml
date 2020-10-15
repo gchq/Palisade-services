@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-logging:
-  level:
-    uk.gov.gchq.palisade: "DEBUG"
+
+spring:
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: expireAfterWrite=1s, maximumSize=100

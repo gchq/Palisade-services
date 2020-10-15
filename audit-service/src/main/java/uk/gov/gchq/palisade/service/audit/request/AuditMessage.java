@@ -60,14 +60,14 @@ public class AuditMessage {
             final @JsonProperty("serverHostname") String serverHostname,
             final @JsonProperty("attributes") JsonNode attributes) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.serviceName = Optional.ofNullable(serviceName).orElseThrow(() -> new RuntimeException("Service Name cannot be null"));
-        this.timestamp = Optional.ofNullable(timestamp).orElseThrow(() -> new RuntimeException("Timestamp cannot be null"));
-        this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new RuntimeException("Server IP address cannot be null"));
-        this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new RuntimeException("Server Hostname cannot be null"));
-        this.attributes = Optional.ofNullable(attributes).orElseThrow(() -> new RuntimeException("Attributes cannot be null"));
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
+        this.serviceName = Optional.ofNullable(serviceName).orElseThrow(() -> new IllegalArgumentException("Service Name cannot be null"));
+        this.timestamp = Optional.ofNullable(timestamp).orElseThrow(() -> new IllegalArgumentException("Timestamp cannot be null"));
+        this.serverIP = Optional.ofNullable(serverIP).orElseThrow(() -> new IllegalArgumentException("Server IP address cannot be null"));
+        this.serverHostname = Optional.ofNullable(serverHostname).orElseThrow(() -> new IllegalArgumentException("Server Hostname cannot be null"));
+        this.attributes = Optional.ofNullable(attributes).orElseThrow(() -> new IllegalArgumentException("Attributes cannot be null"));
 
     }
 
@@ -107,7 +107,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map getAttributes() throws JsonProcessingException {
+    public Map<String, Object> getAttributes() throws JsonProcessingException {
         return MAPPER.treeToValue(attributes, Map.class);
     }
 
