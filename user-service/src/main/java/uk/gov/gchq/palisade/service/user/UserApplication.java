@@ -89,7 +89,7 @@ public class UserApplication {
                 .run(args);
     }
 
-    @PostConstruct()
+    @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
         // Add example users to the user-service cache

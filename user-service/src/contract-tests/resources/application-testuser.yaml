@@ -13,11 +13,11 @@
 # limitations under the License.
 #
 
-spring:
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-  cache:
-    type: caffeine
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
+population:
+  userProvider: std
+  users:
+  - userId: test-user-id
+    auths:
+      auth
+    roles:
+      role
