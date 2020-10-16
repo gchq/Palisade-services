@@ -24,9 +24,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Sets;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.User;
@@ -50,28 +50,27 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class AbstractLdapUserServiceTest {
+class AbstractLdapUserServiceTest {
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         logger = (Logger) LoggerFactory.getLogger(AbstractLdapUserService.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }
@@ -84,7 +83,7 @@ public class AbstractLdapUserServiceTest {
     }
 
     @Test
-    public void shouldFetchUserDetailsFromLdap() throws NamingException {
+    void testShouldFetchUserDetailsFromLdap() throws NamingException {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final UserId userId = new UserId().id("user#01");
@@ -114,12 +113,13 @@ public class AbstractLdapUserServiceTest {
         final User user = service.getUser(userId);
 
         // Then
-        assertEquals(userId, user.getUserId());
-        assertEquals(auths, user.getAuths());
-        assertEquals(roles, user.getRoles());
+        assertThat(userId).isEqualTo(user.getUserId());
+        assertThat(auths).isEqualTo(user.getAuths());
+        assertThat(roles).isEqualTo(user.getRoles());
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages).isNotEmpty();
+        assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("was not in the cache. Fetching details from LDAP")
         ));
@@ -127,7 +127,7 @@ public class AbstractLdapUserServiceTest {
 
 
     @Test
-    public void shouldPerformABasicSearch() throws NamingException {
+    void testShouldPerformABasicSearch() throws NamingException {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final UserId userId = new UserId().id("user01");
@@ -155,19 +155,19 @@ public class AbstractLdapUserServiceTest {
         final SearchResult searchResult2 = new SearchResult("key2", "value2", searchResult2Attrs);
 
         Iterator<SearchResult> itr = Arrays.asList(searchResult1, searchResult2).iterator();
-        final NamingEnumeration<SearchResult> responseAttrs = new NamingEnumeration<SearchResult>() {
+        final NamingEnumeration<SearchResult> responseAttrs = new NamingEnumeration<>() {
             @Override
-            public SearchResult next() throws NamingException {
+            public SearchResult next() {
                 return itr.next();
             }
 
             @Override
-            public boolean hasMore() throws NamingException {
+            public boolean hasMore() {
                 return itr.hasNext();
             }
 
             @Override
-            public void close() throws NamingException {
+            public void close() {
             }
 
             @Override
@@ -194,17 +194,17 @@ public class AbstractLdapUserServiceTest {
                 new BasicAttributes(attrIdForUserId, userId.getId()),
                 requestAttrs);
         final Set<Object> expectedResults = Sets.newHashSet(search1Attr1, search1Attr2, search2Att1, search2Attr2);
-        assertEquals(expectedResults, results);
+        assertThat(expectedResults).isEqualTo(results);
 
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Performing basic search using")
         ));
     }
 
     @Test
-    public void shouldEscapeCharacters() throws NamingException {
+    void testShouldEscapeCharacters() {
         // Given
         final AbstractLdapUserService mock = mock(AbstractLdapUserService.class);
         final LdapContext context = mock(LdapContext.class);
@@ -212,8 +212,7 @@ public class AbstractLdapUserServiceTest {
         final MockLdapUserService service = new MockLdapUserService(context);
         service.setMock(mock);
 
-        final String input = "test input: " + Stream.of(AbstractLdapUserService.ESCAPED_CHARS)
-                .collect(Collectors.joining());
+        final String input = "test input: " + String.join("", AbstractLdapUserService.ESCAPED_CHARS);
 
         // When
         final String result = service.formatInput(input);
@@ -222,23 +221,23 @@ public class AbstractLdapUserServiceTest {
         final String expectedResult = "test input: " + Stream.of(AbstractLdapUserService.ESCAPED_CHARS)
                 .map(t -> "\\" + t)
                 .collect(Collectors.joining());
-        assertEquals(expectedResult, result);
+        assertThat(expectedResult).isEqualTo(result);
         List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
-        assertNotEquals(0, debugMessages.size());
+        assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
                 Matchers.containsString("Formatting input with"),
                 Matchers.containsString("Returning formatted input as")
         ));
     }
 
-    public static final class MockLdapUserService extends AbstractLdapUserService {
+    static final class MockLdapUserService extends AbstractLdapUserService {
         private AbstractLdapUserService mock;
 
-        public MockLdapUserService(final LdapContext context) {
+        MockLdapUserService(final LdapContext context) {
             super(context);
         }
 
-        public MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
+        MockLdapUserService(@JsonProperty("ldapConfigPath") final String ldapConfigPath) throws IOException, NamingException {
             super(ldapConfigPath);
         }
 
@@ -257,7 +256,7 @@ public class AbstractLdapUserServiceTest {
             return mock.getRoles(userId, userAttrs, context);
         }
 
-        public void setMock(final AbstractLdapUserService mock) {
+        void setMock(final AbstractLdapUserService mock) {
             this.mock = mock;
         }
     }

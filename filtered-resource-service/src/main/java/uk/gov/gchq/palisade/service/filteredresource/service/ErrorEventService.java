@@ -25,10 +25,11 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
 public interface ErrorEventService {
 
     /**
-     * Callback function for external error event messages
+     * Report the given error back to the client.
+     * At this point, this is just writing to persistence.
      *
-     * @param token that identifies the query
-     * @param exception that was thrown by the external service
+     * @param token     the request's unique token
+     * @param exception the exception thrown by one of the services
      */
     void reportError(final String token, final Throwable exception);
 

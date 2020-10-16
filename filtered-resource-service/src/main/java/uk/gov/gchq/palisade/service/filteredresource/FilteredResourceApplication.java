@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
- * Application entrypoint and main process runner
+ * SpringBoot application entry-point method for the {@link FilteredResourceApplication} executable
  */
 @SpringBootApplication
 public class FilteredResourceApplication {
