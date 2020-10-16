@@ -69,7 +69,6 @@ import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.user.ContractTestData;
 import uk.gov.gchq.palisade.service.user.UserApplication;
-import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.StreamMarker;
 import uk.gov.gchq.palisade.service.user.model.Token;
