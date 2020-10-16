@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableRedisRepositories
 @ContextConfiguration(initializers = Initializer.class)
 class RedisPersistenceContractTest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final int REDIS_PORT = 6379;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
