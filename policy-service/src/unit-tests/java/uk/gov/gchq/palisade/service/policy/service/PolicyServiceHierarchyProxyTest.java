@@ -21,16 +21,13 @@ import org.junit.jupiter.api.Test;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.service.request.Policy;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,19 +57,19 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // When - a record-level policy is requested on a resource
         Optional<Policy> secretDirPolicies = HIERARCHY_POLICY.getPolicy(SECRET_DIRECTORY);
-        Optional<Map<String, Rule<Serializable>>> secretDirRules = secretDirPolicies.map(Policy::getRecordRules).map(Rules::getRules);
+        Optional<?> secretDirRules = secretDirPolicies.map(Policy::getRecordRules).map(Rules::getRules);
 
         // Then - the record-level rules are returned
+        assertThat(secretDirRules).isNotNull();
         assertThat(secretDirRules).isNotEmpty();
-        assertThat(secretDirRules.get()).isNotEmpty();
 
         // When - a record-level policy is requested on a resource
         Optional<Policy> secretFilePolicies = HIERARCHY_POLICY.getPolicy(SECRET_TXT_FILE);
-        Optional<Map<String, Rule<Serializable>>> secretFileRules = secretFilePolicies.map(Policy::getRecordRules).map(Rules::getRules);
+        Optional<?> secretFileRules = secretFilePolicies.map(Policy::getRecordRules).map(Rules::getRules);
 
         // Then - the record-level rules are returned (and include all those of the parent directory)
-        assertThat(secretFileRules).isNotNull().isPresent();
-        assertThat(secretFileRules.get()).isNotEmpty();
+        assertThat(secretFileRules).isNotNull();
+        assertThat(secretFileRules).isNotEmpty();
     }
 
     @Test
