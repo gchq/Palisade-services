@@ -24,6 +24,12 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
  */
 public interface ErrorEventService {
 
+    /**
+     * Callback function for external error event messages
+     *
+     * @param token that identifies the query
+     * @param exception that was thrown by the external service
+     */
     void reportError(final String token, final Throwable exception);
 
 }

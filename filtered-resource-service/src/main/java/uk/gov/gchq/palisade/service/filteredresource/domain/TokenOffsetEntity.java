@@ -32,6 +32,9 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Persistence domain object that describes the Kafka consumer offset where the stream of query results are stored.
+ */
 @Entity
 @Table(
         name = "token_offsets",

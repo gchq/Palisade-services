@@ -101,10 +101,10 @@ class RedisPersistenceContractTest {
         String token = ContractTestData.REQUEST_TOKEN;
         AttributeMaskingRequest request = ContractTestData.REQUEST_OBJ;
 
-        // When a request is made to store the topic offset for a given token
+        // When a request is made to store the request for a given token
         service.storeAuthorisedRequest(token, request).join();
 
-        // Then the offset is persisted in redis
+        // Then the request is persisted in redis
         final String redisKey = "AuthorisedRequestEntity:" + new AuthorisedRequestEntity.AuthorisedRequestEntityId(token, request.getResourceId()).getUniqueId();
         assertThat(redisTemplate.keys(redisKey)).hasSize(1);
 
@@ -121,7 +121,7 @@ class RedisPersistenceContractTest {
         String token = ContractTestData.REQUEST_TOKEN;
         AttributeMaskingRequest request = ContractTestData.REQUEST_OBJ;
 
-        // When a request is made to store the topic offset for a given token
+        // When a request is made to store the request for a given token
         service.storeAuthorisedRequest(token, request).join();
         TimeUnit.SECONDS.sleep(2);
         // Then the offset is persisted in redis

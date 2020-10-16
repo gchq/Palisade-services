@@ -27,10 +27,22 @@ import java.util.Optional;
  */
 public interface TokenOffsetRepository extends CrudRepository<TokenOffsetEntity, String> {
 
+    /**
+     * Persist the {@code TokenOffsetEntity} to storage
+     *
+     * @param token that identifies the request
+     * @param offset in the kafka consumer topic
+     */
     default void save(final String token, final Long offset) {
         save(new TokenOffsetEntity(token, offset));
     }
 
+    /**
+     * Find the offset in the consumer topic for a given query token
+     *
+     * @param token that identifies the request
+     * @return an optional wrapped {@code TokenOffsetEntity}
+     */
     Optional<TokenOffsetEntity> findByToken(final String token);
 
 }
