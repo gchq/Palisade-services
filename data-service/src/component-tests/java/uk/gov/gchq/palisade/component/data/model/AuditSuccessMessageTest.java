@@ -28,8 +28,6 @@ import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

@@ -25,7 +25,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -41,6 +40,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -88,7 +88,7 @@ class DataControllerTest {
         Mockito.when(dataService.authoriseRequest(Mockito.any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(readerRequest)));
         Mockito.when(dataService.read(Mockito.any(), Mockito.any()))
-                .thenReturn(Pair.of(1L, 1L));
+                .thenReturn(Pair.of(new AtomicLong(1), new AtomicLong(1)));
 
         // When
         controller.readChunked(request).getBody().writeTo(output);

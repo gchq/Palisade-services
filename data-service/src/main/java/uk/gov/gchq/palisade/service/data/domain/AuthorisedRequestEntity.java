@@ -15,6 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.data.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
@@ -28,6 +32,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -45,10 +50,12 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
+@RedisHash("AuthorisedRequestEntity")
 public class AuthorisedRequestEntity {
-
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
+    @org.springframework.data.annotation.Id
+    @Indexed
     private String uniqueId;
 
     @Column(name = "token", columnDefinition = "varchar(255)")
@@ -90,6 +97,7 @@ public class AuthorisedRequestEntity {
      * @param context      the {@link Context} as originally supplied by the client
      * @param rules        the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      */
+    @PersistenceConstructor
     public AuthorisedRequestEntity(final String token, final User user, final LeafResource leafResource, final Context context, final Rules<?> rules) {
         this.uniqueId = new AuthorisedRequestEntityId(token, leafResource.getId()).getUniqueId();
         this.token = token;

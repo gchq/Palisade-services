@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,7 +91,7 @@ class SimpleDataServiceTest {
                 .thenReturn(Mockito.mock(ResponseWriter.class));
 
         // When
-        Pair<Long, Long> recordsReadAndReturned = simpleDataService.read(readerRequest, outputStream);
+        Pair<AtomicLong, AtomicLong> recordsReadAndReturned = simpleDataService.read(readerRequest, outputStream);
 
         // Then the mock has been called
         Mockito.verify(dataReader, Mockito.atLeastOnce()).read(Mockito.any(), Mockito.any(), Mockito.any());

@@ -37,6 +37,8 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 @RestController
 @RequestMapping(path = "/")
 public class DataController {
@@ -72,8 +74,8 @@ public class DataController {
                 .join();
 
         StreamingResponseBody stream = outputStream -> {
-            Pair<Long, Long> recordsAudit = dataService.read(readerRequest, outputStream);
-            AuditSuccessMessage successMessage = auditService.createSuccessMessage(dataRequest, readerRequest, recordsAudit.getFirst(), recordsAudit.getSecond());
+            Pair<AtomicLong, AtomicLong> recordsAudit = dataService.read(readerRequest, outputStream);
+            AuditSuccessMessage successMessage = auditService.createSuccessMessage(dataRequest, readerRequest, recordsAudit.getFirst().get(), recordsAudit.getSecond().get());
             auditService.auditSuccess(dataRequest.getToken(), successMessage);
         };
 

@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The core API for the data service.
@@ -45,7 +46,7 @@ public interface DataService extends Service {
 
     CompletableFuture<Optional<DataReaderRequest>> authoriseRequest(final DataRequest request);
 
-    Pair<Long, Long> read(final DataReaderRequest request, final OutputStream out);
+    Pair<AtomicLong, AtomicLong> read(final DataReaderRequest request, final OutputStream out);
 
     /**
      * Used to add a new serialiser to the data reader

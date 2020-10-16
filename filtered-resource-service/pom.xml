@@ -33,7 +33,6 @@
     <properties>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
-        <embedded-redis.version>0.7.3</embedded-redis.version>
     </properties>
 
     <dependencies>

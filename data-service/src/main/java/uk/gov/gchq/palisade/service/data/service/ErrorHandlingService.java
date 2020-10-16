@@ -44,9 +44,10 @@ public interface ErrorHandlingService {
     /**
      * Helper method for mapping requests to errors.
      *
-     * @param request    original request input to the service
-     * @param error      error thrown by the service at runtime
-     * @param attributes map of additional attributes to add to the error message
+     * @param dataRequest   original request input to the service
+     * @param readerRequest authorised request read from persistence
+     * @param error         error thrown by the service at runtime
+     * @param attributes    map of additional attributes to add to the error message
      * @return an error message containing the given details
      */
     default AuditErrorMessage createErrorMessage(final DataRequest dataRequest, final DataReaderRequest readerRequest, final Throwable error, final Map<String, Object> attributes) {

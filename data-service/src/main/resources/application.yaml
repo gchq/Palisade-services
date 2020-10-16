@@ -21,17 +21,9 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
 
 server:
   port: 8082
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -43,20 +35,6 @@ management:
       show-details: always
     shutdown:
       enabled: true
-
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 60000
-        loggerLevel: basic
-    default-config: default
-
-# Default development & testing static config, not suitable for production
-web:
-  client:
-    audit-service: http://localhost:8089
 
 population:
   serialiserProvder: std

@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.data.config;
+package uk.gov.gchq.palisade.component.data.repository;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.contract.data.config.web.DataClient;
-import uk.gov.gchq.palisade.contract.data.config.web.DataClientWrapper;
-import uk.gov.gchq.palisade.service.data.service.DataService;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 
-@Configuration
-@EnableAutoConfiguration
-public class DataTestConfiguration {
-
-    @Bean
-    public DataClientWrapper dataClientWrapper(final DataClient client, final DataService service) {
-        return new DataClientWrapper(client, service);
+@TestConfiguration
+public class AsyncConfiguration {
+    @Bean("threadPoolTaskExecutor")
+    Executor testExecutor() {
+        return new ForkJoinPool(1);
     }
-
 }

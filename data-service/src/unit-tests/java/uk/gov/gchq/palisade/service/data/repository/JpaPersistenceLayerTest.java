@@ -43,15 +43,15 @@ class JpaPersistenceLayerTest {
         // When an entity is requested from the persistence layer
         CompletableFuture<Optional<AuthorisedRequestEntity>> entity = persistenceLayer.getAsync("test-request-token", "/resource/id");
 
-        // Then the mock was called
-        Mockito.verify(requestsRepository, Mockito.atLeastOnce()).find(Mockito.any(), Mockito.any());
-
         // Then the configured entity is returned
         assertThat(entity.join())
                 .isNotNull()
                 .isPresent()
                 .get()
                 .isEqualTo(new AuthorisedRequestEntity());
+
+        // Then the mock was called
+        Mockito.verify(requestsRepository, Mockito.atLeastOnce()).findByUniqueId(Mockito.any());
     }
 
 }

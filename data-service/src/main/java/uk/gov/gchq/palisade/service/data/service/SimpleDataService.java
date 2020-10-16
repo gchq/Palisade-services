@@ -62,7 +62,7 @@ public class SimpleDataService implements DataService {
         );
     }
 
-    public Pair<Long, Long> read(final DataReaderRequest readerRequest, final OutputStream out) {
+    public Pair<AtomicLong, AtomicLong> read(final DataReaderRequest readerRequest, final OutputStream out) {
         final AtomicLong recordsProcessed = new AtomicLong(0);
         final AtomicLong recordsReturned = new AtomicLong(0);
 
@@ -78,7 +78,7 @@ public class SimpleDataService implements DataService {
         }
 
         LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
-        return Pair.of(recordsProcessed.get(), recordsReturned.get());
+        return Pair.of(recordsProcessed, recordsReturned);
     }
 
     @Override

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.data.model;
+package uk.gov.gchq.palisade.contract.data.config.model;
 
 import uk.gov.gchq.palisade.Generated;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class Employee implements Serializable {
     private static final long serialVersionUID = 1;
@@ -30,6 +31,11 @@ public class Employee implements Serializable {
     public Employee() {
         this.name = "the only employee";
         this.number = 1;
+    }
+
+    public Employee(final String name, final Integer number) {
+        this.name = name;
+        this.number = number;
     }
 
     @Generated
@@ -70,5 +76,14 @@ public class Employee implements Serializable {
     @Generated
     public int hashCode() {
         return Objects.hash(name, number);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", Employee.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("number=" + number)
+                .toString();
     }
 }
