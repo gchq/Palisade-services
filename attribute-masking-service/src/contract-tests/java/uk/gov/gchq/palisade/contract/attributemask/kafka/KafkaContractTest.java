@@ -464,6 +464,7 @@ class KafkaContractTest {
                         props.getAllActiveProperties().entrySet().stream()
                                 .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
                         Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                        .peek(entry -> LOGGER.info("Config key {} = {}", entry.getKey(), entry.getValue()))
                         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
             }
 
