@@ -39,10 +39,11 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles({"caffeinetest", "akkatest"})
+@ActiveProfiles({"caffeine", "akkatest"})
 @SpringBootTest(
         classes = {UserApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class},
-        webEnvironment = WebEnvironment.NONE
+        webEnvironment = WebEnvironment.NONE,
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
 class CaffeineUserCachingTest {
 

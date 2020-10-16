@@ -40,6 +40,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
@@ -147,6 +148,7 @@ class RedisPersistenceContractTest {
 
         static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
+                .withNetwork(Network.SHARED)
                 .withReuse(true);
 
         @Override
@@ -193,8 +195,8 @@ class RedisPersistenceContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("masked-resource", 3, (short) 1),
+                    new NewTopic("request", 3, (short) 1),
+                    new NewTopic("user", 3, (short) 1),
                     new NewTopic("error", 3, (short) 1));
 
             @Bean

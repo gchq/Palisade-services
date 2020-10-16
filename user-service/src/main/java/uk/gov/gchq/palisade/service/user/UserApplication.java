@@ -36,8 +36,6 @@ import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 
-import javax.annotation.PostConstruct;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,9 +59,11 @@ public class UserApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer the Akka {@link Materializer} configured to be used
-     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer  the Akka {@link Materializer} configured to be used
+     * @param service       the specific {@link UserService} implementation
+     * @param configuration the {@link UserConfiguration} required for loading {@link uk.gov.gchq.palisade.User}s into the service
+     * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public UserApplication(
             final Collection<RunnableGraph<?>> runners,
