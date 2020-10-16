@@ -1,0 +1,50 @@
+# Copyright 2020 Crown Copyright
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Not interpreted by any java code, simply used by reference in the population.resources section
+default:
+  rootId: ../Palisade-services/resources
+  connectionDetail: data-service
+  type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
+  format: avro
+
+population:
+  userProvider: example
+  users:
+  - userId: test-user-id
+    auths:
+      test-purpose
+    roles:
+      IT
+
+  policyProvider: std
+  policies:
+  - resource: test/resourceId/
+    owner: test-user-id
+
+  resourceProvider: std
+  resources:
+  - resourceId: test/resourceId/
+    rootId: test
+    connectionDetail: ${default.connectionDetail}
+    attributes:
+      type: ${default.type}
+      serialisedFormat: ${default.format}
+
+  serialiserProvider: std
+  serialisers:
+  - flavourFormat: ${default.format}
+    flavourType: ${default.type}
+    serialiserClass: uk.gov.gchq.palisade.data.serialise.AvroSerialiser

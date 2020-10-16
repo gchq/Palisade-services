@@ -30,6 +30,11 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.event.EventListener;
 
+import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.ResourceConfiguration;
+import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 
@@ -50,6 +55,10 @@ public class PolicyApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
+    private final PolicyService service;
+    private final PolicyConfiguration policyConfig;
+    private final UserConfiguration userConfig;
+    private final ResourceConfiguration resourceConfig;
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -61,9 +70,17 @@ public class PolicyApplication {
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
+            final @Qualifier("controller") PolicyService service,
+            final PolicyConfiguration policyConfig,
+            final UserConfiguration userConfig,
+            final ResourceConfiguration resourceConfig,
             @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;
+        this.service = service;
+        this.policyConfig = policyConfig;
+        this.userConfig = userConfig;
+        this.resourceConfig = resourceConfig;
         this.executor = executor;
     }
 
@@ -78,6 +95,18 @@ public class PolicyApplication {
                 .run(args);
     }
 
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPostConstruct() {
+        // Add example Policies to the policy-service cache
+        LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
+        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
+        LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
+        policyConfig.getPolicies().stream()
+                .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
+                .peek(entry -> LOGGER.debug(entry.toString()))
+                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
+    }
+
     /**
      * Runs all available Akka {@link RunnableGraph}s until completion.
      * The 'main' threads of the application during runtime are the completable futures spawned here.
@@ -90,5 +119,6 @@ public class PolicyApplication {
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
     }
+
 
 }

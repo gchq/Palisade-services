@@ -88,7 +88,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 @SpringBootTest(classes = PolicyApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles({"caffeine", "akkatest"})
+@ActiveProfiles({"caffeine", "akkatest", "prepopulation"})
 class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     @SpyBean
