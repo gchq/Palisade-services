@@ -33,8 +33,7 @@ import org.springframework.context.event.EventListener;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
-import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 
@@ -55,7 +54,7 @@ public class PolicyApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
-    private final PolicyService service;
+    private final PolicyServiceCachingProxy service;
     private final PolicyConfiguration policyConfig;
     private final UserConfiguration userConfig;
     private final ResourceConfiguration resourceConfig;
@@ -70,7 +69,7 @@ public class PolicyApplication {
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
-            final @Qualifier("controller") PolicyService service,
+            final @Qualifier("cachingProxy") PolicyServiceCachingProxy service,
             final PolicyConfiguration policyConfig,
             final UserConfiguration userConfig,
             final ResourceConfiguration resourceConfig,
@@ -103,8 +102,11 @@ public class PolicyApplication {
         LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
                 .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
-                .peek(entry -> LOGGER.debug(entry.toString()))
-                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
+                .peek(entry -> LOGGER.info(entry.toString()))
+                .forEach(entry -> {
+                    LOGGER.info("policy service is: {}", service.getClassName());
+                    service.setResourcePolicy(entry.getKey(), entry.getValue());
+                });
     }
 
     /**

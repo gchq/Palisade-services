@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.policy.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
@@ -31,6 +34,8 @@ import java.util.Optional;
  * After cache TTL timeout, the service will effectively be reset and empty
  */
 public class NullPolicyService implements PolicyService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NullPolicyService.class);
+
     @Override
     public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
         // By default, all resources can be accessed (this may be overruled by hierarchy and policies on the resource)
@@ -44,6 +49,7 @@ public class NullPolicyService implements PolicyService {
     }
 
     public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
+        LOGGER.info("Im here with the resource: {}", resource);
         // Policies cannot be stored, but pretend that they are (they will be cached)
         return policy;
     }

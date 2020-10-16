@@ -21,13 +21,13 @@ default:
   format: avro
 
 population:
-  userProvider: example
+  userProvider: std
   users:
   - userId: test-user-id
     auths:
-      test-purpose
+      auth
     roles:
-      IT
+      role
 
   policyProvider: std
   policies:

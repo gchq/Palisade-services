@@ -129,13 +129,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean("nullService")
     @Qualifier("impl")
     public PolicyService nullPolicyService() {
+        LOGGER.info("Instantiated nullPolicyService");
         return new NullPolicyService();
     }
 
     @Bean("cachingProxy")
     public PolicyServiceCachingProxy cachedPolicyService(final @Qualifier("impl") PolicyService service) {
         PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
-        LOGGER.debug("Instantiated CachedPolicyService");
+        LOGGER.info("Instantiated CachedPolicyService");
         return policyServiceCachingProxy;
     }
 
@@ -143,7 +144,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Qualifier("controller")
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
         PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
-        LOGGER.debug("Instantiated HierarchicalPolicyService");
+        LOGGER.info("Instantiated HierarchicalPolicyService");
         return policyServiceHierarchyProxy;
     }
 
