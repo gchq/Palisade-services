@@ -32,7 +32,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 

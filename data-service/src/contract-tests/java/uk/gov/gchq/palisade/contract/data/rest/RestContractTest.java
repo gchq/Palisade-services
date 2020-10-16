@@ -49,11 +49,9 @@ import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

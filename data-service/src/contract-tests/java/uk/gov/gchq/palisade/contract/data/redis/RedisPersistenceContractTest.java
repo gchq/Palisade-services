@@ -28,7 +28,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
