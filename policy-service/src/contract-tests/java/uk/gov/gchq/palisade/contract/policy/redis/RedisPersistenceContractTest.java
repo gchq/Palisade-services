@@ -20,6 +20,7 @@ import akka.stream.Materializer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -60,24 +62,27 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         classes = {RedisPersistenceContractTest.class, PolicyApplication.class},
-        webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.data.redis.repositories.timeToLive.AuthorisedRequestEntity=1s", "akka.discovery.config.services.kafka.from-config=false"}
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import({RedisPersistenceContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceContractTest.KafkaInitializer.class, RedisPersistenceContractTest.RedisInitializer.class})
 @ActiveProfiles({"redis", "akkatest"})
-class RedisPersistenceContractTest extends PolicyTestCommon {
+class RedisPersistenceContractTest extends PolicyTestCommon{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @BeforeEach
     void setup() {
@@ -94,9 +99,19 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
         }
     }
 
+    protected void cleanCache() {
+        requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanCache();
+    }
+
     @Test
     void testContextLoads() {
         assertThat(cacheProxy).isNotNull();
+        assertThat(redisTemplate).isNotNull();
     }
 
     @Test
