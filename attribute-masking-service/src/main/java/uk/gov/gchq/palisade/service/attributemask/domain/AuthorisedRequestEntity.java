@@ -15,11 +15,17 @@
  */
 package uk.gov.gchq.palisade.service.attributemask.domain;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
+import org.springframework.data.redis.core.index.Indexed;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.attributemask.config.RedisTtlConfiguration;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -45,10 +51,13 @@ import java.util.StringJoiner;
                 @UniqueConstraint(columnNames = {"token", "resource_id"})
         }
 )
+@RedisHash(value = "AuthorisedRequestEntity", timeToLive = 86400)
 public class AuthorisedRequestEntity {
 
     @Id
     @Column(name = "unique_id", columnDefinition = "varchar(255)")
+    @org.springframework.data.annotation.Id
+    @Indexed
     private String uniqueId;
 
     @Column(name = "token", columnDefinition = "varchar(255)")
@@ -73,6 +82,9 @@ public class AuthorisedRequestEntity {
     @Convert(converter = RulesConverter.class)
     private Rules<?> rules;
 
+    @TimeToLive
+    protected Long timeToLive;
+
     /**
      * Empty-constructor for (de)serialisation functions
      */
@@ -90,6 +102,7 @@ public class AuthorisedRequestEntity {
      * @param context      the {@link Context} as originally supplied by the client
      * @param rules        the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      */
+    @PersistenceConstructor
     public AuthorisedRequestEntity(final String token, final User user, final LeafResource leafResource, final Context context, final Rules<?> rules) {
         this.uniqueId = new AuthorisedRequestEntityId(token, leafResource.getId()).getUniqueId();
         this.token = token;
@@ -98,6 +111,7 @@ public class AuthorisedRequestEntity {
         this.leafResource = leafResource;
         this.context = context;
         this.rules = rules;
+        this.timeToLive = RedisTtlConfiguration.getTimeToLiveSeconds("AuthorisedRequestEntity");
     }
 
     @Generated
@@ -128,6 +142,11 @@ public class AuthorisedRequestEntity {
     @Generated
     public Rules<?> getRules() {
         return rules;
+    }
+
+    @Generated
+    public Long getTimeToLive() {
+        return timeToLive;
     }
 
     @Override
