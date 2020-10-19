@@ -64,6 +64,8 @@ spec:
         env:
         - name: "LOADER_PATH"
           value: {{ include "data-service.deployment.path" . }}
+        - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
+          value: {{ include "data-service.config.path" . }}
         {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
         {{- range $item := $envVars }}
         - name: {{ $item.name }}
@@ -72,6 +74,8 @@ spec:
         volumeMounts:
         - name: {{ include "data-service.deployment.fullname" . }}
           mountPath: {{ include "data-service.deployment.path" . }}
+        - name: config-volume
+          mountPath: {{ include "data-service.config.path" . }}
         {{- range $name, $value := .Values.global.persistence.dataStores }}
         - name: {{ $name }}
           mountPath: {{ $value.mountPath }}
@@ -81,6 +85,9 @@ spec:
         persistentVolumeClaim:
           claimName: {{ include "data-service.deployment.fullname" . }}
           readOnly: true
+      - name: config-volume
+        configMap:
+          name: {{ include "data-service.name" . }}-configmap
       {{- range $name, $_ := .Values.global.persistence.dataStores }}
       - name: {{ $name }}
         persistentVolumeClaim:
