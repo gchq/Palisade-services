@@ -62,6 +62,7 @@ import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.model.Token;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
@@ -92,7 +93,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     @SpyBean
-    private PolicyApplication service;
+    private PolicyServiceCachingProxy service;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired

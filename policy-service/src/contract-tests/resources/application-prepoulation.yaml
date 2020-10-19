@@ -31,7 +31,7 @@ population:
 
   policyProvider: std
   policies:
-  - resource: test/resourceId/
+  - resource: ${default.rootId}/data/
     owner: test-user-id
 
   resourceProvider: std
@@ -42,9 +42,3 @@ population:
     attributes:
       type: ${default.type}
       serialisedFormat: ${default.format}
-
-  serialiserProvider: std
-  serialisers:
-  - flavourFormat: ${default.format}
-    flavourType: ${default.type}
-    serialiserClass: uk.gov.gchq.palisade.data.serialise.AvroSerialiser

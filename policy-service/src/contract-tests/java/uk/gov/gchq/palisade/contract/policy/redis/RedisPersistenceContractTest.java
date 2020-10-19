@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -49,7 +48,6 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.request.Policy;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
@@ -81,10 +79,6 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
 
-    @Autowired
-    @Qualifier("impl")
-    private PolicyService policyService;
-
     @BeforeEach
     void setup() {
         // Add the system resource to the policy service
@@ -102,7 +96,6 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
 
     @Test
     void testContextLoads() {
-        assertThat(policyService).isNotNull();
         assertThat(cacheProxy).isNotNull();
     }
 

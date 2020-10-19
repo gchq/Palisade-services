@@ -61,3 +61,4 @@ population:
 logging:
   level:
     org.apache.kafka: WARN
+

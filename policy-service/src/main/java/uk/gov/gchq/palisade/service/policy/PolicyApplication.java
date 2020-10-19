@@ -100,11 +100,12 @@ public class PolicyApplication {
         LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
         LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
-        policyConfig.getPolicies().stream()
+        policyConfig.getPolicies().stream().peek(e -> LOGGER.info("prepop stream {}", e))
                 .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
-                .peek(entry -> LOGGER.info(entry.toString()))
+                .peek(entry -> LOGGER.info("prepop entry {}",entry))
                 .forEach(entry -> {
                     LOGGER.info("policy service is: {}", service.getClassName());
+                    LOGGER.info("setResourcePolicy(entry.getKey() {}, entry.getValue() {}", entry.getKey(), entry.getValue());
                     service.setResourcePolicy(entry.getKey(), entry.getValue());
                 });
     }
