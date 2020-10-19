@@ -15,17 +15,34 @@
  */
 package uk.gov.gchq.palisade.component.policy.service;
 
+import akka.actor.ActorSystem;
+import akka.stream.Materializer;
 import com.github.benmanes.caffeine.cache.Cache;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.contract.policy.PolicyTestCommon;
-import uk.gov.gchq.palisade.contract.policy.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.StubResource;
@@ -36,20 +53,31 @@ import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles({"caffeine", "akkatest"})
-@SpringBootTest(classes = {PolicyApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+@Import({CaffeinePolicyCachingTest.KafkaInitializer.Config.class})
+@ContextConfiguration(initializers = {CaffeinePolicyCachingTest.KafkaInitializer.class})
+@SpringBootTest(classes = {PolicyApplication.class, ApplicationConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 
 class CaffeinePolicyCachingTest extends PolicyTestCommon {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CaffeinePolicyCachingTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy policyService;
@@ -138,5 +166,68 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();
+    }
+
+    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        static KafkaContainer kafka = new KafkaContainer("5.5.1")
+                .withReuse(true);
+
+        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
+                admin.createTopics(newTopics);
+                LOGGER.info("created topics: " + admin.listTopics().names().get());
+            }
+        }
+
+        @Override
+        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "caffeine");
+            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+            kafka.start();
+
+            // test kafka config
+            String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
+            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
+        }
+
+        @Configuration
+        public static class Config {
+
+            private final List<NewTopic> topics = List.of(
+                    new NewTopic("resource", 3, (short) 1),
+                    new NewTopic("rule", 3, (short) 1),
+                    new NewTopic("error", 3, (short) 1));
+
+            @Bean
+            @ConditionalOnMissingBean
+            static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
+                return new PropertiesConfigurer(resourceLoader, environment);
+            }
+
+            @Bean
+            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
+                createTopics(this.topics, kafka);
+                return kafka;
+            }
+
+            @Bean
+            @Primary
+            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+                CaffeinePolicyCachingTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
+                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
+                        props.getAllActiveProperties().entrySet().stream()
+                                .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                        Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
+            }
+
+            @Bean
+            @Primary
+            Materializer materializer(final ActorSystem system) {
+                return Materializer.createMaterializer(system);
+            }
+        }
     }
 }

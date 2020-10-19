@@ -102,14 +102,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "rule" topic is written to by the policy-service and read by this service.
- * The downstream "filtered-resource" topic is written to by this service and read by the filtered-resource-service.
+ * The upstream "resource" topic is written to by the resource-service and read by this service.
+ * The downstream "rule" topic is written to by this service and read by the attribute-masking-service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(classes = PolicyApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"caffeine", "akkatest", "prepopulation"})
+@ActiveProfiles({"caffeine", "akkatest", "prepopulation", "debug"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
@@ -150,8 +150,6 @@ class KafkaContractTest {
             }
         }
     }
-    @SpyBean
-    private PolicyService service;
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -175,9 +173,6 @@ class KafkaContractTest {
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
         final long recordCount = messageCount + 2;
-
-        // Given - the service is not mocked
-        Mockito.reset(service);
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
@@ -303,7 +298,7 @@ class KafkaContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("caffeine", "akkatest", "prepopulation", "debug");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();
