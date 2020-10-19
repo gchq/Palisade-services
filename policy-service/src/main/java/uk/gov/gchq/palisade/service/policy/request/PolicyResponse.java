@@ -66,12 +66,12 @@ public final class PolicyResponse {
             final @JsonProperty("resource") JsonNode resource,
             final @JsonProperty("rules") Rules rules) {
 
-        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new RuntimeException("User ID cannot be null"));
-        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new RuntimeException("Resource ID  cannot be null"));
-        this.context = Optional.ofNullable(context).orElseThrow(() -> new RuntimeException("Context cannot be null"));
-        this.user = Optional.ofNullable(user).orElseThrow(() -> new RuntimeException("User cannot be null"));
-        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new RuntimeException("Resource cannot be null"));
-        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new RuntimeException("Rules cannot be null"));
+        this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
+        this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
+        this.context = Optional.ofNullable(context).orElseThrow(() -> new IllegalArgumentException("Context cannot be null"));
+        this.user = Optional.ofNullable(user).orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
+        this.resource = Optional.ofNullable(resource).orElseThrow(() -> new IllegalArgumentException("Resource cannot be null"));
+        this.rules = Optional.ofNullable(rules).orElseThrow(() -> new IllegalArgumentException("Rules cannot be null"));
     }
 
     @Generated
@@ -83,7 +83,6 @@ public final class PolicyResponse {
     public String getResourceId() {
         return resourceId;
     }
-
 
     @Generated
     public Context getContext() throws JsonProcessingException {
@@ -99,7 +98,6 @@ public final class PolicyResponse {
     public LeafResource getResource() throws JsonProcessingException {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
-
 
     /**
      * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
@@ -137,7 +135,7 @@ public final class PolicyResponse {
         /**
          * Adds the user ID information to the message.
          */
-        interface IUserId {
+        public interface IUserId {
             /**
              * Adds the user ID.
              *
@@ -150,7 +148,7 @@ public final class PolicyResponse {
         /**
          * Adds the resource ID information to the message.
          */
-        interface IResourceId {
+        public interface IResourceId {
             /**
              * Adds the resource ID.
              *
@@ -163,7 +161,7 @@ public final class PolicyResponse {
         /**
          * Adds the user context information to the message.
          */
-        interface IContext {
+        public interface IContext {
             /**
              * Adds the user context information.
              *
@@ -186,7 +184,7 @@ public final class PolicyResponse {
         /**
          * Adds the user information to the message.
          */
-        interface IUser {
+        public interface IUser {
             /**
              * Adds the user user information.
              *
@@ -209,7 +207,7 @@ public final class PolicyResponse {
         /**
          * Adds the resource to this message.
          */
-        interface IResource {
+        public interface IResource {
             /**
              * Adds the resource that has been requested to access.
              *
@@ -232,7 +230,7 @@ public final class PolicyResponse {
         /**
          * Adds the rules to this message.
          */
-        interface IRules {
+        public interface IRules {
             /**
              * Adds the rules that has apply to this request.
              *

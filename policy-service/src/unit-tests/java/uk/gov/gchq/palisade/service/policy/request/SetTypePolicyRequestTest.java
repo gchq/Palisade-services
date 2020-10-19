@@ -30,19 +30,19 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-public class SetTypePolicyRequestTest {
+class SetTypePolicyRequestTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final User testUser = new User().userId("TestUser");
     private Policy typePolicy;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         typePolicy = new Policy().owner(testUser).resourceLevelRule("Testing purpose", new IsTextResourceRule());
     }
 
     @Test
-    public void testSetTypePolicyRequestToJson() throws IOException {
+    void testSetTypePolicyRequestToJson() throws IOException {
         // Given
         final SetTypePolicyRequest request = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 
@@ -57,7 +57,7 @@ public class SetTypePolicyRequestTest {
     }
 
     @Test
-    public void testSetTypePolicyRequestFromJson() throws IOException {
+    void testSetTypePolicyRequestFromJson() throws IOException {
         // Given
         final SetTypePolicyRequest expected = new SetTypePolicyRequest().type("TestObj").policy(typePolicy);
 

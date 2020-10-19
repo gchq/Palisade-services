@@ -1,0 +1,80 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package uk.gov.gchq.palisade.component.policy;
+
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.request.Policy;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Set of methods and classes used in construction of integration tests in this package.
+ */
+public class PolicyTestData {
+    public static User mockUser() {
+        return (new User())
+                .userId("Alice")
+                .roles("HR")
+                .auths("private", "public");
+    }
+
+    public static Context mockContext() {
+        return (new Context())
+                .contents(new HashMap<String, Object>()).put("purpose", "SALARY")
+                .purpose("Testing");
+    }
+
+    public static RequestId mockOriginalRequestId() {
+        return (new RequestId()).id(UUID.randomUUID().toString());
+    }
+
+    public static LeafResource mockResource() {
+        return new FileResource()
+                .id("TEST_RESOURCE_ID")
+                .type("data type of the resource, e.g. Employee")
+                .serialisedFormat("none")
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service-mock"))
+                .parent((new DirectoryResource())
+                        .id("resource")
+                        .parent((new SystemResource())
+                                .id("root")));
+    }
+
+    public static Collection<LeafResource> mockResources() {
+        List<LeafResource> resources = new ArrayList<>();
+        resources.add(mockResource());
+        return resources;
+    }
+
+    public static Policy mockPolicy() {
+        return new Policy<>()
+                .owner(mockUser())
+                .resourceRules(new Rules<>())
+                .recordRules(new Rules<>());
+    }
+}

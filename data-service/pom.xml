@@ -32,8 +32,9 @@
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
-        <unit-test.skip>false</unit-test.skip>
+        <wiremock.version>2.20.0</wiremock.version>
     </properties>
+
     <dependencies>
         <!-- Spring automatically picks up either gson or jackson
            ~ Hadoop already bundles gson, but an out-of-date version
@@ -79,6 +80,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -293,6 +300,8 @@
                         <configuration>
                             <sources>
                                 <source>src/unit-tests/java</source>
+                                <source>src/component-tests/java</source>
+                                <source>src/contract-tests/java</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -307,22 +316,13 @@
                                 <resource>
                                     <filtering>true</filtering>
                                     <directory>src/unit-tests/resources</directory>
+                                    <directory>src/component-tests/resources</directory>
+                                    <directory>src/contract-tests/resources</directory>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.plugin.version}</version>
-                <configuration>
-                    <skipTests>${unit-test.skip}</skipTests>
-                    <includes>
-                        <include>**/palisade/service/**</include>
-                    </includes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

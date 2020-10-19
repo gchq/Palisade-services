@@ -46,7 +46,6 @@ public final class AuditErrorMessage extends AuditMessage {
 
         super(userId, resourceId, context, attributes);
         this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
-
     }
 
     @Generated

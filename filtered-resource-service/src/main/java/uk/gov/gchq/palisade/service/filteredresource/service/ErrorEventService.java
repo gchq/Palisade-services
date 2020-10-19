@@ -24,6 +24,13 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
  */
 public interface ErrorEventService {
 
+    /**
+     * Report the given error back to the client.
+     * At this point, this is just writing to persistence.
+     *
+     * @param token     the request's unique token
+     * @param exception the exception thrown by one of the services
+     */
     void reportError(final String token, final Throwable exception);
 
 }
