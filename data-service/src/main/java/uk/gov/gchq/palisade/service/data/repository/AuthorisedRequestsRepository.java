@@ -24,14 +24,13 @@ import java.util.Optional;
 
 public interface AuthorisedRequestsRepository extends CrudRepository<AuthorisedRequestEntity, String> {
 
-    Optional<AuthorisedRequestEntity> findByUniqueId(final String uniqueId);
 
-    default Optional<AuthorisedRequestEntity> find(final AuthorisedRequestEntityId entityId) {
-        return findByUniqueId(entityId.getUniqueId());
+    default Optional<AuthorisedRequestEntity> findByEntityId(final AuthorisedRequestEntityId entityId) {
+        return this.findById(entityId.getUniqueId());
     }
 
-    default Optional<AuthorisedRequestEntity> find(final String token, final String leafResourceId) {
-        return find(new AuthorisedRequestEntityId(token, leafResourceId));
+    default Optional<AuthorisedRequestEntity> findByTokenAndResourceId(final String token, final String resourceId) {
+        return this.findByEntityId(new AuthorisedRequestEntityId(token, resourceId));
     }
 
 }

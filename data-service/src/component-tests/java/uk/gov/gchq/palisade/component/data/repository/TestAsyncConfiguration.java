@@ -18,14 +18,14 @@ package uk.gov.gchq.palisade.component.data.repository;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
 
 @TestConfiguration
-public class AsyncConfiguration {
+public class TestAsyncConfiguration {
     @Bean("threadPoolTaskExecutor")
     Executor testExecutor() {
-        return new ForkJoinPool(1);
+        return new ThreadPoolTaskExecutor();
     }
 }

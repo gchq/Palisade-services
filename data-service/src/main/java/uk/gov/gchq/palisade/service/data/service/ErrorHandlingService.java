@@ -37,7 +37,6 @@ public interface ErrorHandlingService {
      *
      * @param token   the token for this request - used to notify the client of failures
      * @param request the request input that led to failure - the original request is extracted from this message
-     * @param error   the error thrown in processing
      */
     void reportError(final String token, final AuditErrorMessage request);
 

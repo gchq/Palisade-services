@@ -17,6 +17,8 @@ package uk.gov.gchq.palisade.service.data.repository;
 
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 
+import javax.transaction.Transactional;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -43,7 +45,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     }
 
     @Override
+    @Transactional
     public CompletableFuture<Optional<AuthorisedRequestEntity>> getAsync(final String token, final String leafResourceId) {
-        return CompletableFuture.supplyAsync(() -> authorisedRequestsRepository.find(token, leafResourceId), executor);
+        return CompletableFuture.supplyAsync(() -> authorisedRequestsRepository.findByTokenAndResourceId(token, leafResourceId), executor);
     }
 }

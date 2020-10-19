@@ -22,13 +22,15 @@ import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import java.io.IOException;
 
 public class ReadException extends RuntimeException {
+    @SuppressWarnings("java:S1948")
     private final DataReaderRequest readerRequest;
 
     /**
      * Specialised exception thrown by the data-service when an IOException occurred while reading
      * from the data-reader, bundling the data-reader request that caused the exception.
      *
-     * @param cause a {@link IOException} that caused the error
+     * @param readerRequest the authorised request to the data-reader that was being processed
+     * @param cause         the {@link IOException} that caused the error
      */
     public ReadException(final DataReaderRequest readerRequest, final IOException cause) {
         super("An exception was thrown while reading from data-reader", cause);

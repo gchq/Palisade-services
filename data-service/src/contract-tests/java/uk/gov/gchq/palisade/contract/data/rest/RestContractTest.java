@@ -111,6 +111,7 @@ class RestContractTest {
     @Test
     void testReadChunked() throws Exception {
         // Given - the file contains the expected data
+        // This data file can be recreated with the following code:
         // AVRO_SERIALISER.serialise(Stream.of(new Employee()), new FileOutputStream(CURRENT_PATH));
 
         // When
@@ -129,6 +130,7 @@ class RestContractTest {
         List<Employee> data = AVRO_SERIALISER.deserialise(new ByteArrayInputStream(bytes))
                 .collect(Collectors.toList());
 
+        // Then the data file was read correctly - it was a single default Employee
         assertThat(data)
                 .hasSize(1)
                 .first().isEqualTo(new Employee());

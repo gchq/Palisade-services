@@ -30,7 +30,7 @@ import java.io.Serializable;
 
 class DomainTestData {
     /**
-     * Common test data for all classes
+     * Common test data
      */
 
     private DomainTestData() {

@@ -132,6 +132,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
+             * @return interface {@link AuditSuccessMessage.Builder.ILeafResourceId} for the next step in the build.
              */
             default ILeafResourceId withContext(Context context) {
                 return withContextNode(MAPPER.valueToTree(context));
@@ -141,6 +142,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.  Uses a JsonNode string form of the information.
              *
              * @param context user context for the request.
+             * @return interface {@link AuditSuccessMessage.Builder.ILeafResourceId} for the next step in the build.
              */
             ILeafResourceId withContextNode(JsonNode context);
         }
@@ -153,6 +155,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the leaf resource ID for the message.
              *
              * @param leafResource leaf resource ID.
+             * @return interface {@link AuditSuccessMessage.Builder.IAttributes} for the next step in the build.
              */
             IAttributes withLeafResourceId(String leafResource);
         }
@@ -165,6 +168,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the attributes for the message.
              *
              * @param attributes timestamp for the request.
+             * @return completed {@link AuditSuccessMessage} object.
              */
             AuditSuccessMessage withAttributes(Map<String, Object> attributes);
 

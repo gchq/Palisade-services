@@ -108,6 +108,11 @@ public class AuthorisedRequestEntity {
     }
 
     @Generated
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    @Generated
     public String getToken() {
         return token;
     }
@@ -166,13 +171,13 @@ public class AuthorisedRequestEntity {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuthorisedRequestEntity.class.getSimpleName() + "[", "]")
+                .add("uniqueId='" + uniqueId + "'")
                 .add("token='" + token + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("user=" + user)
                 .add("leafResource=" + leafResource)
                 .add("context=" + context)
                 .add("rules=" + rules)
-                .add(super.toString())
                 .toString();
     }
 

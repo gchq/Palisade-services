@@ -22,6 +22,9 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * A simple 'Employee' type to read from a file, with some 'interesting' default values
+ */
 public class Employee implements Serializable {
     private static final long serialVersionUID = 1;
 

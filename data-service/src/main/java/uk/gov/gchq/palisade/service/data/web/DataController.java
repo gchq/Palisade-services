@@ -53,6 +53,7 @@ public class DataController {
      * Constructor for a {@link DataController} instance.
      *
      * @param dataService             a {@link DataService} instance that will process the requests.
+     * @param auditService            an {@link AuditService} instance that will audit successful data reads by the client.
      * @param serialiserConfiguration a {@link StdSerialiserConfiguration} that can be used to Pre-populate the {@link DataService}
      *                                with a {@link uk.gov.gchq.palisade.data.serialise.Serialiser}
      */
@@ -64,6 +65,12 @@ public class DataController {
         this.serialiserConfig = serialiserConfiguration;
     }
 
+    /**
+     * REST endpoint to read a resource and return a streaming response.
+     *
+     * @param dataRequest the request to read the data from a leafResource
+     * @return a stream of bytes representing the contents of the resource
+     */
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final DataRequest dataRequest) {
         LOGGER.info("Invoking read (chunked): {}", dataRequest);

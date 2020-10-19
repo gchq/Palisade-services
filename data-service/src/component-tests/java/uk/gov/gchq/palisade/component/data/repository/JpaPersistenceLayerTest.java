@@ -22,11 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -37,17 +35,20 @@ import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {ApplicationConfiguration.class})
-@Import({AsyncConfiguration.class})
-@EntityScan(basePackages = {"uk.gov.gchq.palisade.service.data.domain"})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class})
+@EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.data.repository"})
 @ActiveProfiles({"h2test"})
 class JpaPersistenceLayerTest {
@@ -91,35 +92,40 @@ class JpaPersistenceLayerTest {
     }
 
     @Test
-    @Transactional
+    @Transactional(TxType.NEVER)
     void testEmptyGetReturnsEmpty() {
-    }
-
-    @Test
-    @Transactional
-    void testGetReturnsResource() {
-        // Given
-        var entities = List.of(entity1, entity2, entity3);
-
-        LOGGER.info("save");
-        requestsRepository.saveAll(entities);
-
-        LOGGER.info("find");
-        requestsRepository.findAll().forEach(e -> System.out.println(e.getToken() + ":" + e.getResourceId()));
-
         // When
         LOGGER.info("get");
-        var futureEntities = entities.stream()
-                .map(ent -> new SimpleImmutableEntry<>(ent, persistenceLayer.getAsync(ent.getToken(), ent.getResourceId())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        LOGGER.info("join");
-        futureEntities.forEach((e, f) -> System.out.println(e.getToken() + ":" + e.getResourceId() + " :: " + f.join().toString()));
+        Optional<AuthorisedRequestEntity> missingEntity = persistenceLayer.getAsync("not-a-token", "not-a-leafresource").join();
 
         // Then
         LOGGER.info("assert");
-        futureEntities.forEach((entity, future) ->
-                assertThat(future.join())
+        assertThat(missingEntity)
+                .isEmpty();
+    }
+
+    /**
+     * @implNote
+     * Because of the CompletableFuture, we will be scheduling a job in Spring-managed test within the scope of a Spring transaction.
+     * Therefore the transaction will never be committed, and the external scheduler and worker threads won't see the new job record in the database.
+     * To fix this, for this specific case (synchronous save, then asynchronous find), we must disable the test transaction.
+     * Similar tests (asynchronous save, then synchronous find) are unaffected by this quirk (eg. the dual to this data store in the attribute-masking-service).
+     */
+    @Transactional(TxType.NEVER)
+    @Test
+    void testGetReturnsAuthorisedRequest() {
+        // Given
+        List<AuthorisedRequestEntity> entities = List.of(entity1, entity2, entity3);
+        requestsRepository.saveAll(entities);
+
+        // When
+        Map<AuthorisedRequestEntity, Optional<AuthorisedRequestEntity>> persistedEntities = entities.stream()
+                .map(ent -> new SimpleImmutableEntry<>(ent, persistenceLayer.getAsync(ent.getToken(), ent.getResourceId()).join()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        // Then
+        persistedEntities.forEach((entity, persisted) ->
+                assertThat(persisted)
                         .isPresent()
                         .get()
                         .isEqualTo(entity));

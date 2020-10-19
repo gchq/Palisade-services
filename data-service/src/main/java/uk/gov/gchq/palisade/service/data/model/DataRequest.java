@@ -26,13 +26,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The FilteredResourceRequest is the input for results-service where the resource is queued-up ready for the client's request
- * to retrieve the Resource.
- * TopicOffsetMessage is the output for this service which will be send the client the information needed to
- * retrieve this data.
- * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse is the output from the attribute-masking-service.
- * uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest is the input for the filtered-resource-service.
+ * The {@link DataRequest} is the input for the data-service where the resource is read.
+ * This message is created by the response from the filtered-resource-service to the client.
+ * It is then routed via the resource's connectionDetail to the appropriate instance of a data-service.
+ * This message is used to retrieve the {@link uk.gov.gchq.palisade.reader.request.DataReaderRequest} from the attribute-masking-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class DataRequest {

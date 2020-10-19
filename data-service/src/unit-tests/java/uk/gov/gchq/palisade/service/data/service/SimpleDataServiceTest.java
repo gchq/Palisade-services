@@ -97,6 +97,8 @@ class SimpleDataServiceTest {
         Mockito.verify(dataReader, Mockito.atLeastOnce()).read(Mockito.any(), Mockito.any(), Mockito.any());
 
         // Then the correct number of records was (not) read
-        assertThat(recordsReadAndReturned).isEqualTo(Pair.of(0L, 0L));
+        assertThat(recordsReadAndReturned)
+                .usingRecursiveComparison()
+                .isEqualTo(Pair.of(0L, 0L));
     }
 }

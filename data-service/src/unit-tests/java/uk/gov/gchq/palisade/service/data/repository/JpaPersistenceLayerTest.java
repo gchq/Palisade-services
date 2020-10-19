@@ -32,10 +32,8 @@ class JpaPersistenceLayerTest {
     @Test
     void testPersistenceLayerGetsFromRepository() {
         // Given the repository is mocked
-        AuthorisedRequestsRepository requestsRepository = Mockito.mock(AuthorisedRequestsRepository.class);
-        Mockito.when(requestsRepository.find(Mockito.any())).thenCallRealMethod();
-        Mockito.when(requestsRepository.find(Mockito.any(), Mockito.any())).thenCallRealMethod();
-        Mockito.when(requestsRepository.findByUniqueId(Mockito.any())).thenReturn(Optional.of(new AuthorisedRequestEntity()));
+        AuthorisedRequestsRepository requestsRepository = Mockito.spy(AuthorisedRequestsRepository.class);
+        Mockito.when(requestsRepository.findById(Mockito.anyString())).thenReturn(Optional.of(new AuthorisedRequestEntity()));
 
         // Given the JpaPersistenceLayer is using this mocked repository
         JpaPersistenceLayer persistenceLayer = new JpaPersistenceLayer(requestsRepository, new ForkJoinPool(1));
@@ -51,7 +49,7 @@ class JpaPersistenceLayerTest {
                 .isEqualTo(new AuthorisedRequestEntity());
 
         // Then the mock was called
-        Mockito.verify(requestsRepository, Mockito.atLeastOnce()).findByUniqueId(Mockito.any());
+        Mockito.verify(requestsRepository, Mockito.atLeastOnce()).findById(Mockito.anyString());
     }
 
 }
