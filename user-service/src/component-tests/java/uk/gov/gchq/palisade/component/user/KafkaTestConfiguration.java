@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.user.kafka;
+package uk.gov.gchq.palisade.component.user;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;

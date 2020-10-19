@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration;
+import uk.gov.gchq.palisade.component.user.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
