@@ -35,7 +35,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.NonNull;
 
-
 import uk.gov.gchq.palisade.service.topicoffset.exception.PropertyLoadingException;
 
 import java.io.IOException;

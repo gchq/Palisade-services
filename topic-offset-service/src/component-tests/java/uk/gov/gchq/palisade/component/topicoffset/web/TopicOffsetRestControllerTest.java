@@ -78,7 +78,7 @@ class TopicOffsetRestControllerTest {
     @MockBean
     private ErrorHandlingService errorHandlingService;
 
-    public static final TopicOffsetResponse startResponse = TopicOffsetResponse.Builder.create().withOffset(123L);
+    public static final TopicOffsetResponse START_RESPONSE = TopicOffsetResponse.Builder.create().withOffset(123L);
     public static final String SERVICE_ENDPOINT_URL = "/api/offset";
     public static final String TEST_REQUEST_TOKEN = "test-request-token";
     public static final String USER_ID = "testUserId";
