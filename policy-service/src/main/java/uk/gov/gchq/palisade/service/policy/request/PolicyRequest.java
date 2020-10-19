@@ -38,7 +38,7 @@ import java.util.StringJoiner;
  * PolicyResponse is the output for this service which will include the Rules to implement with this Resource.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.resource.response.ResourceResponse is the output from the resource-service.
- * uk.gov.gchq.palisade.service.policy.model.PolicyRequest is the input for the policy-service.
+ * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class PolicyRequest {
