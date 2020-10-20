@@ -92,6 +92,10 @@ public class UserApplication {
                 .run(args);
     }
 
+    /**
+     * This method will add a {@link uk.gov.gchq.palisade.User} to the
+     * {@link UserService} using the details provided in a yaml file.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
