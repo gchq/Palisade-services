@@ -16,6 +16,7 @@ replicaCount: 1
 
 service:
   port: 80
+  internalPort: 8093
   type: ClusterIP
 
 image:
