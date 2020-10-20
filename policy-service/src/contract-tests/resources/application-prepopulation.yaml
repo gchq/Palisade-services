@@ -15,7 +15,6 @@
 
 # Not interpreted by any java code, simply used by reference in the population.resources section
 default:
-  rootId: ../Palisade-services/resources
   connectionDetail: data-service
   type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
   format: avro
@@ -31,12 +30,12 @@ population:
 
   policyProvider: std
   policies:
-  - resource: ${default.rootId}/data/
+  - resource: /test/resourceId
     owner: test-user-id
 
   resourceProvider: std
   resources:
-  - resourceId: test/resourceId/
+  - resourceId: /test/resourceId
     rootId: test
     connectionDetail: ${default.connectionDetail}
     attributes:

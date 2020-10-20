@@ -29,10 +29,14 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rule;
+import uk.gov.gchq.palisade.service.ConnectionDetail;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.model.Token;
+import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.Serializable;
 import java.util.function.Function;
@@ -62,14 +66,35 @@ public class ContractTestData {
     public static final String RESOURCE_ID = "/test/resourceId";
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
-
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"uk.gov.gchq.palisade.test.TestType\"}}";
+    public static final User USER = new User().userId(USER_ID).roles("role").auths("auth");
+    public static final ConnectionDetail CONNECTION_DETAIL = new SimpleConnectionDetail().serviceName("data-service");
+    public static final LeafResource RESOURCE = (LeafResource) ResourceBuilder.create(RESOURCE_ID);
+    public static final PolicyRequest POLICY_REQUEST;
     public static final JsonNode REQUEST_NODE;
     public static final PolicyRequest REQUEST_OBJ;
+    public static String requestJson;
+
+    static {
+        RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
+        POLICY_REQUEST = PolicyRequest.Builder.create()
+                .withUserId(USER_ID.getId())
+                .withResourceId(RESOURCE.getId())
+                .withContext(CONTEXT)
+                .withUser(USER)
+                .withResource(RESOURCE);
+    }
 
     static {
         try {
-            REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
+            requestJson = MAPPER.writeValueAsString(POLICY_REQUEST);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse PolicyRequest test data", e);
+        }
+    }
+
+    static {
+        try {
+            REQUEST_NODE = MAPPER.readTree(requestJson);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
@@ -80,7 +105,7 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"}}", i, i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(requestJson, i, i);
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
