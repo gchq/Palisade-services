@@ -103,7 +103,6 @@ public abstract class AbstractLdapUserService implements UserService {
     @Override
     public User getUser(final UserId userId) {
         requireNonNull(userId, "userId has not been set");
-        requireNonNull(userId.getId(), "userId has not been set");
         LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
         try {
             Map<String, Object> userAttrs = getAttributes(userId);

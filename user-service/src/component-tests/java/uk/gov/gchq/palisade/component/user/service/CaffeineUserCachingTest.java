@@ -25,7 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.contract.user.kafka.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
@@ -37,8 +39,12 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles("caffeine")
-@SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
+@ActiveProfiles({"caffeine", "akkatest"})
+@SpringBootTest(
+        classes = {UserApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class},
+        webEnvironment = WebEnvironment.NONE,
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
+)
 class CaffeineUserCachingTest {
 
     @Autowired
@@ -73,10 +79,12 @@ class CaffeineUserCachingTest {
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
         // When
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "NonExistentUser should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(userId), "NonExistentUser should throw noSuchIdException"
+        );
 
         //Then
-        assertThat("No userId matching UserId[id='definitely-not-a-real-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='definitely-not-a-real-user'] found in cache");
     }
 
     @Test
@@ -105,11 +113,13 @@ class CaffeineUserCachingTest {
 
         // When - we try to get the first (now-evicted) user to be added
         forceCleanUp();
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(makeUser.apply(0).getUserId()), "testMaxSizeTest should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(makeUser.apply(0).getUserId()), "testMaxSizeTest should throw noSuchIdException"
+        );
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat("No userId matching UserId[id='max-size-0-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='max-size-0-test-user'] found in cache");
     }
 
     @Test
@@ -122,10 +132,12 @@ class CaffeineUserCachingTest {
 
         // When - we try to access stale cache data
         forceCleanUp();
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException"
+        );
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat("No userId matching UserId[id='ttl-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='ttl-test-user'] found in cache");
     }
 }
