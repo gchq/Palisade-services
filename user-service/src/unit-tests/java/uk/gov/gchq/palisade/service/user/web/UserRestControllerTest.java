@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
@@ -44,6 +44,7 @@ import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -89,8 +90,9 @@ class UserRestControllerTest {
     void testAddAndGetUser() {
         // Given
         User expected = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        UserRequest request = UserRequest.Builder.create().withUserId(expected.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
         when(service.addUser(any(User.class))).thenReturn(expected);
-        when(service.getUser(any(UserId.class))).thenReturn(expected);
+        when(service.getUser(any(UserRequest.class))).thenReturn(CompletableFuture.completedFuture(expected));
 
         // When
         User addedUser = proxy.addUser(expected);
@@ -98,7 +100,7 @@ class UserRestControllerTest {
         assertThat(addedUser).isEqualTo(expected);
 
         // When
-        User user = proxy.getUser(expected.getUserId());
+        User user = proxy.getUser(request).join();
         // Then
         assertThat(user).isEqualTo(expected);
 

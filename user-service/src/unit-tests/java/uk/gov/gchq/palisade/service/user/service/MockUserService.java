@@ -19,25 +19,27 @@ package uk.gov.gchq.palisade.service.user.service;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class MockUserService extends HashMap<UserId, User> implements UserService {
 
     @Override
-    public User getUser(final UserId userId) {
-        User user = this.get(userId);
+    public CompletableFuture<User> getUser(final UserRequest userRequest) {
+        User user = this.get(userRequest.userId);
         if (Objects.nonNull(user)) {
-            return user;
+            return CompletableFuture.completedFuture(user);
         } else {
-            throw new NoSuchUserIdException("No such key: " + userId.toString());
+            throw new NoSuchUserIdException("No such key: " + userRequest.getUserId());
         }
     }
 
     @Override
     public User addUser(final User user) {
         this.put(user.getUserId(), user);
-        return this.getUser(user.getUserId());
+        return user;
     }
 }

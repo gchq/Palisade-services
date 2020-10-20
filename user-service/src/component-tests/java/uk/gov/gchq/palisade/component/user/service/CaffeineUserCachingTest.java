@@ -23,12 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.component.user.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
 import java.util.Collections;
@@ -61,6 +63,7 @@ class CaffeineUserCachingTest {
     void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
 
         // When
         User addedUser = userService.addUser(user);
@@ -68,7 +71,7 @@ class CaffeineUserCachingTest {
         assertThat(addedUser).isEqualTo(user);
 
         // When
-        User getUser = userService.getUser(user.getUserId());
+        User getUser = userService.getUser(request).join();
         // Then
         assertThat(getUser).isEqualTo(user);
     }
@@ -77,10 +80,11 @@ class CaffeineUserCachingTest {
     void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
+        UserRequest request = UserRequest.Builder.create().withUserId(userId.getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
 
         // When
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(userId), "NonExistentUser should throw noSuchIdException"
+                () -> userService.getUser(request), "NonExistentUser should throw noSuchIdException"
         );
 
         //Then
@@ -92,12 +96,13 @@ class CaffeineUserCachingTest {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
+        UserRequest userRequest = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
 
         // When
         userService.addUser(user);
         userService.addUser(update);
 
-        User updatedUser = userService.getUser(user.getUserId());
+        User updatedUser = userService.getUser(userRequest).join();
 
         // Then
         assertThat(updatedUser).isEqualTo(update);
@@ -107,6 +112,10 @@ class CaffeineUserCachingTest {
     void testMaxSize() {
         // Given - many users are added and cached (cache size set to 100 in application.yaml)
         Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
+        Function<Integer, UserRequest> makeUserRequest = i -> UserRequest.Builder.create()
+                .withUserId("max-size-" + i.toString() + "-test-user")
+                .withResourceId("test/resource")
+                .withContext(new Context().purpose("purpose"));
         for (int count = 0; count <= 150; ++count) {
             userService.addUser(makeUser.apply(count));
         }
@@ -114,7 +123,7 @@ class CaffeineUserCachingTest {
         // When - we try to get the first (now-evicted) user to be added
         forceCleanUp();
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(makeUser.apply(0).getUserId()), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(makeUserRequest.apply(0)), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted
@@ -133,7 +142,11 @@ class CaffeineUserCachingTest {
         // When - we try to access stale cache data
         forceCleanUp();
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(UserRequest.Builder.create()
+                        .withUserId(user.getUserId().getId())
+                        .withResourceId("test/resource")
+                        .withContext(new Context().purpose("purpose"))
+                ), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted

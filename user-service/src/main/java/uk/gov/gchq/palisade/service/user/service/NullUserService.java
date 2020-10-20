@@ -16,14 +16,16 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
+
+import java.util.concurrent.CompletableFuture;
 
 public class NullUserService implements UserService {
 
     @Override
-    public User getUser(final UserId userId) {
-        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
+    public CompletableFuture<User> getUser(final UserRequest userRequest) {
+        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userRequest.userId));
     }
 
     @Override

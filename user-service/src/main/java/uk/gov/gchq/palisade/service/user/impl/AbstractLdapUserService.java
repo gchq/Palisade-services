@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import javax.naming.NamingEnumeration;
@@ -42,6 +43,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
@@ -101,13 +103,15 @@ public abstract class AbstractLdapUserService implements UserService {
     }
 
     @Override
-    public User getUser(final UserId userId) {
-        requireNonNull(userId, "userId is null");
-        requireNonNull(userId.getId(), "userId.id has not been set");
-        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
+    public CompletableFuture<User> getUser(final UserRequest userRequest) {
+        requireNonNull(userRequest.userId, "userId is null");
+        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userRequest.userId);
         try {
-            Map<String, Object> userAttrs = getAttributes(userId);
-            return new User().userId(userId).auths(getAuths(userId, userAttrs, context)).roles(getRoles(userId, userAttrs, context));
+            Map<String, Object> userAttrs = getAttributes(new UserId().id(userRequest.userId));
+            return CompletableFuture.completedFuture(new User()
+                    .userId(new UserId().id(userRequest.userId))
+                    .auths(getAuths(new UserId().id(userRequest.userId), userAttrs, context))
+                    .roles(getRoles(new UserId().id(userRequest.userId), userAttrs, context)));
         } catch (NamingException ex) {
             LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);

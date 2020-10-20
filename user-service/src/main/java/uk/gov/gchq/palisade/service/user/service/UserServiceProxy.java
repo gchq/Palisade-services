@@ -23,7 +23,9 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
+
+import java.util.concurrent.CompletableFuture;
 
 @CacheConfig(cacheNames = {"users"})
 public class UserServiceProxy implements UserService {
@@ -35,9 +37,9 @@ public class UserServiceProxy implements UserService {
     }
 
     @Cacheable(key = "#userId")
-    public User getUser(final UserId userId) {
-        LOGGER.info("Cache miss for userId {}", userId);
-        return service.getUser(userId);
+    public CompletableFuture<User> getUser(final UserRequest userRequest) {
+        LOGGER.info("Cache miss for userId {}", userRequest.userId);
+        return service.getUser(userRequest);
     }
 
     @CachePut(key = "#user.userId")

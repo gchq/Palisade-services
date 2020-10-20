@@ -42,10 +42,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.Network;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
@@ -81,6 +83,7 @@ class RedisPersistenceContractTest {
     void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         // When
         User addedUser = userService.addUser(user);
@@ -88,7 +91,7 @@ class RedisPersistenceContractTest {
         assertThat(addedUser).isEqualTo(user);
 
         // When
-        User getUser = userService.getUser(user.getUserId());
+        User getUser = userService.getUser(request).join();
         // Then
         assertThat(getUser).isEqualTo(user);
     }
@@ -97,10 +100,11 @@ class RedisPersistenceContractTest {
     void testNonExistentUserRetrieveFails() {
         // Given
         UserId userId = new UserId().id("definitely-not-a-real-user");
+        UserRequest request = UserRequest.Builder.create().withUserId(userId.getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         // When
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(userId), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(request), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted
@@ -113,12 +117,13 @@ class RedisPersistenceContractTest {
         // Given
         User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
         User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
+        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         // When
         userService.addUser(user);
         userService.addUser(update);
 
-        User updatedUser = userService.getUser(user.getUserId());
+        User updatedUser = userService.getUser(request).join();
 
         // Then
         assertThat(updatedUser).isEqualTo(update);
@@ -128,13 +133,14 @@ class RedisPersistenceContractTest {
     void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
+        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
         userService.addUser(user);
 
         TimeUnit.MILLISECONDS.sleep(1000);
 
         // When - we try to access stale cache data
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(request), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted

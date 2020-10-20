@@ -29,8 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -108,9 +110,10 @@ class AbstractLdapUserServiceTest {
 
         final MockLdapUserService service = new MockLdapUserService(context);
         service.setMock(mock);
+        UserRequest request = UserRequest.Builder.create().withUserId(userId.getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         // When
-        final User user = service.getUser(userId);
+        final User user = service.getUser(request).join();
 
         // Then
         assertThat(userId).isEqualTo(user.getUserId());

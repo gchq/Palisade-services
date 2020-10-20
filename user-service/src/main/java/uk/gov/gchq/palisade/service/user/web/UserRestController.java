@@ -46,14 +46,26 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * A REST interface mimicking the Kafka API to the service.
+ * POSTs to the controller write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
+ * Intended for debugging only.
+ */
 @RestController
 @RequestMapping(path = "/api")
 public class UserRestController {
-
     private final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
 
+    /**
+     * Autowired constructor for the rest controller
+     *
+     * @param upstreamSink   a sink to the upstream topic
+     * @param upstreamConfig the config for the topic (name, partitions, ...)
+     * @param materializer   the akka system materializer
+     */
     public UserRestController(
             final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
             final ConsumerTopicConfiguration upstreamConfig,

@@ -20,6 +20,9 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * <p> The core API for the user service. </p> <p> The responsibility of the user service is to maintain the mapping
@@ -35,11 +38,11 @@ public interface UserService extends Service {
      * {@link UserService}. If the requested {@link UserId} doesn't exist in this {@link
      * UserService} then an exception will be thrown.
      *
-     * @param userId the user ID to look up
-     * @return a {@link User} with the user details
-     * @throws NoSuchUserIdException if the {@link UserId} could not be found
+     * @param userRequest the request received by the user-service
+     * @return a {@link CompletableFuture} of a {@link User} with the user details
+     * @throws NoSuchUserIdException if the {@link User} could not be found
      */
-    User getUser(final UserId userId);
+    CompletableFuture<User> getUser(final UserRequest userRequest);
 
     /**
      * Adds the user to the {@link UserService}. The {@link User} should be fully populated with all the necessary
