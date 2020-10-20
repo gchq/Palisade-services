@@ -33,13 +33,13 @@ public class RedisTtlProperties {
     private Map<String, Duration> timeToLive = new HashMap<>();
 
     @Generated
-    public Map<String, Duration> getTimeToLive() {
-        return timeToLive;
+    public static Duration getDefaultTtl() {
+        return DEFAULT_TTL;
     }
 
     @Generated
-    public static Duration getDefaultTtl() {
-        return DEFAULT_TTL;
+    public Map<String, Duration> getTimeToLive() {
+        return timeToLive;
     }
 
     @Generated

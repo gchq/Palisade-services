@@ -31,6 +31,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
@@ -168,4 +170,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new ApplicationAsyncExceptionHandler();
     }
+
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception {}", token, message.getResourceId(), message.getError());
+    }
+
 }

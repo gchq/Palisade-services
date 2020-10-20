@@ -29,20 +29,12 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
   autoconfigure:
     exclude:
     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
 server:
   port: 8085
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:

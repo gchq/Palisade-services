@@ -39,8 +39,6 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,18 +124,17 @@ class KafkaContractTest {
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
-    @ParameterizedTest
-    @ValueSource(longs = {1})
+    @Test
     @DirtiesContext
-    void testVariousRequestSets(final long messageCount) {
+    void testVariousRequestSets() {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
+                ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
-        final long recordCount = messageCount + 2;
+        final long recordCount = 3;
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
@@ -190,26 +187,28 @@ class KafkaContractTest {
         results.removeLast();
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
-                        .hasSize((int) messageCount),
+                        .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                () -> assertAll("Policy Assertion",
-                        () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                                .isEqualTo(ContractTestData.USER_ID.getId()),
-                        () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
-                                .isEqualTo("auth"),
-                        () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())
-                                .isEqualTo("role")),
-
                 () -> assertThat(results.stream()
                         .map(ConsumerRecord::value)
                         .map(response -> response.get("resource").get("type").asInt())
                         .collect(Collectors.toList()))
-                        .isSorted()
+                        .isSorted(),
+
+                () -> assertAll("Policy Assertion",
+                        () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
+                                .isEqualTo(ContractTestData.USER_ID.getId()),
+                        () -> assertThat(results.get(0).value().get("resourceId").asText())
+                                .isEqualTo("file:" + ContractTestData.RESOURCE_ID),
+                        () -> assertThat(results.get(0).value().get("context").get("contents").get("purpose").asText())
+                                .isEqualTo(ContractTestData.PURPOSE),
+                        () -> assertThat(results.get(0).value().get("rules").get("rules"))
+                                .isEmpty())
         );
     }
 

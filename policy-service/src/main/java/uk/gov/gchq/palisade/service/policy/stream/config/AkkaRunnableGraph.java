@@ -57,10 +57,7 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> {
-            System.out.println(ex.toString());
-            return Supervision.resumingDecider().apply(ex);
-        };
+        return ex -> Supervision.resumingDecider().apply(ex);
     }
 
     @Bean
@@ -82,7 +79,7 @@ public class AkkaRunnableGraph {
                  * be record level rules. Either list may be empty, but they should at least be present
                  */
                 .map((Pair<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>> messageAndRequest) -> {
-                    PolicyResponse response = messageAndRequest.second().map(request -> {
+                    PolicyResponse response = messageAndRequest.second().map((PolicyRequest request) -> {
                         Rules rules = service.getPolicy(request.getResource()).orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules();
                         return PolicyResponse.Builder.create(request).withRules(rules);
                     }).orElse(null);

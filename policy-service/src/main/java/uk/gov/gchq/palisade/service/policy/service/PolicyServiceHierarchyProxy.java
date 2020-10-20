@@ -45,7 +45,7 @@ import static java.util.Objects.requireNonNull;
 public class PolicyServiceHierarchyProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
-    final PolicyService service;
+    private final PolicyService service;
 
     public PolicyServiceHierarchyProxy(final PolicyService service) {
         this.service = service;

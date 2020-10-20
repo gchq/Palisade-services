@@ -46,6 +46,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * A REST interface mimicking the Kafka API to the service.
+ * POSTs to the controller write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
+ * Intended for debugging only.
+ */
 @RestController
 @RequestMapping(path = "/api")
 public class PolicyRestController {

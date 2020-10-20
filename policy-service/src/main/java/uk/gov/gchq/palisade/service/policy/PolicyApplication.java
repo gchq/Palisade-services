@@ -46,7 +46,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
- * The type Policy application.
+ * Application entrypoint and main process runner
  */
 @EnableDiscoveryClient
 @EnableCaching

@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
-
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 
 import java.util.Map;
