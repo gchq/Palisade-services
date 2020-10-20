@@ -52,7 +52,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> ruleKeySerializer() {
+    public static Serializer<String> requestKeySerializer() {
         return new StringSerializer();
     }
 
@@ -62,7 +62,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingRequest)
      */
-    public static Serializer<UserRequest> ruleValueSerializer() {
+    public static Serializer<UserRequest> requestValueSerializer() {
         return (String ignored, UserRequest userRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(userRequest);
@@ -77,7 +77,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> ruleKeyDeserializer() {
+    public static Deserializer<String> requestKeyDeserializer() {
         return new StringDeserializer();
     }
 
@@ -86,12 +86,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (AttributeMaskingRequest)
      */
-    public static Deserializer<UserRequest> ruleValueDeserializer() {
-        return (String ignored, byte[] attributeMaskingRequest) -> {
+    public static Deserializer<UserRequest> requestValueDeserializer() {
+        return (String ignored, byte[] userRequest) -> {
             try {
-                return MAPPER.readValue(attributeMaskingRequest, UserRequest.class);
+                return MAPPER.readValue(userRequest, UserRequest.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(attributeMaskingRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(userRequest, Charset.defaultCharset()), e);
             }
         };
     }
@@ -101,7 +101,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> maskedResourceKeySerializer() {
+    public static Serializer<String> userKeySerializer() {
         return new StringSerializer();
     }
 
@@ -110,7 +110,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
      */
-    public static Serializer<UserResponse> maskedResourceValueSerializer() {
+    public static Serializer<UserResponse> userValueSerializer() {
         return (String ignored, UserResponse userResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(userResponse);

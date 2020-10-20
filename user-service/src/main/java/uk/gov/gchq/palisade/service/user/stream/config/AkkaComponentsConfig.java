@@ -58,8 +58,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, UserRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.ruleKeySerializer(),
-                SerDesConfig.ruleValueSerializer());
+                SerDesConfig.requestKeySerializer(),
+                SerDesConfig.requestValueSerializer());
 
         return INPUT_COMPONENTS.plainProducer(producerSettings);
     }
@@ -68,8 +68,8 @@ public class AkkaComponentsConfig {
     Source<CommittableMessage<String, UserRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, UserRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.ruleKeyDeserializer(),
-                SerDesConfig.ruleValueDeserializer());
+                SerDesConfig.requestKeyDeserializer(),
+                SerDesConfig.requestValueDeserializer());
 
         Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
@@ -83,8 +83,8 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, UserResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, UserResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.maskedResourceKeySerializer(),
-                SerDesConfig.maskedResourceValueSerializer());
+                SerDesConfig.userKeySerializer(),
+                SerDesConfig.userValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
