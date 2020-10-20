@@ -15,12 +15,10 @@
  */
 package uk.gov.gchq.palisade.component.user.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.User;
@@ -30,26 +28,17 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
 
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles("caffeine")
-@SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.NONE)
-class CaffeineUserCachingTest {
+@ActiveProfiles("redis")
+@SpringBootTest(classes = {UserApplication.class, RedisTestConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+class RedisUserCachingTest {
 
     @Autowired
     private UserServiceProxy userService;
-
-    @Autowired
-    private CacheManager cacheManager;
-
-    private void forceCleanUp() {
-        ((Cache<?, ?>) Objects.requireNonNull(cacheManager.getCache("users")).getNativeCache()).cleanUp();
-    }
 
     @Test
     void testAddedUserIsRetrievable() {
@@ -73,9 +62,10 @@ class CaffeineUserCachingTest {
         UserId userId = new UserId().id("definitely-not-a-real-user");
 
         // When
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "NonExistentUser should throw noSuchIdException");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(userId), "testMaxSizeTest should throw noSuchIdException");
 
-        //Then
+        // Then - it is no longer found, it has been evicted
+        // ie. throw NoSuchUserIdException
         assertThat("No userId matching UserId[id='definitely-not-a-real-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
     }
 
@@ -96,23 +86,6 @@ class CaffeineUserCachingTest {
     }
 
     @Test
-    void testMaxSize() {
-        // Given - many users are added and cached (cache size set to 100 in application.yaml)
-        Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
-        for (int count = 0; count <= 150; ++count) {
-            userService.addUser(makeUser.apply(count));
-        }
-
-        // When - we try to get the first (now-evicted) user to be added
-        forceCleanUp();
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(makeUser.apply(0).getUserId()), "testMaxSizeTest should throw noSuchIdException");
-
-        // Then - it is no longer found, it has been evicted
-        // ie. throw NoSuchUserIdException
-        assertThat("No userId matching UserId[id='max-size-0-test-user'] found in cache").isEqualTo(noSuchUserId.getMessage());
-    }
-
-    @Test
     void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
@@ -121,7 +94,6 @@ class CaffeineUserCachingTest {
         TimeUnit.MILLISECONDS.sleep(1000);
 
         // When - we try to access stale cache data
-        forceCleanUp();
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> userService.getUser(user.getUserId()), "testMaxSizeTest should throw noSuchIdException");
 
         // Then - it is no longer found, it has been evicted

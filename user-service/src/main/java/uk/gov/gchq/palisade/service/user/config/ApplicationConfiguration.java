@@ -89,7 +89,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Override
-    @Bean("applicationTaskExecutor")
+    @Bean("threadPoolTaskExecutor")
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");

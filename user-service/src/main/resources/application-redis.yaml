@@ -15,8 +15,7 @@
 
 spring:
   autoconfigure:
-    exclude:
-    - com.github.benmanes
+    exclude: []
   cache:
     type: redis
     redis:
