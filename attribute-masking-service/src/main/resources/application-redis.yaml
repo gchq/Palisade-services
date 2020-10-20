@@ -15,16 +15,18 @@
 spring:
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username:
-    password:
-    initialization-mode: always
-    driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    database: h2
+    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: true
+        timeToLive:
+          AuthorisedRequestEntity: 24h
+  # redis.host/port or redis.cluster.nodes configured by k8s
+
+# TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
+# Once released, if spring-boot 2.4.x fixes the health-check bugs, re-enable the endpoint here
+management:
+  health:
+    redis:
+      enabled: false
