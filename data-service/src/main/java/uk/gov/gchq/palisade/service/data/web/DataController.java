@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
+import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -80,7 +81,7 @@ public class DataController {
                                 String.format("The token '%s' is not authorised to access the leafResource '%s'", dataRequest.getToken(), dataRequest.getLeafResourceId()))))
                 .join();
 
-        StreamingResponseBody stream = outputStream -> {
+        StreamingResponseBody stream = (OutputStream outputStream) -> {
             Pair<AtomicLong, AtomicLong> recordsAudit = dataService.read(readerRequest, outputStream);
             AuditSuccessMessage successMessage = auditService.createSuccessMessage(dataRequest, readerRequest, recordsAudit.getFirst().get(), recordsAudit.getSecond().get());
             auditService.auditSuccess(dataRequest.getToken(), successMessage);

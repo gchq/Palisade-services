@@ -22,13 +22,30 @@ import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity.Authoris
 
 import java.util.Optional;
 
+/**
+ * Read-only repository interface for reading the details of an authorised request using its token and leaf resource id.
+ * This database is written to by the attribute-masking-service.
+ */
 public interface AuthorisedRequestsRepository extends CrudRepository<AuthorisedRequestEntity, String> {
 
-
+    /**
+     * Find an {@link AuthorisedRequestEntity} by its unique {@link AuthorisedRequestEntityId}
+     * This id is a combination of the token and leaf resource id.
+     *
+     * @param entityId the entity's unique id object
+     * @return an {@link Optional} of whether the entity was found.
+     */
     default Optional<AuthorisedRequestEntity> findByEntityId(final AuthorisedRequestEntityId entityId) {
         return this.findById(entityId.getUniqueId());
     }
 
+    /**
+     * Find an {@link AuthorisedRequestEntity} by its unique combination of token and leaf resource id.
+     *
+     * @param token      the client's request token
+     * @param resourceId the leaf resource id the client requested
+     * @return an {@link Optional} of whether the entity was found
+     */
     default Optional<AuthorisedRequestEntity> findByTokenAndResourceId(final String token, final String resourceId) {
         return this.findByEntityId(new AuthorisedRequestEntityId(token, resourceId));
     }

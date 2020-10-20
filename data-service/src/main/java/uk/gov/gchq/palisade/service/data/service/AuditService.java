@@ -20,10 +20,31 @@ import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
+/**
+ * Interface to the audit-service for auditing successful data-reads along with some required metadata,
+ * such as records processed and records returned (processed - redacted).
+ */
 public interface AuditService {
 
+    /**
+     * Audit a successful read to the audit-service
+     *
+     * @param token          the client's (unique) request token
+     * @param successMessage the constructed message detailing the resource read, the rules applied and other metadata
+     */
     void auditSuccess(final String token, final AuditSuccessMessage successMessage);
 
+    /**
+     * Convenience method for converting the pair of {@link DataRequest} and {@link DataReaderRequest} objects from the data-service
+     * into the {@link AuditSuccessMessage} required for the audit-service, attaching any additional required metadata.
+     *
+     * @param dataRequest the client's {@link DataRequest} sent to the data-service
+     * @param readerRequest the persisted-and-retrieved rules for the data access,
+     *                      passed as a request to the {@link uk.gov.gchq.palisade.reader.common.DataReader}
+     * @param recordsProcessed the total number of records processed by the data-reader (number of records in the resource)
+     * @param recordsReturned the number of records returned to the client after applying record-level redaction (processed - redacted)
+     * @return an {@link AuditSuccessMessage} to be used by this class
+     */
     default AuditSuccessMessage createSuccessMessage(final DataRequest dataRequest, final DataReaderRequest readerRequest, final long recordsProcessed, final long recordsReturned) {
         return AuditSuccessMessage.Builder.create(dataRequest, readerRequest)
                 .withRecordsProcessedAndReturned(recordsProcessed, recordsReturned);

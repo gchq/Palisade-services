@@ -36,11 +36,21 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Smple implementation of a data-service, which reads using a data-reader and audits the
+ * number of records processed and returned.
+ */
 public class SimpleDataService implements DataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataService.class);
     private final PersistenceLayer persistenceLayer;
     private final DataReader dataReader;
 
+    /**
+     * Autowired constructor for Spring.
+     *
+     * @param persistenceLayer the persistence layer containing the authorised read requests
+     * @param dataReader       an instance of a data-reader (eg a {@code new HadoopDataReader()})
+     */
     public SimpleDataService(
             final PersistenceLayer persistenceLayer,
             final DataReader dataReader

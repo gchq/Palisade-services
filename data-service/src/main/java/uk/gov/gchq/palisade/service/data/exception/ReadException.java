@@ -21,6 +21,11 @@ import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.io.IOException;
 
+/**
+ * Specialised exception thrown by the data-service when an IOException occurred while reading
+ * from the data-reader, bundling the data-reader request that caused the exception.
+ * This provides enough context for the thrown exception to be caught and audited appropriately.
+ */
 public class ReadException extends RuntimeException {
     @SuppressWarnings("java:S1948")
     private final DataReaderRequest readerRequest;
