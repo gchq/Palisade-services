@@ -77,7 +77,7 @@ public class AkkaRunnableGraph {
                 // Get the user from the userId, keeping track of original message and token
                 .map((CommittableMessage<String, UserRequest> message) -> {
                     Optional<UserRequest> optionalUserRequest = Optional.ofNullable(message.record().value());
-                    UserResponse userResponse = optionalUserRequest.map(request -> {
+                    UserResponse userResponse = optionalUserRequest.map((UserRequest request) -> {
                         User user = service.getUser(new UserId().id(request.getUserId()));
                         return Builder.create(request).withUser(user);
                     }).orElse(null);
@@ -89,7 +89,7 @@ public class AkkaRunnableGraph {
                     ConsumerRecord<String, UserRequest> requestRecord = messageTokenResponse.first().record();
                     return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                             messageTokenResponse.second(), requestRecord.headers()));
-                    })
+                })
 
                 // Build producer message, applying the committable pass-thru consuming the original message
                 .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
