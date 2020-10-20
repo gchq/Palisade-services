@@ -29,6 +29,8 @@ import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -41,18 +43,30 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
@@ -66,13 +80,16 @@ import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -80,6 +97,8 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -90,9 +109,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
-@Import(KafkaTestConfiguration.class)
+@Import({KafkaContractTest.KafkaInitializer.Config.class})
+@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
 @ActiveProfiles({"dbtest", "akkatest"})
 class KafkaContractTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // Serialiser for upstream test input
@@ -137,8 +159,6 @@ class KafkaContractTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
-    private KafkaContainer kafkaContainer;
-    @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
     private Materializer akkaMaterializer;
@@ -166,7 +186,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -176,7 +196,7 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
@@ -236,7 +256,7 @@ class KafkaContractTest {
         ConsumerSettings<String, AttributeMaskingRequest> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.ruleKeyDeserializer(), SerDesConfig.ruleValueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, AttributeMaskingRequest>> probe = Consumer
@@ -299,7 +319,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
@@ -308,7 +328,7 @@ class KafkaContractTest {
         // Given - we are already listening to the errors
         ConsumerSettings<String, AuditErrorMessage> errorConsumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
                 .atMostOnceSource(errorConsumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
@@ -317,7 +337,7 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
@@ -390,6 +410,70 @@ class KafkaContractTest {
         results.removeLast();
         assertThat(results)
                 .hasSize((int) (messageCount - errorCount));
+    }
+
+    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        static KafkaContainer kafka = new KafkaContainer("5.5.1")
+                .withReuse(true);
+
+        @Override
+        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest");
+            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+            kafka.start();
+
+            // test kafka config
+            String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
+            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
+        }
+
+        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
+                admin.createTopics(newTopics);
+                LOGGER.info("created topics: " + admin.listTopics().names().get());
+            }
+        }
+
+        @Configuration
+        public static class Config {
+
+            private final List<NewTopic> topics = List.of(
+                    new NewTopic("rule", 3, (short) 1),
+                    new NewTopic("masked-resource", 3, (short) 1),
+                    new NewTopic("error", 3, (short) 1));
+
+            @Bean
+            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
+                createTopics(this.topics, kafka);
+                return kafka;
+            }
+
+            @Bean
+            @ConditionalOnMissingBean
+            static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
+                return new PropertiesConfigurer(resourceLoader, environment);
+            }
+
+            @Bean
+            @Primary
+            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+                LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
+                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
+                        props.getAllActiveProperties().entrySet().stream()
+                                .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
+                        Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
+                        .peek(entry -> LOGGER.info("Config key {} = {}", entry.getKey(), entry.getValue()))
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
+            }
+
+            @Bean
+            @Primary
+            Materializer materializer(final ActorSystem system) {
+                return Materializer.createMaterializer(system);
+            }
+        }
     }
 
 }
