@@ -52,8 +52,8 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
+import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.request.Policy;
-import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -78,7 +78,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.NONE,
         properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
-
 class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CaffeinePolicyCachingTest.class);
