@@ -73,7 +73,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({"caffeine", "akkatest"})
 @Import({CaffeinePolicyCachingTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {CaffeinePolicyCachingTest.KafkaInitializer.class})
-@SpringBootTest(classes = {PolicyApplication.class, ApplicationConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+@SpringBootTest(
+        classes = {PolicyApplication.class, ApplicationConfiguration.class},
+        webEnvironment = WebEnvironment.NONE,
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
+)
 
 class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
