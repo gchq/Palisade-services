@@ -175,7 +175,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception {}", token, message.getResourceId(), message.getError());
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception {}", token, message.getResourceId(), message.getAttributes(), message.getError());
     }
 
 }
