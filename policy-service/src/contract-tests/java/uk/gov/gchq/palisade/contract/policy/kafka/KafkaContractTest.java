@@ -110,47 +110,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"caffeine", "akkatest", "prepopulation"})
+@ActiveProfiles({"caffeine", "akkatest", "pre-population"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
-        @Override
-        public byte[] serialize(final String s, final JsonNode policyRequest) {
-            try {
-                return MAPPER.writeValueAsBytes(policyRequest);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + policyRequest.toString(), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
-        @Override
-        public JsonNode deserialize(final String s, final byte[] policyResponse) {
-            try {
-                return MAPPER.readTree(policyResponse);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(policyResponse), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
-        @Override
-        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
-            try {
-                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
-            }
-        }
-    }
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
@@ -233,6 +197,14 @@ class KafkaContractTest {
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
+                () -> assertAll("Policy Assertion",
+                        () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
+                                .isEqualTo(ContractTestData.USER_ID.getId()),
+                        () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
+                                .isEqualTo("auth"),
+                        () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())
+                                .isEqualTo("role")),
+
                 () -> assertThat(results.stream()
                         .map(ConsumerRecord::value)
                         .map(response -> response.get("resource").get("type").asInt())
@@ -284,6 +256,42 @@ class KafkaContractTest {
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );
+    }
+
+    // Serialiser for upstream test input
+    static class RequestSerializer implements Serializer<JsonNode> {
+        @Override
+        public byte[] serialize(final String s, final JsonNode policyRequest) {
+            try {
+                return MAPPER.writeValueAsBytes(policyRequest);
+            } catch (JsonProcessingException e) {
+                throw new SerializationFailedException("Failed to serialize " + policyRequest.toString(), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test output
+    static class ResponseDeserializer implements Deserializer<JsonNode> {
+        @Override
+        public JsonNode deserialize(final String s, final byte[] policyResponse) {
+            try {
+                return MAPPER.readTree(policyResponse);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(policyResponse), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test error output
+    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+        @Override
+        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
+            try {
+                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+            }
+        }
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

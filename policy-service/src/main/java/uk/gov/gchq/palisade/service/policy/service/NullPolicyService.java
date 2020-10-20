@@ -49,7 +49,6 @@ public class NullPolicyService implements PolicyService {
     }
 
     public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        LOGGER.info("Im here with the resource: {}", resource);
         // Policies cannot be stored, but pretend that they are (they will be cached)
         return policy;
     }

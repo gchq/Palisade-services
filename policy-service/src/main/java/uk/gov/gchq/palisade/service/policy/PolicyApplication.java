@@ -28,6 +28,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
@@ -44,6 +45,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+/**
+ * The type Policy application.
+ */
 @EnableDiscoveryClient
 @EnableCaching
 @SpringBootApplication
@@ -62,9 +66,13 @@ public class PolicyApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer the Akka {@link Materializer} configured to be used
-     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param runners        collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer   the Akka {@link Materializer} configured to be used
+     * @param service        specifically policyServiceCachingProxy used for pre-population
+     * @param policyConfig   resourceConfig used to create the policy object used in pre-population
+     * @param userConfig     resourceConfig used to create the user object used in pre-population
+     * @param resourceConfig resourceConfig used to create the resource object used in pre-population
+     * @param executor       an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
@@ -94,20 +102,22 @@ public class PolicyApplication {
                 .run(args);
     }
 
+    /**
+     * Init post construct.
+     */
     @EventListener(ApplicationReadyEvent.class)
+    @Profile({"pre-population, example"})
+    // Pre-population profile used in the KafkaContractTests for pre-populating the cache. Example profile used for pre-populating the cache for the example
     public void initPostConstruct() {
         // Add example Policies to the policy-service cache
-        LOGGER.info("Prepopulating using policy config: {}", policyConfig.getClass());
-        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
-        LOGGER.info("Prepopulating using resource config: {}", resourceConfig.getClass());
-        LOGGER.info("policy service is: {}", service.getClassName());
+        LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
+        LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
+        LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
+        LOGGER.debug("Pre-populating using Policy Service: {}", service.getClassName());
         policyConfig.getPolicies().stream().peek(e -> LOGGER.info("prepop stream {}", e))
                 .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
-                .peek(entry -> LOGGER.info("prepop entry {}",entry))
-                .forEach(entry -> {
-                    LOGGER.info("setResourcePolicy(entry.getKey() {}, entry.getValue() {}", entry.getKey(), entry.getValue());
-                    service.setResourcePolicy(entry.getKey(), entry.getValue());
-                });
+                .peek(entry -> LOGGER.debug("pre-pop entry {}", entry))
+                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
     }
 
     /**

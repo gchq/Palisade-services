@@ -75,7 +75,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import({RedisPersistenceContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceContractTest.KafkaInitializer.class, RedisPersistenceContractTest.RedisInitializer.class})
 @ActiveProfiles({"redis", "akkatest"})
-class RedisPersistenceContractTest extends PolicyTestCommon{
+class RedisPersistenceContractTest extends PolicyTestCommon {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 

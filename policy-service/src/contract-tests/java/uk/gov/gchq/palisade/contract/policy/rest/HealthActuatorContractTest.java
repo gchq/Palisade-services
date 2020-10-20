@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.contract.policy.rest;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This should return 200 OK if the service is healthy.
  */
 @SpringBootTest(classes = {PolicyApplication.class, PolicyTestConfiguration.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"caffeine","akkatest"})
+@ActiveProfiles({"caffeine", "akkatest"})
 class HealthActuatorContractTest {
 
     @Autowired

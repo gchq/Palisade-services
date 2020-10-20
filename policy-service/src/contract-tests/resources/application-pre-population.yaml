@@ -14,11 +14,6 @@
 #
 
 # Not interpreted by any java code, simply used by reference in the population.resources section
-default:
-  connectionDetail: data-service
-  type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
-  format: avro
-
 population:
   userProvider: std
   users:
@@ -37,7 +32,7 @@ population:
   resources:
   - resourceId: /test/resourceId
     rootId: test
-    connectionDetail: ${default.connectionDetail}
+    connectionDetail: test-data-service
     attributes:
-      type: ${default.type}
-      serialisedFormat: ${default.format}
+      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
+      serialisedFormat: avro

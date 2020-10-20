@@ -72,7 +72,7 @@ public class ContractTestData {
     public static final PolicyRequest POLICY_REQUEST;
     public static final JsonNode REQUEST_NODE;
     public static final PolicyRequest REQUEST_OBJ;
-    public static String requestJson;
+    public static final String REQUEST_JSON;
 
     static {
         RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
@@ -86,7 +86,7 @@ public class ContractTestData {
 
     static {
         try {
-            requestJson = MAPPER.writeValueAsString(POLICY_REQUEST);
+            REQUEST_JSON = MAPPER.writeValueAsString(POLICY_REQUEST);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse PolicyRequest test data", e);
         }
@@ -94,7 +94,7 @@ public class ContractTestData {
 
     static {
         try {
-            REQUEST_NODE = MAPPER.readTree(requestJson);
+            REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
@@ -105,7 +105,7 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(requestJson, i, i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
