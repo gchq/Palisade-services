@@ -68,10 +68,10 @@ public class AkkaRunnableGraph {
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         return source
-                //filter out the start of stream for the topic and retrieves the offset
+                // Filter out the start of stream for the topic and retrieves the offset
                 .filter(committableMessage -> service.isOffsetForTopic(committableMessage.record().headers()))
 
-                //create a topic offset response using the offset value from filter above
+                // Create a topic offset response using the offset value of the original message
                 .map(committableMessage -> new Pair<>(committableMessage, service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset())))
 
                 // Build producer record, copying the partition, keeping track of original message
@@ -81,7 +81,7 @@ public class AkkaRunnableGraph {
                     return new Pair<>(messageAndResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageAndResponse.second(), requestRecord.headers()));
                 })
 
-                // Build producer message, applying the committable pass-thru consuming the original message
+                // Build producer message, applying the committable pass-thru and consuming the original message
                 .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
 
                 // Send errors to supervisor

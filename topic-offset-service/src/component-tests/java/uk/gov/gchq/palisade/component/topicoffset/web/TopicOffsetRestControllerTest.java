@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.component.topicoffset.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
@@ -41,9 +41,7 @@ import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguratio
 import uk.gov.gchq.palisade.service.topicoffset.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetRestController;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,33 +60,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TopicOffsetRestControllerTest {
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private TopicOffsetRestController controller;
 
     @SpyBean
     ConsumerTopicConfiguration topicConfiguration;
-
     @MockBean
     private TopicOffsetService topicOffsetService;
-
     @MockBean
     private ErrorHandlingService errorHandlingService;
 
-    public static final TopicOffsetResponse START_RESPONSE = TopicOffsetResponse.Builder.create().withOffset(123L);
     public static final String SERVICE_ENDPOINT_URL = "/api/offset";
     public static final String TEST_REQUEST_TOKEN = "test-request-token";
-    public static final String USER_ID = "testUserId";
-    public static final String RESOURCE_ID = "/test/resourceId";
     public static final String KEY_NULL_VALUE = "$.keyToNull";
-    public static final String RESOURCE_TYPE = "uk.gov.gchq.palisade.test.TestType";
-    public static final String RESOURCE_FORMAT = "avro";
-    public static final String RESOURCE_CONNECTION = "test-data-service";
-    public static final String RESOURCE_PARENT_ID = "/test";
-    public static final String CONTEXT_PURPOSE = "testPurpose";
 
     @BeforeEach
     void setUp() {
@@ -117,50 +102,50 @@ class TopicOffsetRestControllerTest {
      * @throws Exception if it fails to process the request
      */
     @Test
-    void testControllerWithAnEndMessage() throws Exception {
-        Optional<TopicOffsetRequest> requestBody = Optional.empty();
+    void testControllerWithOffsetForTopic() throws Exception {
+        // Given this is an offset for the topic
+        Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(true);
+
+        // When a request is made to the service
         HttpHeaders headers = new HttpHeaders();
         headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
-        headers.add(StreamMarker.HEADER, StreamMarker.END.toString());
-
-        Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
-
-        this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+        headers.add(StreamMarker.HEADER, StreamMarker.START.toString());
+        ResultActions action = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8.name())
-                .headers(headers)
-                .content(mapper.writeValueAsString(requestBody)))
-                .andExpect(status().isAccepted()) //a HTTP 2XX
+                .headers(headers));
+
+        // Then it is accepted by the rest controller
+        action.andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) //no message
+                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) // no message
                 .andReturn();
     }
 
     /**
-     * This permutation is for a request that comes in for a standard message, containing the data related to the
-     * client's request and no StreamMarker in the headers.
-     * Test should accept an incoming request including (optionally) TopicOffsetRequest, Token, and no StreamMarker
-     * as a Post at the the URL "/stream-api/topicOffset" as a Json String. Response should be a null with HTTP code for
-     * message accepted.
+     * This permutation is for a request that comes in for an end of messages indicator, StreamMarker is set to END.
+     * Test should accept an incoming request including TopicOffsetRequest, Token, and a StreamMarker as a Post to
+     * the the URL "/stream-api/topicOffset" as a Json String. Response should be a null.
      *
      * @throws Exception if it fails to process the request
      */
     @Test
-    void testControllerWithAnStandardMessage() throws Exception {
-        Optional<TopicOffsetRequest> requestBody = Optional.empty();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
-
+    void testControllerWithEndMessage() throws Exception {
+        // Given this is not an offset for the topic
         Mockito.when(topicOffsetService.isOffsetForTopic(any())).thenReturn(false);
 
-        this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
+        // When  a request is made to the service
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(Token.HEADER, TEST_REQUEST_TOKEN);
+        headers.add(StreamMarker.HEADER, StreamMarker.END.toString());
+        ResultActions action = this.mockMvc.perform(post(SERVICE_ENDPOINT_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8.name())
-                .headers(headers)
-                .content(mapper.writeValueAsString(requestBody)))
-                .andExpect(status().isAccepted())  // a HTTP 200
+                .headers(headers));
+
+        // Then it is accepted by the rest controller
+        action.andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist())  //no message
+                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) // no message
                 .andReturn();
     }
+
 }
