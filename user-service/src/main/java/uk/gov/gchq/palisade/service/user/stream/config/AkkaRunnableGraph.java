@@ -48,7 +48,9 @@ import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.user.UserApplication}
@@ -56,6 +58,7 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
+    private static final int PARALLELISM = 1;
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -75,13 +78,11 @@ public class AkkaRunnableGraph {
         // Read messages from the stream source
         return source
                 // Get the user from the userId, keeping track of original message and token
-                .map((CommittableMessage<String, UserRequest> message) -> {
-                    Optional<UserRequest> optionalUserRequest = Optional.ofNullable(message.record().value());
-                    UserResponse userResponse = optionalUserRequest.map(request -> {
-                        User user = service.getUser(new UserId().id(request.getUserId()));
-                        return Builder.create(request).withUser(user);
-                    }).orElse(null);
-                    return new Pair<>(message, userResponse);
+                .mapAsync(PARALLELISM, (CommittableMessage<String, UserRequest> message) -> {
+                    UserRequest userRequest = message.record().value();
+                    return service.getUser(userRequest).thenApply(user ->
+                            new Pair<>(message, UserResponse.Builder.create(userRequest).withUser(user))
+                    );
                 })
 
                 // Build producer record, copying the partition, keeping track of original message

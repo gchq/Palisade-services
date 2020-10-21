@@ -109,7 +109,6 @@ public class UserApplication {
                 .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
                 .collect(Collectors.toSet());
         LOGGER.info("Started {} runner threads", runnerThreads.size());
-
         runnerThreads.forEach(CompletableFuture::join);
     }
 }
