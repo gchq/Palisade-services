@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,6 +29,9 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
@@ -96,5 +100,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             ex.setCorePoolSize(6);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new ApplicationAsyncExceptionHandler();
+    }
+
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and userId {} threw exception {}", token, message.getUserId(), message.getAttributes(), message.getError());
     }
 }
