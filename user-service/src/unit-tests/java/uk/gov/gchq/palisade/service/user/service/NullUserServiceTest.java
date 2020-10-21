@@ -39,7 +39,7 @@ class NullUserServiceTest {
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> nullUserService.getUser(request), "No user found");
 
         //Then an error is thrown
-        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='testUser'] found in cache");
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching testUser found in cache");
     }
 
     @Test
