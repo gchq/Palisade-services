@@ -54,6 +54,7 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
+    private static final int PARALLELISM = 1;
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -78,7 +79,7 @@ public class AkkaRunnableGraph {
                  * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
                  * be record level rules. Either list may be empty, but they should at least be present
                  */
-                .map((Pair<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>> messageAndRequest) -> {
+                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>> messageAndRequest) -> {
                     PolicyResponse response = messageAndRequest.second().map((PolicyRequest request) -> {
                         Rules rules = service.getPolicy(request.getResource()).orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules();
                         return PolicyResponse.Builder.create(request).withRules(rules);
