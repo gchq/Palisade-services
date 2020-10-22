@@ -15,7 +15,11 @@
  */
 package uk.gov.gchq.palisade.service.user.config;
 
+import akka.Done;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -32,14 +36,17 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
@@ -74,7 +81,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserPrepopulationFactory();
     }
 
-    @Bean
+    @Bean("userService")
     public CacheableUserServiceProxy cacheableUserServiceProxy(final Set<UserService> userServices) {
         CacheableUserServiceProxy cacheableUserServiceProxy = new CacheableUserServiceProxy(userServices.stream().findFirst().orElse(null));
         LOGGER.info("Instantiated CacheableUserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
@@ -82,9 +89,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public AsyncUserServiceProxy asyncUserServiceProxy(final CacheableUserServiceProxy cacheableUserServiceProxy,
-                                                       final @Qualifier("applicationTaskExecutor") Executor executor) {
-        return new AsyncUserServiceProxy(cacheableUserServiceProxy, executor);
+    public AsyncUserServiceProxy asyncUserServiceProxy(@Qualifier("plainRequestSink") final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
+                                                       final ConsumerTopicConfiguration upstreamConfig,
+                                                       final Materializer materializer,
+                                                       @Qualifier("userService") final UserService service,
+                                                       @Qualifier("applicationTaskExecutor") final Executor executor) {
+        LOGGER.info("Instantiated AsyncUserServiceProxy with {}", service.getClassName());
+        return new AsyncUserServiceProxy(sink, upstreamConfig, materializer, service, executor);
     }
 
     @Bean(name = "null-user-service")

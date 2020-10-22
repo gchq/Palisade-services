@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.user.ApplicationTestData;
+import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
@@ -41,7 +42,7 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {UserRestController.class})
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, UserRestController.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, UserRestController.class, AkkaSystemConfig.class, ApplicationTestConfiguration.class})
 class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
