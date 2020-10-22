@@ -34,14 +34,14 @@ public class CacheableUserServiceProxy implements UserService {
     }
 
     @Cacheable(key = "#userId")
-    public User getUser(final String user) {
-        LOGGER.info("Cache miss for userId {}", user);
-        return service.getUser(user);
+    public User getUser(final String userId) {
+        LOGGER.info("Cache miss for userId {}", userId);
+        return service.getUser(userId);
     }
 
     @CachePut(key = "#user.userId.id")
     public User addUser(final User user) {
-        LOGGER.info("Cache add for userId {}", user.getUserId());
+        LOGGER.info("Cache add for userId {}", user.getUserId().getId());
         LOGGER.debug("Added user {} to cache (key=userId)", user);
         return service.addUser(user);
     }

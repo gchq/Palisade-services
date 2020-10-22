@@ -18,35 +18,33 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * An asynchronous service for processing a cacheable method.
  */
-@EnableAsync
 public class AsyncUserServiceProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncUserServiceProxy.class);
+    private final Executor executor;
     private final CacheableUserServiceProxy service;
 
     /**
      * Constructor for instantiating the {@link AsyncUserServiceProxy}
      */
-    public AsyncUserServiceProxy(final CacheableUserServiceProxy service) {
+    public AsyncUserServiceProxy(final CacheableUserServiceProxy service, final Executor executor) {
         this.service = service;
+        this.executor = executor;
     }
 
-    @Async
     public CompletableFuture<User> getUser(final UserRequest userRequest) {
         LOGGER.debug("Getting user '{}' from cache", userRequest.getUserId());
-        User user = service.getUser(userRequest.userId);
-        return CompletableFuture.completedFuture(user);
+        return CompletableFuture.supplyAsync(() -> service.getUser(userRequest.userId), executor);
     }
 
     public User addUser(final User user) {

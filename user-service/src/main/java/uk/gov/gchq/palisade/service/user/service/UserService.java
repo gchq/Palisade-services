@@ -32,8 +32,8 @@ import uk.gov.gchq.palisade.service.user.model.UserRequest;
  */
 public interface UserService extends Service {
     /**
-     * Look up a user by their ID. The request contains the {@link UserId} to lookup from the
-     * {@link UserService}. If the requested {@link UserId} doesn't exist in this {@link
+     * Look up a user by their ID. The request contains the {@link String} to lookup from the
+     * {@link UserService}. If the requested {@link String} doesn't exist in this {@link
      * UserService} then an exception will be thrown.
      *
      * @param userId the request received by the user-service

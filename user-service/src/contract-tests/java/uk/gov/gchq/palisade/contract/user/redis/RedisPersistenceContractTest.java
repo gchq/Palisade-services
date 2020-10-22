@@ -104,12 +104,12 @@ class RedisPersistenceContractTest {
 
         // When
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(request.userId), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(request.userId), "testNonExistentUser should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='definitely-not-a-real-user'] found in cache");
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching definitely-not-a-real-user found in cache");
     }
 
     @Test
@@ -145,7 +145,7 @@ class RedisPersistenceContractTest {
 
         // Then - it is no longer found, it has been evicted
         // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching UserId[id='ttl-test-user'] found in cache");
+        assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching ttl-test-user found in cache");
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

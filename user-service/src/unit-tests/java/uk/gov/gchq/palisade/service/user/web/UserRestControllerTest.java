@@ -47,6 +47,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,6 @@ class UserRestControllerTest {
     private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
     private final UserService service = Mockito.mock(UserService.class);
     private final CacheableUserServiceProxy cacheProxy = new CacheableUserServiceProxy(service);
-    private final AsyncUserServiceProxy asyncProxy = new AsyncUserServiceProxy(cacheProxy);
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;

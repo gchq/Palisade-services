@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -81,9 +82,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public AsyncUserServiceProxy asyncUserServiceProxy(final CacheableUserServiceProxy cacheableUserServiceProxy) {
-        return new AsyncUserServiceProxy(cacheableUserServiceProxy);
+    public AsyncUserServiceProxy asyncUserServiceProxy(final CacheableUserServiceProxy cacheableUserServiceProxy,
+                                                       final @Qualifier("applicationTaskExecutor") Executor executor) {
+        return new AsyncUserServiceProxy(cacheableUserServiceProxy, executor);
     }
+
     @Bean(name = "null-user-service")
     @ConditionalOnProperty(prefix = "user-service", name = "service", havingValue = "null-user-service", matchIfMissing = true)
     public NullUserService nullUserService() {
