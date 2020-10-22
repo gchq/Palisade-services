@@ -31,10 +31,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
 
 import java.util.Optional;
 import java.util.Set;
@@ -73,12 +74,16 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    public UserServiceProxy userService(final Set<UserService> userServices) {
-        UserServiceProxy userServiceProxy = new UserServiceProxy(userServices.stream().findFirst().orElse(null));
-        LOGGER.info("Instantiated UserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
-        return userServiceProxy;
+    public CacheableUserServiceProxy cacheableUserServiceProxy(final Set<UserService> userServices) {
+        CacheableUserServiceProxy cacheableUserServiceProxy = new CacheableUserServiceProxy(userServices.stream().findFirst().orElse(null));
+        LOGGER.info("Instantiated CacheableUserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
+        return cacheableUserServiceProxy;
     }
 
+    @Bean
+    public AsyncUserServiceProxy asyncUserServiceProxy(final CacheableUserServiceProxy cacheableUserServiceProxy) {
+        return new AsyncUserServiceProxy(cacheableUserServiceProxy);
+    }
     @Bean(name = "null-user-service")
     @ConditionalOnProperty(prefix = "user-service", name = "service", havingValue = "null-user-service", matchIfMissing = true)
     public NullUserService nullUserService() {

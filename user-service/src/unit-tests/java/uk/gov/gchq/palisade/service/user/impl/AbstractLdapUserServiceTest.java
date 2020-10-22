@@ -113,7 +113,7 @@ class AbstractLdapUserServiceTest {
         UserRequest request = UserRequest.Builder.create().withUserId(userId.getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         // When
-        final User user = service.getUser(request).join();
+        final User user = service.getUser(request.userId);
 
         // Then
         assertThat(userId).isEqualTo(user.getUserId());

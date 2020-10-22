@@ -36,7 +36,7 @@ class NullUserServiceTest {
         UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
 
         //When we go to get the user
-        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> nullUserService.getUser(request), "No user found");
+        Exception noSuchUserId = assertThrows(NoSuchUserIdException.class, () -> nullUserService.getUser(request.userId), "No user found");
 
         //Then an error is thrown
         assertThat(noSuchUserId.getMessage()).isEqualTo("No userId matching testUser found in cache");

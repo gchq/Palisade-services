@@ -48,7 +48,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
@@ -77,7 +77,7 @@ class RedisPersistenceContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 
     @Autowired
-    private UserServiceProxy userService;
+    private CacheableUserServiceProxy userService;
 
     @Test
     void testAddedUserIsRetrievable() {
@@ -91,7 +91,7 @@ class RedisPersistenceContractTest {
         assertThat(addedUser).isEqualTo(user);
 
         // When
-        User getUser = userService.getUser(request).join();
+        User getUser = userService.getUser(request.userId);
         // Then
         assertThat(getUser).isEqualTo(user);
     }
@@ -104,7 +104,7 @@ class RedisPersistenceContractTest {
 
         // When
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(request), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(request.userId), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted
@@ -123,7 +123,7 @@ class RedisPersistenceContractTest {
         userService.addUser(user);
         userService.addUser(update);
 
-        User updatedUser = userService.getUser(request).join();
+        User updatedUser = userService.getUser(request.userId);
 
         // Then
         assertThat(updatedUser).isEqualTo(update);
@@ -140,7 +140,7 @@ class RedisPersistenceContractTest {
 
         // When - we try to access stale cache data
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,
-                () -> userService.getUser(request), "testMaxSizeTest should throw noSuchIdException"
+                () -> userService.getUser(request.userId), "testMaxSizeTest should throw noSuchIdException"
         );
 
         // Then - it is no longer found, it has been evicted

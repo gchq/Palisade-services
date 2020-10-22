@@ -24,8 +24,8 @@ import java.util.concurrent.CompletableFuture;
 public class NullUserService implements UserService {
 
     @Override
-    public CompletableFuture<User> getUser(final UserRequest userRequest) {
-        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userRequest.userId));
+    public User getUser(final String userId) {
+        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
     }
 
     @Override

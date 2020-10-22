@@ -73,7 +73,7 @@ import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.StreamMarker;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
@@ -153,7 +153,7 @@ class KafkaContractTest {
     }
 
     @SpyBean
-    private UserServiceProxy service;
+    private CacheableUserServiceProxy service;
 
     @Autowired
     private TestRestTemplate restTemplate;

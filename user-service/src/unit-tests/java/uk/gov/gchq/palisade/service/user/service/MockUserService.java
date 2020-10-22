@@ -28,12 +28,12 @@ import java.util.concurrent.CompletableFuture;
 public class MockUserService extends HashMap<UserId, User> implements UserService {
 
     @Override
-    public CompletableFuture<User> getUser(final UserRequest userRequest) {
-        User user = this.get(userRequest.userId);
+    public User getUser(final String userId) {
+        User user = this.get(userId);
         if (Objects.nonNull(user)) {
-            return CompletableFuture.completedFuture(user);
+            return user;
         } else {
-            throw new NoSuchUserIdException("No such key: " + userRequest.getUserId());
+            throw new NoSuchUserIdException("No such key: " + userId);
         }
     }
 

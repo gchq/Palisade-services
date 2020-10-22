@@ -18,35 +18,39 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import java.util.concurrent.CompletableFuture;
 
-@CacheConfig(cacheNames = {"users"})
-public class UserServiceProxy implements UserService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProxy.class);
-    private final UserService service;
+/**
+ * An asynchronous service for processing a cacheable method.
+ */
+@EnableAsync
+public class AsyncUserServiceProxy {
 
-    public UserServiceProxy(final UserService service) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncUserServiceProxy.class);
+    private final CacheableUserServiceProxy service;
+
+    /**
+     * Constructor for instantiating the {@link AsyncUserServiceProxy}
+     */
+    public AsyncUserServiceProxy(final CacheableUserServiceProxy service) {
         this.service = service;
     }
 
-    @Cacheable(key = "#userId")
+    @Async
     public CompletableFuture<User> getUser(final UserRequest userRequest) {
-        LOGGER.info("Cache miss for userId {}", userRequest.userId);
-        return service.getUser(userRequest);
+        LOGGER.debug("Getting user '{}' from cache", userRequest.getUserId());
+        User user = service.getUser(userRequest.userId);
+        return CompletableFuture.completedFuture(user);
     }
 
-    @CachePut(key = "#user.userId")
     public User addUser(final User user) {
-        LOGGER.info("Cache add for userId {}", user.getUserId());
-        LOGGER.debug("Added user {} to cache (key=userId)", user);
+        LOGGER.debug("Adding user '{}' to cache", user.getUserId().getId());
         return service.addUser(user);
     }
-
 }

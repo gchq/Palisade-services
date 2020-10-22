@@ -36,8 +36,9 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
+import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
 class UserRestControllerTest {
@@ -60,14 +62,15 @@ class UserRestControllerTest {
     private final Topic mockTopic = Mockito.mock(Topic.class);
     private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
     private final UserService service = Mockito.mock(UserService.class);
-    private final UserServiceProxy proxy = new UserServiceProxy(service);
+    private final CacheableUserServiceProxy cacheProxy = new CacheableUserServiceProxy(service);
+    private final AsyncUserServiceProxy asyncProxy = new AsyncUserServiceProxy(cacheProxy);
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
     public void setup() {
-        logger = (Logger) LoggerFactory.getLogger(UserServiceProxy.class);
+        logger = (Logger) LoggerFactory.getLogger(CacheableUserServiceProxy.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
@@ -92,15 +95,15 @@ class UserRestControllerTest {
         User expected = new User().userId("add-user-request-id").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
         UserRequest request = UserRequest.Builder.create().withUserId(expected.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
         when(service.addUser(any(User.class))).thenReturn(expected);
-        when(service.getUser(any(UserRequest.class))).thenReturn(CompletableFuture.completedFuture(expected));
+        when(service.getUser(any(String.class))).thenReturn(expected);
 
         // When
-        User addedUser = proxy.addUser(expected);
+        User addedUser = cacheProxy.addUser(expected);
         // Then
         assertThat(addedUser).isEqualTo(expected);
 
         // When
-        User user = proxy.getUser(request).join();
+        User user = cacheProxy.getUser(request.userId);
         // Then
         assertThat(user).isEqualTo(expected);
 

@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
@@ -103,15 +102,14 @@ public abstract class AbstractLdapUserService implements UserService {
     }
 
     @Override
-    public CompletableFuture<User> getUser(final UserRequest userRequest) {
-        requireNonNull(userRequest.userId, "userId is null");
-        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userRequest.userId);
+    public User getUser(final String userId) {
+        requireNonNull(userId, "userId is null");
+        LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
         try {
-            Map<String, Object> userAttrs = getAttributes(new UserId().id(userRequest.userId));
-            return CompletableFuture.completedFuture(new User()
-                    .userId(new UserId().id(userRequest.userId))
-                    .auths(getAuths(new UserId().id(userRequest.userId), userAttrs, context))
-                    .roles(getRoles(new UserId().id(userRequest.userId), userAttrs, context)));
+            Map<String, Object> userAttrs = getAttributes(new UserId().id(userId));
+            return new User().userId(new UserId().id(userId))
+                    .auths(getAuths(new UserId().id(userId), userAttrs, context))
+                    .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
             LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);

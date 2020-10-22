@@ -32,6 +32,7 @@ import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
+import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
@@ -53,7 +54,7 @@ public class UserApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
-    private final UserService service;
+    private final AsyncUserServiceProxy service;
     private final UserConfiguration userConfig;
 
     /**
@@ -68,7 +69,7 @@ public class UserApplication {
     public UserApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
-            @Qualifier("userService") final UserService service,
+            @Qualifier("asyncUserServiceProxy") final AsyncUserServiceProxy service,
             @Qualifier("userConfiguration") final UserConfiguration configuration,
             @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.service = service;

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.Context;
@@ -31,10 +32,12 @@ import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -45,12 +48,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest(
         classes = {UserApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
+@EnableAsync
 class CaffeineUserCachingTest {
 
     @Autowired
-    private UserServiceProxy userService;
+    private AsyncUserServiceProxy userService;
 
     @Autowired
     private CacheManager cacheManager;
