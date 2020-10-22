@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
@@ -46,6 +45,7 @@ import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -74,17 +74,19 @@ public class AkkaRunnableGraph {
         // Read messages from the stream source
         return source
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
-                .filter(messageAndRequest -> messageAndRequest.second().map(policyRequest -> service.canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource()).isPresent()).orElse(true))
+                .mapAsync(PARALLELISM, messageAndRequest -> CompletableFuture.completedFuture(messageAndRequest.second().map(policyRequest -> service.canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource()).map(stuff)).orElse(Optional.of(Optional.empty()))))
+                .flatMapConcat(thing -> Source.fromJavaStream(thing::stream))
                 /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
                  * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
                  * be record level rules. Either list may be empty, but they should at least be present
                  */
                 .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>> messageAndRequest) -> {
-                    PolicyResponse response = messageAndRequest.second().map((PolicyRequest request) -> {
-                        Rules rules = service.getPolicy(request.getResource()).orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules();
-                        return PolicyResponse.Builder.create(request).withRules(rules);
-                    }).orElse(null);
-                    return new Pair<>(messageAndRequest.first(), response);
+                    CompletableFuture<PolicyResponse> response = messageAndRequest.second().map((PolicyRequest request) ->
+                            CompletableFuture.completedFuture(service.getPolicy(request.getResource()))
+                                    .thenApply(p -> p.orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules())
+                                    .thenApply(rules -> PolicyResponse.Builder.create(request).withRules(rules)))
+                            .orElse(CompletableFuture.completedFuture(null));
+                    return response.thenApply(r -> new Pair<>(messageAndRequest.first(), r));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message
