@@ -213,9 +213,9 @@ class KafkaContractTest {
                                 .isEqualTo("file:" + ContractTestData.RESOURCE_ID),
                         () -> assertThat(results.get(0).value().get("context").get("contents").get("purpose").asText())
                                 .isEqualTo(ContractTestData.PURPOSE),
-                        () -> assertThat(results.get(0).value().get("rules").get("rules"))
-                                .isEmpty())
-        );
+                        () -> assertThat(results.get(0).value().get("rules").get("message").asText())
+                                .isEqualTo("1-PassThroughRule")
+                ));
     }
 
     /**

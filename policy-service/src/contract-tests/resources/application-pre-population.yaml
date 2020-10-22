@@ -17,6 +17,18 @@
 population:
   userProvider: std
   users:
+  - userId: noResourceRulesUser
+    auths:
+      auth
+    roles:
+      role
+
+  - userId: onlyRecordRulesUser
+    auths:
+      auth
+    roles:
+      role
+
   - userId: test-user-id
     auths:
       auth
@@ -26,31 +38,22 @@ population:
   policyProvider: std
   policies:
   - resource: /test/noRulesResource
-    owner: test-user-id
+    owner: noResourceRulesUser
     # no rules - should throw exception
-    resourceRules: {}
-    recordRules: {}
-
-  - resource: /test/onlyResourceRulesResource
-    owner: test-user-id
-    # no rules - should throw exception
-    resourceRules:
-      something: null
-    recordRules: {}
+    recordRules: { }
 
   - resource: /test/onlyRecordRulesResource
-    owner: test-user-id
+    owner: onlyRecordRulesUser
     # no rules - should throw exception
-    resourceRules: {}
     recordRules:
-      something: null
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
 
   - resource: /test/resourceId
     owner: test-user-id
     resourceRules:
-      something: null
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
     recordRules:
-      somethingElse: null
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
 
   resourceProvider: std
   resources:
