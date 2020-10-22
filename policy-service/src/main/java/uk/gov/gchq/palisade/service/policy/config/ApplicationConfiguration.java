@@ -32,6 +32,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
@@ -142,6 +143,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return policyServiceCachingProxy;
     }
 
+    @Bean("asyncPolicyService")
+    public AsyncPolicyServiceProxy asyncPolicyServiceProxy(final PolicyServiceCachingProxy policyServiceCachingProxy,
+                                                         final @Qualifier("applicationTaskExecutor") Executor executor) {
+        LOGGER.debug("Instantiated asyncUserServiceProxy");
+        return new AsyncPolicyServiceProxy(policyServiceCachingProxy, executor);
+    }
+
     @Bean("hierarchicalProxy")
     @Qualifier("controller")
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
@@ -175,7 +183,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception {}", token, message.getResourceId(), message.getAttributes(), message.getError());
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception", token, message.getResourceId(), message.getError());
     }
 
 }

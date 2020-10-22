@@ -34,6 +34,7 @@ import org.springframework.context.event.EventListener;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
@@ -58,7 +59,7 @@ public class PolicyApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
-    private final PolicyServiceCachingProxy service;
+    private final AsyncPolicyServiceProxy service;
     private final PolicyConfiguration policyConfig;
     private final UserConfiguration userConfig;
     private final ResourceConfiguration resourceConfig;
@@ -77,7 +78,7 @@ public class PolicyApplication {
     public PolicyApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
-            final @Qualifier("cachingProxy") PolicyServiceCachingProxy service,
+            final @Qualifier("asyncPolicyService") AsyncPolicyServiceProxy service,
             final PolicyConfiguration policyConfig,
             final UserConfiguration userConfig,
             final ResourceConfiguration resourceConfig,
@@ -113,7 +114,6 @@ public class PolicyApplication {
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
         LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
         LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
-        LOGGER.debug("Pre-populating using Policy Service: {}", service.getClassName());
         policyConfig.getPolicies().stream().peek(e -> LOGGER.info("prepop stream {}", e))
                 .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
                 .peek(entry -> LOGGER.debug("pre-pop entry {}", entry))

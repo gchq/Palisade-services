@@ -50,7 +50,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
+import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.request.Policy;
 
@@ -80,22 +80,25 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 
     @Autowired
-    private PolicyServiceCachingProxy cacheProxy;
+    private AsyncPolicyServiceProxy cacheProxy;
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Before the tests run, add policies to resources in the Policy service
+     */
     @BeforeEach
     void setup() {
         // Add the system resource to the policy service
-        assertThat(cacheProxy.setResourcePolicy(TXT_SYSTEM, TXT_POLICY)).isEqualTo(TXT_POLICY);
+        cacheProxy.setResourcePolicy(TXT_SYSTEM, TXT_POLICY);
 
         // Add the directory resources to the policy service
-        assertThat(cacheProxy.setResourcePolicy(JSON_DIRECTORY, JSON_POLICY)).isEqualTo(JSON_POLICY);
-        assertThat(cacheProxy.setResourcePolicy(SECRET_DIRECTORY, SECRET_POLICY)).isEqualTo(SECRET_POLICY);
+        cacheProxy.setResourcePolicy(JSON_DIRECTORY, JSON_POLICY);
+        cacheProxy.setResourcePolicy(SECRET_DIRECTORY, SECRET_POLICY);
 
         // Add the file resources to the policy service
         for (FileResource fileResource : FILE_RESOURCES) {
-            assertThat(cacheProxy.setResourcePolicy(fileResource, PASS_THROUGH_POLICY)).isEqualTo(PASS_THROUGH_POLICY);
+            cacheProxy.setResourcePolicy(fileResource, PASS_THROUGH_POLICY);
         }
     }
 
@@ -121,7 +124,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Policy> policy = cacheProxy.getPolicy(resource);
+            Optional<Policy> policy = cacheProxy.getPolicy(resource).join();
 
             // Then
             assertThat(policy).isPresent()
@@ -134,7 +137,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Policy> policy = cacheProxy.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist")));
+        Optional<Policy> policy = cacheProxy.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist"))).join();
 
         // Then
         assertThat(policy).isEmpty();
@@ -156,7 +159,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
         cacheProxy.setResourcePolicy(systemResource, newPolicy);
 
         // When
-        Optional<Policy> returnedPolicy = cacheProxy.getPolicy(systemResource);
+        Optional<Policy> returnedPolicy = cacheProxy.getPolicy(systemResource).join();
 
         // Then the returned policy should have the updated resource rules
         assertThat(returnedPolicy).isPresent();
@@ -172,7 +175,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
         TimeUnit.SECONDS.sleep(1);
 
         // When - an old entry is requested
-        Optional<Policy> cachedPolicy = cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE);
+        Optional<Policy> cachedPolicy = cacheProxy.getPolicy(ACCESSIBLE_JSON_TXT_FILE).join();
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();

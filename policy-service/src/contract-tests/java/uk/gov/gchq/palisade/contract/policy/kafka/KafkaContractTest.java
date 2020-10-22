@@ -124,6 +124,12 @@ class KafkaContractTest {
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
+    /**
+     * Creates a number of requests, including a start and end record, and the body, JSON, on the right topic
+     * Listens on the producer topic, then writes to the consumer topic and retrieves the processed messages from the producer topic.
+     * Then asserts that the messages are valid, have the correct token and headers, the right number of messages exist, then are correctly orderd.
+     * Finally checks the body of the message has appropriately been processed and the right objects are returned
+     */
     @Test
     @DirtiesContext
     void testVariousRequestSets() {
@@ -212,6 +218,10 @@ class KafkaContractTest {
         );
     }
 
+    /**
+     * Tests the rest endpoint used for mocking a kafka entry point exists and is working as expected, returns a HTTP.ACCEPTED.
+     * Then checks the token and headers are correct
+     */
     @Test
     @DirtiesContext
     void testRestEndpoint() {

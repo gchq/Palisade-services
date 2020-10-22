@@ -37,10 +37,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
+import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
@@ -67,14 +68,16 @@ public class AkkaRunnableGraph {
             final Sink<Envelope<String, PolicyResponse, Committable>, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
-            final PolicyServiceCachingProxy service) {
+            final AsyncPolicyServiceProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         // Read messages from the stream source
         return source
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
-                .mapAsync(PARALLELISM, messageAndRequest -> CompletableFuture.completedFuture(messageAndRequest.second().map(policyRequest -> service.canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource()).map(stuff)).orElse(Optional.of(Optional.empty()))))
+                .mapAsync(PARALLELISM, messageAndRequest -> CompletableFuture.completedFuture(messageAndRequest.second().map(policyRequest -> service.canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource())
+                        .map(stuff))
+                        .orElse(Optional.of(Optional.empty()))))
                 .flatMapConcat(thing -> Source.fromJavaStream(thing::stream))
                 /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
                  * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD

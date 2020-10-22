@@ -51,7 +51,7 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
+import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.request.Policy;
 
@@ -83,36 +83,48 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaffeinePolicyCachingTest.class);
 
     @Autowired
-    private PolicyServiceCachingProxy policyService;
+    private AsyncPolicyServiceProxy policyService;
 
     @Autowired
     private CacheManager cacheManager;
 
+    /**
+     * Cleans up the caches used by the Policy Service
+     */
     private void forceCleanUp() {
         List<String> caches = Arrays.asList("resourcePolicy", "typePolicy", "accessPolicy");
         caches.forEach(x -> ((Cache<?, ?>) Objects.requireNonNull(cacheManager.getCache(x)).getNativeCache()).cleanUp());
     }
 
+    /**
+     * Before the tests run, add policies to resources in the Policy service
+     */
     @BeforeEach
     void setup() {
         // Add the system resource to the policy service
-        assertThat(policyService.setResourcePolicy(TXT_SYSTEM, TXT_POLICY)).isEqualTo(TXT_POLICY);
+       policyService.setResourcePolicy(TXT_SYSTEM, TXT_POLICY);
 
         // Add the directory resources to the policy service
-        assertThat(policyService.setResourcePolicy(JSON_DIRECTORY, JSON_POLICY)).isEqualTo(JSON_POLICY);
-        assertThat(policyService.setResourcePolicy(SECRET_DIRECTORY, SECRET_POLICY)).isEqualTo(SECRET_POLICY);
+       policyService.setResourcePolicy(JSON_DIRECTORY, JSON_POLICY);
+       policyService.setResourcePolicy(SECRET_DIRECTORY, SECRET_POLICY);
 
         // Add the file resources to the policy service
         for (FileResource fileResource : FILE_RESOURCES) {
-            assertThat(policyService.setResourcePolicy(fileResource, PASS_THROUGH_POLICY)).isEqualTo(PASS_THROUGH_POLICY);
+            policyService.setResourcePolicy(fileResource, PASS_THROUGH_POLICY);
         }
     }
 
+    /**
+     * Tests that the service loads
+     */
     @Test
     void testContextLoads() {
         assertThat(policyService).isNotNull();
     }
 
+    /**
+     * Tests that the correct policy is retrieved for the resource
+     */
     @Test
     void testAddedPolicyIsRetrievable() {
         // Given - resources have been added as above
@@ -120,24 +132,30 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Policy> policy = policyService.getPolicy(resource);
+            Optional<Policy> policy = policyService.getPolicy(resource).join();
 
             // Then
             assertThat(policy).isPresent();
         }
     }
 
+    /**
+     * Tests that if the resource is not added for the policy then nothing is returned
+     */
     @Test
     void testNonExistentPolicyRetrieveFails() {
         // Given - the requested resource is not added
 
         // When
-        Optional<Policy> policy = policyService.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist")));
+        Optional<Policy> policy = policyService.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist"))).join();
 
         // Then
         assertThat(policy).isEmpty();
     }
 
+    /**
+     * Tests that if the cache is full, the first entry is removed
+     */
     @Test
     void testCacheMaxSize() {
         /// Given - the cache is overfilled
@@ -149,28 +167,35 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // When - we try to get the first (now-evicted) entry
         forceCleanUp();
-        Optional<Policy> cachedPolicy = policyService.getPolicy(makeResource.apply(0));
+        Optional<Policy> cachedPolicy = policyService.getPolicy(makeResource.apply(0)).join();
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();
     }
 
+    /**
+     * Tests that if the entry ttl expires it is removed
+     * @throws InterruptedException in case TimeUnit.sleep throws an exception
+     */
     @Test
     void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
-        assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
+        assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE).join()).isPresent();
         // Given - a sufficient amount of time has passed
 
         TimeUnit.SECONDS.sleep(1);
         forceCleanUp();
 
         // When - an old entry is requested
-        Optional<Policy> cachedPolicy = policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE);
+        Optional<Policy> cachedPolicy = policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE).join();
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();
     }
 
+    /**
+     * Kafka configuration
+     */
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         static KafkaContainer kafka = new KafkaContainer("5.5.1")
                 .withReuse(true);

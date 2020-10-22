@@ -60,7 +60,7 @@ public final class SerDesConfig {
      * Kafka value serialiser for upstream messages coming in as input
      * Used by the Rest Controller to insert requests onto the topic
      *
-     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingRequest)
+     * @return an appropriate value serialiser for the topic's message content (PolicyRequest)
      */
     public static Serializer<PolicyRequest> resourceValueSerializer() {
         return (String ignored, PolicyRequest policyRequest) -> {
@@ -84,7 +84,7 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserialiser for the topic's message content (AttributeMaskingRequest)
+     * @return an appropriate value deserialiser for the topic's message content (PolicyRequest)
      */
     public static Deserializer<PolicyRequest> resourceValueDeserializer() {
         return (String ignored, byte[] policyRequest) -> {
@@ -108,7 +108,7 @@ public final class SerDesConfig {
     /**
      * Kafka value serialiser for downstream messages going out as output
      *
-     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
+     * @return an appropriate value serialiser for the topic's message content (PolicyResponse)
      */
     public static Serializer<PolicyResponse> ruleValueSerializer() {
         return (String ignored, PolicyResponse policyResponse) -> {
