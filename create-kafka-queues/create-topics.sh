@@ -58,7 +58,7 @@ else
     echo "Checking for topic ${!topic}"
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
-      # Use variable indirection to get the contents of KAFKATOPICX e.g palisade 1 1
+      # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
       echo "Creating topic ${!topic}"
       write_to_kafka ${!topic}
     else
