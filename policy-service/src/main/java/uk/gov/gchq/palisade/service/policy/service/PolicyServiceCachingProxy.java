@@ -49,15 +49,13 @@ public class PolicyServiceCachingProxy implements PolicyService {
         this.service = service;
     }
 
-    @Override
     @Cacheable(value = "accessPolicy", key = "''.concat(#resource.getId()).concat('-').concat(#context.hashCode()).concat('-').concat(#user.hashCode())")
-    public Optional<Resource> canAccess(final User user, final Context context, final Resource resource) {
+    public <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource) {
         LOGGER.info("Key triplet {}-{}-{} not found in cache", user.hashCode(), context.hashCode(), resource.hashCode());
         LOGGER.debug("Cache miss for canAccess user {}, resource {}, context {}", user.getUserId(), resource.getId(), context);
         return service.canAccess(user, context, resource);
     }
 
-    @Override
     @Cacheable(value = "resourcePolicy", key = "#resource.id")
     public Optional<Policy> getPolicy(final Resource resource) {
         LOGGER.info("ResourceId for resource {} not found in cache", resource);
@@ -65,7 +63,6 @@ public class PolicyServiceCachingProxy implements PolicyService {
         return service.getPolicy(resource);
     }
 
-    @Override
     @CachePut(value = "resourcePolicy", key = "#resource.id")
     @CacheEvict(value = "accessPolicy")
     public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
@@ -74,7 +71,6 @@ public class PolicyServiceCachingProxy implements PolicyService {
         return service.setResourcePolicy(resource, policy);
     }
 
-    @Override
     @CachePut(value = "typePolicy", key = "#type")
     @CacheEvict(value = "accessPolicy")
     public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {

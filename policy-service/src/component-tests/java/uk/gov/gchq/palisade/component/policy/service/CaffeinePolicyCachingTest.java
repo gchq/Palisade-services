@@ -51,7 +51,7 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.request.Policy;
 
@@ -83,7 +83,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaffeinePolicyCachingTest.class);
 
     @Autowired
-    private AsyncPolicyServiceProxy policyService;
+    private PolicyServiceCachingProxy policyService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -132,7 +132,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Policy> policy = policyService.getPolicy(resource).join();
+            Optional<Policy> policy = policyService.getPolicy(resource);
 
             // Then
             assertThat(policy).isPresent();
@@ -147,7 +147,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Policy> policy = policyService.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist"))).join();
+        Optional<Policy> policy = policyService.getPolicy(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist")));
 
         // Then
         assertThat(policy).isEmpty();
@@ -167,7 +167,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // When - we try to get the first (now-evicted) entry
         forceCleanUp();
-        Optional<Policy> cachedPolicy = policyService.getPolicy(makeResource.apply(0)).join();
+        Optional<Policy> cachedPolicy = policyService.getPolicy(makeResource.apply(0));
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();
@@ -180,14 +180,14 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
-        assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE).join()).isPresent();
+        assertThat(policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
         // Given - a sufficient amount of time has passed
 
         TimeUnit.SECONDS.sleep(1);
         forceCleanUp();
 
         // When - an old entry is requested
-        Optional<Policy> cachedPolicy = policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE).join();
+        Optional<Policy> cachedPolicy = policyService.getPolicy(ACCESSIBLE_JSON_TXT_FILE);
 
         // Then - it has been evicted
         assertThat(cachedPolicy).isEmpty();

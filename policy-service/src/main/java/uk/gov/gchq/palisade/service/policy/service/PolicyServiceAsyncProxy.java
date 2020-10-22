@@ -32,20 +32,20 @@ import java.util.concurrent.Executor;
 /**
  * An asynchronous service for processing a cacheable method.
  */
-public class AsyncPolicyServiceProxy {
+public class PolicyServiceAsyncProxy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncPolicyServiceProxy.class);
-    private final PolicyServiceCachingProxy service;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceAsyncProxy.class);
+    private final PolicyServiceHierarchyProxy service;
     private final Executor executor;
 
     /**
-     * Constructor for instantiating the {@link AsyncPolicyServiceProxy}
+     * Constructor for instantiating the {@link PolicyServiceAsyncProxy}
      *
      * @param service  the PolicyServiceCachingProxy
      * @param executor an executor for any {@link CompletableFuture}s
      */
-    public AsyncPolicyServiceProxy(final PolicyServiceCachingProxy service, final Executor executor) {
-        LOGGER.debug("Initialised the AsyncPolicyServiceProxy");
+    public PolicyServiceAsyncProxy(final PolicyServiceHierarchyProxy service, final Executor executor) {
+        LOGGER.debug("Initialised the PolicyServiceAsyncProxy");
         this.service = service;
         this.executor = executor;
     }
@@ -58,11 +58,10 @@ public class AsyncPolicyServiceProxy {
      * @param resource the resource that they want to access
      * @return the completable future of the cacheable canAccess response
      */
-    public CompletableFuture<Optional<Resource>> canAccess(final User user, final Context context, final Resource resource) {
+    public <R extends Resource> CompletableFuture<Optional<R>> canAccess(final User user, final Context context, final R resource) {
         LOGGER.debug("Running canAccess from policy cache with values: user {}, context {}, and resource {}", user, context, resource);
         return CompletableFuture.supplyAsync(() -> service.canAccess(user, context, resource), executor);
     }
-
 
     /**
      * Async call to the caching getPolicy method

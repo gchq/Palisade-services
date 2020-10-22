@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.policy.stream.config;
 
 import akka.Done;
 import akka.japi.Pair;
+import akka.japi.tuple.Tuple3;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
@@ -37,14 +38,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
-import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -68,29 +70,37 @@ public class AkkaRunnableGraph {
             final Sink<Envelope<String, PolicyResponse, Committable>, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
-            final AsyncPolicyServiceProxy service) {
+            final PolicyServiceAsyncProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         // Read messages from the stream source
         return source
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
-                .mapAsync(PARALLELISM, messageAndRequest -> CompletableFuture.completedFuture(messageAndRequest.second().map(policyRequest -> service.canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource())
-                        .map(stuff))
-                        .orElse(Optional.of(Optional.empty()))))
-                .flatMapConcat(thing -> Source.fromJavaStream(thing::stream))
-                /* Having filtered out any resources the user doesn't have access to in the line above, we now build the map
-                 * of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
-                 * be record level rules. Either list may be empty, but they should at least be present
-                 */
-                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>> messageAndRequest) -> {
-                    CompletableFuture<PolicyResponse> response = messageAndRequest.second().map((PolicyRequest request) ->
-                            CompletableFuture.completedFuture(service.getPolicy(request.getResource()))
-                                    .thenApply(p -> p.orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules())
-                                    .thenApply(rules -> PolicyResponse.Builder.create(request).withRules(rules)))
-                            .orElse(CompletableFuture.completedFuture(null));
-                    return response.thenApply(r -> new Pair<>(messageAndRequest.first(), r));
-                })
+
+                // Apply coarse-grained resource-level rules
+                .mapAsync(PARALLELISM, messageAndRequest -> messageAndRequest.second()
+                        // If is a real message
+                        .map(policyRequest -> service
+                                .canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource())
+                                .thenApply(accessible -> accessible.map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
+                        )
+                        // If is a START/END of stream then treat as accessible
+                        .orElse(CompletableFuture.completedFuture(Optional.of(new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), null)))))
+
+                // Filter out resources that are completely redacted
+                .flatMapConcat(optional -> Source.fromJavaStream(optional::stream))
+
+                // Having filtered out any resources the user doesn't have access to in the line above, we now build the map
+                // of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
+                // be record level rules. Either list may be empty, but they should at least be present
+                .mapAsync(PARALLELISM, (Tuple3<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>, LeafResource> messageRequestResource) -> messageRequestResource.t2()
+                        .map((PolicyRequest request) ->
+                                service.getPolicy(request.getResource())
+                                        .thenApply(policy -> policy.orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules())
+                                        .thenApply(rules -> PolicyResponse.Builder.create(request).withResource(messageRequestResource.t3()).withRules(rules)))
+                        .orElse(CompletableFuture.completedFuture(null))
+                        .thenApply(r -> new Pair<>(messageRequestResource.t1(), r)))
 
                 // Build producer record, copying the partition, keeping track of original message
                 .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {

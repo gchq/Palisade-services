@@ -84,6 +84,7 @@ public class ApplicationTestData {
             .withResource(LEAF_RESOURCE);
 
     public static final PolicyResponse RESPONSE = PolicyResponse.Builder.create(REQUEST)
+            .withResource(LEAF_RESOURCE)
             .withRules(RULES);
 
     public static final ProducerRecord<String, PolicyRequest> START = new ProducerRecord<>("resource", 0, null, null);

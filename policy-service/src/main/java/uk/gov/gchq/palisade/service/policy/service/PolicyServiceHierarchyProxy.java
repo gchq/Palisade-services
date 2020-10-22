@@ -42,7 +42,7 @@ import static java.util.Objects.requireNonNull;
  * If there are any negation rules then all rules inherited from up the
  * chain should be checked to see if any rules need removing due to the negation rule.
  */
-public class PolicyServiceHierarchyProxy implements PolicyService {
+public class PolicyServiceHierarchyProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
     private final PolicyService service;
@@ -51,7 +51,6 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         this.service = service;
     }
 
-    @Override
     public <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource) {
         LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, resource);
         Optional<R> serviceCanAccess = service.canAccess(user, context, resource);
@@ -120,20 +119,17 @@ public class PolicyServiceHierarchyProxy implements PolicyService {
         return mergedRules;
     }
 
-    @Override
     public Optional<Policy> getPolicy(final Resource resource) {
         Optional<Rules<Serializable>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
         return optionalRules.map(rules -> new Policy<>().recordRules(rules));
     }
 
-    @Override
     public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
         requireNonNull(resource, "type cannot be null");
         LOGGER.debug("Setting Resource policy {} to resource {}", policy, resource);
         return service.setResourcePolicy(resource, policy);
     }
 
-    @Override
     public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
         requireNonNull(type, "type cannot be null");
         LOGGER.debug("Setting Type policy {} to data type {}", policy, type);

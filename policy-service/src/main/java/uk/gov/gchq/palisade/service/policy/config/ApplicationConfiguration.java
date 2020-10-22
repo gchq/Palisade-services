@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -32,21 +31,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.policy.service.AsyncPolicyServiceProxy;
 import uk.gov.gchq.palisade.service.policy.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-@EnableAutoConfiguration
 public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
@@ -136,26 +133,26 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new NullPolicyService();
     }
 
-    @Bean("cachingProxy")
+    @Bean
     public PolicyServiceCachingProxy cachedPolicyService(final @Qualifier("impl") PolicyService service) {
         PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
         LOGGER.debug("Instantiated CachedPolicyService");
         return policyServiceCachingProxy;
     }
 
-    @Bean("asyncPolicyService")
-    public AsyncPolicyServiceProxy asyncPolicyServiceProxy(final PolicyServiceCachingProxy policyServiceCachingProxy,
-                                                         final @Qualifier("applicationTaskExecutor") Executor executor) {
-        LOGGER.debug("Instantiated asyncUserServiceProxy");
-        return new AsyncPolicyServiceProxy(policyServiceCachingProxy, executor);
-    }
-
-    @Bean("hierarchicalProxy")
-    @Qualifier("controller")
+    @Bean
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
         PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
         LOGGER.debug("Instantiated HierarchicalPolicyService");
         return policyServiceHierarchyProxy;
+    }
+
+    @Bean
+    public PolicyServiceAsyncProxy asyncPolicyServiceProxy(
+            final PolicyServiceHierarchyProxy hierarchy,
+            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+        LOGGER.debug("Instantiated asyncUserServiceProxy");
+        return new PolicyServiceAsyncProxy(hierarchy, executor);
     }
 
     @Bean
@@ -167,11 +164,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Override
     @Bean("threadPoolTaskExecutor")
     public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(6);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
     }
 
     @Override

@@ -25,8 +25,32 @@ population:
 
   policyProvider: std
   policies:
+  - resource: /test/noRulesResource
+    owner: test-user-id
+    # no rules - should throw exception
+    resourceRules: {}
+    recordRules: {}
+
+  - resource: /test/onlyResourceRulesResource
+    owner: test-user-id
+    # no rules - should throw exception
+    resourceRules:
+      something: null
+    recordRules: {}
+
+  - resource: /test/onlyRecordRulesResource
+    owner: test-user-id
+    # no rules - should throw exception
+    resourceRules: {}
+    recordRules:
+      something: null
+
   - resource: /test/resourceId
     owner: test-user-id
+    resourceRules:
+      something: null
+    recordRules:
+      somethingElse: null
 
   resourceProvider: std
   resources:

@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-
 /**
  * PolicyResponse represents the output for policy-service which will include the Rules to implement with this Resource.
  * This will be forwarded to the attribute-masking-service for preliminary processing and routing of the data.
@@ -123,13 +122,12 @@ public final class PolicyResponse {
          * @param request message that has been sent to the policy-service
          * @return interface {@link IRules} for the next step in the build.
          */
-        public static IRules create(final PolicyRequest request) {
+        public static IResource create(final PolicyRequest request) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
                     .withContextNode(request.getContextNode())
-                    .withUserNode(request.getUserNode())
-                    .withResourceNode(request.getResourceNode());
+                    .withUserNode(request.getUserNode());
         }
 
         /**

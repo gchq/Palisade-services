@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyTestCommon;
@@ -91,21 +90,21 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // When - access to the resource is queried
         for (User accessingUser : Arrays.asList(USER, SENSITIVE_USER, SECRET_USER)) {
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, ACCESSIBLE_JSON_TXT_FILE);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, ACCESSIBLE_JSON_TXT_FILE);
             // Then - the resource is accessible
             assertThat(resource).isNotEmpty();
         }
 
         // When - access to the resource is queried
         for (User accessingUser : Arrays.asList(SENSITIVE_USER, SECRET_USER)) {
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, SENSITIVE_TXT_FILE);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, SENSITIVE_TXT_FILE);
             // Then - the resource is accessible
             assertThat(resource).isNotEmpty();
         }
 
         for (User accessingUser : Collections.singletonList(SECRET_USER)) {
             // When - access to the resource is queried
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, SECRET_TXT_FILE);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(accessingUser, CONTEXT, SECRET_TXT_FILE);
             // Then - the resource is accessible
             assertThat(resource).isNotEmpty();
         }
@@ -121,7 +120,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         resources.remove(ACCESSIBLE_JSON_TXT_FILE);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(USER, CONTEXT, fileResource);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(USER, CONTEXT, fileResource);
             // Then - the resource is not accessible
             assertThat(resource).isEmpty();
         }
@@ -133,7 +132,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         resources.remove(SENSITIVE_TXT_FILE);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(SENSITIVE_USER, CONTEXT, fileResource);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(SENSITIVE_USER, CONTEXT, fileResource);
             // Then - the resource is not accessible
             assertThat(resource).isEmpty();
         }
@@ -146,7 +145,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         resources.remove(SECRET_TXT_FILE);
         for (FileResource fileResource : resources) {
             // When - access to the resource is queried
-            Optional<Resource> resource = HIERARCHY_POLICY.canAccess(SENSITIVE_USER, CONTEXT, fileResource);
+            Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(SENSITIVE_USER, CONTEXT, fileResource);
             // Then - the resource is not accessible
             assertThat(resource).isEmpty();
         }
@@ -158,7 +157,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         // NEW_FILE
 
         // When - access to the resource is queried
-        Optional<Resource> resource = HIERARCHY_POLICY.canAccess(USER, CONTEXT, NEW_FILE);
+        Optional<FileResource> resource = HIERARCHY_POLICY.canAccess(USER, CONTEXT, NEW_FILE);
 
         // Then - the resource is not accessible
         assertThat(resource).isEmpty();
