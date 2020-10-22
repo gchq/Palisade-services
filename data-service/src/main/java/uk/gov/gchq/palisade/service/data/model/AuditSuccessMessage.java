@@ -167,7 +167,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             /**
              * Adds the attributes for the message.
              *
-             * @param attributes timestamp for the request.
+             * @param attributes other attributes to add to the message object
              * @return completed {@link AuditSuccessMessage} object.
              */
             AuditSuccessMessage withAttributes(Map<String, Object> attributes);
