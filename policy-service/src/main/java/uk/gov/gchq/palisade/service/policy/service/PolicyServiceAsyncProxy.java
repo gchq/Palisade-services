@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.request.Policy;
 
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -53,6 +52,7 @@ public class PolicyServiceAsyncProxy {
     /**
      * Async call to the caching canAccess method
      *
+     * @param <R>      the type of resource (may be a supertype)
      * @param user     the user requesting access to the resource
      * @param context  the context for the resource they want to access
      * @param resource the resource that they want to access
@@ -72,17 +72,5 @@ public class PolicyServiceAsyncProxy {
     public CompletableFuture<Optional<Policy>> getPolicy(final Resource resource) {
         LOGGER.debug("Running getPolicy from policy cache with resource {}", resource);
         return CompletableFuture.supplyAsync(() -> service.getPolicy(resource), executor);
-    }
-
-    /**
-     * Calls the caching layer to set the policy for the resource
-     * @param resource a {@link Resource} to set a policy for
-     * @param policy   the {@link Policy} to apply to this resource
-     * @param <T>      the record type for this resource
-     * @return the {@link Policy} that was added (may be different to what was requested)
-     */
-    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        LOGGER.debug("Setting policy message {}, for resourceId {}", policy.getMessage(), resource.getId());
-        return service.setResourcePolicy(resource, policy);
     }
 }

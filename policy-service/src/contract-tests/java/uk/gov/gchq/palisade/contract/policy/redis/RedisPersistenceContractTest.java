@@ -74,7 +74,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @Import({RedisPersistenceContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {RedisPersistenceContractTest.KafkaInitializer.class, RedisPersistenceContractTest.RedisInitializer.class})
-@ActiveProfiles({"redis", "akkatest"})
+@ActiveProfiles({"redis", "akka-test"})
 class RedisPersistenceContractTest extends PolicyTestCommon {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
@@ -192,7 +192,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akkatest");
+            context.getEnvironment().setActiveProfiles("redis", "akka-test");
             // Start container
             redis.start();
 
@@ -220,7 +220,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "redis");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "redis");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

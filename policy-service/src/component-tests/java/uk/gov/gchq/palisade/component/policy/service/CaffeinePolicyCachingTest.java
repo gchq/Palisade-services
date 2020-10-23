@@ -70,7 +70,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles({"caffeine", "akkatest"})
+@ActiveProfiles({"caffeine", "akka-test"})
 @Import({CaffeinePolicyCachingTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {CaffeinePolicyCachingTest.KafkaInitializer.class})
 @SpringBootTest(
@@ -209,7 +209,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "caffeine");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "caffeine");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

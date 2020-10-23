@@ -46,7 +46,6 @@ import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -80,7 +79,7 @@ public class AkkaRunnableGraph {
 
                 // Apply coarse-grained resource-level rules
                 .mapAsync(PARALLELISM, messageAndRequest -> messageAndRequest.second()
-                        // If is a real message
+                        // If is a real message, not start or end of stream messages then check the resource level rules
                         .map(policyRequest -> service
                                 .canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource())
                                 .thenApply(accessible -> accessible.map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
@@ -91,7 +90,7 @@ public class AkkaRunnableGraph {
                 // Filter out resources that are completely redacted
                 .flatMapConcat(optional -> Source.fromJavaStream(optional::stream))
 
-                // Having filtered out any resources the user doesn't have access to in the line above, we now build the map
+                // Having filtered out any resources the user doesn't have access to in the function above, we now build the map
                 // of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
                 // be record level rules. Either list may be empty, but they should at least be present
                 .mapAsync(PARALLELISM, (Tuple3<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>, LeafResource> messageRequestResource) -> messageRequestResource.t2()

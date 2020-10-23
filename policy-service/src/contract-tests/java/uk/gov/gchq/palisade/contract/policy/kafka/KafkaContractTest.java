@@ -108,7 +108,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"caffeine", "akkatest", "pre-population"})
+@ActiveProfiles({"caffeine", "akka-test", "pre-population"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
@@ -134,7 +134,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSets() {
         // Create a variable number of requests
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
@@ -316,7 +316,7 @@ class KafkaContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("caffeine", "akkatest", "prepopulation", "debug");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("caffeine", "akka-test", "prepopulation", "debug");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();
