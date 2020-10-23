@@ -40,6 +40,10 @@ management:
   endpoint:
     shutdown:
       enabled: true
+  # Disable health check for all user-service profiles
+  health:
+    redis:
+      enabled: false
 
 feign:
   client:
