@@ -95,9 +95,9 @@ class TopicOffsetRestControllerTest {
     }
 
     /**
-     * This permutation is for a request that comes in for an end of messages indicator, StreamMarker is set to END.
-     * Test should accept an incoming request including TopicOffsetRequest, Token, and a StreamMarker as a Post to
-     * the the URL "/stream-api/topicOffset" as a Json String. Response should be a null.
+     * This permutation is for a request that comes in for an end of messages indicator, StreamMarker is set to START.
+     * Test should accept an incoming request including {@link TopicOffsetRequest}, {@link Token}, and a {@link StreamMarker}
+     * as a POST to the the URL "/stream-api/topicOffset" as a JSON String. Response should be a 2XX status and null body.
      *
      * @throws Exception if it fails to process the request
      */

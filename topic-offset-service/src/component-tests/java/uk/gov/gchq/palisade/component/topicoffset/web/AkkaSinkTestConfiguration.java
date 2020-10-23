@@ -27,6 +27,12 @@ import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Config for {@link TopicOffsetRestControllerTest} class.
+ * Rather than actually connecting to kafka, set-up an akka sink to consume messages and do nothing
+ * with them. For stricter testing configuration, sink to a static Collection and inspect the contents
+ * after each test.
+ */
 @Configuration
 public class AkkaSinkTestConfiguration {
     @Primary
