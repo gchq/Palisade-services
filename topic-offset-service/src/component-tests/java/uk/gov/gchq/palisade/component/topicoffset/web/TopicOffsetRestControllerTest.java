@@ -50,8 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * A request of type {@link TopicOffsetRequest} as a Json string, and HTTP header with a required Token
  * and optionally a StreamMarker is sent.  The response will either be a {@link TopicOffsetResponse} or null
  */
-@WebMvcTest(TopicOffsetRestController.class)
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, TopicOffsetApplication.class, AkkaSystemConfig.class})
+@WebMvcTest(controllers = {TopicOffsetRestController.class})
+@ContextConfiguration(classes = {TopicOffsetRestControllerTest.class, TopicOffsetRestController.class})
 class TopicOffsetRestControllerTest {
 
     @Autowired
