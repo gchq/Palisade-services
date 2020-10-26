@@ -61,8 +61,8 @@ public class AkkaRunnableGraph {
 
     @Bean
     KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
-                                                     final ConsumerTopicConfiguration upstreamConfig,
-                                                     final Materializer materializer) {
+                                              final ConsumerTopicConfiguration upstreamConfig,
+                                              final Materializer materializer) {
         return new KafkaProducerService(sink, upstreamConfig, materializer);
     }
 
