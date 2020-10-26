@@ -45,11 +45,24 @@ public class UserServiceAsyncProxy {
         this.executor = executor;
     }
 
+    /**
+     * Takes the {@link String} value of the userId from the {@link UserRequest} and requests the {@link User}
+     * from an implementation of the {@link UserService}
+     *
+     * @param userRequest   the request
+     * @return              a {@link CompletableFuture} of the {@link User} from
+     */
     public CompletableFuture<User> getUser(final UserRequest userRequest) {
         LOGGER.info("Getting user '{}' from cache", userRequest.getUserId());
         return CompletableFuture.supplyAsync(() -> service.getUser(userRequest.userId), executor);
     }
 
+    /**
+     * Adds a {@link User} to the {@link UserService} implementation cache
+     *
+     * @param user  the {@link User} to be added to the cache of the service
+     * @return      the {@link User} that was added to the service cache
+     */
     public User addUser(final User user) {
         LOGGER.info("Adding user '{}' to cache", user.getUserId().getId());
         return service.addUser(user);

@@ -50,5 +50,4 @@ public interface ErrorHandlingService {
         return AuditErrorMessage.Builder.create(userRequest, attributes)
                 .withError(error);
     }
-
 }

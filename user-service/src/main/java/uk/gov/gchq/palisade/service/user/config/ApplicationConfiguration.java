@@ -38,8 +38,8 @@ import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -74,13 +74,26 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserPrepopulationFactory();
     }
 
+    /**
+     * A bean to instantiate a {@link UserService} implementation
+     *
+     * @param userServices  a {@link Collection} of available {@link UserService}s
+     * @return              an instance of the {@link UserServiceAsyncProxy}
+     */
     @Bean("userService")
-    public UserServiceCachingProxy cacheableUserServiceProxy(final Set<UserService> userServices) {
+    public UserServiceCachingProxy cacheableUserServiceProxy(final Collection<UserService> userServices) {
         UserServiceCachingProxy userServiceCachingProxy = new UserServiceCachingProxy(userServices.stream().findFirst().orElse(null));
         LOGGER.info("Instantiated UserServiceCachingProxy with {}", (userServices.stream().findFirst().orElse(null)));
         return userServiceCachingProxy;
     }
 
+    /**
+     * A bean for the creation of the {@link UserServiceAsyncProxy}
+     *
+     * @param service   the {@link UserService} implementation
+     * @param executor  an async {@link Executor}
+     * @return          an instance of the {@link UserServiceCachingProxy}
+     */
     @Bean
     public UserServiceAsyncProxy asyncUserServiceProxy(@Qualifier("userService") final UserService service,
                                                        @Qualifier("applicationTaskExecutor") final Executor executor) {

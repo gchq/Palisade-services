@@ -60,7 +60,7 @@ public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
 
     @Bean
-    public KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
+    KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
                                                      final ConsumerTopicConfiguration upstreamConfig,
                                                      final Materializer materializer) {
         return new KafkaProducerService(sink, upstreamConfig, materializer);

@@ -24,8 +24,6 @@ import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -43,12 +41,24 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * A service mimicking the Kafka API to the service.
+ * Write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
+ * Intended for debugging only.
+ */
 public class KafkaProducerService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerService.class);
     private final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
 
+    /**
+     * Autowired constructor for the rest controller
+     *
+     * @param upstreamSink   a sink to the upstream topic
+     * @param upstreamConfig the config for the topic (name, partitions, ...)
+     * @param materializer   the akka system materializer
+     */
     public KafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
                                 final ConsumerTopicConfiguration upstreamConfig,
                                 final Materializer materializer) {
@@ -57,6 +67,14 @@ public class KafkaProducerService {
         this.materializer = materializer;
     }
 
+    /**
+     * Takes a list of requests and processes each of them with the given headers.
+     * These requests are each written to kafka using the supplied headers for all of them.
+     *
+     * @param headers  a map of request headers
+     * @param requests a list of requests
+     * @return a {@link ResponseEntity} once all requests have been written to kafka
+     */
     public ResponseEntity<Void> processRequest(final Map<String, String> headers,
                                                final Collection<UserRequest> requests) {
         // Get token from headers

@@ -24,11 +24,19 @@ import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
 
+/**
+ * This acts as a caching layer on top of an implementation of the user-service.
+ */
 @CacheConfig(cacheNames = {"users"})
 public class UserServiceCachingProxy implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceCachingProxy.class);
     private final UserService service;
 
+    /**
+     * Constructor for the {@link UserServiceCachingProxy}
+     *
+     * @param service an implementation of the {@link UserService}
+     */
     public UserServiceCachingProxy(final UserService service) {
         this.service = service;
     }
