@@ -26,6 +26,7 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
@@ -39,7 +40,9 @@ import scala.Function1;
 
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
+import uk.gov.gchq.palisade.service.topicoffset.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.topicoffset.service.TopicOffsetService;
+import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration.Topic;
 
@@ -51,6 +54,14 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
+
+    @Bean
+    KafkaProducerService kafkaProducerService(
+            final Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> upstreamSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        return new KafkaProducerService(upstreamSink, upstreamConfig, materializer);
+    }
 
     @Bean
     Function1<Throwable, Directive> supervisor() {

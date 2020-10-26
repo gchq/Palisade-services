@@ -73,7 +73,7 @@ class TopicOffsetRestControllerTest {
 
     public static final String SERVICE_ENDPOINT_URL = "/api/offset";
     public static final String TEST_REQUEST_TOKEN = "test-request-token";
-    public static final String KEY_NULL_VALUE = "$.keyToNull";
+    public static final String MESSAGE_BODY_KEY = "$";
 
     @BeforeEach
     void setUp() {
@@ -117,7 +117,7 @@ class TopicOffsetRestControllerTest {
         // Then it is accepted by the rest controller
         action.andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) // no message
+                .andExpect(jsonPath(MESSAGE_BODY_KEY).doesNotExist()) // no message
                 .andReturn();
     }
 
@@ -144,7 +144,7 @@ class TopicOffsetRestControllerTest {
         // Then it is accepted by the rest controller
         action.andExpect(status().isAccepted()) //a HTTP 2XX
                 .andDo(print())
-                .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) // no message
+                .andExpect(jsonPath(MESSAGE_BODY_KEY).doesNotExist()) // no message
                 .andReturn();
     }
 
