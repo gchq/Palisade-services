@@ -58,7 +58,7 @@ public class KafkaProducerService {
     }
 
     public ResponseEntity<Void> processRequest(final Map<String, String> headers,
-                                               Collection<UserRequest> requests) {
+                                               final Collection<UserRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));

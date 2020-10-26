@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 
 import javax.naming.NamingEnumeration;

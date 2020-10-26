@@ -17,9 +17,6 @@ package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
-
-import java.util.concurrent.CompletableFuture;
 
 public class NullUserService implements UserService {
 

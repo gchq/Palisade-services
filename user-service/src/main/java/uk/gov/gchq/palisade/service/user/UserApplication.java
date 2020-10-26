@@ -32,8 +32,8 @@ import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
-import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 

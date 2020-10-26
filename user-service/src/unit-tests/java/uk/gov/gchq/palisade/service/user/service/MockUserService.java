@@ -19,11 +19,9 @@ package uk.gov.gchq.palisade.service.user.service;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public class MockUserService extends HashMap<UserId, User> implements UserService {
 

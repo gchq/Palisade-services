@@ -17,10 +17,8 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
 /**
  * <p> The core API for the user service. </p> <p> The responsibility of the user service is to maintain the mapping
