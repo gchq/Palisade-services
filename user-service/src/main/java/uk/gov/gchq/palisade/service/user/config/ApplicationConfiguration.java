@@ -15,11 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.user.config;
 
-import akka.Done;
-import akka.stream.Materializer;
-import akka.stream.javadsl.Sink;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -36,18 +32,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
-import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
@@ -80,13 +72,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std")
     public StdUserPrepopulationFactory userPrepopulationFactory() {
         return new StdUserPrepopulationFactory();
-    }
-
-    @Bean
-    public KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
-                                                     final ConsumerTopicConfiguration upstreamConfig,
-                                                     final Materializer materializer) {
-        return new KafkaProducerService(sink, upstreamConfig, materializer);
     }
 
     @Bean("userService")

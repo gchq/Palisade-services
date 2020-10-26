@@ -26,6 +26,7 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
@@ -40,10 +41,14 @@ import scala.Function1;
 
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
+import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -53,6 +58,13 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
+
+    @Bean
+    public KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
+                                                     final ConsumerTopicConfiguration upstreamConfig,
+                                                     final Materializer materializer) {
+        return new KafkaProducerService(sink, upstreamConfig, materializer);
+    }
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -73,10 +85,10 @@ public class AkkaRunnableGraph {
         return source
                 // Get the user from the userId, keeping track of original message and token
                 .mapAsync(PARALLELISM, (CommittableMessage<String, UserRequest> message) -> {
-                    UserRequest userRequest = message.record().value();
-                    return service.getUser(userRequest).thenApply(
-                            user -> new Pair<>(message, UserResponse.Builder.create(userRequest).withUser(user))
-                    );
+                    Optional<UserRequest> userRequest = Optional.ofNullable(message.record().value());
+                    return userRequest.map(request -> service.getUser(request)
+                            .thenApply(user -> new Pair<>(message, UserResponse.Builder.create(request).withUser(user))))
+                            .orElse(CompletableFuture.completedFuture(new Pair<>(message, null)));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message

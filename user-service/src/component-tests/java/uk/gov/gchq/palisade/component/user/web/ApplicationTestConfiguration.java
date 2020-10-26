@@ -28,9 +28,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
-import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
