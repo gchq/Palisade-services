@@ -17,16 +17,14 @@ package uk.gov.gchq.palisade.service.policy.service;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.Serializable;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * The core API for the policy service.
@@ -37,6 +35,15 @@ import java.util.stream.Collectors;
  * resource (policies added to the system resource would be applied globally).
  */
 public interface PolicyService extends Service {
+
+    Optional<Rules<LeafResource>> getResourceRules(Resource resource);
+
+    Optional<Rules<Serializable>> getRecordRules(Resource resource);
+
+    Optional<Rules<LeafResource>> setResourceRules(Resource resource, Rules<LeafResource> rules);
+
+    Optional<Rules<Serializable>> setRecordRules(Resource resource, Rules<Serializable> rules);
+
 
     /**
      * This method is used to find out if the given user is allowed to access
@@ -51,7 +58,7 @@ public interface PolicyService extends Service {
      * @return an Optional {@link Resource} which is only present if the resource
      *         is accessible
      */
-    <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource);
+//    <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource);
 
     /**
      * This method gets the {@link Policy}s that apply to the resource
@@ -66,32 +73,15 @@ public interface PolicyService extends Service {
     // Either through typing the class  --  <T> PolicyService<T>
     // Or supplying some sort of constructor factory  --  Producer<T>
     // Or passing the class as an argument  --  getPolicy(Resource, Class<? extends T>)
-    <R extends Resource> Optional<Policy> getPolicy(R resource);
+//    <R extends Resource> Optional<Policy> getPolicy(R resource);
 
-    default <R extends Resource> Map<R, Policy> getPolicy(final Collection<R> resources) {
-        return resources.stream()
-                .map(resource -> getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
+//    default <R extends Resource> Map<R, Policy> getPolicy(final Collection<R> resources) {
+//        return resources.stream()
+//                .map(resource -> getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
+//                .flatMap(Optional::stream)
+//                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+//    }
 
-    /**
-     * This method allows for the setting of a policy to a resource.
-     *
-     * @param resource a {@link Resource} to set a policy for
-     * @param policy   the {@link Policy} to apply to this resource
-     * @param <T>      the record type for this resource
-     * @return the {@link Policy} that was added (may be different to what was requested)
-     */
-    <T extends Serializable> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
+    ;
 
-    /**
-     * This method allows for the setting of a policy to a resource type.
-     *
-     * @param type   a resource type to apply a blanket policy to
-     * @param policy the {@link Policy} to apply to this type
-     * @param <T>    the record type for this resource
-     * @return the {@link Policy} that was added (may be different to what was requested)
-     */
-    <T extends Serializable> Policy<T> setTypePolicy(String type, Policy<T> policy);
 }

@@ -22,15 +22,14 @@ import uk.gov.gchq.palisade.policy.HasSensitiveAuthRule;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.PredicateRule;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
-import uk.gov.gchq.palisade.service.policy.service.SimplePolicyService;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,15 +59,13 @@ public class PolicyTestCommon {
 
     // A system that only allows text files to be seen
     public static final SystemResource TXT_SYSTEM = new SystemResource().id("/txt");
-    public static final Policy TXT_POLICY = new Policy<>()
-            .owner(USER)
-            .resourceLevelRule("Resource serialised format is txt", new IsTextResourceRule());
+    public static final Rules<LeafResource> TXT_POLICY = new Rules<LeafResource>()
+            .addRule("Resource serialised format is txt", new IsTextResourceRule());
 
     // A directory that only allows JSON types
     public static final DirectoryResource JSON_DIRECTORY = new DirectoryResource().id("/txt/json").parent(TXT_SYSTEM);
-    public static final Policy JSON_POLICY = new Policy<>()
-            .owner(USER)
-            .resourceLevelRule("Resource type is json", (PredicateRule<Resource>) (resource, user, context) -> resource instanceof LeafResource && ((LeafResource) resource).getType().equals("json"));
+    public static final Rules<LeafResource> JSON_POLICY = new Rules<LeafResource>()
+            .addRule("Resource type is json", (PredicateRule<LeafResource>) (resource, user, context) -> resource.getType().equals("json"));
 
     // A text file containing json data - this should be accessible
     public static final FileResource ACCESSIBLE_JSON_TXT_FILE = new FileResource().id("/txt/json/json.txt").serialisedFormat("txt").type("json").parent(JSON_DIRECTORY);
@@ -79,9 +76,8 @@ public class PolicyTestCommon {
 
     // A sensitive directory that only allows sensitive authorised users
     public static final DirectoryResource SENSITIVE_DIRECTORY = new DirectoryResource().id("/txt/sensitive").parent(TXT_SYSTEM);
-    public static final Policy SENSITIVE_POLICY = new Policy<>()
-            .owner(SENSITIVE_USER)
-            .resourceLevelRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>());
+    public static final Rules<LeafResource> SENSITIVE_POLICY = new Rules<LeafResource>()
+            .addRule("Check user has 'Sensitive' auth", new HasSensitiveAuthRule<>());
 
     // A sensitive text file containing a report of salary information - this is accessible to authorised users only
     public static final FileResource SENSITIVE_TXT_FILE = new FileResource().id("/txt/sensitive/report.txt").serialisedFormat("txt").type("txt").parent(SENSITIVE_DIRECTORY);
@@ -90,10 +86,9 @@ public class PolicyTestCommon {
 
     // A secret directory that allows only secret authorised users
     public static final DirectoryResource SECRET_DIRECTORY = new DirectoryResource().id("/txt/secret").parent(TXT_SYSTEM);
-    public static final Policy SECRET_POLICY = new Policy<>()
-            .owner(SENSITIVE_USER)
-            .resourceLevelRule("Check user has 'Secret' auth", (PredicateRule<Resource>) (resource, user, context) -> user.getAuths().contains("Secret"))
-            .recordLevelPredicateRule("Redact all with 'Testing' purpose", (record, user, context) -> context.getPurpose().equals("Testing"));
+    public static final Rules<LeafResource> SECRET_POLICY = new Rules<LeafResource>()
+            .addRule("Check user has 'Secret' auth", (PredicateRule<LeafResource>) (resource, user, context) -> user.getAuths().contains("Secret"))
+            .addPredicateRule("Redact all with 'Testing' purpose", (record, user, context) -> context.getPurpose().equals("Testing"));
 
     // A secret file - accessible only to the secret user
     public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);
@@ -101,11 +96,10 @@ public class PolicyTestCommon {
     public static final FileResource NEW_FILE = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
 
     // A do-nothing policy to apply to leaf resources
-    public static final Policy PASS_THROUGH_POLICY = new Policy<>()
-            .owner(USER)
-            .resourceLevelRule("Does nothing", new PassThroughRule<>())
-            .recordLevelRule("Does nothing", new PassThroughRule<>());
+    public static final Rules<LeafResource> PASS_THROUGH_POLICY = new Rules<LeafResource>()
+            .addRule("Does nothing", new PassThroughRule<>())
+            .addRule("Does nothing", new PassThroughRule<>());
 
-    public static final PolicyService SERVICE = new SimplePolicyService();
+    public static final PolicyService SERVICE = new NullPolicyService();
     public static final PolicyServiceHierarchyProxy HIERARCHY_POLICY = new PolicyServiceHierarchyProxy(SERVICE);
 }

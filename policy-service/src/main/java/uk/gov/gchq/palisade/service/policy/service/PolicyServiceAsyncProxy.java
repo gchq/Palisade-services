@@ -19,12 +19,9 @@ package uk.gov.gchq.palisade.service.policy.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -49,28 +46,12 @@ public class PolicyServiceAsyncProxy {
         this.executor = executor;
     }
 
-    /**
-     * Async call to the caching canAccess method
-     *
-     * @param <R>      the type of resource (may be a supertype)
-     * @param user     the user requesting access to the resource
-     * @param context  the context for the resource they want to access
-     * @param resource the resource that they want to access
-     * @return the completable future of the cacheable canAccess response
-     */
-    public <R extends Resource> CompletableFuture<Optional<R>> canAccess(final User user, final Context context, final R resource) {
-        LOGGER.debug("Running canAccess from policy cache with values: user {}, context {}, and resource {}", user, context, resource);
-        return CompletableFuture.supplyAsync(() -> service.canAccess(user, context, resource), executor);
+    public CompletableFuture<Rules<LeafResource>> getResourceRules(final LeafResource resource) {
+
+        return CompletableFuture.supplyAsync(() -> service.getResourceRules(resource), executor);
     }
 
-    /**
-     * Async call to the caching getPolicy method
-     *
-     * @param resource the {@link Resource} they want to retrieve the recordRules for
-     * @return the completableFuture containing an Optional of the recordRules from the cacheable getPolicy method
-     */
-    public CompletableFuture<Optional<Policy>> getPolicy(final Resource resource) {
-        LOGGER.debug("Running getPolicy from policy cache with resource {}", resource);
-        return CompletableFuture.supplyAsync(() -> service.getPolicy(resource), executor);
+    public CompletableFuture<Rules<?>> getRecordRules(final LeafResource resource) {
+        return CompletableFuture.supplyAsync(() -> service.getRecordRules(resource), executor);
     }
 }

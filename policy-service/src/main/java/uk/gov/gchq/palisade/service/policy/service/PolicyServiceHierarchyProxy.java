@@ -22,17 +22,15 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.Util;
 import uk.gov.gchq.palisade.resource.ChildResource;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * By having the policies stored in several key value stores we can attach policies
@@ -78,13 +76,8 @@ public class PolicyServiceHierarchyProxy {
         return mergedRules;
     }
 
-    public <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource) {
-        LOGGER.debug("Determining access: {} for user {} with these resources {}", context, user, resource);
-        Optional<R> serviceCanAccess = service.canAccess(user, context, resource);
-        // If the service says we can access the resource naively, check up the resource hierarchy
-        // If all parent, grandparent etc. resources say we can access the resource, then it is accessible
-        Optional<Rules<Resource>> accessRules = serviceCanAccess.flatMap(res -> getHierarchicalRules(res, Policy::getResourceRules));
-        return (Optional<R>) accessRules.map(rule -> Util.applyRulesToItem(resource, user, context, rule));
+    public static <R extends Resource> R applyRulesToResource(User user, R resource, Context context, Rules<R> rules) {
+        return Util.applyRulesToItem(resource, user, context, rules);
     }
 
     /**
@@ -93,17 +86,16 @@ public class PolicyServiceHierarchyProxy {
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
      * @param rulesExtractor The rule type to extract from each policy
-     * @param <T>            The record tpe for this resource
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
      */
-    private <T extends Serializable> Optional<Rules<T>> getHierarchicalRules(final Resource resource, final Function<Policy, Rules<T>> rulesExtractor) {
+    private <R extends Resource> Optional<Rules<Serializable>> getRecordRules(final R resource, final Function<Resource, Optional<Rules<Serializable>>> rulesExtractor) {
         LOGGER.debug("Getting the applicable rules: {}", resource);
-        Optional<Rules<T>> inheritedRules;
+        Optional<Rules<Serializable>> inheritedRules;
         if (resource instanceof ChildResource) {
             // We will also need the policy applied to the parent resource
             LOGGER.debug("resource {} an instance of ChildResource", resource);
-            inheritedRules = getHierarchicalRules(((ChildResource) resource).getParent(), rulesExtractor);
+            inheritedRules = getRecordRules(((ChildResource) resource).getParent(), rulesExtractor);
             LOGGER.debug("Inherited rules {} for resource {}", inheritedRules, resource);
         } else {
             // We are at top of hierarchy
@@ -111,8 +103,7 @@ public class PolicyServiceHierarchyProxy {
             inheritedRules = Optional.empty();
         }
 
-        Optional<Policy> newPolicy = service.getPolicy(resource);
-        Optional<Rules<T>> newRules = newPolicy.map(rulesExtractor);
+        Optional<Rules<Serializable>> newRules = rulesExtractor.apply(resource);
 
         // If both present, merge both
         // If either present, return present
@@ -120,24 +111,58 @@ public class PolicyServiceHierarchyProxy {
         return inheritedRules.map(iRules -> newRules.map(nRules -> mergeRules(iRules, nRules)).or(() -> inheritedRules)).orElse(newRules);
     }
 
-    public Optional<Policy> getPolicy(final Resource resource) {
-        Optional<Rules<Serializable>> optionalRules = getHierarchicalRules(resource, Policy::getRecordRules);
+    /**
+     * This method is used to recursively go up the resource hierarchy ending with the original
+     * data type to extract and merge the policies at each stage of the hierarchy.
+     *
+     * @param resource       A {@link Resource} to get the applicable rules for.
+     * @param rulesExtractor The rule type to extract from each policy
+     * @return An optional {@link Rules} object, which contains the list of rules found
+     * that need to be applied to the resource.
+     */
+    private <R extends Resource> Optional<Rules<LeafResource>> getResourceRules(final R resource, final Function<Resource, Optional<Rules<LeafResource>>> rulesExtractor) {
+        LOGGER.debug("Getting the applicable rules: {}", resource);
+        Optional<Rules<LeafResource>> inheritedRules;
+        if (resource instanceof ChildResource) {
+            // We will also need the policy applied to the parent resource
+            LOGGER.debug("resource {} an instance of ChildResource", resource);
+            inheritedRules = getResourceRules(((ChildResource) resource).getParent(), rulesExtractor);
+            LOGGER.debug("Inherited rules {} for resource {}", inheritedRules, resource);
+        } else {
+            // We are at top of hierarchy
+            LOGGER.debug("resource {} NOT an instance of ChildResource (top of hierarchy)", resource);
+            inheritedRules = Optional.empty();
+        }
 
-        return Optional.ofNullable(optionalRules
-                .map(rules -> new Policy<>().recordRules(rules))
-                .filter(policy -> !policy.getRecordRules().getRules().isEmpty())
-                .orElseThrow(() -> new NoSuchPolicyException("No Policy Found")));
+        Optional<Rules<LeafResource>> newRules = rulesExtractor.apply(resource);
+
+        // If both present, merge both
+        // If either present, return present
+        // If none present, return Optional.empty()
+        return inheritedRules.map(iRules -> newRules.map(nRules -> mergeRules(iRules, nRules)).or(() -> inheritedRules)).orElse(newRules);
     }
 
-    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        requireNonNull(resource, "type cannot be null");
-        LOGGER.debug("Setting Resource policy {} to resource {}", policy, resource);
-        return service.setResourcePolicy(resource, policy);
+    public Rules<Serializable> getRecordRules(final LeafResource resource) {
+        var optionalRules = getRecordRules(resource, service::getRecordRules);
+
+        return optionalRules
+                .filter(rules -> !rules.getRules().isEmpty())
+                .orElseThrow(() -> new NoSuchPolicyException("No Policy Found"));
     }
 
-    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
-        requireNonNull(type, "type cannot be null");
-        LOGGER.debug("Setting Type policy {} to data type {}", policy, type);
-        return service.setTypePolicy(type, policy);
+    public Rules<LeafResource> getResourceRules(final LeafResource resource) {
+        Optional<Rules<LeafResource>> optionalRules = getResourceRules(resource, service::getResourceRules);
+
+        return optionalRules
+                .filter(rules -> !rules.getRules().isEmpty())
+                .orElseThrow(() -> new NoSuchPolicyException("No Policy Found"));
+    }
+
+    public void setRecordRules(final Resource resource, final Rules<Serializable> rules) {
+        this.service.setRecordRules(resource, rules);
+    }
+
+    public void setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
+        this.service.setResourceRules(resource, rules);
     }
 }

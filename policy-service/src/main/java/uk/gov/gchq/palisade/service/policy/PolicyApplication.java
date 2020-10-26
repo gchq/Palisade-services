@@ -30,15 +30,21 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
+import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -113,9 +119,15 @@ public class PolicyApplication {
         LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
                 .peek(e -> LOGGER.info("pre-pop stream {}", e))
-                .map(prepopulation -> prepopulation.build(userConfig.getUsers(), resourceConfig.getResources()))
-                .peek(entry -> LOGGER.debug("pre-pop entry {}", entry))
-                .forEach(entry -> service.setResourcePolicy(entry.getKey(), entry.getValue()));
+                .forEach((PolicyPrepopulationFactory factory) -> {
+                    //Build Resource Rules
+                    Entry<Resource, Rules<LeafResource>> resourceMap = factory.buildResourceRules(resourceConfig.getResources());
+                    service.setResourceRules(resourceMap.getKey(), resourceMap.getValue());
+
+                    //Build Record Rules
+                    Entry<Resource, Rules<Serializable>> recordMap = factory.buildRecordRules(resourceConfig.getResources());
+                    service.setRecordRules(recordMap.getKey(), recordMap.getValue());
+                });
     }
 
     /**

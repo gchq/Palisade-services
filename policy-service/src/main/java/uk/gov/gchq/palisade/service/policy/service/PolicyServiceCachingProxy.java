@@ -19,14 +19,12 @@ package uk.gov.gchq.palisade.service.policy.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.request.Policy;
+import uk.gov.gchq.palisade.rule.Rules;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -35,12 +33,8 @@ import java.util.Optional;
  * This acts as a caching layer on top of an implementation of a policy service. This does not have any hierarchy logic
  * as that is handled before it reaches caching. In this way, a hierarchical traversal for policies is more
  * cache-friendly.
- * The three caches are used as follows:
- * - resourcePolicy is a map of Resources to Policies, another proxy may query for each parent resource etc.
- * - typePolicy is a map of Types to Policies
- * - accessPolicy is a map of CanAccessRequests (or equivalent of) to an Optional (available) Resource
  */
-@CacheConfig(cacheNames = {"resourcePolicy, typePolicy, accessPolicy"})
+@CacheConfig(cacheNames = {"resourceRules, recordRules"})
 public class PolicyServiceCachingProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceCachingProxy.class);
     private final PolicyService service;
@@ -49,33 +43,32 @@ public class PolicyServiceCachingProxy implements PolicyService {
         this.service = service;
     }
 
-    @Cacheable(value = "accessPolicy", key = "''.concat(#resource.getId()).concat('-').concat(#context.hashCode()).concat('-').concat(#user.hashCode())")
-    public <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource) {
-        LOGGER.info("Key triplet {}-{}-{} not found in cache", user.hashCode(), context.hashCode(), resource.hashCode());
-        LOGGER.debug("Cache miss for canAccess user {}, resource {}, context {}", user.getUserId(), resource.getId(), context);
-        return service.canAccess(user, context, resource);
+    @Cacheable(value = "resourceRules", key = "#resource.id")
+    public Optional<Rules<LeafResource>> getResourceRules(final Resource resource) {
+        LOGGER.debug("Cache miss for resourceId {}", resource.getId());
+        return service.getResourceRules(resource);
     }
 
-    @Cacheable(value = "resourcePolicy", key = "#resource.id")
-    public Optional<Policy> getPolicy(final Resource resource) {
+    @CachePut(value = "resourceRules", key = "#resource.id")
+    public Optional<Rules<LeafResource>> setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
+        LOGGER.info("ResourceId for {} with policy {} added to cache", resource, rules);
+        LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
+        return service.setResourceRules(resource, rules);
+    }
+
+    @Cacheable(value = "recordRules", key = "#resource.id")
+    public Optional<Rules<Serializable>> getRecordRules(final Resource resource) {
         LOGGER.info("ResourceId for resource {} not found in cache", resource);
         LOGGER.debug("Cache miss for resourceId {}", resource.getId());
-        return service.getPolicy(resource);
+        return service.getRecordRules(resource);
     }
 
-    @CachePut(value = "resourcePolicy", key = "#resource.id")
-    @CacheEvict(value = "accessPolicy")
-    public <T extends Serializable> Policy<T> setResourcePolicy(final Resource resource, final Policy<T> policy) {
-        LOGGER.info("ResourceId for {} with policy {} added to cache", resource, policy);
-        LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), policy.getMessage());
-        return service.setResourcePolicy(resource, policy);
+    @CachePut(value = "recordRules", key = "#resource.id")
+    public Optional<Rules<Serializable>> setRecordRules(final Resource resource, final Rules<Serializable> rules) {
+        LOGGER.info("ResourceId for resource {} not found in cache", resource);
+        LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
+        return service.setRecordRules(resource, rules);
     }
 
-    @CachePut(value = "typePolicy", key = "#type")
-    @CacheEvict(value = "accessPolicy")
-    public <T extends Serializable> Policy<T> setTypePolicy(final String type, final Policy<T> policy) {
-        LOGGER.info("Type {} with policy {} added to cache", type, policy);
-        LOGGER.debug("Cache add for type {} with policy message {}", type, policy.getMessage());
-        return service.setTypePolicy(type, policy);
-    }
+
 }

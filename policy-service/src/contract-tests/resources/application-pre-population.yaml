@@ -32,10 +32,8 @@ population:
   policyProvider: std
   policies:
   - resource: /test/noRulesResource
-    owner: noResourceRulesUser
 
   - resource: /test/resourceId
-    owner: test-user-id
     resourceRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
     recordRules:

@@ -39,13 +39,12 @@ import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -82,8 +81,9 @@ public class AkkaRunnableGraph {
                 .mapAsync(PARALLELISM, messageAndRequest -> messageAndRequest.second()
                         // If is a real message, not start or end of stream messages then check the resource level rules
                         .map(policyRequest -> service
-                                .canAccess(policyRequest.getUser(), policyRequest.getContext(), policyRequest.getResource())
-                                .thenApply(accessible -> accessible.map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
+                                .getResourceRules(policyRequest.getResource())
+                                .thenApply(rules -> PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules))
+                                .thenApply(resource -> Optional.ofNullable(resource).map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
                         )
                         // If is a START/END of stream then treat as accessible
                         .orElse(CompletableFuture.completedFuture(Optional.of(new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), null)))))
@@ -96,8 +96,7 @@ public class AkkaRunnableGraph {
                 // be record level rules. Either list may be empty, but they should at least be present
                 .mapAsync(PARALLELISM, (Tuple3<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>, LeafResource> messageRequestResource) -> messageRequestResource.t2()
                         .map((PolicyRequest request) ->
-                                service.getPolicy(request.getResource())
-                                        .thenApply(policy -> policy.get().getRecordRules())
+                                service.getRecordRules(request.getResource())
                                         .thenApply(rules -> PolicyResponse.Builder.create(request).withResource(messageRequestResource.t3()).withRules(rules)))
                         .orElse(CompletableFuture.completedFuture(null))
                         .thenApply(r -> new Pair<>(messageRequestResource.t1(), r)))
