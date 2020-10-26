@@ -18,7 +18,10 @@ spring:
       repositories:
         enabled: true
   autoconfigure:
-    exclude: []
+    # Exclude hibernate for redis
+    exclude:
+    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
   # redis.host/port or redis.cluster.nodes configured by k8s
 
 # TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
