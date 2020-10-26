@@ -15,9 +15,7 @@
 
 spring:
   autoconfigure:
-  exclude:
-    - org.springframework.boot.autoconfigure.cache.CacheProperties.Caffeine
-
+    exclude: []
   cache:
     type: redis
     redis:
