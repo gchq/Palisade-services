@@ -22,6 +22,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyTestCommon;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
@@ -76,11 +78,11 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         // Given - there are no policies for the requested resource
         // NEW_FILE
 
-        // When - a policy is requested on a resource
-        Optional<Policy> policy = HIERARCHY_POLICY.getPolicy(NEW_FILE);
+        //When - a policy is requested on a resource
+        Exception NoSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getPolicy(NEW_FILE), "should throw NoSuchPolicyException");
 
-        // Then - no such policy was retrieved
-        assertThat(policy).isEmpty();
+        //Then an error is thrown
+        assertThat("No Policy Found").isEqualTo(NoSuchPolicy.getMessage());
     }
 
     @Test

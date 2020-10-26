@@ -23,12 +23,6 @@ population:
     roles:
       role
 
-  - userId: onlyRecordRulesUser
-    auths:
-      auth
-    roles:
-      role
-
   - userId: test-user-id
     auths:
       auth
@@ -39,14 +33,6 @@ population:
   policies:
   - resource: /test/noRulesResource
     owner: noResourceRulesUser
-    # no rules - should throw exception
-    recordRules: { }
-
-  - resource: /test/onlyRecordRulesResource
-    owner: onlyRecordRulesUser
-    # no rules - should throw exception
-    recordRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
 
   - resource: /test/resourceId
     owner: test-user-id
@@ -58,6 +44,13 @@ population:
   resourceProvider: std
   resources:
   - resourceId: /test/resourceId
+    rootId: test
+    connectionDetail: test-data-service
+    attributes:
+      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
+      serialisedFormat: avro
+
+  - resourceId: /test/noRulesResource
     rootId: test
     connectionDetail: test-data-service
     attributes:

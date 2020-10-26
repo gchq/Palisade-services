@@ -45,6 +45,7 @@ import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -96,7 +97,7 @@ public class AkkaRunnableGraph {
                 .mapAsync(PARALLELISM, (Tuple3<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>, LeafResource> messageRequestResource) -> messageRequestResource.t2()
                         .map((PolicyRequest request) ->
                                 service.getPolicy(request.getResource())
-                                        .thenApply(policy -> policy.orElseThrow(() -> new NoSuchPolicyException("No Policy Found")).getRecordRules())
+                                        .thenApply(policy -> policy.get().getRecordRules())
                                         .thenApply(rules -> PolicyResponse.Builder.create(request).withResource(messageRequestResource.t3()).withRules(rules)))
                         .orElse(CompletableFuture.completedFuture(null))
                         .thenApply(r -> new Pair<>(messageRequestResource.t1(), r)))

@@ -63,16 +63,26 @@ public class ContractTestData {
     }
 
     public static final UserId USER_ID = new UserId().id("test-user-id");
+    public static final UserId NO_RESOURCE_RULES_USER_ID = new UserId().id("noResourceRulesUser");
     public static final String RESOURCE_ID = "/test/resourceId";
+    public static final String NO_RESOURCE_RULES_RESOURCE_ID = "/test/noRulesResource";
     public static final String PURPOSE = "test-purpose";
+    public static final String NO_RESOURCE_RULES_PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
+    public static final Context NO_RESOURCE_RULES_CONTEXT = new Context().purpose(NO_RESOURCE_RULES_PURPOSE);
     public static final User USER = new User().userId(USER_ID).roles("role").auths("auth");
-    public static final ConnectionDetail CONNECTION_DETAIL = new SimpleConnectionDetail().serviceName("data-service");
+    public static final User NO_RESOURCE_RULES_USER = new User().userId(NO_RESOURCE_RULES_USER_ID).roles("role").auths("auth");
+    public static final ConnectionDetail CONNECTION_DETAIL = new SimpleConnectionDetail().serviceName("test-data-service");
     public static final LeafResource RESOURCE = (LeafResource) ResourceBuilder.create(RESOURCE_ID);
+    public static final LeafResource NO_RESOURCE_RULES_RESOURCE = (LeafResource) ResourceBuilder.create(NO_RESOURCE_RULES_RESOURCE_ID);
     public static final PolicyRequest POLICY_REQUEST;
+    public static final PolicyRequest NO_RESOURCE_RULES_POLICY_REQUEST;
     public static final JsonNode REQUEST_NODE;
+    public static final JsonNode NO_RESOURCE_RULES_REQUEST_NODE;
     public static final PolicyRequest REQUEST_OBJ;
+    public static final PolicyRequest NO_RESOURCE_RULES_REQUEST_OBJ;
     public static final String REQUEST_JSON;
+    public static final String NO_RESOURCE_RULES_REQUEST_JSON;
 
     static {
         RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
@@ -82,11 +92,20 @@ public class ContractTestData {
                 .withContext(CONTEXT)
                 .withUser(USER)
                 .withResource(RESOURCE);
+
+        NO_RESOURCE_RULES_RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
+        NO_RESOURCE_RULES_POLICY_REQUEST = PolicyRequest.Builder.create()
+                .withUserId(NO_RESOURCE_RULES_USER_ID.getId())
+                .withResourceId(NO_RESOURCE_RULES_RESOURCE.getId())
+                .withContext(NO_RESOURCE_RULES_CONTEXT)
+                .withUser(NO_RESOURCE_RULES_USER)
+                .withResource(NO_RESOURCE_RULES_RESOURCE);
     }
 
     static {
         try {
             REQUEST_JSON = MAPPER.writeValueAsString(POLICY_REQUEST);
+            NO_RESOURCE_RULES_REQUEST_JSON = MAPPER.writeValueAsString(NO_RESOURCE_RULES_POLICY_REQUEST);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse PolicyRequest test data", e);
         }
@@ -95,17 +114,20 @@ public class ContractTestData {
     static {
         try {
             REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
+            NO_RESOURCE_RULES_REQUEST_NODE = MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_JSON);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
         try {
             REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, PolicyRequest.class);
+            NO_RESOURCE_RULES_REQUEST_OBJ = MAPPER.treeToValue(NO_RESOURCE_RULES_REQUEST_NODE, PolicyRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     }
 
     public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
+    public static final Function<Integer, String> NO_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(NO_RESOURCE_RULES_REQUEST_JSON, i, i);
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
@@ -113,9 +135,23 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
     };
+    public static final Function<Integer, JsonNode> NO_RESOURCE_RULES_REQUEST_FACTORY_NODE = i -> {
+        try {
+            return MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_FACTORY_JSON.apply(i));
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse contract test data", e);
+        }
+    };
     public static final Function<Integer, PolicyRequest> REQUEST_FACTORY_OBJ = i -> {
         try {
             return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), PolicyRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
+        }
+    };
+    public static final Function<Integer, PolicyRequest> NO_RESOURCE_RULES_REQUEST_FACTORY_OBJ = i -> {
+        try {
+            return MAPPER.treeToValue(NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), PolicyRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
@@ -133,4 +169,7 @@ public class ContractTestData {
     // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> NO_RESOURCE_RULES_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

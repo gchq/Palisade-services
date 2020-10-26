@@ -34,8 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
  * This should return 200 OK if the service is healthy.
  */
-@SpringBootTest(classes = {PolicyApplication.class, PolicyTestConfiguration.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"caffeine", "akka-test"})
+@SpringBootTest(classes = {PolicyApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"akka-test"})
 class HealthActuatorContractTest {
 
     @Autowired
