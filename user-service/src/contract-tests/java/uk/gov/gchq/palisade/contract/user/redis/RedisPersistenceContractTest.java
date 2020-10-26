@@ -48,7 +48,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
@@ -77,7 +77,7 @@ class RedisPersistenceContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
 
     @Autowired
-    private CacheableUserServiceProxy userService;
+    private UserServiceCachingProxy userService;
 
     @Test
     void testAddedUserIsRetrievable() {

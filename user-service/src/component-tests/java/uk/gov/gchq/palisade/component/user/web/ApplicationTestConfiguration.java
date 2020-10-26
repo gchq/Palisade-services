@@ -27,10 +27,10 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
-import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
-import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
@@ -41,17 +41,21 @@ import java.util.concurrent.Executor;
 public class ApplicationTestConfiguration implements AsyncConfigurer {
 
     @Bean
-    public AsyncUserServiceProxy asyncUserServiceProxy(@Qualifier("ignoringSink") final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
-                                                       final ConsumerTopicConfiguration upstreamConfig,
-                                                       final Materializer materializer,
-                                                       final CacheableUserServiceProxy service,
-                                                       final Executor executor) {
-        return new AsyncUserServiceProxy(sink, upstreamConfig, materializer, service, executor);
+    public KafkaProducerService kafkaProducerService(@Qualifier("ignoringSink") final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
+                                                     final ConsumerTopicConfiguration upstreamConfig,
+                                                     final Materializer materializer) {
+        return new KafkaProducerService(sink, upstreamConfig, materializer);
     }
 
     @Bean
-    public CacheableUserServiceProxy cacheableUserServiceProxy() {
-        return new CacheableUserServiceProxy(new NullUserService());
+    public UserServiceAsyncProxy userServiceAsyncProxy(final UserServiceCachingProxy service,
+                                                       final Executor executor) {
+        return new UserServiceAsyncProxy(service, executor);
+    }
+
+    @Bean
+    public UserServiceCachingProxy cacheableUserServiceProxy() {
+        return new UserServiceCachingProxy(new NullUserService());
     }
 
     @Override

@@ -40,8 +40,7 @@ import scala.Function1;
 
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.model.UserResponse;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
-import uk.gov.gchq.palisade.service.user.service.UserService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
@@ -66,7 +65,7 @@ public class AkkaRunnableGraph {
             final Sink<Envelope<String, UserResponse, Committable>, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
-            @Qualifier("asyncUserServiceProxy") final AsyncUserServiceProxy service) {
+            @Qualifier("asyncUserServiceProxy") final UserServiceAsyncProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
@@ -75,8 +74,8 @@ public class AkkaRunnableGraph {
                 // Get the user from the userId, keeping track of original message and token
                 .mapAsync(PARALLELISM, (CommittableMessage<String, UserRequest> message) -> {
                     UserRequest userRequest = message.record().value();
-                    return service.getUser(userRequest).thenApply(user ->
-                            new Pair<>(message, UserResponse.Builder.create(userRequest).withUser(user))
+                    return service.getUser(userRequest).thenApply(
+                            user -> new Pair<>(message, UserResponse.Builder.create(userRequest).withUser(user))
                     );
                 })
 

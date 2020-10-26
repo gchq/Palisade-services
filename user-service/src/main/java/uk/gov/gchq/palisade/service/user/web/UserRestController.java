@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.user.web;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,14 +39,14 @@ import java.util.Map;
 @RequestMapping(path = "/api")
 public class UserRestController {
 
-    private final AsyncUserServiceProxy service;
+    private final KafkaProducerService service;
 
     /**
      * Autowired constructor for the rest controller
      *
      * @param service the service used to process a {@link UserRequest}
      */
-    public UserRestController(final AsyncUserServiceProxy service) {
+    public UserRestController(final KafkaProducerService service) {
         this.service = service;
     }
 

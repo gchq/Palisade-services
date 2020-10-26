@@ -37,11 +37,12 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
@@ -81,21 +82,25 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserPrepopulationFactory();
     }
 
+    @Bean
+    public KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
+                                                     final ConsumerTopicConfiguration upstreamConfig,
+                                                     final Materializer materializer) {
+        return new KafkaProducerService(sink, upstreamConfig, materializer);
+    }
+
     @Bean("userService")
-    public CacheableUserServiceProxy cacheableUserServiceProxy(final Set<UserService> userServices) {
-        CacheableUserServiceProxy cacheableUserServiceProxy = new CacheableUserServiceProxy(userServices.stream().findFirst().orElse(null));
-        LOGGER.info("Instantiated CacheableUserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
-        return cacheableUserServiceProxy;
+    public UserServiceCachingProxy cacheableUserServiceProxy(final Set<UserService> userServices) {
+        UserServiceCachingProxy userServiceCachingProxy = new UserServiceCachingProxy(userServices.stream().findFirst().orElse(null));
+        LOGGER.info("Instantiated UserServiceCachingProxy with {}", (userServices.stream().findFirst().orElse(null)));
+        return userServiceCachingProxy;
     }
 
     @Bean
-    public AsyncUserServiceProxy asyncUserServiceProxy(@Qualifier("plainRequestSink") final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
-                                                       final ConsumerTopicConfiguration upstreamConfig,
-                                                       final Materializer materializer,
-                                                       @Qualifier("userService") final UserService service,
+    public UserServiceAsyncProxy asyncUserServiceProxy(@Qualifier("userService") final UserService service,
                                                        @Qualifier("applicationTaskExecutor") final Executor executor) {
         LOGGER.info("Instantiated AsyncUserServiceProxy with {}", service.getClassName());
-        return new AsyncUserServiceProxy(sink, upstreamConfig, materializer, service, executor);
+        return new UserServiceAsyncProxy(service, executor);
     }
 
     @Bean(name = "null-user-service")

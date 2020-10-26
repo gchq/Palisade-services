@@ -73,7 +73,7 @@ import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.StreamMarker;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
@@ -153,12 +153,10 @@ class KafkaContractTest {
     }
 
     @SpyBean
-    private CacheableUserServiceProxy service;
+    private UserServiceCachingProxy service;
 
     @Autowired
     private TestRestTemplate restTemplate;
-    @Autowired
-    private KafkaContainer kafkaContainer;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -183,7 +181,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -193,7 +191,7 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092");
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
@@ -252,7 +250,7 @@ class KafkaContractTest {
         ConsumerSettings<String, UserRequest> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.requestKeyDeserializer(), SerDesConfig.requestValueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, UserRequest>> probe = Consumer
@@ -296,7 +294,7 @@ class KafkaContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "caffeine", "testuser");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "caffeine", "testuser", "debug");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

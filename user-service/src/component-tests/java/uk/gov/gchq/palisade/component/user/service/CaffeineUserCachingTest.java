@@ -31,7 +31,7 @@ import uk.gov.gchq.palisade.component.user.KafkaTestConfiguration;
 import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CaffeineUserCachingTest {
 
     @Autowired
-    private AsyncUserServiceProxy userService;
+    private UserServiceAsyncProxy userService;
 
     @Autowired
     private CacheManager cacheManager;

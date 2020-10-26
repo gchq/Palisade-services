@@ -24,13 +24,11 @@ import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.apache.kafka.common.protocol.types.Field.Str;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
@@ -42,41 +40,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
-/**
- * An asynchronous service for processing a cacheable method.
- */
-public class AsyncUserServiceProxy {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncUserServiceProxy.class);
+public class KafkaProducerService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerService.class);
     private final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
-    private final Executor executor;
-    private final UserService service;
 
-    /**
-     * Constructor for the {@link AsyncUserServiceProxy}
-     *
-     * @param upstreamSink       a sink to the upstream topic
-     * @param upstreamConfig     the config for the topic (name, partitions, ...)
-     * @param materializer       the akka system materializer
-     * @param service            the {@link UserService} implementation
-     * @param executor           the {@link Executor} for the service
-     */
-    public AsyncUserServiceProxy(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
-                                 final ConsumerTopicConfiguration upstreamConfig,
-                                 final Materializer materializer,
-                                 final UserService service,
-                                 final Executor executor) {
+    public KafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> upstreamSink,
+                                final ConsumerTopicConfiguration upstreamConfig,
+                                final Materializer materializer) {
         this.upstreamSink = upstreamSink;
         this.upstreamConfig = upstreamConfig;
         this.materializer = materializer;
-        this.service = service;
-        this.executor = executor;
     }
 
     public ResponseEntity<Void> processRequest(final Map<String, String> headers,
@@ -106,15 +84,5 @@ public class AsyncUserServiceProxy {
 
         // Return results
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    public CompletableFuture<User> getUser(final UserRequest userRequest) {
-        LOGGER.debug("Getting user '{}' from cache", userRequest.getUserId());
-        return CompletableFuture.supplyAsync(() -> service.getUser(userRequest.userId), executor);
-    }
-
-    public User addUser(final User user) {
-        LOGGER.debug("Adding user '{}' to cache", user.getUserId().getId());
-        return service.addUser(user);
     }
 }

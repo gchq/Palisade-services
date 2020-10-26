@@ -25,11 +25,11 @@ import org.springframework.cache.annotation.Cacheable;
 import uk.gov.gchq.palisade.User;
 
 @CacheConfig(cacheNames = {"users"})
-public class CacheableUserServiceProxy implements UserService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CacheableUserServiceProxy.class);
+public class UserServiceCachingProxy implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceCachingProxy.class);
     private final UserService service;
 
-    public CacheableUserServiceProxy(final UserService service) {
+    public UserServiceCachingProxy(final UserService service) {
         this.service = service;
     }
 

@@ -24,12 +24,14 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.user.model.StreamMarker;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -67,12 +69,22 @@ public class ContractTestData {
     public static final ProducerRecord<String, JsonNode> START_RECORD = new ProducerRecord<String, JsonNode>("request", 0, null, null, START_HEADERS);
     public static final ProducerRecord<String, JsonNode> END_RECORD = new ProducerRecord<String, JsonNode>("request", 0, null, null, END_HEADERS);
 
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}}}";
+    public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
+        try {
+            return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse contract test data", e);
+        }
+    };
+    public static final Function<Integer, UserRequest> REQUEST_FACTORY_OBJ = i -> {
+        try {
+            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), UserRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
+        }
+    };
+
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> {
-                try {
-                    return new ProducerRecord<String, JsonNode>("request", 0, null, MAPPER.readTree(REQUEST_JSON), REQUEST_HEADERS);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            .map(i -> new ProducerRecord<String, JsonNode>("request", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

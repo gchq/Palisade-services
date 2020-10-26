@@ -36,18 +36,15 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.AsyncUserServiceProxy;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.CacheableUserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -63,14 +60,14 @@ class UserRestControllerTest {
     private final Topic mockTopic = Mockito.mock(Topic.class);
     private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
     private final UserService service = Mockito.mock(UserService.class);
-    private final CacheableUserServiceProxy cacheProxy = new CacheableUserServiceProxy(service);
+    private final UserServiceCachingProxy cacheProxy = new UserServiceCachingProxy(service);
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
     public void setup() {
-        logger = (Logger) LoggerFactory.getLogger(CacheableUserServiceProxy.class);
+        logger = (Logger) LoggerFactory.getLogger(UserServiceCachingProxy.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
