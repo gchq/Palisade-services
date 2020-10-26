@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -33,13 +32,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaRunnableGraph;
-import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
 
-import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
