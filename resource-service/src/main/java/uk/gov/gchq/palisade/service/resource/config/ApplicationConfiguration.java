@@ -38,8 +38,6 @@ import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
-import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
-import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
 import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
@@ -120,17 +118,13 @@ public class ApplicationConfiguration {
      *
      * @param completenessRepository     the completeness repository to use, storing whether persistence will return a response for any given request
      * @param resourceRepository         the resource repository to use, a store of each available {@link LeafResource} and its parents
-     * @param typeRepository             the type repository to use, a one-to-many relation of types to resource ids
-     * @param serialisedFormatRepository the serialisedFormat repository to use, a one-to-many relation of serialisedFormats to resource ids
      * @return a {@link JpaPersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
      */
     @Bean(name = "jpa-persistence")
     public JpaPersistenceLayer persistenceLayer(
             final CompletenessRepository completenessRepository,
-            final ResourceRepository resourceRepository,
-            final TypeRepository typeRepository,
-            final SerialisedFormatRepository serialisedFormatRepository) {
-        return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
+            final ResourceRepository resourceRepository) {
+        return new JpaPersistenceLayer(completenessRepository, resourceRepository);
     }
 
     /**

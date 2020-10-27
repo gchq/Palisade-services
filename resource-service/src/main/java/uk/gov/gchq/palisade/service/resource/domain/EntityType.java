@@ -21,7 +21,5 @@ package uk.gov.gchq.palisade.service.resource.domain;
  * Used when persisting information about resources into a backing store
  */
 public enum EntityType {
-    RESOURCE,
-    TYPE,
-    FORMAT
+    RESOURCE
 }

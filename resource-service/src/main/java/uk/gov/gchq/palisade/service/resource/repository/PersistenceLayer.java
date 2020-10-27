@@ -37,27 +37,7 @@ public interface PersistenceLayer {
      * Optional.empty if no such information has been persisted
      * nb. the {@link Stream} may still be empty if this resourceId is an empty directory
      */
-    Optional<Stream<LeafResource>> getResourcesById(String resourceId);
-
-    /**
-     * Given a type, return all leaf resources of that type
-     *
-     * @param type the type to query
-     * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     * Optional.empty if no such information has been persisted
-     * nb. the {@link Stream} may still be empty if this type simply has no resources matching it
-     */
-    Optional<Stream<LeafResource>> getResourcesByType(String type);
-
-    /**
-     * Given a serialised format, return all leaf resources of that serialised format
-     *
-     * @param serialisedFormat the serialised format to query
-     * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     * Optional.empty if no such information has been persisted
-     * nb. the {@link Stream} may still be empty if this serialised format simply has no resources matching it
-     */
-    Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
+    Optional<LeafResource> getResourcesById(String resourceId);
 
     /**
      * Add a {@link Stream} of {@link LeafResource}s to persistence for a given resourceId
@@ -67,28 +47,7 @@ public interface PersistenceLayer {
      * @param resources      the resource stream returned
      * @return a new stream which will persist each resource as it is consumed
      */
-    Stream<LeafResource> withPersistenceById(String rootResourceId, Stream<LeafResource> resources);
-
-    /**
-     * Add a {@link Stream} of {@link LeafResource}s to persistence for a given type
-     * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
-     *
-     * @param type      the type that was queried to return this stream of resources
-     * @param resources the resource stream returned
-     * @return a new stream which will persist each resource as it is consumed
-     */
-    Stream<LeafResource> withPersistenceByType(String type, Stream<LeafResource> resources);
-
-    /**
-     * Add a {@link Stream} of {@link LeafResource}s to persistence for a given serialised format
-     * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
-     *
-     * @param serialisedFormat the serialised format that was queried to return this stream of resources
-     * @param resources        the resource stream returned
-     * @return a new stream which will persist each resource as it is consumed
-     */
-    Stream<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, Stream<LeafResource> resources);
-
+    LeafResource withPersistenceById(String rootResourceId, LeafResource resources);
 
     /**
      * Add a new resource that has been created during runtime to the persistence store
