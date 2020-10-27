@@ -38,7 +38,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
+import uk.gov.gchq.palisade.service.resource.model.ResourceRequest.Builder;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.Token;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
@@ -76,21 +78,19 @@ public class AkkaRunnableGraph {
                 // Extract token from message, keeping track of original message
                 .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
 
-                // Store authorised request in persistence, keeping track of original message and token
+                // Get the resources(s) using the resourceId
                 .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, ResourceRequest>, String> messageAndToken) -> {
                     ResourceRequest request = messageAndToken.first().record().value();
-                    return service.getResourcesById(messageAndToken.second(), request)
-                            .thenApply(ignored -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), request));
+                    return service.getResourcesById(request)
+                            .thenApply(resource -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), resource));
                 })
 
-                // Mask resource attributes, keeping track of original message and token
-                .map(messageTokenRequest -> new Tuple3<>(messageTokenRequest.t1(), messageTokenRequest.t2(), service.maskResourceAttributes(messageTokenRequest.t3())))
-
                 // Build producer record, copying the partition, keeping track of original message
-                .map((Tuple3<CommittableMessage<String, ResourceRequest>, String, ResourceResponse> messageTokenResponse) -> {
-                    ConsumerRecord<String, ResourceRequest> requestRecord = messageTokenResponse.t1().record();
+                .map((Tuple3<CommittableMessage<String, ResourceRequest>, String, LeafResource> messageTokenResource) -> {
+                    ConsumerRecord<String, ResourceRequest> requestRecord = messageTokenResource.t1().record();
+                    ResourceResponse response = ResourceResponse.Builder.create(requestRecord.value()).withResource(messageTokenResource.t3());
                     // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-                    return new Pair<>(messageTokenResponse.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageTokenResponse.t3(), requestRecord.headers()));
+                    return new Pair<>(messageTokenResource.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), response, requestRecord.headers()));
                 })
 
                 // Build producer message, applying the committable pass-thru consuming the original message

@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -106,19 +107,13 @@ public class StreamingResourceServiceProxy {
     }
 
     @Transactional
-    public void getResourcesById(final ResourceRequest resourceRequest) {
+    public CompletableFuture<LeafResource> getResourcesById(final ResourceRequest resourceRequest) {
         // Validate resourceId is a valid and normalised URI
         Resource normalisedResourceWithId = ResourceBuilder.create(resourceRequest.resourceId);
         String normalisedId = normalisedResourceWithId.getId();
         // Try first from persistence
         LOGGER.info(STORE);
-        LeafResource resourceStream = persistence.getResourcesById(normalisedId)
-                // Otherwise call out to resource service
-                .orElseGet(() -> {
-                    LOGGER.info(EMPTY);
-                    // Persist returned resources as the stream is consumed
-                    return persistence.withPersistenceById(normalisedId, delegate.getResourcesById(normalisedId));
-                });
+        return CompletableFuture.completedFuture(persistence.withPersistenceById(normalisedId, delegate.getResourcesById(normalisedId)));
     }
 
     @Transactional
