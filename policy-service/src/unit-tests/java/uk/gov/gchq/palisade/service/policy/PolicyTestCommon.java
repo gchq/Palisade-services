@@ -27,9 +27,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.PredicateRule;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
-import uk.gov.gchq.palisade.service.policy.service.PolicyService;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,13 +90,10 @@ public class PolicyTestCommon {
     // A secret file - accessible only to the secret user
     public static final FileResource SECRET_TXT_FILE = new FileResource().id("/txt/secret/secrets.txt").serialisedFormat("txt").type("txt").parent(SECRET_DIRECTORY);
 
-    public static final FileResource NEW_FILE = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
+    public static final LeafResource NEW_FILE = new FileResource().id("/new/file.exe").serialisedFormat("exe").type("elf").parent(new SystemResource().id("/new"));
 
     // A do-nothing policy to apply to leaf resources
     public static final Rules<LeafResource> PASS_THROUGH_POLICY = new Rules<LeafResource>()
             .addRule("Does nothing", new PassThroughRule<>())
             .addRule("Does nothing", new PassThroughRule<>());
-
-    public static final PolicyService SERVICE = new NullPolicyService();
-    public static final PolicyServiceHierarchyProxy HIERARCHY_POLICY = new PolicyServiceHierarchyProxy(SERVICE);
 }

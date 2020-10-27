@@ -214,7 +214,9 @@ class KafkaContractTest {
                         () -> assertThat(results.get(0).value().get("context").get("contents").get("purpose").asText())
                                 .isEqualTo(ContractTestData.PURPOSE),
                         () -> assertThat(results.get(0).value().get("rules").get("message").asText())
-                                .isEqualTo("1-PassThroughRule")
+                                .isEqualTo("no rules set"),
+                        () -> assertThat(results.get(0).value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
+                                .isEqualTo("uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule")
                 ));
     }
 

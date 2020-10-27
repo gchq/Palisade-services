@@ -39,13 +39,18 @@ public class PolicyServiceCachingProxy implements PolicyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceCachingProxy.class);
     private final PolicyService service;
 
+    /**
+     * Default constructor used to create the PolicyServiceCachingProxy
+     *
+     * @param service {@link PolicyService} this service calls
+     */
     public PolicyServiceCachingProxy(final PolicyService service) {
         this.service = service;
     }
 
     @Cacheable(value = "resourceRules", key = "#resource.id")
     public Optional<Rules<LeafResource>> getResourceRules(final Resource resource) {
-        LOGGER.debug("Cache miss for resourceId {}", resource.getId());
+        LOGGER.info("Cache miss for resourceId {}", resource.getId());
         return service.getResourceRules(resource);
     }
 

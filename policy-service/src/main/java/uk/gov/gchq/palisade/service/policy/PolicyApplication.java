@@ -108,10 +108,11 @@ public class PolicyApplication {
 
     /**
      * Init post construct.
+     * Pre-population profile used in the KafkaContractTests for pre-populating the cache.
+     * Example profile used for pre-populating the cache for the example
      */
     @EventListener(ApplicationReadyEvent.class)
     @Profile({"pre-population, example"})
-    // Pre-population profile used in the KafkaContractTests for pre-populating the cache. Example profile used for pre-populating the cache for the example
     public void initPostConstruct() {
         // Add example Policies to the policy-service cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());

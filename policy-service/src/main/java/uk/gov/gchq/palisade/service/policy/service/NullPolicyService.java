@@ -23,6 +23,12 @@ import uk.gov.gchq.palisade.rule.Rules;
 import java.io.Serializable;
 import java.util.Optional;
 
+/**
+ * A default do-nothing Policy Service designed to work with the Caching and Hierarchy layers.
+ * Within cache TTL and cache size, the set...Rules methods will add to the cache, get...Rules will get from the cache
+ * and the service will declare all Resources available unless Policy dictates otherwise.
+ * After cache TTL timeout, the service will effectively be reset and empty
+ */
 public class NullPolicyService implements PolicyService {
 
     @Override

@@ -48,7 +48,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     /**
-     * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.service.request.Policy}s
+     * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating Policies
      * These wil be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
      * These policies will be used for prepopulating the {@link PolicyService}
      *
@@ -62,13 +62,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A factory for {@link uk.gov.gchq.palisade.service.request.Policy} objects, using:
+     * A factory for a map of {@link uk.gov.gchq.palisade.rule.Rules} to {@link uk.gov.gchq.palisade.resource.Resource} objects, using:
      * - a {@link uk.gov.gchq.palisade.resource.Resource} resource
-     * - a {@link uk.gov.gchq.palisade.User} owner
      * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
      * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
      *
-     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.service.request.Policy} from configuration
+     * @return a standard {@link uk.gov.gchq.palisade.service.PolicyPrepopulationFactory} capable of building a Policy from configuration
      */
     @Bean
     @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
@@ -78,7 +77,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
-     * These users will be attached to {@link uk.gov.gchq.palisade.service.request.Policy}s from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
+     * These users will be attached to {@link uk.gov.gchq.palisade.rule.Rules}s from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
      * These policies will be used for prepopulating the {@link PolicyService}
      *
      * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
@@ -103,7 +102,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
 
     /**
      * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
-     * These resources will be attached to {@link uk.gov.gchq.palisade.service.request.Policy}s from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
+     * These resources will be mapped to {@link uk.gov.gchq.palisade.rule.Rules} from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
      * These policies will be used for prepopulating the {@link PolicyService}
      *
      * @return a standard {@link uk.gov.gchq.palisade.service.ResourceConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}s

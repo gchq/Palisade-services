@@ -80,8 +80,7 @@ public class AkkaRunnableGraph {
                 // Apply coarse-grained resource-level rules
                 .mapAsync(PARALLELISM, messageAndRequest -> messageAndRequest.second()
                         // If is a real message, not start or end of stream messages then check the resource level rules
-                        .map(policyRequest -> service
-                                .getResourceRules(policyRequest.getResource())
+                        .map(policyRequest -> service.getResourceRules(policyRequest.getResource())
                                 .thenApply(rules -> PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules))
                                 .thenApply(resource -> Optional.ofNullable(resource).map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
                         )

@@ -15,8 +15,10 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -24,7 +26,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.PolicyTestCommon;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
+
+    private static final PolicyService MOCK_SERVICE = Mockito.spy(new PolicyServiceCachingProxy(new NullPolicyService()));
+    private static final PolicyServiceHierarchyProxy HIERARCHY_POLICY = new PolicyServiceHierarchyProxy(MOCK_SERVICE);
 
     @BeforeAll
     static void setupClass() {
@@ -52,64 +56,85 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         }
     }
 
+    @AfterAll
+    static void tearDown() {
+        Mockito.reset(MOCK_SERVICE);
+    }
+
     @Test
     void testGetRecordLevelRules() {
         // Given - there are record-level rules for the requested resource
         // SECRET_DIRECTORY and (by hierarchy) secretFile
 
         // When - a record-level policy is requested on a resource
-        Optional<Rules<?>> secretDirPolicies = HIERARCHY_POLICY.getRecordRules(SECRET_DIRECTORY);
-        Optional<?> secretDirRules = secretDirPolicies.map(Policy::getRecordRules).map(Rules::getRules);
+        Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getRecordRules(SENSITIVE_TXT_FILE);
+        Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getRecordRules(SECRET_TXT_FILE);
+
+        Rules<?> secretDirRules = HIERARCHY_POLICY.getRecordRules(SENSITIVE_TXT_FILE);
 
         // Then - the record-level rules are returned
-        assertThat(secretDirRules).isNotNull();
-        assertThat(secretDirRules).isNotEmpty();
+        assertThat(secretDirRules)
+                .isNotNull()
+                .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
 
         // When - a record-level policy is requested on a resource
-        Optional<Rules<?>> secretFilePolicies = Optional.ofNullable(HIERARCHY_POLICY.getRecordRules(SECRET_TXT_FILE));
-        Optional<?> secretFileRules = secretFilePolicies.map(Policy::getRecordRules).map(Rules::getRules);
+        Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getRecordRules(SECRET_TXT_FILE);
+        Rules<?> secretFileRules = HIERARCHY_POLICY.getRecordRules(SECRET_TXT_FILE);
 
         // Then - the record-level rules are returned (and include all those of the parent directory)
-        assertThat(secretFileRules).isNotNull();
-        assertThat(secretFileRules).isNotEmpty();
+        assertThat(secretFileRules)
+                .isNotNull()
+                .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
     }
 
     @Test
-    void testShouldReturnNoPolicyWhenNotSet() {
+    void testShouldReturnNoRulesWhenNotSet() {
         // Given - there are no policies for the requested resource
         // NEW_FILE
 
         //When - a policy is requested on a resource
-        Exception NoSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
+        Exception noSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
 
         //Then an error is thrown
-        assertThat("No Policy Found").isEqualTo(NoSuchPolicy.getMessage());
+        assertThat("No Policy Found").isEqualTo(noSuchPolicy.getMessage());
     }
 
     @Test
     void testCanAccessResources() {
         // Given - there are accessible resources
         // ACCESSIBLE_JSON_TXT_FILE for user, SENSITIVE_TXT_FILE for sensitiveUser, SECRET_TXT_FILE for secretUser
+        HIERARCHY_POLICY.setResourceRules(ACCESSIBLE_JSON_TXT_FILE, PASS_THROUGH_POLICY);
 
-        // When - access to the resource is queried
         for (User accessingUser : Arrays.asList(USER, SENSITIVE_USER, SECRET_USER)) {
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+            // When - access to the resource is queried
+            Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+
+            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, ACCESSIBLE_JSON_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotEmpty();
+            assertThat(resource).isNotNull();
         }
 
-        // When - access to the resource is queried
+
         for (User accessingUser : Arrays.asList(SENSITIVE_USER, SECRET_USER)) {
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(SENSITIVE_TXT_FILE);
+            // When - access to the resource is queried
+            Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(SENSITIVE_TXT_FILE);
+
+            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(SENSITIVE_TXT_FILE);
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SENSITIVE_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotEmpty();
+            assertThat(resource).isNotNull();
         }
 
         for (User accessingUser : Collections.singletonList(SECRET_USER)) {
             // When - access to the resource is queried
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(SECRET_TXT_FILE);
+            Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(SECRET_TXT_FILE);
+
+            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(SECRET_TXT_FILE);
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SECRET_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotEmpty();
+            assertThat(resource).isNotNull();
+
         }
     }
 
@@ -119,51 +144,40 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Given - there are inaccessible resources
         // everything but ACCESSIBLE_JSON_TXT_FILE for user
-        HashSet<FileResource> resources = new HashSet<>(files);
-        resources.remove(ACCESSIBLE_JSON_TXT_FILE);
-        for (FileResource fileResource : resources) {
+        for (FileResource fileResource : files) {
             // When - access to the resource is queried
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(fileResource);
+            Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource);
+
+            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(USER, fileResource, CONTEXT, HIERARCHY_POLICY.getResourceRules(fileResource));
             // Then - the resource is not accessible
-            assertThat(resource).isEmpty();
+            assertThat(resource).isNotNull().usingRecursiveComparison().isEqualTo(fileResource);
         }
 
         // Given - there are inaccessible resources
         // everything but (accessible/sensitive)TxtFile for sensitiveUser
-        resources = new HashSet<>(files);
-        resources.remove(ACCESSIBLE_JSON_TXT_FILE);
-        resources.remove(SENSITIVE_TXT_FILE);
-        for (FileResource fileResource : resources) {
+        files.remove(ACCESSIBLE_JSON_TXT_FILE);
+        files.remove(SENSITIVE_TXT_FILE);
+        for (FileResource fileResource : files) {
             // When - access to the resource is queried
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(fileResource);
+            Mockito.doReturn(Optional.of(SECRET_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource);
+
+            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(fileResource);
+            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
-            assertThat(resource).isEmpty();
+            assertThat(resource).isNull();
         }
 
         // Given - there are inaccessible resources
         // everything except (accessible/sensitive/secret)TxtFile for secretUser
-        resources = new HashSet<>(files);
-        resources.remove(ACCESSIBLE_JSON_TXT_FILE);
-        resources.remove(SENSITIVE_TXT_FILE);
-        resources.remove(SECRET_TXT_FILE);
-        for (FileResource fileResource : resources) {
+        files.remove(SECRET_TXT_FILE);
+        for (FileResource fileResource : files) {
             // When - access to the resource is queried
-            Optional<FileResource> resource = HIERARCHY_POLICY.getResourceRules(fileResource);
+            Mockito.doReturn(Optional.of(SECRET_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource);
+
+            Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(fileResource);
+            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
-            assertThat(resource).isEmpty();
+            assertThat(resource).isNull();
         }
-    }
-
-    @Test
-    void testCannotAccessResourceWithoutPolicies() {
-        // Given - there are resources with no policies
-        // NEW_FILE
-
-        // When - access to the resource is queried
-        Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(NEW_FILE);
-        LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(USER, NEW_FILE, CONTEXT, rules);
-
-        // Then - the resource is not accessible
-        assertThat(resource).isNull();
     }
 }

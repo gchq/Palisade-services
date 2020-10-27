@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@code NoSuchPolicyException} is a {@link RuntimeException} thrown by a
  * {@link uk.gov.gchq.palisade.service.policy.service.PolicyService} implementation to
- * indicate that the requested {@link uk.gov.gchq.palisade.service.request.Policy} doesn't exist,
+ * indicate that the requested {@link uk.gov.gchq.palisade.rule.Rule} doesnt exist for the requested {@link uk.gov.gchq.palisade.resource.Resource} doesn't exist,
  * or is not known to that {@code Service} instance.
  */
 public class NoSuchPolicyException extends RuntimeException {

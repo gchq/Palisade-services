@@ -76,7 +76,21 @@ public class PolicyServiceHierarchyProxy {
         return mergedRules;
     }
 
-    public static <R extends Resource> R applyRulesToResource(User user, R resource, Context context, Rules<R> rules) {
+    /**
+     * This method is used to find out if the given user is allowed to access
+     * the resource given their purpose. This is where any resource level
+     * access controls are enforced.
+     *
+     * @param user     the {@link User} requesting the data
+     * @param context  the query time {@link Context} containing environmental variables
+     *                 such as why they want the data
+     * @param resource the {@link Resource} being queried for access
+     * @param rules    the {@link uk.gov.gchq.palisade.rule.Rule} that will be applied to the resource
+     * @param <R>      the type of resource (may be a supertype)
+     * @return an Optional {@link Resource} which is only present if the resource
+     * is accessible
+     */
+    public static <R extends Resource> R applyRulesToResource(final User user, final R resource, final Context context, final Rules<R> rules) {
         return Util.applyRulesToItem(resource, user, context, rules);
     }
 
@@ -85,6 +99,7 @@ public class PolicyServiceHierarchyProxy {
      * data type to extract and merge the policies at each stage of the hierarchy.
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
+     * @param <R> the type of resource (may be a supertype)
      * @param rulesExtractor The rule type to extract from each policy
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
@@ -117,6 +132,7 @@ public class PolicyServiceHierarchyProxy {
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
      * @param rulesExtractor The rule type to extract from each policy
+     * @param <R> the type of resource (may be a supertype)
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
      */

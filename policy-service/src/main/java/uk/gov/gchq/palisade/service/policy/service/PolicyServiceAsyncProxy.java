@@ -46,11 +46,22 @@ public class PolicyServiceAsyncProxy {
         this.executor = executor;
     }
 
+    /**
+     * Async call to the {@link PolicyServiceHierarchyProxy} getResourceRules takes a resource to get the resource rules applied against it
+     *
+     * @param resource the resource the user wants access to
+     * @return the rules for the LeafResource, if null then an exception will be thrown
+     */
     public CompletableFuture<Rules<LeafResource>> getResourceRules(final LeafResource resource) {
-
         return CompletableFuture.supplyAsync(() -> service.getResourceRules(resource), executor);
     }
 
+    /**
+     * Async call to the {@link PolicyServiceHierarchyProxy} getRecordRules that takes a resource and gets the record rules applied against it
+     *
+     * @param resource the resource the user wants access to
+     * @return the record rules for the LeafResource, if null then an exception will be thrown
+     */
     public CompletableFuture<Rules<?>> getRecordRules(final LeafResource resource) {
         return CompletableFuture.supplyAsync(() -> service.getRecordRules(resource), executor);
     }
