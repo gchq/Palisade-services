@@ -19,6 +19,5 @@ spring:
     caffeine:
       spec: expireAfterWrite=60m, maximumSize=500
   autoconfigure:
-    # For Caffeine installs exclude redis
     exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration

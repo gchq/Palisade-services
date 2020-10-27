@@ -14,7 +14,6 @@
 
 spring:
   autoconfigure:
-    # Exclude redis for h2 installs.
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
