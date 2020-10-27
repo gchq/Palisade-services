@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.request;
+package uk.gov.gchq.palisade.service.resource.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,8 +36,8 @@ import java.util.StringJoiner;
  * Note that there can any number of ResourceResponse messages generated from a single request.  There will be one message for each
  * of the resources that were found to correspond to this Resource ID.
  * There are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.resource.request.ResourceResponse is the output from the resource-service.
- * uk.gov.gchq.palisade.service.policy.request.PolicyRequest is the input for the policy-service.
+ * uk.gov.gchq.palisade.service.resource.model.ResourceResponse is the output from the resource-service.
+ * uk.gov.gchq.palisade.service.policy.model.PolicyRequest is the input for the policy-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResourceResponse {

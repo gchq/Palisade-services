@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.resource.request.ResourceRequest;
+import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 
 import java.io.IOException;
 

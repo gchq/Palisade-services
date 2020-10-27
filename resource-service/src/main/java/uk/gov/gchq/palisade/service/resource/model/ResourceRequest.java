@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.resource.request;
+package uk.gov.gchq.palisade.service.resource.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -35,7 +35,7 @@ import java.util.StringJoiner;
  * ResourceResponse is the output for this service which will include the Resource identified by the service.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.palisade.response.UserResponse is the response with the data from user-service included.
- * uk.gov.gchq.palisade.service.resource.request.ResourceRequest is the input for the resource-service.
+ * uk.gov.gchq.palisade.service.resource.model.ResourceRequest is the input for the resource-service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class ResourceRequest {
