@@ -17,10 +17,6 @@ spring:
     redis:
       repositories:
         enabled: true
-  autoconfigure:
-    # Exclude hibernate for redis
-    exclude:
-    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
   # redis.host/port or redis.cluster.nodes configured by k8s
 
