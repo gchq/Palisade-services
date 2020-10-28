@@ -31,22 +31,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.policy.ApplicationTestData;
 import uk.gov.gchq.palisade.service.policy.model.Token;
-import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.policy.stream.config.AkkaSystemConfig;
+import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
 
-import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {PolicyRestController.class})
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, PolicyRestController.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, PolicyRestController.class})
 class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
-    ConsumerTopicConfiguration topicConfiguration;
+    private KafkaProducerService kafkaProducerService;
     @Autowired
     private PolicyRestController controller;
     @Autowired
@@ -54,15 +52,13 @@ class RestControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        Topic topic = new Topic();
-        topic.setPartitions(1);
-        topic.setName("input-topic");
-        Mockito.when(topicConfiguration.getTopics()).thenReturn(Collections.singletonMap("input-topic", topic));
+        Mockito.when(kafkaProducerService.policyMulti(Mockito.any(), Mockito.any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(topicConfiguration);
+        Mockito.reset(kafkaProducerService);
     }
 
     @Test

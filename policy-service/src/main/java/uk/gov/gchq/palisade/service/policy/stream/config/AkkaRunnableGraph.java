@@ -27,6 +27,7 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
@@ -41,8 +42,10 @@ import scala.Function1;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
+import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
+import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 
@@ -57,6 +60,14 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
+
+    @Bean
+    KafkaProducerService kafkaProducerService(
+            final Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> upstreamSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        return new KafkaProducerService(upstreamSink, upstreamConfig, materializer);
+    }
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
