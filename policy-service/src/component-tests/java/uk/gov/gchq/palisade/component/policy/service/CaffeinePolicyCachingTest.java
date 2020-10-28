@@ -185,7 +185,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         assertThat(policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
         // Given - a sufficient amount of time has passed
 
-        TimeUnit.SECONDS.sleep(2);
+        TimeUnit.SECONDS.sleep(1);
         forceCleanUp();
 
         // When - an old entry is requested

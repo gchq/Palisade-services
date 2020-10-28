@@ -78,7 +78,7 @@ public class PolicyRestController {
      * Takes a list of requests and processes each of them with the given headers
      *
      * @param headers  a multi-value map of http request headers
-     * @param requests a list of requests
+     * @param requests a list of Policy Requests
      * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/policy/multi", consumes = "application/json", produces = "application/json")

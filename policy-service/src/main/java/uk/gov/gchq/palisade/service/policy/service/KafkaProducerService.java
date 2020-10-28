@@ -66,6 +66,14 @@ public class KafkaProducerService {
         this.materializer = materializer;
     }
 
+    /**
+     * Takes a list of requests and processes each of them with the given headers.
+     * These requests are each written to kafka using the supplied headers for all of them.
+     *
+     * @param headers  a map of request headers
+     * @param requests a Collection of {@link PolicyRequest}
+     * @return a future completing once all requests have been written to kafka
+     */
     public CompletableFuture<Void> policyMulti(final Map<String, String> headers, final Collection<PolicyRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
@@ -98,6 +106,5 @@ public class KafkaProducerService {
                 // Return a CompletableFuture<Void> result
                 .toCompletableFuture()
                 .thenApply(x -> null);
-
     }
 }

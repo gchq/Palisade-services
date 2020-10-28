@@ -31,10 +31,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PolicyTestCommon {
-    public static final User USER = new User().userId("testUser");
-    public static final User SECRET_USER = new User().userId("secretTestUser").addAuths(new HashSet<>(Arrays.asList("Sensitive", "Secret")));
-    public static final Context CONTEXT = new Context().purpose("Testing");
-
     /**
      * Setup a collection of resources with policies like so:
      * /txt - only txt type files are viewable
@@ -80,7 +76,6 @@ public class PolicyTestCommon {
             .addRule("Does nothing", new PassThroughRule<>())
             .addRule("Does nothing", new PassThroughRule<>());
 
-    public static final Set<DirectoryResource> DIRECTORY_RESOURCES = new HashSet<>(Arrays.asList(JSON_DIRECTORY, SECRET_DIRECTORY));
     public static final Set<FileResource> FILE_RESOURCES = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, SECRET_TXT_FILE));
 }
 
