@@ -15,8 +15,6 @@
  */
 package uk.gov.gchq.palisade.contract.policy;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.policy.PassThroughRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
