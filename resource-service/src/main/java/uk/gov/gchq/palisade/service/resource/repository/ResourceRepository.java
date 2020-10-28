@@ -43,8 +43,8 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param parentId the parent id of the Resource
      * @return a stream of ResourceEntity resources from the backing store
      */
-    default ResourceEntity streamFindAllByParentId(String parentId) {
-        return findAllByParentId(parentId);
+    default Stream<ResourceEntity> streamFindAllByParentId(String parentId) {
+        return StreamSupport.stream(findAllByParentId(parentId).spliterator(), false);
     }
 
     /**
@@ -53,6 +53,6 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param parentId the parent id of the Resource
      * @return a list of ResourceEntity resources from the backing store
      */
-    ResourceEntity findAllByParentId(String parentId);
+    Iterable<ResourceEntity> findAllByParentId(String parentId);
 
 }

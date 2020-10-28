@@ -94,17 +94,50 @@ public class SimpleResourceService implements ResourceService {
     /**
      * Query returns a stream of {@link LeafResource} after walking the path of the uri passed in using a filter on the predicate.
      *
-     * @param resourceId    the {@link String} value of the resourceId
-     * @param pred          the predicate of {@link LeafResource}
+     * @param uri  the uri converted from a String
+     * @param pred the predicate of {@link LeafResource}
      * @return the stream of {@link LeafResource}
      */
-    protected LeafResource query(final String resourceId, final Predicate<LeafResource> pred) {
-        return (LeafResource) ResourceBuilder.create(resourceId);
+    protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
+        return filesOf(Path.of(uri))
+                .map(this::asFileResource)
+                .filter(pred);
+    }
+
+    private URI stringToURI(final String uriString) {
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException("URISyntaxException converting '" + uriString + "' to URI", ex);
+        }
+    }
+
+    private URI filesystemURI(final String fileString) {
+        try {
+            return new File(fileString).getCanonicalFile().toURI();
+        } catch (IOException ex) {
+            return new File(fileString).getAbsoluteFile().toURI();
+        }
     }
 
     @Override
-    public LeafResource getResourcesById(final String resourceId) {
-        return query(resourceId, x -> true);
+    public Stream<LeafResource> getResourcesByResource(final Resource resource) {
+        return query(stringToURI(resource.getId()), x -> true);
+    }
+
+    @Override
+    public Stream<LeafResource> getResourcesById(final String resourceId) {
+        return query(stringToURI(resourceId), x -> true);
+    }
+
+    @Override
+    public Stream<LeafResource> getResourcesByType(final String type) {
+        return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getType().equals(type));
+    }
+
+    @Override
+    public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
+        return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 
     @Override
