@@ -126,7 +126,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * The simplest implementation of a policy service, allows unit tests and small services to use a lightweight policy servic
+     * The simplest implementation of a policy service, allows unit tests and small services to use a lightweight policy service
      *
      * @return a new instance of the nullPolicyService
      */

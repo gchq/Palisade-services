@@ -74,6 +74,4 @@ public class PolicyServiceCachingProxy implements PolicyService {
         LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
         return service.setRecordRules(resource, rules);
     }
-
-
 }
