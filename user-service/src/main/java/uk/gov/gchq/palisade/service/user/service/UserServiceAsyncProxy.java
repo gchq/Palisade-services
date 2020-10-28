@@ -49,8 +49,8 @@ public class UserServiceAsyncProxy {
      * Takes the {@link String} value of the userId from the {@link UserRequest} and requests the {@link User}
      * from an implementation of the {@link UserService}
      *
-     * @param userRequest   the request
-     * @return              a {@link CompletableFuture} of the {@link User} from
+     * @param userRequest   the {@link UserRequest} containing the user ID
+     * @return              a {@link CompletableFuture} of the {@link User} obtained from the {@link UserService}
      */
     public CompletableFuture<User> getUser(final UserRequest userRequest) {
         LOGGER.info("Getting user '{}' from cache", userRequest.getUserId());

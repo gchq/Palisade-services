@@ -90,6 +90,9 @@ public class UserApplication {
                 .run(args);
     }
 
+    /**
+     * Adds a user from a configuration file to the cache of the {@link UserService}
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void initPostConstruct() {
         LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
