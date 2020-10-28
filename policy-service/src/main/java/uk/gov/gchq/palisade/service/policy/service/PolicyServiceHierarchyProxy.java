@@ -46,6 +46,11 @@ public class PolicyServiceHierarchyProxy {
 
     private final PolicyService service;
 
+    /**
+     * Instantiates a new Policy service hierarchy proxy taking a PolicyService as an argument.
+     *
+     * @param service {@link PolicyService} used to instantiate this class
+     */
     public PolicyServiceHierarchyProxy(final PolicyService service) {
         this.service = service;
     }
@@ -81,14 +86,12 @@ public class PolicyServiceHierarchyProxy {
      * the resource given their purpose. This is where any resource level
      * access controls are enforced.
      *
-     * @param user     the {@link User} requesting the data
-     * @param context  the query time {@link Context} containing environmental variables
-     *                 such as why they want the data
-     * @param resource the {@link Resource} being queried for access
-     * @param rules    the {@link uk.gov.gchq.palisade.rule.Rule} that will be applied to the resource
      * @param <R>      the type of resource (may be a supertype)
-     * @return an Optional {@link Resource} which is only present if the resource
-     * is accessible
+     * @param user     the {@link User} requesting the data
+     * @param resource the {@link Resource} being queried for access
+     * @param context  the query time {@link Context} containing environmental variables such as why they want the data
+     * @param rules    the {@link uk.gov.gchq.palisade.rule.Rule} that will be applied to the resource
+     * @return an Optional {@link Resource} which is only present if the resource is accessible
      */
     public static <R extends Resource> R applyRulesToResource(final User user, final R resource, final Context context, final Rules<R> rules) {
         return Util.applyRulesToItem(resource, user, context, rules);
@@ -99,7 +102,7 @@ public class PolicyServiceHierarchyProxy {
      * data type to extract and merge the policies at each stage of the hierarchy.
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
-     * @param <R> the type of resource (may be a supertype)
+     * @param <R>            the type of resource (may be a supertype)
      * @param rulesExtractor The rule type to extract from each policy
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
@@ -132,7 +135,7 @@ public class PolicyServiceHierarchyProxy {
      *
      * @param resource       A {@link Resource} to get the applicable rules for.
      * @param rulesExtractor The rule type to extract from each policy
-     * @param <R> the type of resource (may be a supertype)
+     * @param <R>            the type of resource (may be a supertype)
      * @return An optional {@link Rules} object, which contains the list of rules found
      * that need to be applied to the resource.
      */
@@ -158,6 +161,13 @@ public class PolicyServiceHierarchyProxy {
         return inheritedRules.map(iRules -> newRules.map(nRules -> mergeRules(iRules, nRules)).or(() -> inheritedRules)).orElse(newRules);
     }
 
+    /**
+     * GetRecordRules is used by the service to get any record rules that could be applied against the resource that the user has requested
+     * If no rules are found then a {@link NoSuchPolicyException} will be thrown
+     *
+     * @param resource a {@link LeafResource} to get rules for
+     * @return the record rules that apply to the LeafResource
+     */
     public Rules<Serializable> getRecordRules(final LeafResource resource) {
         var optionalRules = getRecordRules(resource, service::getRecordRules);
 
@@ -166,6 +176,14 @@ public class PolicyServiceHierarchyProxy {
                 .orElseThrow(() -> new NoSuchPolicyException("No Policy Found"));
     }
 
+    /**
+     * GetResourceRules is used by the service to get any resource rules that could be applied against the resource.
+     * If no rules are applied then a {@link NoSuchPolicyException} will be thrown
+     * A resource rule may be applied at any point in the file tree, and could cause the record to be redacted.
+     *
+     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @return rules {@link Rules} object, which contains the list of rules found that need to be applied to the resource
+     */
     public Rules<LeafResource> getResourceRules(final LeafResource resource) {
         Optional<Rules<LeafResource>> optionalRules = getResourceRules(resource, service::getResourceRules);
 
@@ -174,10 +192,22 @@ public class PolicyServiceHierarchyProxy {
                 .orElseThrow(() -> new NoSuchPolicyException("No Policy Found"));
     }
 
+    /**
+     * This method sets the record rules against the resource for which the user will eventually request
+     *
+     * @param resource {@link Resource} the resource which the user wants to apply rules against
+     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     */
     public void setRecordRules(final Resource resource, final Rules<Serializable> rules) {
         this.service.setRecordRules(resource, rules);
     }
 
+    /**
+     * This method sets the resource rules against the resource for which the user will eventually request
+     *
+     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     */
     public void setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
         this.service.setResourceRules(resource, rules);
     }

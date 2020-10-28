@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -62,7 +63,7 @@ public class PolicyServiceAsyncProxy {
      * @param resource the resource the user wants access to
      * @return the record rules for the LeafResource, if null then an exception will be thrown
      */
-    public CompletableFuture<Rules<?>> getRecordRules(final LeafResource resource) {
+    public CompletableFuture<Rules<Serializable>> getRecordRules(final LeafResource resource) {
         return CompletableFuture.supplyAsync(() -> service.getRecordRules(resource), executor);
     }
 }

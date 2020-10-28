@@ -125,6 +125,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdResourcePrepopulationFactory();
     }
 
+    /**
+     * The simplest implementation of a policy service, allows unit tests and small services to use a lightweight policy servic
+     *
+     * @return a new instance of the nullPolicyService
+     */
     @Bean("nullService")
     @Qualifier("impl")
     public PolicyService nullPolicyService() {
@@ -132,6 +137,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new NullPolicyService();
     }
 
+    /**
+     * An implementation of the policy service that allows caching to take place, either using Redis or Caffeine
+     *
+     * @param service the service that will be implemented
+     * @return a new instance of the PolicyServiceCachingProxy
+     */
     @Bean
     public PolicyServiceCachingProxy cachedPolicyService(final @Qualifier("impl") PolicyService service) {
         PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
@@ -139,6 +150,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return policyServiceCachingProxy;
     }
 
+    /**
+     * An implementation of the PolicyService that contains java code used to apply, get and set rules against resources
+     *
+     * @param cache the cache layer that this service will implement
+     * @return a new instance of the PolicyServiceHierarchyProxy
+     */
     @Bean
     public PolicyServiceHierarchyProxy hierarchicalPolicyService(final PolicyServiceCachingProxy cache) {
         PolicyServiceHierarchyProxy policyServiceHierarchyProxy = new PolicyServiceHierarchyProxy(cache);
@@ -146,6 +163,14 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return policyServiceHierarchyProxy;
     }
 
+    /**
+     * AysncPolicyServiceProxy sits between akka and a caching layer,
+     * allowing akka to make async calls to a service and not have to wait for a response
+     *
+     * @param hierarchy {@link PolicyServiceHierarchyProxy} as the service performing the majority of the code manipulation
+     * @param executor  {@link Executor} This interface provides a way of decoupling task submission from the mechanics of how each task will be run, including details of thread use, scheduling, etc.
+     * @return a new instance of a PolicyServiceAsyncProxy
+     */
     @Bean
     public PolicyServiceAsyncProxy asyncPolicyServiceProxy(
             final PolicyServiceHierarchyProxy hierarchy,
@@ -154,6 +179,11 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new PolicyServiceAsyncProxy(hierarchy, executor);
     }
 
+    /**
+     * ObjectMapper used in serializing and deserializing
+     *
+     * @return a new instance of the ObjectMapper
+     */
     @Bean
     @Primary
     ObjectMapper objectMapper() {
@@ -175,7 +205,12 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new ApplicationAsyncExceptionHandler();
     }
 
-    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    /**
+     * Logging only error handling.
+     * FIX_ME Replace this with a proper error handling mechanism (kafka queues etc.)
+     *
+     * @return a new implementation of a ErrorHandlingService
+     */
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
