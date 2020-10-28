@@ -58,8 +58,8 @@ public class AkkaComponentsConfig {
     Sink<ProducerRecord<String, TopicOffsetRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
         ProducerSettings<String, TopicOffsetRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.topicOffsetRequestKeySerializer(),
-                SerDesConfig.topicOffsetRequestValueSerializer());
+                SerDesConfig.maskedResourceKeySerializer(),
+                SerDesConfig.maskedResourceValueSerializer());
 
         return INPUT_COMPONENTS.plainProducer(producerSettings);
     }
@@ -68,8 +68,8 @@ public class AkkaComponentsConfig {
     Source<CommittableMessage<String, TopicOffsetRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, TopicOffsetRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.topicOffsetRequestKeyDeserializer(),
-                SerDesConfig.topicOffsetRequestValueDeserializer());
+                SerDesConfig.maskedResourceKeyDeserializer(),
+                SerDesConfig.maskedResourceValueDeserializer());
 
         Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
@@ -83,8 +83,8 @@ public class AkkaComponentsConfig {
     Sink<Envelope<String, TopicOffsetResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, TopicOffsetResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
-                SerDesConfig.topicOffsetRequestOffsetKeySerializer(),
-                SerDesConfig.topicOffsetRequestOffsetValueSerializer());
+                SerDesConfig.maskedResourceOffsetKeySerializer(),
+                SerDesConfig.maskedResourceOffsetValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);

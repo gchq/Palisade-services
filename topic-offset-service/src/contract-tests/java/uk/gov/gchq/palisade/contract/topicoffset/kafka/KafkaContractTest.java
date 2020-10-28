@@ -221,7 +221,7 @@ class KafkaContractTest {
     void testRestEndpoint() {
         // Given - we are already listening to the service input
         ConsumerSettings<String, TopicOffsetRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.topicOffsetRequestKeyDeserializer(), SerDesConfig.topicOffsetRequestValueDeserializer())
+                .create(akkaActorSystem, SerDesConfig.maskedResourceKeyDeserializer(), SerDesConfig.maskedResourceValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(kafkaContainer.isRunning() ? kafkaContainer.getBootstrapServers() : "localhost:9092")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

@@ -52,7 +52,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> topicOffsetRequestKeySerializer() {
+    public static Serializer<String> maskedResourceKeySerializer() {
         return new StringSerializer();
     }
 
@@ -62,7 +62,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetRequest)
      */
-    public static Serializer<TopicOffsetRequest> topicOffsetRequestValueSerializer() {
+    public static Serializer<TopicOffsetRequest> maskedResourceValueSerializer() {
         return (String ignored, TopicOffsetRequest topicOffsetRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(topicOffsetRequest);
@@ -77,7 +77,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key deserialiser for the topic's message content
      */
-    public static Deserializer<String> topicOffsetRequestKeyDeserializer() {
+    public static Deserializer<String> maskedResourceKeyDeserializer() {
         return new StringDeserializer();
     }
 
@@ -86,7 +86,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (TopicOffsetRequest)
      */
-    public static Deserializer<TopicOffsetRequest> topicOffsetRequestValueDeserializer() {
+    public static Deserializer<TopicOffsetRequest> maskedResourceValueDeserializer() {
         return (String ignored, byte[] topicOffsetRequest) -> {
             try {
                 return MAPPER.readValue(topicOffsetRequest, TopicOffsetRequest.class);
@@ -101,7 +101,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> topicOffsetRequestOffsetKeySerializer() {
+    public static Serializer<String> maskedResourceOffsetKeySerializer() {
         return new StringSerializer();
     }
 
@@ -110,7 +110,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content (TopicOffsetResponse)
      */
-    public static Serializer<TopicOffsetResponse> topicOffsetRequestOffsetValueSerializer() {
+    public static Serializer<TopicOffsetResponse> maskedResourceOffsetValueSerializer() {
         return (String ignored, TopicOffsetResponse topicOffsetResponse) -> {
             try {
                 return MAPPER.writeValueAsBytes(topicOffsetResponse);

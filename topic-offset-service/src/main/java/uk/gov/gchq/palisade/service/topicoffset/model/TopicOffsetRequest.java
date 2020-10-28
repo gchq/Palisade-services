@@ -33,11 +33,12 @@ import java.util.Optional;
 /**
  * The TopicOffsetRequest is the input for topic-offset-service.  This is used to optimise the later retrieval of the
  * data for the client. TopicOffsetResponse is the output for this service.
- * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.attributemask.message.TopicOffsetResponse is the output from the policy-service.
- * uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest is the input for this the topic-offset-service.
- * uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest is the input for this the
- * filtered-resource-service.
+ * Note there are three classes that effectively represent the same data but under a slightly different transformation:
+ * <ul>
+ * <li> {@code uk.gov.gchq.palisade.service.attributemask.message.AttributeMaskingResponse} is the output from the attribute-masking-service.
+ * <li> {@code uk.gov.gchq.palisade.service.topicoffset.message.TopicOffsetRequest} is the input for this the topic-offset-service.
+ * <li> {@code uk.gov.gchq.palisade.service.filteredresource.message.FilteredResourceRequest} is the input for this the filtered-resource-service.
+ * </ul>
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class TopicOffsetRequest {
