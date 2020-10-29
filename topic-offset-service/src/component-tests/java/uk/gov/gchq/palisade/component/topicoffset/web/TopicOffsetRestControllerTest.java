@@ -28,13 +28,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.Token;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetRequest;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 import uk.gov.gchq.palisade.service.topicoffset.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.topicoffset.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.topicoffset.web.TopicOffsetRestController;
 
 import java.util.concurrent.CompletableFuture;
