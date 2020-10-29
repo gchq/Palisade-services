@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 
@@ -33,6 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * This should return 200 OK if the service is healthy.
  */
 @SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+// Use the h2 profile so we don't get redis errors
+@ActiveProfiles("h2")
 class HealthActuatorContractTest {
 
     @Autowired
