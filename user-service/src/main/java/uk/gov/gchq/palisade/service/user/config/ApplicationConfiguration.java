@@ -133,6 +133,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and userId {} threw exception {}", token, message.getUserId(), message.getAttributes(), message.getError());
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {}, userId {} and attributes {}, threw exception ", token, message.getUserId(), message.getAttributes(), message.getError());
     }
 }
