@@ -19,9 +19,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.Iterator;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
@@ -35,20 +33,20 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param resourceId the resource id of the resource in the backing store
      * @return Optional value of ResourceEntity stored in the backing store
      */
-    Optional<ResourceEntity> findByResourceId(String resourceId);
+    Iterator<ResourceEntity> findByResourceId(String resourceId);
 
     /**
-     * Returns a stream of Resources from a backing store by ParentId
+     * Returns an {@link Iterator} of Resources from a backing store by ParentId
      *
      * @param parentId the parent id of the Resource
-     * @return a stream of ResourceEntity resources from the backing store
+     * @return an {@link Iterator} of ResourceEntity resources from the backing store
      */
-    default Stream<ResourceEntity> streamFindAllByParentId(String parentId) {
-        return StreamSupport.stream(findAllByParentId(parentId).spliterator(), false);
+    default Iterator<ResourceEntity> streamFindAllByParentId(String parentId) {
+        return findAllByParentId(parentId).iterator();
     }
 
     /**
-     * Iterable used to create a stream of resources by parentId
+     * Iterator of a list of resources by parentId
      *
      * @param parentId the parent id of the Resource
      * @return a list of ResourceEntity resources from the backing store

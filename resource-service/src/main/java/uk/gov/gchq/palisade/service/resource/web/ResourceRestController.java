@@ -83,6 +83,6 @@ public class ResourceRestController {
                                                      final @RequestBody Collection<ResourceRequest> requests) {
 
         // Process the request and return the results
-        return service.processRequest(headers, requests);
+        return service.resourceRequestMulti(headers, requests);
     }
 }

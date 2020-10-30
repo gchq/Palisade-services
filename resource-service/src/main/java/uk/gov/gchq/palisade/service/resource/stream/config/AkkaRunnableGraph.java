@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.resource.stream.config;
 
 import akka.Done;
+import akka.NotUsed;
 import akka.japi.Pair;
 import akka.japi.tuple.Tuple3;
 import akka.kafka.ConsumerMessage.Committable;
@@ -27,6 +28,7 @@ import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
+import akka.stream.SourceShape;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
@@ -48,6 +50,7 @@ import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -75,22 +78,25 @@ public class AkkaRunnableGraph {
 
         // Read messages from the stream source
         return source
-                // Extract token from message, keeping track of original message
-                .map(committableMessage -> new Pair<>(committableMessage, new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset())))
 
-                // Get the resources(s) using the resourceId
-                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, ResourceRequest>, String> messageAndToken) -> {
-                    ResourceRequest request = messageAndToken.first().record().value();
-                    return service.getResourcesById(request)
-                            .thenApply(resource -> new Tuple3<>(messageAndToken.first(), messageAndToken.second(), resource));
-                })
+                // Get a stream of resources
+                .flatMapConcat(committableMessage ->
+                        service.getResourcesById(committableMessage.record().value().resourceId)
+                        .map(leafResource -> {
+                            Optional<LeafResource> leafResourceOptional = Optional.of(leafResource);
+                            return new Pair<>(committableMessage, leafResourceOptional);
+                        })
+                )
 
                 // Build producer record, copying the partition, keeping track of original message
-                .map((Tuple3<CommittableMessage<String, ResourceRequest>, String, LeafResource> messageTokenResource) -> {
-                    ConsumerRecord<String, ResourceRequest> requestRecord = messageTokenResource.t1().record();
-                    ResourceResponse response = ResourceResponse.Builder.create(requestRecord.value()).withResource(messageTokenResource.t3());
+                .map((Pair<CommittableMessage<String, ResourceRequest>, Optional<LeafResource>> messageResource) -> {
+                    ConsumerRecord<String, ResourceRequest> requestRecord = messageResource.first().record();
+                    ResourceResponse response = null;
+                    if (messageResource.second().isPresent()) {
+                        response = ResourceResponse.Builder.create(requestRecord.value()).withResource(messageResource.second().get());
+                    }
                     // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-                    return new Pair<>(messageTokenResource.t1(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), response, requestRecord.headers()));
+                    return new Pair<>(messageResource.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), response, requestRecord.headers()));
                 })
 
                 // Build producer message, applying the committable pass-thru consuming the original message

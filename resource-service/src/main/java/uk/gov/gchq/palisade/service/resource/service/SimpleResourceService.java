@@ -32,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -60,7 +61,7 @@ public class SimpleResourceService implements ResourceService {
 
     private Stream<File> filesOf(final Path path) {
         try {
-            return Files.walk(path)
+            return Files.walk(path).parallel()
                     .map(Path::toFile)
                     .map(file -> {
                         try {
@@ -98,10 +99,10 @@ public class SimpleResourceService implements ResourceService {
      * @param pred the predicate of {@link LeafResource}
      * @return the stream of {@link LeafResource}
      */
-    protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
+    protected Iterator<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
-                .filter(pred);
+                .filter(pred).iterator();
     }
 
     private URI stringToURI(final String uriString) {
@@ -121,22 +122,22 @@ public class SimpleResourceService implements ResourceService {
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByResource(final Resource resource) {
+    public Iterator<LeafResource> getResourcesByResource(final Resource resource) {
         return query(stringToURI(resource.getId()), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesById(final String resourceId) {
+    public Iterator<LeafResource> getResourcesById(final String resourceId) {
         return query(stringToURI(resourceId), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByType(final String type) {
+    public Iterator<LeafResource> getResourcesByType(final String type) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getType().equals(type));
     }
 
     @Override
-    public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
+    public Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 
