@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +41,6 @@ import static java.util.Objects.requireNonNull;
 
 public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
-    private static final String EMPTY_STREAM_KEY = "EMPTY_STREAM_KEY";
 
     private final CompletenessRepository completenessRepository;
     private final ResourceRepository resourceRepository;
@@ -209,24 +207,24 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param resource the top-level resource to get the leaves of
      * @return a {@link Stream} of {@link LeafResource}s from the resource repository persistence store
      */
-    private Iterator<Resource> collectLeaves(final Resource resource) {
+    private Iterator<LeafResource> collectLeaves(final Resource resource) {
         if (resource instanceof ParentResource) {
             // Treat resource as a ParentResource
             ParentResource parentResource = (ParentResource) resource;
+            Iterator<LeafResource> resourceIterator = null;
             // Get the children
             Iterator<ResourceEntity> childEntities = resourceRepository.streamFindAllByParentId(parentResource.getId());
-            List<Resource> childResources = new ArrayList<>();
             while (childEntities.hasNext()) {
                 ResourceEntity entity = childEntities.next();
-                childResources.add(entity.getResource());
+                resourceIterator = collectLeaves(resolveParentsUpto(entity.getResource(), resource));
             }
-            return childResources.iterator();
+            return resourceIterator;
         } else {
             // If we have reached a leaf, then done
             // Return one-element stream (this could probably lead to some performance penalty)
             // It should be a negligible hit to performance, relative how much other processing happens per-leaf
-            List<Resource> resourceList = new ArrayList<>();
-            resourceList.add(resource);
+            List<LeafResource> resourceList = new ArrayList<>();
+            resourceList.add((LeafResource) resource);
             return resourceList.iterator();
         }
     }
@@ -421,7 +419,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     @Override
     public Iterator<LeafResource> getResourcesById(final String resourceId) {
         LOGGER.debug("Getting resources by id '{}'", resourceId);
-        List<LeafResource> resourceList = new ArrayList<>();
+        Iterator<LeafResource> resourceIterator = null;
         // Only return info on complete sets of information
         if (isResourceIdComplete(resourceId)) {
             LOGGER.info("Persistence hit for resourceId {}", resourceId);
@@ -429,13 +427,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
             Iterator<ResourceEntity> entityIterator = resourceRepository.findByResourceId(resourceId);
             while (entityIterator.hasNext()) {
                 ResourceEntity entity = entityIterator.next();
-                resourceList.add((LeafResource) entity.getResource());
+                resourceIterator = collectLeaves(resolveParents(entity.getResource()));
             }
         } else {
             LOGGER.info("Persistence miss for resourceId {}", resourceId);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
-        return resourceList.iterator();
+        return resourceIterator;
     }
 
     // Given a type, return all leaf resources of that type with all parents resolved
