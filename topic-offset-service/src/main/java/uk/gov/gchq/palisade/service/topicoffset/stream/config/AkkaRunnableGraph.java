@@ -81,18 +81,23 @@ public class AkkaRunnableGraph {
 
         return source
                 // Create a topic offset response using the offset value of the original message
+                // We want to do a Source::filter, but can't because we still need to commit *every* message to the upstream source
+                // Instead, map to Optional, filtering for those that are offsets, but still keeping track of every original committableMessage (probably paired with an Optional::empty)
                 .map(committableMessage -> {
-                    // Filter out the non-offsets from the offsets for the topic and get the offset values
-                    Optional<TopicOffsetResponse> response = Optional.empty();
-                    if (service.isOffsetForTopic(committableMessage.record().headers())) {
-                        response = Optional.of(service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset()));
-                    }
+                    Optional<TopicOffsetResponse> response = Optional.of(committableMessage.record().headers())
+                            // 'Filter out' the non-offsets for the topic
+                            // These messages still need to be committed to the upstream, but the downstream will be discarded through the ProducerMessage::passThrough
+                            .filter(service::isOffsetForTopic)
+                            // Get the offset values for offsets for this topic
+                            .map(ignored -> service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset()));
 
                     return new Pair<>(committableMessage, response);
                 })
 
+                // Either send the Optional::present result to the downstream kafka, or discard the Optional::empty
+                // Create a ProducerMessage of either a committable ::passThrough (if not an offset) or a committable ::single (if an offset)
+                // In this way, *every* upstream message is committed exactly once
                 .map((Pair<CommittableMessage<String, TopicOffsetRequest>, Optional<TopicOffsetResponse>> messageAndResponse) -> {
-                    // We must commit the consumer (upstream) offset even if messages are 'filtered out'
                     Committable consumerOffset = messageAndResponse.first().committableOffset();
                     return messageAndResponse.second()
                             .map(response -> {
@@ -103,6 +108,7 @@ public class AkkaRunnableGraph {
                                 // Build producer message, applying the committable pass-thru and consuming the original message
                                 return ProducerMessage.single(record, consumerOffset);
                             })
+                            // We must commit the consumer (upstream) offset even if messages are 'filtered out' and discarded
                             .orElse(ProducerMessage.passThrough(consumerOffset));
                 })
 
