@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,22 +31,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
-import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.attributemask.stream.config.AkkaSystemConfig;
+import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.attributemask.web.AttributeMaskingRestController;
 
-import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {AttributeMaskingRestController.class})
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, AttributeMaskingRestController.class, AkkaSystemConfig.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, AttributeMaskingRestController.class})
 class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @SpyBean
-    ConsumerTopicConfiguration topicConfiguration;
+    @MockBean
+    private KafkaProducerService serviceMock;
     @Autowired
     private AttributeMaskingRestController controller;
     @Autowired
@@ -54,15 +52,13 @@ class RestControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        Topic topic = new Topic();
-        topic.setPartitions(1);
-        topic.setName("input-topic");
-        Mockito.when(topicConfiguration.getTopics()).thenReturn(Collections.singletonMap("input-topic", topic));
+        Mockito.when(serviceMock.maskAttributesMulti(Mockito.any(), Mockito.any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(topicConfiguration);
+        Mockito.reset(serviceMock);
     }
 
     @Test
