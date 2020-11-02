@@ -41,6 +41,8 @@ import static java.util.Objects.requireNonNull;
 
 public class JpaPersistenceLayer implements PersistenceLayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
+    private static final String COMPLETE = "complete";
+    private static final String NOT_COMPLETE = "not complete";
 
     private final CompletenessRepository completenessRepository;
     private final ResourceRepository resourceRepository;
@@ -103,7 +105,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private boolean isResourceIdComplete(final String resourceId) {
         // Check details with completeness db
         boolean complete = completenessRepository.compositeExistsByEntityTypeAndEntityId(EntityType.RESOURCE, resourceId);
-        LOGGER.debug("Resource {} is {}", resourceId, complete ? "complete" : "not complete");
+        LOGGER.debug("Resource {} is {}", resourceId, complete ? COMPLETE : NOT_COMPLETE);
         return complete;
     }
 
@@ -116,7 +118,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private boolean isTypeComplete(final String type) {
         // Check details with completeness db
         boolean complete = completenessRepository.compositeExistsByEntityTypeAndEntityId(EntityType.TYPE, type);
-        LOGGER.debug("Type {} is {}", type, complete ? "complete" : "not complete");
+        LOGGER.debug("Type {} is {}", type, complete ? COMPLETE : NOT_COMPLETE);
         return complete;
     }
 
@@ -129,7 +131,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private boolean isSerialisedFormatComplete(final String serialisedFormat) {
         // Check details with completeness db
         boolean complete = completenessRepository.compositeExistsByEntityTypeAndEntityId(EntityType.FORMAT, serialisedFormat);
-        LOGGER.debug("SerialisedFormat {} is {}", serialisedFormat, complete ? "complete" : "not complete");
+        LOGGER.debug("SerialisedFormat {} is {}", serialisedFormat, complete ? COMPLETE : NOT_COMPLETE);
         return complete;
     }
 
@@ -145,7 +147,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         boolean persisted = resourceRepository.findByResourceId(resourceId)
                 // Return whether or not such an entity exists
                 .hasNext();
-        LOGGER.debug("Resource {} is {}", resourceId, persisted ? "persisted" : "not persisted");
+        LOGGER.debug("Resource {} is {}", resourceId, persisted ? COMPLETE : NOT_COMPLETE);
         return persisted;
     }
 
@@ -181,12 +183,10 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * Apply the callback predicate to each parent-child pair
      * Stop if the predicate is not satisfied or if no further parents exist
      *
-     * @param <T>          the type of this initial resource, e.g. {@link LeafResource}
      * @param resource     the initial resource to begin operating and recursing up from
      * @param callbackPred callback function to apply to each parent-child pair, return false to stop recursion
-     * @return the resource passed as the first argument, useful for Stream.map operations
      */
-    private <T extends Resource> T traverseParentsByResource(final T resource, final BiPredicate<ParentResource, ChildResource> callbackPred) {
+    private void traverseParentsByResource(final Resource resource, final BiPredicate<ParentResource, ChildResource> callbackPred) {
         if (resource instanceof ChildResource) {
             // Treat resource as a ChildResource
             ChildResource childResource = (ChildResource) resource;
@@ -197,7 +197,6 @@ public class JpaPersistenceLayer implements PersistenceLayer {
             }
         }
         // Nice for transparency, even though the reference has been mutated
-        return resource;
     }
 
     /**
