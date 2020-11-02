@@ -67,7 +67,7 @@ public class ResourceRestController {
                                                 final @RequestBody(required = false) ResourceRequest request) {
 
         // Process the request and return the result
-        return resourceRequestMulti(headers, Collections.singletonList(request));
+        return service.resourceRequestMulti(headers, Collections.singletonList(request));
     }
 
     /**

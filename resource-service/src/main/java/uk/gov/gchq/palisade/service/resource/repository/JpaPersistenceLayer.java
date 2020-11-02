@@ -401,16 +401,15 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param resourceId the id of the resource to get
      * @return {@link Iterator} of a {@link Resource} in persistence, Optional.empty if not found
      */
-    private Iterator<Resource> getResourceById(final String resourceId) {
+    private Iterator<LeafResource> getResourceById(final String resourceId) {
         // Get resource entity from db
+        Iterator<LeafResource> resourceIterator = null;
         Iterator<ResourceEntity> entityIterator = resourceRepository.findByResourceId(resourceId);
-        List<Resource> resourceList = new ArrayList<>();
         while (entityIterator.hasNext()) {
             ResourceEntity entity = entityIterator.next();
-            Resource resource = entity.getResource();
-            resourceList.add(resource);
+            resourceIterator = collectLeaves(resolveParents(entity.getResource()));
         }
-        return resourceList.iterator();
+        return resourceIterator;
     }
 
     // ~~~ Actual method implementations/overrides for PersistenceLayer interface ~~~ //
@@ -440,7 +439,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     @Override
     public Iterator<LeafResource> getResourcesByType(final String type) {
         LOGGER.debug("Getting resources by type '{}'", type);
-        List<LeafResource> resourceList = new ArrayList<>();
+        Iterator<LeafResource> resourceIterator = null;
         // Only return info on complete sets of information
         if (isTypeComplete(type)) {
             LOGGER.info("Persistence hit for type {}", type);
@@ -448,23 +447,21 @@ public class JpaPersistenceLayer implements PersistenceLayer {
             Iterator<TypeEntity> typeIterator = typeRepository.streamFindAllByType(type);
             while (typeIterator.hasNext()) {
                 TypeEntity entity = typeIterator.next();
-                Iterator<Resource> resourceIterator = getResourceById(entity.getResourceId());
-                while (resourceIterator.hasNext()) {
-                    resourceList.add((LeafResource) resourceIterator.next());
-                }
+                resourceIterator = getResourceById(entity.getResourceId());
             }
+            return resourceIterator;
         } else {
             LOGGER.info("Persistence miss for type {}", type);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
-        return resourceList.iterator();
+        return null;
     }
 
     // Given a serialisedFormat, return all leaf resources of that serialisedFormat with all parents resolved
     @Override
     public Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         LOGGER.debug("Getting resources by serialised format '{}'", serialisedFormat);
-        List<LeafResource> resourceList = new ArrayList<>();
+        Iterator<LeafResource> resourceIterator = null;
         // Only return info on complete sets of information
         if (isSerialisedFormatComplete(serialisedFormat)) {
             LOGGER.info("Persistence hit for serialised format {}", serialisedFormat);
@@ -472,17 +469,14 @@ public class JpaPersistenceLayer implements PersistenceLayer {
             Iterator<SerialisedFormatEntity> formatIterator = serialisedFormatRepository.streamFindAllBySerialisedFormat(serialisedFormat);
             while (formatIterator.hasNext()) {
                 SerialisedFormatEntity entity = formatIterator.next();
-                // Get the Resource(s)
-                Iterator<Resource> resourceIterator = getResourceById(entity.getResourceId());
-                while (resourceIterator.hasNext()) {
-                    resourceList.add((LeafResource) resourceIterator.next());
-                }
+                resourceIterator = getResourceById(entity.getResourceId());
             }
+            return resourceIterator;
         } else {
             LOGGER.info("Persistence miss for serialised format {}", serialisedFormat);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
-        return resourceList.iterator();
+        return null;
     }
 
     // Add a leaf resource and mark it and its parents as complete up to a given root resource id
