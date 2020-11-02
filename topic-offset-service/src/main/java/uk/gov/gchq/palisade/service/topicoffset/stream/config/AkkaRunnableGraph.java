@@ -46,6 +46,7 @@ import uk.gov.gchq.palisade.service.topicoffset.stream.ConsumerTopicConfiguratio
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.topicoffset.stream.ProducerTopicConfiguration.Topic;
 
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -79,21 +80,31 @@ public class AkkaRunnableGraph {
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         return source
-                // Filter out the start of stream for the topic and retrieves the offset
-                .filter(committableMessage -> service.isOffsetForTopic(committableMessage.record().headers()))
-
                 // Create a topic offset response using the offset value of the original message
-                .map(committableMessage -> new Pair<>(committableMessage, service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset())))
+                .map(committableMessage -> {
+                    // Filter out the non-offsets from the offsets for the topic and get the offset values
+                    Optional<TopicOffsetResponse> response = Optional.empty();
+                    if (service.isOffsetForTopic(committableMessage.record().headers())) {
+                        response = Optional.of(service.createTopicOffsetResponse(committableMessage.committableOffset().partitionOffset().offset()));
+                    }
 
-                // Build producer record, copying the partition, keeping track of original message
-                .map((Pair<CommittableMessage<String, TopicOffsetRequest>, TopicOffsetResponse> messageAndResponse) -> {
-                    ConsumerRecord<String, ?> requestRecord = messageAndResponse.first().record();
-                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-                    return new Pair<>(messageAndResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), messageAndResponse.second(), requestRecord.headers()));
+                    return new Pair<>(committableMessage, response);
                 })
 
-                // Build producer message, applying the committable pass-thru and consuming the original message
-                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
+                .map((Pair<CommittableMessage<String, TopicOffsetRequest>, Optional<TopicOffsetResponse>> messageAndResponse) -> {
+                    // We must commit the consumer (upstream) offset even if messages are 'filtered out'
+                    Committable consumerOffset = messageAndResponse.first().committableOffset();
+                    return messageAndResponse.second()
+                            .map(response -> {
+                                ConsumerRecord<String, ?> requestRecord = messageAndResponse.first().record();
+                                // Build producer record, copying the partition, keeping track of original message
+                                // In the future, consider recalculating the token according to number of upstream/downstream partitions available
+                                ProducerRecord<String, TopicOffsetResponse> record = new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), response, requestRecord.headers());
+                                // Build producer message, applying the committable pass-thru and consuming the original message
+                                return ProducerMessage.single(record, consumerOffset);
+                            })
+                            .orElse(ProducerMessage.passThrough(consumerOffset));
+                })
 
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
