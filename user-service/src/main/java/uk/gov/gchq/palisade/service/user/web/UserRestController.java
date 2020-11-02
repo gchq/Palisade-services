@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.user.web;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,7 +64,7 @@ public class UserRestController {
             final @RequestBody(required = false) UserRequest request) {
 
         // Process the request and return results
-        return this.userRequestMulti(headers, Collections.singletonList(request));
+        return service.processRequest(headers, Collections.singletonList(request));
     }
 
     /**

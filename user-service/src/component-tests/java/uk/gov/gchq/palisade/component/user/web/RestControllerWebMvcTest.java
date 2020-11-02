@@ -24,6 +24,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,22 +33,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.service.user.ApplicationTestData;
 import uk.gov.gchq.palisade.service.user.model.Token;
-import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
-import uk.gov.gchq.palisade.service.user.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.service.user.web.UserRestController;
-
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {UserRestController.class})
-@ContextConfiguration(classes = {AkkaSinkTestConfiguration.class, UserRestController.class, AkkaSystemConfig.class, ApplicationTestConfiguration.class})
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, UserRestController.class, ApplicationTestConfiguration.class})
 class RestControllerWebMvcTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
-    ConsumerTopicConfiguration topicConfiguration;
+    KafkaProducerService serviceMock;
     @Autowired
     private UserRestController controller;
     @Autowired
@@ -57,12 +56,13 @@ class RestControllerWebMvcTest {
         Topic topic = new Topic();
         topic.setPartitions(1);
         topic.setName("input-topic");
-        Mockito.when(topicConfiguration.getTopics()).thenReturn(Collections.singletonMap("input-topic", topic));
+        Mockito.when(serviceMock.processRequest(Mockito.any(), Mockito.any()))
+                .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
     }
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(topicConfiguration);
+        Mockito.reset(serviceMock);
     }
 
     @Test
