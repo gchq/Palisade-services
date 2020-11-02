@@ -83,7 +83,7 @@ public class AkkaRunnableGraph {
                 // Create a topic offset response using the offset value of the original message
                 // We want to do a Source::filter, but can't because we still need to commit *every* message to the upstream source
                 // Instead, map to Optional, filtering for those that are offsets, but still keeping track of every original committableMessage (probably paired with an Optional::empty)
-                .map(committableMessage -> {
+                .map((CommittableMessage<String, TopicOffsetRequest> committableMessage) -> {
                     Optional<TopicOffsetResponse> response = Optional.of(committableMessage.record().headers())
                             // 'Filter out' the non-offsets for the topic
                             // These messages still need to be committed to the upstream, but the downstream will be discarded through the ProducerMessage::passThrough
@@ -100,7 +100,7 @@ public class AkkaRunnableGraph {
                 .map((Pair<CommittableMessage<String, TopicOffsetRequest>, Optional<TopicOffsetResponse>> messageAndResponse) -> {
                     Committable consumerOffset = messageAndResponse.first().committableOffset();
                     return messageAndResponse.second()
-                            .map(response -> {
+                            .map((TopicOffsetResponse response) -> {
                                 ConsumerRecord<String, ?> requestRecord = messageAndResponse.first().record();
                                 // Build producer record, copying the partition, keeping track of original message
                                 // In the future, consider recalculating the token according to number of upstream/downstream partitions available
