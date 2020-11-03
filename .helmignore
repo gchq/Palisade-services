@@ -53,6 +53,6 @@ Palisade-services-*.tgz
 /palisade-service/
 /policy-service/
 /resource-service/
-/results-service/
+/topic-offset-service/
 /user-service/
 /services-manager/

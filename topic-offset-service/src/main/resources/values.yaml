@@ -11,45 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 replicaCount: 1
 
 service:
   port: 80
-
-kafkaCreateTopics:
-  - name: request
-    replicationFactor: 1
-    partitions: 1
-  - name: user
-    replicationFactor: 1
-    partitions: 1
-  - name: resource
-    replicationFactor: 1
-    partitions: 1
-  - name: rule
-    replicationFactor: 1
-    partitions: 1
-  - name: masked-resource
-    replicationFactor: 1
-    partitions: 1
-  - name: masked-resource-offset
-    replicationFactor: 1
-    partitions: 1
+  internalPort: 8093
+  type: ClusterIP
 
 image:
-  name: create-kafka-queues
-  tag: SNAPSHOT-d0a6b79
+  name: @artifactId@
+  tag: @git.commit.id.abbrev@-@revision@
   pullPolicy: IfNotPresent
+  codeRelease: @project.parent.version@
 
 resources:
   limits:
     cpu: 750m
-    memory: 2.5Gi
+    memory: 1Gi
   requests:
     cpu: 250m
-    memory: 1Gi
+    memory: 512Mi
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+nodeSelector: { }
+tolerations: [ ]
+affinity: { }
