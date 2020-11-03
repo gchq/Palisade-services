@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
+import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 
@@ -56,7 +57,9 @@ class AttributeMaskingRestControllerTest {
     @Test
     void testControllerDelegatesToAkkaSink() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(aggregatorSink, mockTopicConfig, materializer);
+        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(
+                new KafkaProducerService(aggregatorSink, mockTopicConfig, materializer)
+        );
         Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
         Mockito.when(mockTopic.getName()).thenReturn("upstream-topic");
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
@@ -84,7 +87,9 @@ class AttributeMaskingRestControllerTest {
     @Test
     void testControllerAcceptsNulls() {
         // given some test data, and a mocked service behind the controller
-        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(aggregatorSink, mockTopicConfig, materializer);
+        AttributeMaskingRestController attributeMaskingRestController = new AttributeMaskingRestController(
+                new KafkaProducerService(aggregatorSink, mockTopicConfig, materializer)
+        );
         Mockito.when(mockTopicConfig.getTopics()).thenReturn(Collections.singletonMap("input-topic", mockTopic));
         Mockito.when(mockTopic.getName()).thenReturn("upstream-topic");
         Mockito.when(mockTopic.getPartitions()).thenReturn(1);
