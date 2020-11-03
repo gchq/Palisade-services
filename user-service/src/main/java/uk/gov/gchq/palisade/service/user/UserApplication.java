@@ -44,6 +44,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+/**
+ * SpringBoot application entry-point method for the {@link UserApplication} executable
+ */
 @EnableDiscoveryClient
 @EnableCaching
 @SpringBootApplication
