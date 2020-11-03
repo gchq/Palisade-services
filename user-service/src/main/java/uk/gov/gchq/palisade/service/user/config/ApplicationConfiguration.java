@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.user.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,12 +30,16 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.user.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.UserServiceProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -68,11 +74,31 @@ public class ApplicationConfiguration implements AsyncConfigurer {
         return new StdUserPrepopulationFactory();
     }
 
+    /**
+     * A bean to instantiate a {@link UserService} implementation
+     *
+     * @param userServices  a {@link Collection} of available {@link UserService}s
+     * @return              an instance of the {@link UserServiceAsyncProxy}
+     */
+    @Bean("userService")
+    public UserServiceCachingProxy cacheableUserServiceProxy(final Collection<UserService> userServices) {
+        UserServiceCachingProxy userServiceCachingProxy = new UserServiceCachingProxy(userServices.stream().findFirst().orElse(null));
+        LOGGER.info("Instantiated UserServiceCachingProxy with {}", (userServices.stream().findFirst().orElse(null)));
+        return userServiceCachingProxy;
+    }
+
+    /**
+     * A bean for the creation of the {@link UserServiceAsyncProxy}
+     *
+     * @param service   the {@link UserService} implementation
+     * @param executor  an async {@link Executor}
+     * @return          an instance of the {@link UserServiceCachingProxy}
+     */
     @Bean
-    public UserServiceProxy userService(final Set<UserService> userServices) {
-        UserServiceProxy userServiceProxy = new UserServiceProxy(userServices.stream().findFirst().orElse(null));
-        LOGGER.info("Instantiated UserServiceProxy with {}", (userServices.stream().findFirst().orElse(null)));
-        return userServiceProxy;
+    public UserServiceAsyncProxy asyncUserServiceProxy(@Qualifier("userService") final UserService service,
+                                                       @Qualifier("applicationTaskExecutor") final Executor executor) {
+        LOGGER.info("Instantiated AsyncUserServiceProxy with {}", service.getClassName());
+        return new UserServiceAsyncProxy(service, executor);
     }
 
     @Bean(name = "null-user-service")
@@ -89,12 +115,24 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Override
-    @Bean("threadPoolTaskExecutor")
+    @Bean("applicationTaskExecutor")
     public Executor getAsyncExecutor() {
         return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
             ex.setThreadNamePrefix("AppThreadPool-");
             ex.setCorePoolSize(6);
             LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         }).findFirst().orElse(null);
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new ApplicationAsyncExceptionHandler();
+    }
+
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {}, userId {} and attributes {}, threw exception ", token, message.getUserId(), message.getAttributes(), message.getError());
     }
 }

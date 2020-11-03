@@ -26,18 +26,18 @@ import java.util.Objects;
 public class MockUserService extends HashMap<UserId, User> implements UserService {
 
     @Override
-    public User getUser(final UserId userId) {
+    public User getUser(final String userId) {
         User user = this.get(userId);
         if (Objects.nonNull(user)) {
             return user;
         } else {
-            throw new NoSuchUserIdException("No such key: " + userId.toString());
+            throw new NoSuchUserIdException("No such key: " + userId);
         }
     }
 
     @Override
     public User addUser(final User user) {
         this.put(user.getUserId(), user);
-        return this.getUser(user.getUserId());
+        return user;
     }
 }

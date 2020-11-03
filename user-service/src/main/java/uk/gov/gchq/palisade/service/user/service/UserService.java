@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.user.service;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.Service;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
@@ -31,15 +30,15 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
  */
 public interface UserService extends Service {
     /**
-     * Look up a user by their ID. The request contains the {@link UserId} to lookup from the
-     * {@link UserService}. If the requested {@link UserId} doesn't exist in this {@link
+     * Look up a user by their ID. The request contains the {@link String} to lookup from the
+     * {@link UserService}. If the requested {@link String} doesn't exist in this {@link
      * UserService} then an exception will be thrown.
      *
-     * @param userId the user ID to look up
+     * @param userId the request received by the user-service
      * @return a {@link User} with the user details
-     * @throws NoSuchUserIdException if the {@link UserId} could not be found
+     * @throws NoSuchUserIdException if the {@link User} could not be found
      */
-    User getUser(final UserId userId);
+    User getUser(final String userId);
 
     /**
      * Adds the user to the {@link UserService}. The {@link User} should be fully populated with all the necessary
