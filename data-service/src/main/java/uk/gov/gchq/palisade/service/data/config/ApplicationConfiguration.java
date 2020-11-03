@@ -43,8 +43,7 @@ import java.util.concurrent.Executor;
  * Bean configuration and dependency injection graph
  */
 @Configuration
-public
-class ApplicationConfiguration {
+public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     // Replace this with a proper error handling mechanism (kafka queues etc.)
@@ -61,12 +60,28 @@ class ApplicationConfiguration {
         return (String token, AuditSuccessMessage message) -> LOGGER.warn("Token {} and resourceId {} read leafResourceId {}", token, message.getResourceId(), message.getLeafResourceId());
     }
 
+    /**
+     * Bean for the {@link JpaPersistenceLayer}.
+     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests
+     *
+     * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
+     * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
+     * @return
+     */
     @Bean
     JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
                                             final @Qualifier("threadPoolTaskExecutor") Executor executor) {
         return new JpaPersistenceLayer(requestsRepository, executor);
     }
 
+    /**
+     * Bean for a {@link SimpleDataService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
+     * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
+     *
+     * @param persistenceLayer the persistence layer for reading authorised requests
+     * @param dataReader       the data reader to use for reading resource data from storage
+     * @return a new {@link SimpleDataService}
+     */
     @Bean
     SimpleDataService simpleDataService(final PersistenceLayer persistenceLayer,
                                         final DataReader dataReader) {
@@ -84,6 +99,11 @@ class ApplicationConfiguration {
         return new HadoopDataReader();
     }
 
+    /**
+     * Default JSON to Java seraialiser/deserialiser
+     *
+     * @return a new {@link ObjectMapper} with some additional configuration
+     */
     @Bean
     @Primary
     ObjectMapper objectMapper() {
