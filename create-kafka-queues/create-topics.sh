@@ -52,13 +52,13 @@ else
     sleep 20
   done
 
-  #Search for all environmental variables starting with the word: TOPIC
-  for topic in "${!TOPIC@}"; do
+  #Search for all environmental variables starting with the word: KAFKATOPIC
+  for topic in "${!KAFKATOPIC@}"; do
     # Check if topic already exists and store the returned value
     echo "Checking for topic ${!topic}"
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
-      # Use variable indirection to get the contents of TOPICX e.g palisade 1 1
+      # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
       echo "Creating topic ${!topic}"
       write_to_kafka ${!topic}
     else
