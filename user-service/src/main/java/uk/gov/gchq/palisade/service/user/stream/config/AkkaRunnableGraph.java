@@ -96,7 +96,7 @@ public class AkkaRunnableGraph {
                     ConsumerRecord<String, UserRequest> requestRecord = messageTokenResponse.first().record();
                     return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                             messageTokenResponse.second(), requestRecord.headers()));
-                    })
+                })
 
                 // Build producer message, applying the committable pass-thru consuming the original message
                 .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
