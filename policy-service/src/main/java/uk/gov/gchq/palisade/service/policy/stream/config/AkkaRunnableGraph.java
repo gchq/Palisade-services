@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.policy.stream.config;
 
 import akka.Done;
 import akka.japi.Pair;
-import akka.japi.tuple.Tuple3;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
@@ -93,33 +92,41 @@ public class AkkaRunnableGraph {
                         // If is a real message, not start or end of stream messages then check the resource level rules
                         .map(policyRequest -> service.getResourceRules(policyRequest.getResource())
                                 .thenApply(rules -> PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules))
-                                .thenApply(resource -> Optional.ofNullable(resource).map(leafResource -> new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), leafResource)))
-                        )
+                                // If this is a proper request (not start or end of stream)
+                                // If this is empty it could be a start/end of stream, or it could be a redacted resource, so keep track of both cases
+                                .thenApply(resource -> new Pair<>(messageAndRequest.first(), Optional.of(new Pair<>(policyRequest, Optional.ofNullable(resource))))))
                         // If is a START/END of stream then treat as accessible
-                        .orElse(CompletableFuture.completedFuture(Optional.of(new Tuple3<>(messageAndRequest.first(), messageAndRequest.second(), null)))))
+                        .orElse(CompletableFuture.completedFuture(new Pair<>(messageAndRequest.first(), Optional.empty()))))
 
-                // Filter out resources that are completely redacted
-                .flatMapConcat(optional -> Source.fromJavaStream(optional::stream))
+                // Now we get the record level rules for all resources that weren't course grain filtered out
+                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, Optional<Pair<PolicyRequest, Optional<LeafResource>>>> messageRequestResource) -> messageRequestResource.second()
+                        // If this is a proper request (not start or end of stream)
+                        .map(requestAndResource -> requestAndResource.second()
+                                // If there were resource rules and the resource was not redacted (course grain filtering)
+                                .map(resource -> service.getRecordRules(resource)
+                                        .thenApply(rules -> Optional.of(Optional.of(PolicyResponse.Builder.create(requestAndResource.first()).withResource(resource).withRules(rules)))))
+                                // If the resource was redacted
+                                .orElse(CompletableFuture.completedFuture(Optional.of(Optional.empty()))))
+                        // If this is a start or end of stream
+                        .orElse(CompletableFuture.completedFuture(Optional.empty()))
+                        // Keep track of original committable
+                        .thenApply(response -> new Pair<>(messageRequestResource.first(), response)))
 
-                // Having filtered out any resources the user doesn't have access to in the function above, we now build the map
-                // of resource to record level rule policies. If there are resource level rules for a record then there SHOULD
-                // be record level rules. Either list may be empty, but they should at least be present
-                .mapAsync(PARALLELISM, (Tuple3<CommittableMessage<String, PolicyRequest>, Optional<PolicyRequest>, LeafResource> messageRequestResource) -> messageRequestResource.t2()
-                        .map((PolicyRequest request) ->
-                                service.getRecordRules(request.getResource())
-                                        .thenApply(rules -> PolicyResponse.Builder.create(request).withResource(messageRequestResource.t3()).withRules(rules)))
-                        .orElse(CompletableFuture.completedFuture(null))
-                        .thenApply(r -> new Pair<>(messageRequestResource.t1(), r)))
-
-                // Build producer record, copying the partition, keeping track of original message
-                .map((Pair<CommittableMessage<String, PolicyRequest>, PolicyResponse> messageTokenResponse) -> {
-                    ConsumerRecord<String, PolicyRequest> requestRecord = messageTokenResponse.first().record();
-                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                            messageTokenResponse.second(), requestRecord.headers()));
+                // Now we build the producer message for kafka, adding the original committable
+                // Filtered out resources use a pass through message, they aren't sent downstream but are committed upstream
+                .map((Pair<CommittableMessage<String, PolicyRequest>, Optional<Optional<PolicyResponse>>> messageAndResponse) -> {
+                    Committable committable = messageAndResponse.first().committableOffset();
+                    ConsumerRecord<String, PolicyRequest> record = messageAndResponse.first().record();
+                    return messageAndResponse.second()
+                            // If this is a proper request
+                            .map(maybeResponse -> maybeResponse
+                                    // If the resource was not redacted
+                                    .map(response -> ProducerMessage.single(new ProducerRecord<>(outputTopic.getName(), record.partition(), record.key(), response, record.headers()), committable))
+                                    // If the resource was redacted
+                                    .orElse(ProducerMessage.passThrough(committable)))
+                            // If this is a start or end of stream
+                            .orElse(ProducerMessage.single(new ProducerRecord<>(outputTopic.getName(), record.partition(), record.key(), null, record.headers()), committable));
                 })
-
-                // Build producer message, applying the committable pass-thru consuming the original message
-                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
 
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
