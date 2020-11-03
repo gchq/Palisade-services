@@ -44,6 +44,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+/**
+ * Application entrypoint and main process runner
+ */
 @EnableDiscoveryClient
 @EnableCaching
 @SpringBootApplication
