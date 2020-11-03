@@ -14,13 +14,24 @@
 #
 
 spring:
+  application:
+    name: user-service
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
   autoconfigure:
     exclude:
     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-  cache:
-    type: caffeine
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+server:
+  port: 8087
+
+logging:
+  level:
+    uk.gov.gchq.palisade: "DEBUG"

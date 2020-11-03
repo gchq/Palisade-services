@@ -23,26 +23,33 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 
+/**
+ * This acts as a caching layer on top of an implementation of the user-service.
+ */
 @CacheConfig(cacheNames = {"users"})
-public class UserServiceProxy implements UserService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceProxy.class);
+public class UserServiceCachingProxy implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceCachingProxy.class);
     private final UserService service;
 
-    public UserServiceProxy(final UserService service) {
+    /**
+     * Constructor for the {@link UserServiceCachingProxy}
+     *
+     * @param service an implementation of the {@link UserService}
+     */
+    public UserServiceCachingProxy(final UserService service) {
         this.service = service;
     }
 
     @Cacheable(key = "#userId")
-    public User getUser(final UserId userId) {
+    public User getUser(final String userId) {
         LOGGER.info("Cache miss for userId {}", userId);
         return service.getUser(userId);
     }
 
-    @CachePut(key = "#user.userId")
+    @CachePut(key = "#user.userId.id")
     public User addUser(final User user) {
-        LOGGER.info("Cache add for userId {}", user.getUserId());
+        LOGGER.info("Cache add for userId {}", user.getUserId().getId());
         LOGGER.debug("Added user {} to cache (key=userId)", user);
         return service.addUser(user);
     }

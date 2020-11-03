@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.service.user.service;
 
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+package uk.gov.gchq.palisade.service.user.model;
 
-public class NullUserService implements UserService {
+/**
+ * Marks the start or end of a stream of messages.
+ * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
+ * Will not be present for all other (content-ful) messages.
+ */
+public enum StreamMarker {
+    START,
+    END;
 
-    @Override
-    public User getUser(final String userId) {
-        throw new NoSuchUserIdException(String.format("No userId matching %s found in cache", userId));
-    }
-
-    @Override
-    public User addUser(final User user) {
-        return user;
-    }
-
+    public static final String HEADER = "x-stream-marker";
 }

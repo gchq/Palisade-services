@@ -21,23 +21,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.UserApplication;
-import uk.gov.gchq.palisade.service.user.request.AddUserRequest;
-import uk.gov.gchq.palisade.service.user.request.GetUserRequest;
-
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("caffeine")
+/**
+ * An external requirement of the service is to keep-alive in k8s.
+ * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
+ * This should return 200 OK if the service is healthy.
+ */
 @SpringBootTest(classes = UserApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-class RestContractTest {
+@ActiveProfiles({"caffeine", "akkatest"})
+class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -48,26 +46,13 @@ class RestContractTest {
     }
 
     @Test
-    void testIsUp() {
+    void testServiceIsHealthy() {
+        // Given that the service is running (and presumably healthy)
+
+        // When we GET the /actuator/health REST endpoint (used by k8s)
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
 
-    @Test
-    void testAddedUserIsRetrievable() {
-        // Given
-        User user = new User().userId("rest-added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-
-        // When
-        AddUserRequest addUserRequest = AddUserRequest.create(new RequestId().id("addUserRequest")).withUser(user);
-        Boolean addUserResponse = restTemplate.postForObject("/addUser", addUserRequest, Boolean.class);
-        // Then
-        assertThat(addUserResponse).isTrue();
-
-        // When
-        GetUserRequest getUserRequest = GetUserRequest.create(new RequestId().id("getUserRequest")).withUserId(user.getUserId());
-        User getUserResponse = restTemplate.postForObject("/getUser", getUserRequest, User.class);
-        // Then
-        assertThat(getUserResponse).isEqualTo(user);
+        // Then the service reports itself to be healthy
+        assertThat(health.getStatusCodeValue()).isEqualTo(200);
     }
 }

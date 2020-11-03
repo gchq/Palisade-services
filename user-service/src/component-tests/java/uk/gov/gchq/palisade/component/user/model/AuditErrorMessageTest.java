@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.user.request;
+package uk.gov.gchq.palisade.component.user.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.service.user.request.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,6 +39,11 @@ class AuditErrorMessageTest {
 
     @Autowired
     private JacksonTester<AuditErrorMessage> jsonTester;
+
+    @Test
+    void testContextLoads() {
+        assertThat(jsonTester).isNotNull();
+    }
 
     /**
      * Tests the creation of the message type, AuditErrorMessage using the builder

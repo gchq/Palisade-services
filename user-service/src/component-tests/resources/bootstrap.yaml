@@ -12,15 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 spring:
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-  cache:
-    type: caffeine
-    caffeine:
-      spec: expireAfterWrite=60m, maximumSize=500
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  application:
+    name: user-service
+  cloud:
+    config:
+      enabled: false
