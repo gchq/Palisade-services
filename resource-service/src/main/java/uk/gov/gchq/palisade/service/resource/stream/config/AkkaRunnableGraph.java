@@ -79,29 +79,25 @@ public class AkkaRunnableGraph {
 
         // Read messages from the stream source
         return source
-
-                // Get a stream of resources
+                // Get a stream of resources from an iterator
                 .flatMapConcat(committableMessage -> Source.fromIterator(() ->
                         service.getResourcesById(committableMessage.record().value().resourceId))
+                        // Make the stream of resources an Optional
                         .map(Optional::of)
+                        // Add empty optional
                         .concat(Source.single(Optional.empty()))
                         // Build the producer record for each resource
-                        .map(optional -> optional
-                                .map(leafResource -> new ProducerRecord<>(
-                                    outputTopic.getName(),
-                                    committableMessage.record().partition(),
-                                    committableMessage.record().key(),
-                                    ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
-                                    committableMessage.record().headers())
-                                ).orElse(null)
+                        .map(optional -> optional.map(leafResource -> new ProducerRecord<>(
+                                outputTopic.getName(),
+                                committableMessage.record().partition(),
+                                committableMessage.record().key(),
+                                ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
+                                committableMessage.record().headers()))
                         )
-                        .map(record -> {
-                            if (record != null) {
-                                return ProducerMessage.single(record);
-                            } else {
-                                return ProducerMessage.single(null, (Committable) committableMessage.committableOffset());
-                            }
-                        })
+                        .map(optional -> optional
+                                .map(record -> ProducerMessage.single(optional.get(), (Committable) ProducerMessage.passThrough()))
+                                .orElse(ProducerMessage.passThrough(committableMessage.committableOffset()))
+                        )
                 )
 
                 // Send errors to supervisor
