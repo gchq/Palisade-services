@@ -24,6 +24,7 @@ import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerMessage.Envelope;
+import akka.kafka.ProducerMessage.PassThroughMessage;
 import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
@@ -45,6 +46,7 @@ import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest.Builder;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.Token;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration.Topic;
@@ -59,7 +61,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final int PARALLELISM = 1;
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
@@ -80,27 +81,28 @@ public class AkkaRunnableGraph {
         return source
 
                 // Get a stream of resources
-                .flatMapConcat(committableMessage ->
-                        service.getResourcesById(committableMessage.record().value().resourceId)
-                        .map(leafResource -> {
-                            Optional<LeafResource> leafResourceOptional = Optional.of(leafResource);
-                            return new Pair<>(committableMessage, leafResourceOptional);
+                .flatMapConcat(committableMessage -> Source.fromIterator(() ->
+                        service.getResourcesById(committableMessage.record().value().resourceId))
+                        .map(Optional::of)
+                        .concat(Source.single(Optional.empty()))
+                        // Build the producer record for each resource
+                        .map(optional -> optional
+                                .map(leafResource -> new ProducerRecord<>(
+                                    outputTopic.getName(),
+                                    committableMessage.record().partition(),
+                                    committableMessage.record().key(),
+                                    ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
+                                    committableMessage.record().headers())
+                                ).orElse(null)
+                        )
+                        .map(record -> {
+                            if (record != null) {
+                                return ProducerMessage.single(record);
+                            } else {
+                                return ProducerMessage.single(null, (Committable) committableMessage.committableOffset());
+                            }
                         })
                 )
-
-                // Build producer record, copying the partition, keeping track of original message
-                .map((Pair<CommittableMessage<String, ResourceRequest>, Optional<LeafResource>> messageResource) -> {
-                    ConsumerRecord<String, ResourceRequest> requestRecord = messageResource.first().record();
-                    ResourceResponse response = null;
-                    if (messageResource.second().isPresent()) {
-                        response = ResourceResponse.Builder.create(requestRecord.value()).withResource(messageResource.second().get());
-                    }
-                    // In the future, consider recalculating the token according to number of upstream/downstream partitions available
-                    return new Pair<>(messageResource.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(), response, requestRecord.headers()));
-                })
-
-                // Build producer message, applying the committable pass-thru consuming the original message
-                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
 
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
