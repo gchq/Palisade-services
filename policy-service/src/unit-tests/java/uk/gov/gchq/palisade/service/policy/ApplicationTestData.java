@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
-import uk.gov.gchq.palisade.service.policy.model.StreamMarker;
+import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 
 import java.io.Serializable;

@@ -66,11 +66,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.policy.ContractTestData;
+import uk.gov.gchq.palisade.contract.policy.common.ContractTestData;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.model.StreamMarker;
+import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
@@ -216,7 +216,7 @@ class KafkaContractTest {
                         () -> assertThat(results.get(0).value().get("rules").get("message").asText())
                                 .isEqualTo("no rules set"),
                         () -> assertThat(results.get(0).value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
-                                .isEqualTo("uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule")
+                                .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule")
                 ));
     }
 

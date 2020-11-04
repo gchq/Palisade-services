@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.model;
+package uk.gov.gchq.palisade.contract.policy.common;
 
-/**
- * Marks the start or end of a stream of messages.
- * Will be present in headers to indicate the message is empty and marks the start/end of the stream.
- * Will not be present for all other (content-ful) messages.
- */
-public enum StreamMarker {
-    START,
-    END;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rule;
 
-    public static final String HEADER = "x-stream-marker";
+import java.io.Serializable;
+
+public class PassThroughRule implements Serializable, Rule<Resource> {
+    private static final long serialVersionUID = 1L;
+
+    public Resource apply(final Resource resource, final User user, final Context context) {
+        return resource;
+    }
 }

@@ -107,14 +107,18 @@ public class PolicyApplication {
     }
 
     /**
-     * Init post construct.
-     * Pre-population profile used in the KafkaContractTests for pre-populating the cache.
-     * Example profile used for pre-populating the cache for the example
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
      */
     @EventListener(ApplicationReadyEvent.class)
-    @Profile({"pre-population, example"})
-    public void initPostConstruct() {
-        // Add example Policies to the policy-service cache
+    public void serveForever() {
+        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .collect(Collectors.toSet());
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+        runnerThreads.forEach(CompletableFuture::join);
+
+        //After launching Kafka, now run pre-population
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
         LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
         LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
@@ -129,19 +133,4 @@ public class PolicyApplication {
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
                 });
     }
-
-    /**
-     * Runs all available Akka {@link RunnableGraph}s until completion.
-     * The 'main' threads of the application during runtime are the completable futures spawned here.
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void serveForever() {
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
-        LOGGER.info("Started {} runner threads", runnerThreads.size());
-        runnerThreads.forEach(CompletableFuture::join);
-    }
-
-
 }

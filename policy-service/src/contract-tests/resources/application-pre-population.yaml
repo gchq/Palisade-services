@@ -35,9 +35,9 @@ population:
 
   - resource: /test/resourceId
     resourceRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
     recordRules:
-      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.kafka.PassThroughRule
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
 
   resourceProvider: std
   resources:
