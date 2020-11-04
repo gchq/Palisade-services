@@ -67,10 +67,10 @@ import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.policy.common.ContractTestData;
+import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;

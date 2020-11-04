@@ -27,7 +27,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -53,7 +52,7 @@ import java.util.stream.Collectors;
 /**
  * Application entrypoint and main process runner
  */
-@EnableCaching(proxyTargetClass=true)
+@EnableCaching(proxyTargetClass = true)
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class PolicyApplication {
