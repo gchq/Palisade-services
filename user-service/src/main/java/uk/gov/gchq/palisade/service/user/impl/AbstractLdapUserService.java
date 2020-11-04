@@ -101,13 +101,14 @@ public abstract class AbstractLdapUserService implements UserService {
     }
 
     @Override
-    public User getUser(final UserId userId) {
-        requireNonNull(userId, "userId has not been set");
-        requireNonNull(userId.getId(), "userId has not been set");
+    public User getUser(final String userId) {
+        requireNonNull(userId, "userId is null");
         LOGGER.debug("User {} was not in the cache. Fetching details from LDAP.", userId);
         try {
-            Map<String, Object> userAttrs = getAttributes(userId);
-            return new User().userId(userId).auths(getAuths(userId, userAttrs, context)).roles(getRoles(userId, userAttrs, context));
+            Map<String, Object> userAttrs = getAttributes(new UserId().id(userId));
+            return new User().userId(new UserId().id(userId))
+                    .auths(getAuths(new UserId().id(userId), userAttrs, context))
+                    .roles(getRoles(new UserId().id(userId), userAttrs, context));
         } catch (NamingException ex) {
             LOGGER.error("Unable to get user from LDAP: {}", ex.toString());
             throw new NoSuchUserIdException("Unable to get user from LDAP", ex);
