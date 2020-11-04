@@ -29,9 +29,6 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  autoconfigure:
-    exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
 server:
   port: 8085

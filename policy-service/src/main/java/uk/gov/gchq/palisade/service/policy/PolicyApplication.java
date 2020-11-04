@@ -119,7 +119,6 @@ public class PolicyApplication {
         LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
         LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
-                .peek(e -> LOGGER.info("pre-pop stream {}", e))
                 .forEach((PolicyPrepopulationFactory factory) -> {
                     //Build Resource Rules
                     Entry<Resource, Rules<LeafResource>> resourceMap = factory.buildResourceRules(resourceConfig.getResources());
