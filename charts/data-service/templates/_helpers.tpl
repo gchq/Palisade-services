@@ -96,6 +96,13 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 
 {{/*
+Calculate the service config location
+*/}}
+{{- define "data-service.config.path" }}
+{{- printf "/usr/share/%s/config/" .Chart.Name }}
+{{- end }}
+
+{{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "data-service.deployment.name" }}

@@ -16,121 +16,123 @@
 
 package uk.gov.gchq.palisade.contract.data.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import feign.Response;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.contract.data.config.DataTestConfiguration;
-import uk.gov.gchq.palisade.contract.data.config.mock.AuditServiceMock;
-import uk.gov.gchq.palisade.contract.data.config.mock.PalisadeServiceMock;
-import uk.gov.gchq.palisade.contract.data.config.web.DataClient;
-import uk.gov.gchq.palisade.contract.data.config.web.DataClientWrapper;
-import uk.gov.gchq.palisade.contract.data.model.Employee;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.contract.data.config.model.Employee;
 import uk.gov.gchq.palisade.data.serialise.AvroSerialiser;
-import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.DataApplication;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@EnableFeignClients(basePackageClasses = {DataClient.class})
-@Import(DataTestConfiguration.class)
-@SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
-@ActiveProfiles("web")
+@SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+@AutoConfigureDataJpa
+@ActiveProfiles({"static"})
 class RestContractTest {
-    private static final ObjectMapper MAPPER = JSONSerialiser.createDefaultMapper();
-
     private static final String CURRENT_PATH = Paths.get("src/contract-tests/resources/data/employee_file0.avro").toUri().toString();
-    private static final FileResource RESOURCE = ((FileResource) ResourceBuilder.create(CURRENT_PATH))
-            .type(Employee.class.getTypeName())
-            .serialisedFormat("avro");
+    private static final AvroSerialiser<Employee> AVRO_SERIALISER = new AvroSerialiser<>(Employee.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
-    private Map<String, DataService> serviceMap;
+    private DataService dataService;
     @Autowired
-    private DataClientWrapper client;
-
-    private final WireMockRule auditMock = AuditServiceMock.getRule();
-    private final WireMockRule palisadeMock = PalisadeServiceMock.getRule();
-
-    private AvroSerialiser<Employee> avroSerialiser;
+    private AuthorisedRequestsRepository requestsRepository;
+    @Autowired
+    private TestRestTemplate restTemplate;
+    @Autowired
+    private MockMvc mockMvc;
 
     @BeforeEach
-    void setUp() throws JsonProcessingException {
-        AuditServiceMock.stubRule(auditMock, MAPPER);
-        auditMock.start();
+    void setUp() {
+        // Given - AvroSerialiser added to data-service
+        dataService.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), AVRO_SERIALISER);
 
-        PalisadeServiceMock.stubRule(palisadeMock, MAPPER, RESOURCE);
-        palisadeMock.start();
-
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        avroSerialiser = new AvroSerialiser<>(Employee.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        auditMock.stop();
-        auditMock.resetAll();
-
-        palisadeMock.stop();
-        palisadeMock.resetAll();
+        // Given - Request for "token" and CURRENT_PATH is authorised
+        requestsRepository.save(new AuthorisedRequestEntity(
+                "token",
+                new User().userId("test-user"),
+                new FileResource().id(CURRENT_PATH)
+                        .serialisedFormat("avro")
+                .type(Employee.class.getTypeName())
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
+                .parent(new SystemResource().id("/")),
+                new Context(),
+                new Rules<>()
+        ));
     }
 
     @Test
     void testContextLoads() {
-        assertThat(serviceMap).isNotNull();
-        assertThat(serviceMap).isNotEmpty();
+        assertThat(dataService).isNotNull();
+        assertThat(restTemplate).isNotNull();
+        assertThat(mockMvc).isNotNull();
     }
 
     @Test
     void testIsUp() {
-        Response health = client.getHealth();
-        assertThat(health.status()).isEqualTo(HttpStatus.OK.value());
+        ResponseEntity<JsonNode> health = restTemplate.getForEntity("/actuator/health", JsonNode.class);
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    void testReadChunked() throws IOException {
-        // Given - ReadRequest created
-        ReadRequest readRequest = new ReadRequest().token("token").resource(RESOURCE);
-        readRequest.setOriginalRequestId(new RequestId().id("original"));
-
-        // Given - AvroSerialiser added to Data-service
-        client.addSerialiser(DataFlavour.of(Employee.class.getTypeName(), "avro"), avroSerialiser);
-
+    void testReadChunked() throws Exception {
         // Given - the file contains the expected data
-         avroSerialiser.serialise(Stream.of(new Employee()), new FileOutputStream("src/contract-tests/resources/data/employee_file0.avro"));
+        // This data file can be recreated with the following code:
+        // AVRO_SERIALISER.serialise(Stream.of(new Employee()), new FileOutputStream(CURRENT_PATH));
 
         // When
-        Set<Employee> readResult = client.readChunked(readRequest).collect(Collectors.toSet());
+        DataRequest readRequest = DataRequest.Builder.create()
+                .withToken("token")
+                .withLeafResourceId(CURRENT_PATH);
+        byte[] bytes = mockMvc.perform(
+                post("/read/chunked")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsBytes(readRequest)))
+                .andExpect(request().asyncStarted())
+                .andDo(MvcResult::getAsyncResult)
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsByteArray();
 
-        // Then
-        for (Employee result : readResult) {
-            assertThat(result).isEqualTo(new Employee());
-        }
+        List<Employee> data = AVRO_SERIALISER.deserialise(new ByteArrayInputStream(bytes))
+                .collect(Collectors.toList());
+
+        // Then the data file was read correctly - it was a single default Employee
+        assertThat(data)
+                .hasSize(1)
+                .first().isEqualTo(new Employee());
     }
 }
