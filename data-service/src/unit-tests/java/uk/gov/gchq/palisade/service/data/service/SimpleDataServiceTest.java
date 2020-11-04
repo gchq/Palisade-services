@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,133 +13,92 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.data.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.data.util.Pair;
 
-import uk.gov.gchq.palisade.RequestId;
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.reader.common.DataReader;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.data.request.AuditRequest.ReadRequestExceptionAuditRequest;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.reader.common.ResponseWriter;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.rule.Rules;
+import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.io.OutputStream;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(JUnit4.class)
-public class SimpleDataServiceTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleDataServiceTest.class);
+class SimpleDataServiceTest {
+    // Mocks
+    final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
+    final DataReader dataReader = Mockito.mock(DataReader.class);
+    final DataReaderResponse readerResponse = Mockito.mock(DataReaderResponse.class);
+    final SimpleDataService simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
+    final OutputStream outputStream = Mockito.mock(OutputStream.class);
 
-    private AuditService auditService;
-    private PalisadeService palisadeService;
-    private SimpleDataService simpleDataService;
-    private DataReader dataReader;
-    String token = "token";
-    @Mock
-    ReadRequest readRequest;
-    @Mock
-    RequestId requestId;
-    @Mock
-    LeafResource leafResource;
+    // Test data
+    final DataRequest dataRequest = DataRequest.Builder.create().withToken("test-request-token").withLeafResourceId("/resource/id");
+    final AuthorisedRequestEntity entity = new AuthorisedRequestEntity(
+            "test-request-token",
+            new User().userId("user-id"),
+            new FileResource().id("/resource/id"),
+            new Context(),
+            new Rules<>()
+    );
+    final DataReaderRequest readerRequest = new DataReaderRequest()
+            .user(entity.getUser())
+            .resource(entity.getLeafResource())
+            .context(entity.getContext())
+            .rules(entity.getRules());
 
+    @Test
+    void testAuthoriseRequestDelegatesToPersistence() {
+        // Given the persistence layer is mocked to return the test data
+        Mockito.when(persistenceLayer.getAsync(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(CompletableFuture.completedFuture(Optional.of(entity)));
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        mockOtherServices();
-        simpleDataService = new SimpleDataService(auditService, palisadeService, dataReader);
-        LOGGER.info("Simple Data Service created: {}", simpleDataService);
+        // When
+        CompletableFuture<Optional<DataReaderRequest>> authorisedRequest = simpleDataService.authoriseRequest(dataRequest);
+
+        // Then the mock has been called
+        Mockito.verify(persistenceLayer, Mockito.atLeastOnce()).getAsync(Mockito.anyString(), Mockito.anyString());
+
+        // Then the request was authorised
+        assertThat(authorisedRequest.join())
+                .isPresent()
+                .get()
+                .usingRecursiveComparison()
+                .isEqualTo(readerRequest);
     }
 
     @Test
-    public void auditRequestReceivedExceptionTest() {
-        //given
-        ReadRequest readRequest = Mockito.mock(ReadRequest.class);
-        Throwable throwable = Mockito.mock(Throwable.class);
-        Method method = ReflectionUtils.findMethod(SimpleDataService.class, "auditRequestReceivedException", ReadRequest.class, Throwable.class);
-        ReflectionUtils.makeAccessible(method);
-        when(readRequest.getToken()).thenReturn(token);
-        when(readRequest.getOriginalRequestId()).thenReturn(requestId);
-        when(readRequest.getResource()).thenReturn(leafResource);
+    void testReadDelegatesToReader() {
+        // Given the reader is mocked to return the test data
+        Mockito.when(dataReader.read(Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(readerResponse);
+        Mockito.when(readerResponse.getWriter())
+                .thenReturn(Mockito.mock(ResponseWriter.class));
 
+        // When
+        Pair<AtomicLong, AtomicLong> recordsReadAndReturned = simpleDataService.read(readerRequest, outputStream);
 
-        //when
-        ReflectionUtils.invokeMethod(method, simpleDataService, readRequest, throwable);
+        // Then the mock has been called
+        Mockito.verify(dataReader, Mockito.atLeastOnce()).read(Mockito.any(), Mockito.any(), Mockito.any());
 
-
-        //then
-        ArgumentCaptor<ReadRequestExceptionAuditRequest> readRequestExceptionAuditRequestArgumentCaptor = ArgumentCaptor.forClass(ReadRequestExceptionAuditRequest.class);
-        verify(auditService, times(1)).audit(readRequestExceptionAuditRequestArgumentCaptor.capture());
-        ReadRequestExceptionAuditRequest readRequestExceptionAuditRequest = readRequestExceptionAuditRequestArgumentCaptor.getValue();
-
-        Field tokenField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "token");
-        ReflectionUtils.makeAccessible(tokenField);
-        String generatedToken = (String) ReflectionUtils.getField(tokenField, readRequestExceptionAuditRequest);
-        assertEquals(token, generatedToken);
-
-        Field leafField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "leafResource");
-        ReflectionUtils.makeAccessible(leafField);
-        LeafResource generatedLeafResource = (LeafResource) ReflectionUtils.getField(leafField, readRequestExceptionAuditRequest);
-        assertEquals(leafResource, generatedLeafResource);
-
-        Field exceptionField = ReflectionUtils.findField(ReadRequestExceptionAuditRequest.class, "exception");
-        ReflectionUtils.makeAccessible(exceptionField);
-        Throwable generatedException = (Throwable) ReflectionUtils.getField(exceptionField, readRequestExceptionAuditRequest);
-        assertEquals(throwable, generatedException);
+        // Then the correct number of records was (not) read
+        assertThat(recordsReadAndReturned)
+                .usingRecursiveComparison()
+                .isEqualTo(Pair.of(0L, 0L));
     }
-
-    @Test
-    public void getPalisadeServiceTest() {
-        //given
-
-        //when
-        PalisadeService test = simpleDataService.getPalisadeService();
-
-        //Then
-        assertEquals(test, palisadeService);
-    }
-
-    @Test
-    public void getDataReaderTest() {
-        //given
-
-        //when
-        DataReader test = simpleDataService.getDataReader();
-
-        //Then
-        assertEquals(test, dataReader);
-    }
-
-    @Test
-    public void getAuditServiceTest() {
-        //given
-
-        //when
-        AuditService test = simpleDataService.getAuditService();
-
-        //Then
-        assertEquals(test, auditService);
-    }
-
-    private void mockOtherServices() {
-        auditService = Mockito.mock(AuditService.class);
-        palisadeService = Mockito.mock(PalisadeService.class);
-        dataReader = Mockito.mock(DataReader.class);
-    }
-
 }

@@ -16,15 +16,10 @@
 spring:
   profiles:
     include:
+    - redis
     - k8s-config
 
 ---
 
 spring:
   profiles: k8s-config
-
-# Kubernetes discovery via DNS to the service loadbalancer
-web:
-  client:
-    audit-service: audit-service
-    palisade-service: palisade-service

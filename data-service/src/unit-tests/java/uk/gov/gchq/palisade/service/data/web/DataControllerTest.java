@@ -22,48 +22,48 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
-import uk.gov.gchq.palisade.service.data.request.ReadRequest;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.service.AuditService;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DataControllerTest {
+class DataControllerTest {
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
     private DataController controller;
 
-    @Mock
-    DataService dataService;
-    @Mock
-    StdSerialiserConfiguration config;
+    DataService dataService = Mockito.mock(DataService.class);
+    AuditService auditService = Mockito.mock(AuditService.class);
+    StdSerialiserConfiguration config = Mockito.mock(StdSerialiserConfiguration.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         logger = (Logger) LoggerFactory.getLogger(DataController.class);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        controller = new DataController(dataService, config);
+        controller = new DataController(dataService, auditService, config);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }
@@ -76,12 +76,19 @@ public class DataControllerTest {
     }
 
     @Test
-    public void infoOnReadChunkedRequest() throws IOException {
+    void infoOnReadChunkedRequest() throws IOException {
         // Given
-        ReadRequest request = Mockito.mock(ReadRequest.class);
-        Consumer<OutputStream> response = out -> {
-        };
+        DataRequest request = DataRequest.Builder.create()
+                .withToken("test-request-token")
+                .withLeafResourceId("/resource/id");
+        DataReaderRequest readerRequest = Mockito.mock(DataReaderRequest.class);
         OutputStream output = Mockito.mock(OutputStream.class);
+
+        // Given the service is mocked
+        Mockito.when(dataService.authoriseRequest(Mockito.any()))
+                .thenReturn(CompletableFuture.completedFuture(Optional.of(readerRequest)));
+        Mockito.when(dataService.read(Mockito.any(), Mockito.any()))
+                .thenReturn(Pair.of(new AtomicLong(1), new AtomicLong(1)));
 
         // When
         controller.readChunked(request).getBody().writeTo(output);
