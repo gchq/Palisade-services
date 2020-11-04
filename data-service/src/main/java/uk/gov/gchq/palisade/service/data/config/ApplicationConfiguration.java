@@ -66,7 +66,7 @@ public class ApplicationConfiguration {
      *
      * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
      * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
-     * @return
+     * @return a {@link JpaPersistenceLayer} wrapping the repository instance, providing async methods for getting data from persistence
      */
     @Bean
     JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
