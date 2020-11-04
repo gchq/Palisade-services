@@ -44,7 +44,7 @@ public class StdSerialiserConfiguration {
     /**
      * Constructor with 1 arguments for a {@link StdSerialiserConfiguration} object
      *
-     * @param serialisers   a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
+     * @param serialisers a {@link List} of objects of the {@link StdSerialiserPrepopulationFactory} class
      */
     public StdSerialiserConfiguration(final List<StdSerialiserPrepopulationFactory> serialisers) {
         this.serialisers = Collections.unmodifiableList(serialisers);

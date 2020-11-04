@@ -16,15 +16,10 @@
 spring:
   profiles:
     include:
+    - h2
     - static-config
 
 ---
 
 spring:
   profiles: static-config
-
-# No Discovery static configuration
-web:
-  client:
-    audit-service: http://localhost:8089
-    palisade-service: http://localhost:8084
