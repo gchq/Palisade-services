@@ -72,8 +72,6 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles({"caffeine", "akka-test"})
-@Import({CaffeinePolicyCachingTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {CaffeinePolicyCachingTest.KafkaInitializer.class})
 @SpringBootTest(
         classes = {PolicyApplication.class, ApplicationConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
@@ -193,71 +191,5 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         // Then - it has been evicted
         assertThat(recordRules).isEmpty();
-    }
-
-    /**
-     * Kafka configuration
-     */
-    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static KafkaContainer kafka = new KafkaContainer("5.5.1")
-                .withReuse(true);
-
-        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
-                admin.createTopics(newTopics);
-                LOGGER.info("created topics: " + admin.listTopics().names().get());
-            }
-        }
-
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "caffeine");
-            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-            kafka.start();
-
-            // test kafka config
-            String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
-        }
-
-        @Configuration
-        public static class Config {
-
-            private final List<NewTopic> topics = List.of(
-                    new NewTopic("resource", 3, (short) 1),
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
-
-            @Bean
-            @ConditionalOnMissingBean
-            static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
-                return new PropertiesConfigurer(resourceLoader, environment);
-            }
-
-            @Bean
-            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, kafka);
-                return kafka;
-            }
-
-            @Bean
-            @Primary
-            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-                CaffeinePolicyCachingTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
-                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
-                        props.getAllActiveProperties().entrySet().stream()
-                                .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
-                        Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
-                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
-            }
-
-            @Bean
-            @Primary
-            Materializer materializer(final ActorSystem system) {
-                return Materializer.createMaterializer(system);
-            }
-        }
     }
 }
