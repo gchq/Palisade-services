@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DomainConverterTest {
+class DomainObjectConverterTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static class DomainConvertersSource implements ArgumentsProvider {
         @Override
-        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
                     Arguments.of(new ContextConverter(MAPPER), DomainTestData.CONTEXT),
                     Arguments.of(new LeafResourceConverter(MAPPER), DomainTestData.LEAF_RESOURCE),
@@ -46,7 +46,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterIsConsistent(final AttributeConverter<T, String> converter, final T object) {
+    <T> void testConverterIsConsistent(final AttributeConverter<T, String> converter, final T object) {
         // given we have an object
 
         // when converted to a database column
@@ -64,7 +64,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterIsCorrect(final AttributeConverter<T, String> converter, final T object) {
+    <T> void testConverterIsCorrect(final AttributeConverter<T, String> converter, final T object) {
         // given we have an object
 
         // when converted to and from a database column
@@ -78,7 +78,7 @@ class DomainConverterTest {
 
     @ParameterizedTest
     @ArgumentsSource(DomainConvertersSource.class)
-    <T> void testContextConverterHandlesNulls(final AttributeConverter<T, String> converter, final T ignored) {
+    <T> void testConverterHandlesNulls(final AttributeConverter<T, String> converter, final T ignored) {
         // given the Context object being processed is null
 
         // when converted to and from a database
