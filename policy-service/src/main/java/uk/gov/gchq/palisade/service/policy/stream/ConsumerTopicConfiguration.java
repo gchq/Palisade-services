@@ -35,7 +35,7 @@ public class ConsumerTopicConfiguration {
     private String useDispatcher;
     private Map<String, String> kafkaClients = new HashMap<>();
     private Map<String, String> connectionChecker = new HashMap<>();
-    private Map<String, ProducerTopicConfiguration.Topic> topics = new HashMap<>();
+    private Map<String, Topic> topics = new HashMap<>();
 
     @Generated
     public String getDiscoveryMethod() {

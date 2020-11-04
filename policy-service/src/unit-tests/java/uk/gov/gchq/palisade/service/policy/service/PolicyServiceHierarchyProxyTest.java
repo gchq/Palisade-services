@@ -96,7 +96,7 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         Exception noSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
 
         //Then an error is thrown
-        assertThat("No Policy Found").isEqualTo(noSuchPolicy.getMessage());
+        assertThat("No Record Rules found for the resource").isEqualTo(noSuchPolicy.getMessage());
     }
 
     @Test

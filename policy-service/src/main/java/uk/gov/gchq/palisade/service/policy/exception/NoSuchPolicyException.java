@@ -27,13 +27,6 @@ import org.slf4j.LoggerFactory;
 public class NoSuchPolicyException extends RuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoSuchPolicyException.class);
 
-
-    /**
-     * Initialises this exception with no message or cause.
-     */
-    public NoSuchPolicyException() {
-    }
-
     /**
      * Initialises this exception with the given message.
      *

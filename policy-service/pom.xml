@@ -41,7 +41,6 @@
         <testcontainers.version>1.14.3</testcontainers.version>
         <slf4j-test.version>1.1.0</slf4j-test.version>
         <embedded-redis.version>0.7.3</embedded-redis.version>
-        <wiremock.version>2.20.0</wiremock.version>
     </properties>
 
     <dependencies>
@@ -76,11 +75,6 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-discovery_${scala.version}</artifactId>
             <version>${akka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-standalone</artifactId>
-            <version>${wiremock.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

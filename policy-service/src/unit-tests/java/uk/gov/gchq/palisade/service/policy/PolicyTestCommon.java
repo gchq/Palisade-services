@@ -41,17 +41,17 @@ public class PolicyTestCommon {
     /**
      * Setup a collection of resources with policies like so:
      * /txt - only txt type files are viewable
-     * /txt/json - only json format files are viewable
-     * /txt/json/json.txt - an accessible json txt file
-     * /txt/json/json.avro - an inaccessible json avro file (breaks /txt rule)
-     * /txt/json/pickled.txt - an inaccessible pickle txt file (breaks /txt/json rule)
-     * /txt/sensitive - only users with sensitive auth can view
-     * /txt/sensitive/report.txt - an accessible (to sensitive auths) txt file
-     * /txt/sensitive/salary.csv - an inaccessible csv file (breaks /txt rule)
-     * /txt/secret - only users with secret auth can view, a purpose of testing will redact all record-level info
-     * /txt/secret/secrets.txt - an accessible (to secret auths) txt file
+     * ../txt/json - only json format files are viewable
+     * ..../txt/json/json.txt - an accessible json txt file
+     * ..../txt/json/json.avro - an inaccessible json avro file (breaks /txt rule)
+     * ..../txt/json/pickled.txt - an inaccessible pickle txt file (breaks /txt/json rule)
+     * ../txt/sensitive - only users with sensitive auth can view
+     * ..../txt/sensitive/report.txt - an accessible (to sensitive auths) txt file
+     * ..../txt/sensitive/salary.csv - an inaccessible csv file (breaks /txt rule)
+     * ../txt/secret - only users with secret auth can view, a purpose of testing will redact all record-level info
+     * ..../txt/secret/secrets.txt - an accessible (to secret auths) txt file
      * /new - a directory to be added with a pass-thru policy (do nothing)
-     * /new/file.exe - an accessible executable (not under /txt policy)
+     * ../new/file.exe - an accessible executable (not under /txt policy)
      **/
 
     // A system that only allows text files to be seen
