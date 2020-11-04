@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 /**
  * Application entrypoint and main process runner
  */
-@EnableCaching
+@EnableCaching(proxyTargetClass=true)
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class PolicyApplication {

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
@@ -54,9 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.NONE,
         properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
+@EnableAsync
 class CaffeinePolicyCachingTest extends PolicyTestCommon {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CaffeinePolicyCachingTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy policyService;
