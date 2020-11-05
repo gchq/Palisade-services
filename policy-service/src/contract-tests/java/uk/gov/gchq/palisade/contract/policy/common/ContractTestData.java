@@ -26,18 +26,9 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.service.ConnectionDetail;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.Token;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
-import java.io.Serializable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
