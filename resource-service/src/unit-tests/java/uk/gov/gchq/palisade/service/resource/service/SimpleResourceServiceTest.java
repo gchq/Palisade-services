@@ -26,64 +26,45 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SimpleResourceServiceTest {
+class SimpleResourceServiceTest {
     private final SimpleResourceService service = new SimpleResourceService("data-service", "java.lang.String");
 
     @Test
-    public void testJavaFilesInSrc() throws IOException {
+    void testJavaFilesInUnitTest() throws IOException {
         // Given
-        Set<LeafResource> javaFiles = service.getResourcesBySerialisedFormat("java").collect(Collectors.toSet());
-        DirectoryResource srcMainJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/java").getCanonicalFile().toURI());
-        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
-        DirectoryResource compTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/component-tests/java").getCanonicalFile().toURI());
-        DirectoryResource ctractTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/contract-tests/java").getCanonicalFile().toURI());
+        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/unit-tests/java").getCanonicalFile().toURI());
 
         // When
-        Stream<LeafResource> sourceFiles = service.getResourcesById(srcMainJava.getId());
-        Stream<LeafResource> testFiles = Stream.of(
-                service.getResourcesById(unitTestJava.getId()),
-                service.getResourcesById(compTestJava.getId()),
-                service.getResourcesById(ctractTestJava.getId()))
-                .flatMap(Function.identity());
-        Set<LeafResource> srcAndTestJavaFiles = Stream.concat(sourceFiles, testFiles).collect(Collectors.toSet());
+        FunctionalIterator<LeafResource> testFiles = FunctionalIterator.fromIterator(service.getResourcesById(unitTestJava.getId()));
 
         // Then
-        assertThat(javaFiles).isEqualTo(srcAndTestJavaFiles);
+        assertThat(testFiles.hasNext()).isTrue();
     }
 
     @Test
-    public void testCanFindTestResourceAvro() throws IOException {
+    void testCanFindTestResourceAvro() throws IOException {
         // Given
         URI avroFileURI = new File("./src/unit-tests/resources/test_resource.avro").getCanonicalFile().toURI();
-        FileResource testResourceAvro = (FileResource) ResourceBuilder.create(avroFileURI);
+        LeafResource testResourceAvro = (LeafResource) ResourceBuilder.create(avroFileURI);
         DirectoryResource testResourceDir = (DirectoryResource) testResourceAvro.getParent();
 
         // Given
-        LeafResource expectedAvroResource = service.query(avroFileURI, x -> true).findFirst().orElseThrow();
+        FunctionalIterator<LeafResource> expectedAvroResource = FunctionalIterator.fromIterator(service.query(avroFileURI, x -> true));
 
         // When
-        Optional<LeafResource> resourcesById = service.getResourcesById(testResourceDir.getId())
-                .filter(expectedAvroResource::equals)
-                .findFirst();
+        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()))
+                .filter(resource -> resource.equals(expectedAvroResource.next()));
 
         // Then
-        assertThat(resourcesById).isPresent();
-        assertThat(resourcesById.get()).isEqualTo(expectedAvroResource);
+        assertThat(resourcesById.next()).isEqualTo(expectedAvroResource.next());
 
         // When
-        Optional<LeafResource> resourcesByType = service.getResourcesBySerialisedFormat(expectedAvroResource.getSerialisedFormat())
-                .filter(expectedAvroResource::equals)
-                .findFirst();
+        FunctionalIterator<LeafResource> resourcesByType = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(expectedAvroResource.next().getSerialisedFormat()))
+                .filter(resource -> resource.equals(expectedAvroResource.next()));
 
-        assertThat(resourcesByType).isPresent();
-        assertThat(resourcesByType.get()).isEqualTo(expectedAvroResource);
+        assertThat(resourcesByType.next()).isEqualTo(expectedAvroResource.next());
     }
 }

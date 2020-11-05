@@ -69,7 +69,7 @@ class FunctionalIteratorTest {
         FunctionalIterator<Integer> dslTest = testIterator
                 .peek(i -> count.incrementAndGet());
         assertThat(listOf(dslTest)).isEqualTo(List.of(0, 1, 2, 3, 4, 5));
-        assertThat(count).isEqualTo(6);
+        assertThat(count.intValue()).isEqualTo(6);
     }
 
     @Test
@@ -91,9 +91,8 @@ class FunctionalIteratorTest {
 
     private <T> List<T> listOf(final Iterator<T> iterator) {
         Iterable<T> iterable = () -> iterator;
-        List<T> list = StreamSupport
+        return StreamSupport
                 .stream(iterable.spliterator(), false)
                 .collect(Collectors.toList());
-        return list;
     }
 }

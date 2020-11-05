@@ -21,17 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.gov.gchq.palisade.contract.resource.config.ResourceTestConfiguration;
-import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClient;
-import uk.gov.gchq.palisade.contract.resource.config.web.ResourceClientWrapper;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -39,30 +34,29 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
+import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnableFeignClients(basePackageClasses = {ResourceClient.class})
-@Import(ResourceTestConfiguration.class)
-@SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles({"h2", "web"})
-class H2PersistenceTest {
+@ActiveProfiles({"dbtest", "akka"})
+class H2ContractTest {
 
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
 
     @Autowired
-    private ResourceClientWrapper client;
+    private StreamingResourceServiceProxy client;
 
     /**
      * Scenario as follows, where (F)iles, (D)irectories and (S)ystems are annotated respectively
@@ -97,90 +91,105 @@ class H2PersistenceTest {
     @Transactional
     void setup() {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
-            Stream<LeafResource> fileStream = Stream.of(file);
-            fileStream = persistenceLayer.withPersistenceById(SYSTEM_ROOT.getId(), fileStream);
-            fileStream = persistenceLayer.withPersistenceByType(file.getType(), fileStream);
-            fileStream = persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat(), fileStream);
-            fileStream.forEach(x -> {
-            });
+            Iterator<LeafResource> fileIterator = FunctionalIterator
+                    .fromIterator(Collections.singletonList((LeafResource) file).iterator());
+            persistenceLayer.withPersistenceById(SYSTEM_ROOT.getId(), fileIterator);
+            persistenceLayer.withPersistenceByType(file.getType(), fileIterator);
+            persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat(), fileIterator);
         }
     }
 
     @Test
     void getTestResourceByResource() {
         // Given - setup
+        List<LeafResource> returnedList = new ArrayList<>();
 
         // When
-        Stream<LeafResource> resourcesByResource = client.getResourcesByResource(TEST_DIRECTORY);
+        Iterator<LeafResource> resourcesByResource = client.getResourcesByResource(TEST_DIRECTORY);
+        resourcesByResource.forEachRemaining(returnedList::add);
 
         // Then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE));
-        assertThat(resourcesByResource.collect(Collectors.toSet())).isEqualTo(expected);
+        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
+        returnedList.clear();
 
         // When
         resourcesByResource = client.getResourcesByResource(EMPLOYEE_AVRO_FILE);
+        resourcesByResource.forEachRemaining(returnedList::add);
 
         // Then
-        expected = Collections.singleton(EMPLOYEE_AVRO_FILE);
-        assertThat(resourcesByResource.collect(Collectors.toSet())).isEqualTo(expected);
+        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
     }
 
     @Test
     void getTestResourceById() {
         // Given - setup
+        List<LeafResource> returnedList = new ArrayList<>();
 
         // When
-        Stream<LeafResource> resourcesById = client.getResourcesById(TEST_DIRECTORY.getId());
+        Iterator<LeafResource> resourcesById = client.getResourcesById(TEST_DIRECTORY.getId());
+        resourcesById.forEachRemaining(returnedList::add);
 
         // Then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE));
-        assertThat(resourcesById.collect(Collectors.toSet())).isEqualTo(expected);
+        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
+        returnedList.clear();
 
         // When
         resourcesById = client.getResourcesById(EMPLOYEE_AVRO_FILE.getId());
+        resourcesById.forEachRemaining(returnedList::add);
 
         // Then
-        expected = Collections.singleton(EMPLOYEE_AVRO_FILE);
-        assertThat(resourcesById.collect(Collectors.toSet())).isEqualTo(expected);
+        expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
     }
 
     @Test
     void getTestResourceByType() {
         // Given - setup
+        List<LeafResource> returnedList = new ArrayList<>();
 
         // When
-        Stream<LeafResource> resourcesByType = client.getResourcesByType(EMPLOYEE_TYPE);
+        Iterator<LeafResource> resourcesByType = client.getResourcesByType(EMPLOYEE_TYPE);
+        resourcesByType.forEachRemaining(returnedList::add);
 
         // Then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE));
-        assertThat(resourcesByType.collect(Collectors.toSet())).isEqualTo(expected);
+        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
+        assertThat(returnedList).isEqualTo(expected);
+        returnedList.clear();
 
         // When
         resourcesByType = client.getResourcesByType(CLIENT_TYPE);
+        resourcesByType.forEachRemaining(returnedList::add);
 
         // Then
-        expected = Collections.singleton(CLIENT_AVRO_FILE);
-        assertThat(resourcesByType.collect(Collectors.toSet())).isEqualTo(expected);
+        expected = Collections.singletonList(CLIENT_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
 
     }
 
     @Test
     void getTestResourceBySerialisedFormat() {
         // Given - setup
+        List<LeafResource> returnedList = new ArrayList<>();
 
         // When
-        Stream<LeafResource> resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(AVRO_FORMAT);
+        Iterator<LeafResource> resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(AVRO_FORMAT);
+        resourcesBySerialisedFormat.forEachRemaining(returnedList::add);
 
         // Then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE));
-        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet())).isEqualTo(expected);
+        List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
+        assertThat(returnedList).isEqualTo(expected);
+        returnedList.clear();
 
         // When
         resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(JSON_FORMAT);
+        resourcesBySerialisedFormat.forEachRemaining(returnedList::add);
 
         // Then
-        expected = Collections.singleton(EMPLOYEE_JSON_FILE);
-        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet())).isEqualTo(expected);
+        expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
+        assertThat(returnedList).isEqualTo(expected);
 
     }
 }

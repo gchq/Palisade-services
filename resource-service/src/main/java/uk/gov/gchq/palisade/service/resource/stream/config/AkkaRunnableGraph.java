@@ -86,16 +86,18 @@ public class AkkaRunnableGraph {
                         .map(Optional::of)
                         // Add empty optional
                         .concat(Source.single(Optional.empty()))
-                        // Build the producer record for each resource
-                        .map(optional -> optional.map(leafResource -> new ProducerRecord<>(
-                                outputTopic.getName(),
-                                committableMessage.record().partition(),
-                                committableMessage.record().key(),
-                                ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
-                                committableMessage.record().headers()))
+                        // Build the producer record for each resource within the Optional
+                        .map(resourceOptional -> resourceOptional
+                                .map(leafResource -> new ProducerRecord<>(
+                                    outputTopic.getName(),
+                                    committableMessage.record().partition(),
+                                    committableMessage.record().key(),
+                                    ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
+                                    committableMessage.record().headers()))
                         )
-                        .map(optional -> optional
-                                .map(record -> ProducerMessage.single(optional.get(), (Committable) ProducerMessage.passThrough()))
+                        // Build the producer message for each record in the optional
+                        .map(recordOptional -> recordOptional
+                                .map(record -> ProducerMessage.single(recordOptional.get(), (Committable) ProducerMessage.passThrough()))
                                 .orElse(ProducerMessage.passThrough(committableMessage.committableOffset()))
                         )
                 )

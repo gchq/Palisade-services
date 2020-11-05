@@ -31,12 +31,13 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,12 +62,9 @@ class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> {
-        });
-        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> {
-        });
-        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> {
-        });
+        persistenceLayer.withPersistenceById(resource.getParent().getId(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        persistenceLayer.withPersistenceByType(resource.getType(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
     }
 
     @Test
@@ -78,42 +76,46 @@ class JpaPersistenceLayerTest {
 
     @Test
     @Transactional
-    public void testEmptyGetReturnsEmpty() {
+    void testEmptyGetReturnsEmpty() {
         // When
-        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
+        Iterator<LeafResource> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
         // Then
-        assertThat(persistenceResponse).isEmpty();
+        assertThat(persistenceResponse.hasNext()).isFalse();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE");
         // Then
-        assertThat(persistenceResponse).isEmpty();
+        assertThat(persistenceResponse.hasNext()).isFalse();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT");
         // Then
-        assertThat(persistenceResponse).isEmpty();
+        assertThat(persistenceResponse.hasNext()).isFalse();
     }
 
     @Test
     @Transactional
-    public void testAddAndGetReturnsResource() {
+    void testAddAndGetReturnsResource() {
+        // Given
+        List<LeafResource> resultList = new ArrayList<>();
         // When
-        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
+        Iterator<LeafResource> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
+        persistenceResponse.forEachRemaining(resultList::add);
         // Then
-        Stream<LeafResource> resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
+        resultList.clear();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
+        persistenceResponse.forEachRemaining(resultList::add);
         // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
+        resultList.clear();
 
         // When
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
+        persistenceResponse.forEachRemaining(resultList::add);
         // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
     }
 }

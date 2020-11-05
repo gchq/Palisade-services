@@ -44,12 +44,11 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -122,13 +121,15 @@ public class HadoopResourceServiceTest {
     @Test
     public void getResourcesByIdTest() {
         //given
+        List<LeafResource> resultList = new ArrayList<>();
 
         //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(id1.toString());
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(id1.toString());
+        resourcesById.forEachRemaining(resultList::add);
 
         //then
-        Set<LeafResource> expected = Collections.singleton(resource1);
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Collections.singletonList(resource1);
+        assertThat(resultList, equalTo(expected));
     }
 
     @Test
@@ -149,66 +150,76 @@ public class HadoopResourceServiceTest {
     @Test
     public void shouldGetResourcesByIdOfAFolder() {
         //given
+        List<LeafResource> resultList = new ArrayList<>();
 
         //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        resourcesById.forEachRemaining(resultList::add);
 
         //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList, equalTo(expected));
     }
 
     @Test
     public void shouldFilterOutIllegalFileName() throws Exception {
         //given
+        List<LeafResource> resourceList = new ArrayList<>();
         writeFile(fs, dir.resolve("./I-AM-AN-ILLEGAL-FILENAME"));
 
         //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        resourcesById.forEachRemaining(resourceList::add);
 
         //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resourceList, equalTo(expected));
     }
 
     @Test
     public void shouldGetResourcesByType() throws Exception {
         //given
+        List<LeafResource> resultist = new ArrayList<>();
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
         HadoopResourceDetails.addTypeSupport("not" + TYPE_VALUE, TYPE_CLASSNAME + ".not");
 
         //when
-        final Stream<LeafResource> resourcesByType = resourceService.getResourcesByType(TYPE_CLASSNAME);
+        final Iterator<LeafResource> resourcesByType = resourceService.getResourcesByType(TYPE_CLASSNAME);
+        resourcesByType.forEachRemaining(resultist::add);
 
         //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByType.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultist, equalTo(expected));
     }
 
     @Test
     public void shouldGetResourcesByFormat() throws Exception {
         //given
+        List<LeafResource> resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
 
         //when
-        final Stream<LeafResource> resourcesBySerialisedFormat = resourceService.getResourcesBySerialisedFormat(FORMAT_VALUE);
+        final Iterator<LeafResource> resourcesBySerialisedFormat = resourceService.getResourcesBySerialisedFormat(FORMAT_VALUE);
+        resourcesBySerialisedFormat.forEachRemaining(resultList::add);
 
         //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList, equalTo(expected));
 
     }
 
     @Test
     public void shouldGetResourcesByResource() {
         //given
+        List<LeafResource> resultList = new ArrayList<>();
 
         //when
-        final Stream<LeafResource> resourcesByResource = resourceService.getResourcesByResource(new DirectoryResource().id(dir.toString()));
+        final Iterator<LeafResource> resourcesByResource = resourceService.getResourcesByResource(new DirectoryResource().id(dir.toString()));
+        resourcesByResource.forEachRemaining(resultList::add);
 
         //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByResource.collect(Collectors.toSet()), equalTo(expected));
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList, equalTo(expected));
     }
 
     @Test

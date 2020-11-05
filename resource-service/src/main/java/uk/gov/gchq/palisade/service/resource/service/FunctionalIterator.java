@@ -212,8 +212,10 @@ public interface FunctionalIterator<T> extends Iterator<T> {
     }
 
     class PeekIterator<T> implements FunctionalIterator<T> {
+
         private final Iterator<T> delegate;
         private final Consumer<T> peek;
+
         public PeekIterator(final Iterator<T> delegate, final Consumer<T> peek) {
             this.delegate = delegate;
             this.peek = peek;
