@@ -19,17 +19,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.cache.CacheType;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
@@ -41,7 +35,6 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 
