@@ -55,7 +55,7 @@ public class AsyncWebMvcConfiguration implements AsyncConfigurer, WebMvcConfigur
     }
 
     @Override
-    @Bean("threadPoolTaskExecutor")
+    @Bean("applicationTaskExecutor")
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");

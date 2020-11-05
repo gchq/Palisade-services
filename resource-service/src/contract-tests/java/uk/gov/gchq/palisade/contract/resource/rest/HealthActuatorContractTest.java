@@ -55,5 +55,4 @@ class HealthActuatorContractTest {
         // Then the service reports itself to be healthy
         assertThat(health.getStatusCodeValue()).isEqualTo(200);
     }
-
 }

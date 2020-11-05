@@ -46,11 +46,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"h2", "web"})
+@ActiveProfiles({"dbtest", "web"})
 class JpaPersistenceLayerTest {
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
     private LeafResource resource;
+    private Iterator<LeafResource> resourceIterator;
 
     @BeforeEach
     @Transactional
@@ -62,9 +63,9 @@ class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.withPersistenceById(resource.getParent().getId(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
-        persistenceLayer.withPersistenceByType(resource.getType(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
-        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        resourceIterator = persistenceLayer.withPersistenceById(resource.getParent().getId(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        resourceIterator = persistenceLayer.withPersistenceByType(resource.getType(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        resourceIterator = persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
     }
 
     @Test

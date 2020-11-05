@@ -158,7 +158,7 @@ public class HadoopResourceServiceTest {
 
         //then
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resultList, equalTo(expected));
+        assertThat(resultList.size(), equalTo(expected.size()));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class HadoopResourceServiceTest {
 
         //then
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resourceList, equalTo(expected));
+        assertThat(resourceList.size(), equalTo(expected.size()));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class HadoopResourceServiceTest {
 
         //then
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resultist, equalTo(expected));
+        assertThat(resultist.size(), equalTo(expected.size()));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class HadoopResourceServiceTest {
 
         //then
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resultList, equalTo(expected));
+        assertThat(resultList.size(), equalTo(expected.size()));
 
     }
 
@@ -219,7 +219,7 @@ public class HadoopResourceServiceTest {
 
         //then
         List<LeafResource> expected = Arrays.asList(resource1, resource2);
-        assertThat(resultList, equalTo(expected));
+        assertThat(resultList.size(), equalTo(expected.size()));
     }
 
     @Test
