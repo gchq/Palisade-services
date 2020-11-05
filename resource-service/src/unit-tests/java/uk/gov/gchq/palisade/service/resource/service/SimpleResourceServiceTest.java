@@ -35,7 +35,7 @@ class SimpleResourceServiceTest {
     @Test
     void testJavaFilesInUnitTest() throws IOException {
         // Given
-        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/main/unit-tests/java").getCanonicalFile().toURI());
+        DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
 
         // When
         FunctionalIterator<LeafResource> testFiles = FunctionalIterator.fromIterator(service.getResourcesById(unitTestJava.getId()));
@@ -53,18 +53,18 @@ class SimpleResourceServiceTest {
 
         // Given
         FunctionalIterator<LeafResource> expectedAvroResource = FunctionalIterator.fromIterator(service.query(avroFileURI, x -> true));
+        LeafResource leafResource = expectedAvroResource.next();
 
         // When
-        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()))
-                .filter(resource -> resource.equals(expectedAvroResource.next()));
+        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()));
 
         // Then
-        assertThat(resourcesById.next()).isEqualTo(expectedAvroResource.next());
+        assertThat(resourcesById.next()).isEqualTo(leafResource);
 
         // When
-        FunctionalIterator<LeafResource> resourcesByType = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(expectedAvroResource.next().getSerialisedFormat()))
-                .filter(resource -> resource.equals(expectedAvroResource.next()));
+        FunctionalIterator<LeafResource> resourcesByFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(leafResource.getSerialisedFormat()))
+                .filter(resource -> resource.getId().equals(leafResource.getId()));
 
-        assertThat(resourcesByType.next()).isEqualTo(expectedAvroResource.next());
+        assertThat(resourcesByFormat.next()).isEqualTo(leafResource);
     }
 }
