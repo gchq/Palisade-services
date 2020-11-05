@@ -52,8 +52,8 @@ import java.util.stream.Collectors;
 /**
  * Application entrypoint and main process runner
  */
-@EnableCaching(proxyTargetClass = true)
 @SpringBootApplication
+@EnableCaching(proxyTargetClass = true)
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class PolicyApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyApplication.class);

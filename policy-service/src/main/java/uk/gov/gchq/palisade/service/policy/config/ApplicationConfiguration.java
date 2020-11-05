@@ -130,8 +130,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      *
      * @return a new instance of the nullPolicyService
      */
-    @Bean("nullService")
-    @Qualifier("impl")
+    @Bean
     public PolicyService nullPolicyService() {
         LOGGER.debug("Instantiated nullPolicyService");
         return new NullPolicyService();
@@ -144,7 +143,7 @@ public class ApplicationConfiguration implements AsyncConfigurer {
      * @return a new instance of the PolicyServiceCachingProxy
      */
     @Bean
-    public PolicyServiceCachingProxy cachedPolicyService(final @Qualifier("impl") PolicyService service) {
+    public PolicyServiceCachingProxy cachedPolicyService(final PolicyService service) {
         PolicyServiceCachingProxy policyServiceCachingProxy = new PolicyServiceCachingProxy(service);
         LOGGER.debug("Instantiated CachedPolicyService");
         return policyServiceCachingProxy;

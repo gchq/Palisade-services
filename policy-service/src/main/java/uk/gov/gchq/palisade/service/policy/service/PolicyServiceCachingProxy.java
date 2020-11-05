@@ -35,7 +35,7 @@ import java.util.Optional;
  * cache-friendly.
  */
 @CacheConfig(cacheNames = {"resourceRules, recordRules"})
-public class PolicyServiceCachingProxy implements PolicyService {
+public class PolicyServiceCachingProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceCachingProxy.class);
     private final PolicyService service;
 

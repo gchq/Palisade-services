@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -57,13 +56,14 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = {RedisPolicyCachingTest.class, ApplicationConfiguration.class},
+        classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"akka.discovery.config.services.kafka.from-config=false"}
+        properties = {"spring.cache.redis.timeToLive=1s"}
 )
+@EnableCaching
 @ContextConfiguration(initializers = {RedisInitializer.class})
-@ActiveProfiles({"redis", "akka-test"})
 @Import(RedisAutoConfiguration.class)
+@ActiveProfiles({"redis"})
 class RedisPolicyCachingTest extends PolicyTestCommon {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyCachingTest.class);

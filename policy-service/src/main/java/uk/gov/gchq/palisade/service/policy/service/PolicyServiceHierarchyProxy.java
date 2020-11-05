@@ -44,14 +44,14 @@ import java.util.function.Function;
 public class PolicyServiceHierarchyProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyServiceHierarchyProxy.class);
 
-    private final PolicyService service;
+    private final PolicyServiceCachingProxy service;
 
     /**
      * Instantiates a new Policy service hierarchy proxy taking a PolicyService as an argument.
      *
      * @param service {@link PolicyService} used to instantiate this class
      */
-    public PolicyServiceHierarchyProxy(final PolicyService service) {
+    public PolicyServiceHierarchyProxy(final PolicyServiceCachingProxy service) {
         this.service = service;
     }
 

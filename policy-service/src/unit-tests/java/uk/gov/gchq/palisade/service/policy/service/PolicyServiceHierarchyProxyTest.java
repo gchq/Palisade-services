@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
-    private static final PolicyService MOCK_SERVICE = Mockito.spy(new PolicyServiceCachingProxy(new NullPolicyService()));
+    private static final PolicyServiceCachingProxy MOCK_SERVICE = Mockito.spy(new PolicyServiceCachingProxy(new NullPolicyService()));
     private static final PolicyServiceHierarchyProxy HIERARCHY_POLICY = new PolicyServiceHierarchyProxy(MOCK_SERVICE);
 
     @BeforeAll
