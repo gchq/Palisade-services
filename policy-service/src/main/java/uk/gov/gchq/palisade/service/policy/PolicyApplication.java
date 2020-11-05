@@ -111,13 +111,7 @@ public class PolicyApplication {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
-        LOGGER.info("Started {} runner threads", runnerThreads.size());
-        runnerThreads.forEach(CompletableFuture::join);
-
-        //After launching Kafka, now run pre-population
+        //Prepopulate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
         LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
         LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
@@ -131,5 +125,14 @@ public class PolicyApplication {
                     Entry<Resource, Rules<Serializable>> recordMap = factory.buildRecordRules(resourceConfig.getResources());
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
                 });
+
+        //Then start up kafka
+        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .collect(Collectors.toSet());
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+        runnerThreads.forEach(CompletableFuture::join);
+
+
     }
 }

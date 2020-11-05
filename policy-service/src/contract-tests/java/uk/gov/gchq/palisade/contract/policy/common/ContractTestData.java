@@ -54,61 +54,13 @@ public class ContractTestData {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
-    }
-
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final UserId NO_RESOURCE_RULES_USER_ID = new UserId().id("noResourceRulesUser");
-    public static final String RESOURCE_ID = "/test/resourceId";
-    public static final String NO_RESOURCE_RULES_RESOURCE_ID = "/test/noRulesResource";
-    public static final String PURPOSE = "test-purpose";
-    public static final String NO_RESOURCE_RULES_PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
-    public static final Context NO_RESOURCE_RULES_CONTEXT = new Context().purpose(NO_RESOURCE_RULES_PURPOSE);
-    public static final User USER = new User().userId(USER_ID).roles("role").auths("auth");
-    public static final User NO_RESOURCE_RULES_USER = new User().userId(NO_RESOURCE_RULES_USER_ID).roles("role").auths("auth");
-    public static final ConnectionDetail CONNECTION_DETAIL = new SimpleConnectionDetail().serviceName("test-data-service");
-    public static final LeafResource RESOURCE = (LeafResource) ResourceBuilder.create(RESOURCE_ID);
-    public static final LeafResource NO_RESOURCE_RULES_RESOURCE = (LeafResource) ResourceBuilder.create(NO_RESOURCE_RULES_RESOURCE_ID);
-    public static final PolicyRequest POLICY_REQUEST;
-    public static final PolicyRequest NO_RESOURCE_RULES_POLICY_REQUEST;
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_RULES_REQUEST_NODE;
     public static final PolicyRequest REQUEST_OBJ;
     public static final PolicyRequest NO_RESOURCE_RULES_REQUEST_OBJ;
-    public static final String REQUEST_JSON;
-    public static final String NO_RESOURCE_RULES_REQUEST_JSON;
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
+    public static final String NO_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"noResourceRulesUser\",\"resourceId\":\"file:/test/noRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"noResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/noRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
 
-    static {
-        RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
-        POLICY_REQUEST = PolicyRequest.Builder.create()
-                .withUserId(USER_ID.getId())
-                .withResourceId(RESOURCE.getId())
-                .withContext(CONTEXT)
-                .withUser(USER)
-                .withResource(RESOURCE);
-
-        NO_RESOURCE_RULES_RESOURCE.connectionDetail(CONNECTION_DETAIL).serialisedFormat("txt").setType("test");
-        NO_RESOURCE_RULES_POLICY_REQUEST = PolicyRequest.Builder.create()
-                .withUserId(NO_RESOURCE_RULES_USER_ID.getId())
-                .withResourceId(NO_RESOURCE_RULES_RESOURCE.getId())
-                .withContext(NO_RESOURCE_RULES_CONTEXT)
-                .withUser(NO_RESOURCE_RULES_USER)
-                .withResource(NO_RESOURCE_RULES_RESOURCE);
-    }
-
-    static {
-        try {
-            REQUEST_JSON = MAPPER.writeValueAsString(POLICY_REQUEST);
-            NO_RESOURCE_RULES_REQUEST_JSON = MAPPER.writeValueAsString(NO_RESOURCE_RULES_POLICY_REQUEST);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to parse PolicyRequest test data", e);
-        }
-    }
 
     static {
         try {
@@ -127,6 +79,7 @@ public class ContractTestData {
 
     public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
     public static final Function<Integer, String> NO_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(NO_RESOURCE_RULES_REQUEST_JSON, i, i);
+
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
@@ -139,20 +92,6 @@ public class ContractTestData {
             return MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
-        }
-    };
-    public static final Function<Integer, PolicyRequest> REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(REQUEST_FACTORY_NODE.apply(i), PolicyRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
-    public static final Function<Integer, PolicyRequest> NO_RESOURCE_RULES_REQUEST_FACTORY_OBJ = i -> {
-        try {
-            return MAPPER.treeToValue(NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), PolicyRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     };
 

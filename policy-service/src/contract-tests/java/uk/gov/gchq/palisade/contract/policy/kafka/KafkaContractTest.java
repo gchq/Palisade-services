@@ -208,11 +208,11 @@ class KafkaContractTest {
 
                 () -> assertAll("Policy Assertion",
                         () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                                .isEqualTo(ContractTestData.USER_ID.getId()),
+                                .isEqualTo("test-user-id"),
                         () -> assertThat(results.get(0).value().get("resourceId").asText())
-                                .isEqualTo("file:" + ContractTestData.RESOURCE_ID),
+                                .isEqualTo("file:/test/resourceId"),
                         () -> assertThat(results.get(0).value().get("context").get("contents").get("purpose").asText())
-                                .isEqualTo(ContractTestData.PURPOSE),
+                                .isEqualTo("test-purpose"),
                         () -> assertThat(results.get(0).value().get("rules").get("message").asText())
                                 .isEqualTo("no rules set"),
                         () -> assertThat(results.get(0).value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())

@@ -15,10 +15,6 @@
  */
 package uk.gov.gchq.palisade.component.policy.service;
 
-import akka.actor.ActorSystem;
-import akka.stream.Materializer;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,24 +22,23 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.containers.Network;
 
+import uk.gov.gchq.palisade.component.policy.service.RedisPolicyCachingTest.RedisInitializer;
 import uk.gov.gchq.palisade.contract.policy.common.PolicyTestCommon;
 import uk.gov.gchq.palisade.policy.IsTextResourceRule;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -51,35 +46,27 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.policy.PolicyApplication;
+import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
-import uk.gov.gchq.palisade.service.policy.stream.PropertiesConfigurer;
 
 import java.io.Serializable;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
-import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = {RedisPolicyPersistenceTest.class, PolicyApplication.class},
-        webEnvironment = WebEnvironment.RANDOM_PORT,
+        classes = {RedisPolicyCachingTest.class, ApplicationConfiguration.class},
+        webEnvironment = WebEnvironment.NONE,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({RedisPolicyPersistenceTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {RedisPolicyPersistenceTest.KafkaInitializer.class, RedisPolicyPersistenceTest.RedisInitializer.class})
+@ContextConfiguration(initializers = {RedisInitializer.class})
 @ActiveProfiles({"redis", "akka-test"})
-class RedisPolicyPersistenceTest extends PolicyTestCommon {
+@Import(RedisAutoConfiguration.class)
+class RedisPolicyCachingTest extends PolicyTestCommon {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyPersistenceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyCachingTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
@@ -189,11 +176,12 @@ class RedisPolicyPersistenceTest extends PolicyTestCommon {
 
         static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
+                .withNetwork(Network.SHARED)
                 .withReuse(true);
 
         @Override
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis", "akka-test");
+            context.getEnvironment().setActiveProfiles("redis", "akkatest");
             // Start container
             redis.start();
 
@@ -201,73 +189,9 @@ class RedisPolicyPersistenceTest extends PolicyTestCommon {
             String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
             // Configure the testcontainer random port
             String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
-            RedisPolicyPersistenceTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
+            RedisPolicyCachingTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
-
-
-    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static KafkaContainer kafka = new KafkaContainer("5.5.1")
-                .withReuse(true);
-
-        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
-                admin.createTopics(newTopics);
-                LOGGER.info("created topics: " + admin.listTopics().names().get());
-            }
-        }
-
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test", "redis");
-            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-            kafka.start();
-
-            // test kafka config
-            String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
-        }
-
-        @Configuration
-        public static class Config {
-
-            private final List<NewTopic> topics = List.of(
-                    new NewTopic("resource", 3, (short) 1),
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
-
-            @Bean
-            @ConditionalOnMissingBean
-            static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
-                return new PropertiesConfigurer(resourceLoader, environment);
-            }
-
-            @Bean
-            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, kafka);
-                return kafka;
-            }
-
-            @Bean
-            @Primary
-            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-                RedisPolicyPersistenceTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
-                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
-                        props.getAllActiveProperties().entrySet().stream()
-                                .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
-                        Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
-                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
-            }
-
-            @Bean
-            @Primary
-            Materializer materializer(final ActorSystem system) {
-                return Materializer.createMaterializer(system);
-            }
         }
     }
 }
