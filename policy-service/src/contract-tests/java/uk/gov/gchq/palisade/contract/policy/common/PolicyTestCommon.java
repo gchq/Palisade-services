@@ -71,7 +71,6 @@ public class PolicyTestCommon {
 
     // A do-nothing policy to apply to leaf resources
     public static final Rules<LeafResource> PASS_THROUGH_POLICY = new Rules<LeafResource>()
-            .addRule("Does nothing", new PassThroughRule<>())
             .addRule("Does nothing", new PassThroughRule<>());
 
     public static final Set<FileResource> FILE_RESOURCES = new HashSet<>(Arrays.asList(ACCESSIBLE_JSON_TXT_FILE, SECRET_TXT_FILE));

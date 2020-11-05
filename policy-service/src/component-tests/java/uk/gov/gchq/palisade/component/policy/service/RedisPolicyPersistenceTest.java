@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.contract.policy.redis;
+package uk.gov.gchq.palisade.component.policy.service;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
@@ -70,16 +70,16 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = {RedisPersistenceContractTest.class, PolicyApplication.class},
+        classes = {RedisPolicyPersistenceTest.class, PolicyApplication.class},
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
-@Import({RedisPersistenceContractTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {RedisPersistenceContractTest.KafkaInitializer.class, RedisPersistenceContractTest.RedisInitializer.class})
+@Import({RedisPolicyPersistenceTest.KafkaInitializer.Config.class})
+@ContextConfiguration(initializers = {RedisPolicyPersistenceTest.KafkaInitializer.class, RedisPolicyPersistenceTest.RedisInitializer.class})
 @ActiveProfiles({"redis", "akka-test"})
-class RedisPersistenceContractTest extends PolicyTestCommon {
+class RedisPolicyPersistenceTest extends PolicyTestCommon {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPersistenceContractTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisPolicyPersistenceTest.class);
 
     @Autowired
     private PolicyServiceCachingProxy cacheProxy;
@@ -201,7 +201,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
             String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
             // Configure the testcontainer random port
             String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
-            RedisPersistenceContractTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
+            RedisPolicyPersistenceTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
         }
@@ -255,7 +255,7 @@ class RedisPersistenceContractTest extends PolicyTestCommon {
             @Bean
             @Primary
             ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-                RedisPersistenceContractTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
+                RedisPolicyPersistenceTest.LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
                 return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                         props.getAllActiveProperties().entrySet().stream()
                                 .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
