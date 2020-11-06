@@ -45,6 +45,9 @@ management:
   endpoint:
     shutdown:
       enabled: true
+  health:
+    redis:
+      enabled: false
 
 logging:
   level:

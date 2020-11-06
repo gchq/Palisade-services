@@ -122,7 +122,7 @@ public class AttributeMaskingRestController {
         // Process requests
         // Akka reactive streams can't have null elements, so map to and from optional
         Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
-                .map(request -> new ProducerRecord<String, AttributeMaskingRequest>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .map(request -> new ProducerRecord<String, AttributeMaskingRequest>(topic.getName(), partition, token, request.orElse(null), kafkaHeaders))
                 .toMat(this.upstreamSink, Keep.right())
                 .run(this.materializer)
                 .toCompletableFuture()

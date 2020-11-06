@@ -35,7 +35,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
@@ -51,7 +50,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, AttributeMaskingRequest> INPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, AttributeMaskingResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
@@ -80,14 +79,27 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Sink<Envelope<String, AttributeMaskingResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AttributeMaskingResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
+    Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
                 SerDesConfig.maskedResourceKeySerializer(),
-                SerDesConfig.maskedResourceValueSerializer());
+                SerDesConfig.passthroughValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
+    }
+
+    @Bean
+    CommitterSettings committerSettings(final ActorSystem actorSystem) {
+        return OUTPUT_COMPONENTS.committerSettings(actorSystem);
+    }
+
+    @Bean
+    ProducerSettings<String, byte[]> producerSettings(final ActorSystem actorSystem) {
+        return OUTPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.maskedResourceKeySerializer(),
+                SerDesConfig.passthroughValueSerializer());
     }
 
     @Bean
