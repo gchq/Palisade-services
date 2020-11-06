@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,53 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.data.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.request.AuditRequest;
-import uk.gov.gchq.palisade.service.data.web.AuditClient;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 /**
- * AuditService which implements {@link Service} and uses Feign within {@link AuditClient} to log audit requests
+ * Interface to the audit-service for auditing successful data-reads along with some required metadata,
+ * such as records processed and records returned (processed - redacted).
  */
-public class AuditService implements Service {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditService.class);
-    private final AuditClient client;
+public interface AuditService {
 
     /**
-     * Instantiates a new Audit service.
+     * Audit a successful read to the audit-service
      *
-     * @param auditClient the audit client rest interface for the Audit Service
+     * @param token          the client's (unique) request token
+     * @param successMessage the constructed message detailing the resource read, the rules applied and other metadata
+     * @implNote Any implementation of this should ensure it has confirmation that the message has been persisted downstream.
+     * This provides assurances that the audit logs won't go missing due to processing failures.
+     * This is probably implemented as blocking until the persistence-write (kafka/redis/etc.) completes and throwing a
+     * {@link RuntimeException} if processing fails.
      */
-    public AuditService(final AuditClient auditClient) {
-        this.client = auditClient;
-    }
+    void auditSuccess(final String token, final AuditSuccessMessage successMessage);
 
     /**
-     * Calls the Audit Client and via feign sends audit requests to the Audit service returning TRUE if the audit message was received successfully.
-     * Audit service implementations may have different definitions of 'received successfully'.
+     * Convenience method for converting the pair of {@link DataRequest} and {@link DataReaderRequest} objects from the data-service
+     * into the {@link AuditSuccessMessage} required for the audit-service, attaching any additional required metadata.
      *
-     * @param request the request
-     * @return the boolean
+     * @param dataRequest      the client's {@link DataRequest} sent to the data-service
+     * @param readerRequest    the persisted-and-retrieved rules for the data access,
+     *                         passed as a request to the {@link uk.gov.gchq.palisade.reader.common.DataReader}
+     * @param recordsProcessed the total number of records processed by the data-reader (number of records in the resource)
+     * @param recordsReturned  the number of records returned to the client after applying record-level redaction (processed - redacted)
+     * @return an {@link AuditSuccessMessage} to be used by this class
      */
-    public Boolean audit(final AuditRequest request) {
-        LOGGER.debug("Submitting audit to audit service: {}", request);
-
-        Boolean response;
-        try {
-            LOGGER.info("Audit request: {}", request);
-            response = this.client.audit(request);
-            LOGGER.info("Audit response: {}", response);
-        } catch (Exception ex) {
-            LOGGER.error("Failed to log audit request: {}", ex.getMessage());
-            throw new RuntimeException(ex);
-        }
-
-        return response;
+    default AuditSuccessMessage createSuccessMessage(final DataRequest dataRequest, final DataReaderRequest readerRequest, final long recordsProcessed, final long recordsReturned) {
+        return AuditSuccessMessage.Builder.create(dataRequest, readerRequest)
+                .withRecordsProcessedAndReturned(recordsProcessed, recordsReturned);
     }
 
 }

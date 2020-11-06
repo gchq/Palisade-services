@@ -56,9 +56,9 @@ public class StdSerialiserPrepopulationFactory {
     /**
      * Creates a {@link StdSerialiserPrepopulationFactory}, passing each member as an argument
      *
-     * @param flavourFormat     a {@link String} value of the serialised format for a {@link DataFlavour}
-     * @param flavourType       a {@link String} value of the fully qualified type for a {@link DataFlavour}
-     * @param serialiserClass   a {@link String} value of the fully qualified class to create a {@link Serialiser}
+     * @param flavourFormat   a {@link String} value of the serialised format for a {@link DataFlavour}
+     * @param flavourType     a {@link String} value of the fully qualified type for a {@link DataFlavour}
+     * @param serialiserClass a {@link String} value of the fully qualified class to create a {@link Serialiser}
      */
     public StdSerialiserPrepopulationFactory(final String flavourFormat, final String flavourType, final String serialiserClass) {
         this.flavourFormat = flavourFormat;
@@ -102,7 +102,7 @@ public class StdSerialiserPrepopulationFactory {
     /**
      * Creates a {@link DataFlavour} and a {@link Serialiser} using the values within a {@link StdSerialiserPrepopulationFactory}
      *
-     * @return  an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
+     * @return an {@link Entry} that consists of the created {@link DataFlavour} and {@link Serialiser} objects.
      */
     public Entry<DataFlavour, Serialiser<Object>> build() {
         Serialiser<Object> serialiser;

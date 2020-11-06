@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.redis;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -63,7 +63,7 @@ class RedisPersistenceContractTest {
                 .withReuse(true);
 
         @Override
-        public void initialize(@NotNull final ConfigurableApplicationContext context) {
+        public void initialize(@NonNull final ConfigurableApplicationContext context) {
             // Start container
             redis.start();
 

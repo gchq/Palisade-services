@@ -16,6 +16,8 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,12 +27,14 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
+import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
+import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
-import uk.gov.gchq.palisade.service.data.service.PalisadeService;
+import uk.gov.gchq.palisade.service.data.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
-import uk.gov.gchq.palisade.service.data.web.AuditClient;
-import uk.gov.gchq.palisade.service.data.web.PalisadeClient;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -40,21 +44,48 @@ import java.util.concurrent.Executor;
  */
 @Configuration
 public class ApplicationConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception", token, message.getResourceId(), message.getError());
+    }
+
+    // Replace this with a proper audit mechanism (kafka queues etc.)
+    @Bean
+    AuditService loggingAuditService() {
+        LOGGER.warn("Using a Logging-only auditor, this should be replaced by a proper implementation!");
+        return (String token, AuditSuccessMessage message) -> LOGGER.warn("Token {} and resourceId {} read leafResourceId {}", token, message.getResourceId(), message.getLeafResourceId());
+    }
 
     /**
-     * Simple data service bean created with instances of auditService, palisadeService and dataReader
-     * which is used by a simple implementation of {@link DataService} to connect to different data storage technologies and deserialise the data
+     * Bean for the {@link JpaPersistenceLayer}.
+     * Connect the Redis or Caffeine backed repository to the persistence layer, providing an executor for any async requests
      *
-     * @param auditService    the audit service
-     * @param palisadeService the palisade service
-     * @param dataReader      the data reader
-     * @return the simple data service
+     * @param requestsRepository an instance of the requests repository, backed by either caffeine or redis (depending on profile)
+     * @param executor           an async executor, preferably a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
+     * @return a {@link JpaPersistenceLayer} wrapping the repository instance, providing async methods for getting data from persistence
      */
     @Bean
-    public SimpleDataService simpleDataService(final AuditService auditService,
-                                               final PalisadeService palisadeService,
-                                               final DataReader dataReader) {
-        return new SimpleDataService(auditService, palisadeService, dataReader);
+    JpaPersistenceLayer jpaPersistenceLayer(final AuthorisedRequestsRepository requestsRepository,
+                                            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+        return new JpaPersistenceLayer(requestsRepository, executor);
+    }
+
+    /**
+     * Bean for a {@link SimpleDataService}, connecting a {@link DataReader} and {@link PersistenceLayer}.
+     * These are likely the {@code HadoopDataReader} and the {@link JpaPersistenceLayer}.
+     *
+     * @param persistenceLayer the persistence layer for reading authorised requests
+     * @param dataReader       the data reader to use for reading resource data from storage
+     * @return a new {@link SimpleDataService}
+     */
+    @Bean
+    SimpleDataService simpleDataService(final PersistenceLayer persistenceLayer,
+                                        final DataReader dataReader) {
+        return new SimpleDataService(persistenceLayer, dataReader);
     }
 
     /**
@@ -64,38 +95,18 @@ public class ApplicationConfiguration {
      * @throws IOException ioException
      */
     @Bean
-    public DataReader hadoopDataReader() throws IOException {
+    DataReader hadoopDataReader() throws IOException {
         return new HadoopDataReader();
     }
 
     /**
-     * Palisade service bean created with a palisadeClient which uses Feign to send rest requests to the Palisade Service
-     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
+     * Default JSON to Java seraialiser/deserialiser
      *
-     * @param palisadeClient the feign palisade client
-     * @param executor       the asynchronous executor to use for futures
-     * @return the palisade service
+     * @return a new {@link ObjectMapper} with some additional configuration
      */
-    @Bean
-    public PalisadeService palisadeService(final PalisadeClient palisadeClient, final @Qualifier("threadPoolTaskExecutor") Executor executor) {
-        return new PalisadeService(palisadeClient, executor);
-    }
-
-    /**
-     * Audit service bean created with an auditClient which uses Feign to send rest requests to the Audit Service
-     * Feign will either resolve hostnames from eureka or values in the relevant profiles yaml
-     *
-     * @param auditClient the feign audit client
-     * @return the audit service
-     */
-    @Bean
-    public AuditService auditService(final AuditClient auditClient) {
-        return new AuditService(auditClient);
-    }
-
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
 

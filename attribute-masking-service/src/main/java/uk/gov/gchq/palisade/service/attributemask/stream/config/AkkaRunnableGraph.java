@@ -30,6 +30,7 @@ import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.kafka.javadsl.Producer;
 import akka.stream.ActorAttributes;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.Keep;
@@ -48,6 +49,8 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
+import uk.gov.gchq.palisade.service.attributemask.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
@@ -65,6 +68,14 @@ public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
+
+    @Bean
+    KafkaProducerService kafkaProducerService(
+            final Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> upstreamSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        return new KafkaProducerService(upstreamSink, upstreamConfig, materializer);
+    }
 
     @Bean
     Function1<Throwable, Directive> supervisor() {

@@ -21,13 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import java.util.Arrays;
-
-@EnableDiscoveryClient
-@EnableFeignClients
 @SpringBootApplication
 public class DataApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataApplication.class);
@@ -38,7 +32,7 @@ public class DataApplication {
      * @param args from the command line
      */
     public static void main(final String[] args) {
-        LOGGER.debug("DataApplication started with: {}", Arrays.toString(args));
+        LOGGER.debug("DataApplication started with: {}", (Object) args);
 
         new SpringApplicationBuilder(DataApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
