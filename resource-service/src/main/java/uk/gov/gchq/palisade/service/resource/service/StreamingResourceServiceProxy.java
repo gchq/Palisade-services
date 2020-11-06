@@ -51,7 +51,6 @@ public class StreamingResourceServiceProxy {
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
     private final ObjectMapper objectMapper;
-    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
 
     /**
      * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
@@ -65,20 +64,6 @@ public class StreamingResourceServiceProxy {
         this.persistence = persistence;
         this.delegate = delegate;
         this.objectMapper = objectMapper;
-        this.resourceBuilder = Collections::emptyList;
-    }
-
-    /**
-     * Construct a StreamingResourceServiceProxy, passing each member as an argument
-     *
-     * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param delegate        a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
-     * @param objectMapper    a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
-     */
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper, final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
-        this(persistence, delegate, objectMapper);
-        this.resourceBuilder = resourceBuilder;
     }
 
     @Transactional
@@ -90,9 +75,8 @@ public class StreamingResourceServiceProxy {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {
             LOGGER.info(EMPTY);
-            return FunctionalIterator.fromIterator(
-                    persistence.withPersistenceById(resource.getId(), delegate.getResourcesById(resource.getId()))
-            );
+            return persistence.withPersistenceById(resource.getId(),
+                    FunctionalIterator.fromIterator(delegate.getResourcesById(resource.getId())));
         }
     }
 
@@ -105,9 +89,8 @@ public class StreamingResourceServiceProxy {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {
             LOGGER.info(EMPTY);
-            return FunctionalIterator.fromIterator(
-                    persistence.withPersistenceById(resourceId, delegate.getResourcesById(resourceId))
-            );
+            return persistence.withPersistenceById(resourceId,
+                    FunctionalIterator.fromIterator(delegate.getResourcesById(resourceId)));
         }
     }
 
@@ -120,9 +103,8 @@ public class StreamingResourceServiceProxy {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {
             LOGGER.info(EMPTY);
-            return FunctionalIterator.fromIterator(
-                    persistence.withPersistenceByType(type, delegate.getResourcesById(type))
-            );
+            return persistence.withPersistenceByType(type,
+                    FunctionalIterator.fromIterator(delegate.getResourcesById(type)));
         }
     }
 
@@ -135,9 +117,8 @@ public class StreamingResourceServiceProxy {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {
             LOGGER.info(EMPTY);
-            return FunctionalIterator.fromIterator(
-                    persistence.withPersistenceBySerialisedFormat(serialisedFormat, delegate.getResourcesById(serialisedFormat))
-            );
+            return persistence.withPersistenceBySerialisedFormat(serialisedFormat,
+                            FunctionalIterator.fromIterator(delegate.getResourcesById(serialisedFormat)));
         }
     }
 
@@ -148,27 +129,5 @@ public class StreamingResourceServiceProxy {
             persistence.addResource(leafResource);
         }
         return success;
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void initPostConstruct() {
-        // Add resources to persistence
-        LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
-        resourceBuilder.get()
-                .forEach(entry -> {
-                    Resource rootResource = entry.getKey();
-                    LeafResource leafResource = entry.getValue();
-                    List<LeafResource> leafResourceList = new ArrayList<>();
-                    leafResourceList.add(leafResource);
-                    LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
-                    Iterator<LeafResource> resourceIterator = leafResourceList.iterator();
-                    resourceIterator = persistence.withPersistenceById(rootResource.getId(), resourceIterator);
-                    resourceIterator = persistence.withPersistenceByType(leafResource.getType(), resourceIterator);
-                    resourceIterator = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resourceIterator);
-                    while (resourceIterator.hasNext()) {
-                        LeafResource resource = resourceIterator.next();
-                        LOGGER.debug("Resource {} persisted", resource.getId());
-                    }
-                });
     }
 }

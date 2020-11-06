@@ -91,7 +91,7 @@ class H2ContractTest {
     @Transactional
     void setup() {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
-            Iterator<LeafResource> fileIterator = FunctionalIterator
+            FunctionalIterator<LeafResource> fileIterator = FunctionalIterator
                     .fromIterator(Collections.singletonList((LeafResource) file).iterator());
             persistenceLayer.withPersistenceById(SYSTEM_ROOT.getId(), fileIterator);
             persistenceLayer.withPersistenceByType(file.getType(), fileIterator);

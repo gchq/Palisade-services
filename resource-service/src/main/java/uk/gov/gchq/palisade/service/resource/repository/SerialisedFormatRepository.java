@@ -18,14 +18,15 @@ package uk.gov.gchq.palisade.service.resource.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
  * for more details
+ *
+ * @implNote In the future consider changing this to a {@link org.springframework.data.repository.reactive.ReactiveCrudRepository}
  */
 public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
@@ -35,8 +36,8 @@ public interface SerialisedFormatRepository extends CrudRepository<SerialisedFor
      * @param serialisedFormat the format of the resource
      * @return a stream of SerialisedFormatEntity from the backing store
      */
-    default Iterator<SerialisedFormatEntity> streamFindAllBySerialisedFormat(String serialisedFormat) {
-        return findAllBySerialisedFormat(serialisedFormat).iterator();
+    default FunctionalIterator<SerialisedFormatEntity> iterateFindAllBySerialisedFormat(String serialisedFormat) {
+        return FunctionalIterator.fromIterator(findAllBySerialisedFormat(serialisedFormat).iterator());
     }
 
     /**

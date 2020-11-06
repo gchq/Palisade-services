@@ -18,12 +18,15 @@ package uk.gov.gchq.palisade.service.resource.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
  * for more details
+ *
+ * @implNote In the future consider changing this to a {@link org.springframework.data.repository.reactive.ReactiveCrudRepository}
  */
 public interface ResourceRepository extends CrudRepository<ResourceEntity, String> {
 
@@ -33,7 +36,7 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param resourceId the resource id of the resource in the backing store
      * @return Optional value of ResourceEntity stored in the backing store
      */
-    Iterator<ResourceEntity> findByResourceId(String resourceId);
+    Iterable<ResourceEntity> findByResourceId(String resourceId);
 
     /**
      * Returns an {@link Iterator} of Resources from a backing store by ParentId
@@ -41,8 +44,8 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param parentId the parent id of the Resource
      * @return an {@link Iterator} of ResourceEntity resources from the backing store
      */
-    default Iterator<ResourceEntity> streamFindAllByParentId(String parentId) {
-        return findAllByParentId(parentId).iterator();
+    default FunctionalIterator<ResourceEntity> iterateFindAllByParentId(String parentId) {
+        return FunctionalIterator.fromIterator(findAllByParentId(parentId).iterator());
     }
 
     /**

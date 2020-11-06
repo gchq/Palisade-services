@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.resource.repository;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
 
@@ -60,7 +61,7 @@ public interface PersistenceLayer {
      * @param resources      the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Iterator<LeafResource> withPersistenceById(String rootResourceId, Iterator<LeafResource> resources);
+    FunctionalIterator<LeafResource> withPersistenceById(String rootResourceId, FunctionalIterator<LeafResource> resources);
 
     /**
      * Add a {@link LeafResource} to persistence for a given type
@@ -70,7 +71,7 @@ public interface PersistenceLayer {
      * @param resources the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Iterator<LeafResource> withPersistenceByType(String type, Iterator<LeafResource> resources);
+    FunctionalIterator<LeafResource> withPersistenceByType(String type, FunctionalIterator<LeafResource> resources);
 
     /**
      * Add a {@link LeafResource} to persistence for a given serialised format
@@ -80,7 +81,7 @@ public interface PersistenceLayer {
      * @param resources        the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Iterator<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, Iterator<LeafResource> resources);
+    FunctionalIterator<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, FunctionalIterator<LeafResource> resources);
 
 
     /**

@@ -51,7 +51,6 @@ class JpaPersistenceLayerTest {
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
     private LeafResource resource;
-    private Iterator<LeafResource> resourceIterator;
 
     @BeforeEach
     @Transactional
@@ -63,9 +62,13 @@ class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        resourceIterator = persistenceLayer.withPersistenceById(resource.getParent().getId(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
-        resourceIterator = persistenceLayer.withPersistenceByType(resource.getType(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
-        resourceIterator = persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        FunctionalIterator<LeafResource> resourceIterator = persistenceLayer.withPersistenceById(resource.getParent().getId(),
+                FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        resourceIterator = persistenceLayer.withPersistenceByType(resource.getType(), resourceIterator);
+        resourceIterator = persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), resourceIterator);
+        while (resourceIterator.hasNext()) {
+            resourceIterator.next();
+        }
     }
 
     @Test
@@ -79,17 +82,20 @@ class JpaPersistenceLayerTest {
     @Transactional
     void testEmptyGetReturnsEmpty() {
         // When
-        Iterator<LeafResource> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
+        FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(
+                persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID"));
         // Then
         assertThat(persistenceResponse.hasNext()).isFalse();
 
         // When
-        persistenceResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE");
+        persistenceResponse = FunctionalIterator.fromIterator(
+                persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE"));
         // Then
         assertThat(persistenceResponse.hasNext()).isFalse();
 
         // When
-        persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT");
+        persistenceResponse = FunctionalIterator.fromIterator(
+                persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT"));
         // Then
         assertThat(persistenceResponse.hasNext()).isFalse();
     }
@@ -98,25 +104,20 @@ class JpaPersistenceLayerTest {
     @Transactional
     void testAddAndGetReturnsResource() {
         // Given
-        List<LeafResource> resultList = new ArrayList<>();
-        // When
-        Iterator<LeafResource> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
-        persistenceResponse.forEachRemaining(resultList::add);
-        // Then
-        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
-        resultList.clear();
 
         // When
-        persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
-        persistenceResponse.forEachRemaining(resultList::add);
+        FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesById(resource.getId()));
         // Then
-        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
-        resultList.clear();
+        assertThat(persistenceResponse.next()).isEqualTo(resource);
 
         // When
-        persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
-        persistenceResponse.forEachRemaining(resultList::add);
+        persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesByType(resource.getType()));
         // Then
-        assertThat(resultList).isEqualTo(Collections.singletonList(resource));
+        assertThat(persistenceResponse.next()).isEqualTo(resource);
+
+        // When
+        persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat()));
+        // Then
+        assertThat(persistenceResponse.next()).isEqualTo(resource);
     }
 }

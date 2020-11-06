@@ -18,12 +18,15 @@ package uk.gov.gchq.palisade.service.resource.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link TypeEntity}
  * for more details
+ *
+ * @implNote In the future consider changing this to a {@link org.springframework.data.repository.reactive.ReactiveCrudRepository}
  */
 public interface TypeRepository extends CrudRepository<TypeEntity, String> {
 
@@ -33,8 +36,8 @@ public interface TypeRepository extends CrudRepository<TypeEntity, String> {
      * @param type of resource to retrieve
      * @return an {@link Iterator} of TypeEntities from the backing store
      */
-    default Iterator<TypeEntity> streamFindAllByType(String type) {
-        return findAllByType(type).iterator();
+    default FunctionalIterator<TypeEntity> iterateFindAllByType(String type) {
+        return FunctionalIterator.fromIterator(findAllByType(type).iterator());
     }
 
     /**

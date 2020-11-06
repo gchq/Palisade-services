@@ -29,15 +29,27 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.event.EventListener;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.service.ResourceConfiguration;
+import uk.gov.gchq.palisade.service.UserConfiguration;
+import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -52,20 +64,28 @@ public class ResourceApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
+    private final PersistenceLayer persistence;
+    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
      * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
      * @param materializer  the Akka {@link Materializer} configured to be used
+     * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
      */
     public ResourceApplication(final Collection<RunnableGraph<?>> runners,
                                final Materializer materializer,
+                               final PersistenceLayer persistence,
+                               final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
                                @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;
+        this.persistence = persistence;
         this.executor = executor;
+        this.resourceBuilder = resourceBuilder;
     }
 
     /**
@@ -77,6 +97,29 @@ public class ResourceApplication {
         LOGGER.debug("ResourceApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(ResourceApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
+    }
+
+    /**
+     * Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPostConstruct() {
+        // Add resources to persistence
+        LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
+        resourceBuilder.get()
+                .forEach(entry -> {
+                    Resource rootResource = entry.getKey();
+                    LeafResource leafResource = entry.getValue();
+                    LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
+                    FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.singletonList(leafResource).iterator());
+                    resourceIterator = persistence.withPersistenceById(rootResource.getId(), resourceIterator);
+                    resourceIterator = persistence.withPersistenceByType(leafResource.getType(), resourceIterator);
+                    resourceIterator = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resourceIterator);
+                    while (resourceIterator.hasNext()) {
+                        LeafResource resource = resourceIterator.next();
+                        LOGGER.debug("Resource {} persisted", resource.getId());
+                    }
+                });
     }
 
     /**
