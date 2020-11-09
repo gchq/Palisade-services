@@ -41,15 +41,12 @@ import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServicePro
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
@@ -60,24 +57,6 @@ class ScenarioPersistenceContractTest {
 
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
-
-    private final Method isResourceIdComplete;
-    private final Method isTypeComplete;
-    private final Method isSerialisedFormatComplete;
-
-    {
-        try {
-            isResourceIdComplete = JpaPersistenceLayer.class.getDeclaredMethod("isResourceIdComplete", String.class);
-            isTypeComplete = JpaPersistenceLayer.class.getDeclaredMethod("isTypeComplete", String.class);
-            isSerialisedFormatComplete = JpaPersistenceLayer.class.getDeclaredMethod("isSerialisedFormatComplete", String.class);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        isResourceIdComplete.setAccessible(true);
-        isTypeComplete.setAccessible(true);
-        isSerialisedFormatComplete.setAccessible(true);
-    }
 
     @Autowired
     private StreamingResourceServiceProxy client;
@@ -271,42 +250,4 @@ class ScenarioPersistenceContractTest {
         persistedList.clear();
         LOGGER.debug("");
     }
-
-    boolean extractResourceCompleteness(final Resource resource) {
-
-        try {
-            return ((boolean) isResourceIdComplete.invoke(persistenceLayer, resource.getId()))
-                    && persistenceLayer.getResourcesById(resource.getId()).hasNext();
-        } catch (Exception ex) {
-            LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
-            LOGGER.error("Exception was", ex);
-            fail();
-            return false;
-        }
-    }
-
-    boolean extractTypeCompleteness(final String type) {
-        try {
-            return ((boolean) isTypeComplete.invoke(persistenceLayer, type))
-                    && persistenceLayer.getResourcesByType(type).hasNext();
-        } catch (Exception ex) {
-            LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
-            LOGGER.error("Exception was", ex);
-            fail();
-            return false;
-        }
-    }
-
-    boolean extractSerialisedFormatCompleteness(final String serialisedFormat) {
-        try {
-            return ((boolean) isSerialisedFormatComplete.invoke(persistenceLayer, serialisedFormat))
-                    && persistenceLayer.getResourcesBySerialisedFormat(serialisedFormat).hasNext();
-        } catch (Exception ex) {
-            LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
-            LOGGER.error("Exception was", ex);
-            fail();
-            return false;
-        }
-    }
-
 }

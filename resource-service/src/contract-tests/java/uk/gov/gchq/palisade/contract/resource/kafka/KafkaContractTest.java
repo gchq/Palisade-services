@@ -241,7 +241,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testNoSuchUserIdExceptionIsThrown() {
+    void testNoResourceFoundExceptionIsThrown() {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
