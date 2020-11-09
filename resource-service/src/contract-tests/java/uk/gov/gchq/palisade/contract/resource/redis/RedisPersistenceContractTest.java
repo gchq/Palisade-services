@@ -52,7 +52,7 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
-import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
+import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
@@ -60,13 +60,9 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -89,15 +85,15 @@ class RedisPersistenceContractTest {
     private JpaPersistenceLayer persistenceLayer;
 
     @Autowired
-    private SimpleResourceService client;
+    private StreamingResourceServiceProxy service;
 
     /**
      * Scenario as follows, where (F)iles, (D)irectories and (S)ystems are annotated respectively
-     * S
-     * |
-     * D
-     * / | \
-     * F   F  F
+     *    S
+     *    |
+     *    D
+     *  / | \
+     * F  F  F
      */
 
     private static final SimpleConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("data-service-mock");
@@ -123,13 +119,15 @@ class RedisPersistenceContractTest {
     @BeforeEach
     @Transactional
     void setup() {
-        FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(
-                Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE).iterator());
-        while (resourceIterator.hasNext()) {
-            LeafResource resource = resourceIterator.next();
-            persistenceLayer.withPersistenceById(resource.getId(), resourceIterator);
-            persistenceLayer.withPersistenceByType(resource.getType(), resourceIterator);
-            persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), resourceIterator);
+        for (LeafResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
+            FunctionalIterator<LeafResource> fileIterator = FunctionalIterator
+                    .fromIterator(Collections.singletonList(file).iterator());
+            fileIterator = persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId(), fileIterator);
+            fileIterator = persistenceLayer.withPersistenceByType(file.getType(), fileIterator);
+            fileIterator = persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat(), fileIterator);
+            while (fileIterator.hasNext()) {
+                fileIterator.next();
+            }
         }
     }
 
@@ -140,7 +138,7 @@ class RedisPersistenceContractTest {
         List<LeafResource> result2List = new ArrayList<>();
 
         // When
-        Iterator<LeafResource> resourcesByResource = client.getResourcesByResource(TEST_DIRECTORY);
+        FunctionalIterator<LeafResource> resourcesByResource = FunctionalIterator.fromIterator(service.getResourcesByResource(TEST_DIRECTORY));
         resourcesByResource.forEachRemaining(result1List::add);
 
         // Then
@@ -148,7 +146,7 @@ class RedisPersistenceContractTest {
         assertThat(result1List.size()).isEqualTo(expected.size());
 
         // When
-        resourcesByResource = client.getResourcesByResource(EMPLOYEE_AVRO_FILE);
+        resourcesByResource = FunctionalIterator.fromIterator(service.getResourcesByResource(EMPLOYEE_AVRO_FILE));
         resourcesByResource.forEachRemaining(result2List::add);
 
         // Then
@@ -163,7 +161,7 @@ class RedisPersistenceContractTest {
         List<LeafResource> result2List = new ArrayList<>();
 
         // When
-        Iterator<LeafResource> resourcesById = client.getResourcesById(TEST_DIRECTORY.getId());
+        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(TEST_DIRECTORY.getId()));
         resourcesById.forEachRemaining(result1List::add);
 
         // Then
@@ -171,7 +169,7 @@ class RedisPersistenceContractTest {
         assertThat(result1List.size()).isEqualTo(expected.size());
 
         // When
-        resourcesById = client.getResourcesById(EMPLOYEE_AVRO_FILE.getId());
+        resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(EMPLOYEE_AVRO_FILE.getId()));
         resourcesById.forEachRemaining(result2List::add);
 
         // Then
@@ -186,7 +184,7 @@ class RedisPersistenceContractTest {
         List<LeafResource> result2List = new ArrayList<>();
 
         // When
-        Iterator<LeafResource> resourcesByType = client.getResourcesByType(EMPLOYEE_TYPE);
+        FunctionalIterator<LeafResource> resourcesByType = FunctionalIterator.fromIterator(service.getResourcesByType(EMPLOYEE_TYPE));
         resourcesByType.forEachRemaining(result1List::add);
 
         // Then
@@ -194,7 +192,7 @@ class RedisPersistenceContractTest {
         assertThat(result1List.size()).isEqualTo(expected.size());
 
         // When
-        resourcesByType = client.getResourcesByType(CLIENT_TYPE);
+        resourcesByType = FunctionalIterator.fromIterator(service.getResourcesByType(CLIENT_TYPE));
         resourcesByType.forEachRemaining(result2List::add);
 
         // Then
@@ -210,7 +208,7 @@ class RedisPersistenceContractTest {
         List<LeafResource> result2List = new ArrayList<>();
 
         // When
-        Iterator<LeafResource> resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(AVRO_FORMAT);
+        FunctionalIterator<LeafResource> resourcesBySerialisedFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(AVRO_FORMAT));
         resourcesBySerialisedFormat.forEachRemaining(result1List::add);
 
         // Then
@@ -218,7 +216,7 @@ class RedisPersistenceContractTest {
         assertThat(result1List.size()).isEqualTo(expected.size());
 
         // When
-        resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(JSON_FORMAT);
+        resourcesBySerialisedFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(JSON_FORMAT));
         resourcesBySerialisedFormat.forEachRemaining(result2List::add);
 
         // Then
@@ -278,8 +276,8 @@ class RedisPersistenceContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("masked-resource", 3, (short) 1),
+                    new NewTopic("user", 3, (short) 1),
+                    new NewTopic("resource", 3, (short) 1),
                     new NewTopic("error", 3, (short) 1));
 
             @Bean

@@ -16,13 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import akka.NotUsed;
-import akka.stream.javadsl.Source;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -30,12 +26,7 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.function.Supplier;
 
 /**
  * A proxy of (wrapper around) an instance of a {@link ResourceService}.
@@ -70,7 +61,7 @@ public class StreamingResourceServiceProxy {
     public FunctionalIterator<LeafResource> getResourcesByResource(final Resource resource) {
         // Try first from persistence
         LOGGER.info(STORE);
-        Iterator<LeafResource> persistenceIterator = persistence.getResourcesById(resource.getId());
+        FunctionalIterator<LeafResource> persistenceIterator = FunctionalIterator.fromIterator(persistence.getResourcesById(resource.getId()));
         if (persistenceIterator.hasNext()) {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {
@@ -98,7 +89,7 @@ public class StreamingResourceServiceProxy {
     public FunctionalIterator<LeafResource> getResourcesByType(final String type) {
         // Try first from persistence
         LOGGER.info(STORE);
-        Iterator<LeafResource> persistenceIterator = persistence.getResourcesByType(type);
+        FunctionalIterator<LeafResource> persistenceIterator = FunctionalIterator.fromIterator(persistence.getResourcesByType(type));
         if (persistenceIterator.hasNext()) {
             return FunctionalIterator.fromIterator(persistenceIterator);
         } else {

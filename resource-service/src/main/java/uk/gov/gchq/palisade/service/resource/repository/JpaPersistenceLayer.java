@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import com.google.common.collect.Iterators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -120,7 +122,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private boolean isTypeComplete(final String type) {
         // Check details with completeness db
         boolean complete = completenessRepository.compositeExistsByEntityTypeAndEntityId(EntityType.TYPE, type);
-        LOGGER.debug("Type {} is {}", type, complete ? COMPLETE : NOT_COMPLETE);
+        LOGGER.info("Type {} is {}", type, complete ? COMPLETE : NOT_COMPLETE);
         return complete;
     }
 
@@ -420,15 +422,18 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.emptyIterator());
         // Only return info on complete sets of information
         if (isResourceIdComplete(resourceId)) {
-            LOGGER.info("Persistence hit for resourceId {}", resourceId);
+            LOGGER.info("Persistence hit for resourceId '{}'", resourceId);
             // Get resource entity from db
             FunctionalIterator<ResourceEntity> entityIterator = FunctionalIterator.fromIterator(resourceRepository.findByResourceId(resourceId).iterator());
             while (entityIterator.hasNext()) {
                 ResourceEntity entity = entityIterator.next();
-                resourceIterator = collectLeaves(resolveParents(entity.getResource()));
+                FunctionalIterator<LeafResource> iterator = getResourceById(entity.getResourceId());
+                if (iterator != null) {
+                    resourceIterator = FunctionalIterator.fromIterator(Iterators.concat(resourceIterator, iterator));
+                }
             }
         } else {
-            LOGGER.info("Persistence miss for resourceId {}", resourceId);
+            LOGGER.info("Persistence miss for resourceId '{}'", resourceId);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
         return resourceIterator;
@@ -441,16 +446,18 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.emptyIterator());
         // Only return info on complete sets of information
         if (isTypeComplete(type)) {
-            LOGGER.info("Persistence hit for type {}", type);
+            LOGGER.info("Persistence hit for type '{}'", type);
             // Get resource entity from db
-            Iterator<TypeEntity> typeIterator = typeRepository.iterateFindAllByType(type);
+            FunctionalIterator<TypeEntity> typeIterator = typeRepository.iterateFindAllByType(type);
             while (typeIterator.hasNext()) {
                 TypeEntity entity = typeIterator.next();
-                resourceIterator = getResourceById(entity.getResourceId());
+                FunctionalIterator<LeafResource> iterator = getResourceById(entity.getResourceId());
+                if (iterator != null) {
+                    resourceIterator = FunctionalIterator.fromIterator(Iterators.concat(resourceIterator, iterator));
+                }
             }
-            return resourceIterator;
         } else {
-            LOGGER.info("Persistence miss for type {}", type);
+            LOGGER.info("Persistence miss for type '{}'", type);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
         return resourceIterator;
@@ -463,16 +470,18 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.emptyIterator());
         // Only return info on complete sets of information
         if (isSerialisedFormatComplete(serialisedFormat)) {
-            LOGGER.info("Persistence hit for serialised format {}", serialisedFormat);
+            LOGGER.info("Persistence hit for serialised format '{}'", serialisedFormat);
             // Get resource entity from db
-            Iterator<SerialisedFormatEntity> formatIterator = serialisedFormatRepository.iterateFindAllBySerialisedFormat(serialisedFormat);
-            while (formatIterator.hasNext()) {
-                SerialisedFormatEntity entity = formatIterator.next();
-                resourceIterator = getResourceById(entity.getResourceId());
+            FunctionalIterator<SerialisedFormatEntity> typeIterator = serialisedFormatRepository.iterateFindAllBySerialisedFormat(serialisedFormat);
+            while (typeIterator.hasNext()) {
+                SerialisedFormatEntity entity = typeIterator.next();
+                FunctionalIterator<LeafResource> iterator = getResourceById(entity.getResourceId());
+                if (iterator != null) {
+                    resourceIterator = FunctionalIterator.fromIterator(Iterators.concat(resourceIterator, iterator));
+                }
             }
-            return resourceIterator;
         } else {
-            LOGGER.info("Persistence miss for serialised format {}", serialisedFormat);
+            LOGGER.info("Persistence miss for serialised format '{}'", serialisedFormat);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
         return resourceIterator;
@@ -482,7 +491,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public FunctionalIterator<LeafResource> withPersistenceById(final String rootResourceId, final FunctionalIterator<LeafResource> resources) {
-        LOGGER.debug("Persistence add for resources by id '{}'", rootResourceId);
+        LOGGER.info("Persistence add for resources by id '{}'", rootResourceId);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.RESOURCE, rootResourceId);
@@ -513,7 +522,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public FunctionalIterator<LeafResource> withPersistenceByType(final String type, final FunctionalIterator<LeafResource> resources) {
-        LOGGER.debug("Persistence add for resources by type '{}'", type);
+        LOGGER.info("Persistence add for resources by type '{}'", type);
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.TYPE, type);
@@ -527,7 +536,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
     public FunctionalIterator<LeafResource> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<LeafResource> resources) {
-        LOGGER.debug("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
+        LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.FORMAT, serialisedFormat);

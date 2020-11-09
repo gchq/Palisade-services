@@ -34,7 +34,7 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * Find resource in backing store by ResourceId
      *
      * @param resourceId the resource id of the resource in the backing store
-     * @return Optional value of ResourceEntity stored in the backing store
+     * @return {@link Iterable} value of ResourceEntity stored in the backing store
      */
     Iterable<ResourceEntity> findByResourceId(String resourceId);
 
@@ -52,7 +52,7 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * Iterator of a list of resources by parentId
      *
      * @param parentId the parent id of the Resource
-     * @return a list of ResourceEntity resources from the backing store
+     * @return an {@link Iterable} of ResourceEntity resources from the backing store
      */
     Iterable<ResourceEntity> findAllByParentId(String parentId);
 
