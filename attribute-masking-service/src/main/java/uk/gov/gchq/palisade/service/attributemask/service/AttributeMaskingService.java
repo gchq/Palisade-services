@@ -94,6 +94,7 @@ public class AttributeMaskingService {
                         return storeAuthorisedRequest(token, request.getUser(), request.getResource(), request.getContext(), request.getRules())
                                 .thenCompose(saved -> CompletableFuture.completedFuture(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(request).withNoError()));
                     } catch (JsonProcessingException e) {
+                        LOGGER.error("Json Exception thrown from method storeAuthorisedRequest() : ", e);
                         return CompletableFuture.completedFuture(
                                 AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null)
                                         .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())
@@ -136,6 +137,7 @@ public class AttributeMaskingService {
                                 .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
                                 .withAuditErrorMessage(null);
                     } catch (JsonProcessingException e) {
+                        LOGGER.error("Json Exception thrown from method maskResourceAttributes() : ", e);
                         return AuditableAttributeMaskingResponse.Builder.create()
                                 .withAttributeMaskingResponse(null)
                                 .withAuditErrorMessage(AuditErrorMessage.Builder.create()

@@ -139,7 +139,6 @@ public class AkkaRunnableGraph {
                 .toMat(Committer.sink(committerSettings), Keep.both())
                 // Materialize the stream, sending messages to the sink
                 .mapMaterializedValue(Consumer::createDrainingControl);
-                //.toMat(sink, Consumer::createDrainingControl);
     }
 
 }
