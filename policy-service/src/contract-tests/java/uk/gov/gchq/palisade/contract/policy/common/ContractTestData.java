@@ -47,22 +47,27 @@ public class ContractTestData {
 
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_RULES_REQUEST_NODE;
+    public static final JsonNode REDACTED_RESOURCE_RULES_REQUEST_NODE;
     public static final PolicyRequest REQUEST_OBJ;
     public static final PolicyRequest NO_RESOURCE_RULES_REQUEST_OBJ;
+    public static final PolicyRequest REDACTED_RESOURCE_RULES_REQUEST_OBJ;
     public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
     public static final String NO_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"noResourceRulesUser\",\"resourceId\":\"file:/test/noRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"noResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/noRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
+    public static final String REDACTED_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"redactedResourceRulesUser\",\"resourceId\":\"/test/recordRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"redactedResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/recordRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
 
 
     static {
         try {
             REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
             NO_RESOURCE_RULES_REQUEST_NODE = MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_JSON);
+            REDACTED_RESOURCE_RULES_REQUEST_NODE = MAPPER.readTree(REDACTED_RESOURCE_RULES_REQUEST_JSON);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
         try {
             REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, PolicyRequest.class);
             NO_RESOURCE_RULES_REQUEST_OBJ = MAPPER.treeToValue(NO_RESOURCE_RULES_REQUEST_NODE, PolicyRequest.class);
+            REDACTED_RESOURCE_RULES_REQUEST_OBJ = MAPPER.treeToValue(REDACTED_RESOURCE_RULES_REQUEST_NODE, PolicyRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
@@ -70,6 +75,7 @@ public class ContractTestData {
 
     public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
     public static final Function<Integer, String> NO_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(NO_RESOURCE_RULES_REQUEST_JSON, i, i);
+    public static final Function<Integer, String> REDACTED_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(REDACTED_RESOURCE_RULES_REQUEST_JSON, i, i);
 
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
@@ -81,6 +87,13 @@ public class ContractTestData {
     public static final Function<Integer, JsonNode> NO_RESOURCE_RULES_REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_FACTORY_JSON.apply(i));
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse contract test data", e);
+        }
+    };
+    public static final Function<Integer, JsonNode> REDACTED_RESOURCE_RULES_REQUEST_FACTORY_NODE = i -> {
+        try {
+            return MAPPER.readTree(REDACTED_RESOURCE_RULES_REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
@@ -100,5 +113,8 @@ public class ContractTestData {
             .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> NO_RESOURCE_RULES_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> REDACTED_RESOURCE_RULES_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("resource", 0, null, NO_RESOURCE_RULES_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

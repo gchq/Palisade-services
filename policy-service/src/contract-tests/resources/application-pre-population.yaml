@@ -23,6 +23,12 @@ population:
     roles:
       role
 
+  - userId: redactedResourceRulesUser
+    auths:
+      auth
+    roles:
+      role
+
   - userId: test-user-id
     auths:
       auth
@@ -36,6 +42,12 @@ population:
   - resource: /test/resourceId
     resourceRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
+    recordRules:
+      "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
+
+  - resource: /test/resourceRulesResource
+    resourceRules:
+      "1-Serialised-Format-Rule": uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule
     recordRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
 
@@ -54,3 +66,10 @@ population:
     attributes:
       type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
       serialisedFormat: avro
+
+  - resourceId: /test/resourceRulesResource
+    rootId: test
+    connectionDetail: test-data-service
+    attributes:
+      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
+      serialisedFormat: txt

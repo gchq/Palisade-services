@@ -82,9 +82,7 @@ public class PolicyServiceHierarchyProxy {
     }
 
     /**
-     * This method is used to find out if the given user is allowed to access
-     * the resource given their purpose. This is where any resource level
-     * access controls are enforced.
+     * This is where any resource level access controls are enforced, taking the resource, user, context and rules.
      *
      * @param <R>      the type of resource (may be a supertype)
      * @param user     the {@link User} requesting the data

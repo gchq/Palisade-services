@@ -340,6 +340,78 @@ class KafkaContractTest {
         );
     }
 
+    /**
+     * Creates a number of requests, including a start and end record, and the body, JSON, on the right topic
+     * Listens on the producer topic, then writes to the consumer topic and retrieves the processed messages from the producer topic.
+     * Then asserts that the messages are valid, have the correct token and headers, the right number of messages exist, then are correctly ordered.
+     * Finally checks the body of the message has appropriately been processed and the right objects are returned
+     * In this case, the resourceRules applied to the resource have redacted the resource so nothing is returned to the user
+     */
+    @Test
+    @DirtiesContext
+    void testResourceRulesRedactedResource() {
+        // Create a variable number of requests
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
+                Stream.of(ContractTestData.START_RECORD),
+                ContractTestData.REDACTED_RESOURCE_RULES_RECORD_NODE_FACTORY.get().limit(1L),
+                Stream.of(ContractTestData.END_RECORD))
+                .flatMap(Function.identity());
+
+        // Given - we are already listening to the output
+        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new KafkaContractTest.ResponseDeserializer())
+                .withBootstrapServers(KafkaContractTest.KafkaInitializer.kafka.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
+        // When - we write to the input
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new KafkaContractTest.RequestSerializer())
+                .withBootstrapServers(KafkaContractTest.KafkaInitializer.kafka.getBootstrapServers());
+
+        Source.fromJavaStream(() -> requests)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+
+
+        // When - results are pulled from the output stream
+        // record count set to 2, as one record will be removed as no policy exists for it
+        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
+        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then - the results are as expected
+
+        // All messages have a correct Token in the header
+        assertAll("Headers have correct token",
+                () -> assertThat(results)
+                        .hasSize(2),
+
+                () -> assertThat(results)
+                        .allSatisfy(result ->
+                                assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
+        );
+
+        // The first and last have a correct StreamMarker header
+        assertAll("StreamMarkers are correct START and END",
+                () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .isEqualTo(StreamMarker.START.toString().getBytes()),
+
+                () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .isEqualTo(StreamMarker.END.toString().getBytes())
+        );
+
+        // All but the first and last have the expected message
+        results.removeFirst();
+        results.removeLast();
+        assertThat(results).isEmpty();
+    }
+
     // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
         @Override
