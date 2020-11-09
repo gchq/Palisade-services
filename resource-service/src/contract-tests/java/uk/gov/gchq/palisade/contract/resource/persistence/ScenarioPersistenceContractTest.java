@@ -133,9 +133,10 @@ class ScenarioPersistenceContractTest {
     @Transactional(readOnly = true)
     void runThroughTestScenario() {
         FunctionalIterator<LeafResource> returned;
+        FunctionalIterator<Resource> persisted;
         List<LeafResource> returnedList = new ArrayList<>();
         List<LeafResource> expectedReturned;
-        List<Resource> persisted;
+        List<Resource> persistedList = new ArrayList<>();
         List<Resource> expectedPersisted;
 
         // When - Pt 1
@@ -144,7 +145,9 @@ class ScenarioPersistenceContractTest {
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Collections.singletonList(MULTI_FILE_ONE);
         expectedPersisted = Collections.singletonList(MULTI_FILE_ONE);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toList());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = persistenceLayer.withPersistenceById(MULTI_FILE_ONE.getId(), persisted);
+        persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -155,10 +158,11 @@ class ScenarioPersistenceContractTest {
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted.size()).isEqualTo(expectedPersisted.size());
+        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
         LOGGER.debug("");
         returnedList.clear();
+        persistedList.clear();
         LOGGER.debug("");
 
 
@@ -168,7 +172,9 @@ class ScenarioPersistenceContractTest {
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toList());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = persistenceLayer.withPersistenceById(MULTI_FILE_DIR.getId(), persisted);
+        persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -179,10 +185,11 @@ class ScenarioPersistenceContractTest {
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted.size()).isEqualTo(expectedPersisted.size());
+        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
         LOGGER.debug("");
         returnedList.clear();
+        persistedList.clear();
         LOGGER.debug("");
 
 
@@ -192,7 +199,9 @@ class ScenarioPersistenceContractTest {
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toList());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = persistenceLayer.withPersistenceById(TOP_LEVEL_DIR.getId(), persisted);
+        persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -203,10 +212,11 @@ class ScenarioPersistenceContractTest {
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted.size()).isEqualTo(expectedPersisted.size());
+        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
         LOGGER.debug("");
         returnedList.clear();
+        persistedList.clear();
         LOGGER.debug("");
 
 
@@ -215,7 +225,9 @@ class ScenarioPersistenceContractTest {
         returned = client.getResourcesByResource(EMPTY_DIR);
         returned.forEachRemaining(returnedList::add);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toList());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = persistenceLayer.withPersistenceById(EMPTY_DIR.getId(), persisted);
+        persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -225,10 +237,11 @@ class ScenarioPersistenceContractTest {
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted.size()).isEqualTo(expectedPersisted.size());
+        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
         LOGGER.debug("");
         returnedList.clear();
+        persistedList.clear();
         LOGGER.debug("");
 
 
@@ -238,7 +251,9 @@ class ScenarioPersistenceContractTest {
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);
-        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toList());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = persistenceLayer.withPersistenceById(ROOT_DIR.getId(), persisted);
+        persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
@@ -249,10 +264,11 @@ class ScenarioPersistenceContractTest {
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persisted.size()).isEqualTo(expectedPersisted.size());
+        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
         LOGGER.debug("");
         returnedList.clear();
+        persistedList.clear();
         LOGGER.debug("");
     }
 

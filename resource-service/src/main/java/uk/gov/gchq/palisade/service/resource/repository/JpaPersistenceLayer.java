@@ -329,7 +329,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @return Optional.of the resource represented by the parentResourceId if it was found while recursing
      * Optional.empty if this resourceId was never found
      */
-    private Optional<Resource> saveChildrenOfCompleteResource(final String parentResourceId, final LeafResource leafResource) {
+    private Optional<Resource> saveChildrenOfCompleteResource(final String parentResourceId, final Resource leafResource) {
         LOGGER.debug("Putting resource and parents up-to '{}' for resource '{}'", parentResourceId, leafResource.getId());
         // A bit hacky, but used to pull the rootResource out of the recurseToRootId BiPredicate, see comments on method
         // This saves doing a lot of unnecessary db lookups for an entity we just recursed over
@@ -490,7 +490,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource and mark it and its parents as complete up to a given root resource id
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public FunctionalIterator<LeafResource> withPersistenceById(final String rootResourceId, final FunctionalIterator<LeafResource> resources) {
+    public <T> FunctionalIterator<T> withPersistenceById(final String rootResourceId, final FunctionalIterator<T> resources) {
         LOGGER.info("Persistence add for resources by id '{}'", rootResourceId);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
@@ -499,7 +499,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         final AtomicBoolean persistedRootAndParents = new AtomicBoolean(false);
         return resources.peek(leafResource -> {
             // Persist each leaf resource, with each being complete up-to the root resource id
-            Optional<Resource> rootResource = saveChildrenOfCompleteResource(rootResourceId, leafResource);
+            Optional<Resource> rootResource = saveChildrenOfCompleteResource(rootResourceId, (Resource) leafResource);
             // Persist the root resource and its parents
             rootResource.ifPresentOrElse(
                     // If the root reference was found (ie. the leafResource had a grand*parent with id matching the root resource id)
@@ -512,7 +512,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     },
                     // Otherwise... not sure?
                     () -> {
-                        LOGGER.warn("Putting resource {} into resource repository never led to traversal of the apparent root {} for this put update", leafResource.getId(), rootResourceId);
+                        Resource noRootResource = (Resource) leafResource;
+                        LOGGER.warn("Putting resource {} into resource repository never led to traversal of the apparent root {} for this put update", noRootResource.getId(), rootResourceId);
                         LOGGER.warn("This erroneous behaviour may be a sign of database corruption and should be investigated, but hasn't caused a critical error yet");
                     });
         });
@@ -521,28 +522,28 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given type
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public FunctionalIterator<LeafResource> withPersistenceByType(final String type, final FunctionalIterator<LeafResource> resources) {
+    public <T> FunctionalIterator<T> withPersistenceByType(final String type, final FunctionalIterator<T> resources) {
         LOGGER.info("Persistence add for resources by type '{}'", type);
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.TYPE, type);
         return resources.peek(leafResource -> {
-            saveResourceWithIncompleteParents(leafResource);
-            saveType(type, leafResource);
+            saveResourceWithIncompleteParents((LeafResource) leafResource);
+            saveType(type, (LeafResource) leafResource);
         });
     }
 
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given serialisedFormat
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public FunctionalIterator<LeafResource> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<LeafResource> resources) {
+    public <T>FunctionalIterator<T> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<T> resources) {
         LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
         completenessRepository.save(EntityType.FORMAT, serialisedFormat);
         return resources.peek(leafResource -> {
-            saveResourceWithIncompleteParents(leafResource);
-            saveSerialisedFormat(serialisedFormat, leafResource);
+            saveResourceWithIncompleteParents((LeafResource) leafResource);
+            saveSerialisedFormat(serialisedFormat, (LeafResource) leafResource);
         });
     }
 

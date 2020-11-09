@@ -61,7 +61,7 @@ public interface PersistenceLayer {
      * @param resources      the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    FunctionalIterator<LeafResource> withPersistenceById(String rootResourceId, FunctionalIterator<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceById(String rootResourceId, FunctionalIterator<T> resources);
 
     /**
      * Add a {@link LeafResource} to persistence for a given type
@@ -71,7 +71,7 @@ public interface PersistenceLayer {
      * @param resources the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    FunctionalIterator<LeafResource> withPersistenceByType(String type, FunctionalIterator<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceByType(String type, FunctionalIterator<T> resources);
 
     /**
      * Add a {@link LeafResource} to persistence for a given serialised format
@@ -81,7 +81,7 @@ public interface PersistenceLayer {
      * @param resources        the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    FunctionalIterator<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, FunctionalIterator<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceBySerialisedFormat(String serialisedFormat, FunctionalIterator<T> resources);
 
 
     /**
