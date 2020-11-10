@@ -198,6 +198,7 @@ class KafkaContractTest {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
+        LOGGER.info("Number of results returned: {}", results.size());
 
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
@@ -222,6 +223,7 @@ class KafkaContractTest {
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
+        LOGGER.info("Number of results after removing first and last: {}", results.size());
         // This assert will need to be changed for multiple ResourceResponse object
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
@@ -241,7 +243,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testNoResourceFoundExceptionIsThrown() {
+    void testNoSuchFileExceptionIsThrown() {
         // Create a variable number of requests
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
@@ -270,13 +272,13 @@ class KafkaContractTest {
 
 
         // When - results are pulled from the output stream
-        // record count set to 2, as one record will be removed as no policy exists for it
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
+        LOGGER.info("Number of results returned: {}", results.size());
 
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
@@ -301,6 +303,7 @@ class KafkaContractTest {
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
+        LOGGER.info("Number of results after removing first and last: {}", results.size());
         assertThat(results).isEmpty();
     }
 
