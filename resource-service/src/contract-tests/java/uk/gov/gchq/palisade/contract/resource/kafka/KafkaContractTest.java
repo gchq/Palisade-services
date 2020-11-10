@@ -108,7 +108,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import(KafkaContractTest.KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"redis", "akkatest", "testuser"})
+@ActiveProfiles({"dbtest", "akkatest", "testresource", "debug"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
@@ -171,7 +171,7 @@ class KafkaContractTest {
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
-        final long recordCount = 3;
+        final long recordCount = 4;
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
@@ -225,7 +225,7 @@ class KafkaContractTest {
         // This assert will need to be changed for multiple ResourceResponse object
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
-                        .hasSize(1),
+                        .hasSize(2),
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
@@ -355,7 +355,7 @@ class KafkaContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "redis", "testresource", "debug");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest", "testresource", "debug");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

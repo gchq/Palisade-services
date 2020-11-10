@@ -31,19 +31,14 @@ import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -65,7 +60,7 @@ public class ResourceApplication {
     private final Materializer materializer;
     private final Executor executor;
     private final PersistenceLayer persistence;
-    private Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
+    private final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder;
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -79,7 +74,7 @@ public class ResourceApplication {
     public ResourceApplication(final Collection<RunnableGraph<?>> runners,
                                final Materializer materializer,
                                final PersistenceLayer persistence,
-                               final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
+                               @Qualifier("configuredResourceBuilder") final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
                                @Qualifier("applicationTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;

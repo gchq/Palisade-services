@@ -50,8 +50,8 @@ public class ContractTestData {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     public static final UserId USER_ID = new UserId().id("test-user-id");
     public static final User USER = new User().userId(USER_ID);
-    public static final String RESOURCE_ID = "/test/resourceId/";
-    public static final String BAD_RESOURCE_ID = "/not/a/resource/";
+    public static final String RESOURCE_ID = "file:/test/resourceId/";
+    public static final String BAD_RESOURCE_ID = "file:/not/a/resource/";
     public static final Context CONTEXT = new Context().purpose("purpose");
     public static final ResourceRequest RESOURCE_REQUEST;
     public static final ResourceRequest NO_RESOURCE_REQUEST;
@@ -109,7 +109,7 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
     };
-    public static final Function<Integer, JsonNode> NO_USER_ID_REQUEST_FACTORY_NODE = i -> {
+    public static final Function<Integer, JsonNode> NO_RESOURCE_REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(NO_RESOURCE_REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
@@ -125,7 +125,7 @@ public class ContractTestData {
     };
     public static final Function<Integer, ResourceRequest> NO_USER_ID_REQUEST_FACTORY_OBJ = i -> {
         try {
-            return MAPPER.treeToValue(NO_USER_ID_REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
+            return MAPPER.treeToValue(NO_RESOURCE_REQUEST_FACTORY_NODE.apply(i), ResourceRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert error contract test data to objects", e);
         }
@@ -141,5 +141,5 @@ public class ContractTestData {
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("user", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> NO_RESOURCE_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("user", 0, null, NO_USER_ID_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<String, JsonNode>("user", 0, null, NO_RESOURCE_REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

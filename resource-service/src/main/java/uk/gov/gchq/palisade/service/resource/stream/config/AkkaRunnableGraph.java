@@ -55,6 +55,7 @@ import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration.Topic;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
@@ -89,26 +90,41 @@ public class AkkaRunnableGraph {
 
         // Read messages from the stream source
         return source
+                .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
                 // Get a stream of resources from an iterator
-                .flatMapConcat(committableMessage -> Source.fromIterator(() ->
-                        service.getResourcesById(committableMessage.record().value().resourceId))
-                        // Make the stream of resources an Optional
-                        .map(Optional::of)
-                        // Add empty optional
-                        .concat(Source.single(Optional.empty()))
-                        // Build the producer record for each resource within the Optional
-                        .map(resourceOptional -> resourceOptional
-                                .map(leafResource -> new ProducerRecord<>(
-                                    outputTopic.getName(),
-                                    committableMessage.record().partition(),
-                                    committableMessage.record().key(),
-                                    ResourceResponse.Builder.create(committableMessage.record().value()).withResource(leafResource),
-                                    committableMessage.record().headers()))
+                .flatMapConcat(messageAndRequest -> messageAndRequest.second()
+                        .map(request-> Source.fromIterator(() ->
+                            service.getResourcesById(request.resourceId))
+                            // Make the stream of resources an Optional
+                            .map(Optional::of)
+                            // Add empty optional to the end of the stream
+                            .concat(Source.single(Optional.empty()))
+                            // Build the producer record for each resource within the Optional
+                            .map(resourceOptional -> resourceOptional
+                                    .map(leafResource -> new ProducerRecord<>(
+                                        outputTopic.getName(),
+                                        messageAndRequest.first().record().partition(),
+                                        messageAndRequest.first().record().key(),
+                                        ResourceResponse.Builder.create(messageAndRequest.first().record().value()).withResource(leafResource),
+                                        messageAndRequest.first().record().headers())
+                                    )
+                            )
+                            // Build the producer message for each record in the optional
+                            .map(recordOptional -> recordOptional
+                                    // If the optional has a leaf resource object we send the message to the output topic
+                                    .map(record -> ProducerMessage.single(record, (Committable) ProducerMessage.passThrough()))
+                                    // When we get to the final empty optional element in the stream we need to acknowledge the original message
+                                    .orElse(ProducerMessage.passThrough(messageAndRequest.first().committableOffset()))
+                            )
                         )
-                        // Build the producer message for each record in the optional
-                        .map(recordOptional -> recordOptional
-                                .map(record -> ProducerMessage.single(recordOptional.get(), (Committable) ProducerMessage.passThrough()))
-                                .orElse(ProducerMessage.passThrough(committableMessage.committableOffset()))
+                        .orElseGet(() ->
+                                Source.single(ProducerMessage.single(new ProducerRecord<>(
+                                        outputTopic.getName(),
+                                        messageAndRequest.first().record().partition(),
+                                        messageAndRequest.first().record().key(),
+                                        null,
+                                        messageAndRequest.first().record().headers()), messageAndRequest.first().committableOffset())
+                                )
                         )
                 )
 

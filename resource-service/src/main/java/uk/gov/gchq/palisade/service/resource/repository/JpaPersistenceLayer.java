@@ -30,11 +30,8 @@ import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -419,7 +416,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     @Override
     public FunctionalIterator<LeafResource> getResourcesById(final String resourceId) {
         LOGGER.debug("Getting resources by id '{}'", resourceId);
-        FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.emptyIterator());
+        Iterator<LeafResource> resourceIterator = Collections.emptyIterator();
         // Only return info on complete sets of information
         if (isResourceIdComplete(resourceId)) {
             LOGGER.info("Persistence hit for resourceId '{}'", resourceId);
@@ -429,14 +426,14 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                 ResourceEntity entity = entityIterator.next();
                 FunctionalIterator<LeafResource> iterator = getResourceById(entity.getResourceId());
                 if (iterator != null) {
-                    resourceIterator = FunctionalIterator.fromIterator(Iterators.concat(resourceIterator, iterator));
+                    resourceIterator = iterator;
                 }
             }
         } else {
             LOGGER.info("Persistence miss for resourceId '{}'", resourceId);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
         }
-        return resourceIterator;
+        return FunctionalIterator.fromIterator(resourceIterator);
     }
 
     // Given a type, return all leaf resources of that type with all parents resolved
