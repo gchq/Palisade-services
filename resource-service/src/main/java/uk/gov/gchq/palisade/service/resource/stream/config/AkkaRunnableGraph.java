@@ -17,45 +17,35 @@
 package uk.gov.gchq.palisade.service.resource.stream.config;
 
 import akka.Done;
-import akka.NotUsed;
 import akka.japi.Pair;
-import akka.japi.tuple.Tuple3;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerMessage.Envelope;
-import akka.kafka.ProducerMessage.PassThroughMessage;
 import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
 import akka.stream.ActorAttributes;
 import akka.stream.Materializer;
-import akka.stream.SourceShape;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
-import uk.gov.gchq.palisade.service.resource.model.ResourceRequest.Builder;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
-import uk.gov.gchq.palisade.service.resource.model.Token;
-import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
+import uk.gov.gchq.palisade.service.resource.model.ResourceResponse.Builder;
 import uk.gov.gchq.palisade.service.resource.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration.Topic;
 
-import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
@@ -93,29 +83,28 @@ public class AkkaRunnableGraph {
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
                 // Get a stream of resources from an iterator
                 .flatMapConcat(messageAndRequest -> messageAndRequest.second()
-                        .map(request-> Source.fromIterator(() ->
-                            service.getResourcesById(request.resourceId))
-                            // Make the stream of resources an Optional
-                            .map(Optional::of)
-                            // Add empty optional to the end of the stream
-                            .concat(Source.single(Optional.empty()))
-                            // Build the producer record for each resource within the Optional
-                            .map(resourceOptional -> resourceOptional
-                                    .map(leafResource -> new ProducerRecord<>(
-                                        outputTopic.getName(),
-                                        messageAndRequest.first().record().partition(),
-                                        messageAndRequest.first().record().key(),
-                                        ResourceResponse.Builder.create(messageAndRequest.first().record().value()).withResource(leafResource),
-                                        messageAndRequest.first().record().headers())
-                                    )
-                            )
-                            // Build the producer message for each record in the optional
-                            .map(recordOptional -> recordOptional
-                                    // If the optional has a leaf resource object we send the message to the output topic
-                                    .map(record -> ProducerMessage.single(record, (Committable) ProducerMessage.passThrough()))
-                                    // When we get to the final empty optional element in the stream we need to acknowledge the original message
-                                    .orElse(ProducerMessage.passThrough(messageAndRequest.first().committableOffset()))
-                            )
+                        .map(request -> Source.fromIterator(() -> service.getResourcesById(request.resourceId))
+                                // Make the stream of resources an Optional
+                                .map(Optional::of)
+                                // Add empty optional to the end of the stream
+                                .concat(Source.single(Optional.empty()))
+                                // Build the producer record for each resource within the Optional
+                                .map(resourceOptional -> resourceOptional
+                                        .map(leafResource -> new ProducerRecord<>(
+                                                outputTopic.getName(),
+                                                messageAndRequest.first().record().partition(),
+                                                messageAndRequest.first().record().key(),
+                                                Builder.create(messageAndRequest.first().record().value()).withResource(leafResource),
+                                                messageAndRequest.first().record().headers())
+                                        )
+                                )
+                                // Build the producer message for each record in the optional
+                                .map(recordOptional -> recordOptional
+                                        // If the optional has a leaf resource object we send the message to the output topic
+                                        .map(record -> ProducerMessage.single(record, (Committable) null))
+                                        // When we get to the final empty optional element in the stream we need to acknowledge the original message
+                                        .orElse(ProducerMessage.passThrough(messageAndRequest.first().committableOffset()))
+                                )
                         )
                         .orElseGet(() ->
                                 Source.single(ProducerMessage.single(new ProducerRecord<>(

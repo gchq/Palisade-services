@@ -171,6 +171,8 @@ class KafkaContractTest {
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
+        // We're requesting file:/test/resourceId/ and expecting data1.txt and data2.txt back
+        // Including the START/END, expect 4 records on kafka
         final long recordCount = 4;
 
         // Given - we are already listening to the output
