@@ -23,13 +23,13 @@ default:
 population:
   resourceProvider: std
   resources:
-  - resourceId: ${default.rootId}/data2.txt
+  - resourceId: ${default.rootId}/data1.txt
     rootId: ${default.rootId}/
     connectionDetail: ${default.connectionDetail}
     attributes:
       type: ${default.type}
       serialisedFormat: ${default.format}
-  - resourceId: ${default.rootId}/data1.txt
+  - resourceId: ${default.rootId}/data2.txt
     rootId: ${default.rootId}/
     connectionDetail: ${default.connectionDetail}
     attributes:

@@ -234,12 +234,22 @@ class KafkaContractTest {
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-                () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                        .isEqualTo(ContractTestData.USER_ID.getId()),
-                () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
-                        .isEqualTo("auth"),
-                () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())
-                        .isEqualTo("role")
+                () -> assertThat(results.get(0).value().get("resource").get("id").asText())
+                        .isEqualTo("file:/test/resourceId/data1.txt"),
+                () -> assertThat(results.get(0).value().get("resource").get("serialisedFormat").asText())
+                        .isEqualTo("txt"),
+                () -> assertThat(results.get(0).value().get("resource").get("type").asText())
+                        .isEqualTo("type"),
+                () -> assertThat(results.get(0).value().get("resource").get("connectionDetail").get("serviceName").asText())
+                        .isEqualTo("data-service"),
+                () -> assertThat(results.get(1).value().get("resource").get("id").asText())
+                        .isEqualTo("file:/test/resourceId/data2.txt"),
+                () -> assertThat(results.get(1).value().get("resource").get("serialisedFormat").asText())
+                        .isEqualTo("txt"),
+                () -> assertThat(results.get(1).value().get("resource").get("type").asText())
+                        .isEqualTo("type"),
+                () -> assertThat(results.get(1).value().get("resource").get("connectionDetail").get("serviceName").asText())
+                        .isEqualTo("data-service")
         );
     }
 
