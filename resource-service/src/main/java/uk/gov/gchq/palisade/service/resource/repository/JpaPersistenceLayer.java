@@ -533,7 +533,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given serialisedFormat
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public <T>FunctionalIterator<T> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<T> resources) {
+    public <T> FunctionalIterator<T> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<T> resources) {
         LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence

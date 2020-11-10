@@ -57,7 +57,8 @@ public interface PersistenceLayer {
      * Add a {@link LeafResource} to persistence for a given resourceId
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param rootResourceId the resource id that was queried to return this stream of resources
+     * @param <T>            the type for the {@link FunctionalIterator}
+     * @param rootResourceId the resource id that was queried to return this {@link Iterator} of resources
      * @param resources      the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
@@ -67,7 +68,8 @@ public interface PersistenceLayer {
      * Add a {@link LeafResource} to persistence for a given type
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param type      the type that was queried to return this stream of resources
+     * @param <T>       the type for the {@link FunctionalIterator}
+     * @param type      the file type that was queried to return this {@link Iterator} of resources
      * @param resources the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
@@ -77,7 +79,8 @@ public interface PersistenceLayer {
      * Add a {@link LeafResource} to persistence for a given serialised format
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param serialisedFormat the serialised format that was queried to return this stream of resources
+     * @param <T>              the type for the {@link FunctionalIterator}
+     * @param serialisedFormat the serialised format that was queried to return this {@link Iterator} of resources
      * @param resources        the resource stream returned
      * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */

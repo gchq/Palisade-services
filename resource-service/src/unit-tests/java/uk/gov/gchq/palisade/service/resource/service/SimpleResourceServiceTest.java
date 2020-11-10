@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;

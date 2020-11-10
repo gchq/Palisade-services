@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.gchq.palisade.service.resource.service;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +95,7 @@ class FunctionalIteratorTest {
                 .map(i -> i + 1) // 1, 2, 3, 4, 5, 6
                 .filter(i -> i % 3 != 0 && i % 2 != 0) // 1, 5
                 .mapLast(i -> i + 2) // 1, 7
-                .flatMap(i -> List.of(i, i*i).iterator()) // 1, 1, 7, 49
+                .flatMap(i -> List.of(i, i * i).iterator()) // 1, 1, 7, 49
                 .peek(firstSum::addAndGet) // 58
                 .map(i -> i - 1) // 0, 0, 6, 48
                 .mapLast(i -> i - 40) // 0, 0, 6, 8
