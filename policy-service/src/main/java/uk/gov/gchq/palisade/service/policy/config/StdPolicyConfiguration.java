@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link PolicyConfiguration} that uses Spring to configure a list of policies from a yaml file
- * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.service.request.Policy}s
+ * A container for a number of {@link StdPolicyPrepopulationFactory} builders used for creating policies by mapping {@link uk.gov.gchq.palisade.resource.Resource} to {@link uk.gov.gchq.palisade.rule.Rules}
  * These will be populated further using a {@link uk.gov.gchq.palisade.service.UserConfiguration} and {@link uk.gov.gchq.palisade.service.ResourceConfiguration}
  * These policies will be used for prepopulating the {@link uk.gov.gchq.palisade.service.policy.service.PolicyService}
  */
@@ -49,7 +49,7 @@ public class StdPolicyConfiguration implements PolicyConfiguration {
      * Constructor with one argument for a standard implementation
      * of the {@link PolicyConfiguration} interface
      *
-     * @param policies  a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
+     * @param policies a {@link List} of objects implementing the {@link PolicyPrepopulationFactory} interface
      */
     public StdPolicyConfiguration(final List<StdPolicyPrepopulationFactory> policies) {
         this.policies = policies;
