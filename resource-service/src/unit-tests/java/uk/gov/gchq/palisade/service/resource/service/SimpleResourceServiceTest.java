@@ -55,7 +55,8 @@ class SimpleResourceServiceTest {
         LeafResource leafResource = expectedAvroResource.next();
 
         // When
-        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()));
+        FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(testResourceDir.getId()))
+                .filter(resource -> resource.getSerialisedFormat().equals("avro"));
 
         // Then
         assertThat(resourcesById.next()).isEqualTo(leafResource);
