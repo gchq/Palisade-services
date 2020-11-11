@@ -41,6 +41,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+/**
+ * A service mimicking the Kafka API to the service.
+ * Write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
+ * Intended for debugging only.
+ */
 public class KafkaProducerService {
     private final Sink<ProducerRecord<String, ResourceRequest>, CompletionStage<Done>> upstreamSink;
     private final ConsumerTopicConfiguration upstreamConfig;

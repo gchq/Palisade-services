@@ -23,31 +23,81 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * An interface that allows an {@link Iterator} to have Stream like methods.
+ *
+ * @param <T> the type of the {@link FunctionalIterator}
+ */
 public interface FunctionalIterator<T> extends Iterator<T> {
+
+    /**
+     * A method used to create a {@link FunctionalIterator} from an iterator.
+     *
+     * @param iterator  the Iterator used to create a FunctionalIterator
+     * @param <T>       the type of the Iterator
+     * @return          a {@link FunctionalIterator} of type {@link T}
+     */
     static <T> FunctionalIterator<T> fromIterator(final Iterator<T> iterator) {
         return new PlainIterator<>(iterator);
     }
 
+    /**
+     * A method that maps an object within the iterator.
+     *
+     * @param map   the function used to perform the map
+     * @param <R>   the type of the Iterator
+     * @return      a {@link FunctionalIterator} of type {@link R}
+     */
     default <R> FunctionalIterator<R> map(final Function<T, R> map) {
         return new MapIterator<>(this, map);
     }
 
+    /**
+     * A method that maps the last element of the iterator.
+     *
+     * @param mapLast the unary operator used to perform the map.
+     * @return        a {@link FunctionalIterator} of type {@link T}
+     */
     default FunctionalIterator<T> mapLast(final UnaryOperator<T> mapLast) {
         return new MapLastIterator<>(this, mapLast);
     }
 
+    /**
+     * A method used to filter out any elements that do not match a {@link Predicate}.
+     *
+     * @param filter the predicate used to filter out any elements
+     * @return       a {@link FunctionalIterator} of type {@link T}
+     */
     default FunctionalIterator<T> filter(final Predicate<T> filter) {
         return new FilterIterator<>(this, filter);
     }
 
+    /**
+     * A method used to map an iterator
+     *
+     * @param flatMap the function used to perform the flatMap
+     * @param <R>     the type of the iterator
+     * @return        a {@link FunctionalIterator} of type {@link R}
+     */
     default <R> FunctionalIterator<R> flatMap(final Function<T, Iterator<R>> flatMap) {
         return new FlatMapIterator<>(this, flatMap);
     }
 
+    /**
+     * A method that peeks into the elemets of the iterator.
+     *
+     * @param peek the consumer used to peek into the iterator elements
+     * @return     a {@link FunctionalIterator} of type {@link T}
+     */
     default FunctionalIterator<T> peek(final Consumer<T> peek) {
         return new PeekIterator<>(this, peek);
     }
 
+    /**
+     * A standard implementation of a {@link FunctionalIterator}.
+     *
+     * @param <T> the type of the iterator
+     */
     class PlainIterator<T> implements FunctionalIterator<T> {
 
         private final Iterator<T> delegate;
@@ -67,6 +117,12 @@ public interface FunctionalIterator<T> extends Iterator<T> {
         }
     }
 
+    /**
+     * A {@link FunctionalIterator} implementation that allows the iterator to map an object.
+     *
+     * @param <T> the original type of the iterator
+     * @param <R> the returned type of the iterator
+     */
     class MapIterator<T, R> implements FunctionalIterator<R> {
 
         private final Iterator<T> delegate;
@@ -88,6 +144,11 @@ public interface FunctionalIterator<T> extends Iterator<T> {
         }
     }
 
+    /**
+     * A {@link FunctionalIterator} implementation that allows an iterator to map the last element.
+     *
+     * @param <T> the type of the iterator
+     */
     class MapLastIterator<T> implements FunctionalIterator<T> {
 
         private final Iterator<T> delegate;
@@ -113,6 +174,11 @@ public interface FunctionalIterator<T> extends Iterator<T> {
         }
     }
 
+    /**
+     * A {@link FunctionalIterator} implementation that allows an iterator to filter out elements
+     *
+     * @param <T> the type of the iterator
+     */
     class FilterIterator<T> implements FunctionalIterator<T> {
 
         private final Iterator<T> delegate;
@@ -171,6 +237,12 @@ public interface FunctionalIterator<T> extends Iterator<T> {
         }
     }
 
+    /**
+     * A {@link FunctionalIterator} implementation that allows an iterator to flat map the elements
+     *
+     * @param <T> the original type of the iterator
+     * @param <R> the returned type of the iterator
+     */
     class FlatMapIterator<T, R> implements FunctionalIterator<R> {
 
         private final Iterator<T> delegate;
@@ -211,6 +283,11 @@ public interface FunctionalIterator<T> extends Iterator<T> {
         }
     }
 
+    /**
+     * A {@link FunctionalIterator} implementation that allows an iterator to peek into the elements
+     *
+     * @param <T> the type of the iterator
+     */
     class PeekIterator<T> implements FunctionalIterator<T> {
 
         private final Iterator<T> delegate;

@@ -42,8 +42,6 @@ import java.util.Map;
 @RequestMapping(path = "/api")
 public class ResourceRestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceRestController.class);
-
     private final KafkaProducerService service;
 
     /**

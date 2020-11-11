@@ -57,6 +57,12 @@ public class StreamingResourceServiceProxy {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Uses a resource to get any {@link LeafResource}s associated with the it.
+     *
+     * @param resource  the resource to be queried
+     * @return          a {@link FunctionalIterator} of {@link LeafResource}s associated with the resource
+     */
     @Transactional
     public FunctionalIterator<LeafResource> getResourcesByResource(final Resource resource) {
         // Try first from persistence
@@ -71,6 +77,12 @@ public class StreamingResourceServiceProxy {
         }
     }
 
+    /**
+     * Uses a resourceId to get any {@link LeafResource}s associated with the it.
+     *
+     * @param resourceId    the resourceId to be queried
+     * @return              a {@link FunctionalIterator} of {@link LeafResource}s associated with the resourceId
+     */
     @Transactional
     public FunctionalIterator<LeafResource> getResourcesById(final String resourceId) {
         // Try first from persistence
@@ -85,6 +97,12 @@ public class StreamingResourceServiceProxy {
         }
     }
 
+    /**
+     * Uses a type to get any {@link LeafResource}s associated with the it.
+     *
+     * @param type  the type to be queried
+     * @return      a {@link FunctionalIterator} of {@link LeafResource}s associated with the type
+     */
     @Transactional
     public FunctionalIterator<LeafResource> getResourcesByType(final String type) {
         // Try first from persistence
@@ -99,6 +117,12 @@ public class StreamingResourceServiceProxy {
         }
     }
 
+    /**
+     * Uses a serialisedFormat to get any {@link LeafResource}s associated with the it.
+     *
+     * @param serialisedFormat  the serialisedFormat to be queried
+     * @return                  a {@link FunctionalIterator} of {@link LeafResource}s associated with the type
+     */
     @Transactional
     public FunctionalIterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         // Try first from persistence

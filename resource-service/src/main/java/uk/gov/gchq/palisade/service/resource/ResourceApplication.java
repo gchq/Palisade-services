@@ -102,7 +102,7 @@ public class ResourceApplication {
         // Add resources to persistence
         LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
         resourceBuilder.get()
-                .forEach(entry -> {
+                .forEach((Entry<Resource, LeafResource> entry) -> {
                     Resource rootResource = entry.getKey();
                     LeafResource leafResource = entry.getValue();
                     LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
