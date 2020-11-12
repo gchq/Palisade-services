@@ -111,7 +111,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void testGetResourcesByIdTest() {
+    void testGetResourcesById() {
         // Given an empty list
         List<LeafResource> resultList = new ArrayList<>();
 
@@ -213,7 +213,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void testAddResourceTest() {
+    void testAddResource() {
         boolean success = resourceService.addResource(null);
         assertThat(success).isFalse();
     }
