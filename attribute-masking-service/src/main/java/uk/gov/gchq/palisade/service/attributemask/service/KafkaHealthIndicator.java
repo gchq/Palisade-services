@@ -71,7 +71,11 @@ public class KafkaHealthIndicator implements HealthIndicator {
      */
     @Override
     public Health health() {
-        return performCheck() ? Health.up().build() : Health.down().build();
+        if (performCheck()) {
+            return Health.up().build();
+        } else {
+            return Health.down().build();
+        }
     }
 
     private boolean performCheck() {
