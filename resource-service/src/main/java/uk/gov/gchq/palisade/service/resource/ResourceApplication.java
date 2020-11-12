@@ -95,10 +95,16 @@ public class ResourceApplication {
     }
 
     /**
-     * Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}
+     * This method perform 2 actions on the {@link ApplicationReadyEvent}
+     * <ol>
+     *     <li>Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}</li>
+     *     <li>Runs all available Akka {@link RunnableGraph}s until completion.</li>
+     * </ol>
+     *
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
      */
     @EventListener(ApplicationReadyEvent.class)
-    public void initPostConstruct() {
+    public void serverForever() {
         // Add resources to persistence
         LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
         resourceBuilder.get()
@@ -115,14 +121,8 @@ public class ResourceApplication {
                         LOGGER.debug("Resource {} persisted", resource.getId());
                     }
                 });
-    }
 
-    /**
-     * Runs all available Akka {@link RunnableGraph}s until completion.
-     * The 'main' threads of the application during runtime are the completable futures spawned here.
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void serverForever() {
+        // Then start up kafka
         Set<CompletableFuture<?>> runnerThreads = runners.stream()
                 .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
                 .collect(Collectors.toSet());

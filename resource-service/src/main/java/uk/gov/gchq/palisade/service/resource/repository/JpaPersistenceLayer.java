@@ -416,11 +416,11 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * Get a single resource by resource id with all parents resolved - not necessarily a leaf
      *
      * @param resourceId the id of the resource to get
-     * @return {@link Iterator} of a {@link Resource} in persistence, Optional.empty if not found
+     * @return {@link FunctionalIterator} of a {@link Resource} in persistence, empty {@link FunctionalIterator} if not found
      */
     private FunctionalIterator<LeafResource> getResourceById(final String resourceId) {
         // Get resource entity from db
-        FunctionalIterator<LeafResource> resourceIterator = null;
+        FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.emptyIterator());
         FunctionalIterator<ResourceEntity> entityIterator = FunctionalIterator.fromIterator(resourceRepository.findByResourceId(resourceId).iterator());
         while (entityIterator.hasNext()) {
             ResourceEntity entity = entityIterator.next();

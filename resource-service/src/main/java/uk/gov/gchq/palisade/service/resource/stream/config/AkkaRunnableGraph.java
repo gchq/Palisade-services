@@ -83,12 +83,16 @@ public class AkkaRunnableGraph {
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
                 // Get a stream of resources from an iterator
                 .flatMapConcat(messageAndRequest -> messageAndRequest.second()
+                        // If the request optional is not empty then we need to process the message
+                        // Get a stream of resources from the implemented resource-service
                         .map(request -> Source.fromIterator(() -> service.getResourcesById(request.resourceId))
                                 // Make the stream of resources an Optional
                                 .map(Optional::of)
-                                // Add empty optional to the end of the stream
+                                // Add empty optional to the end of the stream so that we can identify
+                                // when we have processed the last resource in the stream.
+                                // This will allow us to then acknowledge the original upstream message
                                 .concat(Source.single(Optional.empty()))
-                                // Build the producer record for each resource within the Optional
+                                // Build the producer record for each leaf resource within the Optional
                                 .map(resourceOptional -> resourceOptional
                                         .map(leafResource -> new ProducerRecord<>(
                                                 outputTopic.getName(),
@@ -102,10 +106,11 @@ public class AkkaRunnableGraph {
                                 .map(recordOptional -> recordOptional
                                         // If the optional has a leaf resource object we send the message to the output topic
                                         .map(record -> ProducerMessage.single(record, (Committable) null))
-                                        // When we get to the final empty optional element in the stream we need to acknowledge the original message
+                                        // When we get to the final empty optional in the stream we need to acknowledge the original message
                                         .orElse(ProducerMessage.passThrough(messageAndRequest.first().committableOffset()))
                                 )
                         )
+                        // If the request optional is empty this is either a `START` or `END` message and is passed to the downstream topic with no value
                         .orElseGet(() ->
                                 Source.single(ProducerMessage.single(new ProducerRecord<>(
                                         outputTopic.getName(),

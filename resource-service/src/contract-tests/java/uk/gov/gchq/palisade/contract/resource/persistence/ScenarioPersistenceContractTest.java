@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles({"dbtest", "akka"})
+@ActiveProfiles({"dbtest", "akkatest"})
 class ScenarioPersistenceContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceContractTest.class);
 
@@ -59,7 +59,7 @@ class ScenarioPersistenceContractTest {
     private JpaPersistenceLayer persistenceLayer;
 
     @Autowired
-    private StreamingResourceServiceProxy client;
+    private StreamingResourceServiceProxy proxy;
 
     private static final ConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("http://localhost:8082");
 
@@ -120,7 +120,7 @@ class ScenarioPersistenceContractTest {
 
         // When - Pt 1
         LOGGER.debug("Getting resources for {}", MULTI_FILE_ONE.getId());
-        returned = client.getResourcesByResource(MULTI_FILE_ONE);
+        returned = proxy.getResourcesByResource(MULTI_FILE_ONE);
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Collections.singletonList(MULTI_FILE_ONE);
         expectedPersisted = Collections.singletonList(MULTI_FILE_ONE);
@@ -147,7 +147,7 @@ class ScenarioPersistenceContractTest {
 
         // When - Pt 2
         LOGGER.debug("Getting resources for {}", MULTI_FILE_DIR.getId());
-        returned = client.getResourcesByResource(MULTI_FILE_DIR);
+        returned = proxy.getResourcesByResource(MULTI_FILE_DIR);
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
@@ -174,7 +174,7 @@ class ScenarioPersistenceContractTest {
 
         // When - Pt 3
         LOGGER.debug("Getting resources for {}", TOP_LEVEL_DIR.getId());
-        returned = client.getResourcesByResource(TOP_LEVEL_DIR);
+        returned = proxy.getResourcesByResource(TOP_LEVEL_DIR);
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
@@ -201,7 +201,7 @@ class ScenarioPersistenceContractTest {
 
         // When - Pt 4
         LOGGER.debug("Getting resources for {}", EMPTY_DIR.getId());
-        returned = client.getResourcesByResource(EMPTY_DIR);
+        returned = proxy.getResourcesByResource(EMPTY_DIR);
         returned.forEachRemaining(returnedList::add);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
         persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
@@ -226,7 +226,7 @@ class ScenarioPersistenceContractTest {
 
         // When - Pt 5
         LOGGER.debug("Getting resources for {}", ROOT_DIR.getId());
-        returned = client.getResourcesByResource(ROOT_DIR);
+        returned = proxy.getResourcesByResource(ROOT_DIR);
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
         expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);

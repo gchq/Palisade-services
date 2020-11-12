@@ -49,14 +49,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles({"dbtest", "akka"})
+@ActiveProfiles({"dbtest", "akkatest"})
 class H2ContractTest {
 
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
 
     @Autowired
-    private StreamingResourceServiceProxy client;
+    private StreamingResourceServiceProxy proxy;
 
     /**
      * Scenario as follows, where (F)iles, (D)irectories and (S)ystems are annotated respectively
@@ -107,20 +107,20 @@ class H2ContractTest {
         // Given - setup
         List<LeafResource> returnedList = new ArrayList<>();
 
-        // When
-        FunctionalIterator<LeafResource> resourcesByResource = client.getResourcesByResource(TEST_DIRECTORY);
+        // When making a get request to the resource service by resource for a directory
+        FunctionalIterator<LeafResource> resourcesByResource = proxy.getResourcesByResource(TEST_DIRECTORY);
         resourcesByResource.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
         returnedList.clear();
 
-        // When
-        resourcesByResource = client.getResourcesByResource(EMPLOYEE_AVRO_FILE);
+        // When making a get request to the resource service by resource for a specific file
+        resourcesByResource = proxy.getResourcesByResource(EMPLOYEE_AVRO_FILE);
         resourcesByResource.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
     }
@@ -130,20 +130,20 @@ class H2ContractTest {
         // Given - setup
         List<LeafResource> returnedList = new ArrayList<>();
 
-        // When
-        Iterator<LeafResource> resourcesById = client.getResourcesById(TEST_DIRECTORY.getId());
+        // When making a get request to the resource service by resourceId for a directory
+        Iterator<LeafResource> resourcesById = proxy.getResourcesById(TEST_DIRECTORY.getId());
         resourcesById.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
         returnedList.clear();
 
-        // When
-        resourcesById = client.getResourcesById(EMPLOYEE_AVRO_FILE.getId());
+        // When making a get request to the resource service by resourceId for a specific file
+        resourcesById = proxy.getResourcesById(EMPLOYEE_AVRO_FILE.getId());
         resourcesById.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
     }
@@ -153,20 +153,20 @@ class H2ContractTest {
         // Given - setup
         List<LeafResource> returnedList = new ArrayList<>();
 
-        // When
-        Iterator<LeafResource> resourcesByType = client.getResourcesByType(EMPLOYEE_TYPE);
+        // When making a get request to the resource service by type
+        Iterator<LeafResource> resourcesByType = proxy.getResourcesByType(EMPLOYEE_TYPE);
         resourcesByType.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
         returnedList.clear();
 
-        // When
-        resourcesByType = client.getResourcesByType(CLIENT_TYPE);
+        // When making a get request to the resource service by type
+        resourcesByType = proxy.getResourcesByType(CLIENT_TYPE);
         resourcesByType.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(CLIENT_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
 
@@ -177,20 +177,20 @@ class H2ContractTest {
         // Given - setup
         List<LeafResource> returnedList = new ArrayList<>();
 
-        // When
-        Iterator<LeafResource> resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(AVRO_FORMAT);
+        // When making a get request to the resource service by serialisedFormat
+        Iterator<LeafResource> resourcesBySerialisedFormat = proxy.getResourcesBySerialisedFormat(AVRO_FORMAT);
         resourcesBySerialisedFormat.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
         returnedList.clear();
 
-        // When
-        resourcesBySerialisedFormat = client.getResourcesBySerialisedFormat(JSON_FORMAT);
+        // When making a get request to the resource service by serialisedFormat
+        resourcesBySerialisedFormat = proxy.getResourcesBySerialisedFormat(JSON_FORMAT);
         resourcesBySerialisedFormat.forEachRemaining(returnedList::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
         assertThat(returnedList.size()).isEqualTo(expected.size());
 

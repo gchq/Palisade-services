@@ -25,8 +25,6 @@ import java.util.Iterator;
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
  * for more details
- *
- * @implNote In the future consider changing this to a {@link org.springframework.data.repository.reactive.ReactiveCrudRepository}
  */
 public interface ResourceRepository extends CrudRepository<ResourceEntity, String> {
 

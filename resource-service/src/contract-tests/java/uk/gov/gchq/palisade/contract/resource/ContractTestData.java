@@ -26,9 +26,6 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.resource.model.Token;
@@ -48,42 +45,12 @@ public class ContractTestData {
     }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final User USER = new User().userId(USER_ID);
-    public static final String RESOURCE_ID = "file:/test/resourceId/";
-    public static final String BAD_RESOURCE_ID = "file:/not/a/resource/";
-    public static final Context CONTEXT = new Context().purpose("purpose");
-    public static final ResourceRequest RESOURCE_REQUEST;
-    public static final ResourceRequest NO_RESOURCE_REQUEST;
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
+    public static final String NO_RESOURCE_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/not/a/resource/\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"}}";
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode NO_RESOURCE_REQUEST_NODE;
     public static final ResourceRequest REQUEST_OBJ;
     public static final ResourceRequest NO_RESOURCE_REQUEST_OBJ;
-    public static final String REQUEST_JSON;
-    public static final String NO_RESOURCE_JSON;
-
-    static {
-        RESOURCE_REQUEST = ResourceRequest.Builder.create()
-                .withUserId(USER_ID.getId())
-                .withResourceId(RESOURCE_ID)
-                .withContext(CONTEXT)
-                .withUser(USER);
-
-        NO_RESOURCE_REQUEST = ResourceRequest.Builder.create()
-                .withUserId(USER_ID.getId())
-                .withResourceId(BAD_RESOURCE_ID)
-                .withContext(CONTEXT)
-                .withUser(USER);
-    }
-
-    static {
-        try {
-            REQUEST_JSON = MAPPER.writeValueAsString(RESOURCE_REQUEST);
-            NO_RESOURCE_JSON = MAPPER.writeValueAsString(NO_RESOURCE_REQUEST);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to parse UserRequest test data", e);
-        }
-    }
 
     static {
         try {

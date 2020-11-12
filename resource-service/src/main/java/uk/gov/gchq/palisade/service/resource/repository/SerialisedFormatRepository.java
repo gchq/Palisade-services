@@ -25,8 +25,6 @@ import java.util.Iterator;
 /**
  * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
  * for more details
- *
- * @implNote In the future consider changing this to a {@link org.springframework.data.repository.reactive.ReactiveCrudRepository}
  */
 public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 

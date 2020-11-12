@@ -97,8 +97,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "request" topic is written to by the palisade-service and read by this service.
- * The downstream "user" topic is written to by this service and read by the resource-service.
+ * The upstream "user" topic is written to by the user-service and read by this service.
+ * The downstream "resource" topic is written to by this service and read by the policy-service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(
@@ -108,47 +108,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 )
 @Import(KafkaContractTest.KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"dbtest", "akkatest", "testresource", "debug"})
+@ActiveProfiles({"dbtest", "akkatest", "testresource"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    // Serialiser for upstream test input
-    static class RequestSerializer implements Serializer<JsonNode> {
-        @Override
-        public byte[] serialize(final String s, final JsonNode userRequest) {
-            try {
-                return MAPPER.writeValueAsBytes(userRequest);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + userRequest.toString(), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
-        @Override
-        public JsonNode deserialize(final String s, final byte[] userResponse) {
-            try {
-                return MAPPER.readTree(userResponse);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
-            }
-        }
-    }
-
-    // Deserialiser for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
-        @Override
-        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
-            try {
-                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
-            }
-        }
-    }
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -200,7 +164,6 @@ class KafkaContractTest {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
-        LOGGER.info("Number of results returned: {}", results.size());
 
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
@@ -225,8 +188,7 @@ class KafkaContractTest {
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-        LOGGER.info("Number of results after removing first and last: {}", results.size());
-        // This assert will need to be changed for multiple ResourceResponse object
+
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
                         .hasSize(2),
@@ -290,7 +252,6 @@ class KafkaContractTest {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
-        LOGGER.info("Number of results returned: {}", results.size());
 
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
@@ -315,7 +276,6 @@ class KafkaContractTest {
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-        LOGGER.info("Number of results after removing first and last: {}", results.size());
         assertThat(results).isEmpty();
     }
 
@@ -364,13 +324,49 @@ class KafkaContractTest {
         );
     }
 
+    // Serialiser for upstream test input
+    static class RequestSerializer implements Serializer<JsonNode> {
+        @Override
+        public byte[] serialize(final String s, final JsonNode userRequest) {
+            try {
+                return MAPPER.writeValueAsBytes(userRequest);
+            } catch (JsonProcessingException e) {
+                throw new SerializationFailedException("Failed to serialize " + userRequest.toString(), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test output
+    static class ResponseDeserializer implements Deserializer<JsonNode> {
+        @Override
+        public JsonNode deserialize(final String s, final byte[] userResponse) {
+            try {
+                return MAPPER.readTree(userResponse);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
+            }
+        }
+    }
+
+    // Deserialiser for downstream test error output
+    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+        @Override
+        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
+            try {
+                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+            }
+        }
+    }
+
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         static KafkaContainer kafka = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest", "testresource", "debug");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "dbtest", "testresource");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

@@ -136,19 +136,19 @@ class RedisPersistenceContractTest {
         List<LeafResource> result1List = new ArrayList<>();
         List<LeafResource> result2List = new ArrayList<>();
 
-        // When
+        // When making a get request to the resource service by resource for a directory
         FunctionalIterator<LeafResource> resourcesByResource = FunctionalIterator.fromIterator(service.getResourcesByResource(TEST_DIRECTORY));
         resourcesByResource.forEachRemaining(result1List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
         assertThat(result1List.size()).isEqualTo(expected.size());
 
-        // When
+        // When making a get request to the resource service by resource for a specific file
         resourcesByResource = FunctionalIterator.fromIterator(service.getResourcesByResource(EMPLOYEE_AVRO_FILE));
         resourcesByResource.forEachRemaining(result2List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
         assertThat(result2List.size()).isEqualTo(expected.size());
     }
@@ -159,19 +159,19 @@ class RedisPersistenceContractTest {
         List<LeafResource> result1List = new ArrayList<>();
         List<LeafResource> result2List = new ArrayList<>();
 
-        // When
+        // When making a get request to the resource service by resourceId for a directory
         FunctionalIterator<LeafResource> resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(TEST_DIRECTORY.getId()));
         resourcesById.forEachRemaining(result1List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
         assertThat(result1List.size()).isEqualTo(expected.size());
 
-        // When
+        // When making a get request to the resource service by resourceId for a specific file
         resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(EMPLOYEE_AVRO_FILE.getId()));
         resourcesById.forEachRemaining(result2List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
         assertThat(result2List.size()).isEqualTo(expected.size());
     }
@@ -182,19 +182,19 @@ class RedisPersistenceContractTest {
         List<LeafResource> result1List = new ArrayList<>();
         List<LeafResource> result2List = new ArrayList<>();
 
-        // When
+        // When making a get request to the resource service by type
         FunctionalIterator<LeafResource> resourcesByType = FunctionalIterator.fromIterator(service.getResourcesByType(EMPLOYEE_TYPE));
         resourcesByType.forEachRemaining(result1List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
         assertThat(result1List.size()).isEqualTo(expected.size());
 
-        // When
+        // When making a get request to the resource service by type
         resourcesByType = FunctionalIterator.fromIterator(service.getResourcesByType(CLIENT_TYPE));
         resourcesByType.forEachRemaining(result2List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(CLIENT_AVRO_FILE);
         assertThat(result2List.size()).isEqualTo(expected.size());
 
@@ -206,19 +206,19 @@ class RedisPersistenceContractTest {
         List<LeafResource> result1List = new ArrayList<>();
         List<LeafResource> result2List = new ArrayList<>();
 
-        // When
+        // When making a get request to the resource service by serialisedFormat
         FunctionalIterator<LeafResource> resourcesBySerialisedFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(AVRO_FORMAT));
         resourcesBySerialisedFormat.forEachRemaining(result1List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
         assertThat(result1List.size()).isEqualTo(expected.size());
 
-        // When
+        // When making a get request to the resource service by serialisedFormat
         resourcesBySerialisedFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(JSON_FORMAT));
         resourcesBySerialisedFormat.forEachRemaining(result2List::add);
 
-        // Then
+        // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
         assertThat(result2List.size()).isEqualTo(expected.size());
     }

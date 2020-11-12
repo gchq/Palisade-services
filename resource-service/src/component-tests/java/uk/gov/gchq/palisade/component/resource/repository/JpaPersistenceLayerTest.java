@@ -78,43 +78,43 @@ class JpaPersistenceLayerTest {
     @Test
     @Transactional
     void testEmptyGetReturnsEmpty() {
-        // When
+        // When getting a non-existent resourceId
         FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(
                 persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID"));
-        // Then
+        // Then the iterator should be empty
         assertThat(persistenceResponse.hasNext()).isFalse();
 
-        // When
+        // When getting a non-existent resource type
         persistenceResponse = FunctionalIterator.fromIterator(
                 persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE"));
-        // Then
+        // Then the iterator should be empty
         assertThat(persistenceResponse.hasNext()).isFalse();
 
-        // When
+        // When getting a non-existent resource serialised format
         persistenceResponse = FunctionalIterator.fromIterator(
                 persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT"));
-        // Then
+        // Then the iterator should be empty
         assertThat(persistenceResponse.hasNext()).isFalse();
     }
 
     @Test
     @Transactional
     void testAddAndGetReturnsResource() {
-        // Given
+        // Given the setup
 
-        // When
+        // When getting a resource from the persistence layer by resourceId
         FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesById(resource.getId()));
-        // Then
+        // Then the returned resource should match the created resource
         assertThat(persistenceResponse.next()).isEqualTo(resource);
 
-        // When
+        // When getting a resource from the persistence layer by type
         persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesByType(resource.getType()));
-        // Then
+        // Then the returned resource should match the created resource
         assertThat(persistenceResponse.next()).isEqualTo(resource);
 
-        // When
+        // When getting a resource from the persistence layer by serialised format
         persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat()));
-        // Then
+        // Then the returned resource should match the created resource
         assertThat(persistenceResponse.next()).isEqualTo(resource);
     }
 }

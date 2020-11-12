@@ -28,6 +28,9 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * A class to test the functionality of the {@link FunctionalIterator}
+ */
 class FunctionalIteratorTest {
 
     FunctionalIterator<Integer> testIterator;
