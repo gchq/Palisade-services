@@ -128,14 +128,10 @@ public class AkkaRunnableGraph {
                             response.first().committableOffset());
                 })
 
-                // Send errors to supervisor
+                // Supervise and commit
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
                 .via(Producer.flexiFlow(producerSettings))
-                .map(obj -> {
-                    LOGGER.info("Got value at {}", obj.passThrough().partitionOffset().toString());
-                    return obj;
-                })
-                .map(m -> m.passThrough())
+                .map(ProducerMessage.Results::passThrough)
                 .toMat(Committer.sink(committerSettings), Keep.both())
                 // Materialize the stream, sending messages to the sink
                 .mapMaterializedValue(Consumer::createDrainingControl);
