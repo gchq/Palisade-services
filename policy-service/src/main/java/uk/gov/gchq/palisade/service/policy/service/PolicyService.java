@@ -15,18 +15,13 @@
  */
 package uk.gov.gchq.palisade.service.policy.service;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.request.Policy;
 
 import java.io.Serializable;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * The core API for the policy service.
@@ -39,59 +34,38 @@ import java.util.stream.Collectors;
 public interface PolicyService extends Service {
 
     /**
-     * This method is used to find out if the given user is allowed to access
-     * the resource given their purpose. This is where any resource level
-     * access controls are enforced.
+     * GetResourceRules is used by the service to get any resource rules that could be applied against the resource.
+     * If no rules are applied then an exception will be thrown
+     * A resource rule may be applied at any point in the file tree, and could cause the record to be redacted.
      *
-     * @param user     the {@link User} requesting the data
-     * @param context  the query time {@link Context} containing environmental variables
-     *                 such as why they want the data
-     * @param resource the {@link Resource} being queried for access
-     * @param <R>      the type of resource (may be a supertype)
-     * @return an Optional {@link Resource} which is only present if the resource
-     *         is accessible
+     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @return An optional {@link Rules} object, which contains the list of rules found that need to be applied to the resource.
      */
-    <R extends Resource> Optional<R> canAccess(final User user, final Context context, final R resource);
+    Optional<Rules<LeafResource>> getResourceRules(Resource resource);
 
     /**
-     * This method gets the {@link Policy}s that apply to the resource
-     * that the user has requested.
+     * GetRecordRules is used by the service to get any record rules that could be applied against the resource that the user has requested
      *
-     * @param resource a {@link Resource} to get policies for
-     * @param <R>      the type of resource (may be a supertype)
-     * @return an Optional {@link Policy} if any policies exist for the resource
+     * @param resource a {@link Resource} to get rules for
+     * @return An optional {@link Rules} object, which contains the list of rules found that need to be applied to the resource.
      */
-    // FIXME: This cannot be typed as <T> Optional<Policy<T>> getPolicy(Resource resource)
-    // There must be some input argument to specify T
-    // Either through typing the class  --  <T> PolicyService<T>
-    // Or supplying some sort of constructor factory  --  Producer<T>
-    // Or passing the class as an argument  --  getPolicy(Resource, Class<? extends T>)
-    <R extends Resource> Optional<Policy> getPolicy(R resource);
-
-    default <R extends Resource> Map<R, Policy> getPolicy(final Collection<R> resources) {
-        return resources.stream()
-                .map(resource -> getPolicy(resource).map(policy -> new SimpleEntry<>(resource, policy)))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-    }
+    Optional<Rules<Serializable>> getRecordRules(Resource resource);
 
     /**
-     * This method allows for the setting of a policy to a resource.
+     * This method sets the resource rules against the resource for which the user will eventually request
      *
-     * @param resource a {@link Resource} to set a policy for
-     * @param policy   the {@link Policy} to apply to this resource
-     * @param <T>      the record type for this resource
-     * @return the {@link Policy} that was added (may be different to what was requested)
+     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     * @return an Optional Rules for LeafResource object that contains the returned map of resource rules for each resource
      */
-    <T extends Serializable> Policy<T> setResourcePolicy(Resource resource, Policy<T> policy);
+    Optional<Rules<LeafResource>> setResourceRules(Resource resource, Rules<LeafResource> rules);
 
     /**
-     * This method allows for the setting of a policy to a resource type.
+     * This method sets the record rules against the resource for which the user will eventually request
      *
-     * @param type   a resource type to apply a blanket policy to
-     * @param policy the {@link Policy} to apply to this type
-     * @param <T>    the record type for this resource
-     * @return the {@link Policy} that was added (may be different to what was requested)
+     * @param resource {@link Resource} the resource which the user wants to apply rules against
+     * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
+     * @return an Optional Serializable rules object that contains the returned map of record rules for each resource
      */
-    <T extends Serializable> Policy<T> setTypePolicy(String type, Policy<T> policy);
+    Optional<Rules<Serializable>> setRecordRules(Resource resource, Rules<Serializable> rules);
 }
