@@ -32,6 +32,10 @@ import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskin
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Pointcut aspects for the processing of {@link AttributeMaskingService} public methods for the handling and
+ * suppression of exceptions and embedding them in audit objects.
+ */
 @Aspect
 public class AttributeMaskingAspect {
 
@@ -39,9 +43,19 @@ public class AttributeMaskingAspect {
     private static final String SAR = "storeAuthorisedRequest";
     private static final String MRA = "maskResourceAttributes";
 
+    /**
+     * Pointcut for all public methods of {@link AttributeMaskingService}
+     */
     @Pointcut("execution(* uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService.*(..))")
-    public void serviceMethods() { }
+    public void serviceMethods() {
+        // Pointcut definition, no implementation
+    }
 
+    /**
+     * Around aspect for method calls, handle and swallow exceptions
+     * @param pjp method call metadata
+     * @return audit object and method return value container
+     */
     @Around("serviceMethods()")
     public Object executeServiceMethods(final ProceedingJoinPoint pjp) {
         Object result = null;
@@ -51,11 +65,11 @@ public class AttributeMaskingAspect {
         } catch (Throwable t) {
             LOGGER.error("Exception thrown from method {}() : ", pjp.getSignature().getName(), t);
             switch (pjp.getSignature().getName()) {
-                case "storeAuthorisedRequest":
-                    result = CompletableFuture.completedFuture(this.auditStorageException(pjp.getArgs(), t));
+                case SAR:
+                    result = CompletableFuture.completedFuture(auditStorageException(pjp.getArgs(), t));
                     break;
-                case "maskResourceAttributes":
-                    result = this.auditMaskException(pjp.getArgs(), t);
+                case MRA:
+                    result = auditMaskException(pjp.getArgs(), t);
                     break;
                 default:
                     LOGGER.error("Unknown method: {} has thrown exception ", pjp.getSignature().getName(), t);
@@ -65,7 +79,7 @@ public class AttributeMaskingAspect {
         return result;
     }
 
-    private AuditableAttributeMaskingResponse auditMaskException(final @NonNull Object[] args, final @NonNull Throwable reason) {
+    private static AuditableAttributeMaskingResponse auditMaskException(final @NonNull Object[] args, final @NonNull Throwable reason) {
         AttributeMaskingRequest request = (AttributeMaskingRequest) args[0];
         return AuditableAttributeMaskingResponse.Builder.create().withAttributeMaskingResponse(null)
                 .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())
@@ -75,7 +89,7 @@ public class AttributeMaskingAspect {
                 .withError(reason));
     }
 
-    private AuditableAttributeMaskingRequest auditStorageException(final @NonNull Object[] args, final @NonNull Throwable reason) {
+    private static AuditableAttributeMaskingRequest auditStorageException(final @NonNull Object[] args, final @NonNull Throwable reason) {
         AttributeMaskingRequest request = (AttributeMaskingRequest) args[1];
         return AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null)
                 .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())

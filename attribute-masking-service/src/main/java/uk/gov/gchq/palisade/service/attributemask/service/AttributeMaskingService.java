@@ -128,8 +128,8 @@ public class AttributeMaskingService {
     public AuditableAttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map((AttributeMaskingRequest request) -> {
-                    LeafResource maskedResource = mask(request);
-                    return AuditableAttributeMaskingResponse.Builder.create()
+                        LeafResource maskedResource = mask(request);
+                        return AuditableAttributeMaskingResponse.Builder.create()
                             .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
                             .withAuditErrorMessage(null);
                  })

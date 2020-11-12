@@ -79,7 +79,7 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> {
+        return (Throwable ex) -> {
             LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
             return Supervision.resumingDecider().apply(ex);
         };
