@@ -22,7 +22,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AuditableAttributeMaskingResponse implements AuditableResult {
+/**
+ * This class is a container for {@code AttributeMaskingResponse} and {@code AuditErrorMessage} during stream processing.
+ * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
+ */
+public final class AuditableAttributeMaskingResponse {
 
     @JsonProperty("attributeMaskingResponse")
     private final AttributeMaskingResponse attributeMaskingResponse;
@@ -37,11 +41,6 @@ public class AuditableAttributeMaskingResponse implements AuditableResult {
         this.auditErrorMessage = auditErrorMessage;
     }
 
-    @Override
-    public Class<?> getType() {
-        return this.attributeMaskingResponse.getClass();
-    }
-
     public AuditableAttributeMaskingResponse chain(final AuditErrorMessage audit) {
         return Optional.ofNullable(audit).map(message -> AuditableAttributeMaskingResponse.Builder.create()
                 .withAttributeMaskingResponse(this.attributeMaskingResponse)
@@ -49,16 +48,29 @@ public class AuditableAttributeMaskingResponse implements AuditableResult {
                     .orElse(this);
     }
 
+    /**
+     * The static builder
+     */
     public static class Builder {
 
+        /**
+         * Compose with {@code AttributeMaskingResponse}
+         */
         public interface IAttributeMaskingResponse {
             AuditableAttributeMaskingResponse.Builder.IAuditErrorMessage withAttributeMaskingResponse(AttributeMaskingResponse response);
         }
 
+        /**
+         * Compose with {@code AuditErrorMessage}
+         */
         public interface IAuditErrorMessage {
             AuditableAttributeMaskingResponse withAuditErrorMessage(AuditErrorMessage audit);
         }
 
+        /**
+         * The creator function
+         * @return the composed immutable object
+         */
         public static AuditableAttributeMaskingResponse.Builder.IAttributeMaskingResponse create() {
             return request -> audit -> new AuditableAttributeMaskingResponse(request, audit);
         }

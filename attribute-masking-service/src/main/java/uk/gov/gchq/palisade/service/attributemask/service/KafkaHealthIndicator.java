@@ -48,13 +48,18 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private final AdminClient adminClient;
 
+    /**
+     * Requires the AdminClient to interact with Kafka
+     * @param adminClient of the cluster
+     */
     public KafkaHealthIndicator(final AdminClient adminClient) {
         this.adminClient = adminClient;
     }
 
     @Override
     public Health getHealth(final boolean includeDetails) {
-        return performCheck() ? Health.up().withDetail("group", this.groupId).build() : Health.down().withDetail("group", this.groupId).build();
+        if (performCheck()) return Health.up().withDetail("group", this.groupId).build();
+        return Health.down().withDetail("group", this.groupId).build();
     }
 
     /**
@@ -76,11 +81,12 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
-            if (consumerGroupDescription.state().equals(ConsumerGroupState.STABLE)) {
+            if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
                 return consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             return false;
         }
 

@@ -21,7 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-public class AuditableAttributeMaskingRequest implements AuditableResult {
+/**
+ * This class is a container for {@code AttributeMaskingRequest} and {@code AuditErrorMessage} during stream processing.
+ * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
+ */
+public final class AuditableAttributeMaskingRequest {
 
     @JsonProperty("attributeMaskingRequest")
     private final AttributeMaskingRequest attributeMaskingRequest;
@@ -36,25 +40,37 @@ public class AuditableAttributeMaskingRequest implements AuditableResult {
         this.auditErrorMessage = auditErrorMessage;
     }
 
-    @Override
-    public Class<?> getType() {
-        return this.attributeMaskingRequest.getClass();
-    }
-
+    /**
+     * The static builder
+     */
     public static class Builder {
 
+        /**
+         * Compose with {@code AttributeMaskingRequest}
+         */
         public interface IAttributeMaskingRequest {
             IAuditErrorMessage withAttributeMaskingRequest(AttributeMaskingRequest request);
         }
 
+        /**
+         * Compose with {@code AuditErrorMessage}
+         */
         public interface IAuditErrorMessage {
             AuditableAttributeMaskingRequest withAuditErrorMessage(AuditErrorMessage audit);
 
+            /**
+             * Without error audit
+             * @return the composed immutable object
+             */
             default AuditableAttributeMaskingRequest withNoError() {
                 return this.withAuditErrorMessage(null);
             }
         }
 
+        /**
+         * The creator function
+         * @return the composed immutable object
+         */
         public static IAttributeMaskingRequest create() {
             return request -> audit -> new AuditableAttributeMaskingRequest(request, audit);
         }

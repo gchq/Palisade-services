@@ -110,15 +110,12 @@ public class AttributeMaskingService {
     /**
      * Mask any sensitive attributes on a resource, possibly by applying attribute-level rules.
      *
-     * @param user     the {@link User} as authorised and returned by the user-service
-     * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service, to be masked
-     * @param context  the {@link Context} as originally supplied by the client
-     * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
+     * @param attributeMaskingRequest the {@link AttributeMaskingRequest}
      * @return a copy of the resource with sensitive data masked or redacted
      */
-    private LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
-        LOGGER.info("Masking resource attributes for leaf resource id {}", resource.getId());
-        return resourceMasker.apply(resource);
+    private LeafResource mask(final AttributeMaskingRequest attributeMaskingRequest) {
+        LOGGER.info("Masking resource attributes for leaf resource id {}", attributeMaskingRequest.getResource().getId());
+        return resourceMasker.apply(attributeMaskingRequest.getResource());
     }
 
     /**
@@ -131,23 +128,11 @@ public class AttributeMaskingService {
     public AuditableAttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map((AttributeMaskingRequest request) -> {
-                    try {
-                        LeafResource maskedResource = maskResourceAttributes(request.getUser(), request.getResource(), request.getContext(), request.getRules());
-                        return AuditableAttributeMaskingResponse.Builder.create()
-                                .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
-                                .withAuditErrorMessage(null);
-                    } catch (JsonProcessingException e) {
-                        LOGGER.error("Json Exception thrown from method maskResourceAttributes() : ", e);
-                        return AuditableAttributeMaskingResponse.Builder.create()
-                                .withAttributeMaskingResponse(null)
-                                .withAuditErrorMessage(AuditErrorMessage.Builder.create()
-                                    .withUserId(nullableRequest.getUserId())
-                                    .withResourceId(nullableRequest.getResourceId())
-                                    .withContextNode(nullableRequest.getContextNode())
-                                    .withAttributes(Collections.singletonMap("method", "maskResourceAttributes"))
-                                    .withError(e));
-                    }
-                })
+                    LeafResource maskedResource = mask(request);
+                    return AuditableAttributeMaskingResponse.Builder.create()
+                            .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
+                            .withAuditErrorMessage(null);
+                 })
                 .orElse(AuditableAttributeMaskingResponse.Builder.create().withAttributeMaskingResponse(null).withAuditErrorMessage(null));
     }
 }

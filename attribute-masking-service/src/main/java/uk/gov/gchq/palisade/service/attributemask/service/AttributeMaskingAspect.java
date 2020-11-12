@@ -58,7 +58,7 @@ public class AttributeMaskingAspect {
                     result = this.auditMaskException(pjp.getArgs(), t);
                     break;
                 default:
-                    LOGGER.error("Unknown method: {} has thrown exception {}", pjp.getSignature().getName(), t);
+                    LOGGER.error("Unknown method: {} has thrown exception ", pjp.getSignature().getName(), t);
             }
         }
 
