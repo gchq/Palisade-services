@@ -41,6 +41,11 @@ public final class AuditableAttributeMaskingResponse {
         this.auditErrorMessage = auditErrorMessage;
     }
 
+    /**
+     * Chain any errors from previous stream elements
+     * @param audit the previous audit or null
+     * @return a new instance of this object
+     */
     public AuditableAttributeMaskingResponse chain(final AuditErrorMessage audit) {
         return Optional.ofNullable(audit).map(message -> AuditableAttributeMaskingResponse.Builder.create()
                 .withAttributeMaskingResponse(this.attributeMaskingResponse)
@@ -57,6 +62,11 @@ public final class AuditableAttributeMaskingResponse {
          * Compose with {@code AttributeMaskingResponse}
          */
         public interface IAttributeMaskingResponse {
+            /**
+             * Compose value
+             * @param response value or null
+             * @return value object
+             */
             AuditableAttributeMaskingResponse.Builder.IAuditErrorMessage withAttributeMaskingResponse(AttributeMaskingResponse response);
         }
 
@@ -64,6 +74,11 @@ public final class AuditableAttributeMaskingResponse {
          * Compose with {@code AuditErrorMessage}
          */
         public interface IAuditErrorMessage {
+            /**
+             * Compose value
+             * @param audit value or null
+             * @return value object
+             */
             AuditableAttributeMaskingResponse withAuditErrorMessage(AuditErrorMessage audit);
         }
 

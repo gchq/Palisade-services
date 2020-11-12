@@ -49,6 +49,11 @@ public final class AuditableAttributeMaskingRequest {
          * Compose with {@code AttributeMaskingRequest}
          */
         public interface IAttributeMaskingRequest {
+            /**
+             * Compose value
+             * @param request or null
+             * @return value object
+             */
             IAuditErrorMessage withAttributeMaskingRequest(AttributeMaskingRequest request);
         }
 
@@ -56,6 +61,11 @@ public final class AuditableAttributeMaskingRequest {
          * Compose with {@code AuditErrorMessage}
          */
         public interface IAuditErrorMessage {
+            /**
+             * Compose value
+             * @param audit or null
+             * @return value object
+             */
             AuditableAttributeMaskingRequest withAuditErrorMessage(AuditErrorMessage audit);
 
             /**
