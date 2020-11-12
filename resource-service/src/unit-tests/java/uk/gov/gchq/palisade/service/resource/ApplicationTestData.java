@@ -24,17 +24,11 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.rule.Rule;
-import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.resource.model.Token;
-
-import java.io.Serializable;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class ApplicationTestData {
     /**
@@ -65,17 +59,6 @@ public class ApplicationTestData {
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
 
-    public static final String RULE_MESSAGE = "test-rule";
-
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
-    }
-
-    public static final Rules<Serializable> RULES = new Rules<Serializable>().addRule(RULE_MESSAGE, new PassThroughRule<Serializable>());
-
     public static final ResourceRequest REQUEST = ResourceRequest.Builder.create()
             .withUserId(USER_ID.getId())
             .withResourceId(RESOURCE_ID)
@@ -101,17 +84,4 @@ public class ApplicationTestData {
         END.headers().add(Token.HEADER, REQUEST_TOKEN.getBytes());
     }
 
-    // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
-    public static final Supplier<Stream<ProducerRecord<String, ResourceRequest>>> RECORD_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> ResourceRequest.Builder.create()
-                    .withUserId(USER_ID.getId())
-                    .withResourceId(RESOURCE_ID)
-                    .withContext(CONTEXT)
-                    .withUser(USER))
-            .map(request -> new ProducerRecord<>(
-                    "user",
-                    0,
-                    (String) null,
-                    request,
-                    RECORD.headers()));
 }

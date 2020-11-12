@@ -111,7 +111,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void getResourcesByIdTest() {
+    void testGetResourcesByIdTest() {
         // Given an empty list
         List<LeafResource> resultList = new ArrayList<>();
 
@@ -125,7 +125,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldGetResourcesOutsideOfScope() throws URISyntaxException {
+    void testShouldGetResourcesOutsideOfScope() throws URISyntaxException {
         // Given setup
 
         // When making a get request to the resource service by resourceId
@@ -138,7 +138,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldGetResourcesByIdOfAFolder() {
+    void testShouldGetResourcesByIdOfAFolder() {
         // Given an empty list
         List<LeafResource> resultList = new ArrayList<>();
 
@@ -152,7 +152,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldFilterOutIllegalFileName() throws Exception {
+    void testShouldFilterOutIllegalFileName() throws Exception {
         // Given an illegal file is added
         List<LeafResource> resourceList = new ArrayList<>();
         writeFile(fs, dir.resolve("./I-AM-AN-ILLEGAL-FILENAME"));
@@ -167,7 +167,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldGetResourcesByType() throws Exception {
+    void testShouldGetResourcesByType() throws Exception {
         // Given a new file with a new type is added
         List<LeafResource> resultist = new ArrayList<>();
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
@@ -183,7 +183,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldGetResourcesByFormat() throws Exception {
+    void testShouldGetResourcesByFormat() throws Exception {
         // Given a new file with a new format is added
         List<LeafResource> resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
@@ -199,7 +199,7 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void shouldGetResourcesByResource() {
+    void testShouldGetResourcesByResource() {
         // Given an empty list
         List<LeafResource> resultList = new ArrayList<>();
 
@@ -213,19 +213,19 @@ class HadoopResourceServiceTest {
     }
 
     @Test
-    void addResourceTest() {
+    void testAddResourceTest() {
         boolean success = resourceService.addResource(null);
         assertThat(success).isFalse();
     }
 
     @Test
-    void shouldResolveParents() {
+    void testShouldResolveParents() {
         final URI id = dir.resolve("folder1/folder2/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE));
         final FileResource fileResource = (FileResource) ResourceBuilder.create(id);
 
         final ParentResource parent1 = fileResource.getParent();
 
-        assertThat(dir.resolve("folder1/folder2/").toString()).hasToString(parent1.getId());
+        assertThat(dir.resolve("folder1/folder2/").toString()).isEqualTo(parent1.getId());
         assertAll(
                 () -> assertThat(parent1).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent1).isInstanceOf(DirectoryResource.class)
@@ -235,7 +235,7 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent2 = child.getParent();
 
-        assertThat(dir.resolve("folder1/").toString()).hasToString(parent2.getId());
+        assertThat(dir.resolve("folder1/").toString()).isEqualTo(parent2.getId());
         assertAll(
                 () -> assertThat(parent2).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent2).isInstanceOf(DirectoryResource.class)
@@ -245,7 +245,7 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent3 = child2.getParent();
 
-        assertThat(dir.toString()).hasToString(parent3.getId());
+        assertThat(dir.toString()).isEqualTo(parent3.getId());
         assertAll(
                 () -> assertThat(parent3).isInstanceOf(ChildResource.class),
                 () -> assertThat(parent3).isInstanceOf(DirectoryResource.class)
@@ -256,10 +256,10 @@ class HadoopResourceServiceTest {
 
         final ParentResource parent4 = child3.getParent();
 
-        assertThat(root.toString()).hasToString(parent4.getId());
+        assertThat(root.toString()).isEqualTo(parent4.getId());
     }
 
-    private Configuration createConf(final String fsDefaultName) throws URISyntaxException {
+    private Configuration createConf(final String fsDefaultName) {
         // Set up local conf
         final Configuration conf = new Configuration();
         conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, fsDefaultName);
