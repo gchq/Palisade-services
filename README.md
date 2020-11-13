@@ -103,6 +103,7 @@ Pods that require re-deployment must advance the image tag using the "push image
 
 ### Generated Deployment Names
 
+
 It is possible to let helm generate the deployment name and let the chart create a new namespace for it, then deploy it there:
 ```
 helm upgrade --install --generate-name . --set global.uniqueNamespace=true
