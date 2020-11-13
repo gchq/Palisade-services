@@ -427,7 +427,7 @@ class KafkaContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("rule", 3, (short) 1),
+                    new NewTopic("rule", 1, (short) 1),
                     new NewTopic("masked-resource", 1, (short) 1),
                     new NewTopic("error", 1, (short) 1));
 

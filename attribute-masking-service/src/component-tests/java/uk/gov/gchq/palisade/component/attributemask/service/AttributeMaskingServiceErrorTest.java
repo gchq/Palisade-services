@@ -59,11 +59,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ExecutorTestConfiguration.class, AttributeMaskingServiceErrorTest.Config.class})
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.attributemask.repository"})
-public class AttributeMaskingServiceErrorTest {
+class AttributeMaskingServiceErrorTest {
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
+    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
 
-    public final Function<Integer, JsonNode> requestFactoryNode = i -> {
+    private final Function<Integer, JsonNode> requestFactoryNode = i -> {
         try {
             return this.mapper.readTree(REQUEST_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
@@ -71,7 +71,7 @@ public class AttributeMaskingServiceErrorTest {
         }
     };
 
-    public final Function<Integer, AttributeMaskingRequest> requestFactoryObj = i -> {
+    private final Function<Integer, AttributeMaskingRequest> requestFactoryObj = i -> {
         try {
             return this.mapper.treeToValue(requestFactoryNode.apply(i), AttributeMaskingRequest.class);
         } catch (JsonProcessingException e) {
@@ -83,10 +83,10 @@ public class AttributeMaskingServiceErrorTest {
     private AttributeMaskingService attributeMaskingService;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Test
-    public void persistenceFailureTest() {
+    void persistenceFailureTest() {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
 
         final CompletableFuture<AuditableAttributeMaskingRequest> subject = this.attributeMaskingService.storeAuthorisedRequest("test-token", attributeMaskingRequest);
@@ -101,7 +101,7 @@ public class AttributeMaskingServiceErrorTest {
     }
 
     @Test
-    public void maskingFailureTest() {
+    void maskingFailureTest() {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
 
         final AuditableAttributeMaskingResponse subject = this.attributeMaskingService.maskResourceAttributes(attributeMaskingRequest);
@@ -177,7 +177,7 @@ public class AttributeMaskingServiceErrorTest {
 
     }
 
-    public static class ExceptionalPersistenceLayer implements PersistenceLayer {
+    private static class ExceptionalPersistenceLayer implements PersistenceLayer {
 
         @Override
         public CompletableFuture<AttributeMaskingRequest> putAsync(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
@@ -186,7 +186,7 @@ public class AttributeMaskingServiceErrorTest {
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    public static class Stub {
+    private static class Stub {
 
         public String getValue() {
             return value;
