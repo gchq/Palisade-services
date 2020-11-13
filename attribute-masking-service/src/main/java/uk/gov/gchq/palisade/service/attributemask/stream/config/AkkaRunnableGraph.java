@@ -18,22 +18,17 @@ package uk.gov.gchq.palisade.service.attributemask.stream.config;
 
 import akka.Done;
 import akka.japi.Pair;
-import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerMessage.Envelope;
-import akka.kafka.ProducerSettings;
-import akka.kafka.javadsl.Committer;
 import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.kafka.javadsl.Consumer.DrainingControl;
-import akka.kafka.javadsl.Producer;
 import akka.stream.ActorAttributes;
 import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
-import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -89,8 +84,6 @@ public class AkkaRunnableGraph {
     RunnableGraph<DrainingControl<Done>> runner(
             final Source<CommittableMessage<String, AttributeMaskingRequest>, Control> source,
             final Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> sink,
-            final ProducerSettings<String, byte[]> producerSettings,
-            final CommitterSettings committerSettings,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
             final AttributeMaskingService service) {
@@ -120,21 +113,17 @@ public class AkkaRunnableGraph {
                         ProducerMessage.single(
                             new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                     SerDesConfig.errorValueSerializer().serialize(null, response.second().getAuditErrorMessage()), requestRecord.headers()),
-                            response.first().committableOffset())
+                                (Committable) response.first().committableOffset())
                         :
                         ProducerMessage.single(
                             new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                     SerDesConfig.maskedResourceValueSerializer().serialize(null, response.second().getAttributeMaskingResponse()), requestRecord.headers()),
-                            response.first().committableOffset());
+                                (Committable) response.first().committableOffset());
                 })
 
-                // Supervise and commit
+                // Supervise, commit & produce to sink
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
-                .via(Producer.flexiFlow(producerSettings))
-                .map(ProducerMessage.Results::passThrough)
-                .toMat(Committer.sink(committerSettings), Keep.both())
-                // Materialize the stream, sending messages to the sink
-                .mapMaterializedValue(Consumer::createDrainingControl);
+                .toMat(sink, Consumer::createDrainingControl);
     }
 
 }

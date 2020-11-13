@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
-import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.attributemask.stream.SerDesConfig;
@@ -58,7 +57,6 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, AttributeMaskingRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
     Sink<ProducerRecord<String, AttributeMaskingRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
@@ -94,29 +92,6 @@ public class AkkaComponentsConfig {
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
-    }
-
-    @Bean
-    CommitterSettings committerSettings(final ActorSystem actorSystem) {
-        return OUTPUT_COMPONENTS.committerSettings(actorSystem);
-    }
-
-    @Bean
-    ProducerSettings<String, byte[]> producerSettings(final ActorSystem actorSystem) {
-        return OUTPUT_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.maskedResourceKeySerializer(),
-                SerDesConfig.passthroughValueSerializer());
-    }
-
-    @Bean
-    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
-
-        return ERROR_COMPONENTS.plainProducer(producerSettings);
     }
 
     @Bean
