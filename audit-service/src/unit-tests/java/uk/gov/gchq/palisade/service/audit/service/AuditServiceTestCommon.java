@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 
 class AuditServiceTestCommon {
 

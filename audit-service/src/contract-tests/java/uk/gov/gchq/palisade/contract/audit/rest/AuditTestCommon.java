@@ -27,7 +27,7 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.ServiceName;
 
 import java.util.Collections;

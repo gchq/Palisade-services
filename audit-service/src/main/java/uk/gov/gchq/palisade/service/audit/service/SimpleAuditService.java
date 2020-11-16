@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,7 +31,7 @@ public class SimpleAuditService implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditRequest request) {
+    public CompletableFuture<Boolean> audit(final AuditMessage request) {
         LOGGER.info("SimpleAuditService.audit called with {}", request);
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }

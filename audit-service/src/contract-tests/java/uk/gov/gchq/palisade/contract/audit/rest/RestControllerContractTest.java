@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.List;

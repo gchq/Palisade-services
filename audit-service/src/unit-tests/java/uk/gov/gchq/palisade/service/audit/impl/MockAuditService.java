@@ -19,7 +19,8 @@ package uk.gov.gchq.palisade.service.audit.impl;
 
 import org.mockito.Mockito;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +40,7 @@ public class MockAuditService implements AuditService {
     }
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditRequest request) {
+    public CompletableFuture<Boolean> audit(final AuditMessage request) {
         return mock.audit(request);
     }
 }

@@ -32,7 +32,7 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
@@ -69,102 +69,5 @@ public class LoggerAuditServiceTest extends AuditServiceTestCommon {
     }
 
 
-    @Test
-    public void auditRegisterRequestSuccessful() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(Sets.newSet(resource))
-                .withContext(context);
 
-        // When
-        auditService.audit(auditRequest);
-
-        // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                user.toString(),
-                context.toString(),
-                requestId.toString(),
-                LoggerAuditService.REGISTER_REQUEST_COMPLETE
-        );
-    }
-
-    @Test
-    public void auditRegisterRequestException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(ServiceName.USER_SERVICE.name());
-
-        // When
-        auditService.audit(auditRequest);
-
-        // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                userId.toString(),
-                context.toString(),
-                requestId.toString(),
-                resource.getId(),
-                exception.toString(),
-                LoggerAuditService.REGISTER_REQUEST_EXCEPTION
-        );
-    }
-
-    @Test
-    public void auditReadRequestSuccessful() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResource(resource)
-                .withContext(context)
-                .withRulesApplied(rules)
-                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
-                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
-
-        // When
-        auditService.audit(auditRequest);
-
-        // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                user.toString(),
-                context.toString(),
-                rules.toString(),
-                resource.toString(),
-                LoggerAuditService.READ_REQUEST_COMPLETE,
-                String.valueOf(TEST_NUMBER_OF_RECORDS_RETURNED),
-                String.valueOf(TEST_NUMBER_OF_RECORDS_PROCESSED)
-        );
-    }
-
-    @Test
-    public void auditReadRequestException() {
-
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
-
-        // When
-        auditService.audit(auditRequest);
-
-        // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                requestId.toString(),
-                resource.toString(),
-                exception.toString(),
-                LoggerAuditService.READ_REQUEST_EXCEPTION
-        );
-    }
 }

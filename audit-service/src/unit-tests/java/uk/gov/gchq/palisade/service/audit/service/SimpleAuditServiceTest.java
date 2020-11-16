@@ -29,7 +29,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 
 import java.util.List;
 import java.util.function.Predicate;

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.List;
@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
  * RESTful interface to a number of different {@link AuditService}s
  */
 @RestController
-@RequestMapping(path = "/")
-public class AuditController {
+@RequestMapping(path = "/api")
+public class AuditRestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditRestController.class);
 
     private final Map<String, AuditService> services;
 
@@ -46,7 +46,7 @@ public class AuditController {
      *
      * @param services a {@link Map} of services to use for this controller
      */
-    public AuditController(final Map<String, AuditService> services) {
+    public AuditRestController(final Map<String, AuditService> services) {
         this.services = services;
     }
 

@@ -18,7 +18,9 @@ package uk.gov.gchq.palisade.service.audit.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,25 +39,24 @@ import static java.util.Objects.requireNonNull;
  */
 public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
-    static final String REGISTER_REQUEST_COMPLETE = "AuditRequest$RegisterRequestCompleteAuditRequest";
-    static final String REGISTER_REQUEST_EXCEPTION = "AuditRequest$RegisterRequestExceptionAuditRequest";
-    static final String READ_REQUEST_COMPLETE = "AuditRequest$ReadRequestCompleteAuditRequest";
-    static final String READ_REQUEST_EXCEPTION = "AuditRequest$ReadRequestExceptionAuditRequest";
-    private static final Map<Class, BiConsumer<Logger, AuditRequest>> DISPATCHER = new HashMap<>();
+    static final String AUDIT_MESSAGE_NULL = "AuditMessage cannot be null";
+    static final String LOGGER_NULL = "Logger cannot be null";
+    static final String SUCCESS_CALLED = "auditSuccessMessage called, logger is: {}, and request is {}";
+    static final String ERROR_CALLED = "auditErrorMessage called, logger is: {}, and request is {}";
+    static final String AUDIT_MESSAGE = "AuditMessage : {}";
+    private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
 
 
     static {
-        DISPATCHER.put(AuditRequest.RegisterRequestCompleteAuditRequest.class, LoggerAuditService::onRegisterRequestComplete);
-        DISPATCHER.put(AuditRequest.RegisterRequestExceptionAuditRequest.class, LoggerAuditService::onRegisterRequestException);
-        DISPATCHER.put(AuditRequest.ReadRequestCompleteAuditRequest.class, LoggerAuditService::onReadRequestComplete);
-        DISPATCHER.put(AuditRequest.ReadRequestExceptionAuditRequest.class, LoggerAuditService::onReadRequestException);
+        DISPATCHER.put(AuditSuccessMessage.class, LoggerAuditService::auditSuccessMessage);
+        DISPATCHER.put(AuditErrorMessage.class, LoggerAuditService::auditErrorMessage);
     }
 
     private final Logger auditLogger;
 
     /**
-     * Create a new LoggerAuditService, which will take in an {@link AuditRequest} and write information from the request to a {@link Logger}
+     * Create a new LoggerAuditService, which will take in an {@link AuditMessage} and write information from the request to a {@link Logger}
      *
      * @param loggingService the target {@link Logger} to output data to
      */
@@ -63,47 +64,26 @@ public class LoggerAuditService implements AuditService {
         auditLogger = loggingService;
     }
 
-    private static void onRegisterRequestComplete(final Logger logger, final AuditRequest request) {
-        requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "AuditRequest$RegisterRequestCompleteAuditRequest cannot be null");
-        LOGGER.debug("onRegisterRequestComplete called, logger is: {}, and request is {}", logger, request);
-        final String msg = String.format("'%s': %s", REGISTER_REQUEST_COMPLETE, request);
-        logger.info(msg);
-        LOGGER.info("RegisterRequestComplete: {}", msg);
+    private static void auditSuccessMessage(final Logger logger, final AuditMessage request) {
+        requireNonNull(logger, LOGGER_NULL);
+        requireNonNull(request, AUDIT_MESSAGE_NULL);
+        LOGGER.debug(SUCCESS_CALLED, logger, request);
+        logger.info(AUDIT_MESSAGE, request);
+        LOGGER.info(AUDIT_MESSAGE, request);
     }
 
-    private static void onRegisterRequestException(final Logger logger, final AuditRequest request) {
-        requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "AuditRequest$RegisterRequestExceptionAuditRequest cannot be null");
-        LOGGER.debug("onRegisterRequestException called, logger is: {}, and request is {}", logger, request);
-        final String msg = String.format("'%s': %s", REGISTER_REQUEST_EXCEPTION, request);
-        logger.error(msg);
-        LOGGER.error("RegisterRequestException: {}", msg);
-    }
-
-    private static void onReadRequestComplete(final Logger logger, final AuditRequest request) {
-        requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "AuditRequest$ReadRequestCompleteAuditRequest cannot be null");
-        LOGGER.debug("onReadRequestComplete called, logger is: {}, and request is {}", logger, request);
-        final String msg = String.format("'%s': %s", READ_REQUEST_COMPLETE, request);
-        logger.info(msg);
-        LOGGER.info("ReadRequestComplete: {}", msg);
-
-    }
-
-    private static void onReadRequestException(final Logger logger, final AuditRequest request) {
-        requireNonNull(logger, "Logger cannot be null");
-        requireNonNull(request, "AuditRequest$ReadRequestExceptionAuditRequest cannot be null");
-        LOGGER.debug("onReadRequestException called, logger is: {}, and request is {}", logger, request);
-        final String msg = String.format("'%s': %s", READ_REQUEST_EXCEPTION, request);
-        logger.error(msg);
-        LOGGER.error("ReadRequestException: {}", msg);
+    private static void auditErrorMessage(final Logger logger, final AuditMessage request) {
+        requireNonNull(logger, LOGGER_NULL);
+        requireNonNull(request, AUDIT_MESSAGE_NULL);
+        LOGGER.debug(ERROR_CALLED, logger, request);
+        logger.error(AUDIT_MESSAGE, request);
+        LOGGER.error(AUDIT_MESSAGE, request);
     }
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditRequest request) {
+    public CompletableFuture<Boolean> audit(final AuditMessage request) {
         requireNonNull(request, "The audit request can not be null.");
-        BiConsumer<Logger, AuditRequest> handler = DISPATCHER.get(request.getClass());
+        BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
             handler.accept(auditLogger, request);
         } else {

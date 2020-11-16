@@ -3,9 +3,7 @@ List of third-party dependencies grouped by their license type
 ### [Apache Software License 2.0](./licenses/apache_software_license_2.0.txt):
 * jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.10.4](http://github.com/FasterXML/jackson))
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
-* WireMock ([com.github.tomakehurst:wiremock-standalone:2.20.0](http://wiremock.org))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
-* project ':json-path' ([com.jayway.jsonpath:json-path:2.4.0](https://github.com/jayway/JsonPath))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
 * akka-slf4j ([com.typesafe.akka:akka-slf4j_2.13:2.6.8](https://akka.io/))
@@ -49,10 +47,6 @@ List of third-party dependencies grouped by their license type
 
 ### [Eclipse Public License 1.0](./licenses/eclipse_public_license_1.0.html):
 * JAXB Runtime ([org.glassfish.jaxb:jaxb-runtime:2.3.3](https://eclipse-ee4j.github.io/jaxb-ri/jaxb-runtime-parent/jaxb-runtime))
-
-### [Eclipse Public License 2.0](./licenses/eclipse_public_license_2.0.html):
-* JUnit Jupiter API ([org.junit.jupiter:junit-jupiter-api:5.6.2](https://junit.org/junit5/))
-* JUnit Jupiter Engine ([org.junit.jupiter:junit-jupiter-engine:5.6.2](https://junit.org/junit5/))
 
 ### [GNU General Public License 2 w/ Classpath Exception](./licenses/missing):
 * jaxb-api ([javax.xml.bind:jaxb-api:2.3.0](https://github.com/javaee/jaxb-spec/jaxb-api))
