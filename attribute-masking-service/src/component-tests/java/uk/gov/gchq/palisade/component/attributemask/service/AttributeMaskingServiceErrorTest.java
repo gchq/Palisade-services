@@ -116,7 +116,7 @@ class AttributeMaskingServiceErrorTest {
     }
 
     @Test
-    public void jsonFormatFailureTest() throws JsonProcessingException {
+    void jsonFormatFailureTest() throws JsonProcessingException {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
 
         JsonNode stub;
