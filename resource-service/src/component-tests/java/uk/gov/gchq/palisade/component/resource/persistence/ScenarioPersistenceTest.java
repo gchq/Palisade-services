@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -37,7 +35,6 @@ import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.ResourceApplication;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
@@ -137,14 +134,14 @@ class ScenarioPersistenceTest {
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returned.peek(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList.size()).isEqualTo(expectedReturned.size());
+        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returnedList).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
+        assertThat(persistedList).isEqualTo(expectedPersisted);
         LOGGER.debug("");
         returnedList.clear();
         persistedList.clear();
@@ -164,14 +161,14 @@ class ScenarioPersistenceTest {
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returned.peek(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList.size()).isEqualTo(expectedReturned.size());
+        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returnedList).containsAll(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
+        assertThat(persistedList).isEqualTo(expectedPersisted);
         LOGGER.debug("");
         returnedList.clear();
         persistedList.clear();
@@ -191,14 +188,14 @@ class ScenarioPersistenceTest {
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returned.peek(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList.size()).isEqualTo(expectedReturned.size());
+        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returnedList).containsAll(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
+        assertThat(persistedList).containsAll(expectedPersisted);
         LOGGER.debug("");
         returnedList.clear();
         persistedList.clear();
@@ -216,8 +213,8 @@ class ScenarioPersistenceTest {
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
-        returned.peek(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList.size()).isZero();
+        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returnedList).isEmpty();
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
@@ -243,14 +240,14 @@ class ScenarioPersistenceTest {
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returned.peek(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList.size()).isEqualTo(expectedReturned.size());
+        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returnedList).containsAll(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
+        assertThat(persistedList).containsAll(expectedPersisted);
         LOGGER.debug("");
         returnedList.clear();
         persistedList.clear();
