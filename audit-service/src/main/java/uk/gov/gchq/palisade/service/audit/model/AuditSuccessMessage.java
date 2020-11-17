@@ -31,9 +31,9 @@ import java.util.StringJoiner;
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same kind of data but represent a different
  * stage of the process:
- * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
+ * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
+ * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the filtered-resource-service.
+ * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the data-service.
  */
 public final class AuditSuccessMessage extends AuditMessage {
 
