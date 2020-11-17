@@ -128,8 +128,8 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_DESCRIPTION))
         );
     }
 
@@ -141,7 +141,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName(ServiceName.USER_SERVICE.name());
+                .withServiceName(RequestServiceName.USER_SERVICE.name());
         auditRequest.setOriginalRequestId(requestId);
 
         // When
@@ -156,9 +156,9 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
                 () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_OUTCOME))
         );
     }
 
@@ -170,7 +170,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName(ServiceName.RESOURCE_SERVICE.name());
+                .withServiceName(RequestServiceName.RESOURCE_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
@@ -185,9 +185,9 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_OUTCOME))
         );
     }
 
@@ -199,7 +199,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .withResourceId(resource.getId())
                 .withContext(context)
                 .withException(exception)
-                .withServiceName(ServiceName.POLICY_SERVICE.name());
+                .withServiceName(RequestServiceName.POLICY_SERVICE.name());
 
         // When
         auditService.audit(auditRequest);
@@ -247,8 +247,8 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
                 () -> assertThat(logCaptor.getAllValues().contains(rules.getMessage())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_READ_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_READ_DESCRIPTION))
         );
     }
 
@@ -272,9 +272,9 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_OUTCOME))
         );
     }
 
