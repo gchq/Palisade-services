@@ -189,30 +189,15 @@ class KafkaContractTest {
         results.removeFirst();
         results.removeLast();
 
-        assertAll("Results are correct and ordered",
-                () -> assertThat(results)
-                        .hasSize(2),
-                () -> assertThat(results)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-                () -> assertThat(results.get(0).value().get("resource").get("id").asText())
-                        .isEqualTo("file:/test/resourceId/data1.txt"),
-                () -> assertThat(results.get(0).value().get("resource").get("serialisedFormat").asText())
-                        .isEqualTo("txt"),
-                () -> assertThat(results.get(0).value().get("resource").get("type").asText())
-                        .isEqualTo("type"),
-                () -> assertThat(results.get(0).value().get("resource").get("connectionDetail").get("serviceName").asText())
-                        .isEqualTo("data-service"),
-                () -> assertThat(results.get(1).value().get("resource").get("id").asText())
-                        .isEqualTo("file:/test/resourceId/data2.txt"),
-                () -> assertThat(results.get(1).value().get("resource").get("serialisedFormat").asText())
-                        .isEqualTo("txt"),
-                () -> assertThat(results.get(1).value().get("resource").get("type").asText())
-                        .isEqualTo("type"),
-                () -> assertThat(results.get(1).value().get("resource").get("connectionDetail").get("serviceName").asText())
-                        .isEqualTo("data-service")
-        );
+        assertThat(results)
+                .extracting(ConsumerRecord::value)
+                .extracting(result -> result.get("resource"))
+                .allSatisfy(resource -> {
+                    assertThat(resource.get("id").asText()).isIn("file:/test/resourceId/data1.txt", "file:/test/resourceId/data2.txt");
+                    assertThat(resource.get("type").asText()).isEqualTo("type");
+                    assertThat(resource.get("serialisedFormat").asText()).isEqualTo("txt");
+                    assertThat(resource.get("connectionDetail").get("serviceName").asText()).isEqualTo("data-service");
+                });
     }
 
     @Test

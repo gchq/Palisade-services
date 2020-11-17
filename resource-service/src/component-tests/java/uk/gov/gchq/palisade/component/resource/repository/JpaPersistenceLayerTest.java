@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"dbtest", "web"})
+@ActiveProfiles({"dbtest"})
 class JpaPersistenceLayerTest {
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
@@ -63,6 +63,7 @@ class JpaPersistenceLayerTest {
                 FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
         resourceIterator = persistenceLayer.withPersistenceByType(resource.getType(), resourceIterator);
         resourceIterator = persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), resourceIterator);
+        // Consume the 'stream', applying the 'withPersistenceByXXX' functions
         while (resourceIterator.hasNext()) {
             resourceIterator.next();
         }

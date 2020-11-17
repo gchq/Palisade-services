@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.resource.persistence;
+package uk.gov.gchq.palisade.component.resource.persistence;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -35,6 +38,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.ResourceApplication;
+import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
@@ -48,12 +52,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = ResourceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
+@DataJpaTest
+@ContextConfiguration(classes = {ApplicationConfiguration.class})
+@EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@ActiveProfiles({"dbtest", "akkatest"})
-class ScenarioPersistenceContractTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceContractTest.class);
+@ActiveProfiles({"dbtest"})
+class ScenarioPersistenceTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioPersistenceTest.class);
 
     @Autowired
     private JpaPersistenceLayer persistenceLayer;

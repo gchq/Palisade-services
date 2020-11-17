@@ -18,7 +18,8 @@ spring:
       repositories:
         enabled: true
   autoconfigure:
-    exclude: []
+    exclude:
+    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
   redis:
     host: localhost
     port: 6379

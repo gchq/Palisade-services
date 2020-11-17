@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+
+---
 
 spring:
   application:
