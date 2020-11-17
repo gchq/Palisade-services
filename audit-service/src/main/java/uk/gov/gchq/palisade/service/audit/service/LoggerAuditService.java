@@ -39,11 +39,11 @@ import static java.util.Objects.requireNonNull;
  */
 public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
-    static final String AUDIT_MESSAGE_NULL = "AuditMessage cannot be null";
-    static final String LOGGER_NULL = "Logger cannot be null";
-    static final String SUCCESS_CALLED = "auditSuccessMessage called, logger is: {}, and request is {}";
-    static final String ERROR_CALLED = "auditErrorMessage called, logger is: {}, and request is {}";
     static final String AUDIT_MESSAGE = "AuditMessage : {}";
+    static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
+    static final String ERROR_CALLED = "auditErrorMessage called, logger is: {}, and request is {}";
+    static final String LOGGER_NULL = "The Logger cannot be null";
+    static final String SUCCESS_CALLED = "auditSuccessMessage called, logger is: {}, and request is {}";
     private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
 
@@ -82,7 +82,7 @@ public class LoggerAuditService implements AuditService {
 
     @Override
     public CompletableFuture<Boolean> audit(final AuditMessage request) {
-        requireNonNull(request, "The audit request can not be null.");
+        requireNonNull(request, AUDIT_MESSAGE_NULL);
         BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
             handler.accept(auditLogger, request);
