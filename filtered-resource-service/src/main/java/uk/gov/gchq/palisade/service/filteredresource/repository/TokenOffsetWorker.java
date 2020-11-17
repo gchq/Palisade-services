@@ -23,25 +23,28 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.receptionist.ServiceKey;
-import akka.japi.Pair;
 
-import java.time.Duration;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.GetOffset;
 
-public class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
-    public interface WorkerCmd {
-        class GetOffset extends Pair<String, ActorRef<SetOffset>> implements WorkerCmd {
-            public GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
-                super(token, replyTo);
+class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
+    interface WorkerCmd {
+        class GetOffset implements WorkerCmd {
+            public final String token;
+            public final ActorRef<SetOffset> replyTo;
+
+            GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
+                this.token = token;
+                this.replyTo = replyTo;
             }
         }
 
-        class SetOffset extends Pair<String, Long> implements WorkerCmd {
-            public SetOffset(final Pair<String, Long> copy) {
-                super(copy.first(), copy.second());
-            }
+        class SetOffset implements WorkerCmd {
+            public final String token;
+            public final Long offset;
 
-            public SetOffset(final String token, final Long offset) {
-                super(token, offset);
+            SetOffset(final String token, final Long offset) {
+                this.token = token;
+                this.offset = offset;
             }
         }
     }
@@ -63,24 +66,30 @@ public class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.Worker
 
     @Override
     public Receive<WorkerCmd> createReceive() {
+        return this.onGetOffset();
+    }
+
+    private Receive<WorkerCmd> onGetOffset() {
         return newReceiveBuilder()
                 // Start off in Getting mode
-                .onMessage(WorkerCmd.GetOffset.class, getOffset -> {
-                    String token = getOffset.first();
+                .onMessage(WorkerCmd.GetOffset.class, getCmd -> {
                     // Get from persistence, if present tell self (if not, will be told in the future)
-                    this.persistenceLayer.findOffset(token).join()
+                    this.persistenceLayer.findOffset(getCmd.token).join()
                             .ifPresent(offset -> this.getContext().getSelf()
-                                    .tell(new WorkerCmd.SetOffset(token, offset)));
-                    return newReceiveBuilder()
-                            // Switch state to Setting mode
-                            .onMessage(WorkerCmd.SetOffset.class, setOffset -> {
-                                // Tell the replyTo actor the offset that has been received
-                                ActorRef<WorkerCmd.SetOffset> replyTo = getOffset.second();
-                                replyTo.tell(setOffset);
-                                // Stop this actor
-                                return Behaviors.stopped();
-                            })
-                            .build();
+                                    .tell(new WorkerCmd.SetOffset(getCmd.token, offset)));
+                    return this.onSetOffset(getCmd);
+                })
+                .build();
+    }
+
+    private Receive<WorkerCmd> onSetOffset(final GetOffset getCmd) {
+        return newReceiveBuilder()
+                // Switch state to Setting mode
+                .onMessage(WorkerCmd.SetOffset.class, setOffset -> {
+                    // Tell the replyTo actor the offset that has been received
+                    getCmd.replyTo.tell(setOffset);
+                    // Stop this actor
+                    return Behaviors.stopped();
                 })
                 .build();
     }

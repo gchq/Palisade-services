@@ -16,6 +16,8 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,8 @@ import org.springframework.context.annotation.Primary;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
@@ -76,6 +80,21 @@ public class ApplicationConfiguration {
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
         return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
+    }
+
+    /**
+     * Create the TokenOffsetActorSsytem, controlling get access to the persistence layer and asynchronously blocking until offsets
+     * are available.
+     *
+     * @param persistenceLayer an instance of the TokenOffsetPersistenceLayer (this must still be written to explicitly)
+     * @return a (running) ActorSystem for {@link TokenOffsetCmd}s
+     * @implNote it is most likely this object will be used in conjunction with {@link TokenOffsetActorSystem#asGetterFlow(ActorRef)}
+     * and {@link TokenOffsetActorSystem#asSetterSink(ActorRef)}, supplying this object as the argument, producing an
+     * {@link akka.stream.javadsl.Flow} or {@link akka.stream.javadsl.Sink} respectively.
+     */
+    @Bean
+    ActorRef<TokenOffsetCmd> tokenOffsetActorSystem(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return TokenOffsetActorSystem.create(persistenceLayer);
     }
 
     @Bean

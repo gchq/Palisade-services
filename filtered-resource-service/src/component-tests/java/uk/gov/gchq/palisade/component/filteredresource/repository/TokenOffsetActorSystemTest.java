@@ -16,37 +16,81 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
+import akka.actor.typed.ActorRef;
+import akka.japi.Pair;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
+import org.junit.jupiter.api.Test;
+
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-public class TokenOffsetActorSystemTest {
-    public static void main(final String[] args) throws InterruptedException {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TokenOffsetActorSystemTest {
+    /**
+     * Map-based implementation of persistence layer for testing purposes
+     */
+    static class MapTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLayer {
+        final Map<String, Long> offsets = new HashMap<>();
+
+        @Override
+        public CompletableFuture<Void> putOffsetIfAbsent(final String token, final Long offset) {
+            offsets.putIfAbsent(token, offset);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public CompletableFuture<Void> overwriteOffset(final String token, final Long offset) {
+            offsets.put(token, offset);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public CompletableFuture<Optional<Long>> findOffset(final String token) {
+            return CompletableFuture.completedFuture(Optional.ofNullable(offsets.get(token)));
+        }
+    }
+
+    @Test
+    void testOffsetSystemReturnsEarlyAndLateValues() throws InterruptedException, ExecutionException, TimeoutException {
         // Setup a persistence layer
         TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
         persistenceLayer.overwriteOffset("five", 5L);
 
         // Start the tokenOffset system
         akka.actor.ActorSystem actorSystem = akka.actor.ActorSystem.create();
-        ActorSystem<TokenOffsetCmd> tokenOffsetSystem = TokenOffsetActorSystem.create(persistenceLayer);
+        ActorRef<TokenOffsetCmd> tokenOffsetSystem = TokenOffsetActorSystem.create(persistenceLayer);
 
         // Run the system with two tokens to request offsets for
         // Only one of these is in the persistence layer so far
-        Source.fromJavaStream(() -> Stream.of("five", "six"))
+        CompletableFuture<List<Pair<String, Long>>> messages = Source.fromJavaStream(() -> Stream.of("five", "six", "seven"))
                 .via(TokenOffsetActorSystem.asGetterFlow(tokenOffsetSystem))
-                .to(Sink.foreach(toldOffset -> System.out.println(toldOffset.first() + " :: " + toldOffset.second().toString())))
-                .run(actorSystem);
+                .runWith(Sink.seq(), actorSystem)
+                .toCompletableFuture();
 
-        // Add the second token and its offset to persistence, allow some time for async processing
-        Source.fromJavaStream(() -> Stream.of(new Pair<>("six", 6L)))
+        // Add the second token and its offset to persistence
+        Source.fromJavaStream(() -> Stream.of(new Pair<>("seven", 7L), new Pair<>("six", 6L)))
                 .mapAsync(2, pair -> persistenceLayer.putOffsetIfAbsent(pair.first(), pair.second())
                         .thenApply(ign -> pair))
                 .to(TokenOffsetActorSystem.asSetterSink(tokenOffsetSystem))
                 .run(actorSystem);
 
-        TimeUnit.SECONDS.sleep(1L);
+        // Assert that we received all the expected messages
+        assertThat(messages.get(1, TimeUnit.SECONDS))
+                .hasSize(3)
+                .isEqualTo(List.of(Pair.create("five", 5L), Pair.create("six", 6L), Pair.create("seven", 7L)));
     }
+
 }
