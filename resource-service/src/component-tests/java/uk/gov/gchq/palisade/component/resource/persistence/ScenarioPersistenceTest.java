@@ -37,17 +37,13 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
-import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

@@ -41,6 +41,7 @@ public interface CompletenessRepository extends CrudRepository<CompletenessEntit
      *
      * @param entityType Information about the resource Object
      * @param entityId   The Id of the entity
+     * @return the {@link CompletenessEntity} that was saved in the backing store
      */
     default CompletenessEntity save(EntityType entityType, String entityId) {
         return save(new CompletenessEntity(entityType, entityId));

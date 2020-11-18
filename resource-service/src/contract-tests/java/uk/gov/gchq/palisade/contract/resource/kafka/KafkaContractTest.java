@@ -128,7 +128,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testRequestSet() {
-        // Only 1 request will be received by the user-service
+        // Only 1 request will be received by the resource-service
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),

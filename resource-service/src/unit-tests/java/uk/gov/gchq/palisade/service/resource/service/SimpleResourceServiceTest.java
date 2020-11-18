@@ -20,11 +20,16 @@ import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.DirectoryResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,12 +40,17 @@ class SimpleResourceServiceTest {
     void testJavaFilesInUnitTest() throws IOException {
         // Given
         DirectoryResource unitTestJava = (DirectoryResource) ResourceBuilder.create(new File("./src/unit-tests/java").getCanonicalFile().toURI());
+        LeafResource resource = (LeafResource) ResourceBuilder.create(
+                new File("./src/unit-tests/java/uk/gov/gchq/palisade/service/resource/ApplicationTestData.java").getCanonicalFile().toURI()
+        );
+        resource.type("java.lang.String").serialisedFormat("java").connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
+        Set<LeafResource> testFiles = new HashSet<>();
 
         // When
-        FunctionalIterator<LeafResource> testFiles = FunctionalIterator.fromIterator(service.getResourcesById(unitTestJava.getId()));
+        service.getResourcesById(unitTestJava.getId()).forEachRemaining(testFiles::add);
 
         // Then
-        assertThat(testFiles.hasNext()).isTrue();
+        assertThat(testFiles).contains(resource);
     }
 
     @Test

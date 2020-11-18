@@ -21,6 +21,7 @@ spring:
 ---
 
 spring:
+  profiles: default-config
   application:
     name: resource-service
   output:

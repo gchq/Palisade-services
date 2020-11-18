@@ -27,7 +27,6 @@ import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * A proxy of (wrapper around) an instance of a {@link ResourceService}.

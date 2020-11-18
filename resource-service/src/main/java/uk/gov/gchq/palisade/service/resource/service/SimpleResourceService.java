@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
