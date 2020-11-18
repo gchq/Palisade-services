@@ -27,6 +27,7 @@ import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * A proxy of (wrapper around) an instance of a {@link ResourceService}.
@@ -64,17 +65,15 @@ public class StreamingResourceServiceProxy {
      * @return          a {@link FunctionalIterator} of {@link LeafResource}s associated with the resource
      */
     @Transactional
-    public FunctionalIterator<LeafResource> getResourcesByResource(final Resource resource) {
+    public Iterator<LeafResource> getResourcesByResource(final Resource resource) {
         // Try first from persistence
         LOGGER.info(STORE);
-        FunctionalIterator<LeafResource> persistenceIterator = FunctionalIterator.fromIterator(persistence.getResourcesById(resource.getId()));
-        if (persistenceIterator.hasNext()) {
-            return FunctionalIterator.fromIterator(persistenceIterator);
-        } else {
-            LOGGER.info(EMPTY);
-            return persistence.withPersistenceById(resource.getId(),
-                    FunctionalIterator.fromIterator(delegate.getResourcesById(resource.getId())));
-        }
+        return persistence.getResourcesById(resource.getId())
+                .orElseGet(() -> {
+                    LOGGER.info(EMPTY);
+                    return persistence.withPersistenceById(resource.getId(),
+                            FunctionalIterator.fromIterator(delegate.getResourcesById(resource.getId())));
+                });
     }
 
     /**
@@ -84,17 +83,15 @@ public class StreamingResourceServiceProxy {
      * @return              a {@link FunctionalIterator} of {@link LeafResource}s associated with the resourceId
      */
     @Transactional
-    public FunctionalIterator<LeafResource> getResourcesById(final String resourceId) {
+    public Iterator<LeafResource> getResourcesById(final String resourceId) {
         // Try first from persistence
         LOGGER.info(STORE);
-        Iterator<LeafResource> persistenceIterator = persistence.getResourcesById(resourceId);
-        if (persistenceIterator.hasNext()) {
-            return FunctionalIterator.fromIterator(persistenceIterator);
-        } else {
-            LOGGER.info(EMPTY);
-            return persistence.withPersistenceById(resourceId,
-                    FunctionalIterator.fromIterator(delegate.getResourcesById(resourceId)));
-        }
+        return persistence.getResourcesById(resourceId)
+                .orElseGet(() -> {
+                    LOGGER.info(EMPTY);
+                    return persistence.withPersistenceById(resourceId,
+                            FunctionalIterator.fromIterator(delegate.getResourcesById(resourceId)));
+                });
     }
 
     /**
@@ -104,17 +101,15 @@ public class StreamingResourceServiceProxy {
      * @return      a {@link FunctionalIterator} of {@link LeafResource}s associated with the type
      */
     @Transactional
-    public FunctionalIterator<LeafResource> getResourcesByType(final String type) {
+    public Iterator<LeafResource> getResourcesByType(final String type) {
         // Try first from persistence
         LOGGER.info(STORE);
-        FunctionalIterator<LeafResource> persistenceIterator = FunctionalIterator.fromIterator(persistence.getResourcesByType(type));
-        if (persistenceIterator.hasNext()) {
-            return FunctionalIterator.fromIterator(persistenceIterator);
-        } else {
-            LOGGER.info(EMPTY);
-            return persistence.withPersistenceByType(type,
-                    FunctionalIterator.fromIterator(delegate.getResourcesById(type)));
-        }
+        return persistence.getResourcesByType(type)
+                .orElseGet(() -> {
+                    LOGGER.info(EMPTY);
+                    return persistence.withPersistenceByType(type,
+                            FunctionalIterator.fromIterator(delegate.getResourcesById(type)));
+                });
     }
 
     /**
@@ -124,17 +119,16 @@ public class StreamingResourceServiceProxy {
      * @return                  a {@link FunctionalIterator} of {@link LeafResource}s associated with the type
      */
     @Transactional
-    public FunctionalIterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
+    public Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         // Try first from persistence
         LOGGER.debug(STORE);
-        Iterator<LeafResource> persistenceIterator = persistence.getResourcesBySerialisedFormat(serialisedFormat);
-        if (persistenceIterator.hasNext()) {
-            return FunctionalIterator.fromIterator(persistenceIterator);
-        } else {
-            LOGGER.info(EMPTY);
-            return persistence.withPersistenceBySerialisedFormat(serialisedFormat,
+        return persistence.getResourcesBySerialisedFormat(serialisedFormat)
+                .orElseGet(() -> {
+                    LOGGER.info(EMPTY);
+                    return persistence.withPersistenceBySerialisedFormat(serialisedFormat,
                             FunctionalIterator.fromIterator(delegate.getResourcesById(serialisedFormat)));
-        }
+                });
+
     }
 
     @Transactional

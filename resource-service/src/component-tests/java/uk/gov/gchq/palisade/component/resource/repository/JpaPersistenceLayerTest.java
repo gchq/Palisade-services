@@ -35,6 +35,8 @@ import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,22 +82,19 @@ class JpaPersistenceLayerTest {
     @Transactional
     void testEmptyGetReturnsEmpty() {
         // When getting a non-existent resourceId
-        FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(
-                persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID"));
+        Optional<Iterator<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
         // Then the iterator should be empty
-        assertThat(persistenceResponse.hasNext()).isFalse();
+        assertThat(persistenceResponse).isEmpty();
 
         // When getting a non-existent resource type
-        persistenceResponse = FunctionalIterator.fromIterator(
-                persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE"));
+        persistenceResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE");
         // Then the iterator should be empty
-        assertThat(persistenceResponse.hasNext()).isFalse();
+        assertThat(persistenceResponse).isEmpty();
 
         // When getting a non-existent resource serialised format
-        persistenceResponse = FunctionalIterator.fromIterator(
-                persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT"));
+        persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT");
         // Then the iterator should be empty
-        assertThat(persistenceResponse.hasNext()).isFalse();
+        assertThat(persistenceResponse).isEmpty();
     }
 
     @Test
@@ -104,18 +103,21 @@ class JpaPersistenceLayerTest {
         // Given the setup
 
         // When getting a resource from the persistence layer by resourceId
-        FunctionalIterator<LeafResource> persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesById(resource.getId()));
+        Optional<Iterator<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
         // Then the returned resource should match the created resource
-        assertThat(persistenceResponse.next()).isEqualTo(resource);
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
 
         // When getting a resource from the persistence layer by type
-        persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesByType(resource.getType()));
+        persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
         // Then the returned resource should match the created resource
-        assertThat(persistenceResponse.next()).isEqualTo(resource);
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
 
         // When getting a resource from the persistence layer by serialised format
-        persistenceResponse = FunctionalIterator.fromIterator(persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat()));
+        persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
         // Then the returned resource should match the created resource
-        assertThat(persistenceResponse.next()).isEqualTo(resource);
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
     }
 }

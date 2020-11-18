@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -58,9 +59,9 @@ public class SimpleResourceService implements ResourceService {
         this.resourceType = resourceType;
     }
 
-    private Stream<File> filesOf(final Path path) {
+    private FunctionalIterator<File> filesOf(final Path path) {
         try {
-            return Files.walk(path).parallel()
+            return FunctionalIterator.fromIterator(Files.walk(path).iterator())
                     .map(Path::toFile)
                     .map(file -> {
                         try {
@@ -74,7 +75,7 @@ public class SimpleResourceService implements ResourceService {
         } catch (IOException ex) {
             LOGGER.error("Could not walk {}", path);
             LOGGER.error("Error was: ", ex);
-            return Stream.empty();
+            return FunctionalIterator.fromIterator(Collections.emptyIterator());
         }
     }
 
@@ -101,7 +102,7 @@ public class SimpleResourceService implements ResourceService {
     protected Iterator<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
-                .filter(pred).iterator();
+                .filter(pred);
     }
 
     private URI stringToURI(final String uriString) {

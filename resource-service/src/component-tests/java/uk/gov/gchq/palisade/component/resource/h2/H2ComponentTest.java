@@ -114,7 +114,7 @@ class H2ComponentTest {
         List<LeafResource> returnedList = new ArrayList<>();
 
         // When making a get request to the resource service by resource for a directory
-        FunctionalIterator<LeafResource> resourcesByResource = proxy.getResourcesByResource(TEST_DIRECTORY);
+        Iterator<LeafResource> resourcesByResource = proxy.getResourcesByResource(TEST_DIRECTORY);
         resourcesByResource.forEachRemaining(returnedList::add);
 
         // Then assert that the expected resource(s) are returned

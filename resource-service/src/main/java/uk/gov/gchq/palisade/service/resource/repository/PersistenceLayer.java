@@ -19,6 +19,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Interface for a persistence store to be used as a cache by the resource-service
@@ -35,7 +36,7 @@ public interface PersistenceLayer {
      * @param resourceId the resource id to query
      * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Iterator<LeafResource> getResourcesById(String resourceId);
+    Optional<Iterator<LeafResource>> getResourcesById(String resourceId);
 
     /**
      * Given a type, return all leaf resources of that type
@@ -43,7 +44,7 @@ public interface PersistenceLayer {
      * @param type the type to query
      * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Iterator<LeafResource> getResourcesByType(String type);
+    Optional<Iterator<LeafResource>> getResourcesByType(String type);
 
     /**
      * Given a serialised format, return all leaf resources of that serialised format
@@ -51,7 +52,7 @@ public interface PersistenceLayer {
      * @param serialisedFormat the serialised format to query
      * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Iterator<LeafResource> getResourcesBySerialisedFormat(String serialisedFormat);
+    Optional<Iterator<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
 
     /**
      * Add a {@link LeafResource} to persistence for a given resourceId

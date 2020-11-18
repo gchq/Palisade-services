@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
@@ -34,7 +35,7 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Strin
      * @param resourceId the resource id of the resource in the backing store
      * @return {@link Iterable} value of ResourceEntity stored in the backing store
      */
-    Iterable<ResourceEntity> findByResourceId(String resourceId);
+    Optional<ResourceEntity> findByResourceId(String resourceId);
 
     /**
      * Returns an {@link Iterator} of Resources from a backing store by ParentId

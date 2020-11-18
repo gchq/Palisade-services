@@ -46,7 +46,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -89,7 +92,7 @@ class ScenarioPersistenceTest {
 
     /**
      * Scenario as follows, where (F)iles, (D)irectories and (S)ystems are annotated respectively and numbered in query order
-     *
+     * <pre>
      *       5 -> S
      *           / \
      *     3 -> D   D <- 4
@@ -97,6 +100,7 @@ class ScenarioPersistenceTest {
      *   2 -> D   D
      *       / \   \
      * 1 -> F   F   F
+     * </pre>
      */
 
     private static final DirectoryResource ROOT_DIR = (DirectoryResource) ResourceBuilder.create(new File(ROOT_PATH).toURI());
@@ -126,152 +130,131 @@ class ScenarioPersistenceTest {
     // Test is still marked as transactional as we poke and prod the persistence layer directly to see what is persisted and what isn't
     // For spring reasons, we can't just mark the extractResourceCompleteness method as transactional
     @Test
-    @Transactional(readOnly = true)
+    @Transactional
     void runThroughTestScenario() {
-        FunctionalIterator<LeafResource> returned;
-        FunctionalIterator<Resource> persisted;
-        List<LeafResource> returnedList = new ArrayList<>();
-        List<LeafResource> expectedReturned;
-        List<Resource> persistedList = new ArrayList<>();
-        List<Resource> expectedPersisted;
+        Set<LeafResource> returned;
+        Set<LeafResource> expectedReturned;
+        Set<Resource> persisted;
+        Set<Resource> expectedPersisted;
 
         // When - Pt 1
+        returned = new HashSet<>();
         LOGGER.debug("Getting resources for {}", MULTI_FILE_ONE.getId());
-        returned = proxy.getResourcesByResource(MULTI_FILE_ONE);
-        returned.forEachRemaining(returnedList::add);
-        expectedReturned = Collections.singletonList(MULTI_FILE_ONE);
-        expectedPersisted = Collections.singletonList(MULTI_FILE_ONE);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator()).filter(this::extractResourceCompleteness);
-        persisted = persistenceLayer.withPersistenceById(MULTI_FILE_ONE.getId(), persisted);
-        persisted.forEachRemaining(persistedList::add);
+        proxy.getResourcesByResource(MULTI_FILE_ONE).forEachRemaining(returned::add);
+        expectedReturned = Collections.singleton(MULTI_FILE_ONE);
+        expectedPersisted = Collections.singleton(MULTI_FILE_ONE);
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList).isEqualTo(expectedReturned);
+        returned.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returned).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList).isEqualTo(expectedPersisted);
+        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        returnedList.clear();
-        persistedList.clear();
         LOGGER.debug("");
 
 
         // When - Pt 2
+        returned = new HashSet<>();
         LOGGER.debug("Getting resources for {}", MULTI_FILE_DIR.getId());
-        returned = proxy.getResourcesByResource(MULTI_FILE_DIR);
-        returned.forEachRemaining(returnedList::add);
-        expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO);
-        expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
-        persisted = persistenceLayer.withPersistenceById(MULTI_FILE_DIR.getId(), persisted);
-        persisted.forEachRemaining(persistedList::add);
+        proxy.getResourcesByResource(MULTI_FILE_DIR).forEachRemaining(returned::add);
+        expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO);
+        expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR);
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList).containsAll(expectedReturned);
+        returned.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returned).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList).isEqualTo(expectedPersisted);
+        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        returnedList.clear();
-        persistedList.clear();
         LOGGER.debug("");
 
 
         // When - Pt 3
+        returned = new HashSet<>();
         LOGGER.debug("Getting resources for {}", TOP_LEVEL_DIR.getId());
-        returned = proxy.getResourcesByResource(TOP_LEVEL_DIR);
-        returned.forEachRemaining(returnedList::add);
-        expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
-        expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
-        persisted = persistenceLayer.withPersistenceById(TOP_LEVEL_DIR.getId(), persisted);
-        persisted.forEachRemaining(persistedList::add);
+        proxy.getResourcesByResource(TOP_LEVEL_DIR).forEachRemaining(returned::add);
+        expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
+        expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR);
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList).containsAll(expectedReturned);
+        returned.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returned).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList).containsAll(expectedPersisted);
+        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        returnedList.clear();
-        persistedList.clear();
         LOGGER.debug("");
 
 
         // When - Pt 4
+        returned = new HashSet<>();
         LOGGER.debug("Getting resources for {}", EMPTY_DIR.getId());
-        returned = proxy.getResourcesByResource(EMPTY_DIR);
-        returned.forEachRemaining(returnedList::add);
-        expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
-        persisted = persistenceLayer.withPersistenceById(EMPTY_DIR.getId(), persisted);
-        persisted.forEachRemaining(persistedList::add);
+        proxy.getResourcesByResource(EMPTY_DIR).forEachRemaining(returned::add);
+        expectedReturned = Collections.emptySet();
+        expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR);
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
-        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList).isEmpty();
+        LOGGER.debug("Expected: nothing");
+        returned.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returned).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList.size()).isEqualTo(expectedPersisted.size());
+        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        returnedList.clear();
-        persistedList.clear();
         LOGGER.debug("");
 
 
         // When - Pt 5
+        returned = new HashSet<>();
         LOGGER.debug("Getting resources for {}", ROOT_DIR.getId());
-        returned = proxy.getResourcesByResource(ROOT_DIR);
-        returned.forEachRemaining(returnedList::add);
-        expectedReturned = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
-        expectedPersisted = Arrays.asList(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
-        persisted = persistenceLayer.withPersistenceById(ROOT_DIR.getId(), persisted);
-        persisted.forEachRemaining(persistedList::add);
+        proxy.getResourcesByResource(ROOT_DIR).forEachRemaining(returned::add);
+        expectedReturned = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, SINGLE_FILE);
+        expectedPersisted = Set.of(MULTI_FILE_ONE, MULTI_FILE_TWO, MULTI_FILE_DIR, SINGLE_FILE, SINGLE_FILE_DIR, TOP_LEVEL_DIR, EMPTY_DIR, ROOT_DIR);
+        persisted = expectedPersisted.stream().filter(this::extractResourceCompleteness).collect(Collectors.toSet());
         LOGGER.debug("");
 
         // Then - resource service returned expected leaf resources
         expectedReturned.forEach(resource -> LOGGER.debug("Expected: {}", resource.getId()));
-        returnedList.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
-        assertThat(returnedList).containsAll(expectedReturned);
+        returned.forEach(resource -> LOGGER.debug("Returned: {}", resource.getId()));
+        assertThat(returned).isEqualTo(expectedReturned);
         LOGGER.debug("");
 
         // Then - persistence layer stored expected resources of all kinds
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
-        persistedList.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
-        assertThat(persistedList).containsAll(expectedPersisted);
+        persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
+        assertThat(persisted).isEqualTo(expectedPersisted);
         LOGGER.debug("");
-        returnedList.clear();
-        persistedList.clear();
         LOGGER.debug("");
     }
 
     boolean extractResourceCompleteness(final Resource resource) {
         try {
-            return ((boolean) isResourceIdComplete.invoke(persistenceLayer, resource.getId()))
-                    && persistenceLayer.getResourcesById(resource.getId()).hasNext();
+            return ((boolean) isResourceIdComplete.invoke(persistenceLayer, resource.getId()));
         } catch (Exception ex) {
             LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
             LOGGER.error("Exception was", ex);

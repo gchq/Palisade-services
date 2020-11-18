@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -36,9 +35,7 @@ import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,7 +47,6 @@ import java.util.stream.Collectors;
 /**
  * Application entrypoint and main process runner
  */
-@EnableDiscoveryClient
 @SpringBootApplication
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class ResourceApplication {
@@ -69,14 +65,15 @@ public class ResourceApplication {
      * @param materializer  the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
-     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
+     * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory},
+     *                        but with a connection detail attached
      */
-    public ResourceApplication(final Collection<RunnableGraph<?>> runners,
+    public ResourceApplication(final Set<RunnableGraph<?>> runners,
                                final Materializer materializer,
                                final PersistenceLayer persistence,
                                @Qualifier("configuredResourceBuilder") final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
                                @Qualifier("applicationTaskExecutor") final Executor executor) {
-        this.runners = new HashSet<>(runners);
+        this.runners = Collections.unmodifiableSet(runners);
         this.materializer = materializer;
         this.persistence = persistence;
         this.executor = executor;
