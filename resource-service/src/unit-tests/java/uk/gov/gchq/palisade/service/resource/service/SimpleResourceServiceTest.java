@@ -26,9 +26,7 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
