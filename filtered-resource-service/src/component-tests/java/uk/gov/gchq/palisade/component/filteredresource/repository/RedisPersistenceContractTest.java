@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.filteredresource.redis;
+package uk.gov.gchq.palisade.component.filteredresource.repository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.redis.AutoConfigureDataRedis;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -30,10 +33,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 
+import uk.gov.gchq.palisade.component.filteredresource.repository.RedisPersistenceContractTest.Initializer;
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
-import uk.gov.gchq.palisade.contract.filteredresource.redis.RedisPersistenceContractTest.Initializer;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
+import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
 import java.util.Map;
@@ -42,12 +49,15 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(
-        classes = {RedisPersistenceContractTest.class, FilteredResourceApplication.class},
-        properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"}
+@DataJpaTest(properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"})
+@ContextConfiguration(
+        classes = {ApplicationConfiguration.class, AsyncConfiguration.class, RedisTtlConfiguration.class, JpaTokenOffsetPersistenceLayer.class},
+        initializers = Initializer.class
 )
+@EnableAutoConfiguration
+@AutoConfigureDataRedis
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("redis")
-@ContextConfiguration(initializers = Initializer.class)
 class RedisPersistenceContractTest {
 
     private static final int REDIS_PORT = 6379;

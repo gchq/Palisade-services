@@ -32,7 +32,6 @@ import akka.stream.typed.javadsl.ActorFlow;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.AckTellWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.SpawnWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.SetOffset;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -117,7 +116,7 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
      * elements.
      */
     public static Flow<String, Pair<String, Long>, NotUsed> asGetterFlow(final ActorRef<TokenOffsetCmd> tokenOffsetActor) {
-         return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCmd.SpawnWorker::new)
+        return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCmd.SpawnWorker::new)
                 // Downcast SetOffset to Pair<String, Long>
                 .map(setOffset -> Pair.create(setOffset.token, setOffset.offset));
     }

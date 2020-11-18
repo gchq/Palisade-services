@@ -25,6 +25,7 @@ import akka.kafka.ConsumerMessage.CommittableOffset;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.javadsl.Consumer.Control;
+import akka.stream.Materializer;
 import akka.stream.Supervision;
 import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.Flow;
@@ -41,12 +42,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
+import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditService;
+import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaComponentsConfig.PartitionedOffsetSourceFactory;
@@ -70,6 +76,28 @@ public class AkkaRunnableGraph {
 
     public interface AuditServiceSinkFactory {
         Sink<Pair<FilteredResourceRequest, CommittableOffset>, CompletionStage<Done>> create(String token);
+    }
+
+    @Bean
+    WebsocketEventService websocketEventService(
+            final AuditServiceSinkFactory auditSinkFactory,
+            final FilteredResourceSourceFactory resourceSourceFactory) {
+        return new WebsocketEventService(auditSinkFactory, resourceSourceFactory);
+    }
+
+    @Bean
+    KafkaProducerService kafkaProducerService(
+            final Sink<ProducerRecord<String, FilteredResourceRequest>, CompletionStage<Done>> filteredResourceSink,
+            final Sink<ProducerRecord<String, TopicOffsetMessage>, CompletionStage<Done>> topicOffsetSink,
+            final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> auditErrorSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        return new KafkaProducerService(
+                filteredResourceSink,
+                topicOffsetSink,
+                auditErrorSink,
+                upstreamConfig,
+                materializer);
     }
 
     @Bean
