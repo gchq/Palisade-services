@@ -32,7 +32,6 @@ import akka.stream.typed.javadsl.ActorFlow;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.AckTellWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.SpawnWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.SetOffset;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

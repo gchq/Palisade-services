@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import akka.actor.typed.ActorRef;
-import akka.actor.typed.ActorSystem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
