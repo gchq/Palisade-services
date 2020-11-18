@@ -92,7 +92,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.debug("Timeout during Kafka health check for group {} : {}", this.groupId, e);
+            LOGGER.debug("Timeout during Kafka health check for group {}", this.groupId, e);
             Thread.currentThread().interrupt();
             return false;
         }
