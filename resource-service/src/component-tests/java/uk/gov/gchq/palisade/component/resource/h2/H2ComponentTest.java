@@ -119,7 +119,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
         returnedList.clear();
 
         // When making a get request to the resource service by resource for a specific file
@@ -128,7 +128,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
     }
 
     @Test
@@ -142,7 +142,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
         returnedList.clear();
 
         // When making a get request to the resource service by resourceId for a specific file
@@ -151,7 +151,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
     }
 
     @Test
@@ -165,7 +165,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
         returnedList.clear();
 
         // When making a get request to the resource service by type
@@ -174,7 +174,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(CLIENT_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
 
     }
 
@@ -189,7 +189,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
         returnedList.clear();
 
         // When making a get request to the resource service by serialisedFormat
@@ -198,7 +198,7 @@ class H2ComponentTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
-        assertThat(returnedList.size()).isEqualTo(expected.size());
+        assertThat(returnedList).containsAll(expected);
 
     }
 }

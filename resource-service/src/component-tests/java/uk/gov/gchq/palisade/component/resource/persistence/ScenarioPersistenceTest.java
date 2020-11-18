@@ -42,12 +42,14 @@ import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServicePro
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class})
@@ -63,6 +65,18 @@ class ScenarioPersistenceTest {
 
     @Autowired
     private StreamingResourceServiceProxy proxy;
+
+    private final Method isResourceIdComplete;
+
+    {
+        try {
+            isResourceIdComplete = JpaPersistenceLayer.class.getDeclaredMethod("isResourceIdComplete", String.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        isResourceIdComplete.setAccessible(true);
+    }
 
     private static final ConnectionDetail DETAIL = new SimpleConnectionDetail().serviceName("http://localhost:8082");
 
@@ -127,7 +141,7 @@ class ScenarioPersistenceTest {
         returned.forEachRemaining(returnedList::add);
         expectedReturned = Collections.singletonList(MULTI_FILE_ONE);
         expectedPersisted = Collections.singletonList(MULTI_FILE_ONE);
-        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator());
+        persisted = FunctionalIterator.fromIterator(expectedPersisted.iterator()).filter(this::extractResourceCompleteness);
         persisted = persistenceLayer.withPersistenceById(MULTI_FILE_ONE.getId(), persisted);
         persisted.forEachRemaining(persistedList::add);
         LOGGER.debug("");
@@ -252,5 +266,17 @@ class ScenarioPersistenceTest {
         returnedList.clear();
         persistedList.clear();
         LOGGER.debug("");
+    }
+
+    boolean extractResourceCompleteness(final Resource resource) {
+        try {
+            return ((boolean) isResourceIdComplete.invoke(persistenceLayer, resource.getId()))
+                    && persistenceLayer.getResourcesById(resource.getId()).hasNext();
+        } catch (Exception ex) {
+            LOGGER.error("Exception encountered while reflecting {}", persistenceLayer);
+            LOGGER.error("Exception was", ex);
+            fail();
+            return false;
+        }
     }
 }

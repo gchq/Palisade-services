@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -125,7 +124,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(result1List.size()).isEqualTo(expected.size());
+        assertThat(result1List).containsAll(expected);
 
         // When making a get request to the resource service by resource for a specific file
         resourcesByResource = FunctionalIterator.fromIterator(service.getResourcesByResource(EMPLOYEE_AVRO_FILE));
@@ -133,7 +132,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(result2List.size()).isEqualTo(expected.size());
+        assertThat(result2List).containsAll(expected);
     }
 
     @Test
@@ -148,7 +147,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE, CLIENT_AVRO_FILE);
-        assertThat(result1List.size()).isEqualTo(expected.size());
+        assertThat(result1List).containsAll(expected);
 
         // When making a get request to the resource service by resourceId for a specific file
         resourcesById = FunctionalIterator.fromIterator(service.getResourcesById(EMPLOYEE_AVRO_FILE.getId()));
@@ -156,7 +155,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_AVRO_FILE);
-        assertThat(result2List.size()).isEqualTo(expected.size());
+        assertThat(result2List).containsAll(expected);
     }
 
     @Test
@@ -171,7 +170,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, EMPLOYEE_JSON_FILE);
-        assertThat(result1List.size()).isEqualTo(expected.size());
+        assertThat(result1List).containsAll(expected);
 
         // When making a get request to the resource service by type
         resourcesByType = FunctionalIterator.fromIterator(service.getResourcesByType(CLIENT_TYPE));
@@ -179,7 +178,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(CLIENT_AVRO_FILE);
-        assertThat(result2List.size()).isEqualTo(expected.size());
+        assertThat(result2List).containsAll(expected);
 
     }
 
@@ -195,7 +194,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         List<LeafResource> expected = Arrays.asList(EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE);
-        assertThat(result1List.size()).isEqualTo(expected.size());
+        assertThat(result1List).containsAll(expected);
 
         // When making a get request to the resource service by serialisedFormat
         resourcesBySerialisedFormat = FunctionalIterator.fromIterator(service.getResourcesBySerialisedFormat(JSON_FORMAT));
@@ -203,7 +202,7 @@ class RedisPersistenceTest {
 
         // Then assert that the expected resource(s) are returned
         expected = Collections.singletonList(EMPLOYEE_JSON_FILE);
-        assertThat(result2List.size()).isEqualTo(expected.size());
+        assertThat(result2List).containsAll(expected);
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
