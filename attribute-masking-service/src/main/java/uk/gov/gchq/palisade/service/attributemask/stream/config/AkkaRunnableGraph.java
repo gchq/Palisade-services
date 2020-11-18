@@ -109,16 +109,18 @@ public class AkkaRunnableGraph {
                 // Build producer message, copying the partition, keeping track of original message
                 .map((Pair<CommittableMessage<String, AttributeMaskingRequest>, AuditableAttributeMaskingResponse> response) -> {
                     ConsumerRecord<String, AttributeMaskingRequest> requestRecord = response.first().record();
-                    return (Optional.ofNullable(response.second().getAuditErrorMessage()).isPresent()) ?
+                    return Optional.ofNullable(response.second().getAuditErrorMessage()).map(audit ->
+                        // Produce Audit Message
                         ProducerMessage.single(
                             new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                    SerDesConfig.errorValueSerializer().serialize(null, response.second().getAuditErrorMessage()), requestRecord.headers()),
-                                (Committable) response.first().committableOffset())
-                        :
+                                    SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                (Committable) response.first().committableOffset()))
+                    .orElseGet(() ->
+                        // Produce Masked Response
                         ProducerMessage.single(
                             new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                     SerDesConfig.maskedResourceValueSerializer().serialize(null, response.second().getAttributeMaskingResponse()), requestRecord.headers()),
-                                (Committable) response.first().committableOffset());
+                                (Committable) response.first().committableOffset()));
                 })
 
                 // Supervise, commit & produce to sink

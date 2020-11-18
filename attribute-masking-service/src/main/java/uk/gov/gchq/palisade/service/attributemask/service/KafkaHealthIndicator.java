@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,11 +59,10 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     @Override
     public Health getHealth(final boolean includeDetails) {
-        if (performCheck()) {
-            return Health.up().withDetail("group", this.groupId).build();
-        } else {
-            return Health.down().withDetail("group", this.groupId).build();
-        }
+        return Optional.of(performCheck())
+                .filter(healthy -> healthy)
+                .map(up -> Health.up().withDetail("group", this.groupId).build())
+                .orElseGet(() -> Health.down().withDetail("group", this.groupId).build());
     }
 
     /**
@@ -71,11 +71,10 @@ public class KafkaHealthIndicator implements HealthIndicator {
      */
     @Override
     public Health health() {
-        if (performCheck()) {
-            return Health.up().build();
-        } else {
-            return Health.down().build();
-        }
+        return Optional.of(performCheck())
+                .filter(healthy -> healthy)
+                .map(up -> Health.up().build())
+                .orElseGet(() -> Health.down().build());
     }
 
     private boolean performCheck() {
@@ -93,6 +92,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOGGER.debug("Timeout during Kafka health check for group {} : {}", this.groupId, e);
             Thread.currentThread().interrupt();
             return false;
         }
