@@ -55,9 +55,6 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tests to verify the handling of exceptions and the population of audit objects during stream processing
- */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = {ExecutorTestConfiguration.class, AttributeMaskingServiceErrorTest.Config.class})
 @EntityScan(basePackageClasses = {AuthorisedRequestEntity.class})
@@ -89,12 +86,11 @@ class AttributeMaskingServiceErrorTest {
     private ObjectMapper mapper;
 
     @Test
-    void testPersistenceFailure() {
-        // Given a masking request
+    void persistenceFailureTest() {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
-        // When persisting
+
         final CompletableFuture<AuditableAttributeMaskingRequest> subject = this.attributeMaskingService.storeAuthorisedRequest("test-token", attributeMaskingRequest);
-        // Then the service suppresses exception and populates Audit object
+
         assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
                 .isEqualTo("Cannot persist");
@@ -105,12 +101,11 @@ class AttributeMaskingServiceErrorTest {
     }
 
     @Test
-    void testMaskingFailure() {
-        // Given a masking request
+    void maskingFailureTest() {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
-        // When masking
+
         final AuditableAttributeMaskingResponse subject = this.attributeMaskingService.maskResourceAttributes(attributeMaskingRequest);
-        // Then the service suppresses exception and populates Audit object
+
         assertThat(subject.getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
                 .isEqualTo("Cannot mask");
@@ -121,10 +116,9 @@ class AttributeMaskingServiceErrorTest {
     }
 
     @Test
-    public void testJsonFormatFailure() throws JsonProcessingException {
-        // Given a masking request
+    void jsonFormatFailureTest() throws JsonProcessingException {
         final AttributeMaskingRequest attributeMaskingRequest = requestFactoryObj.apply(1);
-        // With invalid JSON in the context
+
         JsonNode stub;
         try {
            stub = this.mapper.readTree("{ \"value\": \"content\" }");
@@ -139,9 +133,9 @@ class AttributeMaskingServiceErrorTest {
                 .withUser(attributeMaskingRequest.getUser())
                 .withResource(attributeMaskingRequest.getResource())
                 .withRules(attributeMaskingRequest.getRules());
-        // When persisting
+
         final CompletableFuture<AuditableAttributeMaskingRequest> subject = this.attributeMaskingService.storeAuthorisedRequest("broken-token", broken);
-        // hen the service suppresses exception and populates Audit object
+
         assertThat(subject.getNow(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withNoError()).getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
                 .isEqualTo("Missing type id when trying to resolve subtype of [simple type, class uk.gov.gchq.palisade.Context]: missing type id property 'class'\n at [Source: UNKNOWN; line: -1, column: -1]");
