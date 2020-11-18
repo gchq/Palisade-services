@@ -34,18 +34,18 @@ import java.util.StringJoiner;
  */
 public final class AuditErrorMessage extends AuditMessage {
 
-    private final Throwable error;  //Error that occurred
+    private final Throwable error;  //Failure that occurred
 
     @JsonCreator
     private AuditErrorMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("attributes") Map<String, String> attributes,
             final @JsonProperty("error") Throwable error) {
 
         super(userId, resourceId, context, attributes);
-        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
+        this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Failure cannot be null"));
     }
 
     @Generated
@@ -78,7 +78,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final FilteredResourceRequest request, final Map<String, Object> attributes) {
+        public static IError create(final FilteredResourceRequest request, final Map<String, String> attributes) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
@@ -142,10 +142,10 @@ public final class AuditErrorMessage extends AuditMessage {
             /**
              * Adds the attributes for the message.
              *
-             * @param attributes timestamp for the request.
+             * @param attributes additional attributes for the request.
              * @return interface {@link IError} for the next step in the build.
              */
-            IError withAttributes(Map<String, Object> attributes);
+            IError withAttributes(Map<String, String> attributes);
         }
 
         /**

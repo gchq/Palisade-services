@@ -16,18 +16,26 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
+import akka.Done;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd;
@@ -35,16 +43,23 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersi
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
-import uk.gov.gchq.palisade.service.filteredresource.service.FilteredResourceService;
+import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
+import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 
+import java.util.Collections;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableConfigurationProperties(ServerProperties.class)
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
@@ -58,7 +73,13 @@ public class ApplicationConfiguration {
     // Replace this with a proper error reporting service (akka actors etc.)
     @Bean
     ErrorEventService loggingErrorReporterService() {
+        LOGGER.warn("Using a Logging-only error reporter, this should be replaced by a proper implementation!");
         return (String token, Throwable exception) -> LOGGER.error("An error was reported for token {}:", token, exception);
+    }
+
+    @Bean
+    SimpleAuditService simpleAuditService() {
+        return new SimpleAuditService(Collections.emptyMap());
     }
 
     @Bean
@@ -66,20 +87,18 @@ public class ApplicationConfiguration {
         return new OffsetEventService(persistenceLayer);
     }
 
-    // Replace this with a proper filtered resource service (websockets etc.)
     @Bean
-    FilteredResourceService loggingFilteredResourceService(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return (String token) -> {
-            LOGGER.info("Ignoring token {} since there's no real websocketEventService", token);
-            return new WebsocketEventService(persistenceLayer);
-        };
+    WebsocketEventService websocketEventService(
+            final AuditServiceSinkFactory auditSinkFactory,
+            final FilteredResourceSourceFactory resourceSourceFactory) {
+        return new WebsocketEventService(auditSinkFactory, resourceSourceFactory);
     }
 
     // Replace this with a proper error handling mechanism (kafka queues etc.)
     @Bean
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
+        return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception", token, request, error);
     }
 
     /**
@@ -98,7 +117,22 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    KafkaProducerService kafkaProducerService(
+            final Sink<ProducerRecord<String, FilteredResourceRequest>, CompletionStage<Done>> filteredResourceSink,
+            final Sink<ProducerRecord<String, TopicOffsetMessage>, CompletionStage<Done>> topicOffsetSink,
+            final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> auditErrorSink,
+            final ConsumerTopicConfiguration upstreamConfig,
+            final Materializer materializer) {
+        return new KafkaProducerService(
+                filteredResourceSink,
+                topicOffsetSink,
+                auditErrorSink,
+                upstreamConfig,
+                materializer);
+    }
+
     @Primary
+    @Bean("jsonSerialiser")
     ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
     }
