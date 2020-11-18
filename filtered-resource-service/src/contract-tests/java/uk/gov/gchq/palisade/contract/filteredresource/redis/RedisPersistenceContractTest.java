@@ -44,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         classes = {RedisPersistenceContractTest.class, FilteredResourceApplication.class},
-        webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"spring.data.redis.repositories.timeToLive.TokenOffsetEntity=1s"}
 )
 @ActiveProfiles("redis")
