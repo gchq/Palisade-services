@@ -22,7 +22,6 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import akka.actor.typed.receptionist.ServiceKey;
 
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.GetOffset;
 
@@ -53,13 +52,9 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
         return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
     }
 
-    public static ServiceKey<WorkerCmd> serviceKey(final String token) {
-        return ServiceKey.create(WorkerCmd.class, token);
-    }
-
     private final TokenOffsetPersistenceLayer persistenceLayer;
 
-    public TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+    TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
         super(context);
         this.persistenceLayer = persistenceLayer;
     }
