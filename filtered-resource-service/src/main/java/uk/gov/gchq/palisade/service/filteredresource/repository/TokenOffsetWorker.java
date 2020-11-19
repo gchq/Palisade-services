@@ -23,13 +23,11 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.GetOffset;
-
 class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     interface WorkerCmd {
         class GetOffset implements WorkerCmd {
-            public final String token;
-            public final ActorRef<SetOffset> replyTo;
+            final String token;
+            final ActorRef<SetOffset> replyTo;
 
             GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
                 this.token = token;
@@ -38,8 +36,8 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
         }
 
         class SetOffset implements WorkerCmd {
-            public final String token;
-            public final Long offset;
+            final String token;
+            final Long offset;
 
             SetOffset(final String token, final Long offset) {
                 this.token = token;
@@ -77,7 +75,7 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
                 .build();
     }
 
-    private Receive<WorkerCmd> onSetOffset(final GetOffset getCmd) {
+    private Receive<WorkerCmd> onSetOffset(final WorkerCmd.GetOffset getCmd) {
         return newReceiveBuilder()
                 // Switch state to Setting mode
                 .onMessage(WorkerCmd.SetOffset.class, setOffset -> {
