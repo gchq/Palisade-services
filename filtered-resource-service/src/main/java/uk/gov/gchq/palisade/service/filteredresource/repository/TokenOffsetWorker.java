@@ -23,7 +23,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
-class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
+final class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     protected interface WorkerCmd {
         /**
          * A request to get the offset for a token.

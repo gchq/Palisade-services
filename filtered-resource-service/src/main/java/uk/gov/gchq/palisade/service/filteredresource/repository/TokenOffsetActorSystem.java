@@ -41,7 +41,7 @@ import java.util.Optional;
  * This aims to remove any long-polling of the persistence store (redis) while ensuring offsets from
  * kafka can be set before -or- after they are got by the client's websocket handler.
  */
-public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSystem.TokenOffsetCmd> {
+public final class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSystem.TokenOffsetCmd> {
     /**
      * Command to the token-offset-actor-system.
      * This can either be a request to spawn a new worker, which will acquire the offset for a token and reply back,
