@@ -102,7 +102,7 @@ public class AttributeMaskingService {
                                                 .withContextNode(request.getContextNode())
                                                 .withAttributes(Collections.singletonMap("method", "storeAuthorisedRequest"))
                                                 .withError(e)));
-                        }
+                    }
                 })
                 .orElse(CompletableFuture.completedFuture(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withAuditErrorMessage(null)));
     }
@@ -132,7 +132,7 @@ public class AttributeMaskingService {
                     return AuditableAttributeMaskingResponse.Builder.create()
                             .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
                             .withAuditErrorMessage(null);
-                 })
+                })
                 .orElse(AuditableAttributeMaskingResponse.Builder.create().withAttributeMaskingResponse(null).withAuditErrorMessage(null));
     }
 }
