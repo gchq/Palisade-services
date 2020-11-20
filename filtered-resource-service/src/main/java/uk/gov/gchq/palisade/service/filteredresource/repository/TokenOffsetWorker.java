@@ -25,6 +25,10 @@ import akka.actor.typed.javadsl.Receive;
 
 class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     interface WorkerCmd {
+        /**
+         * A request to get the offset for a token.
+         * The worker will {@link ActorRef#tell} the replyTo actor the offset once found.
+         */
         class GetOffset implements WorkerCmd {
             final String token;
             final ActorRef<SetOffset> replyTo;
@@ -35,6 +39,10 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
             }
         }
 
+        /**
+         * A response for this actor to send to its {@code replyTo} actor.
+         * This is received by the worker when an appropriate offset if found.
+         */
         class SetOffset implements WorkerCmd {
             final String token;
             final Long offset;
@@ -46,15 +54,15 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
         }
     }
 
-    public static Behavior<WorkerCmd> create(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
-    }
-
     private final TokenOffsetPersistenceLayer persistenceLayer;
 
-    TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+    private TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
         super(context);
         this.persistenceLayer = persistenceLayer;
+    }
+
+    static Behavior<WorkerCmd> create(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
     }
 
     @Override
@@ -65,7 +73,7 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     private Receive<WorkerCmd> onGetOffset() {
         return newReceiveBuilder()
                 // Start off in Getting mode
-                .onMessage(WorkerCmd.GetOffset.class, getCmd -> {
+                .onMessage(WorkerCmd.GetOffset.class, (WorkerCmd.GetOffset getCmd) -> {
                     // Get from persistence, if present tell self (if not, will be told in the future)
                     this.persistenceLayer.findOffset(getCmd.token).join()
                             .ifPresent(offset -> this.getContext().getSelf()
@@ -78,7 +86,7 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     private Receive<WorkerCmd> onSetOffset(final WorkerCmd.GetOffset getCmd) {
         return newReceiveBuilder()
                 // Switch state to Setting mode
-                .onMessage(WorkerCmd.SetOffset.class, setOffset -> {
+                .onMessage(WorkerCmd.SetOffset.class, (WorkerCmd.SetOffset setOffset) -> {
                     // Tell the replyTo actor the offset that has been received
                     getCmd.replyTo.tell(setOffset);
                     // Stop this actor

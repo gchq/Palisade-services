@@ -48,6 +48,9 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
      * or a request to tell running workers about a newly-discovered offset for a given token.
      */
     public interface TokenOffsetCmd extends WorkerCmd {
+        /**
+         * A request to spawn a new worker, which will acquire the offset for a token and reply back
+         */
         class SpawnWorker implements TokenOffsetCmd {
             final WorkerCmd.GetOffset getOffset;
 
@@ -62,6 +65,9 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
             }
         }
 
+        /**
+         * A request to tell running workers about a newly-discovered offset for a given token.
+         */
         class AckTellWorker implements TokenOffsetCmd {
             final WorkerCmd.SetOffset setOffset;
             final ActorRef<WorkerCmd.SetOffset> ackRef;
@@ -83,6 +89,15 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
     // The unit can't be longer than DAYS (anything more is an estimated duration)
     // Despite this, we can just put the max value akka will accept, which seems to be about 248 days
     private static final Duration TIMEOUT = Duration.of(Integer.MAX_VALUE / 100, ChronoUnit.SECONDS);
+
+    private final TokenOffsetPersistenceLayer persistenceLayer;
+    // Map from Tokens to TokenOffsetWorker actors
+    private final HashMap<String, ActorRef<WorkerCmd>> inFlightWorkers = new HashMap<>();
+
+    private TokenOffsetActorSystem(final ActorContext<TokenOffsetCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+        super(context);
+        this.persistenceLayer = persistenceLayer;
+    }
 
     /**
      * Create a new {@link TokenOffsetActorSystem} and start it running.
@@ -112,7 +127,7 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
      *                .thenApply(ignored -> (token, offset)))
      *        .to(TokenOffsetActorSystem.asSetterSink(tokenOffsetActor))
      *        .run(actorSystem);
-     *    }</pre>
+     * }</pre>
      */
     public static Sink<Pair<String, Long>, NotUsed> asSetterSink(final ActorRef<TokenOffsetCmd> tokenOffsetActor) {
         return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCmd.AckTellWorker::new)
@@ -134,15 +149,6 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
         return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCmd.SpawnWorker::new)
                 // Downcast SetOffset to Pair<String, Long>
                 .map(setOffset -> Pair.create(setOffset.token, setOffset.offset));
-    }
-
-    private final TokenOffsetPersistenceLayer persistenceLayer;
-    // Map from Tokens to TokenOffsetWorker actors
-    private final HashMap<String, ActorRef<WorkerCmd>> inFlightWorkers = new HashMap<>();
-
-    public TokenOffsetActorSystem(final ActorContext<TokenOffsetCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
-        super(context);
-        this.persistenceLayer = persistenceLayer;
     }
 
     /**
