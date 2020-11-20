@@ -29,7 +29,7 @@ import java.util.function.UnaryOperator;
  *
  * @param <T> the type of the {@link FunctionalIterator}
  */
-public interface FunctionalIterator<T> extends Iterator<T>, Closeable {
+public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
 
     /**
      * A method used to create a {@link FunctionalIterator} from an iterator.
