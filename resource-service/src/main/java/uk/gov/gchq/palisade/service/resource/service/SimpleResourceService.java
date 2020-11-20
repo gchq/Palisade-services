@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -34,11 +35,33 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
  */
 public class SimpleResourceService implements ResourceService {
+    /**
+     * A {@link FunctionalIterator} implementation wrapping a stream.
+     * Avoid using unless absolutely necessary, which in this case is because of {@link Files#walk}.
+     *
+     * @param <T> iterator and stream type
+     */
+    private static class StreamClosingIterator<T> extends PlainIterator<T> {
+
+        private final Stream<T> closeableStream;
+
+        public StreamClosingIterator(final Stream<T> stream) {
+            super(stream.iterator());
+            this.closeableStream = stream;
+        }
+
+        @Override
+        public void close() {
+            this.closeableStream.close();
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
     private final String dataServiceName;
@@ -60,7 +83,7 @@ public class SimpleResourceService implements ResourceService {
 
     private FunctionalIterator<File> filesOf(final Path path) {
         try {
-            return FunctionalIterator.fromIterator(Files.walk(path).iterator())
+            return new StreamClosingIterator<>(Files.walk(path))
                     .map(Path::toFile)
                     .map(file -> {
                         try {

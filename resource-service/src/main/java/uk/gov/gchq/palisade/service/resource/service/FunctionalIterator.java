@@ -16,19 +16,21 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import java.io.Closeable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
- * An interface that allows an {@link Iterator} to have Stream like methods.
+ * An interface that allows an {@link Iterator} to have {@link java.util.stream.Stream}-like methods.
  *
  * @param <T> the type of the {@link FunctionalIterator}
  */
-public interface FunctionalIterator<T> extends Iterator<T> {
+public interface FunctionalIterator<T> extends Iterator<T>, Closeable {
 
     /**
      * A method used to create a {@link FunctionalIterator} from an iterator.
@@ -39,6 +41,14 @@ public interface FunctionalIterator<T> extends Iterator<T> {
      */
     static <T> FunctionalIterator<T> fromIterator(final Iterator<T> iterator) {
         return new PlainIterator<>(iterator);
+    }
+
+    /**
+     * Default do-nothing {@link Closeable#close()} method. This is available because some
+     * functional iterator implementations may need to hook into it (in particular, any
+     * iterators operating on {@link java.util.stream.Stream}s)
+     */
+    default void close() {
     }
 
     /**
