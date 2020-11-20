@@ -83,7 +83,8 @@ public class SimpleResourceService implements ResourceService {
 
     private FunctionalIterator<File> filesOf(final Path path) {
         try {
-            return new StreamClosingIterator<>(Files.walk(path))
+            Stream<Path> filesWalk = Files.walk(path);
+            return new StreamClosingIterator<>(filesWalk)
                     .map(Path::toFile)
                     .map(file -> {
                         try {
