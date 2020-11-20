@@ -19,7 +19,6 @@ package uk.gov.gchq.palisade.service.attributemask.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -29,8 +28,12 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingResponse;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -71,7 +74,7 @@ public class AttributeMaskingService {
      * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
      * @return a completable future representing the asynchronous completion of the storage operation
      */
-    CompletableFuture<Void> storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
+    private CompletableFuture<AttributeMaskingRequest> storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
         LOGGER.info("Storing authorised request for token {} and leaf resource id {}", token, resource.getId());
         return this.persistenceLayer.putAsync(token, user, resource, context, rules);
     }
@@ -84,32 +87,35 @@ public class AttributeMaskingService {
      * @return a completable future representing the asynchronous completion of the storage operation
      */
     @NonNull
-    public CompletableFuture<Void> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
+    public CompletableFuture<AuditableAttributeMaskingRequest> storeAuthorisedRequest(final @NonNull String token, final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map((AttributeMaskingRequest request) -> {
                     try {
-                        return storeAuthorisedRequest(token, request.getUser(), request.getResource(), request.getContext(), request.getRules());
+                        return storeAuthorisedRequest(token, request.getUser(), request.getResource(), request.getContext(), request.getRules())
+                                .thenCompose(saved -> CompletableFuture.completedFuture(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(request).withNoError()));
                     } catch (JsonProcessingException e) {
-                        CompletableFuture<Void> failedFuture = new CompletableFuture<>();
-                        failedFuture.obtrudeException(e);
-                        return failedFuture;
-                    }
+                        LOGGER.error("Json Exception thrown from method storeAuthorisedRequest() : ", e);
+                        return CompletableFuture.completedFuture(
+                                AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null)
+                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create().withUserId(request.getUserId())
+                                                .withResourceId(request.getResourceId())
+                                                .withContextNode(request.getContextNode())
+                                                .withAttributes(Collections.singletonMap("method", "storeAuthorisedRequest"))
+                                                .withError(e)));
+                        }
                 })
-                .orElse(CompletableFuture.completedFuture(null));
+                .orElse(CompletableFuture.completedFuture(AuditableAttributeMaskingRequest.Builder.create().withAttributeMaskingRequest(null).withAuditErrorMessage(null)));
     }
 
     /**
      * Mask any sensitive attributes on a resource, possibly by applying attribute-level rules.
      *
-     * @param user     the {@link User} as authorised and returned by the user-service
-     * @param resource one of many {@link LeafResource} as discovered and returned by the resource-service, to be masked
-     * @param context  the {@link Context} as originally supplied by the client
-     * @param rules    the {@link Rules} that will be applied to the resource and its records as returned by the policy-service
+     * @param attributeMaskingRequest the {@link AttributeMaskingRequest}
      * @return a copy of the resource with sensitive data masked or redacted
      */
-    LeafResource maskResourceAttributes(final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
-        LOGGER.info("Masking resource attributes for leaf resource id {}", resource.getId());
-        return resourceMasker.apply(resource);
+    private LeafResource mask(final AttributeMaskingRequest attributeMaskingRequest) {
+        LOGGER.info("Masking resource attributes for leaf resource id {}", attributeMaskingRequest.getResource().getId());
+        return resourceMasker.apply(attributeMaskingRequest.getResource());
     }
 
     /**
@@ -119,16 +125,14 @@ public class AttributeMaskingService {
      * @return a nullable response, with a masked resource if appropriate
      */
     @Nullable
-    public AttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
+    public AuditableAttributeMaskingResponse maskResourceAttributes(final @Nullable AttributeMaskingRequest nullableRequest) {
         return Optional.ofNullable(nullableRequest)
                 .map((AttributeMaskingRequest request) -> {
-                    try {
-                        LeafResource maskedResource = maskResourceAttributes(request.getUser(), request.getResource(), request.getContext(), request.getRules());
-                        return AttributeMaskingResponse.Builder.create(request).withResource(maskedResource);
-                    } catch (JsonProcessingException e) {
-                        throw new SerializationFailedException("Failed to deserialize request json members", e);
-                    }
-                })
-                .orElse(null);
+                    LeafResource maskedResource = mask(request);
+                    return AuditableAttributeMaskingResponse.Builder.create()
+                            .withAttributeMaskingResponse(AttributeMaskingResponse.Builder.create(request).withResource(maskedResource))
+                            .withAuditErrorMessage(null);
+                 })
+                .orElse(AuditableAttributeMaskingResponse.Builder.create().withAttributeMaskingResponse(null).withAuditErrorMessage(null));
     }
 }

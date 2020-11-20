@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = AttributeMaskingApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dbtest", "akkatest"})
+@TestPropertySource(properties = "management.health.kafka.enabled=false")
 class HealthActuatorContractTest {
 
     @Autowired
