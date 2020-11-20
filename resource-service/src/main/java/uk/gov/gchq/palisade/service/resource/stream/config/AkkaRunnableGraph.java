@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse.Builder;
@@ -95,7 +96,7 @@ public class AkkaRunnableGraph {
                                 .concat(Source.single(Optional.empty()))
                                 // Build the producer record for each leaf resource within the Optional
                                 .map(resourceOptional -> resourceOptional
-                                        .map(leafResource -> {
+                                        .map((LeafResource leafResource) -> {
                                                     ConsumerRecord<String, ResourceRequest> consumerRecord = messageAndRequest.first().record();
                                                     return new ProducerRecord<>(
                                                             outputTopic.getName(),
