@@ -32,6 +32,7 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,12 +95,15 @@ public class AkkaRunnableGraph {
                                 .concat(Source.single(Optional.empty()))
                                 // Build the producer record for each leaf resource within the Optional
                                 .map(resourceOptional -> resourceOptional
-                                        .map(leafResource -> new ProducerRecord<>(
-                                                outputTopic.getName(),
-                                                messageAndRequest.first().record().partition(),
-                                                messageAndRequest.first().record().key(),
-                                                Builder.create(messageAndRequest.first().record().value()).withResource(leafResource),
-                                                messageAndRequest.first().record().headers())
+                                        .map(leafResource -> {
+                                                    ConsumerRecord<String, ResourceRequest> consumerRecord = messageAndRequest.first().record();
+                                                    return new ProducerRecord<>(
+                                                            outputTopic.getName(),
+                                                            consumerRecord.partition(),
+                                                            consumerRecord.key(),
+                                                            Builder.create(consumerRecord.value()).withResource(leafResource),
+                                                            consumerRecord.headers());
+                                                }
                                         )
                                 )
                                 // Build the producer message for each record in the optional
@@ -111,14 +115,16 @@ public class AkkaRunnableGraph {
                                 )
                         )
                         // If the request optional is empty this is either a `START` or `END` message and is passed to the downstream topic with no value
-                        .orElseGet(() ->
-                                Source.single(ProducerMessage.single(new ProducerRecord<>(
-                                        outputTopic.getName(),
-                                        messageAndRequest.first().record().partition(),
-                                        messageAndRequest.first().record().key(),
-                                        null,
-                                        messageAndRequest.first().record().headers()), messageAndRequest.first().committableOffset())
-                                )
+                        .orElseGet(() -> {
+                                    ConsumerRecord<String, ResourceRequest> consumerRecord = messageAndRequest.first().record();
+                                    return Source.single(ProducerMessage.single(new ProducerRecord<>(
+                                            outputTopic.getName(),
+                                            consumerRecord.partition(),
+                                            consumerRecord.key(),
+                                            null,
+                                            consumerRecord.headers()), messageAndRequest.first().committableOffset())
+                                    );
+                                }
                         )
                 )
 
