@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import java.io.Closeable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
