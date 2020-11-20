@@ -43,14 +43,6 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
     }
 
     /**
-     * Default do-nothing {@link Closeable#close()} method. This is available because some
-     * functional iterator implementations may need to hook into it (in particular, any
-     * iterators operating on {@link java.util.stream.Stream}s)
-     */
-    default void close() {
-    }
-
-    /**
      * A method that maps an object within the iterator.
      *
      * @param map the function used to perform the map
@@ -124,6 +116,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
         public T next() {
             return this.delegate.next();
         }
+
+        @Override
+        public void close() {
+            // Do nothing
+        }
     }
 
     /**
@@ -134,10 +131,10 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     class MapIterator<T, R> implements FunctionalIterator<R> {
 
-        private final Iterator<T> delegate;
+        private final FunctionalIterator<T> delegate;
         private final Function<T, R> map;
 
-        public MapIterator(final Iterator<T> delegate, final Function<T, R> map) {
+        public MapIterator(final FunctionalIterator<T> delegate, final Function<T, R> map) {
             this.delegate = delegate;
             this.map = map;
         }
@@ -151,6 +148,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
         public R next() {
             return this.map.apply(this.delegate.next());
         }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
+        }
     }
 
     /**
@@ -160,10 +162,10 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     class MapLastIterator<T> implements FunctionalIterator<T> {
 
-        private final Iterator<T> delegate;
+        private final FunctionalIterator<T> delegate;
         private final UnaryOperator<T> mapLast;
 
-        public MapLastIterator(final Iterator<T> delegate, final UnaryOperator<T> mapLast) {
+        public MapLastIterator(final FunctionalIterator<T> delegate, final UnaryOperator<T> mapLast) {
             this.delegate = delegate;
             this.mapLast = mapLast;
         }
@@ -181,6 +183,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
             }
             return next;
         }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
+        }
     }
 
     /**
@@ -190,12 +197,12 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     class FilterIterator<T> implements FunctionalIterator<T> {
 
-        private final Iterator<T> delegate;
+        private final FunctionalIterator<T> delegate;
         private final Predicate<T> filter;
         private boolean bufferExhausted;
         private T buffer;
 
-        public FilterIterator(final Iterator<T> delegate, final Predicate<T> filter) {
+        public FilterIterator(final FunctionalIterator<T> delegate, final Predicate<T> filter) {
             this.delegate = delegate;
             this.filter = filter;
             this.bufferExhausted = true;
@@ -244,6 +251,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
                 } while (!this.filter.test(this.buffer) && this.delegate.hasNext());
             }
         }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
+        }
     }
 
     /**
@@ -254,11 +266,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     class FlatMapIterator<T, R> implements FunctionalIterator<R> {
 
-        private final Iterator<T> delegate;
+        private final FunctionalIterator<T> delegate;
         private final Function<T, Iterator<R>> flatMap;
         private Iterator<R> buffer;
 
-        public FlatMapIterator(final Iterator<T> delegate, final Function<T, Iterator<R>> flatMap) {
+        public FlatMapIterator(final FunctionalIterator<T> delegate, final Function<T, Iterator<R>> flatMap) {
             this.delegate = delegate;
             this.flatMap = flatMap;
             this.prebuffer();
@@ -290,6 +302,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
                 this.buffer = this.flatMap.apply(this.delegate.next());
             }
         }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
+        }
     }
 
     /**
@@ -299,10 +316,10 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     class PeekIterator<T> implements FunctionalIterator<T> {
 
-        private final Iterator<T> delegate;
+        private final FunctionalIterator<T> delegate;
         private final Consumer<T> peek;
 
-        public PeekIterator(final Iterator<T> delegate, final Consumer<T> peek) {
+        public PeekIterator(final FunctionalIterator<T> delegate, final Consumer<T> peek) {
             this.delegate = delegate;
             this.peek = peek;
         }
@@ -317,6 +334,11 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
             T next = this.delegate.next();
             this.peek.accept(next);
             return next;
+        }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
         }
     }
 }
