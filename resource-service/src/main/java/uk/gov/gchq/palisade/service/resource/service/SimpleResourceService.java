@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 public class SimpleResourceService implements ResourceService {
     /**
      * A {@link FunctionalIterator} implementation wrapping a stream.
-     * Avoid using unless absolutely necessary, which in this case is because of {@link Files#walk}.
+     * Avoid using unless essential, which in this case is because of {@link Files#walk}.
      *
      * @param <T> iterator and stream type
      */
@@ -51,7 +51,7 @@ public class SimpleResourceService implements ResourceService {
 
         private final Stream<T> closeableStream;
 
-        public StreamClosingIterator(final Stream<T> stream) {
+        StreamClosingIterator(final Stream<T> stream) {
             super(stream.iterator());
             this.closeableStream = stream;
         }
