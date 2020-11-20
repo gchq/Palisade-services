@@ -52,7 +52,7 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
          * A request to spawn a new worker, which will acquire the offset for a token and reply back
          */
         class SpawnWorker implements TokenOffsetCmd {
-            final WorkerCmd.GetOffset getOffset;
+            protected final WorkerCmd.GetOffset getOffset;
 
             /**
              * A request to spawn a new worker, which will acquire the offset for a token and reply back
@@ -69,8 +69,8 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
          * A request to tell running workers about a newly-discovered offset for a given token.
          */
         class AckTellWorker implements TokenOffsetCmd {
-            final WorkerCmd.SetOffset setOffset;
-            final ActorRef<WorkerCmd.SetOffset> ackRef;
+            protected final WorkerCmd.SetOffset setOffset;
+            protected final ActorRef<WorkerCmd.SetOffset> ackRef;
 
             /**
              * A request to tell running workers about a newly-discovered offset for a given token.

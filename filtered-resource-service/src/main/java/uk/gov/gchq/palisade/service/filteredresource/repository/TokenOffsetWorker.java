@@ -24,16 +24,16 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
-    interface WorkerCmd {
+    protected interface WorkerCmd {
         /**
          * A request to get the offset for a token.
          * The worker will {@link ActorRef#tell} the replyTo actor the offset once found.
          */
         class GetOffset implements WorkerCmd {
-            final String token;
-            final ActorRef<SetOffset> replyTo;
+            protected final String token;
+            protected final ActorRef<SetOffset> replyTo;
 
-            GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
+            protected GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
                 this.token = token;
                 this.replyTo = replyTo;
             }
@@ -44,10 +44,10 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
          * This is received by the worker when an appropriate offset if found.
          */
         class SetOffset implements WorkerCmd {
-            final String token;
-            final Long offset;
+            protected final String token;
+            protected final Long offset;
 
-            SetOffset(final String token, final Long offset) {
+            protected SetOffset(final String token, final Long offset) {
                 this.token = token;
                 this.offset = offset;
             }
