@@ -25,10 +25,3 @@ spring:
 spring:
   profiles: k8s-config
 
-# Kubernetes discovery via DNS to the service loadbalancer
-web:
-  client:
-    audit-service: audit-service
-    policy-service: policy-service
-    resource-service: resource-service
-    user-service: user-service
