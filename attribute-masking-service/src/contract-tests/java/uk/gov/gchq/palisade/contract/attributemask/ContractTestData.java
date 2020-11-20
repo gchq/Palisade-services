@@ -107,5 +107,5 @@ public class ContractTestData {
 
     // Create a stream of resources, uniquely identifiable by their type, which is their position in the stream (first resource has type "0", second has type "1", etc.)
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("rule", 0, null, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<String, JsonNode>("rule", 0, REQUEST_TOKEN, REQUEST_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

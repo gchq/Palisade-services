@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.attributemask.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingAspect;
 import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.service.LeafResourceMasker;
 
@@ -60,6 +61,11 @@ public class ApplicationConfiguration {
     @Bean
     AttributeMaskingService simpleAttributeMaskingService(final PersistenceLayer persistenceLayer, final LeafResourceMasker resourceMasker) {
         return new AttributeMaskingService(persistenceLayer, resourceMasker);
+    }
+
+    @Bean
+    AttributeMaskingAspect attributeMaskingAspect() {
+        return new AttributeMaskingAspect();
     }
 
     @Bean
