@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  * Application entrypoint and main process runner
  */
 @SpringBootApplication
+@EnableAspectJAutoProxy
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class AttributeMaskingApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeMaskingApplication.class);
