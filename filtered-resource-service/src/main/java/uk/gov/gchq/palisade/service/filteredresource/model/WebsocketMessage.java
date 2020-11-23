@@ -41,9 +41,9 @@ public class WebsocketMessage {
 
     @JsonCreator
     private WebsocketMessage(
-            @JsonProperty("type") final MessageType type,
-            @JsonProperty("headers") final Map<String, String> headers,
-            @JsonProperty("body") final String body) {
+            final @JsonProperty("type") MessageType type,
+            final @JsonProperty("headers") Map<String, String> headers,
+            final @JsonProperty("body") String body) {
         this.type = type;
         this.headers = headers;
         this.body = body;
@@ -66,7 +66,7 @@ public class WebsocketMessage {
     }
 
     @JsonIgnore
-    public <T> T getBodyObject(Class<T> clazz) {
+    public <T> T getBodyObject(final Class<T> clazz) {
         try {
             return MAPPER.readValue(body, clazz);
         } catch (JsonProcessingException e) {

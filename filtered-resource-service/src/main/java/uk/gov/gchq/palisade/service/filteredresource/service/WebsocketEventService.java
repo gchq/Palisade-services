@@ -60,7 +60,8 @@ public class WebsocketEventService {
      * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
      * back to the client as required.
      *
-     * @param persistenceLayer the persistence layer for retrieving token offsets
+     * @param auditSinkFactory a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
+     * @param  resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
     public WebsocketEventService(
             final AuditServiceSinkFactory auditSinkFactory,
@@ -81,6 +82,7 @@ public class WebsocketEventService {
      * <p>
      * All other incoming types of message will be discarded. No other outgoing types of message will be produced.
      *
+     * @param token the token for this flowGraph - this is used when creating the audit {@link Sink} and resource {@link Source}
      * @return a flow from client requests to server responses
      */
     public Flow<WebsocketMessage, WebsocketMessage, NotUsed> createFlowGraph(final String token) {
@@ -103,6 +105,7 @@ public class WebsocketEventService {
      * Handle {@link MessageType#PING} messages, expected to return a {@link MessageType#PONG} message in response.
      * This may handle some additional form of validation in the future.
      *
+     * @param token the token for this client
      * @return a flow from SUBSCRIBE client requests to server responses
      */
     private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onPing(final String token) {
@@ -121,7 +124,7 @@ public class WebsocketEventService {
      * This ensures <i>every</i> resource is paired up with <i>every</i> client resource request in a strict one-to-one manner,
      * while still making best use of asynchronous akka streams.
      *
-     * @param resourceSource
+     * @param token the token for this client
      * @return a flow from SUBSCRIBE client requests to server responses
      */
     private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onCts(final String token) {

@@ -75,7 +75,12 @@ public class KafkaProducerService {
         this.materializer = materializer;
     }
 
-    private <T> CompletableFuture<Void> sinkToKafka(Map<String, String> headers, Collection<T> requests, Topic topic, Sink<ProducerRecord<String, T>, CompletionStage<Done>> sink) {
+    private <T> CompletableFuture<Void> sinkToKafka(
+            final Map<String, String> headers,
+            final Collection<T> requests,
+            final Topic topic,
+            final Sink<ProducerRecord<String, T>, CompletionStage<Done>> sink
+    ) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));

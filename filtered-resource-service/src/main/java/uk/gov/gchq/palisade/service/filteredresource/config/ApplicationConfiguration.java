@@ -34,10 +34,10 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActor
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
-import uk.gov.gchq.palisade.service.filteredresource.service.SimpleAuditService;
 
 import java.util.Collections;
 import java.util.concurrent.Executor;
@@ -65,8 +65,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    SimpleAuditService simpleAuditService() {
-        return new SimpleAuditService(Collections.emptyMap());
+    AuditEventService auditEventService() {
+        return new AuditEventService(Collections.emptyMap());
     }
 
     @Bean
