@@ -76,7 +76,7 @@ public class AkkaRunnableGraph {
                 .mapAsync(PARALLELISM, committableMessage -> {
                     String token = new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                     return service.audit(committableMessage.record().value(), token)
-                            .thenApply(ignored -> (Committable) committableMessage.committableOffset());
+                            .<Committable>thenApply(ignored -> committableMessage.committableOffset());
                 })
 
                 // Send errors to supervisor
