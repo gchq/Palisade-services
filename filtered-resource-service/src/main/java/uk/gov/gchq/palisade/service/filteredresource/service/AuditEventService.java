@@ -21,15 +21,19 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 
 import java.util.Map;
 
-public class SimpleAuditService implements AuditService {
+public class AuditEventService {
     private final Map<String, String> additionalAttributes;
 
-    public SimpleAuditService(final Map<String, String> additionalAttributes) {
+    public AuditEventService(final Map<String, String> additionalAttributes) {
         this.additionalAttributes = additionalAttributes;
     }
 
     /**
-     * @return an {@link AuditSuccessMessage} to be used by this class
+     * Convert between {@link FilteredResourceRequest} input messages and {@link AuditSuccessMessage} output messages,
+     * using a common {@link Map} of additional attributes for each message.
+     *
+     * @param request the request to the service to be audited as a successfully-returned resource
+     * @return an {@link AuditSuccessMessage} to be written to the "success" kafka topic
      */
     public AuditSuccessMessage createSuccessMessage(final FilteredResourceRequest request) {
         return AuditSuccessMessage.Builder.create(request, this.additionalAttributes);

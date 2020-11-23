@@ -49,7 +49,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.service.AuditService;
+import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
@@ -186,18 +186,14 @@ public class AkkaRunnableGraph {
     }
 
 
-    /**
-     * Take an incoming flow of {@link Optional} {@link FilteredResourceRequest}s and audit those which are present.
-     * This should consume the provided {@link CommittableOffset} and commit it to kafka.
-     * Empty elements should be passed through.
-     *
-     * @return an Akka {@link Flow} that will consume the committable offset, committing and auditing the requests
-     */
+    // Take an incoming flow of Optional FilteredResourceRequests and audit those which are present.
+    // This should consume the provided {@link CommittableOffset} and commit it to kafka.
+    // Empty elements should be passed through.
     @Bean
     AuditServiceSinkFactory auditServiceSinkFactory(
             final Sink<Envelope<String, AuditSuccessMessage, Committable>, CompletionStage<Done>> auditSink,
             final ProducerTopicConfiguration topicConfiguration,
-            final AuditService auditService
+            final AuditEventService auditEventService
     ) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("success-topic");
@@ -212,7 +208,7 @@ public class AkkaRunnableGraph {
             // Create a processing flow before sinking to our sink
             return Flow.<Pair<FilteredResourceRequest, CommittableOffset>>create()
                     // Convert incoming FilteredResourceRequest to outgoing AuditSuccessMessage using the service instance
-                    .map(resourceAndOffset -> new Pair<>(auditService.createSuccessMessage(resourceAndOffset.first()), resourceAndOffset.second()))
+                    .map(resourceAndOffset -> new Pair<>(auditEventService.createSuccessMessage(resourceAndOffset.first()), resourceAndOffset.second()))
 
                     // Convert the audit message to a producer record, supplying the kafka topic, partition and headers
                     .map(requestAndOffset -> new Pair<>(
