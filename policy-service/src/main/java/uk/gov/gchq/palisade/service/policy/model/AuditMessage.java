@@ -45,6 +45,7 @@ import java.util.StringJoiner;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AuditMessage {
 
+
     public static final String SERVICE_NAME = "policy-service";
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
