@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.File;
@@ -32,6 +32,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -39,6 +41,27 @@ import java.util.stream.Stream;
  * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
  */
 public class SimpleResourceService implements ResourceService {
+    /**
+     * A {@link FunctionalIterator} implementation wrapping a stream.
+     * Avoid using unless essential, which in this case is because of {@link Files#walk}.
+     *
+     * @param <T> iterator and stream type
+     */
+    private static class StreamClosingIterator<T> extends PlainIterator<T> {
+
+        private final Stream<T> closeableStream;
+
+        StreamClosingIterator(final Stream<T> stream) {
+            super(stream.iterator());
+            this.closeableStream = stream;
+        }
+
+        @Override
+        public void close() {
+            this.closeableStream.close();
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
 
     private final String dataServiceName;
@@ -58,9 +81,10 @@ public class SimpleResourceService implements ResourceService {
         this.resourceType = resourceType;
     }
 
-    private Stream<File> filesOf(final Path path) {
+    private FunctionalIterator<File> filesOf(final Path path) {
         try {
-            return Files.walk(path)
+            Stream<Path> filesWalk = Files.walk(path);
+            return new StreamClosingIterator<>(filesWalk)
                     .map(Path::toFile)
                     .map(file -> {
                         try {
@@ -74,7 +98,7 @@ public class SimpleResourceService implements ResourceService {
         } catch (IOException ex) {
             LOGGER.error("Could not walk {}", path);
             LOGGER.error("Error was: ", ex);
-            return Stream.empty();
+            return FunctionalIterator.fromIterator(Collections.emptyIterator());
         }
     }
 
@@ -85,7 +109,7 @@ public class SimpleResourceService implements ResourceService {
             extension = file.getName().substring(i + 1);
         }
 
-        return ((FileResource) ResourceBuilder.create(file.toURI()))
+        return ((LeafResource) ResourceBuilder.create(file.toURI()))
                 .serialisedFormat(extension)
                 .type(this.resourceType)
                 .connectionDetail(new SimpleConnectionDetail().serviceName(this.dataServiceName));
@@ -98,7 +122,7 @@ public class SimpleResourceService implements ResourceService {
      * @param pred the predicate of {@link LeafResource}
      * @return the stream of {@link LeafResource}
      */
-    protected Stream<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
+    protected Iterator<LeafResource> query(final URI uri, final Predicate<LeafResource> pred) {
         return filesOf(Path.of(uri))
                 .map(this::asFileResource)
                 .filter(pred);
@@ -121,22 +145,22 @@ public class SimpleResourceService implements ResourceService {
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByResource(final Resource resource) {
+    public Iterator<LeafResource> getResourcesByResource(final Resource resource) {
         return query(stringToURI(resource.getId()), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesById(final String resourceId) {
+    public Iterator<LeafResource> getResourcesById(final String resourceId) {
         return query(stringToURI(resourceId), x -> true);
     }
 
     @Override
-    public Stream<LeafResource> getResourcesByType(final String type) {
+    public Iterator<LeafResource> getResourcesByType(final String type) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getType().equals(type));
     }
 
     @Override
-    public Stream<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
+    public Iterator<LeafResource> getResourcesBySerialisedFormat(final String serialisedFormat) {
         return query(filesystemURI(System.getProperty("user.dir")), leafResource -> leafResource.getSerialisedFormat().equals(serialisedFormat));
     }
 

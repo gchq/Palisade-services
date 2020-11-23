@@ -13,20 +13,18 @@
 # limitations under the License.
 
 spring:
-  data:
-    redis:
-      repositories:
-        enabled: true
   autoconfigure:
     exclude:
-    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-  redis:
-    host: localhost
-    port: 6379
-
-# TODO: spring-boot 2.2.x has cluster bugs, but 2.3.x has health-check bugs
-# Once released, if spring-boot 2.4.x fixes the health-check bugs, re-enable the endpoint here
-management:
-  health:
-    redis:
-      enabled: false
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username:
+    password:
+    initialization-mode: always
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database: h2
