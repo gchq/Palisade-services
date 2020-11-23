@@ -155,15 +155,13 @@ public class ApplicationConfiguration {
      * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate         a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
      *                         This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
-     * @param objectMapper     a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
      * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
      */
     @Bean
     public StreamingResourceServiceProxy resourceServiceProxy(
             final PersistenceLayer persistenceLayer,
-            final @Qualifier("impl") ResourceService delegate,
-            final ObjectMapper objectMapper) {
-        return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper);
+            final @Qualifier("impl") ResourceService delegate) {
+        return new StreamingResourceServiceProxy(persistenceLayer, delegate);
     }
 
     /**
