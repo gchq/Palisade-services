@@ -19,6 +19,7 @@ package uk.gov.gchq.palisade.service.audit.stream.config;
 import akka.Done;
 import akka.actor.ActorSystem;
 import akka.kafka.CommitterSettings;
+import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
 import akka.kafka.ProducerSettings;
@@ -47,6 +48,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, AuditMessage> INPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
 
     @Bean
     Sink<ProducerRecord<String, AuditMessage>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
@@ -71,6 +73,12 @@ public class AkkaComponentsConfig {
                 .orElse(Subscriptions.topics(topic.getName()));
 
         return INPUT_COMPONENTS.committableConsumer(consumerSettings, subscription);
+    }
+
+    @Bean
+    Sink<Committable, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
+        CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
+        return OUTPUT_COMPONENTS.committableSink(committerSettings);
     }
 
     @Bean
