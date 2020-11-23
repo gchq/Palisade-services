@@ -35,7 +35,6 @@ import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.component.filteredresource.repository.RedisPersistenceContractTest.Initializer;
 import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
-import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
