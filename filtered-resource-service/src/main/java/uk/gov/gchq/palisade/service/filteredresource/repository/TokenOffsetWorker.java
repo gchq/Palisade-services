@@ -22,46 +22,47 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import akka.actor.typed.receptionist.ServiceKey;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd.GetOffset;
-
-class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
-    interface WorkerCmd {
+final class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
+    protected interface WorkerCmd {
+        /**
+         * A request to get the offset for a token.
+         * The worker will {@link ActorRef#tell} the replyTo actor the offset once found.
+         */
         class GetOffset implements WorkerCmd {
-            public final String token;
-            public final ActorRef<SetOffset> replyTo;
+            protected final String token;
+            protected final ActorRef<SetOffset> replyTo;
 
-            GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
+            protected GetOffset(final String token, final ActorRef<SetOffset> replyTo) {
                 this.token = token;
                 this.replyTo = replyTo;
             }
         }
 
+        /**
+         * A response for this actor to send to its {@code replyTo} actor.
+         * This is received by the worker when an appropriate offset if found.
+         */
         class SetOffset implements WorkerCmd {
-            public final String token;
-            public final Long offset;
+            protected final String token;
+            protected final Long offset;
 
-            SetOffset(final String token, final Long offset) {
+            protected SetOffset(final String token, final Long offset) {
                 this.token = token;
                 this.offset = offset;
             }
         }
     }
 
-    public static Behavior<WorkerCmd> create(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
-    }
-
-    public static ServiceKey<WorkerCmd> serviceKey(final String token) {
-        return ServiceKey.create(WorkerCmd.class, token);
-    }
-
     private final TokenOffsetPersistenceLayer persistenceLayer;
 
-    public TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+    private TokenOffsetWorker(final ActorContext<WorkerCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
         super(context);
         this.persistenceLayer = persistenceLayer;
+    }
+
+    static Behavior<WorkerCmd> create(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
     }
 
     @Override
@@ -72,7 +73,7 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
     private Receive<WorkerCmd> onGetOffset() {
         return newReceiveBuilder()
                 // Start off in Getting mode
-                .onMessage(WorkerCmd.GetOffset.class, getCmd -> {
+                .onMessage(WorkerCmd.GetOffset.class, (WorkerCmd.GetOffset getCmd) -> {
                     // Get from persistence, if present tell self (if not, will be told in the future)
                     this.persistenceLayer.findOffset(getCmd.token).join()
                             .ifPresent(offset -> this.getContext().getSelf()
@@ -82,10 +83,10 @@ class TokenOffsetWorker extends AbstractBehavior<TokenOffsetWorker.WorkerCmd> {
                 .build();
     }
 
-    private Receive<WorkerCmd> onSetOffset(final GetOffset getCmd) {
+    private Receive<WorkerCmd> onSetOffset(final WorkerCmd.GetOffset getCmd) {
         return newReceiveBuilder()
                 // Switch state to Setting mode
-                .onMessage(WorkerCmd.SetOffset.class, setOffset -> {
+                .onMessage(WorkerCmd.SetOffset.class, (WorkerCmd.SetOffset setOffset) -> {
                     // Tell the replyTo actor the offset that has been received
                     getCmd.replyTo.tell(setOffset);
                     // Stop this actor

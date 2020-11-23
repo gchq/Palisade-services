@@ -29,8 +29,6 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.typed.javadsl.ActorFlow;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.AckTellWorker;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd.SpawnWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCmd;
 
 import java.time.Duration;
@@ -43,20 +41,43 @@ import java.util.Optional;
  * This aims to remove any long-polling of the persistence store (redis) while ensuring offsets from
  * kafka can be set before -or- after they are got by the client's websocket handler.
  */
-public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSystem.TokenOffsetCmd> {
+public final class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSystem.TokenOffsetCmd> {
+    /**
+     * Command to the token-offset-actor-system.
+     * This can either be a request to spawn a new worker, which will acquire the offset for a token and reply back,
+     * or a request to tell running workers about a newly-discovered offset for a given token.
+     */
     public interface TokenOffsetCmd extends WorkerCmd {
+        /**
+         * A request to spawn a new worker, which will acquire the offset for a token and reply back
+         */
         class SpawnWorker implements TokenOffsetCmd {
-            public final WorkerCmd.GetOffset getOffset;
+            protected final WorkerCmd.GetOffset getOffset;
 
+            /**
+             * A request to spawn a new worker, which will acquire the offset for a token and reply back
+             *
+             * @param token   the client's token for which an offset was requested
+             * @param replyTo the {@link ActorRef} to reply to once the offset is found
+             */
             public SpawnWorker(final String token, final ActorRef<WorkerCmd.SetOffset> replyTo) {
                 this.getOffset = new GetOffset(token, replyTo);
             }
         }
 
+        /**
+         * A request to tell running workers about a newly-discovered offset for a given token.
+         */
         class AckTellWorker implements TokenOffsetCmd {
-            public final WorkerCmd.SetOffset setOffset;
-            public final ActorRef<WorkerCmd.SetOffset> ackRef;
+            protected final WorkerCmd.SetOffset setOffset;
+            protected final ActorRef<WorkerCmd.SetOffset> ackRef;
 
+            /**
+             * A request to tell running workers about a newly-discovered offset for a given token.
+             *
+             * @param setOffsetPair a pair of a token and its offset
+             * @param ackRef        an {@link ActorRef} to reply to to acknowledge the message has been processed
+             */
             public AckTellWorker(final Pair<String, Long> setOffsetPair, final ActorRef<WorkerCmd.SetOffset> ackRef) {
                 this.setOffset = new SetOffset(setOffsetPair.first(), setOffsetPair.second());
                 this.ackRef = ackRef;
@@ -68,6 +89,15 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
     // The unit can't be longer than DAYS (anything more is an estimated duration)
     // Despite this, we can just put the max value akka will accept, which seems to be about 248 days
     private static final Duration TIMEOUT = Duration.of(Integer.MAX_VALUE / 100, ChronoUnit.SECONDS);
+
+    private final TokenOffsetPersistenceLayer persistenceLayer;
+    // Map from Tokens to TokenOffsetWorker actors
+    private final HashMap<String, ActorRef<WorkerCmd>> inFlightWorkers = new HashMap<>();
+
+    private TokenOffsetActorSystem(final ActorContext<TokenOffsetCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+        super(context);
+        this.persistenceLayer = persistenceLayer;
+    }
 
     /**
      * Create a new {@link TokenOffsetActorSystem} and start it running.
@@ -97,7 +127,7 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
      *                .thenApply(ignored -> (token, offset)))
      *        .to(TokenOffsetActorSystem.asSetterSink(tokenOffsetActor))
      *        .run(actorSystem);
-     *    }</pre>
+     * }</pre>
      */
     public static Sink<Pair<String, Long>, NotUsed> asSetterSink(final ActorRef<TokenOffsetCmd> tokenOffsetActor) {
         return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCmd.AckTellWorker::new)
@@ -121,15 +151,6 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
                 .map(setOffset -> Pair.create(setOffset.token, setOffset.offset));
     }
 
-    private final TokenOffsetPersistenceLayer persistenceLayer;
-    // Map from Tokens to TokenOffsetWorker actors
-    private final HashMap<String, ActorRef<WorkerCmd>> inFlightWorkers = new HashMap<>();
-
-    public TokenOffsetActorSystem(final ActorContext<TokenOffsetCmd> context, final TokenOffsetPersistenceLayer persistenceLayer) {
-        super(context);
-        this.persistenceLayer = persistenceLayer;
-    }
-
     /**
      * Default (initial) behaviour for this actor to assume.
      *
@@ -139,7 +160,7 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
     public Receive<TokenOffsetCmd> createReceive() {
         return newReceiveBuilder()
                 .onMessage(TokenOffsetCmd.SpawnWorker.class, this::onSpawnWorker)
-                .onMessage(AckTellWorker.class, this::onAckSetOffset)
+                .onMessage(TokenOffsetCmd.AckTellWorker.class, this::onAckSetOffset)
                 .build();
     }
 
@@ -147,9 +168,9 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
      * The {@link TokenOffsetCmd.SpawnWorker} command will spawn a {@link TokenOffsetWorker} and pass it the command's token
      * ({@link Pair#first()}).
      * After the worker has been spawned, it is added to an internal map of Tokens to TokenOffsetWorkers for tokens currently
-     * in flight. This is later got from the map by the {@link TokenOffsetActorSystem#onAckSetOffset(AckTellWorker)} method.
-     * The command's replyTo ({@link Pair#second()}) will later {@link ActorRef#tell} the offset for that token. This offset
-     * may come from persistence, or it may have been told to the actor through an {@link AckTellWorker}
+     * in flight. This is later got from the map by the {@link TokenOffsetActorSystem#onAckSetOffset(TokenOffsetCmd.AckTellWorker)}
+     * method. The command's replyTo ({@link Pair#second()}) will later {@link ActorRef#tell} the offset for that token. This
+     * offset may come from persistence, or it may have been told to the actor through an {@link TokenOffsetCmd.AckTellWorker}
      * command.
      *
      * @param spawnWorker the {@link TokenOffsetCmd.SpawnWorker} command to handle
@@ -167,17 +188,17 @@ public class TokenOffsetActorSystem extends AbstractBehavior<TokenOffsetActorSys
     }
 
     /**
-     * The {@link AckTellWorker} command will tell any {@link TokenOffsetWorker}s for the command's token that an
+     * The {@link TokenOffsetCmd.AckTellWorker} command will tell any {@link TokenOffsetWorker}s for the command's token that an
      * offset has been set ({@link Pair#first()}). This is done through storing the worker's {@link ActorRef} in an internal map,
      * then looking up any {@link ActorRef}s matching the token. The former step (storing the worker actor) is done as part of
-     * the  {@link TokenOffsetActorSystem#onSpawnWorker(SpawnWorker)} method when the worker is created.
+     * the  {@link TokenOffsetActorSystem#onSpawnWorker(TokenOffsetCmd.SpawnWorker)} method when the worker is created.
      *
-     * @param ackTellWorker the {@link AckTellWorker} command to handle
+     * @param ackTellWorker the {@link TokenOffsetCmd.AckTellWorker} command to handle
      * @return an unchanged {@link Behavior} (this actor does not 'become' any other behaviour)
      */
-    private Behavior<TokenOffsetCmd> onAckSetOffset(final AckTellWorker ackTellWorker) {
+    private Behavior<TokenOffsetCmd> onAckSetOffset(final TokenOffsetCmd.AckTellWorker ackTellWorker) {
         Optional.ofNullable(this.inFlightWorkers.get(ackTellWorker.setOffset.token))
-                .ifPresent(workerRef -> {
+                .ifPresent((ActorRef<WorkerCmd> workerRef) -> {
                     workerRef.tell(ackTellWorker.setOffset);
                     this.inFlightWorkers.remove(ackTellWorker.setOffset.token, workerRef);
                 });
