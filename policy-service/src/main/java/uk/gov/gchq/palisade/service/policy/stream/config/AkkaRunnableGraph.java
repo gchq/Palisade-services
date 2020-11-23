@@ -82,6 +82,7 @@ public class AkkaRunnableGraph {
             final PolicyServiceAsyncProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         // Read messages from the stream source
         return source

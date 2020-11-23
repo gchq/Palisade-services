@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.policy.model;
 
-
 /**
  * Simply stores the expected header key for Tokens
  * Since the content of tokens are strings, there is no need for further implementation
