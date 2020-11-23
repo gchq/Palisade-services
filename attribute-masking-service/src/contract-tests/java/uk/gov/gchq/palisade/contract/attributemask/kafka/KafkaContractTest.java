@@ -42,14 +42,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -77,7 +75,6 @@ import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
-import uk.gov.gchq.palisade.service.attributemask.service.AttributeMaskingService;
 import uk.gov.gchq.palisade.service.attributemask.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.attributemask.stream.PropertiesConfigurer;
@@ -129,7 +126,6 @@ class KafkaContractTest {
         }
     }
 
-    // Deserialiser for downstream test output
     static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
         public JsonNode deserialize(final String s, final byte[] attributeMaskingResponse) {
@@ -152,9 +148,6 @@ class KafkaContractTest {
             }
         }
     }
-
-    @SpyBean
-    private AttributeMaskingService service;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -179,9 +172,6 @@ class KafkaContractTest {
                 Stream.of(ContractTestData.END_RECORD))
                 .flatMap(Function.identity());
         final long recordCount = messageCount + 2;
-
-        // Given - the service is not mocked
-        Mockito.reset(service);
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
@@ -312,9 +302,6 @@ class KafkaContractTest {
 
         // Given - the service will throw exceptions for 10% of the requests (first of each ten, so [START, message, END] -> [START, error, END])
         final AtomicLong throwCounter = new AtomicLong(0);
-        Mockito.reset(service);
-        Mockito.when(service.maskResourceAttributes(Mockito.argThat(obj -> throwCounter.getAndIncrement() % 10 == 0)))
-                .thenThrow(serviceSpyException);
 
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
@@ -440,9 +427,9 @@ class KafkaContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("rule", 3, (short) 1),
-                    new NewTopic("masked-resource", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("rule", 1, (short) 1),
+                    new NewTopic("masked-resource", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {

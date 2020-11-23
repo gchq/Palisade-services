@@ -21,7 +21,7 @@ service:
 
 image:
   name: attribute-masking-service
-  tag: b78dc31-SNAPSHOT
+  tag: SNAPSHOT-2b7cb97
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 
