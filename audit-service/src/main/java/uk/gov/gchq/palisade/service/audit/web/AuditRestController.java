@@ -19,12 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
+import java.net.http.HttpHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -51,17 +53,17 @@ public class AuditRestController {
     }
 
     /**
-     * Audit an incoming REST POST {@link AuditRequest} on the /audit endpoint.
+     * Audit an incoming REST POST {@link AuditMessage} on the /api/audit endpoint.
      * Consumes and produces JSON requests and responses
      *
      * @param request the request to pass to each of the underlying services
      * @return true if all services completed their audit successfully, otherwise false
      */
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
-    public Boolean auditRequest(@RequestBody final AuditRequest request) {
-        LOGGER.debug("Invoking GetUserRequest: {}", request);
+    public Boolean auditRequest(@RequestHeader("x-request-token") final String token, @RequestBody final AuditMessage request) {
+        LOGGER.debug("Invoking audit: {}", request);
         // Submit audit to all providing services
-        final List<CompletableFuture<Boolean>> audits = this.audit(request);
+        final List<CompletableFuture<Boolean>> audits = this.audit(token, request);
         // Wait for all providers to complete
         // Succeed only if all providers succeeded
         boolean result = audits.stream().allMatch(CompletableFuture::join);
@@ -75,10 +77,10 @@ public class AuditRestController {
      * @param request the request to pass to each of the underlying services
      * @return a list of futures for whether each service completed and whether it was a successful completion
      */
-    public List<CompletableFuture<Boolean>> audit(final AuditRequest request) {
-        List<CompletableFuture<Boolean>> result = services.values().stream().map(
-                auditService -> auditService.audit(request)
-        ).collect(Collectors.toList());
+    public List<CompletableFuture<Boolean>> audit(final String token, final AuditMessage request) {
+        List<CompletableFuture<Boolean>> result = services.values().stream()
+                .map(auditService -> auditService.audit(request, token))
+                .collect(Collectors.toList());
         LOGGER.debug("audit result is {}", result);
         return result;
     }

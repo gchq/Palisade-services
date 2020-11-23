@@ -19,10 +19,8 @@ package uk.gov.gchq.palisade.service.audit.stream.config;
 import akka.Done;
 import akka.actor.ActorSystem;
 import akka.kafka.CommitterSettings;
-import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
-import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.Subscriptions;
@@ -34,7 +32,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.audit.stream.ProducerTopicConfiguration.Topic;
@@ -74,5 +71,10 @@ public class AkkaComponentsConfig {
                 .orElse(Subscriptions.topics(topic.getName()));
 
         return INPUT_COMPONENTS.committableConsumer(consumerSettings, subscription);
+    }
+
+    @Bean
+    CommitterSettings committerSettings (final ActorSystem actorSystem) {
+        return INPUT_COMPONENTS.committerSettings(actorSystem);
     }
 }

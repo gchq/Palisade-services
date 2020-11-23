@@ -380,7 +380,7 @@ public class StroomAuditService implements AuditService {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;
             auditErrorMessage(eventLogger, errorMessage, token);
         } else {
-            LOGGER.warn("The service {} has created unknown AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
+            LOGGER.warn("The service {} has created unknown type of AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
