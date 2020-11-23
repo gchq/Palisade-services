@@ -81,7 +81,7 @@ public class SimpleResourceService implements ResourceService {
         this.resourceType = resourceType;
     }
 
-    private FunctionalIterator<File> filesOf(final Path path) {
+    private static FunctionalIterator<File> filesOf(final Path path) {
         try {
             Stream<Path> filesWalk = Files.walk(path);
             return new StreamClosingIterator<>(filesWalk)
