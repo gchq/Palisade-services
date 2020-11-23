@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.filteredresource.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.KafkaRestWriterRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringHealthRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringLoggersRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter;
 
 import java.net.InetAddress;
@@ -50,12 +52,17 @@ public class EndpointConfiguration {
     }
 
     @Bean
-    SpringHealthRouter springHealthRouter(final HealthEndpoint springHealthEndpoint, final ObjectMapper mapper) {
-        return new SpringHealthRouter(springHealthEndpoint, mapper);
+    SpringHealthRouter springHealthRouter(final HealthEndpoint springHealthEndpoint) {
+        return new SpringHealthRouter(springHealthEndpoint);
     }
 
     @Bean
-    WebsocketRouter websocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper mapper) {
-        return new WebsocketRouter(websocketEventService, mapper);
+    SpringLoggersRouter springLoggersRouter(final LoggersEndpoint loggersEndpoint) {
+        return new SpringLoggersRouter(loggersEndpoint);
+    }
+
+    @Bean
+    WebsocketRouter websocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper objectMapper) {
+        return new WebsocketRouter(websocketEventService, objectMapper);
     }
 }

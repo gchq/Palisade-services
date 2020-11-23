@@ -16,11 +16,11 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.web.router;
 
-import akka.http.javadsl.model.ContentTypes;
+import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.model.HttpResponse;
 import akka.http.javadsl.server.Directives;
 import akka.http.javadsl.server.Route;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import akka.http.scaladsl.model.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SpringHealthRouter implements RouteSupplier {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringHealthRouter.class);
-
     // Map Spring health Statuses to Akka StatusCodes
     private static final Map<Status, Integer> SPRING_STATUS_LOOKUP = Map.of(
             Status.UP, 200,
@@ -46,11 +44,9 @@ public class SpringHealthRouter implements RouteSupplier {
     private static final Integer NOT_FOUND = 404;
 
     private final HealthEndpoint springHealthEndpoint;
-    private final ObjectMapper mapper;
 
-    public SpringHealthRouter(final HealthEndpoint springHealthEndpoint, final ObjectMapper mapper) {
+    public SpringHealthRouter(final HealthEndpoint springHealthEndpoint) {
         this.springHealthEndpoint = springHealthEndpoint;
-        this.mapper = mapper;
     }
 
     private Route mapSpringToAkka(final HealthComponent healthComponent) {
@@ -61,16 +57,7 @@ public class SpringHealthRouter implements RouteSupplier {
                 // Convert to an akka response with a status code
                 .map(status -> {
                     Integer statusCode = SPRING_STATUS_LOOKUP.getOrDefault(status, INTERNAL_ERROR);
-                    try {
-                        return Directives.complete(HttpResponse.create()
-                                .withStatus(statusCode)
-                                .withEntity(ContentTypes.APPLICATION_JSON, this.mapper.writeValueAsBytes(status)));
-                    } catch (JsonProcessingException e) {
-                        LOGGER.error("Failed to serialise spring health status", e);
-                        return Directives.complete(HttpResponse.create()
-                                .withStatus(INTERNAL_ERROR)
-                                .withEntity(ContentTypes.APPLICATION_JSON, String.format("{\"error\", \"%s\"}", e.getMessage())));
-                    }
+                    return (Route) Directives.complete(StatusCode.int2StatusCode(statusCode), status, Jackson.marshaller());
                 })
 
                 // If Spring failed to get a health component for the requested path
