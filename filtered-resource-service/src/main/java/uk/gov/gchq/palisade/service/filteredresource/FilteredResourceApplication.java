@@ -42,6 +42,9 @@ public class FilteredResourceApplication {
 
     /**
      * Autowire Akka objects in constructor for application ready event
+     *
+     * @param system the default akka actor system
+     * @param server the http server to start (in replacement of spring-boot-starter-web)
      */
     public FilteredResourceApplication(final ActorSystem system, final AkkaHttpServer server) {
         this.system = system;

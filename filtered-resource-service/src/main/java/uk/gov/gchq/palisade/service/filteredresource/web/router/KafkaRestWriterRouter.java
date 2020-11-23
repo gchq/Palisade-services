@@ -39,11 +39,6 @@ import java.util.stream.StreamSupport;
 public class KafkaRestWriterRouter implements RouteSupplier {
     private final KafkaProducerService kafkaProducerService;
 
-    private static Map<String, String> getHeadersMap(RequestContext requestContext) {
-        return StreamSupport.stream(requestContext.getRequest().getHeaders().spliterator(), false)
-                .collect(Collectors.toMap(HttpHeader::name, HttpHeader::value));
-    }
-
     public KafkaRestWriterRouter(final KafkaProducerService kafkaProducerService) {
         this.kafkaProducerService = kafkaProducerService;
     }
@@ -58,7 +53,12 @@ public class KafkaRestWriterRouter implements RouteSupplier {
                 ));
     }
 
-    private static <T> Route apply(Class<T> domainClass, BiFunction<Map<String, String>, List<T>, CompletableFuture<Void>> kafkaProduceMethod) {
+    private static Map<String, String> getHeadersMap(final RequestContext requestContext) {
+        return StreamSupport.stream(requestContext.getRequest().getHeaders().spliterator(), false)
+                .collect(Collectors.toMap(HttpHeader::name, HttpHeader::value));
+    }
+
+    private static <T> Route apply(final Class<T> domainClass, final BiFunction<Map<String, String>, List<T>, CompletableFuture<Void>> kafkaProduceMethod) {
         Class<List<T>> domainCollectionClass = (Class<List<T>>) List.<T>of().getClass();
         return Directives.concat(
                 Directives.pathEndOrSingleSlash(() -> Directives.post(() ->
@@ -79,7 +79,6 @@ public class KafkaRestWriterRouter implements RouteSupplier {
     private Route resource() {
         return apply(FilteredResourceRequest.class, kafkaProducerService::filteredResourceMulti);
     }
-
 
     private Route offset() {
         return apply(TopicOffsetMessage.class, kafkaProducerService::topicOffsetMulti);
