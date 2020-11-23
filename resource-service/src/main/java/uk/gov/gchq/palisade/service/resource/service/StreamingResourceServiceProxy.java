@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,20 +40,17 @@ public class StreamingResourceServiceProxy {
 
     private final PersistenceLayer persistence;
     private final ResourceService delegate;
-    private final ObjectMapper objectMapper;
 
     /**
      * Construct a StreamingResourceServiceProxy, but without any {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} prepopulation
      *
      * @param persistence  a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate     a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
-     * @param objectMapper a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
      */
 
-    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate, final ObjectMapper objectMapper) {
+    public StreamingResourceServiceProxy(final PersistenceLayer persistence, final ResourceService delegate) {
         this.persistence = persistence;
         this.delegate = delegate;
-        this.objectMapper = objectMapper;
     }
 
     /**
