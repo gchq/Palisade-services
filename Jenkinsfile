@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib/PAL-398-hide-jenkins-contents')_
 
 timestamps {
     services()
