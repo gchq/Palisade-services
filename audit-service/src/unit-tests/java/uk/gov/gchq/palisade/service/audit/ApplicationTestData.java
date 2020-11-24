@@ -20,7 +20,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,8 +35,6 @@ public final class ApplicationTestData {
     public static final String TEST_RESOURCE_ID = "file:/test/resource/file.txt";
     public static final String TEST_PURPOSE = "the purpose for the data access request";
     public static final Context TEST_CONTEXT = new Context().purpose(TEST_PURPOSE);
-    public static final String TEST_ERROR_SERVICE_NAME = "the service name, e.g. USER_SERVICE";
-    public static final String TEST_SUCCESS_SERVICE_NAME = "DATA_SERVICE";
     public static final String TEST_TIMESTAMP = "2020-02-20";
     public static final String TEST_SERVER_IP = "the IP address of the server";
     public static final String TEST_SERVER_NAME = "the name of the server";
@@ -49,12 +46,12 @@ public final class ApplicationTestData {
         TEST_ATTRIBUTES.put("test attribute key", "test attribute value");
     }
 
-    public static AuditErrorMessage auditErrorMessage() {
+    public static AuditErrorMessage userServiceAuditErrorMessage() {
         return AuditErrorMessage.Builder.create()
                 .withUserId(TEST_USER_ID)
                 .withResourceId(TEST_RESOURCE_ID)
                 .withContext(TEST_CONTEXT)
-                .withServiceName(TEST_ERROR_SERVICE_NAME)
+                .withServiceName("USER_SERVICE")
                 .withTimestamp(TEST_TIMESTAMP)
                 .withServerIp(TEST_SERVER_IP)
                 .withServerHostname(TEST_SERVER_NAME)
@@ -62,12 +59,38 @@ public final class ApplicationTestData {
                 .withError(TEST_EXCEPTION);
     }
 
-    public static AuditSuccessMessage auditSuccessMessage() {
+    public static AuditErrorMessage resourceServiceAuditErrorMessage() {
+        return AuditErrorMessage.Builder.create()
+                .withUserId(TEST_USER_ID)
+                .withResourceId(TEST_RESOURCE_ID)
+                .withContext(TEST_CONTEXT)
+                .withServiceName("RESOURCE_SERVICE")
+                .withTimestamp(TEST_TIMESTAMP)
+                .withServerIp(TEST_SERVER_IP)
+                .withServerHostname(TEST_SERVER_NAME)
+                .withAttributes(TEST_ATTRIBUTES)
+                .withError(TEST_EXCEPTION);
+    }
+
+    public static AuditErrorMessage otherServiceAuditErrorMessage() {
+        return AuditErrorMessage.Builder.create()
+                .withUserId(TEST_USER_ID)
+                .withResourceId(TEST_RESOURCE_ID)
+                .withContext(TEST_CONTEXT)
+                .withServiceName("POLICY_SERVICE")
+                .withTimestamp(TEST_TIMESTAMP)
+                .withServerIp(TEST_SERVER_IP)
+                .withServerHostname(TEST_SERVER_NAME)
+                .withAttributes(TEST_ATTRIBUTES)
+                .withError(TEST_EXCEPTION);
+    }
+
+    public static AuditSuccessMessage filteredServiceAuditSuccessMessage() {
         return AuditSuccessMessage.Builder.create()
                 .withUserId(TEST_USER_ID)
                 .withResourceId(TEST_RESOURCE_ID)
                 .withContext(TEST_CONTEXT)
-                .withServiceName(TEST_SUCCESS_SERVICE_NAME)
+                .withServiceName("FILTERED_RESOURCE_SERVICE")
                 .withTimestamp(TEST_TIMESTAMP)
                 .withServerIp(TEST_SERVER_IP)
                 .withServerHostname(TEST_SERVER_NAME)
@@ -75,4 +98,29 @@ public final class ApplicationTestData {
                 .withLeafResourceId(TEST_LEAF_RESOURCE_ID);
     }
 
+    public static AuditSuccessMessage dataServiceAuditSuccessMessage() {
+        return AuditSuccessMessage.Builder.create()
+                .withUserId(TEST_USER_ID)
+                .withResourceId(TEST_RESOURCE_ID)
+                .withContext(TEST_CONTEXT)
+                .withServiceName("DATA_SERVICE")
+                .withTimestamp(TEST_TIMESTAMP)
+                .withServerIp(TEST_SERVER_IP)
+                .withServerHostname(TEST_SERVER_NAME)
+                .withAttributes(TEST_ATTRIBUTES)
+                .withLeafResourceId(TEST_LEAF_RESOURCE_ID);
+    }
+
+    public static AuditSuccessMessage badAuditSuccessMessage() {
+        return AuditSuccessMessage.Builder.create()
+                .withUserId(TEST_USER_ID)
+                .withResourceId(TEST_RESOURCE_ID)
+                .withContext(TEST_CONTEXT)
+                .withServiceName("USER_SERVICE")
+                .withTimestamp(TEST_TIMESTAMP)
+                .withServerIp(TEST_SERVER_IP)
+                .withServerHostname(TEST_SERVER_NAME)
+                .withAttributes(TEST_ATTRIBUTES)
+                .withLeafResourceId(TEST_LEAF_RESOURCE_ID);
+    }
 }

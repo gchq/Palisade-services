@@ -36,8 +36,12 @@ class MessageSerialisationTest {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
-                    Arguments.of(ApplicationTestData.auditErrorMessage()),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage())
+                    Arguments.of(ApplicationTestData.userServiceAuditErrorMessage()),
+                    Arguments.of(ApplicationTestData.resourceServiceAuditErrorMessage()),
+                    Arguments.of(ApplicationTestData.otherServiceAuditErrorMessage()),
+                    Arguments.of(ApplicationTestData.dataServiceAuditSuccessMessage()),
+                    Arguments.of(ApplicationTestData.filteredServiceAuditSuccessMessage()),
+                    Arguments.of(ApplicationTestData.badAuditSuccessMessage())
             );
         }
     }
