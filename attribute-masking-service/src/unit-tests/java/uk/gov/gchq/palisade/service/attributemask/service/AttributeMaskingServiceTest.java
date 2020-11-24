@@ -20,11 +20,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.ApplicationTestData;
 import uk.gov.gchq.palisade.service.attributemask.repository.JpaPersistenceLayer;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 class AttributeMaskingServiceTest {
 
@@ -47,7 +53,8 @@ class AttributeMaskingServiceTest {
     @Test
     void testAttributeMaskingServiceDelegatesToPersistenceLayer() {
         // given we have a simpleAttributeMaskingService with a mocked persistenceLayer
-
+        Mockito.when(mockPersistenceLayer.putAsync(anyString(), any(User.class), any(LeafResource.class), any(Context.class), any(Rules.class)))
+                .thenReturn(CompletableFuture.completedFuture(ApplicationTestData.REQUEST));
         // when we request to store some data
         attributeMaskingService.storeAuthorisedRequest(ApplicationTestData.REQUEST_TOKEN, ApplicationTestData.REQUEST);
 

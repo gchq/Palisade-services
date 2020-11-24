@@ -13,6 +13,9 @@
 # limitations under the License.
 
 spring:
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
   data:
     redis:
       repositories:

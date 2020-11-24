@@ -16,7 +16,123 @@ limitations under the License.
 
 # <img src="../logos/logo.svg" width="180">
 
-# Palisade Resource-Service
+# Resource Service
+
+The Resource service accepts an incoming message from the `user` Kafka topic which contains the resourceId that
+is being accessed (this could be an actual file, or a directory that could contain many files).
+The service will then query the backing store to see if the request resourceId has stored. If this is not the case
+then the request will be passed onto the local implementation of the Resource service. All the returned resources will be
+within an iterator, each element in the iterator is consumed and added to the `resource` Kafka topic to be processed by the Policy service.
+
+## Message Model and Database Domain
+
+| ResourceRequest | ResourceResponse | AuditErrorMessage | 
+|:----------------|:-----------------|:------------------|
+| userId          | userId           | *token            | 
+| resourceId      | resourceId       | userId            |  
+| context         | context          | resourceId        |
+| user            | user             | context           | 
+|                 | resource         | exception         | 
+|                 |                  | serverMetadata    | 
+
+(fields marked with * are acquired from headers metadata)
+
+The service accepts a `ResourceRequest` from the User service, finds all the resources associated with the resourceId as an iterator, the iterator is then consumed
+and for each resource a `ResourceResponse` is created which is sent onto the Policy service for further processing.
+
+
+## Kafka Interface
+
+The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message.
+The `START` gets consumed by the service but no action taken on it and it gets written to the `resource` Kafka topic. 
+The `ResourceRequest` message then gets consumed by the service and for each resource it is added to a `ResourceResponse` message. 
+This then gets written to the `resource` Kafka topic. Once all the `ResourceResponse`s have been written to the topic the `END` message gets 
+written to the `resource` topic to mark the end of the resources for this request.
+In case of errors, the original request and thrown exception are both captured in an `AuditErrorMessage` and written to the Kafka `error` topic.
+
+## REST Interface
+
+The application exposes one REST endpoint for the purpose of debugging:
+* `POST /api/resource`
+  - accepts an `x-request-token` `String` header, any number of extra headers, and an `ResourceRequest` body
+  - returns a `ResourceResponse` for each resource found. This response contains the userId, resourceId, context, user and resource.
+
+## Example JSON Request
+```
+curl -X POST api/resource -H "content-type: application/json" --data \
+{
+   "userId":"test-user-id",
+   "resourceId":"file:/test/resourceId/",
+   "context":{
+      "class":"uk.gov.gchq.palisade.Context",
+      "contents":{
+         "purpose":"test-purpose"
+      }
+   },
+   "user":{
+      "userId":{
+         "id":"test-user-id"
+      },
+      "roles":[
+         "role"
+      ],
+      "auths":[
+         "auth"
+      ],
+      "class":"uk.gov.gchq.palisade.User"
+   }
+}
+```
+
+## Example JSON Response
+```
+{
+   "userId":"test-user-id",
+   "resourceId":"file:/test/resourceId/",
+   "context":{
+      "class":"uk.gov.gchq.palisade.Context",
+      "contents":{
+         "purpose":"test-purpose"
+      }
+   },
+   "user":{
+      "userId":{
+         "id":"test-user-id"
+      },
+      "roles":[
+         "role"
+      ],
+      "auths":[
+         "auth"
+      ],
+      "class":"uk.gov.gchq.palisade.User"
+   },
+   "resource":{
+      "class":"uk.gov.gchq.palisade.resource.impl.FileResource",
+      "id":"file:/test/resourceId/data1.txt",
+      "attributes":{
+         
+      },
+      "connectionDetail":{
+         "class":"uk.gov.gchq.palisade.service.SimpleConnectionDetail",
+         "serviceName":"data-service"
+      },
+      "parent":{
+         "class":"uk.gov.gchq.palisade.resource.impl.DirectoryResource",
+         "id":"file:/test/resourceId/",
+         "parent":null
+      },
+      "serialisedFormat":"txt",
+      "type":"type"
+   }
+}
+```
+
+## Uploading resources to the backing store on service start-up
+It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. 
+This is solved by using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this 
+[testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the
+service starts up.
 
 ## Hadoop and Windows
 
