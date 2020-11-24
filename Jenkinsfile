@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib/PAL-398-hide-jenkins-contents')_
+@Library('jenkinsfile-lib/ices>PAL-926-build-without-docker-pull')_
 
 timestamps {
     services()
