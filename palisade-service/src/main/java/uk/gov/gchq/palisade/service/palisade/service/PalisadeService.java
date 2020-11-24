@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,43 +15,76 @@
  */
 package uk.gov.gchq.palisade.service.palisade.service;
 
-import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.palisade.request.GetDataRequestConfig;
-import uk.gov.gchq.palisade.service.palisade.request.RegisterDataRequest;
-import uk.gov.gchq.palisade.service.request.DataRequestConfig;
-import uk.gov.gchq.palisade.service.request.DataRequestResponse;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
- * The core API for the palisade service. The responsibility of the palisade service is to send off the required
- * auditing records and collate all the relevant information about a request for data (using the other services) and to
- * provide the Data service with the information it requires to enforce the policy and apply any user filters. In order
- * to have multiple Palisade services, the data that the data server will require, needs to be stored in a shared cache
- * (Cache service).
+ * Service for registering a data request. The service is expecting a unique token to identify this data request and
+ * the data relevant to the request.  This data will be forwarded to a set of services, with each processing a step
+ * towards the end goal of the data that satisfies the data request, and the necessary restrictions that are to be
+ * imposed on the access to the data.
  */
-public interface PalisadeService extends Service {
+public abstract class PalisadeService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeService.class);
+
+    private final Materializer materializer;
+    private final CompletableFuture<Sink<TokenRequestPair, ?>> futureSink;
 
     /**
-     * This method is used by the client code to register that they want to read a resource or data set. This method
-     * will check that the user can have access to the resource and pass back details of all the resources linked to the
-     * initial request (if they asked for a data set) and how to connect to the relevant data service to get that data.
-     * Then behind the scenes this will have triggered more services to be called to collate the data required by the
-     * getDataRequestConfig() method so the data service can apply the relevant policies.
+     * Instantiates a new Palisade service.
      *
-     * @param request a {@link RegisterDataRequest} that contains the details the client needs to provide the palisade
-     *                service for it to register the data request
-     * @return details of all the resources linked to the initial request (if they asked for a data set) and how to
-     * connect to the relevant data service to get that data.
+     * @param materializer the materializer
      */
-    DataRequestResponse registerDataRequest(RegisterDataRequest request);
+    public PalisadeService(final Materializer materializer) {
+        this.futureSink = new CompletableFuture<>();
+        this.materializer = materializer;
+    }
 
     /**
-     * This method is used by the data service's to request the trusted details that it requires to apply the necessary
-     * data access controls.
+     * Create token string.
      *
-     * @param request This is the {@link GetDataRequestConfig} that the client passed to the data service.
-     * @return a {@link DataRequestConfig} containing the information that the data service requires to apply the
-     * necessary filtering/transformations to the data.
+     * @param palisadeRequest the original request
+     * @return the string
      */
-    DataRequestConfig getDataRequestConfig(GetDataRequestConfig request);
+    public abstract String createToken(PalisadeRequest palisadeRequest);
 
+    /**
+     * This method will forward the data to a Kafka data stream where it can be retrieved by the user-service.
+     * The incoming request is in the form of a {@link PalisadeRequest} which contains all the information provided by the
+     * client for registering this data request. Service will include a unique token to identify this data request and
+     * the data relevant to the request.
+     *
+     * @param request information about the data, user requesting the data and the context of the request.
+     * @return the token for later accessing the results of the request at the Filtered-Resource-Service.
+     */
+    public CompletableFuture<String> registerDataRequest(final PalisadeRequest request) {
+        // needs to send the information to the stream
+        // what is needed is to include the token, and the Palisade request as part of the source
+        String token = this.createToken(request);
+        TokenRequestPair incomingMessage = new TokenRequestPair(token, request);
+
+        return futureSink.thenApply((Sink<TokenRequestPair, ?> sink) -> {
+            Source.single(incomingMessage).runWith(sink, materializer);
+            LOGGER.debug("registerDataRequest returning with token {} for request {}", token, request);
+            return token;
+        });
+    }
+
+    /**
+     * Register request sink.
+     *
+     * @param sink the sink
+     */
+    public void registerRequestSink(final Sink<TokenRequestPair, ?> sink) {
+        this.futureSink.complete(sink);
+    }
 }

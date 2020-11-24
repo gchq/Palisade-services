@@ -16,9 +16,10 @@
 package uk.gov.gchq.palisade.service.resource.repository;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
+import java.util.Iterator;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Interface for a persistence store to be used as a cache by the resource-service
@@ -33,61 +34,58 @@ public interface PersistenceLayer {
      * Given a resource id, return all {@link LeafResource}s underneath it
      *
      * @param resourceId the resource id to query
-     * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     * Optional.empty if no such information has been persisted
-     * nb. the {@link Stream} may still be empty if this resourceId is an empty directory
+     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Stream<LeafResource>> getResourcesById(String resourceId);
+    Optional<Iterator<LeafResource>> getResourcesById(String resourceId);
 
     /**
      * Given a type, return all leaf resources of that type
      *
      * @param type the type to query
-     * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     * Optional.empty if no such information has been persisted
-     * nb. the {@link Stream} may still be empty if this type simply has no resources matching it
+     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Stream<LeafResource>> getResourcesByType(String type);
+    Optional<Iterator<LeafResource>> getResourcesByType(String type);
 
     /**
      * Given a serialised format, return all leaf resources of that serialised format
      *
      * @param serialisedFormat the serialised format to query
-     * @return Optional.of a {@link Stream} of {@link LeafResource}s if the persistence store is aware of these resources
-     * Optional.empty if no such information has been persisted
-     * nb. the {@link Stream} may still be empty if this serialised format simply has no resources matching it
+     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Stream<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
+    Optional<Iterator<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
 
     /**
-     * Add a {@link Stream} of {@link LeafResource}s to persistence for a given resourceId
+     * Add a {@link LeafResource} to persistence for a given resourceId
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param rootResourceId the resource id that was queried to return this stream of resources
+     * @param <T>            the type for the {@link FunctionalIterator}
+     * @param rootResourceId the resource id that was queried to return this {@link Iterator} of resources
      * @param resources      the resource stream returned
-     * @return a new stream which will persist each resource as it is consumed
+     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Stream<LeafResource> withPersistenceById(String rootResourceId, Stream<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceById(String rootResourceId, FunctionalIterator<T> resources);
 
     /**
-     * Add a {@link Stream} of {@link LeafResource}s to persistence for a given type
+     * Add a {@link LeafResource} to persistence for a given type
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param type      the type that was queried to return this stream of resources
+     * @param <T>       the type for the {@link FunctionalIterator}
+     * @param type      the file type that was queried to return this {@link Iterator} of resources
      * @param resources the resource stream returned
-     * @return a new stream which will persist each resource as it is consumed
+     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Stream<LeafResource> withPersistenceByType(String type, Stream<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceByType(String type, FunctionalIterator<T> resources);
 
     /**
-     * Add a {@link Stream} of {@link LeafResource}s to persistence for a given serialised format
+     * Add a {@link LeafResource} to persistence for a given serialised format
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param serialisedFormat the serialised format that was queried to return this stream of resources
+     * @param <T>              the type for the {@link FunctionalIterator}
+     * @param serialisedFormat the serialised format that was queried to return this {@link Iterator} of resources
      * @param resources        the resource stream returned
-     * @return a new stream which will persist each resource as it is consumed
+     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
      */
-    Stream<LeafResource> withPersistenceBySerialisedFormat(String serialisedFormat, Stream<LeafResource> resources);
+    <T> FunctionalIterator<T> withPersistenceBySerialisedFormat(String serialisedFormat, FunctionalIterator<T> resources);
 
 
     /**

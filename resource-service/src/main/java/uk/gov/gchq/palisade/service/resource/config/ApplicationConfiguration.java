@@ -17,6 +17,8 @@
 package uk.gov.gchq.palisade.service.resource.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,6 +36,7 @@ import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
+import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
@@ -41,6 +44,7 @@ import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
 import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
+import uk.gov.gchq.palisade.service.resource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
 import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
@@ -59,6 +63,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties({ResourceServiceConfigProperties.class})
 public class ApplicationConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
     private final ResourceServiceConfigProperties resourceServiceConfigProperties;
 
     @Value("${web.client.data-service:data-service}")
@@ -150,17 +155,13 @@ public class ApplicationConfiguration {
      * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate         a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
      *                         This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
-     * @param objectMapper     a {@link ObjectMapper} used for serialisation when writing each {@link Resource} to the {@link java.io.OutputStream}
-     * @param resourceBuilder  a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}, but with a connection detail attached
      * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
      */
     @Bean
     public StreamingResourceServiceProxy resourceServiceProxy(
             final PersistenceLayer persistenceLayer,
-            final @Qualifier("impl") ResourceService delegate,
-            final ObjectMapper objectMapper,
-            final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder) {
-        return new StreamingResourceServiceProxy(persistenceLayer, delegate, objectMapper, resourceBuilder);
+            final @Qualifier("impl") ResourceService delegate) {
+        return new StreamingResourceServiceProxy(persistenceLayer, delegate);
     }
 
     /**
@@ -211,4 +212,10 @@ public class ApplicationConfiguration {
         return JSONSerialiser.createDefaultMapper();
     }
 
+    // Replace this with a proper error handling mechanism (kafka queues etc.)
+    @Bean
+    ErrorHandlingService loggingErrorHandler() {
+        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
+        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {}, userId {} and attributes {}, threw exception ", token, message.getUserId(), message.getAttributes(), message.getError());
+    }
 }

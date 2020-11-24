@@ -18,9 +18,9 @@ package uk.gov.gchq.palisade.service.resource.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.Iterator;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link TypeEntity}
@@ -29,17 +29,17 @@ import java.util.stream.StreamSupport;
 public interface TypeRepository extends CrudRepository<TypeEntity, String> {
 
     /**
-     * Returns a stream of {@link TypeEntity} from a backing store by a type
+     * Returns an {@link Iterator} of {@link TypeEntity} from a backing store by a type
      *
      * @param type of resource to retrieve
-     * @return a stream of TypeEntities from the backing store
+     * @return an {@link Iterator} of TypeEntities from the backing store
      */
-    default Stream<TypeEntity> streamFindAllByType(String type) {
-        return StreamSupport.stream(findAllByType(type).spliterator(), false);
+    default FunctionalIterator<TypeEntity> iterateFindAllByType(String type) {
+        return FunctionalIterator.fromIterator(findAllByType(type).iterator());
     }
 
     /**
-     * Iterable used to create a stream of resources by serialisedFormat
+     * Iterator of a list of resources by type
      *
      * @param type the type of the Resource to retrieve
      * @return a list of TypeEntity from the backing store

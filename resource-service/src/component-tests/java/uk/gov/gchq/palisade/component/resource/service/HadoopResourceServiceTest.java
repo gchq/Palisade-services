@@ -21,10 +21,9 @@ import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.test.PathUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -44,20 +43,17 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class HadoopResourceServiceTest {
+class HadoopResourceServiceTest {
 
     private static final String FORMAT_VALUE = "txt";
     private static final String TYPE_VALUE = "bob";
@@ -66,14 +62,9 @@ public class HadoopResourceServiceTest {
     private static final String FILE_NAME_VALUE_00002 = "00002";
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
     private static final String HDFS = "hdfs";
-    private static final File TMP_DIRECTORY;
 
-    static {
-        TMP_DIRECTORY = PathUtils.getTestDir(HadoopResourceServiceTest.class);
-    }
-
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder(TMP_DIRECTORY);
+    @TempDir
+    public final File tmpDirectory = PathUtils.getTestDir(HadoopResourceServiceTest.class);
     private URI id1;
     private URI id2;
     private LeafResource resource1;
@@ -89,13 +80,13 @@ public class HadoopResourceServiceTest {
         return type + "_" + name + "." + format;
     }
 
-    @Before
-    public void setup() throws IOException, URISyntaxException {
+    @BeforeEach
+    void setup() throws IOException, URISyntaxException {
         if (IS_WINDOWS) {
             System.setProperty("hadoop.home.dir", Paths.get("./src/test/resources/hadoop-3.2.1").toAbsolutePath().normalize().toString());
         }
         fs = FileSystem.get(config);
-        root = testFolder.getRoot().getAbsoluteFile().toURI();
+        root = tmpDirectory.getAbsoluteFile().toURI();
         dir = root.resolve("inputDir/");
         config = createConf(root.toString());
         fs.mkdirs(new Path(dir));
@@ -120,138 +111,155 @@ public class HadoopResourceServiceTest {
     }
 
     @Test
-    public void getResourcesByIdTest() {
-        //given
+    void testGetResourcesById() {
+        // Given an empty list
+        List<LeafResource> resultList = new ArrayList<>();
 
-        //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(id1.toString());
+        // When making a get request to the resource service by resourceId
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(id1.toString());
+        resourcesById.forEachRemaining(resultList::add);
 
-        //then
-        Set<LeafResource> expected = Collections.singleton(resource1);
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Collections.singletonList(resource1);
+        assertThat(resultList).isEqualTo(expected);
     }
 
     @Test
-    public void shouldGetResourcesOutsideOfScope() throws URISyntaxException {
-        //given
+    void testShouldGetResourcesOutsideOfScope() throws URISyntaxException {
+        // Given setup
 
-        //when
+        // When making a get request to the resource service by resourceId
         final URI found = new URI(HDFS, "/unknownDir" + id1.getPath(), null);
-        try {
-            resourceService.getResourcesById(found.toString());
-            fail("exception expected");
-        } catch (Exception e) {
-            //then
-            assertThat(String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY)), equalTo(e.getMessage()));
-        }
+        Exception exception = assertThrows(Exception.class,
+                () -> resourceService.getResourcesById(found.toString()), HadoopResourceService.ERROR_OUT_SCOPE);
+
+        // Then assert the expected error message is returned
+        assertThat(String.format(HadoopResourceService.ERROR_OUT_SCOPE, found, config.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY))).isEqualTo(exception.getMessage());
     }
 
     @Test
-    public void shouldGetResourcesByIdOfAFolder() {
-        //given
+    void testShouldGetResourcesByIdOfAFolder() {
+        // Given an empty list
+        List<LeafResource> resultList = new ArrayList<>();
 
-        //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        // When making a get request to the resource service by resourceId
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        resourcesById.forEachRemaining(resultList::add);
 
-        //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList.size()).isEqualTo(expected.size());
     }
 
     @Test
-    public void shouldFilterOutIllegalFileName() throws Exception {
-        //given
+    void testShouldFilterOutIllegalFileName() throws Exception {
+        // Given an illegal file is added
+        List<LeafResource> resourceList = new ArrayList<>();
         writeFile(fs, dir.resolve("./I-AM-AN-ILLEGAL-FILENAME"));
 
-        //when
-        final Stream<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        // When making a get request to the resource service by resourceId
+        final Iterator<LeafResource> resourcesById = resourceService.getResourcesById(dir.toString());
+        resourcesById.forEachRemaining(resourceList::add);
 
-        //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesById.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resourceList.size()).isEqualTo(expected.size());
     }
 
     @Test
-    public void shouldGetResourcesByType() throws Exception {
-        //given
+    void testShouldGetResourcesByType() throws Exception {
+        // Given a new file with a new type is added
+        List<LeafResource> resultist = new ArrayList<>();
         writeFile(fs, dir, "00003", FORMAT_VALUE, "not" + TYPE_VALUE);
         HadoopResourceDetails.addTypeSupport("not" + TYPE_VALUE, TYPE_CLASSNAME + ".not");
 
-        //when
-        final Stream<LeafResource> resourcesByType = resourceService.getResourcesByType(TYPE_CLASSNAME);
+        // When making a get request to the resource service by type
+        final Iterator<LeafResource> resourcesByType = resourceService.getResourcesByType(TYPE_CLASSNAME);
+        resourcesByType.forEachRemaining(resultist::add);
 
-        //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByType.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultist.size()).isEqualTo(expected.size());
     }
 
     @Test
-    public void shouldGetResourcesByFormat() throws Exception {
-        //given
+    void testShouldGetResourcesByFormat() throws Exception {
+        // Given a new file with a new format is added
+        List<LeafResource> resultList = new ArrayList<>();
         writeFile(fs, dir, "00003", "not" + FORMAT_VALUE, TYPE_VALUE);
 
-        //when
-        final Stream<LeafResource> resourcesBySerialisedFormat = resourceService.getResourcesBySerialisedFormat(FORMAT_VALUE);
+        // When making a get request to the resource service by serialisedFormat
+        final Iterator<LeafResource> resourcesBySerialisedFormat = resourceService.getResourcesBySerialisedFormat(FORMAT_VALUE);
+        resourcesBySerialisedFormat.forEachRemaining(resultList::add);
 
-        //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesBySerialisedFormat.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList.size()).isEqualTo(expected.size());
 
     }
 
     @Test
-    public void shouldGetResourcesByResource() {
-        //given
+    void testShouldGetResourcesByResource() {
+        // Given an empty list
+        List<LeafResource> resultList = new ArrayList<>();
 
-        //when
-        final Stream<LeafResource> resourcesByResource = resourceService.getResourcesByResource(new DirectoryResource().id(dir.toString()));
+        // When making a get request to the resource service by resource
+        final Iterator<LeafResource> resourcesByResource = resourceService.getResourcesByResource(new DirectoryResource().id(dir.toString()));
+        resourcesByResource.forEachRemaining(resultList::add);
 
-        //then
-        Set<LeafResource> expected = new HashSet<>(Arrays.asList(resource1, resource2));
-        assertThat(resourcesByResource.collect(Collectors.toSet()), equalTo(expected));
+        // Then assert that the expected resource(s) are returned
+        List<LeafResource> expected = Arrays.asList(resource1, resource2);
+        assertThat(resultList.size()).isEqualTo(expected.size());
     }
 
     @Test
-    public void addResourceTest() {
+    void testAddResource() {
         boolean success = resourceService.addResource(null);
-        assertFalse(success);
+        assertThat(success).isFalse();
     }
 
     @Test
-    public void shouldResolveParents() {
+    void testShouldResolveParents() {
         final URI id = dir.resolve("folder1/folder2/" + getFileNameFromResourceDetails(FILE_NAME_VALUE_00001, TYPE_VALUE, FORMAT_VALUE));
         final FileResource fileResource = (FileResource) ResourceBuilder.create(id);
 
         final ParentResource parent1 = fileResource.getParent();
 
-        assertThat(dir.resolve("folder1/folder2/").toString(), equalTo(parent1.getId()));
-        assertTrue(parent1 instanceof ChildResource);
-        assertTrue(parent1 instanceof DirectoryResource);
+        assertThat(dir.resolve("folder1/folder2/").toString()).isEqualTo(parent1.getId());
+        assertAll(
+                () -> assertThat(parent1).isInstanceOf(ChildResource.class),
+                () -> assertThat(parent1).isInstanceOf(DirectoryResource.class)
+        );
 
         final ChildResource child = (ChildResource) parent1;
 
         final ParentResource parent2 = child.getParent();
 
-        assertThat(dir.resolve("folder1/").toString(), equalTo(parent2.getId()));
-        assertTrue(parent2 instanceof ChildResource);
-        assertTrue(parent2 instanceof DirectoryResource);
+        assertThat(dir.resolve("folder1/").toString()).isEqualTo(parent2.getId());
+        assertAll(
+                () -> assertThat(parent2).isInstanceOf(ChildResource.class),
+                () -> assertThat(parent2).isInstanceOf(DirectoryResource.class)
+        );
 
         final ChildResource child2 = (ChildResource) parent2;
 
         final ParentResource parent3 = child2.getParent();
 
-        assertThat(dir.toString(), equalTo(parent3.getId()));
-        assertTrue(parent3 instanceof ChildResource);
-        assertTrue(parent3 instanceof DirectoryResource);
+        assertThat(dir.toString()).isEqualTo(parent3.getId());
+        assertAll(
+                () -> assertThat(parent3).isInstanceOf(ChildResource.class),
+                () -> assertThat(parent3).isInstanceOf(DirectoryResource.class)
+        );
+
 
         final ChildResource child3 = (ChildResource) parent3;
 
         final ParentResource parent4 = child3.getParent();
 
-        assertThat(root.toString(), equalTo(parent4.getId()));
+        assertThat(root.toString()).isEqualTo(parent4.getId());
     }
 
-    private Configuration createConf(final String fsDefaultName) throws URISyntaxException {
+    private Configuration createConf(final String fsDefaultName) {
         // Set up local conf
         final Configuration conf = new Configuration();
         conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, fsDefaultName);

@@ -46,7 +46,7 @@ spec:
             [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
             ordinal=${BASH_REMATCH[1]}
             java -jar /usr/share/attribute-masking-service/attribute-masking-service.jar \
-              {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal{{ end }}
+              {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal --akka.kafka.consumer.kafka-clients.group.id=`hostname`{{ end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
