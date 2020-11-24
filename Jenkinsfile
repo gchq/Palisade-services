@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib/ices>PAL-926-build-without-docker-pull')_
+@Library('jenkinsfile-lib/PAL-926-build-without-docker-pull')_
 
 timestamps {
     services()
