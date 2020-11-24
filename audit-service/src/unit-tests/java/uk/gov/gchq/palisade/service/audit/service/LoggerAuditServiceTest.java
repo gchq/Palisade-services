@@ -16,58 +16,84 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class LoggerAuditServiceTest extends AuditServiceTestCommon {
-
-    @Mock
-    Logger logger;
-    @Captor
-    ArgumentCaptor<String> logCaptor;
+class LoggerAuditServiceTest {
 
     private static LoggerAuditService auditService;
-    private UserId userId;
-    private User user;
-    private Context context;
-    private RequestId requestId;
-    private LeafResource resource;
-    private Exception exception;
-    private Rules rules;
+    private ListAppender<ILoggingEvent> appender;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        final Logger logger = (Logger) LoggerFactory.getLogger(LoggerAuditService.class);
         auditService = new LoggerAuditService(logger);
-
-        userId = mockUserID();
-        user = mockUser();
-        context = mockContext();
-        requestId = mockOriginalRequestId();
-        resource = mockResource();
-        exception = mockException();
-        rules = mockRules();
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
     }
 
+    private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
+        return appender.list.stream()
+                .filter(predicate)
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
 
+    @Test
+    void testAuditSuccessMessage() {
 
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage());
+        List<String> logMessages = getMessages(event -> true);
+
+        // Then
+        assertAll(
+                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
+                () -> assertThat(logMessages.get(1)).contains(ApplicationTestData.TEST_SUCCESS_SERVICE_NAME),
+                () -> assertThat(logMessages.get(2)).contains(
+                        "AuditMessage : AuditSuccessMessage", ApplicationTestData.TEST_USER_ID,
+                        ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
+                        ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
+                        ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
+                        ApplicationTestData.TEST_LEAF_RESOURCE_ID
+                ),
+                () -> assertThat(logMessages.get(3)).isEqualTo(logMessages.get(2))
+        );
+    }
+
+    @Test
+    void testAuditErrorMessage() {
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage());
+        List<String> logMessages = getMessages(event -> true);
+
+        // Then
+        assertAll(
+                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
+                () -> assertThat(logMessages.get(1)).contains(ApplicationTestData.TEST_ERROR_SERVICE_NAME),
+                () -> assertThat(logMessages.get(2)).contains(
+                        "AuditMessage : AuditErrorMessage", ApplicationTestData.TEST_USER_ID,
+                        ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
+                        ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
+                        ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
+                        ApplicationTestData.TEST_EXCEPTION.getMessage()
+                ),
+                () -> assertThat(logMessages.get(3)).isEqualTo(logMessages.get(2))
+        );
+    }
 }

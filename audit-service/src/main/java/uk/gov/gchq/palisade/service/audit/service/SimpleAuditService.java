@@ -32,7 +32,7 @@ public class SimpleAuditService implements AuditService {
 
     @Override
     public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
-        LOGGER.info("SimpleAuditService.audit called for token {} with request {}", token, request);
+        LOGGER.info("SimpleAuditService.audit called for token '{}' with request '{}'", token, request);
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
 }

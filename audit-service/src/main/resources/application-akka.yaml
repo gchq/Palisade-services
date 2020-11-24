@@ -40,7 +40,10 @@ akka:
         check-interval: 15s
         backoff-factor: 2.0
       topics:
-        input-topic:
+        success-topic:
+          name: success
+          partitions: 3
+        error-topic:
           name: error
           partitions: 3
     producer:

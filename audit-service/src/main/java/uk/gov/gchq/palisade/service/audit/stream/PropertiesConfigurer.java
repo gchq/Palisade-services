@@ -35,7 +35,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.NonNull;
 
-import uk.gov.gchq.palisade.service.user.exception.PropertyLoadingException;
+import uk.gov.gchq.palisade.service.audit.exception.PropertyLoadingException;
 
 import java.io.IOException;
 import java.util.ArrayList;

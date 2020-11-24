@@ -21,8 +21,9 @@ package uk.gov.gchq.palisade.service.audit.service;
  *
  * @since 0.4.0
  */
-public enum RequestServiceName {
+public enum ServiceName {
     ATTRIBUTE_MASKING_SERVICE,
+    DATA_SERVICE,
     FILTERED_RESOURCE_SERVICE,
     PALISADE_SERVICE,
     POLICY_SERVICE,

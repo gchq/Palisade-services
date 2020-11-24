@@ -49,33 +49,32 @@ import static java.util.Objects.requireNonNull;
  */
 public class StroomAuditService implements AuditService {
     public static final String CONFIG_KEY = "stroom";
-    static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
-    static final String MESSAGE_FROM = "AuditErrorMessage is from {}";
-    static final String ORGANISATION = "organisation is {}";
-    static final String REGISTER_REQUEST_NO_RESOURCES_TYPE_ID = "REGISTER_REQUEST_NO_RESOURCES";
-    static final String REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION = "Audits the fact that the user requested access to some resources however they do not have permission to access any of those resources.";
-    static final String REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION = "The user does not have permission to access any of those resources.";
-    static final String AUDIT_SUCCESS_READ_ID = "READ_REQUEST_COMPLETED";
-    static final String AUDIT_SUCCESS_READ_DESCRIPTION = "Audits the fact that a user has finished reading a specific data resource.";
-    static final String AUDIT_SUCCESS_REQUEST_ID = "REGISTER_REQUEST_COMPLETED";
-    static final String AUDIT_SUCCESS_REQUEST_DESCRIPTION = "Audits the fact that this request for data has been approved and these are the resources they have been given course grain approval to query.";
-    static final String AUDIT_ERROR_DATA_EXCEPTION_ID = "READ_REQUEST_EXCEPTION_TOKEN";
-    static final String AUDIT_ERROR_DATA_EXCEPTION_DESCRIPTION = "Audits the fact that the provided token is invalid, probably because it the request wasn't registered first and therefore the request has been denied.";
-    static final String AUDIT_ERROR_DATA_EXCEPTION_OUTCOME = "The provided token is invalid.";
     static final String AUDIT_ERROR_RESOURCE_EXCEPTION_ID = "NO_SUCH_FILE_EXCEPTION";
     static final String AUDIT_ERROR_RESOURCE_EXCEPTION_DESCRIPTION = "Audits the fact that the supplied resource id could not be resolved and therefore the request has been denied.";
     static final String AUDIT_ERROR_RESOURCE_EXCEPTION_OUTCOME = "The supplied resource id could not be resolved.";
     static final String AUDIT_ERROR_USER_EXCEPTION_ID = "NO_SUCH_USER_EXCEPTION";
     static final String AUDIT_ERROR_USER_EXCEPTION_DESCRIPTION = "Audits the fact that the user could not be authenticated by the system and therefore the request has been denied.";
     static final String AUDIT_ERROR_USER_EXCEPTION_OUTCOME = "The user could not be authenticated by the system.";
+    static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
+    static final String AUDIT_SUCCESS_READ_ID = "READ_REQUEST_COMPLETED";
+    static final String AUDIT_SUCCESS_READ_DESCRIPTION = "Audits the fact that the read request for the data has been completed";
+    static final String AUDIT_SUCCESS_REQUEST_ID = "REGISTER_REQUEST_COMPLETED";
+    static final String AUDIT_SUCCESS_REQUEST_DESCRIPTION = "Audits the fact that this request for data has been approved and these are the resources they have been given course grain approval to query";
+    static final String AUDIT_SUCCESS_REQUEST_NO_RESOURCES_TYPE_ID = "REGISTER_REQUEST_NO_RESOURCES";
+    static final String AUDIT_SUCCESS_REQUEST_NO_RESOURCES_DESCRIPTION = "Audits the fact that the user requested access to some resources however they do not have permission to access any of those resources.";
+    static final String AUDIT_SUCCESS_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION = "The user does not have permission to access any of those resources.";
+    static final String CONTEXT = "context";
+    static final String ERROR_MESSAGE_FROM = "AuditErrorMessage received from {}";
+    static final String ORGANISATION = "organisation is {}";
+    static final String RESOURCE_CREATED = "Resource created from leafResourceId";
     static final String REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID = "REGISTER_REQUEST_EXCEPTION_OTHER";
     static final String REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION = "Audits the fact that for some reason the request has thrown an exception and therefore the request has been denied";
-    static final String READ_REQUEST_EXCEPTION_OTHER_TYPE_ID = "READ_REQUEST_EXCEPTION_OTHER";
-    static final String READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION = "Audits the fact that an exception was thrown when trying to provide the data to the user.";
+    static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
     static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
     private static final System SYSTEM = new System();
     private static final String EVENT_GENERATOR = "Palisade";
     private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
+    private static final String JSON_SERIALISING_ERROR = "An error occurred while deseriaising the {}";
 
     private final DefaultEventLoggingService eventLogger;
     private final Logger errorLogger;
@@ -131,7 +130,7 @@ public class StroomAuditService implements AuditService {
         Event.EventSource eventSource = new Event.EventSource();
         eventSource.setSystem(SYSTEM);
         eventSource.setGenerator(EVENT_GENERATOR);
-        eventSource.setDevice(DeviceUtil.createDevice(request.getServerHostName(), request.getServerIP()));
+        eventSource.setDevice(DeviceUtil.createDevice(request.getServerHostname(), request.getServerIP()));
         event.setEventSource(eventSource);
         LOGGER.debug("generateNewGenericEvent returned {}", event);
         return event;
@@ -139,7 +138,7 @@ public class StroomAuditService implements AuditService {
 
     private static void auditSuccessMessage(final String token, final DefaultEventLoggingService loggingService, final AuditSuccessMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
-        LOGGER.debug("auditSuccessMessage called and the DefaultEventLoggingService is: {}, and AuditSuccessMessage is: {}", loggingService, message);
+        LOGGER.debug("auditRequestSuccessMessage called and the DefaultEventLoggingService is: {}, and AuditSuccessMessage is: {}", loggingService, message);
         Event authorisationEvent = generateNewGenericEvent(token, loggingService, message);
         Event.EventDetail authorisationEventDetail = new Event.EventDetail();
         authorisationEvent.setEventDetail(authorisationEventDetail);
@@ -149,35 +148,50 @@ public class StroomAuditService implements AuditService {
         try {
             addPurposeToEvent(authorisationEvent, message.getContext());
         } catch (JsonProcessingException ex) {
-            LOGGER.error("An error occurred while deseriaising the Context");
+            LOGGER.error(JSON_SERIALISING_ERROR, CONTEXT);
         }
         // log the list of resources
         Event.EventDetail.Authorise authorise = new Event.EventDetail.Authorise();
         Outcome outcome;
         // if no files then authorisation request failure
         LeafResource resource = (LeafResource) ResourceBuilder.create(message.getLeafResourceId());
-        if (resource == null) {
-            LOGGER.debug("Resource could not be created using the leafResourceId");
-            authorisationEventDetail.setTypeId(REGISTER_REQUEST_NO_RESOURCES_TYPE_ID);
-            authorisationEventDetail.setDescription(REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION);
-            outcome = createOutcome(false);
-            outcome.setDescription(REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION);
-        } else {
-            LOGGER.debug("Resource created from leafResourceId");
-            authorisationEventDetail.setTypeId(AUDIT_SUCCESS_REQUEST_ID);
-            authorisationEventDetail.setDescription(AUDIT_SUCCESS_REQUEST_DESCRIPTION);
+        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name())) {
+            if (message.getLeafResourceId().isEmpty()) {
+                LOGGER.debug("The leafResourceId field is empty therefore a resource could not be created");
+                authorisationEventDetail.setTypeId(AUDIT_SUCCESS_REQUEST_NO_RESOURCES_TYPE_ID);
+                authorisationEventDetail.setDescription(AUDIT_SUCCESS_REQUEST_NO_RESOURCES_DESCRIPTION);
+                outcome = createOutcome(false);
+                outcome.setDescription(AUDIT_SUCCESS_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION);
+            } else {
+                LOGGER.debug(RESOURCE_CREATED);
+                authorisationEventDetail.setTypeId(AUDIT_SUCCESS_REQUEST_ID);
+                authorisationEventDetail.setDescription(AUDIT_SUCCESS_REQUEST_DESCRIPTION);
+                event.logging.Object stroomResource = new event.logging.Object();
+                stroomResource.setId(resource.getId());
+                stroomResource.setType(resource.getType());
+                authorise.getObjects().add(stroomResource);
+                outcome = createOutcome(true);
+            }
+            authorise.setOutcome(outcome);
+            authorise.setAction(Authorisation.REQUEST);
+            authorisationEventDetail.setAuthorise(authorise);
+            loggingService.log(authorisationEvent);
+            LOGGER.debug("RegisterRequest authorisationEvent is {}", authorisationEvent);
+        } else if (message.getServiceName().equals(ServiceName.DATA_SERVICE.name())) {
+            LOGGER.debug(RESOURCE_CREATED);
+            authorisationEventDetail.setTypeId(AUDIT_SUCCESS_READ_ID);
+            authorisationEventDetail.setDescription(AUDIT_SUCCESS_READ_DESCRIPTION);
             event.logging.Object stroomResource = new event.logging.Object();
             stroomResource.setId(resource.getId());
             stroomResource.setType(resource.getType());
             authorise.getObjects().add(stroomResource);
             outcome = createOutcome(true);
+            authorise.setOutcome(outcome);
+            authorise.setAction(Authorisation.REQUEST);
+            authorisationEventDetail.setAuthorise(authorise);
+            loggingService.log(authorisationEvent);
+            LOGGER.debug("ReadRequest authorisationEvent is {}", authorisationEvent);
         }
-        authorise.setOutcome(outcome);
-        authorise.setAction(Authorisation.REQUEST);
-        authorisationEventDetail.setAuthorise(authorise);
-        loggingService.log(authorisationEvent);
-        LOGGER.debug("onRegisterRequestComplete authorisationEvent is {}", authorisationEvent);
-
     }
 
     private static void auditErrorMessage(final String token, final DefaultEventLoggingService loggingService, final AuditErrorMessage message) {
@@ -193,7 +207,7 @@ public class StroomAuditService implements AuditService {
         try {
             addPurposeToEvent(exceptionEvent, message.getContext());
         } catch (JsonProcessingException ex) {
-            LOGGER.error("An error occurred while deseriaising the Context");
+            LOGGER.error(JSON_SERIALISING_ERROR, CONTEXT);
         }
         Event.EventDetail.Authorise authorise = new Event.EventDetail.Authorise();
         // log the resource
@@ -201,24 +215,22 @@ public class StroomAuditService implements AuditService {
         stroomResource.setId(message.getResourceId());
         authorise.getObjects().add(stroomResource);
         Outcome outcome = createOutcome(false);
-        if (RequestServiceName.USER_SERVICE.name().equalsIgnoreCase(message.getServiceName())) {
-            LOGGER.debug(MESSAGE_FROM, message.getServiceName());
+        LOGGER.debug(ERROR_MESSAGE_FROM, message.getServiceName());
+        if (ServiceName.USER_SERVICE.name().equalsIgnoreCase(message.getServiceName())) {
             exceptionEventDetail.setTypeId(AUDIT_ERROR_USER_EXCEPTION_ID);
             exceptionEventDetail.setDescription(AUDIT_ERROR_USER_EXCEPTION_DESCRIPTION);
             outcome.setDescription(AUDIT_ERROR_USER_EXCEPTION_OUTCOME);
-        } else if (RequestServiceName.RESOURCE_SERVICE.name().equalsIgnoreCase(message.getServiceName())) {
-            LOGGER.debug(MESSAGE_FROM, message.getServiceName());
+        } else if (ServiceName.RESOURCE_SERVICE.name().equalsIgnoreCase(message.getServiceName())) {
             exceptionEventDetail.setTypeId(AUDIT_ERROR_RESOURCE_EXCEPTION_ID);
             exceptionEventDetail.setDescription(AUDIT_ERROR_RESOURCE_EXCEPTION_DESCRIPTION);
             outcome.setDescription(AUDIT_ERROR_RESOURCE_EXCEPTION_OUTCOME);
         } else {
-            LOGGER.debug("onRegisterRequestException  registerRequestExceptionAuditRequest is not set");
             exceptionEventDetail.setTypeId(REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID);
             exceptionEventDetail.setDescription(REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION);
             try {
                 outcome.setDescription(message.getError().getMessage());
             } catch (JsonProcessingException ex) {
-                LOGGER.error("An error occurred while deseriaising the Error");
+                LOGGER.error(JSON_SERIALISING_ERROR, "error");
             }
         }
         authorise.setOutcome(outcome);
@@ -346,7 +358,7 @@ public class StroomAuditService implements AuditService {
     @Generated
     public StroomAuditService systemClassification(final String systemClassification) {
         requireNonNull(systemClassification, "The systemClassification cannot be null.");
-        LOGGER.debug("systemClassification is {}", systemClassification);
+        LOGGER.debug(SYSTEM_CLASSIFICATION, systemClassification);
         Classification classification = new Classification();
         classification.setText(systemClassification);
         SYSTEM.setClassification(classification);
@@ -355,13 +367,13 @@ public class StroomAuditService implements AuditService {
 
     @Generated
     public String getSystemClassification() {
-        LOGGER.debug("systemClassification is {}", SYSTEM.getClassification().getText());
+        LOGGER.debug(SYSTEM_CLASSIFICATION, SYSTEM.getClassification().getText());
         return SYSTEM.getClassification().getText();
     }
 
     @Generated
     public void setSystemClassification(final String systemClassification) {
-        LOGGER.debug("systemClassification is {}", systemClassification);
+        LOGGER.debug(SYSTEM_CLASSIFICATION, systemClassification);
         systemClassification(systemClassification);
     }
 
@@ -370,11 +382,11 @@ public class StroomAuditService implements AuditService {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-            if (message.getServiceName().equals(RequestServiceName.FILTERED_RESOURCE_SERVICE.name())){
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name()) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name())){
                 auditSuccessMessage(token, eventLogger, successMessage);
             } else {
-                LOGGER.warn("An AuditSuccessMessage should only be sent by the {}. Message received from {}",
-                        RequestServiceName.FILTERED_RESOURCE_SERVICE.name(), message.getServiceName());
+                LOGGER.warn("An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                        message.getServiceName());
             }
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;

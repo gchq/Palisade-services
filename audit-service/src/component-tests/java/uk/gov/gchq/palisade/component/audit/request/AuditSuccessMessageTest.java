@@ -91,7 +91,7 @@ public class AuditSuccessMessageTest {
                         () -> assertThat(auditSuccessMessageObject.getContext().getPurpose()).isEqualTo(auditSuccessMessage.getContext().getPurpose()),
                         () -> assertThat(auditSuccessMessageObject.getServiceName()).isEqualTo(auditSuccessMessage.getServiceName()),
                         () -> assertThat(auditSuccessMessageObject.getServerIP()).isEqualTo(auditSuccessMessage.getServerIP()),
-                        () -> assertThat(auditSuccessMessageObject.getServerHostName()).isEqualTo(auditSuccessMessage.getServerHostName()),
+                        () -> assertThat(auditSuccessMessageObject.getServerHostname()).isEqualTo(auditSuccessMessage.getServerHostname()),
                         () -> assertThat(auditSuccessMessageObject.getTimestamp()).isEqualTo(auditSuccessMessage.getTimestamp()),
                         () -> assertThat(auditSuccessMessageObject.getAttributes()).isEqualTo(auditSuccessMessage.getAttributes()),
                         () -> assertThat(auditSuccessMessageObject.getLeafResourceId()).isEqualTo(auditSuccessMessage.getLeafResourceId())

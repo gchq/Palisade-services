@@ -41,9 +41,9 @@ public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
     static final String AUDIT_MESSAGE = "AuditMessage : {}";
     static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
-    static final String ERROR_CALLED = "auditErrorMessage called, logger is: {}, and request is {}";
+    static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
     static final String LOGGER_NULL = "The Logger cannot be null";
-    static final String SUCCESS_CALLED = "auditSuccessMessage called, logger is: {}, and request is {}";
+    static final String SUCCESS_CALLED = "auditSuccessMessage from {}, logger is: {}, and request is {}";
     private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
 
@@ -65,17 +65,22 @@ public class LoggerAuditService implements AuditService {
     }
 
     private static void auditSuccessMessage(final Logger logger, final AuditMessage request) {
-        requireNonNull(logger, LOGGER_NULL);
+        requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        LOGGER.debug(SUCCESS_CALLED, logger, request);
-        logger.info(AUDIT_MESSAGE, request);
-        LOGGER.info(AUDIT_MESSAGE, request);
+        if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name()) || request.getServiceName().equals(ServiceName.DATA_SERVICE.name())) {
+            LOGGER.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
+            logger.info(AUDIT_MESSAGE, request);
+            LOGGER.info(AUDIT_MESSAGE, request);
+        } else {
+            LOGGER.warn("An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}",
+                    request.getServiceName());
+        }
     }
 
     private static void auditErrorMessage(final Logger logger, final AuditMessage request) {
-        requireNonNull(logger, LOGGER_NULL);
+        requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        LOGGER.debug(ERROR_CALLED, logger, request);
+        LOGGER.debug(ERROR_CALLED, request.getServiceName(), logger, request);
         logger.error(AUDIT_MESSAGE, request);
         LOGGER.error(AUDIT_MESSAGE, request);
     }
@@ -83,14 +88,14 @@ public class LoggerAuditService implements AuditService {
     @Override
     public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        LOGGER.debug("LoggerAuditService received an audit request for token {}", token);
+        LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
         BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
             handler.accept(auditLogger, request);
         } else {
-            // received an AuditRequest derived class that is not defined as a Handler above.
+            // received an AuditMessage derived class that is not defined as a Handler above.
             // need to add handler for this class.
-            LOGGER.error("handler == null for " + request.getClass().getName());
+            LOGGER.error("handler == null for {}", request.getClass().getName());
         }
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }

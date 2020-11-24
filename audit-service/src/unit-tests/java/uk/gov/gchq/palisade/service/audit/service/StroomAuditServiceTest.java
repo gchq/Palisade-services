@@ -20,15 +20,11 @@ import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
 import event.logging.impl.DefaultEventSerializer;
 import event.logging.impl.EventSerializer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.internal.util.collections.Sets;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.RequestId;
@@ -36,17 +32,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
-
-import java.util.HashSet;
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class StroomAuditServiceTest extends AuditServiceTestCommon {
+class StroomAuditServiceTest {
     private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     @Spy
@@ -64,7 +55,7 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
     private Exception exception;
     private Rules rules;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         auditService = new StroomAuditService(eventLogger)
                 .organisation("Test Org")
@@ -73,53 +64,36 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .systemEnv("some system env")
                 .systemName("some system name")
                 .systemVersion("some system version");
-        userId = mockUserID();
-        user = mockUser();
-        context = mockContext();
-        requestId = mockOriginalRequestId();
-        resource = mockResource();
-        exception = mockException();
-        rules = mockRules();
     }
 
     @Test
-    public void auditRegisterRequestWithNoResources() {
+    void testAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(new HashSet<>(0))
-                .withContext(context);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage());
 
         //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues().contains(ApplicationTestData.TEST_USER_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(ApplicationTestData.TEST_PURPOSE)),
+                () -> assertThat(logCaptor.getAllValues().contains(ApplicationTestData.TEST_RESOURCE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_NO_RESOURCES_TYPE_ID)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_NO_RESOURCES_DESCRIPTION)),
+                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION))
         );
     }
 
     @Test
-    public void auditRegisterRequestSuccessful() {
+    void testAuditErrorMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(Sets.newSet(resource))
-                .withContext(context);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage());
 
         //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
         final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
@@ -130,176 +104,6 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
                 () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_ID)),
                 () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_REQUEST_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditRegisterRequestUserException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(RequestServiceName.USER_SERVICE.name());
-        auditRequest.setOriginalRequestId(requestId);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_USER_EXCEPTION_OUTCOME))
-        );
-    }
-
-    @Test
-    public void auditRegisterRequestResourceException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(RequestServiceName.RESOURCE_SERVICE.name());
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_RESOURCE_EXCEPTION_OUTCOME))
-        );
-    }
-
-    @Test
-    public void auditRegisterRequestOtherException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(RequestServiceName.POLICY_SERVICE.name());
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        // better error messages
-        assertThat(log)
-            .contains(userId.getId())
-            .contains(context.getPurpose())
-            .contains(requestId.getId())
-            .contains(resource.getId())
-            .contains(exception.getMessage());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditReadRequestSuccessful() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResource(resource)
-                .withContext(context)
-                .withRulesApplied(rules)
-                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
-                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(rules.getMessage())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_READ_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_SUCCESS_READ_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditReadRequestTokenException() {
-        // Given
-        Mockito.doReturn(TOKEN_NOT_FOUND_MESSAGE).when(exception).getMessage();
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.AUDIT_ERROR_DATA_EXCEPTION_OUTCOME))
-        );
-    }
-
-    @Test
-    public void auditReadRequestOtherException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(exception.getMessage())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
         );
     }
 }

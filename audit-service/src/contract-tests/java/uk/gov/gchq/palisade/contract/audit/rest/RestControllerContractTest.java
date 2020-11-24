@@ -24,8 +24,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
-import uk.gov.gchq.palisade.service.audit.model.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
 import java.util.List;
@@ -35,18 +36,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest(classes = AuditApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
- class RestControllerContractTest extends AuditTestCommon {
+ class RestControllerContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private Map<String, AuditService> serviceMap;
 
-    List<AuditRequest> requests = List.of(
-            readRequestCompleteAuditRequest(),
-            readRequestExceptionAuditRequest(),
-            registerRequestCompleteAuditRequest(),
-            registerRequestExceptionAuditRequest()
+    List<AuditMessage> requests = List.of(
+            ApplicationTestData.auditSuccessMessage(),
+            ApplicationTestData.auditErrorMessage()
     );
 
     @Test

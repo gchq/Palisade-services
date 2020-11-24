@@ -79,7 +79,7 @@ public class AuditRestController {
      */
     public List<CompletableFuture<Boolean>> audit(final String token, final AuditMessage request) {
         List<CompletableFuture<Boolean>> result = services.values().stream()
-                .map(auditService -> auditService.audit(request, token))
+                .map(auditService -> auditService.audit(token, request))
                 .collect(Collectors.toList());
         LOGGER.debug("audit result is {}", result);
         return result;
