@@ -20,11 +20,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 
 /**
  * SpringBoot application entry-point method for the {@link FilteredResourceApplication} executable
  */
 @SpringBootApplication
+@EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class FilteredResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteredResourceApplication.class);
 
