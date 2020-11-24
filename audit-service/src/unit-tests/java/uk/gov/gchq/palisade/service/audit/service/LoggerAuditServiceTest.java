@@ -34,6 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class LoggerAuditServiceTest {
 
+    private static final String AUDIT_ERROR_MESSAGE = "AuditMessage : AuditErrorMessage";
+    private static final String AUDIT_ERROR_FROM = "auditErrorMessage from %s";
+    private static final String AUDIT_SUCCESS_MESSAGE = "AuditMessage : AuditSuccessMessage";
+    private static final String AUDIT_SUCCESS_FROM = "auditSuccessMessage from %s";
+    private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from USER_SERVICE";
+    private static final String REQUEST_FOR_TOKEN = "LoggerAuditService received an audit request for token 'token in the form of a UUID'";
     private static LoggerAuditService auditService;
     private ListAppender<ILoggingEvent> appender;
 
@@ -62,10 +68,10 @@ class LoggerAuditServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
-                () -> assertThat(logMessages.get(1)).contains("DATA_SERVICE"),
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_SUCCESS_FROM, "DATA_SERVICE")),
                 () -> assertThat(logMessages.get(2)).contains(
-                        "AuditMessage : AuditSuccessMessage", ApplicationTestData.TEST_USER_ID,
+                        AUDIT_SUCCESS_MESSAGE, ApplicationTestData.TEST_USER_ID,
                         ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
                         ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
                         ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
@@ -84,16 +90,30 @@ class LoggerAuditServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
-                () -> assertThat(logMessages.get(1)).contains("FILTERED_RESOURCE_SERVICE"),
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_SUCCESS_FROM, "FILTERED_RESOURCE_SERVICE")),
                 () -> assertThat(logMessages.get(2)).contains(
-                        "AuditMessage : AuditSuccessMessage", ApplicationTestData.TEST_USER_ID,
+                        AUDIT_SUCCESS_MESSAGE, ApplicationTestData.TEST_USER_ID,
                         ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
                         ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
                         ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
                         ApplicationTestData.TEST_LEAF_RESOURCE_ID
                 ),
                 () -> assertThat(logMessages.get(3)).isEqualTo(logMessages.get(2))
+        );
+    }
+
+    @Test
+    void testOtherServiceAuditSuccessMessage() {
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.badAuditSuccessMessage());
+        List<String> logMessages = getMessages(event -> true);
+
+        // Then
+        assertAll(
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(BAD_AUDIT_SUCCESS_MESSAGE)
         );
     }
 
@@ -106,10 +126,10 @@ class LoggerAuditServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
-                () -> assertThat(logMessages.get(1)).contains("USER_SERVICE"),
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_ERROR_FROM, "USER_SERVICE")),
                 () -> assertThat(logMessages.get(2)).contains(
-                        "AuditMessage : AuditErrorMessage", ApplicationTestData.TEST_USER_ID,
+                        AUDIT_ERROR_MESSAGE, ApplicationTestData.TEST_USER_ID,
                         ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
                         ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
                         ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
@@ -128,10 +148,10 @@ class LoggerAuditServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
-                () -> assertThat(logMessages.get(1)).contains("RESOURCE_SERVICE"),
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_ERROR_FROM, "RESOURCE_SERVICE")),
                 () -> assertThat(logMessages.get(2)).contains(
-                        "AuditMessage : AuditErrorMessage", ApplicationTestData.TEST_USER_ID,
+                        AUDIT_ERROR_MESSAGE, ApplicationTestData.TEST_USER_ID,
                         ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
                         ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
                         ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
@@ -150,10 +170,10 @@ class LoggerAuditServiceTest {
 
         // Then
         assertAll(
-                () -> assertThat(logMessages.get(0)).isEqualTo("LoggerAuditService received an audit request for token 'token in the form of a UUID'"),
-                () -> assertThat(logMessages.get(1)).contains("POLICY_SERVICE"),
+                () -> assertThat(logMessages.get(0)).isEqualTo(REQUEST_FOR_TOKEN),
+                () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_ERROR_FROM, "POLICY_SERVICE")),
                 () -> assertThat(logMessages.get(2)).contains(
-                        "AuditMessage : AuditErrorMessage", ApplicationTestData.TEST_USER_ID,
+                        AUDIT_ERROR_MESSAGE, ApplicationTestData.TEST_USER_ID,
                         ApplicationTestData.TEST_RESOURCE_ID, ApplicationTestData.TEST_PURPOSE,
                         ApplicationTestData.TEST_TIMESTAMP, ApplicationTestData.TEST_SERVER_IP,
                         ApplicationTestData.TEST_SERVER_NAME, ApplicationTestData.TEST_ATTRIBUTES.get("test attribute key").toString(),
