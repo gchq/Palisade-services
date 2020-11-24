@@ -115,7 +115,7 @@ public class StroomAuditService implements AuditService {
         return outcome;
     }
 
-    private static Event generateNewGenericEvent(final DefaultEventLoggingService loggingService, final AuditMessage request, final String token) {
+    private static Event generateNewGenericEvent(final String token, final DefaultEventLoggingService loggingService, final AuditMessage request) {
         LOGGER.debug("generateNewGenericEvent called and the DefaultEventLoggingService is: {}, and AuditMessage is: {}", loggingService, request);
         Event event = loggingService.createEvent();
         // set the event time
@@ -137,10 +137,10 @@ public class StroomAuditService implements AuditService {
         return event;
     }
 
-    private static void auditSuccessMessage(final DefaultEventLoggingService loggingService, final AuditSuccessMessage message, final String token) {
+    private static void auditSuccessMessage(final String token, final DefaultEventLoggingService loggingService, final AuditSuccessMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
         LOGGER.debug("auditSuccessMessage called and the DefaultEventLoggingService is: {}, and AuditSuccessMessage is: {}", loggingService, message);
-        Event authorisationEvent = generateNewGenericEvent(loggingService, message, token);
+        Event authorisationEvent = generateNewGenericEvent(token, loggingService, message);
         Event.EventDetail authorisationEventDetail = new Event.EventDetail();
         authorisationEvent.setEventDetail(authorisationEventDetail);
         // log the user
@@ -180,11 +180,11 @@ public class StroomAuditService implements AuditService {
 
     }
 
-    private static void auditErrorMessage(final DefaultEventLoggingService loggingService, final AuditErrorMessage message, final String token) {
+    private static void auditErrorMessage(final String token, final DefaultEventLoggingService loggingService, final AuditErrorMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
         LOGGER.debug("auditErrorMessage called and the DefaultEventLoggingService is: {}, and AuditRequest is: {}", loggingService, message);
         // authorisation exception
-        Event exceptionEvent = generateNewGenericEvent(loggingService, message, token);
+        Event exceptionEvent = generateNewGenericEvent(token, loggingService, message);
         Event.EventDetail exceptionEventDetail = new Event.EventDetail();
         exceptionEvent.setEventDetail(exceptionEventDetail);
         // log the user
@@ -366,19 +366,19 @@ public class StroomAuditService implements AuditService {
     }
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditMessage message, final String token) {
+    public CompletableFuture<Boolean> audit(final String token, final AuditMessage message) {
         requireNonNull(message, AUDIT_MESSAGE_NULL);
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
             if (message.getServiceName().equals(RequestServiceName.FILTERED_RESOURCE_SERVICE.name())){
-                auditSuccessMessage(eventLogger, successMessage, token);
+                auditSuccessMessage(token, eventLogger, successMessage);
             } else {
                 LOGGER.warn("An AuditSuccessMessage should only be sent by the {}. Message received from {}",
                         RequestServiceName.FILTERED_RESOURCE_SERVICE.name(), message.getServiceName());
             }
         } else if (message instanceof AuditErrorMessage) {
             AuditErrorMessage errorMessage = (AuditErrorMessage) message;
-            auditErrorMessage(eventLogger, errorMessage, token);
+            auditErrorMessage(token, eventLogger, errorMessage);
         } else {
             LOGGER.warn("The service {} has created unknown type of AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
         }

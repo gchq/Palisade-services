@@ -81,8 +81,9 @@ public class LoggerAuditService implements AuditService {
     }
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditMessage request) {
+    public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
         requireNonNull(request, AUDIT_MESSAGE_NULL);
+        LOGGER.debug("LoggerAuditService received an audit request for token {}", token);
         BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(request.getClass());
         if (handler != null) {
             handler.accept(auditLogger, request);

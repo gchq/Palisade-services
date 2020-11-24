@@ -31,8 +31,8 @@ public class SimpleAuditService implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override
-    public CompletableFuture<Boolean> audit(final AuditMessage request) {
-        LOGGER.info("SimpleAuditService.audit called with {}", request);
+    public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
+        LOGGER.info("SimpleAuditService.audit called for token {} with request {}", token, request);
         return CompletableFuture.completedFuture(Boolean.TRUE);
     }
 }
