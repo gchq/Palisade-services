@@ -19,7 +19,9 @@ package uk.gov.gchq.palisade.service.filteredresource.web.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.logging.LoggersEndpoint;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.availability.ApplicationAvailability;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,22 +49,23 @@ public class EndpointConfiguration {
     }
 
     @Bean
+    WebsocketRouter websocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper objectMapper) {
+        return new WebsocketRouter(websocketEventService, objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnBean(KafkaProducerService.class)
     KafkaRestWriterRouter kafkaRestWriterRouter(final KafkaProducerService kafkaProducerService) {
         return new KafkaRestWriterRouter(kafkaProducerService);
     }
 
     @Bean
-    SpringHealthRouter springHealthRouter(final HealthEndpoint springHealthEndpoint) {
-        return new SpringHealthRouter(springHealthEndpoint);
+    SpringHealthRouter springHealthRouter(final HealthEndpoint springHealthEndpoint, final ApplicationAvailability applicationAvailability) {
+        return new SpringHealthRouter(springHealthEndpoint, applicationAvailability);
     }
 
     @Bean
     SpringLoggersRouter springLoggersRouter(final LoggersEndpoint loggersEndpoint) {
         return new SpringLoggersRouter(loggersEndpoint);
-    }
-
-    @Bean
-    WebsocketRouter websocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper objectMapper) {
-        return new WebsocketRouter(websocketEventService, objectMapper);
     }
 }

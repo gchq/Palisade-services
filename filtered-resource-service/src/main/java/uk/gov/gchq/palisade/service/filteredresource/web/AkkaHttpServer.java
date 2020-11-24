@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class AkkaHttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaHttpServer.class);
@@ -57,6 +58,7 @@ public class AkkaHttpServer {
                 .toCompletableFuture();
 
         LOGGER.info("Started Akka Http server at {} with {} bindings", serverBinding.join().localAddress(), this.routeSuppliers.size());
+        LOGGER.debug("Bindings are: {}", routeSuppliers.stream().map(Object::getClass).map(Class::getSimpleName).collect(Collectors.toList()));
     }
 
     public void terminate() {

@@ -24,27 +24,45 @@ import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.boot.actuate.logging.LoggersEndpoint.LoggerLevels;
 import org.springframework.boot.logging.LogLevel;
 
+import java.util.Map;
+
 public class SpringLoggersRouter implements RouteSupplier {
+    /**
+     * Provide Jackson with a zero-args-constructor creator method to call for incoming setLoggerLevel requests (POST LoggerLevels)
+     */
+    private static class DeserializableLoggerLevels extends LoggerLevels {
+        protected DeserializableLoggerLevels() {
+            super(null);
+        }
+    }
+
     private final LoggersEndpoint springLoggersEndpoint;
 
     public SpringLoggersRouter(final LoggersEndpoint springLoggersEndpoint) {
         this.springLoggersEndpoint = springLoggersEndpoint;
     }
 
-    private Route getLoggers(final String path) {
+    private Route getLoggerLevel(final String path) {
         return Directives.get(() -> {
             LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
             return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
         });
     }
 
-    private Route setLoggers(final String path) {
+    private Route setLoggerLevel(final String path) {
         return Directives.post(() ->
-                Directives.entity(Jackson.unmarshaller(LogLevel.class), (LogLevel logLevel) -> {
-                    springLoggersEndpoint.configureLogLevel(path, logLevel);
+                Directives.entity(Jackson.unmarshaller(DeserializableLoggerLevels.class), (DeserializableLoggerLevels loggerLevel) -> {
+                    springLoggersEndpoint.configureLogLevel(path, LogLevel.valueOf(loggerLevel.getConfiguredLevel()));
                     LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
                     return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
                 }));
+    }
+
+    private Route getLoggers() {
+        return Directives.get(() -> {
+            Map<String, Object> entity = springLoggersEndpoint.loggers();
+            return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
+        });
     }
 
     /**
@@ -55,8 +73,11 @@ public class SpringLoggersRouter implements RouteSupplier {
     @Override
     public Route get() {
         return Directives.pathPrefix("loggers", () ->
-                Directives.path(path ->
-                        Directives.concat(this.getLoggers(path), this.setLoggers(path))));
+                Directives.concat(
+                        Directives.path(path ->
+                                Directives.concat(this.getLoggerLevel(path), this.setLoggerLevel(path))),
+                        Directives.pathEndOrSingleSlash(this::getLoggers)
+                ));
     }
 
 }
