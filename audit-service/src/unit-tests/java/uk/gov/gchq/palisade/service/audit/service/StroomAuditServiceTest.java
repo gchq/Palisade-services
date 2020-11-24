@@ -38,7 +38,7 @@ class StroomAuditServiceTest {
     DefaultEventLoggingService eventLogger = new DefaultEventLoggingService();
     @Captor
     ArgumentCaptor<Event> logCaptor;
-    private static EventSerializer eventSerializer = new DefaultEventSerializer();
+    private static final EventSerializer EVENT_SERIALIZER = new DefaultEventSerializer();
 
     private static StroomAuditService auditService;
 
@@ -61,7 +61,8 @@ class StroomAuditServiceTest {
         auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.dataServiceAuditSuccessMessage());
 
         //Then
-        final String log = eventSerializer.serialize(logCaptor.getValue());
+        System.out.println(logCaptor.toString());
+        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues().contains(ApplicationTestData.TEST_USER_ID)),
