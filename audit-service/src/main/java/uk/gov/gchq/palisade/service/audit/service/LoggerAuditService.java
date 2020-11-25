@@ -39,7 +39,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
-    static final String AUDIT_MESSAGE = "AuditMessage : {}";
+    static final String AUDIT_MESSAGE = "AuditMessage: {}";
     static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
     static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
     static final String LOGGER_NULL = "The Logger cannot be null";

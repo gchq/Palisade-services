@@ -22,24 +22,28 @@ import event.logging.impl.DefaultEventSerializer;
 import event.logging.impl.EventSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+@ExtendWith(MockitoExtension.class)
 class StroomAuditServiceTest {
+
     private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
 
     @Spy
     DefaultEventLoggingService eventLogger = new DefaultEventLoggingService();
     @Captor
     ArgumentCaptor<Event> logCaptor;
-    private static final EventSerializer EVENT_SERIALIZER = new DefaultEventSerializer();
 
+    private static final EventSerializer EVENT_SERIALIZER = new DefaultEventSerializer();
     private static StroomAuditService auditService;
 
     @BeforeEach
@@ -54,14 +58,13 @@ class StroomAuditServiceTest {
     }
 
     @Test
-    void testAuditSuccessMessage() {
+    void testDataServiceAuditSuccessMessage() {
         // Given
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.dataServiceAuditSuccessMessage());
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
 
         //Then
-        System.out.println(logCaptor.toString());
         final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(

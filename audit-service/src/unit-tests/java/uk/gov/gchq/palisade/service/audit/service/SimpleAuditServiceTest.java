@@ -65,7 +65,7 @@ class SimpleAuditServiceTest {
     @Test
     void testAuditErrorMessage() {
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.userServiceAuditErrorMessage());
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("USER_SERVICE"));
 
         // Then
         List<String> logMessages = getMessages(event -> true);
@@ -76,7 +76,7 @@ class SimpleAuditServiceTest {
     @Test
     void testAuditSuccessMessage() {
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.dataServiceAuditSuccessMessage());
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
 
         // Then
         List<String> logMessages = getMessages(event -> true);

@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.contract.audit.rest;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -45,12 +44,12 @@ import static org.assertj.core.api.Assertions.assertThat;
     private Map<String, AuditService> serviceMap;
 
     List<AuditMessage> requests = List.of(
-            ApplicationTestData.userServiceAuditErrorMessage(),
-            ApplicationTestData.resourceServiceAuditErrorMessage(),
-            ApplicationTestData.otherServiceAuditErrorMessage(),
-            ApplicationTestData.dataServiceAuditSuccessMessage(),
-            ApplicationTestData.filteredServiceAuditSuccessMessage(),
-            ApplicationTestData.badAuditSuccessMessage()
+            ApplicationTestData.auditErrorMessage("USER_SERVICE"),
+            ApplicationTestData.auditErrorMessage("RESOURCE_SERVICE"),
+            ApplicationTestData.auditErrorMessage("POLICY_SERVICE"),
+            ApplicationTestData.auditSuccessMessage("DATA_SERVICE"),
+            ApplicationTestData.auditSuccessMessage("FILTERED_RESOURCE_SERVICE"),
+            ApplicationTestData.auditSuccessMessage("USER_SERVICE")
     );
 
     @Test
