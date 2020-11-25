@@ -25,22 +25,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
-import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
-
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class LoggerAuditServiceTest {
@@ -56,7 +45,9 @@ class LoggerAuditServiceTest {
     Logger logger;
 
     @Captor
-    ArgumentCaptor<AuditSuccessMessage> logCaptor;
+    ArgumentCaptor<AuditMessage> infoCaptor;
+    @Captor
+    ArgumentCaptor<String> errorCaptor;
 
     private static LoggerAuditService auditService;
 
@@ -68,16 +59,21 @@ class LoggerAuditServiceTest {
     @Test
     void testDataServiceAuditSuccessMessage() {
         // Given
-        Mockito.doNothing().when(logger).info(Mockito.anyString(), logCaptor.capture());
+        Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
+        // Given
+        Mockito.doNothing().when(logger).warn(errorCaptor.capture());
+        Mockito.doNothing().when(logger).error(errorCaptor.capture());
 
         // When
         auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
 
         // Then
-        System.out.println("Log Captor: " + logCaptor.getAllValues());
-        assertThat(logCaptor.getAllValues())
+        System.out.println("Log Captor: " + infoCaptor.getAllValues());
+        assertThat(infoCaptor.getAllValues())
                 .hasSize(1)
                 .first().isEqualTo(ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
+        assertThat(errorCaptor.getAllValues())
+                .isEmpty();
         /*assertAll(
                 () -> assertThat(logCaptor.getValue()).isEqualTo(REQUEST_FOR_TOKEN)
                 () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_SUCCESS_FROM, "DATA_SERVICE")),
