@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -50,10 +51,12 @@ class LoggerAuditServiceTest {
     private static final String AUDIT_SUCCESS_FROM = "auditSuccessMessage from %s";
     private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from USER_SERVICE";
     private static final String REQUEST_FOR_TOKEN = "LoggerAuditService received an audit request for token 'token in the form of a UUID'";
-    Logger logger = Mockito.spy(LoggerFactory.getLogger(LoggerAuditService.class));
+
+    @Mock
+    Logger logger;
 
     @Captor
-    ArgumentCaptor<String> logCaptor;
+    ArgumentCaptor<AuditSuccessMessage> logCaptor;
 
     private static LoggerAuditService auditService;
 
@@ -64,12 +67,17 @@ class LoggerAuditServiceTest {
 
     @Test
     void testDataServiceAuditSuccessMessage() {
+        // Given
+        Mockito.doNothing().when(logger).info(Mockito.anyString(), logCaptor.capture());
 
         // When
         auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
 
         // Then
         System.out.println("Log Captor: " + logCaptor.getAllValues());
+        assertThat(logCaptor.getAllValues())
+                .hasSize(1)
+                .first().isEqualTo(ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
         /*assertAll(
                 () -> assertThat(logCaptor.getValue()).isEqualTo(REQUEST_FOR_TOKEN)
                 () -> assertThat(logMessages.get(1)).contains(String.format(AUDIT_SUCCESS_FROM, "DATA_SERVICE")),
