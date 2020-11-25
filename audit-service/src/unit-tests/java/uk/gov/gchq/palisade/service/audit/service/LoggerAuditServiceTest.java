@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class LoggerAuditServiceTest {
 
-    private static final String AUDIT_MESSAGE = "AuditMessage: {}";
     private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}";
 
     @Mock
@@ -58,7 +57,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
@@ -72,7 +71,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("FILTERED_RESOURCE_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
@@ -86,7 +85,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).warn(errorCaptor.capture(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("USER_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
@@ -101,7 +100,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("USER_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
@@ -116,7 +115,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("RESOURCE_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
@@ -131,7 +130,7 @@ class LoggerAuditServiceTest {
         Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("POLICY_SERVICE"));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.name()));
 
         // Then
         assertThat(infoCaptor.getAllValues())
