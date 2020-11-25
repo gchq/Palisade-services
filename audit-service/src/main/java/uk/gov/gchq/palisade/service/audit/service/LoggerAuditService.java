@@ -68,11 +68,10 @@ public class LoggerAuditService implements AuditService {
         requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
         if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name()) || request.getServiceName().equals(ServiceName.DATA_SERVICE.name())) {
-            LOGGER.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
+            logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
-            LOGGER.info(AUDIT_MESSAGE, request);
         } else {
-            LOGGER.warn("An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}",
+            logger.warn("An AuditSuccessMessage should only be sent by the FILTERED_RESOURCE_SERVICE or the DATA_SERVICE. Message received from {}",
                     request.getServiceName());
         }
     }
@@ -80,9 +79,8 @@ public class LoggerAuditService implements AuditService {
     private static void auditErrorMessage(final Logger logger, final AuditMessage request) {
         requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        LOGGER.debug(ERROR_CALLED, request.getServiceName(), logger, request);
+        logger.debug(ERROR_CALLED, request.getServiceName(), logger, request);
         logger.error(AUDIT_MESSAGE, request);
-        LOGGER.error(AUDIT_MESSAGE, request);
     }
 
     @Override
