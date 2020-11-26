@@ -39,9 +39,9 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorke
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages getting from the persistence layer such that requests will wait until an offset arrives.
@@ -92,6 +92,14 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
         }
     }
 
+    protected static class DeregisterWorker implements TokenOffsetCommand {
+        protected final ActorRef<WorkerCommand> workerRef;
+
+        public DeregisterWorker(final ActorRef<WorkerCommand> workerRef) {
+            this.workerRef = workerRef;
+        }
+    }
+
     // Timeout on the ActorFlow::ask
     // The unit can't be longer than DAYS (anything more is an estimated duration)
     // Despite this, we can just put the max value akka will accept, which seems to be about 248 days
@@ -99,7 +107,7 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
 
     private final TokenOffsetPersistenceLayer persistenceLayer;
     // Map from Tokens to TokenOffsetWorker actors
-    private final HashMap<String, ActorRef<WorkerCommand>> workers = new HashMap<>();
+    private final ConcurrentHashMap<String, ActorRef<WorkerCommand>> workers = new ConcurrentHashMap<>();
 
     private TokenOffsetController(final ActorContext<TokenOffsetCommand> context, final TokenOffsetPersistenceLayer persistenceLayer) {
         super(context);
@@ -186,25 +194,28 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
         return newReceiveBuilder()
                 .onMessage(TokenOffsetCommand.SpawnWorker.class, this::onSpawnWorker)
                 .onMessage(TokenOffsetCommand.AckTellWorker.class, this::onAckSetOffset)
+                .onMessage(DeregisterWorker.class, this::onDeregisterWorker)
                 .build();
     }
 
     /**
      * The {@link TokenOffsetCommand.SpawnWorker} command will spawn a {@link TokenOffsetWorker} and pass it the command's token
      * ({@link Pair#first()}).
-     * After the worker has been spawned, it is added to an internal map of Tokens to TokenOffsetWorkers for tokens currently
-     * in flight. This is later got from the map by the {@link TokenOffsetController#onAckSetOffset(TokenOffsetCommand.AckTellWorker)}
-     * method. The command's replyTo ({@link Pair#second()}) will later {@link ActorRef#tell} the offset for that token. This
-     * offset may come from persistence, or it may have been told to the actor through an {@link TokenOffsetCommand.AckTellWorker}
+     * After the worker has been spawned, it is added to an internal map of Tokens to TokenOffsetWorkers for tokens currently in flight.
+     * Workers added to the map will deregister themselves before stopping.
+     * Workers added to the map are used when got from the map by the {@link TokenOffsetController#onAckSetOffset(TokenOffsetCommand.AckTellWorker)}
+     * method. The command's {@code replyTo} will later {@link ActorRef#tell} the offset for that token.
+     * This offset may come from persistence, or it may have been told to the actor through an {@link TokenOffsetCommand.AckTellWorker}
      * command.
      *
      * @param spawnWorker the {@link TokenOffsetCommand.SpawnWorker} command to handle
      * @return an unchanged {@link Behavior} (this actor does not 'become' any other behaviour)
      */
     private Behavior<TokenOffsetCommand> onSpawnWorker(final TokenOffsetCommand.SpawnWorker spawnWorker) {
-        // Spawn a new worker
+        // Spawn a new worker, passing this (its parent) as a 'callback' for Deregister commands
+        Behavior<WorkerCommand> workerBehavior = TokenOffsetWorker.create(this.persistenceLayer, this.getContext().getSelf().narrow());
         ActorRef<WorkerCommand> workerRef = this.getContext()
-                .spawn(TokenOffsetWorker.create(this.persistenceLayer), spawnWorker.getOffset.token);
+                .spawn(workerBehavior, spawnWorker.getOffset.token);
         // Tell our worker to 'start-up' (check persistence and maybe wait to be told a SetOffset)
         workerRef.tell(new GetOffset(spawnWorker.getOffset.token, spawnWorker.getOffset.replyTo));
         // Register that our worker exists
@@ -223,12 +234,25 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
      */
     private Behavior<TokenOffsetCommand> onAckSetOffset(final TokenOffsetCommand.AckTellWorker ackTellWorker) {
         Optional.ofNullable(this.workers.get(ackTellWorker.setOffset.token))
-                .ifPresent((ActorRef<WorkerCommand> workerRef) -> {
-                    workerRef.tell(ackTellWorker.setOffset);
-                    this.workers.remove(ackTellWorker.setOffset.token, workerRef);
-                });
+                .ifPresent((ActorRef<WorkerCommand> workerRef) -> workerRef.tell(ackTellWorker.setOffset));
         // Acknowledge this message
         ackTellWorker.ackRef.tell(ackTellWorker.setOffset);
+        return this;
+    }
+
+    /**
+     * When workers enter the {@link Behaviors#stopped()} state, they will intercept the {@link akka.actor.typed.PostStop}
+     * signal and deregister themselves with the parent actorSystem.
+     * This will remove the worker from the map.
+     *
+     * @param deregisterWorker the command to deregister a child worker
+     * @return an unchanged {@link Behavior} (this actor does not 'become' any other behaviour)
+     */
+    private Behavior<TokenOffsetCommand> onDeregisterWorker(final DeregisterWorker deregisterWorker) {
+        // Deregister all workers matching the actorRef supplied in the message
+        this.workers.entrySet().stream()
+                .filter(entry -> entry.getValue().compareTo(deregisterWorker.workerRef) == 0)
+                .forEach(entry -> this.workers.remove(entry.getKey()));
         return this;
     }
 

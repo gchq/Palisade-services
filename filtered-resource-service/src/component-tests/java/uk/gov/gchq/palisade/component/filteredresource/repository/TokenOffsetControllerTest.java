@@ -130,7 +130,7 @@ class TokenOffsetControllerTest {
                 .run(actorSystem);
 
         // Assert that we received all the expected messages
-        assertThat(messages.get(5, TimeUnit.SECONDS))
+        assertThat(messages.get(1, TimeUnit.SECONDS))
                 .hasSize(3)
                 .extracting(response -> response.offset)
                 .usingRecursiveComparison()

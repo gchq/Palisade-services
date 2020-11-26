@@ -18,13 +18,19 @@ package uk.gov.gchq.palisade.service.filteredresource.repository;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.DeregisterWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCommand;
 
+/**
+ * A worker to carry-out a client request for an offset (from kafka "masked-resource-offset" topic or redis persistence)
+ * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
+ */
 final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
     protected interface WorkerCommand {
         // Marker interface for inputs of the worker
@@ -69,7 +75,7 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
      *
      * @implNote This is currently only caused by the persistence store throwing an exception.
      */
-    class ReportError implements WorkerResponse {
+    protected static class ReportError implements WorkerResponse {
         protected final String token;
         protected final Throwable exception;
 
@@ -80,14 +86,18 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
     }
 
     private final TokenOffsetPersistenceLayer persistenceLayer;
+    private final ActorRef<DeregisterWorker> parent;
 
-    private TokenOffsetWorker(final ActorContext<WorkerCommand> context, final TokenOffsetPersistenceLayer persistenceLayer) {
+    private TokenOffsetWorker(final ActorContext<WorkerCommand> context,
+                              final TokenOffsetPersistenceLayer persistenceLayer,
+                              final ActorRef<DeregisterWorker> parent) {
         super(context);
         this.persistenceLayer = persistenceLayer;
+        this.parent = parent;
     }
 
-    static Behavior<WorkerCommand> create(final TokenOffsetPersistenceLayer persistenceLayer) {
-        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer));
+    static Behavior<WorkerCommand> create(final TokenOffsetPersistenceLayer persistenceLayer, final ActorRef<DeregisterWorker> parent) {
+        return Behaviors.setup(ctx -> new TokenOffsetWorker(ctx, persistenceLayer, parent));
     }
 
     @Override
@@ -97,28 +107,33 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
 
     private Receive<WorkerCommand> onGetOffset() {
         return newReceiveBuilder()
+                // Deregister self with parent on stop
+                .onSignal(PostStop.class, this::onPostStop)
+
                 // Start off in Getting mode
-                .onMessage(GetOffset.class, (GetOffset getCmd) -> {
-                    // Get from persistence
-                    return this.persistenceLayer.findOffset(getCmd.token)
-                            // If present tell self (if not, will be told in the future)
-                            .<Behavior<WorkerCommand>>thenApply(optional -> {
-                                optional.ifPresent(offset -> this.getContext().getSelf()
-                                        .tell(new SetOffset(getCmd.token, offset)));
-                                return this.onSetOffset(getCmd);
-                            })
-                            // If an exception is thrown reading from persistence, report the exception
-                            .exceptionally(ex -> {
-                                getCmd.replyTo.tell(new ReportError(getCmd.token, ex));
-                                return Behaviors.stopped();
-                            })
-                            .join();
-                })
+                .onMessage(GetOffset.class, (GetOffset getCmd) -> this.persistenceLayer
+                        // Get from persistence
+                        .findOffset(getCmd.token)
+                        // If present tell self (if not, will be told in the future)
+                        .<Behavior<WorkerCommand>>thenApply(optional -> {
+                            optional.ifPresent(offset -> this.getContext().getSelf()
+                                    .tell(new SetOffset(getCmd.token, offset)));
+                            return this.onSetOffset(getCmd);
+                        })
+                        // If an exception is thrown reading from persistence, report the exception
+                        .exceptionally(ex -> {
+                            getCmd.replyTo.tell(new ReportError(getCmd.token, ex));
+                            return Behaviors.stopped();
+                        })
+                        .join())
                 .build();
     }
 
     private Receive<WorkerCommand> onSetOffset(final GetOffset getCmd) {
         return newReceiveBuilder()
+                // Deregister self with parent on stop
+                .onSignal(PostStop.class, this::onPostStop)
+
                 // Switch state to Setting mode
                 .onMessage(SetOffset.class, (SetOffset setOffset) -> {
                     // Tell the replyTo actor the offset that has been received
@@ -129,4 +144,8 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
                 .build();
     }
 
+    private Behavior<WorkerCommand> onPostStop(PostStop ignoredSignal) {
+        this.parent.tell(new DeregisterWorker(getContext().getSelf()));
+        return this;
+    }
 }
