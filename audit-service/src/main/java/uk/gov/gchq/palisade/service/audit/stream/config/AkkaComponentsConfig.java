@@ -22,18 +22,17 @@ import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
-import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.audit.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
@@ -47,42 +46,52 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaComponentsConfig {
-    private static final StreamComponents<String, AuditMessage> INPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_INPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, AuditErrorMessage> ERROR_INPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<Committable, CompletionStage<Done>> OUTPUT_COMPONENTS = new StreamComponents<>();
 
     @Bean
-    Sink<ProducerRecord<String, AuditMessage>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditMessage> producerSettings = INPUT_COMPONENTS.producerSettings(
+    Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+        ConsumerSettings<String, AuditSuccessMessage> consumerSettings = SUCCESS_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
+                SerDesConfig.successKeyDeserializer(),
+                SerDesConfig.successValueDeserializer());
 
-        return INPUT_COMPONENTS.plainProducer(producerSettings);
+        Topic errorTopic = configuration.getTopics().get("success-topic");
+        Subscription successSubscription = Optional.ofNullable(errorTopic.getAssignment())
+                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(errorTopic.getName(), partition)))
+                .orElse(Subscriptions.topics(errorTopic.getName()));
+
+        return SUCCESS_INPUT_COMPONENTS.committableConsumer(consumerSettings, successSubscription);
     }
 
     @Bean
-    Source<CommittableMessage<String, AuditMessage>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
-        ConsumerSettings<String, AuditMessage> consumerSettings = INPUT_COMPONENTS.consumerSettings(
+    CommitterSettings successCommitterSettings (final ActorSystem actorSystem) {
+        return SUCCESS_INPUT_COMPONENTS.committerSettings(actorSystem);
+    }
+
+    @Bean
+    Source<CommittableMessage<String, AuditErrorMessage>, Control> errorCommittableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ERROR_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.errorKeyDeserializer(),
                 SerDesConfig.errorValueDeserializer());
 
-        Topic topic = configuration.getTopics().get("input-topic");
-        Subscription subscription = Optional.ofNullable(topic.getAssignment())
-                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
-                .orElse(Subscriptions.topics(topic.getName()));
+        Topic errorTopic = configuration.getTopics().get("error-topic");
+        Subscription errorSubscription = Optional.ofNullable(errorTopic.getAssignment())
+                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(errorTopic.getName(), partition)))
+                .orElse(Subscriptions.topics(errorTopic.getName()));
 
-        return INPUT_COMPONENTS.committableConsumer(consumerSettings, subscription);
+        return ERROR_INPUT_COMPONENTS.committableConsumer(consumerSettings, errorSubscription);
     }
 
     @Bean
-    Sink<Committable, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
-        CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
-        return OUTPUT_COMPONENTS.committableSink(committerSettings);
+    CommitterSettings errorCommitterSettings (final ActorSystem actorSystem) {
+        return ERROR_INPUT_COMPONENTS.committerSettings(actorSystem);
     }
 
     @Bean
-    CommitterSettings committerSettings (final ActorSystem actorSystem) {
-        return INPUT_COMPONENTS.committerSettings(actorSystem);
+    Sink<Committable, CompletionStage<Done>> committableSink(final ActorSystem actorSystem) {
+        return OUTPUT_COMPONENTS.committableSink(OUTPUT_COMPONENTS.committerSettings(actorSystem));
     }
 }

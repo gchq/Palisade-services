@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,75 +13,96 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.audit.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.audit.service.KafkaProducerService;
 
-import java.net.http.HttpHeaders;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
- * RESTful interface to a number of different {@link AuditService}s
+ * A REST interface mimicking the Kafka API to the service.
+ * POSTs to the controller write the request and headers to the upstream topic.
+ * These messages will then later be read by the service.
+ * Intended for debugging only.
  */
 @RestController
 @RequestMapping(path = "/api")
 public class AuditRestController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditRestController.class);
-
-    private final Map<String, AuditService> services;
+    private final KafkaProducerService service;
 
     /**
-     * Constructor taking in a collection of named {@link AuditService}s, auditing to each of them per request
+     * Autowired constructor for the rest controller
      *
-     * @param services a {@link Map} of services to use for this controller
+     * @param service the service used to process an {@link AuditMessage}
      */
-    public AuditRestController(final Map<String, AuditService> services) {
-        this.services = services;
+    public AuditRestController(final KafkaProducerService service) {
+        this.service = service;
     }
 
     /**
-     * Audit an incoming REST POST {@link AuditMessage} on the /api/audit endpoint.
-     * Consumes and produces JSON requests and responses
+     * REST endpoint for debugging the service, mimicking the Kafka API.
      *
-     * @param request the request to pass to each of the underlying services
-     * @return true if all services completed their audit successfully, otherwise false
+     * @param headers a multi-value map of http request headers
+     * @param request the request itself
+     * @return the response from the service, or an error if one occurred
      */
     @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
-    public Boolean auditRequest(@RequestHeader("x-request-token") final String token, @RequestBody final AuditMessage request) {
-        LOGGER.debug("Invoking audit: {}", request);
-        // Submit audit to all providing services
-        final List<CompletableFuture<Boolean>> audits = this.audit(token, request);
-        // Wait for all providers to complete
-        // Succeed only if all providers succeeded
-        boolean result = audits.stream().allMatch(CompletableFuture::join);
-        LOGGER.debug("AuditRequest result is {}", result);
-        return result;
+    public ResponseEntity<Void> auditRequest(final @RequestHeader Map<String, String> headers,
+                                             final @RequestBody AuditMessage request) {
+
+        // Process the request and return results
+        if (request instanceof AuditErrorMessage) {
+            AuditErrorMessage errorMessage = (AuditErrorMessage) request;
+            return service.processErrorRequest(headers, Collections.singletonList(errorMessage));
+        } else if (request instanceof AuditSuccessMessage) {
+            AuditSuccessMessage successMessage = (AuditSuccessMessage) request;
+            return service.processSuccessRequest(headers, Collections.singletonList(successMessage));
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     /**
-     * Asynchronously audit a request with all underlying services in parallel
+     * REST endpoint for debugging the service, mimicking the Kafka API.
+     * Takes a list of requests and processes each of them with the given headers
      *
-     * @param request the request to pass to each of the underlying services
-     * @return a list of futures for whether each service completed and whether it was a successful completion
+     * @param headers  a multi-value map of http request headers
+     * @param requests a list of requests
+     * @return the response from the service, or an error if one occurred
      */
-    public List<CompletableFuture<Boolean>> audit(final String token, final AuditMessage request) {
-        List<CompletableFuture<Boolean>> result = services.values().stream()
-                .map(auditService -> auditService.audit(token, request))
-                .collect(Collectors.toList());
-        LOGGER.debug("audit result is {}", result);
+    @PostMapping(value = "/audit/multi", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Void> audit(final @RequestHeader Map<String, String> headers,
+                                      final @RequestBody Collection<AuditMessage> requests) {
+
+        // Process the request and return results
+        ResponseEntity<Void> result = null;
+        for (AuditMessage request : requests) {
+            if (request instanceof AuditErrorMessage) {
+                AuditErrorMessage errorMessage = (AuditErrorMessage) request;
+                result = service.processErrorRequest(headers, Collections.singletonList(errorMessage));
+            } else if (request instanceof AuditSuccessMessage) {
+                AuditSuccessMessage successMessage = (AuditSuccessMessage) request;
+                result = service.processSuccessRequest(headers, Collections.singletonList(successMessage));
+            } else {
+                result = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
         return result;
     }
 

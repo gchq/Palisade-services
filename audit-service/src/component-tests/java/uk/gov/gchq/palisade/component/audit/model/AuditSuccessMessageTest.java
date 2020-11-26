@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.gov.gchq.palisade.component.audit.request;
+package uk.gov.gchq.palisade.component.audit.model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditSuccessMessageTest.class})
-public class AuditSuccessMessageTest {
+class AuditSuccessMessageTest {
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jsonTester;
@@ -52,7 +52,7 @@ public class AuditSuccessMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    public void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantSuccessMessageSerialisingAndDeserialising() throws IOException {
         Context context = new Context().purpose("testContext");
         String now = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
         Map<String, Object> attributes = new HashMap<>();

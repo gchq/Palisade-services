@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.service.ServiceName;
 
 import java.util.stream.Stream;
 
@@ -36,12 +37,12 @@ class MessageSerialisationTest {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
-                    Arguments.of(ApplicationTestData.auditErrorMessage("USER_SERVICE")),
-                    Arguments.of(ApplicationTestData.auditErrorMessage("RESOURCE_SERVICE")),
-                    Arguments.of(ApplicationTestData.auditErrorMessage("POLICY_SERVICE")),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage("DATA_SERVICE")),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage("FILTERED_RESOURCE_SERVICE")),
-                    Arguments.of(ApplicationTestData.auditSuccessMessage("USER_SERVICE"))
+                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.name())),
+                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.name())),
+                    Arguments.of(ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.name())),
+                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.name())),
+                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.name())),
+                    Arguments.of(ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.name()))
             );
         }
     }

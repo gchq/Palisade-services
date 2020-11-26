@@ -23,7 +23,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
-import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -57,10 +58,10 @@ public final class SerDesConfig {
      * Kafka value serialiser for upstream messages coming in as input
      * Used by the Rest Controller to insert requests onto the topic
      *
-     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingRequest)
+     * @return an appropriate value serialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Serializer<AuditMessage> errorValueSerializer() {
-        return (String ignored, AuditMessage auditRequest) -> {
+    public static Serializer<AuditErrorMessage> errorValueSerializer() {
+        return (String ignored, AuditErrorMessage auditRequest) -> {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
@@ -81,12 +82,62 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserialiser for the topic's message content (AttributeMaskingRequest)
+     * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Deserializer<AuditMessage> errorValueDeserializer() {
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
         return (String ignored, byte[] auditRequest) -> {
             try {
-                return MAPPER.readValue(auditRequest, AuditMessage.class);
+                return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
+            }
+        };
+    }
+
+    /**
+     * Kafka key serialiser for upstream messages coming in as input
+     * Used by the Rest Controller to insert requests onto the topic
+     *
+     * @return an appropriate key serialiser for the topic's message content
+     */
+    public static Serializer<String> successKeySerializer() {
+        return new StringSerializer();
+    }
+
+    /**
+     * Kafka value serialiser for upstream messages coming in as input
+     * Used by the Rest Controller to insert requests onto the topic
+     *
+     * @return an appropriate value serialiser for the topic's message content (AuditSuccessMessage)
+     */
+    public static Serializer<AuditSuccessMessage> successValueSerializer() {
+        return (String ignored, AuditSuccessMessage auditRequest) -> {
+            try {
+                return MAPPER.writeValueAsBytes(auditRequest);
+            } catch (IOException e) {
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
+            }
+        };
+    }
+
+    /**
+     * Kafka key deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate key deserialiser for the topic's message content
+     */
+    public static Deserializer<String> successKeyDeserializer() {
+        return new StringDeserializer();
+    }
+
+    /**
+     * Kafka value deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate value deserialiser for the topic's message content (AuditSuccessMessage)
+     */
+    public static Deserializer<AuditSuccessMessage> successValueDeserializer() {
+        return (String ignored, byte[] auditRequest) -> {
+            try {
+                return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
             }

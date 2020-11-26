@@ -29,12 +29,12 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.KafkaProducerService;
@@ -52,7 +52,7 @@ public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
 
     @Bean
-    KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, AuditMessage>, CompletionStage<Done>> sink,
+    KafkaProducerService kafkaProducerService(final Sink<Committable, CompletionStage<Done>> sink,
                                               final ConsumerTopicConfiguration upstreamConfig,
                                               final Materializer materializer) {
         return new KafkaProducerService(sink, upstreamConfig, materializer);
@@ -64,15 +64,38 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    RunnableGraph<DrainingControl<Done>> runner(
-            final Source<CommittableMessage<String, AuditMessage>, Control> source,
+    RunnableGraph<DrainingControl<Done>> errorRunner(
+            final Source<CommittableMessage<String, AuditErrorMessage>, Control> source,
             final Sink<Committable, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final AuditService service) {
 
         // Read messages from the stream source
         return source
-                // Audit the message (this can be either a success or error message)
+                // Audit the error message
+                .mapAsync(PARALLELISM, committableMessage -> {
+                    String token = new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
+                    return service.audit(token, committableMessage.record().value())
+                            .<Committable>thenApply(ignored -> committableMessage.committableOffset());
+                })
+
+                // Send errors to supervisor
+                .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
+
+                // Materialize the stream, sending messages to the sink
+                .toMat(sink, Consumer::createDrainingControl);
+    }
+
+    @Bean
+    RunnableGraph<DrainingControl<Done>> successRunner(
+            final Source<CommittableMessage<String, AuditSuccessMessage>, Control> source,
+            final Sink<Committable, CompletionStage<Done>> sink,
+            final Function1<Throwable, Directive> supervisionStrategy,
+            final AuditService service) {
+
+        // Read messages from the stream source
+        return source
+                // Audit the success message
                 .mapAsync(PARALLELISM, committableMessage -> {
                     String token = new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                     return service.audit(token, committableMessage.record().value())
