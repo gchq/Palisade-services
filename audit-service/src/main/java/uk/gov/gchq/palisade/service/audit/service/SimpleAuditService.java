@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * A SimpleAuditService is a simple implementation of a {@link AuditService} that keeps user data in the cache service
  */
@@ -31,9 +29,9 @@ public class SimpleAuditService implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleAuditService.class);
 
     @Override
-    public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
+    public Boolean audit(final String token, final AuditMessage request) {
         LOGGER.info("SimpleAuditService.audit called for token '{}' with request '{}'", token, request);
-        return CompletableFuture.completedFuture(Boolean.TRUE);
+        return true;
     }
 }
 

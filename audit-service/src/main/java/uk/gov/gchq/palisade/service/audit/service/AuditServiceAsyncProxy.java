@@ -16,24 +16,15 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-/**
- * Enum providing type safety for service names
- *
- * @since 0.4.0
- */
-public enum ServiceName {
-    ATTRIBUTE_MASKING_SERVICE("attribute-masking-service"),
-    DATA_SERVICE("data-service"),
-    FILTERED_RESOURCE_SERVICE("filtered-resource-service"),
-    PALISADE_SERVICE("palisade-service"),
-    POLICY_SERVICE("policy-service"),
-    RESOURCE_SERVICE("resource-service"),
-    TOPIC_OFFSET_SERVICE("topic-offset-service"),
-    USER_SERVICE("user-service");
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
-    public final String name;
+import java.util.concurrent.CompletableFuture;
 
-    ServiceName(final String name) {
-        this.name = name;
+public class AuditServiceAsyncProxy {
+
+    private AuditService auditService;
+
+    public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
+        return CompletableFuture.supplyAsync(() -> auditService.audit(token, request)).exceptionally(ex -> false);
     }
 }

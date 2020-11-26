@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.audit.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -107,8 +108,14 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map<String, Object> getAttributes() throws JsonProcessingException {
+    public Map<String, String> getAttributes() throws JsonProcessingException {
         return MAPPER.treeToValue(attributes, Map.class);
+    }
+
+    @JsonIgnore
+    @Generated
+    public JsonNode getAttributesNode() {
+        return attributes;
     }
 
     @Override

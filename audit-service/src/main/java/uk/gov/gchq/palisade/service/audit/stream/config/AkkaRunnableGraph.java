@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 
@@ -68,7 +69,7 @@ public class AkkaRunnableGraph {
             final Source<CommittableMessage<String, AuditErrorMessage>, Control> source,
             final Sink<Committable, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
-            final AuditService service) {
+            final AuditServiceAsyncProxy service) {
 
         // Read messages from the stream source
         return source
@@ -91,7 +92,7 @@ public class AkkaRunnableGraph {
             final Source<CommittableMessage<String, AuditSuccessMessage>, Control> source,
             final Sink<Committable, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
-            final AuditService service) {
+            final AuditServiceAsyncProxy service) {
 
         // Read messages from the stream source
         return source
@@ -105,7 +106,7 @@ public class AkkaRunnableGraph {
                 // Send errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
 
-                // Materialize the stream, sending messages to the sink
+                // Materialize the stream, sending messages to the committer sink
                 .toMat(sink, Consumer::createDrainingControl);
     }
 

@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.service.audit.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.Context;
@@ -53,11 +52,6 @@ public final class AuditErrorMessage extends AuditMessage {
 
         super(userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
         this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error cannot be null"));
-    }
-
-    @Generated
-    public Throwable getError() throws JsonProcessingException {
-        return MAPPER.treeToValue(error, Throwable.class);
     }
 
     @JsonIgnore

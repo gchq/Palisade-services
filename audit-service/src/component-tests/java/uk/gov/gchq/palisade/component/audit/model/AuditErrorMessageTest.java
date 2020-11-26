@@ -92,7 +92,8 @@ class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
                         () -> assertThat(auditErrorMessageObject.getServerHostname()).isEqualTo(auditErrorMessage.getServerHostname()),
                         () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
+                        () -> assertThat(auditErrorMessageObject.getErrorNode().get("message").asText())
+                                .isEqualTo(auditErrorMessage.getErrorNode().get("message").asText())
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here

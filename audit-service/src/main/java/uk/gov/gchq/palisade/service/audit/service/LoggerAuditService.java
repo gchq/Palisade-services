@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.audit.service;
 
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class LoggerAuditService implements AuditService {
     private static void auditSuccessMessage(final Logger logger, final AuditMessage request) {
         requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name()) || request.getServiceName().equals(ServiceName.DATA_SERVICE.name())) {
+        if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || request.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
         } else {
@@ -84,17 +85,16 @@ public class LoggerAuditService implements AuditService {
     }
 
     @Override
-    public CompletableFuture<Boolean> audit(final String token, final AuditMessage request) {
-        requireNonNull(request, AUDIT_MESSAGE_NULL);
+    public Boolean audit(final String token, final AuditMessage message) {
         LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
-        BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(request.getClass());
+        BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(message.getClass());
         if (handler != null) {
-            handler.accept(auditLogger, request);
+            handler.accept(auditLogger, message);
         } else {
             // received an AuditMessage derived class that is not defined as a Handler above.
             // need to add handler for this class.
-            LOGGER.error("handler == null for {}", request.getClass().getName());
+            LOGGER.error("handler == null for {}", message.getClass().getName());
         }
-        return CompletableFuture.completedFuture(Boolean.TRUE);
+        return true;
     }
 }

@@ -146,11 +146,9 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testErrorRequestSet() {
-        // Create an audit error message type
+        // Create an message on the error topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
-        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
-                ContractTestData.ERROR_RECORD_NODE_FACTORY.get().limit(3L))
-                .flatMap(Function.identity());
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.ERROR_RECORD_NODE_FACTORY.get().limit(3L);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -158,10 +156,12 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         // Then - check the audit service has invoked the audit method
-        Mockito.verify(auditService, Mockito.times(3)).audit(anyString(), any());
+        Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
+
     }
 
     /*@Test
@@ -302,8 +302,8 @@ class KafkaContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("success", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("success", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {

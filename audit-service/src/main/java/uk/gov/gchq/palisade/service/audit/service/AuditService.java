@@ -40,6 +40,6 @@ public interface AuditService extends Service {
      * @param request An {@link AuditMessage} object that contains the details required to create an audit log.
      * @return a  {@link CompletableFuture} giving a boolean value indicating the success of this audit request
      */
-    CompletableFuture<Boolean> audit(final String token, final AuditMessage request);
+    Boolean audit(final String token, final AuditMessage request);
 
 }

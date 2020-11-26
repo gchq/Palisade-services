@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
+import uk.gov.gchq.palisade.service.audit.service.ServiceName;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,6 @@ public class ContractTestData {
     public static final String USER_ID = "test-user-id";
     public static final String RESOURCE_ID = "/test/resourceId";
     public static final Context CONTEXT = new Context().purpose("purpose");
-    public static final Map<String, String> SERVICES_MAP = new HashMap<>();
     public static final String TIMESTAMP = "2020-01-01";
     public static final String SERVER_IP = "The IP of the server";
     public static final String SERVER_NAME = "The name of the server";
@@ -68,8 +68,6 @@ public class ContractTestData {
     public static final String SUCCESS_REQUEST_JSON;
 
     static {
-        SERVICES_MAP.put("user", "USER_SERVICE");
-        SERVICES_MAP.put("data", "DATA_SERVICE");
         ATTRIBUTE_MAP.put("messages", "5");
     }
 
@@ -78,7 +76,7 @@ public class ContractTestData {
                 .withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
                 .withContext(CONTEXT)
-                .withServiceName(SERVICES_MAP.get("user"))
+                .withServiceName( ServiceName.USER_SERVICE.name)
                 .withTimestamp(TIMESTAMP)
                 .withServerIp(SERVER_IP)
                 .withServerHostname(SERVER_NAME)
@@ -89,7 +87,7 @@ public class ContractTestData {
                 .withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
                 .withContext(CONTEXT)
-                .withServiceName(SERVICES_MAP.get("data"))
+                .withServiceName(ServiceName.DATA_SERVICE.name)
                 .withTimestamp(TIMESTAMP)
                 .withServerIp(SERVER_IP)
                 .withServerHostname(SERVER_NAME)
@@ -156,7 +154,7 @@ public class ContractTestData {
     public static final Headers REQUEST_HEADERS = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, REQUEST_TOKEN.getBytes())});
 
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> ERROR_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("request", 0, null, ERROR_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<String, JsonNode>("error", 0, null, ERROR_FACTORY_NODE.apply(i), REQUEST_HEADERS));
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> SUCCESS_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("request", 0, null, SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+            .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }
