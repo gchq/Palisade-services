@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCmd;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
@@ -88,13 +88,13 @@ public class ApplicationConfiguration {
      * kafka topic.
      *
      * @param persistenceLayer an instance of the TokenOffsetPersistenceLayer (this must still be written to explicitly)
-     * @return a (running) ActorSystem for {@link TokenOffsetCmd}s
+     * @return a (running) ActorSystem for {@link TokenOffsetCommand}s
      * @implNote it is most likely this object will be used in conjunction with {@link TokenOffsetController#asGetterFlow(ActorRef)}
      * and {@link TokenOffsetController#asSetterSink(ActorRef)}, supplying this object as the argument, producing an
      * {@link akka.stream.javadsl.Flow} or {@link akka.stream.javadsl.Sink} respectively.
      */
     @Bean
-    ActorRef<TokenOffsetCmd> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
+    ActorRef<TokenOffsetCommand> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
         return TokenOffsetController.create(persistenceLayer);
     }
 
