@@ -22,8 +22,8 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.junit.jupiter.api.Test;
 
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetActorSystem.TokenOffsetCmd;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCmd;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TokenOffsetActorSystemTest {
+class TokenOffsetControllerTest {
     /**
      * Map-based implementation of persistence layer for testing purposes
      */
@@ -71,12 +71,12 @@ class TokenOffsetActorSystemTest {
 
         // Start the tokenOffset system
         akka.actor.ActorSystem actorSystem = akka.actor.ActorSystem.create();
-        ActorRef<TokenOffsetCmd> tokenOffsetSystem = TokenOffsetActorSystem.create(persistenceLayer);
+        ActorRef<TokenOffsetCmd> tokenOffsetSystem = TokenOffsetController.create(persistenceLayer);
 
         // Run the system with two tokens to request offsets for
         // Only one of these is in the persistence layer so far
         CompletableFuture<List<Pair<String, Long>>> messages = Source.fromJavaStream(() -> Stream.of("five", "six", "seven"))
-                .via(TokenOffsetActorSystem.asGetterFlow(tokenOffsetSystem))
+                .via(TokenOffsetController.asGetterFlow(tokenOffsetSystem))
                 .runWith(Sink.seq(), actorSystem)
                 .toCompletableFuture();
 
@@ -84,7 +84,7 @@ class TokenOffsetActorSystemTest {
         Source.fromJavaStream(() -> Stream.of(new Pair<>("seven", 7L), new Pair<>("six", 6L)))
                 .mapAsync(2, pair -> persistenceLayer.putOffsetIfAbsent(pair.first(), pair.second())
                         .thenApply(ign -> pair))
-                .to(TokenOffsetActorSystem.asSetterSink(tokenOffsetSystem))
+                .to(TokenOffsetController.asSetterSink(tokenOffsetSystem))
                 .run(actorSystem);
 
         // Assert that we received all the expected messages
