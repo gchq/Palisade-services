@@ -80,6 +80,9 @@ public final class TokenOffsetPersistenceResponse {
             IOffsetAndException withToken(@NonNull String token);
         }
 
+        /**
+         * Supply either a token or an offset to the builder
+         */
         public interface IOffsetAndException {
             /**
              * Supply both an offset and exception to the builder.
@@ -88,6 +91,8 @@ public final class TokenOffsetPersistenceResponse {
              * @param offset    the offset found for the client's token, or null if an exception was thrown
              * @param exception the exception thrown while finding the offset for the token, or null if none was thrown
              * @return a completed {@link TokenOffsetPersistenceResponse} object
+             * @implNote Prefer to call {@link IOffsetAndException#withOffset(Long)} or {@link IOffsetAndException#withException(Throwable)}
+             * instead of this less-strict method.
              */
             TokenOffsetPersistenceResponse withOffsetAndException(Long offset, Throwable exception);
 
