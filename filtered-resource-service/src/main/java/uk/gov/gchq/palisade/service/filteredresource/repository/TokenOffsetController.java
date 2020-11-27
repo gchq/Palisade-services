@@ -162,7 +162,7 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
     @SuppressWarnings("java:S1905") // Cast to SetOffset/ReportError is not unnecessary
     public static Flow<String, TokenOffsetPersistenceResponse, NotUsed> asGetterFlow(final ActorRef<TokenOffsetCommand> tokenOffsetActor) {
         return ActorFlow.ask(tokenOffsetActor, TIMEOUT, TokenOffsetCommand.SpawnWorker::new)
-                .map(workerResponse -> {
+                .map((WorkerResponse workerResponse) -> {
                     if (workerResponse instanceof SetOffset) {
                         SetOffset setOffset = (SetOffset) workerResponse;
                         return TokenOffsetPersistenceResponse.Builder.create()
@@ -178,8 +178,7 @@ public final class TokenOffsetController extends AbstractBehavior<TokenOffsetCom
                         // Entirely developer error, and provides a return from this if statement
                         throw new NoSuchElementException(String.format(
                                 "Could not determine input class type %s as a subclass of %s",
-                                workerResponse.getClass(), WorkerResponse.class
-                        ));
+                                workerResponse.getClass(), WorkerResponse.class));
                     }
                 });
     }

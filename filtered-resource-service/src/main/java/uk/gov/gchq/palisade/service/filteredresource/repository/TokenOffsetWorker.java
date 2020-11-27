@@ -27,6 +27,8 @@ import akka.actor.typed.javadsl.Receive;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.DeregisterWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCommand;
 
+import java.util.Optional;
+
 /**
  * A worker to carry-out a client request for an offset (from kafka "masked-resource-offset" topic or redis persistence)
  * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
@@ -115,13 +117,13 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
                         // Get from persistence
                         .findOffset(getCmd.token)
                         // If present tell self (if not, will be told in the future)
-                        .<Behavior<WorkerCommand>>thenApply(optional -> {
-                            optional.ifPresent(offset -> this.getContext().getSelf()
+                        .<Behavior<WorkerCommand>>thenApply((Optional<Long> optionalOffset) -> {
+                            optionalOffset.ifPresent(offset -> this.getContext().getSelf()
                                     .tell(new SetOffset(getCmd.token, offset)));
                             return this.onSetOffset(getCmd);
                         })
                         // If an exception is thrown reading from persistence, report the exception
-                        .exceptionally(ex -> {
+                        .exceptionally((Throwable ex) -> {
                             getCmd.replyTo.tell(new ReportError(getCmd.token, ex));
                             return Behaviors.stopped();
                         })
@@ -144,7 +146,7 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
                 .build();
     }
 
-    private Behavior<WorkerCommand> onPostStop(PostStop ignoredSignal) {
+    private Behavior<WorkerCommand> onPostStop(final PostStop ignoredSignal) {
         this.parent.tell(new DeregisterWorker(getContext().getSelf()));
         return this;
     }
