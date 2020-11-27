@@ -24,7 +24,7 @@ public enum MessageType {
     // Server
     PONG,
     RESOURCE,
-    // ERROR,
+    ERROR,
     COMPLETE
 
 }

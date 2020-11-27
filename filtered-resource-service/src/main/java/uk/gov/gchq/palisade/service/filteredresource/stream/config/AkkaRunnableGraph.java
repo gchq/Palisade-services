@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.filteredresource.stream.config;
 
 import akka.Done;
+import akka.actor.typed.ActorRef;
 import akka.japi.Pair;
 import akka.japi.tuple.Tuple4;
 import akka.kafka.ConsumerMessage.Committable;
@@ -48,7 +49,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
@@ -71,7 +72,7 @@ public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     public interface FilteredResourceSourceFactory {
-        Source<Pair<FilteredResourceRequest, CommittableOffset>, Control> create(String token);
+        Source<Pair<FilteredResourceRequest, CommittableOffset>, Control> create(String token, Long offset);
     }
 
     public interface AuditServiceSinkFactory {
@@ -80,9 +81,10 @@ public class AkkaRunnableGraph {
 
     @Bean
     WebsocketEventService websocketEventService(
+            final ActorRef<TokenOffsetCommand> tokenOffsetController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
-        return new WebsocketEventService(auditSinkFactory, resourceSourceFactory);
+        return new WebsocketEventService(tokenOffsetController, auditSinkFactory, resourceSourceFactory);
     }
 
     @Bean
@@ -106,11 +108,8 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    FilteredResourceSourceFactory filteredResourceSourceFactory(
-            final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory,
-            final TokenOffsetPersistenceLayer persistenceLayer
-    ) {
-        return (String token) -> {
+    FilteredResourceSourceFactory filteredResourceSourceFactory(final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory) {
+        return (String token, Long offset) -> {
             // Set-up some objects to hold a minimal amount of state for this stream
             // These are mostly used for sanity checks
             // Has the stream START message been seen
@@ -119,9 +118,7 @@ public class AkkaRunnableGraph {
             final AtomicBoolean observedResource = new AtomicBoolean(false);
 
             // Connect to the stream of resources using this token and the offset from the persistence layer
-            final Source<CommittableMessage<String, FilteredResourceRequest>, Control> source = sourceFactory.create(token, persistenceLayer::findOffset);
-
-            return source
+            return sourceFactory.create(token, offset)
                     // Extract token, (maybe) stream marker and (maybe) request from message headers
                     .map((CommittableMessage<String, FilteredResourceRequest> message) -> {
                         Headers headers = message.record().headers();
