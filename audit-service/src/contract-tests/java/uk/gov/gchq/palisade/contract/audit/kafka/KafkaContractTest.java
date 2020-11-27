@@ -131,7 +131,7 @@ class KafkaContractTest {
     @Test
     @DirtiesContext
     void testErrorRequestSet() {
-        // Create an message on the error topic
+        // Add some messages on the error topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.ERROR_RECORD_NODE_FACTORY.get().limit(3L);
 
@@ -144,14 +144,14 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        // Then - check the audit service has invoked the audit method
+        // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
     }
 
     @Test
     @DirtiesContext
-    void testSuccessRequestSet() {
-        // Create a variable number of requests
+    void testGoodSuccessRequestSet() {
+        // Add some messages on the success topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(3L);
 
@@ -163,14 +163,14 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
-        // Then - check the audit service has invoked the audit method
+        // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
     }
 
     @Test
     @DirtiesContext
-    void testMixedSuccessRequestSet() {
-        // Create a variable number of requests
+    void testGoodAndBadSuccessRequestSet() {
+        // Add 2 `Good` and 2 `Bad` success messages to the success topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 ContractTestData.GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(1L),
@@ -186,21 +186,20 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
-        // Then - check the audit service has invoked the audit method
+        // Then - check the audit service has invoked the audit method for the 2 `Good` requests
         Mockito.verify(auditService, Mockito.timeout(3000).times(2)).audit(anyString(), any());
     }
 
     @Test
     @DirtiesContext
     void testRestEndpointForErrorMessage() {
-        // Given
-
+        // Pass an error message to 'error' rest endpoint
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
-        // Then - the REST request was accepted
+        // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
@@ -209,19 +208,34 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testRestEndpointForSuccessMessage() {
-        // Given
-
+    void testRestEndpointForGoodSuccessMessage() {
+        // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
-        // Then - the REST request was accepted
+        // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         Mockito.verify(auditService, Mockito.timeout(3000).times(1)).audit(anyString(), any());
+    }
+
+    @Test
+    @DirtiesContext
+    void testRestEndpointForBadSuccessMessage() {
+        // Pass a success message to 'success' rest endpoint
+        // When - we POST to the rest endpoint
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST, new LinkedMultiValueMap<>(headers));
+        ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
+
+        // Then - check the REST request was accepted
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+
+        // Then - check the audit service has invoked the audit method
+        Mockito.verify(auditService, Mockito.timeout(3000).times(0)).audit(anyString(), any());
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
