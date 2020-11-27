@@ -75,7 +75,7 @@ public class AkkaRunnableGraph {
         // Read messages from the stream source
         return source
                 // Audit the error message
-                .mapAsync(PARALLELISM, committableMessage -> {
+                .mapAsync(PARALLELISM, (CommittableMessage<String, AuditErrorMessage> committableMessage) -> {
                     String token = new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                     return service.audit(token, committableMessage.record().value())
                             .<Committable>thenApply(ignored -> committableMessage.committableOffset());
@@ -98,7 +98,7 @@ public class AkkaRunnableGraph {
         // Read messages from the stream source
         return source
                 // Audit the success message
-                .mapAsync(PARALLELISM, committableMessage -> {
+                .mapAsync(PARALLELISM, (CommittableMessage<String, AuditSuccessMessage> committableMessage) -> {
                     String token = new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                     return service.audit(token, committableMessage.record().value())
                             .<Committable>thenApply(ignored -> committableMessage.committableOffset());

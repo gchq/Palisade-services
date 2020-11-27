@@ -26,25 +26,23 @@ import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+/**
+ * An asynchronous service for processing requests that might be slow.
+ */
 public class AuditServiceAsyncProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceAsyncProxy.class);
-    private final Executor executor;
     private final Map<String, AuditService> services;
 
     /**
      * Constructor for the {@link AuditServiceAsyncProxy}
      *
      * @param services           a {@link Map} of services to use for this proxy
-     * @param executor           the {@link Executor} for the service
      */
-    public AuditServiceAsyncProxy(final Map<String, AuditService> services,
-                                 final Executor executor) {
+    public AuditServiceAsyncProxy(final Map<String, AuditService> services) {
         this.services = services;
-        this.executor = executor;
     }
 
     /**
@@ -57,10 +55,10 @@ public class AuditServiceAsyncProxy {
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {
         LOGGER.debug("Attempting to audit a {} for token {}", message.getClass(), token);
         return CompletableFuture.supplyAsync(() -> services.values().stream()
-                .map(auditService -> {
+                .map((AuditService auditService) -> {
                     if (message instanceof AuditSuccessMessage) {
                         AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-                        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
+                        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                             auditService.audit(token, successMessage);
                             return true;
                         } else {

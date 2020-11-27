@@ -39,13 +39,14 @@ import static java.util.Objects.requireNonNull;
  */
 public class LoggerAuditService implements AuditService {
     public static final String CONFIG_KEY = "logger";
-    static final String AUDIT_MESSAGE = "AuditMessage: {}";
-    static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
-    static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
-    static final String LOGGER_NULL = "The Logger cannot be null";
-    static final String SUCCESS_CALLED = "auditSuccessMessage from {}, logger is: {}, and request is {}";
-    private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerAuditService.class);
+    private static final Map<Class, BiConsumer<Logger, AuditMessage>> DISPATCHER = new HashMap<>();
+    private static final String AUDIT_MESSAGE = "AuditMessage: {}";
+    private static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
+    private static final String ERROR_CALLED = "auditErrorMessage from {}, logger is: {}, and request is {}";
+    private static final String LOGGER_NULL = "The Logger cannot be null";
+    private static final String SUCCESS_CALLED = "auditSuccessMessage from {}, logger is: {}, and request is {}";
 
 
     static {
@@ -67,7 +68,7 @@ public class LoggerAuditService implements AuditService {
     private static void auditSuccessMessage(final Logger logger, final AuditMessage request) {
         requireNonNull(request, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
-        if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || request.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
+        if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || request.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
             logger.info(AUDIT_MESSAGE, request);
         } else {
@@ -88,7 +89,7 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                 auditSuccessMessage(auditLogger, successMessage);
                 return true;
             } else {

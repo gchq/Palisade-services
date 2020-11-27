@@ -31,9 +31,12 @@ public enum ServiceName {
     TOPIC_OFFSET_SERVICE("topic-offset-service"),
     USER_SERVICE("user-service");
 
-    public final String name;
+    /**
+     * The service name value used by the {@link uk.gov.gchq.palisade.service.audit.model.AuditMessage} types
+     */
+    public final String value;
 
-    ServiceName(final String name) {
-        this.name = name;
+    ServiceName(final String value) {
+        this.value = value;
     }
 }

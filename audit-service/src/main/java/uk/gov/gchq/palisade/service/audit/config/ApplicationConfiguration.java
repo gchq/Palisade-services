@@ -19,16 +19,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import event.logging.impl.DefaultEventLoggingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.audit.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
@@ -36,14 +32,12 @@ import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /**
  * Bean configuration and dependency injection graph
  */
 @Configuration
-public class ApplicationConfiguration implements AsyncConfigurer {
+public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Primary
@@ -70,28 +64,13 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    AuditServiceAsyncProxy auditServiceAsyncProxy(final Map<String, AuditService> services, final Executor executor) {
-        return new AuditServiceAsyncProxy(services, executor);
+    AuditServiceAsyncProxy auditServiceAsyncProxy(final Map<String, AuditService> services) {
+        return new AuditServiceAsyncProxy(services);
     }
 
     @Primary
     @Bean
     ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    @Override
-    @Bean("applicationTaskExecutor")
-    public Executor getAsyncExecutor() {
-        return Optional.of(new ThreadPoolTaskExecutor()).stream().peek(ex -> {
-            ex.setThreadNamePrefix("AppThreadPool-");
-            ex.setCorePoolSize(6);
-            LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
-        }).findFirst().orElse(null);
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new ApplicationAsyncExceptionHandler();
     }
 }

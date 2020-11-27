@@ -65,7 +65,7 @@ class StroomAuditServiceTest {
         // Given
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.name));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.value));
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
@@ -76,7 +76,7 @@ class StroomAuditServiceTest {
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
                 () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
-                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.DATA_SERVICE.name),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.DATA_SERVICE.value),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(StroomAuditService.READ_SUCCESS),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_LEAF_RESOURCE_ID),
@@ -90,7 +90,7 @@ class StroomAuditServiceTest {
         // Given
 
         // When
-        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.name));
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.value));
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
@@ -101,7 +101,7 @@ class StroomAuditServiceTest {
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
                 () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
-                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.FILTERED_RESOURCE_SERVICE.name),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.FILTERED_RESOURCE_SERVICE.value),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(StroomAuditService.REQUEST_SUCCESS),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_LEAF_RESOURCE_ID),
@@ -115,7 +115,7 @@ class StroomAuditServiceTest {
         // Given
 
         // When
-        Boolean result = auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.name));
+        Boolean result = auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.value));
 
         //Then
         assertThat(result).isFalse();
@@ -124,7 +124,7 @@ class StroomAuditServiceTest {
     @Test
     void testUserServiceAuditErrorMessage() {
         // Given
-        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.name);
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.value);
 
         // When
         auditService.audit(ApplicationTestData.TEST_TOKEN, message);
@@ -138,7 +138,7 @@ class StroomAuditServiceTest {
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
                 () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
-                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.USER_SERVICE.name),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.USER_SERVICE.value),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),
@@ -151,7 +151,7 @@ class StroomAuditServiceTest {
     @Test
     void testResourceServiceAuditErrorMessage() {
         // Given
-        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.name);
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.value);
 
         // When
         auditService.audit(ApplicationTestData.TEST_TOKEN, message);
@@ -165,7 +165,7 @@ class StroomAuditServiceTest {
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
                 () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
-                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.RESOURCE_SERVICE.name),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.RESOURCE_SERVICE.value),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),
@@ -178,7 +178,7 @@ class StroomAuditServiceTest {
     @Test
     void testOtherServiceAuditErrorMessage() {
         // Given
-        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.name);
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.value);
 
         // When
         auditService.audit(ApplicationTestData.TEST_TOKEN, message);
@@ -192,7 +192,7 @@ class StroomAuditServiceTest {
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
                 () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
                 () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
-                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.POLICY_SERVICE.name),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.POLICY_SERVICE.value),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
                 () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),

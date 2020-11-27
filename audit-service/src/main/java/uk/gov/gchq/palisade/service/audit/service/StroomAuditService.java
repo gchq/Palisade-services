@@ -47,19 +47,20 @@ import static java.util.Objects.requireNonNull;
  */
 public class StroomAuditService implements AuditService {
     public static final String CONFIG_KEY = "stroom";
-    static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
-    static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
-    static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
-    static final String ERROR_MESSAGE_FROM = "AuditErrorMessage received from {}";
-    static final String ORGANISATION = "organisation is {}";
-    static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
-    private static final System SYSTEM = new System();
-    private static final String EVENT_GENERATOR = "Palisade";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StroomAuditService.class);
+    private static final String AUDIT_MESSAGE_NULL = "The AuditMessage cannot be null";
+    private static final String ERROR_MESSAGE_FROM = "AuditErrorMessage received from {}";
+    private static final String EVENT_GENERATOR = "Palisade";
     private static final String JSON_SERIALISING_ERROR = "An error occurred while deseriaising the {} - Message: {}";
+    private static final String ORGANISATION = "organisation is {}";
+    private static final String SYSTEM_CLASSIFICATION = "systemClassification is {}";
+    private static final System SYSTEM = new System();
+
+    protected static final String READ_SUCCESS = "READ_REQUEST_COMPLETED";
+    protected static final String REQUEST_SUCCESS = "REGISTER_REQUEST_COMPLETED";
 
     private final DefaultEventLoggingService eventLogger;
-    private final Logger errorLogger;
 
     /**
      * Create a new StroomAuditService, which will take in an {@link AuditMessage} and produce events from the
@@ -68,7 +69,6 @@ public class StroomAuditService implements AuditService {
      * @param eventLoggingService the target {@link event.logging.EventLoggingService} for all created events
      */
     public StroomAuditService(final DefaultEventLoggingService eventLoggingService) {
-        errorLogger = LoggerFactory.getLogger(StroomAuditService.class);
         eventLogger = eventLoggingService;
         LOGGER.debug("StroomAuditService called and the defaultEventLoggingService is: {}", eventLoggingService);
     }
@@ -142,10 +142,12 @@ public class StroomAuditService implements AuditService {
         // Log the success message
         Outcome outcome = createOutcome(true);
         successEventDetail.setTypeId(message.getServiceName());
-        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name)) {
+        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value)) {
             successEventDetail.setDescription(REQUEST_SUCCESS);
-        } else if (message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
+        } else if (message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
             successEventDetail.setDescription(READ_SUCCESS);
+        } else {
+            successEventDetail.setDescription("UNKNOWN_SUCCESS_MESSAGE");
         }
         // Log the attributes
         Data data = new Data();
@@ -340,7 +342,7 @@ public class StroomAuditService implements AuditService {
     public Boolean audit(final String token, final AuditMessage message) {
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || message.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
                 auditSuccessMessage(token, eventLogger, successMessage);
                 return true;
             } else {
