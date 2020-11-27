@@ -81,9 +81,9 @@ class TokenOffsetControllerTest {
         CompletableFuture<List<Pair<String, Long>>> messages = Source.fromJavaStream(() -> Stream.of("five", "six", "seven"))
                 .via(TokenOffsetController.asGetterFlow(tokenOffsetSystem))
                 // Filter out and ignore errors
-                .filter(response -> response.exception == null)
+                .filter(response -> response.getException() == null)
                 // Extract successes
-                .map(response -> Pair.create(response.token, response.offset))
+                .map(response -> Pair.create(response.getToken(), response.getOffset()))
                 // Run and materialize to list of (successful) responses
                 .runWith(Sink.seq(), actorSystem)
                 .toCompletableFuture();
@@ -132,12 +132,12 @@ class TokenOffsetControllerTest {
         // Assert that we received all the expected messages
         assertThat(messages.get(1, TimeUnit.SECONDS))
                 .hasSize(3)
-                .extracting(response -> response.offset)
+                .extracting(TokenOffsetPersistenceResponse::getOffset)
                 .usingRecursiveComparison()
                 .isEqualTo(Stream.of(5L, null, 7L).collect(Collectors.toList()));
 
         assertThat(messages.get())
-                .extracting(response -> response.exception)
+                .extracting(TokenOffsetPersistenceResponse::getException)
                 .usingRecursiveComparison()
                 .isEqualTo(Stream.of(null, extrudedException, null).collect(Collectors.toList()));
     }
