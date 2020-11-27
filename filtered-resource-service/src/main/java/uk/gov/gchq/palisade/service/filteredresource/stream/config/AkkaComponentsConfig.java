@@ -48,9 +48,7 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.filteredresource.stream.StreamComponents;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -81,7 +79,7 @@ public class AkkaComponentsConfig {
          * @param offsetFunction a function that supplies the offset to start with for the given token, defaulting to 'now' if empty
          * @return a new Kafka source
          */
-        Source<CommittableMessage<K, V>, Control> create(String token, Function<String, CompletableFuture<Optional<Long>>> offsetFunction);
+        Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
     }
 
     @Bean
@@ -92,25 +90,11 @@ public class AkkaComponentsConfig {
                 SerDesConfig.maskedResourceValueDeserializer());
         Topic topic = configuration.getTopics().get("input-topic");
 
-        return (String token, Function<String, CompletableFuture<Optional<Long>>> offsetSupplier) -> {
-            // Set the default offset if one is not found in persistence
-            // n.b. There is the chance for a data race between the attribute-masking-service writing a response and the
-            // topic-offset-service processing it and writing its response - as such, there needs to be some grace period
-            // such that this 'now' is actually 'now - 5000ms' or similar
-            long now = System.currentTimeMillis() - GRACE_PERIOD_MILLIS;
-            // Try to get an offset from persistence, in this case an error thrown is recoverable, but do still log it
-            Optional<Long> topicOffset = offsetSupplier.apply(token)
-                    .exceptionally((Throwable throwable) -> {
-                        LOGGER.warn("Failure while getting offset from persistence, using 'now' as offset", throwable);
-                        return Optional.empty();
-                    })
-                    .join();
+        return (String token, Long offset) -> {
             // Convert the token to a partition number
             int partition = Token.toPartition(token, topic.getPartitions());
             // Dynamically create partition/offset subscription (based on client token)
-            Subscription subscription = topicOffset
-                    .map(storedOffset -> Subscriptions.assignmentWithOffset(new TopicPartition(topic.getName(), partition), storedOffset))
-                    .orElse(Subscriptions.assignmentOffsetsForTimes(new TopicPartition(topic.getName(), partition), now));
+            Subscription subscription = Subscriptions.assignmentWithOffset(new TopicPartition(topic.getName(), partition), offset);
             // Create new kafka consumer / akka source
             // The use of the token as the groupId could be used for better client error recovery, but this isn't actually done
             // Instead it is just used as a convenient unique groupId for this kafka consumer

@@ -17,20 +17,21 @@
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
 import akka.NotUsed;
+import akka.actor.typed.ActorRef;
 import akka.http.javadsl.model.ws.Message;
 import akka.http.scaladsl.model.ws.BinaryMessage;
 import akka.japi.Pair;
-import akka.kafka.ConsumerMessage.CommittableOffset;
-import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebsocketMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.util.ConditionalGraph;
@@ -52,6 +53,7 @@ import java.util.Optional;
 public class WebsocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketEventService.class);
 
+    private final ActorRef<TokenOffsetCommand> tokenOffsetController;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
 
@@ -60,12 +62,15 @@ public class WebsocketEventService {
      * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
      * back to the client as required.
      *
-     * @param auditSinkFactory a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
-     * @param  resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
+     * @param tokenOffsetController the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
+     * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
+     * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
     public WebsocketEventService(
+            final ActorRef<TokenOffsetCommand> tokenOffsetController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
+        this.tokenOffsetController = tokenOffsetController;
         this.auditSinkFactory = auditSinkFactory;
         this.resourceSourceFactory = resourceSourceFactory;
     }
@@ -96,7 +101,9 @@ public class WebsocketEventService {
                 // Register handlers for each MessageType
                 // Any messages with MessageTypes other than those listed here are dropped
                 .via(ConditionalGraph.map(x -> x.getType().ordinal(), Map.of(
+                        // On PING message, do a PONG
                         MessageType.PING.ordinal(), this.onPing(token),
+                        // On CTS message, get the offset for the token from persistence, then return results
                         MessageType.CTS.ordinal(), this.onCts(token)
                 )));
     }
@@ -106,67 +113,87 @@ public class WebsocketEventService {
      * This may handle some additional form of validation in the future.
      *
      * @param token the token for this client
-     * @return a flow from SUBSCRIBE client requests to server responses
+     * @return a flow from {@link MessageType#PING} client requests to {@link MessageType#PONG} server responses
      */
     private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onPing(final String token) {
         return Flow.<WebsocketMessage>create()
                 // Reply to the client's PING request with a PONG (application-layer, not websocket TCP-frame layer)
                 .map(message -> WebsocketMessage.Builder.create()
                         .withType(MessageType.PONG)
-                        .withHeader("token", token).noHeaders()
+                        .withHeader(Token.HEADER, token).noHeaders()
                         .noBody()
                 );
     }
 
     /**
-     * Handle {@link MessageType#CTS} messages, expected to return a {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE} message in response.
+     * Handle {@link MessageType#CTS} messages, expected to return a {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
+     * message in response.
      * This zips the flow of filtered resources from kafka to the flow of {@link MessageType#CTS} messages from the client.
-     * This ensures <i>every</i> resource is paired up with <i>every</i> client resource request in a strict one-to-one manner,
-     * while still making best use of asynchronous akka streams.
+     * This ensures <i>every</i> resource is paired up with <i>every</i> client CTS in a strict one-to-one manner, while still
+     * making best use of asynchronous akka streams.
+     * If an error occurs getting the offset for a token from persistence (eg redis is down), a {@link MessageType#ERROR} will be
+     * returned, followed by a {@link MessageType#COMPLETE}.
      *
      * @param token the token for this client
-     * @return a flow from SUBSCRIBE client requests to server responses
+     * @return a flow from {@link MessageType#CTS} client requests to {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or
+     * {@link MessageType#COMPLETE} server responses
      */
     private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onCts(final String token) {
-        // RESOURCE messages are Optional::of, COMPLETE messages are Optional::empty
-        // This final message is part of the resourceSource stream completing, not the server's websocket processing flow
-        // Otherwise, COMPLETE is returned when the client 'completes' their flow of sent websocket messages (ie. websocket close)
-        // At the end of the stream (upon seeing Optional.empty()), we will send a COMPLETE message
-        final Source<Optional<Pair<FilteredResourceRequest, CommittableOffset>>, Control> resourceSource =
-                this.resourceSourceFactory.create(token)
-                        .map(Optional::of)
-                        .concat(Source.single(Optional.empty()));
-
-        // Audit client's authorisation for this resource
-        final Sink<Optional<Pair<FilteredResourceRequest, CommittableOffset>>, NotUsed> auditSink =
-                Flow.<Optional<Pair<FilteredResourceRequest, CommittableOffset>>>create()
-                        .flatMapConcat(optionalRequest -> Source.fromJavaStream(optionalRequest::stream))
-                        .to(this.auditSinkFactory.create(token));
-
         return Flow.<WebsocketMessage>create()
-                // Connect each CTS message with a processed leafResource
-                .zip(resourceSource)
+                // Connect each CTS message with a processed leafResource or error
+                .zip(this.createResourceSource(token))
+
                 // Drop the CTS message, we don't care about it's contents beyond the MessageType
                 .map(Pair::second)
 
-                // Each filtered resource request is audited as soon as we receive a CTS message for it from the client (before the resource is returned to the client)
-                .alsoTo(auditSink)
-                // Drop the now-committed offset from the pair, keeping just a filteredResourceRequest
-                .via(Flow.<Optional<Pair<FilteredResourceRequest, CommittableOffset>>>create()
-                        .map(optionalPair -> optionalPair.map(Pair::first)))
+                // Append COMPLETE message
+                .concat(Source.single(WebsocketMessage.Builder.create()
+                        .withType(MessageType.COMPLETE)
+                        .withHeader(Token.HEADER, token).noHeaders()
+                        .noBody()));
+    }
 
-                // Convert the leafResource into a WebsocketMessage response object, copying appropriate headers
-                .map(optionalRequest -> optionalRequest
-                        // RESOURCE type, copy headers, leafResource body
-                        .map(request -> WebsocketMessage.Builder.create()
-                                .withType(MessageType.RESOURCE)
-                                .noHeaders()
-                                .withBody(request.getResourceNode()))
-                        // COMPLETE type, copy headers, no body
-                        .orElseGet(() -> WebsocketMessage.Builder.create()
-                                .withType(MessageType.COMPLETE)
-                                .noHeaders()
-                                .noBody())
-                );
+    /**
+     * A finite stream of {@link WebsocketMessage}s, representing either {@link MessageType#RESOURCE}s
+     * or {@link MessageType#ERROR}s.
+     *
+     * @param token the token for this client
+     * @return a source of {@link MessageType#RESOURCE}s or {@link MessageType#ERROR}s
+     */
+    private Source<WebsocketMessage, NotUsed> createResourceSource(final String token) {
+        // Connect to the client's stream of resources by retrieving the token's offset and connecting to kafka
+        return Source.single(token)
+                // Get the offset for the given token
+                .via(TokenOffsetController.asGetterFlow(this.tokenOffsetController))
+
+                // Differing behaviour depending on whether the offset was found:
+                // * many RESOURCE messages if an offset was found
+                // * single ERROR message if an exception was thrown
+                .flatMapConcat(offsetResponse -> Optional.ofNullable(offsetResponse.getOffset())
+                        // If an offset was successfully found for this token, emit many RESOURCE messages
+                        .map(offset -> this.resourceSourceFactory.create(token, offset)
+                                // Connect to the audit topic kafka stream for resources returned to the client
+                                // Each filtered resource request is audited as soon as we receive a CTS message
+                                // for it from the client (before the resource is returned to the client)
+                                .alsoTo(this.auditSinkFactory.create(token))
+
+                                // Drop the now-committed offset from the pair, keeping just a filteredResourceRequest
+                                .map(Pair::first)
+
+                                // Convert the leafResource into a WebsocketMessage response object, copying appropriate headers
+                                .map(request -> WebsocketMessage.Builder.create()
+                                        .withType(MessageType.RESOURCE)
+                                        .withHeader(Token.HEADER, token).noHeaders()
+                                        .withBody(request.getResourceNode()))
+
+                                // Ignore this stream's materialization
+                                .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
+
+                        // If an error occurred finding the offset, emit a single ERROR message
+                        .orElse(Source.single(WebsocketMessage.Builder.create()
+                                .withType(MessageType.ERROR)
+                                .withHeader(Token.HEADER, token).noHeaders()
+                                .withBody(offsetResponse.getException()))));
+
     }
 }
