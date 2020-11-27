@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib@feature/PAL-926-build-without-docker-pull')_
+@Library('jenkinsfile-lib')_
 
 timestamps {
     services()
