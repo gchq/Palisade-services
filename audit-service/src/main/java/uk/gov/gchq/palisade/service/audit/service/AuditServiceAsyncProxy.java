@@ -60,7 +60,7 @@ public class AuditServiceAsyncProxy {
                 .map(auditService -> {
                     if (message instanceof AuditSuccessMessage) {
                         AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-                        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)){
+                        if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
                             auditService.audit(token, successMessage);
                             return true;
                         } else {

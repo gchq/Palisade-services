@@ -340,7 +340,7 @@ public class StroomAuditService implements AuditService {
     public Boolean audit(final String token, final AuditMessage message) {
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)){
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
                 auditSuccessMessage(token, eventLogger, successMessage);
                 return true;
             } else {

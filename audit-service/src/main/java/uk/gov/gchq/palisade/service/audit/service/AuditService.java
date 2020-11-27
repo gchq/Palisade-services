@@ -37,7 +37,8 @@ public interface AuditService extends Service {
      * is to forward to request somewhere else, put the request into cache so it can be aggregated with other requests,
      * or to write it to storage.
      *
-     * @param request An {@link AuditMessage} object that contains the details required to create an audit log.
+     * @param token   the token value for the request that is passing the message
+     * @param request an {@link AuditMessage} object that contains the details required to create an audit log.
      * @return a  {@link CompletableFuture} giving a boolean value indicating the success of this audit request
      */
     Boolean audit(final String token, final AuditMessage request);

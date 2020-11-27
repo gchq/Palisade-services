@@ -79,7 +79,7 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    CommitterSettings successCommitterSettings (final ActorSystem actorSystem) {
+    CommitterSettings successCommitterSettings(final ActorSystem actorSystem) {
         return SUCCESS_INPUT_COMPONENTS.committerSettings(actorSystem);
     }
 
@@ -110,7 +110,7 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    CommitterSettings errorCommitterSettings (final ActorSystem actorSystem) {
+    CommitterSettings errorCommitterSettings(final ActorSystem actorSystem) {
         return ERROR_INPUT_COMPONENTS.committerSettings(actorSystem);
     }
 

@@ -80,7 +80,7 @@ public class ContractTestData {
                 .withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
                 .withContext(CONTEXT)
-                .withServiceName( ServiceName.USER_SERVICE.name)
+                .withServiceName(ServiceName.USER_SERVICE.name)
                 .withTimestamp(TIMESTAMP)
                 .withServerIp(SERVER_IP)
                 .withServerHostname(SERVER_NAME)

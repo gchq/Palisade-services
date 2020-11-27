@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import static java.util.Objects.requireNonNull;
@@ -89,11 +88,11 @@ public class LoggerAuditService implements AuditService {
         LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
         if (message instanceof AuditSuccessMessage) {
             AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
-            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)){
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)) {
                 auditSuccessMessage(auditLogger, successMessage);
                 return true;
             } else {
-                LOGGER.warn("An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                auditLogger.warn("An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}",
                         message.getServiceName());
                 return false;
             }
@@ -102,7 +101,7 @@ public class LoggerAuditService implements AuditService {
             auditErrorMessage(auditLogger, errorMessage);
             return true;
         } else {
-            LOGGER.warn("The service {} has created unknown type of AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
+            auditLogger.warn("The service {} has created unknown type of AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
             return false;
         }
     }

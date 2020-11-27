@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.contract.audit.kafka;
 
 import akka.actor.ActorSystem;
-import akka.kafka.ConsumerSettings;
 import akka.kafka.ProducerSettings;
 import akka.kafka.javadsl.Producer;
 import akka.stream.Materializer;
@@ -27,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -68,7 +66,6 @@ import uk.gov.gchq.palisade.service.audit.model.Token;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.audit.stream.PropertiesConfigurer;
-import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
 
 import java.util.AbstractMap;
 import java.util.Collections;
