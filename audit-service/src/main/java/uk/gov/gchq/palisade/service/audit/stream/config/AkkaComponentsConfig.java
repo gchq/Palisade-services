@@ -22,11 +22,13 @@ import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
 import akka.kafka.ConsumerSettings;
+import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +53,17 @@ public class AkkaComponentsConfig {
     private static final StreamComponents<Committable, CompletionStage<Done>> OUTPUT_COMPONENTS = new StreamComponents<>();
 
     @Bean
+    Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> successRequestSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_INPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.successKeySerializer(),
+                SerDesConfig.successValueSerializer()
+        );
+
+        return SUCCESS_INPUT_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
     Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = SUCCESS_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
@@ -68,6 +81,17 @@ public class AkkaComponentsConfig {
     @Bean
     CommitterSettings successCommitterSettings (final ActorSystem actorSystem) {
         return SUCCESS_INPUT_COMPONENTS.committerSettings(actorSystem);
+    }
+
+    @Bean
+    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorRequestSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_INPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.errorKeySerializer(),
+                SerDesConfig.errorValueSerializer()
+        );
+
+        return ERROR_INPUT_COMPONENTS.plainProducer(producerSettings);
     }
 
     @Bean

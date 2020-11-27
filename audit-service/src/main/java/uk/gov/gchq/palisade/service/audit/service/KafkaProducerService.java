@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.service.audit.service;
 
 import akka.Done;
-import akka.kafka.ConsumerMessage.Committable;
 import akka.stream.Materializer;
+import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -28,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
@@ -50,21 +49,25 @@ import java.util.stream.Collectors;
  * Intended for debugging only.
  */
 public class KafkaProducerService {
-    private final Sink<Committable, CompletionStage<Done>> upstreamSink;
+    private final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> upstreamErrorSink;
+    private final Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> upstreamSuccessSink;
     private final ConsumerTopicConfiguration upstreamConfig;
     private final Materializer materializer;
 
     /**
      * Autowired constructor for the rest controller
      *
-     * @param upstreamSink   a sink to the upstream topic
-     * @param upstreamConfig the config for the topic (name, partitions, ...)
-     * @param materializer   the akka system materializer
+     * @param upstreamErrorSink   a sink to the upstream error topic
+     * @param upstreamSuccessSink a sink to the upstream success topic
+     * @param upstreamConfig      the config for the topic (name, partitions, ...)
+     * @param materializer        the akka system materializer
      */
-    public KafkaProducerService(final Sink<Committable, CompletionStage<Done>> upstreamSink,
+    public KafkaProducerService(final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> upstreamErrorSink,
+                                final Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> upstreamSuccessSink,
                                 final ConsumerTopicConfiguration upstreamConfig,
                                 final Materializer materializer) {
-        this.upstreamSink = upstreamSink;
+        this.upstreamErrorSink = upstreamErrorSink;
+        this.upstreamSuccessSink = upstreamSuccessSink;
         this.upstreamConfig = upstreamConfig;
         this.materializer = materializer;
     }
@@ -96,7 +99,8 @@ public class KafkaProducerService {
         // Process requests
         // Akka reactive streams can't have null elements, so map to and from optional
         Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
-                .map(request -> new ProducerRecord<String, AuditMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .map(request -> new ProducerRecord<String, AuditSuccessMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .toMat(this.upstreamSuccessSink, Keep.right())
                 .run(this.materializer)
                 .toCompletableFuture()
                 .join();
@@ -132,7 +136,8 @@ public class KafkaProducerService {
         // Process requests
         // Akka reactive streams can't have null elements, so map to and from optional
         Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
-                .map(request -> new ProducerRecord<String, AuditMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .map(request -> new ProducerRecord<String, AuditErrorMessage>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+                .toMat(this.upstreamErrorSink, Keep.right())
                 .run(this.materializer)
                 .toCompletableFuture()
                 .join();

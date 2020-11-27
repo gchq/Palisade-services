@@ -59,13 +59,17 @@ public class ContractTestData {
     public static final Throwable EXCEPTION = new Throwable("exception message");
     public static final String LEAF_RESOURCE_ID = "file:/test/resource/file.txt";
     public static final AuditErrorMessage ERROR_REQUEST;
-    public static final AuditSuccessMessage SUCCESS_REQUEST;
+    public static final AuditSuccessMessage GOOD_SUCCESS_REQUEST;
+    public static final AuditSuccessMessage BAD_SUCCESS_REQUEST;
     public static final JsonNode ERROR_REQUEST_NODE;
-    public static final JsonNode SUCCESS_REQUEST_NODE;
+    public static final JsonNode GOOD_SUCCESS_REQUEST_NODE;
+    public static final JsonNode BAD_SUCCESS_REQUEST_NODE;
     public static final AuditErrorMessage ERROR_REQUEST_OBJ;
-    public static final AuditSuccessMessage SUCCESS_REQUEST_OBJ;
+    public static final AuditSuccessMessage GOOD_SUCCESS_REQUEST_OBJ;
+    public static final AuditSuccessMessage BAD_SUCCESS_REQUEST_OBJ;
     public static final String ERROR_REQUEST_JSON;
-    public static final String SUCCESS_REQUEST_JSON;
+    public static final String GOOD_SUCCESS_REQUEST_JSON;
+    public static final String BAD_SUCCESS_REQUEST_JSON;
 
     static {
         ATTRIBUTE_MAP.put("messages", "5");
@@ -83,11 +87,22 @@ public class ContractTestData {
                 .withAttributes(ATTRIBUTE_MAP)
                 .withError(EXCEPTION);
 
-        SUCCESS_REQUEST = AuditSuccessMessage.Builder.create()
+        GOOD_SUCCESS_REQUEST = AuditSuccessMessage.Builder.create()
                 .withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
                 .withContext(CONTEXT)
                 .withServiceName(ServiceName.DATA_SERVICE.name)
+                .withTimestamp(TIMESTAMP)
+                .withServerIp(SERVER_IP)
+                .withServerHostname(SERVER_NAME)
+                .withAttributes(ATTRIBUTE_MAP)
+                .withLeafResourceId(LEAF_RESOURCE_ID);
+
+        BAD_SUCCESS_REQUEST = AuditSuccessMessage.Builder.create()
+                .withUserId(USER_ID)
+                .withResourceId(RESOURCE_ID)
+                .withContext(CONTEXT)
+                .withServiceName(ServiceName.USER_SERVICE.name)
                 .withTimestamp(TIMESTAMP)
                 .withServerIp(SERVER_IP)
                 .withServerHostname(SERVER_NAME)
@@ -98,7 +113,8 @@ public class ContractTestData {
     static {
         try {
             ERROR_REQUEST_JSON = MAPPER.writeValueAsString(ERROR_REQUEST);
-            SUCCESS_REQUEST_JSON = MAPPER.writeValueAsString(SUCCESS_REQUEST);
+            GOOD_SUCCESS_REQUEST_JSON = MAPPER.writeValueAsString(GOOD_SUCCESS_REQUEST);
+            BAD_SUCCESS_REQUEST_JSON = MAPPER.writeValueAsString(BAD_SUCCESS_REQUEST);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse UserRequest test data", e);
         }
@@ -107,20 +123,23 @@ public class ContractTestData {
     static {
         try {
             ERROR_REQUEST_NODE = MAPPER.readTree(ERROR_REQUEST_JSON);
-            SUCCESS_REQUEST_NODE = MAPPER.readTree(SUCCESS_REQUEST_JSON);
+            GOOD_SUCCESS_REQUEST_NODE = MAPPER.readTree(GOOD_SUCCESS_REQUEST_JSON);
+            BAD_SUCCESS_REQUEST_NODE = MAPPER.readTree(BAD_SUCCESS_REQUEST_JSON);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
         try {
             ERROR_REQUEST_OBJ = MAPPER.treeToValue(ERROR_REQUEST_NODE, AuditErrorMessage.class);
-            SUCCESS_REQUEST_OBJ = MAPPER.treeToValue(SUCCESS_REQUEST_NODE, AuditSuccessMessage.class);
+            GOOD_SUCCESS_REQUEST_OBJ = MAPPER.treeToValue(GOOD_SUCCESS_REQUEST_NODE, AuditSuccessMessage.class);
+            BAD_SUCCESS_REQUEST_OBJ = MAPPER.treeToValue(BAD_SUCCESS_REQUEST_NODE, AuditSuccessMessage.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     }
 
     public static final Function<Integer, String> ERROR_FACTORY_JSON = i -> ERROR_REQUEST_JSON;
-    public static final Function<Integer, String> SUCCESS_FACTORY_JSON = i -> SUCCESS_REQUEST_JSON;
+    public static final Function<Integer, String> GOOD_SUCCESS_FACTORY_JSON = i -> GOOD_SUCCESS_REQUEST_JSON;
+    public static final Function<Integer, String> BAD_SUCCESS_FACTORY_JSON = i -> BAD_SUCCESS_REQUEST_JSON;
     public static final Function<Integer, JsonNode> ERROR_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(ERROR_FACTORY_JSON.apply(i));
@@ -128,9 +147,16 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
     };
-    public static final Function<Integer, JsonNode> SUCCESS_FACTORY_NODE = i -> {
+    public static final Function<Integer, JsonNode> GOOD_SUCCESS_FACTORY_NODE = i -> {
         try {
-            return MAPPER.readTree(SUCCESS_FACTORY_JSON.apply(i));
+            return MAPPER.readTree(GOOD_SUCCESS_FACTORY_JSON.apply(i));
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse error contract test data", e);
+        }
+    };
+    public static final Function<Integer, JsonNode> BAD_SUCCESS_FACTORY_NODE = i -> {
+        try {
+            return MAPPER.readTree(BAD_SUCCESS_FACTORY_JSON.apply(i));
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse error contract test data", e);
         }
@@ -142,9 +168,16 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     };
-    public static final Function<Integer, AuditSuccessMessage> SUCCESS_FACTORY_OBJ = i -> {
+    public static final Function<Integer, AuditSuccessMessage> GOOD_SUCCESS_FACTORY_OBJ = i -> {
         try {
-            return MAPPER.treeToValue(SUCCESS_FACTORY_NODE.apply(i), AuditSuccessMessage.class);
+            return MAPPER.treeToValue(GOOD_SUCCESS_FACTORY_NODE.apply(i), AuditSuccessMessage.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to convert error contract test data to objects", e);
+        }
+    };
+    public static final Function<Integer, AuditSuccessMessage> BAD_SUCCESS_FACTORY_OBJ = i -> {
+        try {
+            return MAPPER.treeToValue(BAD_SUCCESS_FACTORY_NODE.apply(i), AuditSuccessMessage.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert error contract test data to objects", e);
         }
@@ -155,6 +188,8 @@ public class ContractTestData {
 
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> ERROR_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("error", 0, null, ERROR_FACTORY_NODE.apply(i), REQUEST_HEADERS));
-    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> SUCCESS_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
-            .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> GOOD_SUCCESS_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, GOOD_SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> BAD_SUCCESS_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, BAD_SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

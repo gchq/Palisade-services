@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.audit.web;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +28,6 @@ import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.service.KafkaProducerService;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -58,52 +56,31 @@ public class AuditRestController {
      * REST endpoint for debugging the service, mimicking the Kafka API.
      *
      * @param headers a multi-value map of http request headers
-     * @param request the request itself
+     * @param request the success request
      * @return the response from the service, or an error if one occurred
      */
-    @PostMapping(value = "/audit", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/success", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> auditRequest(final @RequestHeader Map<String, String> headers,
-                                             final @RequestBody AuditMessage request) {
+                                             final @RequestBody AuditSuccessMessage request) {
 
         // Process the request and return results
-        if (request instanceof AuditErrorMessage) {
-            AuditErrorMessage errorMessage = (AuditErrorMessage) request;
-            return service.processErrorRequest(headers, Collections.singletonList(errorMessage));
-        } else if (request instanceof AuditSuccessMessage) {
-            AuditSuccessMessage successMessage = (AuditSuccessMessage) request;
-            return service.processSuccessRequest(headers, Collections.singletonList(successMessage));
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return service.processSuccessRequest(headers, Collections.singletonList(request));
 
     }
 
     /**
      * REST endpoint for debugging the service, mimicking the Kafka API.
-     * Takes a list of requests and processes each of them with the given headers
      *
-     * @param headers  a multi-value map of http request headers
-     * @param requests a list of requests
+     * @param headers a multi-value map of http request headers
+     * @param request the error request
      * @return the response from the service, or an error if one occurred
      */
-    @PostMapping(value = "/audit/multi", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Void> audit(final @RequestHeader Map<String, String> headers,
-                                      final @RequestBody Collection<AuditMessage> requests) {
+    @PostMapping(value = "/error", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Void> auditRequest(final @RequestHeader Map<String, String> headers,
+                                             final @RequestBody AuditErrorMessage request) {
 
         // Process the request and return results
-        ResponseEntity<Void> result = null;
-        for (AuditMessage request : requests) {
-            if (request instanceof AuditErrorMessage) {
-                AuditErrorMessage errorMessage = (AuditErrorMessage) request;
-                result = service.processErrorRequest(headers, Collections.singletonList(errorMessage));
-            } else if (request instanceof AuditSuccessMessage) {
-                AuditSuccessMessage successMessage = (AuditSuccessMessage) request;
-                result = service.processSuccessRequest(headers, Collections.singletonList(successMessage));
-            } else {
-                result = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        }
-        return result;
-    }
+        return service.processErrorRequest(headers, Collections.singletonList(request));
 
+    }
 }

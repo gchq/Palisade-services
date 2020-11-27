@@ -29,6 +29,7 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -36,7 +37,6 @@ import scala.Function1;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
-import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
@@ -53,10 +53,11 @@ public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
 
     @Bean
-    KafkaProducerService kafkaProducerService(final Sink<Committable, CompletionStage<Done>> sink,
+    KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> errorSink,
+                                              final Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> successSink,
                                               final ConsumerTopicConfiguration upstreamConfig,
                                               final Materializer materializer) {
-        return new KafkaProducerService(sink, upstreamConfig, materializer);
+        return new KafkaProducerService(errorSink, successSink, upstreamConfig, materializer);
     }
 
     @Bean

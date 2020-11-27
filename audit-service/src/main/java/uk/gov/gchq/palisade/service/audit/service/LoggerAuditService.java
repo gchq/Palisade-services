@@ -87,14 +87,23 @@ public class LoggerAuditService implements AuditService {
     @Override
     public Boolean audit(final String token, final AuditMessage message) {
         LOGGER.debug("LoggerAuditService received an audit request for token '{}'", token);
-        BiConsumer<Logger, AuditMessage> handler = DISPATCHER.get(message.getClass());
-        if (handler != null) {
-            handler.accept(auditLogger, message);
+        if (message instanceof AuditSuccessMessage) {
+            AuditSuccessMessage successMessage = (AuditSuccessMessage) message;
+            if (message.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.name) || message.getServiceName().equals(ServiceName.DATA_SERVICE.name)){
+                auditSuccessMessage(auditLogger, successMessage);
+                return true;
+            } else {
+                LOGGER.warn("An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                        message.getServiceName());
+                return false;
+            }
+        } else if (message instanceof AuditErrorMessage) {
+            AuditErrorMessage errorMessage = (AuditErrorMessage) message;
+            auditErrorMessage(auditLogger, errorMessage);
+            return true;
         } else {
-            // received an AuditMessage derived class that is not defined as a Handler above.
-            // need to add handler for this class.
-            LOGGER.error("handler == null for {}", message.getClass().getName());
+            LOGGER.warn("The service {} has created unknown type of AuditMessage for token {}. Request: {}", message.getServiceName(), token, message);
+            return false;
         }
-        return true;
     }
 }
