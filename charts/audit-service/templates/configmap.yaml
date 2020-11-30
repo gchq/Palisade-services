@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,21 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: {{ include "audit-service.name" . }}
+  name: {{ include "audit-service.name" . }}-configmap
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    {{- include "audit-service.labels" . | nindent 4 }}
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - name: web
-    port: { { .Values.service.port } }
-    targetPort: { { .Values.service.internalPort } }
-  selector:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
+    helm.sh/chart: {{ include "audit-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  application-akka.yaml: |
+    akka:
+      kafka:
+        consumer.topics:
+          error-topic.partitions: {{ .Values.replicaCount }}
+          success-topic.partitions: {{ .Values.replicaCount }}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "palisade.kafka.fullname" . }}-headless
+        port: 9092
