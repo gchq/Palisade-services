@@ -40,14 +40,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * When a client connects via websocket, the {@link uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter}
+ * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter}
  * creates an instance of the {@link WebsocketEventService#createFlowGraph(String)} to handle the rest of the request.
  * The service goes through the following steps while returning resources:
  * <ul>
  *   <li> get the topic offset for this token, defaulting to "now"
- *   <li> TODO: send any "early" errors to the client (eg. user-service exceptions)
+ * <!--  <li> send any "early" errors to the client (eg. user-service exceptions) -->
  *   <li> send all appropriate masked resources to the client using the pre-calculated commit offset
- *   <li> TODO: send any "late" errors to the client (eg. resource-service or policy-service exceptions)
+ * <!--  <li> send any "late" errors to the client (eg. resource-service or policy-service exceptions) -->
  * </ul>
  */
 public class WebsocketEventService {
