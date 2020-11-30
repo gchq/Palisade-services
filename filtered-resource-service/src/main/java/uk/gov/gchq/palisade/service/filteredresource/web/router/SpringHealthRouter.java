@@ -32,16 +32,26 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SpringHealthRouter implements RouteSupplier {
-    // Map Spring health Statuses to Akka StatusCodes
+    // Map Spring health Statuses to HTTP status codes
     private static final Map<Status, Integer> SPRING_STATUS_LOOKUP = Map.of(
             Status.UP, 200,
             Status.DOWN, 503,
             Status.OUT_OF_SERVICE, 503,
             Status.UNKNOWN, 500
     );
+    // Map Spring Liveness to HTTP status codes
+    private static final Map<LivenessState, Integer> LIVENESS_STATUS_LOOKUP = Map.of(
+            LivenessState.CORRECT, 200,
+            LivenessState.BROKEN, 500
+    );
+    // Map Spring Readiness to HTTP status codes
+    private static final Map<ReadinessState, Integer> READINESS_STATUS_LOOKUP = Map.of(
+            ReadinessState.ACCEPTING_TRAFFIC, 200,
+            ReadinessState.REFUSING_TRAFFIC, 503
+    );
     // Used as a 'default' response if none of the above are appropriate
-    private static final Integer INTERNAL_ERROR = 500;
-    private static final Integer NOT_FOUND = 404;
+    private static final Integer STATUS_NOT_FOUND = 500;
+    private static final Integer HEALTH_PATH_NOT_FOUND = 404;
 
     private final HealthEndpoint springHealthEndpoint;
     private final ApplicationAvailability applicationAvailability;
@@ -58,23 +68,23 @@ public class SpringHealthRouter implements RouteSupplier {
 
                 // Convert to an akka response with a status code
                 .map(status -> {
-                    Integer statusCode = SPRING_STATUS_LOOKUP.getOrDefault(status, INTERNAL_ERROR);
+                    Integer statusCode = SPRING_STATUS_LOOKUP.getOrDefault(status, STATUS_NOT_FOUND);
                     return (Route) Directives.complete(StatusCode.int2StatusCode(statusCode), status, Jackson.marshaller());
                 })
 
                 // If Spring failed to get a health component for the requested path
-                .orElse(Directives.complete(HttpResponse.create().withStatus(NOT_FOUND)));
+                .orElse(Directives.complete(HttpResponse.create().withStatus(HEALTH_PATH_NOT_FOUND)));
     }
 
     private Route getLiveness() {
         LivenessState livenessState = applicationAvailability.getLivenessState();
-        StatusCode statusCode = StatusCode.int2StatusCode(livenessState.equals(LivenessState.CORRECT) ? 200 : 500);
+        StatusCode statusCode = StatusCode.int2StatusCode(LIVENESS_STATUS_LOOKUP.get(livenessState));
         return Directives.complete(statusCode, livenessState, Jackson.marshaller());
     }
 
     private Route getReadiness() {
         ReadinessState readinessState = applicationAvailability.getReadinessState();
-        StatusCode statusCode = StatusCode.int2StatusCode(readinessState.equals(ReadinessState.ACCEPTING_TRAFFIC) ? 200 : 503);
+        StatusCode statusCode = StatusCode.int2StatusCode(READINESS_STATUS_LOOKUP.get(readinessState));
         return Directives.complete(statusCode, readinessState, Jackson.marshaller());
     }
 
