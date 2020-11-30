@@ -31,8 +31,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,15 +46,12 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.StreamComponents;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 
 /**
  * Configuration for all kafka connections for the application
  */
 @Configuration
 public class AkkaComponentsConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaComponentsConfig.class);
-    private static final int GRACE_PERIOD_MILLIS = 5000;
     private static final StreamComponents<String, FilteredResourceRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, TopicOffsetMessage> OFFSET_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
@@ -67,11 +62,11 @@ public class AkkaComponentsConfig {
          * Create a new Committable Source dynamically given a topic offset and partition.
          * The likely use-case is groupId=[client token], topicPartition=[hash of token] topicOffset=[from topic-offset-service]
          *
-         * @param token          the client's token for this request, which is used for the consumer group-id and partition selection
-         * @param offsetFunction a function that supplies the offset to start with for the given token, defaulting to 'now' if empty
+         * @param token  the client's token for this request, which is used for the consumer group-id and partition selection
+         * @param offset the offset to start with for the given token
          * @return a new Kafka source
-         * @implNote it is important that the offsetFunction's future truly is started on the {@link Supplier#get()} method call as
-         * we need to ensure an accurate time for 'now' before starting the method call
+         * @implNote the offset should come from the {@link uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController}
+         * to ensure it is accurate (i.e. it points to the start-of-stream message)
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
     }
