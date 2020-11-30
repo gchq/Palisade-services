@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter}
+ * When a client connects via websocket, the {@link uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter}
  * creates an instance of the {@link WebsocketEventService#createFlowGraph(String)} to handle the rest of the request.
  * The service goes through the following steps while returning resources:
  * <ul>
