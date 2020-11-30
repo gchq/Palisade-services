@@ -54,7 +54,7 @@ public class ConditionalGraph {
      *
      * @param keyFunc An injective function uniquely mapping each element of the flow to the keyspace.
      *                If the keyFunc is not surjective, then any elements with keys not mapped to a flow are dropped.
-     * @param flowMap A map of keys to flows, such that keyFunc(elem) = x => x gets sent to flowMap[x]
+     * @param flowMap A map of keys to flows, such that keyFunc(elem) = x means x gets sent to flowMap[x]
      * @param <T>     The type of the flow's elements
      * @return a Flow from T to T applying conditionally each of the provided flows
      */

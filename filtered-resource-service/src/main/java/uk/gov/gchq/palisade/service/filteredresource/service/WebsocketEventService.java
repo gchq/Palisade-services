@@ -76,8 +76,8 @@ public class WebsocketEventService {
      * <p>
      * This flow will accept the client {@link MessageType}s and return server types as follows:
      * <ul>
-     *     <li> {@link MessageType#PING} -> {@link MessageType#PONG}
-     *     <li> {@link MessageType#CTS} -> One of {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
+     *     <li> {@link MessageType#PING} replies with {@link MessageType#PONG}
+     *     <li> {@link MessageType#CTS} replies with one of {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
      * </ul>
      * <p>
      * All other incoming types of message will be discarded. No other outgoing types of message will be produced.
