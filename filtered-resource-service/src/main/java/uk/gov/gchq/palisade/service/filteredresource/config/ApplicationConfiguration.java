@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.service.filteredresource.config;
 
+import akka.actor.typed.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ import org.springframework.context.annotation.Primary;
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
@@ -76,6 +79,23 @@ public class ApplicationConfiguration {
     ErrorHandlingService loggingErrorHandler() {
         LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
         return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception {}", token, request, error.getMessage());
+    }
+
+    /**
+     * Create the TokenOffsetController, controlling get access to the persistence layer and asynchronously waiting until offsets
+     * are available. That is, a Source of one element "token" through the {@link TokenOffsetController#asGetterFlow(ActorRef)}
+     * Flow will only emit an element to downstream once an offset is available from either persistence or "masked-resource-offset"
+     * kafka topic.
+     *
+     * @param persistenceLayer an instance of the TokenOffsetPersistenceLayer (this must still be written to explicitly)
+     * @return a (running) ActorSystem for {@link TokenOffsetCommand}s
+     * @implNote it is most likely this object will be used in conjunction with {@link TokenOffsetController#asGetterFlow(ActorRef)}
+     * and {@link TokenOffsetController#asSetterSink(ActorRef)}, supplying this object as the argument, producing an
+     * {@link akka.stream.javadsl.Flow} or {@link akka.stream.javadsl.Sink} respectively.
+     */
+    @Bean
+    ActorRef<TokenOffsetCommand> tokenOffsetController(final TokenOffsetPersistenceLayer persistenceLayer) {
+        return TokenOffsetController.create(persistenceLayer);
     }
 
     @Bean
