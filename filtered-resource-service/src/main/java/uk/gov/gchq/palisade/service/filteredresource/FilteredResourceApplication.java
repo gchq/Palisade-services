@@ -36,7 +36,7 @@ public class FilteredResourceApplication {
     public static void main(final String[] args) {
         LOGGER.debug("FilteredResourceApplication started with: {} {} {}", FilteredResourceApplication.class, "main", args);
         new SpringApplicationBuilder(FilteredResourceApplication.class)
-                .web(WebApplicationType.SERVLET)
+                .web(WebApplicationType.NONE)
                 .run(args);
     }
 
