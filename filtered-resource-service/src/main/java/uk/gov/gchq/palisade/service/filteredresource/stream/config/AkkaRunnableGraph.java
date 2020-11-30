@@ -64,7 +64,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication}
+ * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication}.
  * Configures the connection between Kafka, Akka and the service
  */
 @Configuration
