@@ -69,6 +69,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
         // Then check the message body
         String body = health.getBody();
-        assertThat(body).isEqualTo("{\"status\":\"UP\"}");
+        assertThat(body).contains("\"status\":\"UP\"");
     }
 }
