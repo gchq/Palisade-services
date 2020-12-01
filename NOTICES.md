@@ -1,7 +1,7 @@
 List of third-party dependencies grouped by their license type
 
 ### [Apache Software License 2.0](./licenses/apache_software_license_2.0.txt):
-* jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.10.4](http://github.com/FasterXML/jackson))
+* jackson-databind ([com.fasterxml.jackson.core:jackson-databind:2.11.0](http://github.com/FasterXML/jackson))
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))

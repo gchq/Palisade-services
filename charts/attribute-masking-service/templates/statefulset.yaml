@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -40,13 +40,14 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         command:
-          - bash
-          - "-c"
-          - |
-            [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
-            ordinal=${BASH_REMATCH[1]}
-            java -jar /usr/share/attribute-masking-service/attribute-masking-service.jar \
-              {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal --akka.kafka.consumer.kafka-clients.group.id=`hostname`{{ end }}
+        - bash
+        - "-c"
+        - |
+          [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          java -jar /usr/share/attribute-masking-service/attribute-masking-service.jar \
+          {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal {{ end }} \
+            --akka.kafka.consumer.kafka-clients.group.id={{ include "attribute-masking-service.name" . }}-$ordinal
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
