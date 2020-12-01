@@ -96,7 +96,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 )
 @Import(KafkaContractTest.KafkaInitializer.Config.class)
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"akkatest"})
+@ActiveProfiles({"akka-test"})
 class KafkaContractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
@@ -192,8 +192,15 @@ class KafkaContractTest {
     void testRestEndpointForErrorMessage() {
         // Pass an error message to 'error' rest endpoint
         // When - we POST to the rest endpoint
+        AuditErrorMessage errorMessage = null;
+        try {
+            errorMessage = MAPPER.readValue(ContractTestData.ERROR_REQUEST_JSON, AuditErrorMessage.class);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to convert error contract test data to objects", e);
+        }
+
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(errorMessage, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
         // Then - check the REST request was accepted
@@ -208,8 +215,15 @@ class KafkaContractTest {
     void testRestEndpointForGoodSuccessMessage() {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
+        AuditSuccessMessage successMessage = null;
+        try {
+            successMessage = MAPPER.readValue(ContractTestData.GOOD_SUCCESS_REQUEST_JSON, AuditSuccessMessage.class);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to convert error contract test data to objects", e);
+        }
+
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(successMessage, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
         // Then - check the REST request was accepted
@@ -224,8 +238,15 @@ class KafkaContractTest {
     void testRestEndpointForBadSuccessMessage() {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
+        AuditSuccessMessage successMessage = null;
+        try {
+            successMessage = MAPPER.readValue(ContractTestData.BAD_SUCCESS_REQUEST_JSON, AuditSuccessMessage.class);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to convert error contract test data to objects", e);
+        }
+
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(successMessage, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
         // Then - check the REST request was accepted
@@ -241,7 +262,7 @@ class KafkaContractTest {
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("akkatest", "debug");
+            configurableApplicationContext.getEnvironment().setActiveProfiles("akka-test");
             kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             kafka.start();

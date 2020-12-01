@@ -22,7 +22,6 @@ import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerSettings;
-import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.javadsl.Committer;
@@ -86,19 +85,6 @@ public class StreamComponents<K, V> {
     public CommitterSettings committerSettings(final ActorSystem system) {
         Config config = system.settings().config().getConfig("akka.kafka.committer");
         return CommitterSettings.create(config);
-    }
-
-    /**
-     * Construct a Kafka Committable Sink for Akka streams
-     *
-     * @param producerSettings  the producer settings for kafka
-     * @param committerSettings the committer settings for kafka
-     * @return a Kafka-connected Committable Sink for Akka streams
-     */
-    public Sink<ProducerMessage.Envelope<K, V, ConsumerMessage.Committable>, CompletionStage<Done>> committableProducer(
-            final ProducerSettings<K, V> producerSettings,
-            final CommitterSettings committerSettings) {
-        return Producer.committableSink(producerSettings, committerSettings);
     }
 
     /**

@@ -39,8 +39,6 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class StroomAuditServiceTest {
 
-    private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
-
     @Spy
     DefaultEventLoggingService eventLogger = new DefaultEventLoggingService();
     @Captor
@@ -69,7 +67,6 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues()).hasSize(1),
@@ -94,7 +91,6 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues()).hasSize(1),
@@ -131,7 +127,6 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues()).hasSize(1),
@@ -158,7 +153,6 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues()).hasSize(1),
@@ -185,7 +179,6 @@ class StroomAuditServiceTest {
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = EVENT_SERIALIZER.serialize(logCaptor.getValue());
 
         assertAll(
                 () -> assertThat(logCaptor.getAllValues()).hasSize(1),

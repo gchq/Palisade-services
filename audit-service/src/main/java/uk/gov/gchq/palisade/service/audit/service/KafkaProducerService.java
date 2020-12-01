@@ -73,8 +73,8 @@ public class KafkaProducerService {
     }
 
     /**
-     * Takes a list of requests and processes each of them with the given headers.
-     * These requests are each written to kafka using the supplied headers for all of them.
+     * Takes a list of {@link AuditSuccessMessage}s and processes each of them with the given headers.
+     * These requests are each written to the "success" kafka topic using the supplied headers for all of them.
      *
      * @param headers  a map of request headers
      * @param requests a list of requests
@@ -110,8 +110,8 @@ public class KafkaProducerService {
     }
 
     /**
-     * Takes a list of requests and processes each of them with the given headers.
-     * These requests are each written to kafka using the supplied headers for all of them.
+     * Takes a list of {@link AuditErrorMessage}s and processes each of them with the given headers.
+     * These requests are each written to the "error" kafka topic using the supplied headers for all of them.
      *
      * @param headers  a map of request headers
      * @param requests a list of requests

@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.audit.service;
 /**
  * Enum providing type safety for service names
  *
- * @since 0.4.0
+ * @since 0.5.0
  */
 public enum ServiceName {
     ATTRIBUTE_MASKING_SERVICE("attribute-masking-service"),

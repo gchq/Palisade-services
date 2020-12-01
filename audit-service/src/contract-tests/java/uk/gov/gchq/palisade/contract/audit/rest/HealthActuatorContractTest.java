@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"}
 )
-@ActiveProfiles({"akkatest"})
+@ActiveProfiles({"akka-test"})
  class HealthActuatorContractTest {
 
     @Autowired
@@ -52,8 +52,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     @Test
      void testContextLoads() {
-        assertThat(serviceMap).isNotNull()
-                .isNotEmpty();
+       assertThat(serviceMap)
+               .hasSize(3)
+               .containsKeys("simple", "stroom", "logger");
         assertThat(restTemplate).isNotNull();
     }
 

@@ -35,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuditServiceAsyncProxyTest {
 
     private AuditServiceAsyncProxy proxy;
-    private SimpleAuditService auditService = new SimpleAuditService();
-    private Map<String, AuditService> auditServiceMap = new HashMap<>();
+    private final SimpleAuditService auditService = new SimpleAuditService();
+    private final Map<String, AuditService> auditServiceMap = new HashMap<>();
 
 
     @BeforeEach

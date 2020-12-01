@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -70,7 +72,7 @@ class SimpleAuditServiceTest {
         // Then
         List<String> logMessages = getMessages(event -> true);
 
-        assertThat(logMessages.get(0)).contains("SimpleAuditService.audit");
+        assertThat(logMessages.get(0)).contains(AuditErrorMessage.class.getSimpleName());
     }
 
     @Test
@@ -81,6 +83,6 @@ class SimpleAuditServiceTest {
         // Then
         List<String> logMessages = getMessages(event -> true);
 
-        assertThat(logMessages.get(0)).contains("SimpleAuditService.audit");
+        assertThat(logMessages.get(0)).contains(AuditSuccessMessage.class.getSimpleName());
     }
 }

@@ -31,8 +31,12 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A LoggerAuditService is a simple implementation of an {@link AuditService} that simply constructs a message and logs
- * it using slf4j {@link Logger}. <ul> <li>Messages are logged at INFO logging level.</li> <li>Error messages are logged
- * at ERROR logging level.</li> </ul> <p> An example message is: </p>
+ * it using slf4j {@link Logger}.
+ * <ul>
+ *     <li>Messages are logged at INFO logging level.</li>
+ *     <li>Error messages are logged at ERROR logging level.</li>
+ * </ul>
+ * <p> An example message is: </p>
  * <pre>
  * 'Alice' accessed 'file1' for 'Payroll' and it was processed using 'Age off and visibility filtering'
  * </pre>
@@ -66,7 +70,7 @@ public class LoggerAuditService implements AuditService {
     }
 
     private static void auditSuccessMessage(final Logger logger, final AuditMessage request) {
-        requireNonNull(request, LOGGER_NULL);
+        requireNonNull(logger, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
         if (request.getServiceName().equals(ServiceName.FILTERED_RESOURCE_SERVICE.value) || request.getServiceName().equals(ServiceName.DATA_SERVICE.value)) {
             logger.debug(SUCCESS_CALLED, request.getServiceName(), logger, request);
@@ -78,7 +82,7 @@ public class LoggerAuditService implements AuditService {
     }
 
     private static void auditErrorMessage(final Logger logger, final AuditMessage request) {
-        requireNonNull(request, LOGGER_NULL);
+        requireNonNull(logger, LOGGER_NULL);
         requireNonNull(request, AUDIT_MESSAGE_NULL);
         logger.debug(ERROR_CALLED, request.getServiceName(), logger, request);
         logger.error(AUDIT_MESSAGE, request);

@@ -51,7 +51,7 @@ the `data-service`.
 
 ## Kafka Interface
 
-The application will not receive any `START` or `END` messages on either the `success` or `error` input Kafka topics.
+The application will not receive any `START` or `END` messages on either the `success` or `error` Kafka topics.
 The `success` topic will only consist of AuditSuccessMessage objects and the `error` topic will only consist of 
 AuditErrorMessage objects. The service will consume these messages and process them accordingly but there is no
 output from this service, instead it will acknowledge the incoming message so that it does not get processed more than
