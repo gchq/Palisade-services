@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -55,31 +54,21 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.user.common.ContractTestData;
-import uk.gov.gchq.palisade.contract.user.common.StreamMarker;
 import uk.gov.gchq.palisade.service.user.UserApplication;
-import uk.gov.gchq.palisade.service.user.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.user.model.Token;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.PropertiesConfigurer;
-import uk.gov.gchq.palisade.service.user.stream.SerDesConfig;
 
 import java.io.IOException;
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -98,115 +87,32 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
  * The upstream "request" topic is written to by the palisade-service and read by this service.
- * The downstream "user" topic is written to by this service and read by the resource-service.
- * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
+ * Upon writing to this topic and requesting a user that has not been added to the cache, we then check the error topic for
+ * the appropriate error response.
  */
 @SpringBootTest(
         classes = UserApplication.class,
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false", "spring.cache.caffeine.spec=expireAfterWrite=1m, maximumSize=100"}
 )
-@Import({KafkaContractTest.KafkaInitializer.Config.class})
-@ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
+@Import({KafkaErrorTopicContractTest.KafkaInitializer.Config.class})
+@ContextConfiguration(initializers = {KafkaErrorTopicContractTest.KafkaInitializer.class})
 @ActiveProfiles({"caffeine", "akka-test", "pre-population"})
-class KafkaContractTest {
+class KafkaErrorTopicContractTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaErrorTopicContractTest.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Autowired
-    private TestRestTemplate restTemplate;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
     private Materializer akkaMaterializer;
     @Autowired
-    private ConsumerTopicConfiguration consumerTopicConfiguration;
-    @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
     @Test
     @DirtiesContext
-    void testRequestSet() {
-        // Only 1 request will be received by the user-service
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
-        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
-                Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.RECORD_NODE_FACTORY.get().limit(1L),
-                Stream.of(ContractTestData.END_RECORD))
-                .flatMap(Function.identity());
-        final long recordCount = 3;
-
-        // Given - we are already listening to the output
-        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-
-        // When - we write to the input
-        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
-
-        Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
-
-        // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, recordCount)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        // Then - the results are as expected
-
-        // All messages have a correct Token in the header
-        assertAll("Headers have correct token",
-                () -> assertThat(results)
-                        .hasSize((int) recordCount),
-
-                () -> assertThat(results)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
-        );
-
-        // The first and last have a correct StreamMarker header
-        assertAll("StreamMarkers are correct START and END",
-                () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
-                        .isEqualTo(StreamMarker.START.toString().getBytes()),
-
-                () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
-                        .isEqualTo(StreamMarker.END.toString().getBytes())
-        );
-
-        // All but the first and last have the expected message
-        results.removeFirst();
-        results.removeLast();
-        assertAll("Results are correct and ordered",
-                () -> assertThat(results)
-                        .hasSize(1),
-                () -> assertThat(results)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-                () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                        .isEqualTo("test-user-id"),
-                () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
-                        .isEqualTo("auth"),
-                () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())
-                        .isEqualTo("role")
-        );
-    }
-
-    @Test
-    @DirtiesContext
-    void testNoSuchUserIdExceptionIsThrown() {
-        // Create a variable number of requests
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+    void testErrorExistsOnErrorTopic() {
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.NO_USER_ID_RECORD_NODE_FACTORY.get().limit(1L),
@@ -219,8 +125,9 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
+        // Given - we are listening on the error topic
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When - we write to the input
@@ -231,86 +138,30 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
-
-        // When - results are pulled from the output stream
-        // record count set to 2, as one record will be removed as no policy exists for it
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
-        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+        // When - results are pulled from the output error stream
+        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(1);
+        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 1)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 3, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
-
-        // All messages have a correct Token in the header
-        assertAll("Headers have correct token",
-                () -> assertThat(results)
-                        .hasSize(2),
-
-                () -> assertThat(results)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
-        );
-
-        // The first and last have a correct StreamMarker header
-        assertAll("StreamMarkers are correct START and END",
-                () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
-                        .isEqualTo(StreamMarker.START.toString().getBytes()),
-
-                () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
-                        .isEqualTo(StreamMarker.END.toString().getBytes())
-        );
-
-        // All but the first and last have the expected message
-        results.removeFirst();
-        results.removeLast();
-        assertThat(results).isEmpty();
-    }
-
-    @Test
-    @DirtiesContext
-    void testRestEndpoint() {
-        // Given - we are already listening to the service input
-        ConsumerSettings<String, UserRequest> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, SerDesConfig.requestKeyDeserializer(), SerDesConfig.requestValueDeserializer())
-                .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, UserRequest>> probe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("input-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-
-        // When - we POST to the rest endpoint
-        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<UserRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
-        ResponseEntity<Void> response = restTemplate.postForEntity("/api/user", entity, Void.class);
-
-        // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-
-        // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, UserRequest>> resultSeq = probe.request(1);
-        LinkedList<ConsumerRecord<String, UserRequest>> results = LongStream.range(0, 1)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        // Then - the results are as expected
-        // The request was written with the correct header
-        assertAll("Records returned are correct",
+        assertAll("Results are correct and ordered",
+                // One error is produced
                 () -> assertThat(results)
                         .hasSize(1),
 
+                // The error has the relevant headers, including the token
                 () -> assertThat(results)
-                        .allSatisfy(result -> {
-                            assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                    .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
+                        .allSatisfy(result ->
+                                assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                            assertThat(result.value())
-                                    .isEqualTo(ContractTestData.REQUEST_OBJ);
-                        })
+                // The error has a message that contains the throwable exception, and the message
+                () -> assertThat(results.get(0).value().get("error").get("message").asText())
+                        .isEqualTo("uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException: No userId matching invalid-user-id found in cache")
         );
     }
+
 
     // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
@@ -332,18 +183,6 @@ class KafkaContractTest {
                 return MAPPER.readTree(userResponse);
             } catch (IOException e) {
                 throw new SerializationFailedException("Failed to deserialize " + new String(userResponse), e);
-            }
-        }
-    }
-
-    // Deserializer for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
-        @Override
-        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
-            try {
-                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
             }
         }
     }

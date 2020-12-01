@@ -39,7 +39,7 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Default boilerplate templates for creating Akka {@link Sink}s and {@link Source}s
- * These have many different options that may be used (committable, offset-able, partitioned, manual, external, etc...)
+ * These have different options that may be used (committable, offset-able, partitioned, manual, external, etc...).
  *
  * @param <K> generic Key type
  * @param <V> generic Value type
@@ -49,7 +49,7 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka ProducerSettings from the given config and serialisers
      *
-     * @param system          the application's actor system to use to load config values
+     * @param system          the application's actor system used to load config values
      * @param keySerializer   the stream's key serialiser
      * @param valueSerializer the stream's value serialiser
      * @return a {@link ProducerSettings} object for creating Akka {@link Sink}s
@@ -63,9 +63,9 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka ConsumerSettings from the given config and deserialisers
      *
-     * @param system            the application's actor system to use to load config values
-     * @param keyDeserializer   the stream's key deserialiser
-     * @param valueDeserializer the stream's value deserialiser
+     * @param system            the application's actor system used to load config values
+     * @param keyDeserializer   the stream's key deserializer
+     * @param valueDeserializer the stream's value deserializer
      * @return a {@link ProducerSettings} object for creating Akka {@link Source}s
      */
     public ConsumerSettings<K, V> consumerSettings(final ActorSystem system, final Deserializer<K> keyDeserializer, final Deserializer<V> valueDeserializer) {
@@ -78,7 +78,7 @@ public class StreamComponents<K, V> {
     /**
      * Construct an Akka Kafka CommitterSettings from the given config
      *
-     * @param system the application's actor system to use to load config values
+     * @param system the application's actor system used to load config values
      * @return a {@link CommitterSettings} object for controlling Kafka commits
      */
     public CommitterSettings committerSettings(final ActorSystem system) {

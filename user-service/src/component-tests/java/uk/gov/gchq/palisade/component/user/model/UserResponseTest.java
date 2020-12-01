@@ -41,10 +41,10 @@ class UserResponseTest {
 
     /**
      * Tests the creation of the message type, UserResponse using the builder
-     * plus tests the serialising to a Json string and deserialising to an object.
+     * plus tests the serializing to a Json string and deserialising to an object.
      *
      * @throws IOException throws if the {@link UserResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or de-serialise the Json string.
+     *                     This equates to a failure to serialize or deserialize the Json string.
      */
     @Test
     void testUserResponseSerialisingAndDeserialising() throws IOException {

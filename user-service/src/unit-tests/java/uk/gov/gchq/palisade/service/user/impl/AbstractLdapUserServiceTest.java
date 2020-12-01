@@ -28,6 +28,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
@@ -65,6 +67,7 @@ class AbstractLdapUserServiceTest {
 
     @BeforeEach
     void setup() {
+        LoggingSystem.get(ClassLoader.getSystemClassLoader()).setLogLevel(Logger.ROOT_LOGGER_NAME, LogLevel.DEBUG);
         logger = (Logger) LoggerFactory.getLogger(AbstractLdapUserService.class);
         appender = new ListAppender<>();
         appender.start();

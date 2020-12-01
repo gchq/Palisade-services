@@ -28,25 +28,40 @@ import uk.gov.gchq.palisade.User;
  * This acts as a caching layer on top of an implementation of the user-service.
  */
 @CacheConfig(cacheNames = {"users"})
-public class UserServiceCachingProxy implements UserService {
+public class UserServiceCachingProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceCachingProxy.class);
     private final UserService service;
 
     /**
-     * Constructor for the {@link UserServiceCachingProxy}
+     * Default constructor used to create the UserServiceCachingProxy
      *
-     * @param service an implementation of the {@link UserService}
+     * @param service {@link UserService} this service calls
      */
     public UserServiceCachingProxy(final UserService service) {
         this.service = service;
     }
 
+    /**
+     * Using the userId as the key, retrieves the {@link User} from the cache, if the User doesn't exist,
+     * then a message is Logged, and a {@link NullUserService} getUser() is called,
+     * which will throw a {@link uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException}.
+     *
+     * @param userId of the user wants to retrieve from the cache
+     * @return the user returned from the cache
+     */
     @Cacheable(key = "#userId")
     public User getUser(final String userId) {
         LOGGER.info("Cache miss for userId {}", userId);
         return service.getUser(userId);
     }
 
+    /**
+     * Using the userId from the User object as they key, adds the User, and any attributes about the user,
+     * such as roles and auths, to the cache.
+     *
+     * @param user the user that the client wants to request resources with
+     * @return the user that was successfully added to the cache
+     */
     @CachePut(key = "#user.userId.id")
     public User addUser(final User user) {
         LOGGER.info("Cache add for userId {}", user.getUserId().getId());

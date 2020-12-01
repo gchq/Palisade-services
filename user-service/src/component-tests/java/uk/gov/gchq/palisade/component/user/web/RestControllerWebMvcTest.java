@@ -24,28 +24,27 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import uk.gov.gchq.palisade.service.user.ApplicationTestData;
+import uk.gov.gchq.palisade.component.user.common.CommonTestData;
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.user.web.UserRestController;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @WebMvcTest(controllers = {UserRestController.class})
-@ContextConfiguration(classes = {RestControllerWebMvcTest.class, UserRestController.class, ApplicationTestConfiguration.class})
-class RestControllerWebMvcTest {
+@ContextConfiguration(classes = {RestControllerWebMvcTest.class, UserRestController.class})
+class RestControllerWebMvcTest extends CommonTestData {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
-    KafkaProducerService serviceMock;
+    KafkaProducerService kafkaProducerService;
     @Autowired
     private UserRestController controller;
     @Autowired
@@ -53,16 +52,13 @@ class RestControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        Topic topic = new Topic();
-        topic.setPartitions(1);
-        topic.setName("input-topic");
-        Mockito.when(serviceMock.processRequest(Mockito.any(), Mockito.any()))
-                .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
+        Mockito.when(kafkaProducerService.processRequest(Mockito.any(), Mockito.any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(serviceMock);
+        Mockito.reset(kafkaProducerService);
     }
 
     @Test
@@ -75,8 +71,8 @@ class RestControllerWebMvcTest {
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/api/user")
-                .header(Token.HEADER, ApplicationTestData.REQUEST_TOKEN)
-                .content(MAPPER.writeValueAsBytes(ApplicationTestData.REQUEST))
+                .header(Token.HEADER, REQUEST_TOKEN)
+                .content(MAPPER.writeValueAsBytes(USER_REQUEST))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }

@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Implementation of a {@link UserConfiguration} that uses Spring to configure a list of users from a yaml file
  * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
- * These users will be used for prepopulating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
+ * These users will be used for pre-populating the {@link uk.gov.gchq.palisade.service.user.service.UserService}
  */
 public class StdUserConfiguration implements UserConfiguration {
     private List<StdUserPrepopulationFactory> users;
@@ -47,7 +47,7 @@ public class StdUserConfiguration implements UserConfiguration {
      * Constructor with 1 argument for a standard implementation
      * of the {@link UserConfiguration} interface
      *
-     * @param users     a list of objects implementing the {@link UserPrepopulationFactory} interface
+     * @param users a list of objects implementing the {@link UserPrepopulationFactory} interface
      */
     public StdUserConfiguration(final List<StdUserPrepopulationFactory> users) {
         this.users = users;
