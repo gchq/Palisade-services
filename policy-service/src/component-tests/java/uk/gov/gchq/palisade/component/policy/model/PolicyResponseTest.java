@@ -89,7 +89,7 @@ class PolicyResponseTest {
                         () -> assertThat(policyResponseMessageObject.getUser()).isEqualTo(policyResponse.getUser()),
                         () -> assertThat(policyResponseMessageObject.getContext()).isEqualTo(policyResponse.getContext()),
                         () -> assertThat(policyResponseMessageObject.getResource()).isEqualTo(policyResponse.getResource()),
-                        () -> assertThat(policyResponseMessageObject.rules).isEqualTo(policyResponse.rules)
+                        () -> assertThat(policyResponseMessageObject.getRules()).isEqualTo(policyResponse.getRules())
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
