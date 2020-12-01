@@ -57,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureDataRedis
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("redis")
-class RedisPersistenceContractTest {
+class RedisPersistenceComponentTest {
 
     private static final int REDIS_PORT = 6379;
 
