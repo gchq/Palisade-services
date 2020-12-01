@@ -64,7 +64,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         // When we GET the /actuator/health REST endpoint (used by k8s)
         final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
 
-        // Then the service reports itself to be healthy
+        // Then check the returned code is 200(OK)
         assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Then check the message body
+        String body = health.getBody();
+        assertThat(body).isEqualTo("{\"status\":\"UP\"}");
     }
 }

@@ -27,6 +27,7 @@ output Kafka topics.
 
 | AuditSuccessMessage | AuditErrorMessage | 
 |:--------------------|:------------------|
+| *token              | *token            |
 | userId              | userId            | 
 | resourceId          | resourceId        | 
 | context             | context           | 
@@ -37,9 +38,16 @@ output Kafka topics.
 | attributes          | attributes        |
 | leafResourceId      | error             |
 
+*The token value come from the headers of the Kafka message that the service receives. This links the
+audit message to the original request that was made.
+
 If an error has occurred during a request/read then an AuditErrorMessage will be consumed from
-the `error` Kafka topic. If the request/read was successful then an AuditSuccessMessage will be
-consumed from the `success` Kafka topic.
+the `error` Kafka topic. This type of message can be sent from any of the Palisade services 
+(e.g user-service or policy-service).
+
+If the request/read was successful then an AuditSuccessMessage will be consumed from the `success`
+Kafka topic. This type of message can only be sent from either the `filtered-resource-service` or
+the `data-service`.
 
 ## Kafka Interface
 

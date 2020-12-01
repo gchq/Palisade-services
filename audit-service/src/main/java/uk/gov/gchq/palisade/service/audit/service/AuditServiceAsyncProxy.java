@@ -53,7 +53,7 @@ public class AuditServiceAsyncProxy {
      * @return a {@link CompletableFuture} of a {@link Boolean} value.
      */
     public CompletableFuture<List<Boolean>> audit(final String token, final AuditMessage message) {
-        LOGGER.debug("Attempting to audit a {} for token {}", message.getClass(), token);
+        LOGGER.debug("Attempting to audit an `{}` for token `{}`", message.getClass().getSimpleName(), token);
         return CompletableFuture.supplyAsync(() -> services.values().stream()
                 .map((AuditService auditService) -> {
                     if (message instanceof AuditSuccessMessage) {
@@ -62,7 +62,7 @@ public class AuditServiceAsyncProxy {
                             auditService.audit(token, successMessage);
                             return true;
                         } else {
-                            LOGGER.warn("An AuditSuccessMessage should only be sent by the FilteredResourceService or the DataService. Message received from {}",
+                            LOGGER.warn("An AuditSuccessMessage should only be sent by the `filtered-resource-service` or the `data-service`. Message received from `{}`",
                                     message.getServiceName());
                             return false;
                         }

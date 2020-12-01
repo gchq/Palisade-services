@@ -70,10 +70,10 @@ public class AkkaComponentsConfig {
                 SerDesConfig.successKeyDeserializer(),
                 SerDesConfig.successValueDeserializer());
 
-        Topic errorTopic = configuration.getTopics().get("success-topic");
-        Subscription successSubscription = Optional.ofNullable(errorTopic.getAssignment())
-                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(errorTopic.getName(), partition)))
-                .orElse(Subscriptions.topics(errorTopic.getName()));
+        Topic successTopic = configuration.getTopics().get("success-topic");
+        Subscription successSubscription = Optional.ofNullable(successTopic.getAssignment())
+                .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(successTopic.getName(), partition)))
+                .orElse(Subscriptions.topics(successTopic.getName()));
 
         return SUCCESS_INPUT_COMPONENTS.committableConsumer(consumerSettings, successSubscription);
     }
