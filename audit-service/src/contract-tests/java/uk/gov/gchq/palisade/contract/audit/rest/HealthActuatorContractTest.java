@@ -23,50 +23,53 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
 import uk.gov.gchq.palisade.service.audit.service.AuditService;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-@SpringBootTest(classes = AuditApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
- class RestControllerContractTest extends AuditTestCommon {
+/**
+ * An external requirement of the service is to keep-alive in k8s.
+ * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
+ * This should return 200 OK if the service is healthy.
+ */
+@SpringBootTest(
+        classes = AuditApplication.class,
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"}
+)
+@ActiveProfiles({"akka-test"})
+ class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private Map<String, AuditService> serviceMap;
 
-    List<AuditRequest> requests = List.of(
-            readRequestCompleteAuditRequest(),
-            readRequestExceptionAuditRequest(),
-            registerRequestCompleteAuditRequest(),
-            registerRequestExceptionAuditRequest()
-    );
-
     @Test
      void testContextLoads() {
-        assertThat(serviceMap)
-                .isNotNull()
-                .isNotEmpty();
+       assertThat(serviceMap)
+               .hasSize(3)
+               .containsKeys("simple", "stroom", "logger");
+        assertThat(restTemplate).isNotNull();
     }
 
     @Test
      void testIsUp() {
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
+        // Given that the service is running (and presumably healthy)
 
-    @Test
-     void testComponent() {
-        requests.forEach(request -> {
-            Boolean response = restTemplate.postForObject("/audit", request, Boolean.class);
-            assertThat(response).isTrue();
-        });
+        // When we GET the /actuator/health REST endpoint (used by k8s)
+        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
+
+        // Then check the returned code is 200(OK)
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Then check the message body
+        String body = health.getBody();
+        assertThat(body).contains("\"status\":\"UP\"");
     }
 }
