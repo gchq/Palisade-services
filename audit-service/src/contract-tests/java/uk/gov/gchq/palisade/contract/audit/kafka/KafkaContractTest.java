@@ -192,15 +192,8 @@ class KafkaContractTest {
     void testRestEndpointForErrorMessage() {
         // Pass an error message to 'error' rest endpoint
         // When - we POST to the rest endpoint
-        AuditErrorMessage errorMessage = null;
-        try {
-            errorMessage = MAPPER.readValue(ContractTestData.ERROR_REQUEST_JSON, AuditErrorMessage.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to convert error contract test data to objects", e);
-        }
-
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(errorMessage, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
         // Then - check the REST request was accepted
@@ -215,15 +208,8 @@ class KafkaContractTest {
     void testRestEndpointForGoodSuccessMessage() {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
-        AuditSuccessMessage successMessage = null;
-        try {
-            successMessage = MAPPER.readValue(ContractTestData.GOOD_SUCCESS_REQUEST_JSON, AuditSuccessMessage.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to convert error contract test data to objects", e);
-        }
-
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(successMessage, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
         // Then - check the REST request was accepted
@@ -238,15 +224,8 @@ class KafkaContractTest {
     void testRestEndpointForBadSuccessMessage() {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
-        AuditSuccessMessage successMessage = null;
-        try {
-            successMessage = MAPPER.readValue(ContractTestData.BAD_SUCCESS_REQUEST_JSON, AuditSuccessMessage.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to convert error contract test data to objects", e);
-        }
-
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(successMessage, new LinkedMultiValueMap<>(headers));
+        HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
         // Then - check the REST request was accepted
