@@ -26,7 +26,6 @@ import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.Subscriptions;
-import akka.kafka.javadsl.Committer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -49,7 +48,6 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.StreamComponents;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 
 /**
  * Configuration for all kafka connections for the application
@@ -75,8 +73,8 @@ public class AkkaComponentsConfig {
          * Create a new Committable Source dynamically given a topic offset and partition.
          * The likely use-case is groupId=[client token], topicPartition=[hash of token] topicOffset=[from topic-offset-service]
          *
-         * @param token          the client's token for this request, which is used for the consumer group-id and partition selection
-         * @param offsetFunction a function that supplies the offset to start with for the given token, defaulting to 'now' if empty
+         * @param token  the client's token for this request, which is used for the consumer group-id and partition selection
+         * @param offset the offset to start with for the given token
          * @return a new Kafka source
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
