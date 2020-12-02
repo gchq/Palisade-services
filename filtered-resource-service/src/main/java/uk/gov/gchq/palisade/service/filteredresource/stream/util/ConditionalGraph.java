@@ -30,7 +30,7 @@ import akka.stream.javadsl.Partition;
 
 import java.util.Map;
 
-public class ConditionalGraph {
+public final class ConditionalGraph {
 
     private ConditionalGraph() {
         // No constructor for static helper class
