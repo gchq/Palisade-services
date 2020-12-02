@@ -75,11 +75,38 @@ public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
     private static final Integer PARALLELISM = 1;
 
+    /**
+     * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
+     * This should automatically connect to kafka at the given offset and filter headers by the given token.
+     * The result is a stream of {@link FilteredResourceRequest}s to be returned to the client.
+     */
     public interface FilteredResourceSourceFactory {
+        /**
+         * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
+         * Connect to Kafka at the given offset for the partition decided by the token.
+         * Filter messages by their token.
+         *
+         * @param token  the client's unique token for their request
+         * @param offset the offset for this token retrieved by the {@link TokenOffsetController}
+         * @return {@link Source} of {@link FilteredResourceRequest} for the client's request
+         */
         Source<Pair<FilteredResourceRequest, CommittableOffset>, Control> create(String token, Long offset);
     }
 
+    /**
+     * Factory for Akka {@link Sink}s to the audit success queue for all {@link FilteredResourceRequest}s successfully
+     * returned to the client. This auditing occurs just before the client is sent the resource, and should also
+     * commit the given offset (for the upstream {@link FilteredResourceRequest} to kafka).
+     */
     public interface AuditServiceSinkFactory {
+        /**
+         * Create a connection to the audit success queue for all {@link FilteredResourceRequest}s successfully
+         * returned to the client. This auditing occurs just before the client is sent the resource, and should also
+         * commit the given offset (for the upstream {@link FilteredResourceRequest} to kafka).
+         *
+         * @param token the token to re-attach as a header for kafka messages
+         * @return {@link Sink} to the audit success queue for {@link FilteredResourceRequest}s and their {@link CommittableOffset}s
+         */
         Sink<Pair<FilteredResourceRequest, CommittableOffset>, CompletionStage<Done>> create(String token);
     }
 

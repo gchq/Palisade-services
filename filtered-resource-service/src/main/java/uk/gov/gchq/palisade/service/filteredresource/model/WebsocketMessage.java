@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class WebsocketMessage {
+public final class WebsocketMessage {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final MessageType type;

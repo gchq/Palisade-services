@@ -93,7 +93,7 @@ public class WebsocketEventService {
     public Flow<WebsocketMessage, WebsocketMessage, NotUsed> createFlowGraph(final String token) {
         return Flow.<WebsocketMessage>create()
                 // Log some details of each client request
-                .map(wsMsg -> {
+                .map((WebsocketMessage wsMsg) -> {
                     LOGGER.trace("Received message {} from client", wsMsg);
                     return wsMsg;
                 })

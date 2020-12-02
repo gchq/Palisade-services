@@ -31,8 +31,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,8 +52,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaComponentsConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaComponentsConfig.class);
-    private static final int GRACE_PERIOD_MILLIS = 5000;
     private static final StreamComponents<String, FilteredResourceRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, TopicOffsetMessage> OFFSET_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();

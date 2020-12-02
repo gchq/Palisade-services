@@ -63,7 +63,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void serialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
+    <T> void testSerialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
         // Given some test data
 
         // When a Request is serialised and deserialised

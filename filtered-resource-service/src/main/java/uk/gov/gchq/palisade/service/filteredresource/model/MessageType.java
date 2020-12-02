@@ -15,11 +15,27 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.model;
 
+/**
+ * Type of message (and thus expected headers/body content) sent by either the client or the server.
+ * <p>
+ * The client is expected to only send:
+ * <ul>
+ * <li> {@link MessageType#PING} - is the server alive? reply with a {@link MessageType#PONG}
+ * <li> {@link MessageType#CTS} - clear to send next {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or {@link MessageType#COMPLETE}
+ * </ul>
+ * The server is expected to only send:
+ * <ul>
+ * <li> {@link MessageType#PONG} - the server is alive
+ * <li> {@link MessageType#RESOURCE} - the next available resource for the client
+ * <li> {@link MessageType#ERROR} - an error occurred while processing the client's request
+ * <li> {@link MessageType#COMPLETE} - there is nothing more to return to the client
+ * </ul>
+ */
 public enum MessageType {
 
     // Client
     PING, // -> PONG
-    CTS, // -> RESOURCE|(ERROR?)|COMPLETE
+    CTS, // -> RESOURCE|ERROR|COMPLETE
 
     // Server
     PONG,
