@@ -25,9 +25,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
+import uk.gov.gchq.palisade.service.audit.service.AuditService;
+import uk.gov.gchq.palisade.service.audit.service.AuditServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.audit.service.LoggerAuditService;
 import uk.gov.gchq.palisade.service.audit.service.SimpleAuditService;
 import uk.gov.gchq.palisade.service.audit.service.StroomAuditService;
+
+import java.util.Map;
 
 /**
  * Bean configuration and dependency injection graph
@@ -57,6 +61,11 @@ public class ApplicationConfiguration {
     LoggerAuditService loggerAuditService() {
         LOGGER.info("Instantiated LoggerAuditService");
         return new LoggerAuditService(LoggerFactory.getLogger(LoggerAuditService.class));
+    }
+
+    @Bean
+    AuditServiceAsyncProxy auditServiceAsyncProxy(final Map<String, AuditService> services) {
+        return new AuditServiceAsyncProxy(services);
     }
 
     @Primary
