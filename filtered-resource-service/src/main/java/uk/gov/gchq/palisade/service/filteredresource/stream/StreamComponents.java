@@ -20,10 +20,12 @@ import akka.Done;
 import akka.actor.ActorSystem;
 import akka.kafka.CommitterSettings;
 import akka.kafka.ConsumerMessage;
+import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerSettings;
 import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
+import akka.kafka.javadsl.Committer;
 import akka.kafka.javadsl.Consumer;
 import akka.kafka.javadsl.DiscoverySupport;
 import akka.kafka.javadsl.Producer;
@@ -123,5 +125,17 @@ public class StreamComponents<K, V> {
         return Consumer.committableSource(consumerSettings, subscription);
     }
 
+    /**
+     * Construct a Kafka Committer Sink for Akka streams which sinks {@link akka.kafka.ConsumerMessage.Committable}s
+     * as they are committed for the upstream {@link Source}'s {@link akka.kafka.ConsumerMessage.CommittableMessage}.
+     * This acts as an acknowledgement that a message has been processed.
+     *
+     * @param committerSettings the committer settings for kafka
+     * @return a Kafka-committing sink (does not write to any downstream topic)
+     */
+    public Sink<Committable, CompletionStage<Done>> committerSink(
+            final CommitterSettings committerSettings) {
+        return Committer.sink(committerSettings);
+    }
 
 }

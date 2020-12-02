@@ -17,7 +17,9 @@
 package uk.gov.gchq.palisade.service.filteredresource.stream.config;
 
 import akka.Done;
+import akka.actor.typed.ActorRef;
 import akka.japi.Pair;
+import akka.japi.tuple.Tuple3;
 import akka.japi.tuple.Tuple4;
 import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.ConsumerMessage.CommittableMessage;
@@ -48,6 +50,8 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
@@ -69,6 +73,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Configuration
 public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
+    private static final Integer PARALLELISM = 1;
 
     public interface FilteredResourceSourceFactory {
         Source<Pair<FilteredResourceRequest, CommittableOffset>, Control> create(String token);
@@ -229,9 +234,34 @@ public class AkkaRunnableGraph {
 
 
     @Bean
-    RunnableGraph<Control> tokenOffsetRunnableGraph() {
-        // TODO: KafkaSource.to(ActorSink)
-        return null;
+    RunnableGraph<Control> tokenOffsetRunnableGraph(
+            final Source<CommittableMessage<String, TopicOffsetMessage>, Control> tokenOffsetSource,
+            final Sink<Committable, CompletionStage<Done>> committerSink,
+            final TokenOffsetPersistenceLayer persistenceLayer,
+            final ActorRef<TokenOffsetCommand> tokenOffsetCtrl
+    ) {
+        return tokenOffsetSource
+                // Extract committable, token and message
+                .map(committableMessage -> Tuple3.create(
+                        committableMessage.committableOffset(),
+                        new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset()),
+                        committableMessage.record().value().queuePointer
+                ))
+
+                // Write offset to persistence
+                .mapAsync(PARALLELISM, committableTokenOffset -> persistenceLayer
+                        .putOffsetIfAbsent(committableTokenOffset.t2(), committableTokenOffset.t3())
+                        .thenApply(ignored -> committableTokenOffset))
+
+                // Alert actor system of new offset
+                .alsoTo(Flow.<Tuple3<CommittableOffset, String, Long>>create()
+                        .map(committableTokenOffset -> Pair.create(committableTokenOffset.t2(), committableTokenOffset.t3()))
+                        .to(TokenOffsetController.asSetterSink(tokenOffsetCtrl)))
+
+                // Commit processed message to kafka
+                .to(Flow.<Tuple3<CommittableOffset, String, Long>>create()
+                        .map(committableTokenOffset -> (Committable) committableTokenOffset.t1())
+                        .to(committerSink));
     }
 
 }

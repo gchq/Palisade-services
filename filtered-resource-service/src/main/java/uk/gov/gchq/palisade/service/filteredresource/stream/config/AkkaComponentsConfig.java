@@ -26,6 +26,7 @@ import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.ProducerSettings;
 import akka.kafka.Subscription;
 import akka.kafka.Subscriptions;
+import akka.kafka.javadsl.Committer;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -64,8 +65,14 @@ public class AkkaComponentsConfig {
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_COMPONENTS = new StreamComponents<>();
 
+    /**
+     * Create a new Committable Source dynamically given a topic offset and partition.
+     * The likely use-case is groupId=[client token], topicPartition=[hash of token] topicOffset=[from topic-offset-service]
+     *
+     * @param <K> source's kafka topic key type
+     * @param <V> source's kafka topic value type
+     */
     public interface PartitionedOffsetSourceFactory<K, V> {
-
         /**
          * Create a new Committable Source dynamically given a topic offset and partition.
          * The likely use-case is groupId=[client token], topicPartition=[hash of token] topicOffset=[from topic-offset-service]
@@ -73,11 +80,8 @@ public class AkkaComponentsConfig {
          * @param token          the client's token for this request, which is used for the consumer group-id and partition selection
          * @param offsetFunction a function that supplies the offset to start with for the given token, defaulting to 'now' if empty
          * @return a new Kafka source
-         * @implNote it is important that the offsetFunction's future truly is started on the {@link Supplier#get()} method call as
-         * we need to ensure an accurate time for 'now' before starting the method call
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Function<String, CompletableFuture<Optional<Long>>> offsetFunction);
-
     }
 
     @Bean
@@ -96,7 +100,7 @@ public class AkkaComponentsConfig {
             long now = System.currentTimeMillis() - GRACE_PERIOD_MILLIS;
             // Try to get an offset from persistence, in this case an error thrown is recoverable, but do still log it
             Optional<Long> topicOffset = offsetSupplier.apply(token)
-                    .exceptionally(throwable -> {
+                    .exceptionally((Throwable throwable) -> {
                         LOGGER.warn("Failure while getting offset from persistence, using 'now' as offset", throwable);
                         return Optional.empty();
                     })
@@ -127,6 +131,13 @@ public class AkkaComponentsConfig {
                 .orElse(Subscriptions.topics(topic.getName()));
 
         return OFFSET_COMPONENTS.committableConsumer(consumerSettings, subscription);
+    }
+
+    @Bean
+    Sink<Committable, CompletionStage<Done>> offsetCommitterSink(final ActorSystem actorSystem) {
+        CommitterSettings committerSettings = OFFSET_COMPONENTS.committerSettings(actorSystem);
+
+        return OFFSET_COMPONENTS.committerSink(committerSettings);
     }
 
     @Bean
