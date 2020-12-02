@@ -40,17 +40,18 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         command:
-          - bash
-          - "-c"
-          - |
-            [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
-            ordinal=${BASH_REMATCH[1]}
-            java -jar /usr/share/topic-offset-service/topic-offset-service.jar \
-              {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal{{ end }}
+        - bash
+        - "-c"
+        - |
+          [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          java -jar /usr/share/topic-offset-service/topic-offset-service.jar \
+          {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.input-topic.assignment=$ordinal {{ end }} \
+            --akka.kafka.consumer.kafka-clients.group.id={{ include "topic-offset-service.name" . }}-$ordinal
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-          - name: web
-            containerPort: {{ .Values.service.internalPort }}
+        - name: web
+          containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
           httpGet:
             path: /actuator/health

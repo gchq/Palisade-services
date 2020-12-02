@@ -57,6 +57,13 @@ public class AkkaComponentsConfig {
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_COMPONENTS = new StreamComponents<>();
 
+    /**
+     * Create a new Committable Source dynamically given a topic offset and partition.
+     * The likely use-case is groupId=[client token], topicPartition=[hash of token] topicOffset=[from topic-offset-service]
+     *
+     * @param <K> source's kafka topic key type
+     * @param <V> source's kafka topic value type
+     */
     public interface PartitionedOffsetSourceFactory<K, V> {
         /**
          * Create a new Committable Source dynamically given a topic offset and partition.
@@ -104,6 +111,13 @@ public class AkkaComponentsConfig {
                 .orElse(Subscriptions.topics(topic.getName()));
 
         return OFFSET_COMPONENTS.committableConsumer(consumerSettings, subscription);
+    }
+
+    @Bean
+    Sink<Committable, CompletionStage<Done>> offsetCommitterSink(final ActorSystem actorSystem) {
+        CommitterSettings committerSettings = OFFSET_COMPONENTS.committerSettings(actorSystem);
+
+        return OFFSET_COMPONENTS.committerSink(committerSettings);
     }
 
     @Bean

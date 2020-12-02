@@ -16,8 +16,11 @@
 package uk.gov.gchq.palisade.service.filteredresource;
 
 import akka.actor.ActorSystem;
+import akka.stream.Materializer;
+import akka.stream.javadsl.RunnableGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -29,6 +32,13 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfigu
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+
 /**
  * SpringBoot application entry-point method for the {@link FilteredResourceApplication} executable
  */
@@ -37,18 +47,32 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 public class FilteredResourceApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteredResourceApplication.class);
 
-    private final ActorSystem system;
+    private final Set<RunnableGraph<?>> runners;
     private final AkkaHttpServer server;
+    private final ActorSystem system;
+    private final Materializer materializer;
+    private final Executor executor;
 
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param system the default akka actor system
-     * @param server the http server to start (in replacement of spring-boot-starter-web)
+     * @param runners      collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param system       the default akka actor system
+     * @param server       the http server to start (in replacement of spring-boot-starter-web)
+     * @param materializer the Akka {@link Materializer} configured to be used
+     * @param executor     an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
-    public FilteredResourceApplication(final ActorSystem system, final AkkaHttpServer server) {
-        this.system = system;
+    public FilteredResourceApplication(
+            final Collection<RunnableGraph<?>> runners,
+            final AkkaHttpServer server,
+            final ActorSystem system,
+            final Materializer materializer,
+            @Qualifier("applicationTaskExecutor") final Executor executor) {
+        this.runners = new HashSet<>(runners);
         this.server = server;
+        this.system = system;
+        this.materializer = materializer;
+        this.executor = executor;
     }
 
     /**
@@ -63,8 +87,19 @@ public class FilteredResourceApplication {
                 .run(args);
     }
 
+    /**
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void serveForever() {
+        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .collect(Collectors.toSet());
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+
         this.server.serveForever(this.system);
+
+        runnerThreads.forEach(CompletableFuture::join);
     }
 }
