@@ -16,24 +16,55 @@
 
 package uk.gov.gchq.palisade.service.audit;
 
+import akka.stream.Materializer;
+import akka.stream.javadsl.RunnableGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.event.EventListener;
+
+import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
- * SpringBoot application entry-point class for audit-service executable
- * All spring components to be scanned must be in this package
+ * Application entrypoint and main process runner
  */
-@EnableDiscoveryClient
 @SpringBootApplication
+@EnableConfigurationProperties({ConsumerTopicConfiguration.class})
 public class AuditApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditApplication.class);
 
+    private final Set<RunnableGraph<?>> runners;
+    private final Materializer materializer;
+    private final Executor executor;
+
     /**
-     * SpringBoot application entry-point method for audit-service executable
+     * Autowire Akka objects in constructor for application ready event
+     *
+     * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer  the Akka {@link Materializer} configured to be used
+     * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     */
+    public AuditApplication(final Set<RunnableGraph<?>> runners,
+                            final Materializer materializer,
+                            @Qualifier("applicationTaskExecutor") final Executor executor) {
+        this.runners = Collections.unmodifiableSet(runners);
+        this.materializer = materializer;
+        this.executor = executor;
+    }
+
+    /**
+     * Application entrypoint, creates and runs a spring application, passing in the given command-line args
      *
      * @param args command-line arguments passed to the application
      */
@@ -41,5 +72,18 @@ public class AuditApplication {
         LOGGER.debug("AuditApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(AuditApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
+    }
+
+    /**
+     * Runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void serveForever() {
+        Set<CompletableFuture<?>> runnerThreads = runners.stream()
+                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
+                .collect(Collectors.toSet());
+        LOGGER.info("Started {} runner threads", runnerThreads.size());
+        runnerThreads.forEach(CompletableFuture::join);
     }
 }

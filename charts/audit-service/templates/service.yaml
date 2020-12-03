@@ -23,10 +23,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 8089
-      protocol: TCP
-      name: web
+  - name: web
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

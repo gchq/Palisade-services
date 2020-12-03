@@ -107,7 +107,7 @@ uk.gov.gchq.palisade:resource-service:jar:0.5.0-SNAPSHOT
 |     +- io.netty:netty-transport:jar:4.1.50.Final:compile
 |     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
 +- org.springframework.boot:spring-boot-configuration-processor:jar:2.3.1.RELEASE:compile (optional) 
-+- com.fasterxml.jackson.core:jackson-databind:jar:2.10.4:compile
++- com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile
 +- org.apache.hadoop:hadoop-common:jar:3.2.1:compile
 |  +- org.apache.hadoop:hadoop-annotations:jar:3.2.1:compile
 |  +- com.google.guava:guava:jar:28.2-android:compile

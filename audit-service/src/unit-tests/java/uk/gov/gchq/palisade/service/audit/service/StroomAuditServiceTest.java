@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,51 +20,34 @@ import event.logging.Event;
 import event.logging.impl.DefaultEventLoggingService;
 import event.logging.impl.DefaultEventSerializer;
 import event.logging.impl.EventSerializer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.internal.util.collections.Sets;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
-
-import java.util.HashSet;
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class StroomAuditServiceTest extends AuditServiceTestCommon {
-    private static final String TOKEN_NOT_FOUND_MESSAGE = "User's request was not in the cache: ";
+@ExtendWith(MockitoExtension.class)
+class StroomAuditServiceTest {
 
     @Spy
     DefaultEventLoggingService eventLogger = new DefaultEventLoggingService();
     @Captor
     ArgumentCaptor<Event> logCaptor;
-    private static EventSerializer eventSerializer = new DefaultEventSerializer();
 
+    private static final EventSerializer EVENT_SERIALIZER = new DefaultEventSerializer();
     private static StroomAuditService auditService;
-    private UserId userId;
-    private User user;
-    private Context context;
-    private RequestId requestId;
-    private LeafResource resource;
-    private Exception exception;
-    private Rules rules;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         auditService = new StroomAuditService(eventLogger)
                 .organisation("Test Org")
@@ -73,233 +56,142 @@ public class StroomAuditServiceTest extends AuditServiceTestCommon {
                 .systemEnv("some system env")
                 .systemName("some system name")
                 .systemVersion("some system version");
-        userId = mockUserID();
-        user = mockUser();
-        context = mockContext();
-        requestId = mockOriginalRequestId();
-        resource = mockResource();
-        exception = mockException();
-        rules = mockRules();
     }
 
     @Test
-    public void auditRegisterRequestWithNoResources() {
+    void testDataServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(new HashSet<>(0))
-                .withContext(context);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.value));
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_NO_RESOURCES_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues()).hasSize(1),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
+                () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.DATA_SERVICE.value),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(StroomAuditService.READ_SUCCESS),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_LEAF_RESOURCE_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().isSuccess()).isTrue(),
+                () -> assertThat(logCaptor.getValue().getEventChain().getActivity().getId()).isEqualTo(ApplicationTestData.TEST_TOKEN)
         );
     }
 
     @Test
-    public void auditRegisterRequestSuccessful() {
+    void testFilteredResourceServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(Sets.newSet(resource))
-                .withContext(context);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.value));
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_COMPLETED_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues()).hasSize(1),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
+                () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.FILTERED_RESOURCE_SERVICE.value),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(StroomAuditService.REQUEST_SUCCESS),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_LEAF_RESOURCE_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().isSuccess()).isTrue(),
+                () -> assertThat(logCaptor.getValue().getEventChain().getActivity().getId()).isEqualTo(ApplicationTestData.TEST_TOKEN)
         );
     }
 
     @Test
-    public void auditRegisterRequestUserException() {
+    void testOtherServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(ServiceName.USER_SERVICE.name());
-        auditRequest.setOriginalRequestId(requestId);
 
         // When
-        auditService.audit(auditRequest);
+        Boolean result = auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.value));
+
+        //Then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void testUserServiceAuditErrorMessage() {
+        // Given
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.value);
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, message);
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_USER_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues()).hasSize(1),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
+                () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.USER_SERVICE.value),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().isSuccess()).isFalse(),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().getDescription()).isEqualTo(message.getErrorNode().get("message").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventChain().getActivity().getId()).isEqualTo(ApplicationTestData.TEST_TOKEN)
         );
     }
 
     @Test
-    public void auditRegisterRequestResourceException() {
+    void testResourceServiceAuditErrorMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(ServiceName.RESOURCE_SERVICE.name());
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.value);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, message);
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_RESOURCE_OUTCOME_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues()).hasSize(1),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
+                () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.RESOURCE_SERVICE.value),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().isSuccess()).isFalse(),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().getDescription()).isEqualTo(message.getErrorNode().get("message").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventChain().getActivity().getId()).isEqualTo(ApplicationTestData.TEST_TOKEN)
         );
     }
 
     @Test
-    public void auditRegisterRequestOtherException() {
+    void testOtherServiceAuditErrorMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(ServiceName.POLICY_SERVICE.name());
+        AuditErrorMessage message = ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.value);
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, message);
 
         //Then
         verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        // better error messages
-        assertThat(log)
-            .contains(userId.getId())
-            .contains(context.getPurpose())
-            .contains(requestId.getId())
-            .contains(resource.getId())
-            .contains(exception.getMessage());
 
         assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.REGISTER_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditReadRequestSuccessful() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResource(resource)
-                .withContext(context)
-                .withRulesApplied(rules)
-                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
-                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(userId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(context.getPurpose())),
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(rules.getMessage())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_COMPLETED_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditReadRequestTokenException() {
-        // Given
-        Mockito.doReturn(TOKEN_NOT_FOUND_MESSAGE).when(exception).getMessage();
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_DESCRIPTION)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_TOKEN_OUTCOME_DESCRIPTION))
-        );
-    }
-
-    @Test
-    public void auditReadRequestOtherException() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
-
-        // When
-        auditService.audit(auditRequest);
-
-        //Then
-        verify(eventLogger, atLeastOnce()).log(logCaptor.capture());
-        final String log = eventSerializer.serialize(logCaptor.getValue());
-
-        assertAll(
-                () -> assertThat(logCaptor.getAllValues().contains(requestId.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getId())),
-                () -> assertThat(logCaptor.getAllValues().contains(resource.getType())),
-                () -> assertThat(logCaptor.getAllValues().contains(exception.getMessage())),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_TYPE_ID)),
-                () -> assertThat(logCaptor.getAllValues().contains(StroomAuditService.READ_REQUEST_EXCEPTION_OTHER_DESCRIPTION))
+                () -> assertThat(logCaptor.getAllValues()).hasSize(1),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getHostName()).isEqualTo(ApplicationTestData.TEST_SERVER_NAME),
+                () -> assertThat(logCaptor.getValue().getEventSource().getDevice().getIPAddress()).isEqualTo(ApplicationTestData.TEST_SERVER_IP),
+                () -> assertThat(logCaptor.getValue().getEventSource().getUser().getId()).isEqualTo(ApplicationTestData.TEST_USER_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getTypeId()).isEqualTo(ServiceName.POLICY_SERVICE.value),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getDescription()).isEqualTo(message.getErrorNode().get("stackTrace").get(0).get("className").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getPurpose().getJustification()).isEqualTo(ApplicationTestData.TEST_PURPOSE),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getObjects().get(0).getId()).isEqualTo(ApplicationTestData.TEST_RESOURCE_ID),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().isSuccess()).isFalse(),
+                () -> assertThat(logCaptor.getValue().getEventDetail().getAuthorise().getOutcome().getDescription()).isEqualTo(message.getErrorNode().get("message").textValue()),
+                () -> assertThat(logCaptor.getValue().getEventChain().getActivity().getId()).isEqualTo(ApplicationTestData.TEST_TOKEN)
         );
     }
 }

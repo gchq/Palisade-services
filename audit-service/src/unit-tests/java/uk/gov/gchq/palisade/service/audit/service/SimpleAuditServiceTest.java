@@ -19,31 +19,29 @@ package uk.gov.gchq.palisade.service.audit.service;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@RunWith(Theories.class)
-public class SimpleAuditServiceTest extends AuditServiceTestCommon {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SimpleAuditServiceTest {
 
     private Logger logger;
     private ListAppender<ILoggingEvent> appender;
 
     private static AuditService auditService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         auditService = new SimpleAuditService();
 
@@ -53,22 +51,11 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
         logger.addAppender(appender);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         logger.detachAppender(appender);
         appender.stop();
     }
-
-    //@DataPoints requires the property to be public
-    @SuppressWarnings("checkstyle:visibilitymodifier")
-    @DataPoints()
-    public static AuditRequest[] requests = new AuditRequest[] {
-            registerRequestCompleteAuditRequest(),
-            registerRequestExceptionAuditRequestFromUserService(),
-            readRequestCompleteAuditRequest(),
-            readRequestExceptionAuditRequest()
-
-    };
 
     private List<String> getMessages(final Predicate<ILoggingEvent> predicate) {
         return appender.list.stream()
@@ -77,17 +64,25 @@ public class SimpleAuditServiceTest extends AuditServiceTestCommon {
                 .collect(Collectors.toList());
     }
 
-    @Theory
-    public void auditOnAuditRequest(final AuditRequest request) {
+    @Test
+    void testAuditErrorMessage() {
         // When
-        auditService.audit(request);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage("USER_SERVICE"));
 
         // Then
         List<String> logMessages = getMessages(event -> true);
 
-        MatcherAssert.assertThat(logMessages, Matchers.hasItems(
-                Matchers.containsString(request.toString())
-        ));
+        assertThat(logMessages.get(0)).contains(AuditErrorMessage.class.getSimpleName());
     }
 
+    @Test
+    void testAuditSuccessMessage() {
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage("DATA_SERVICE"));
+
+        // Then
+        List<String> logMessages = getMessages(event -> true);
+
+        assertThat(logMessages.get(0)).contains(AuditSuccessMessage.class.getSimpleName());
+    }
 }

@@ -19,13 +19,24 @@ package uk.gov.gchq.palisade.service.audit.service;
 /**
  * Enum providing type safety for service names
  *
- * @since 0.4.0
+ * @since 0.5.0
  */
 public enum ServiceName {
-    AUDIT_SERVICE,
-    DATA_SERVICE,
-    PALISADE_SERVICE,
-    POLICY_SERVICE,
-    RESOURCE_SERVICE,
-    USER_SERVICE
+    ATTRIBUTE_MASKING_SERVICE("attribute-masking-service"),
+    DATA_SERVICE("data-service"),
+    FILTERED_RESOURCE_SERVICE("filtered-resource-service"),
+    PALISADE_SERVICE("palisade-service"),
+    POLICY_SERVICE("policy-service"),
+    RESOURCE_SERVICE("resource-service"),
+    TOPIC_OFFSET_SERVICE("topic-offset-service"),
+    USER_SERVICE("user-service");
+
+    /**
+     * The service name value used by the {@link uk.gov.gchq.palisade.service.audit.model.AuditMessage} types
+     */
+    public final String value;
+
+    ServiceName(final String value) {
+        this.value = value;
+    }
 }

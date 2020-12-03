@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration(classes = ApplicationConfiguration.class)
-public class ApplicationConfigurationTest {
+class ApplicationConfigurationTest {
 
     private static final Set<Class<? extends AuditService>> EXPECTED_AUDITS = new HashSet<>();
 
@@ -49,16 +49,16 @@ public class ApplicationConfigurationTest {
     private Map<String, AuditService> auditServices;
 
     @Test
-    public void testAuditServicesLoads() {
+    void testAuditServicesLoads() {
         assertThat(auditServices).isNotNull();
     }
 
     @Test
-    public void testConfigurationDefinesLoadedServices() {
+    void testConfigurationDefinesLoadedServices() {
         // Given - expectedAudits
         // Then
         for (AuditService auditService : auditServices.values()) {
-            assertThat(EXPECTED_AUDITS).contains(auditService.getClass());
+            assertThat(auditService.getClass()).isIn(EXPECTED_AUDITS);
         }
     }
 }
