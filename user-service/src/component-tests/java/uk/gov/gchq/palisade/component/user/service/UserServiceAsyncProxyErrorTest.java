@@ -44,6 +44,7 @@ import org.testcontainers.containers.Network;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.component.user.service.UserServiceAsyncProxyErrorTest.RedisInitializer;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.AuditableUserResponse;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
@@ -164,7 +165,7 @@ class UserServiceAsyncProxyErrorTest {
         // Then check the error message contains the correct message
         assertThat(auditableUserResponse.getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo("uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException: No userId matching test-user-id found in cache");
+                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching test-user-id found in cache");
     }
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
