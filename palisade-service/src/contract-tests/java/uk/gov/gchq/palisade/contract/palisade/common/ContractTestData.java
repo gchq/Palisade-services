@@ -60,7 +60,15 @@ public class ContractTestData {
         AuditErrorMessage error = AuditErrorMessage.Builder.create(REQUEST_OBJ, new HashMap<>()).withError(ERROR);
         try {
             ERROR_JSON = MAPPER.writeValueAsString(error);
+        } catch (JsonProcessingException ex) {
+            throw new SerializationFailedException("Failed to parse contract test error data", ex);
+        }
+        try {
             ERROR_NODE = MAPPER.readTree(ERROR_JSON);
+        } catch (JsonProcessingException ex) {
+            throw new SerializationFailedException("Failed to parse contract test error data", ex);
+        }
+        try {
             ERROR_OBJ = MAPPER.treeToValue(ERROR_NODE, AuditErrorMessage.class);
         } catch (JsonProcessingException ex) {
             throw new SerializationFailedException("Failed to parse contract test error data", ex);

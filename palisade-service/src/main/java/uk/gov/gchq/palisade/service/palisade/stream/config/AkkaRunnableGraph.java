@@ -75,6 +75,25 @@ public class AkkaRunnableGraph {
 
         return source
                 .flatMapConcat((TokenRequestPair tokenAndRequest) -> {
+
+                    //decidePartition
+                    Integer partition = Token.toPartition(tokenAndRequest.first(), outputTopic.getPartitions());
+
+                    BiFunction<AuditablePalisadeRequest, Headers, ProducerRecord<String, byte[]>> recordFunc = (AuditablePalisadeRequest value, Headers headers) -> {
+                        // Make the AuditablePalisadeRequest an Optional
+                        Optional<AuditablePalisadeRequest> auditablePalisadeRequest = Optional.ofNullable(value);
+                        // Map the auditable request to either a PalisadeRequest or AuditErrorMessage
+                        return auditablePalisadeRequest.map(AuditablePalisadeRequest::getAuditErrorMessage).map(audit ->
+                                new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
+                                                SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
+                                .orElseGet(() ->
+                                        new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
+                                                    SerDesConfig.requestSerializer().serialize(null,
+                                                            auditablePalisadeRequest.map(AuditablePalisadeRequest::getPalisadeRequest)
+                                                                    .orElse(null)), headers)
+                                );
+                    };
+
                     //create the start of stream message
                     Headers startHeaders = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenAndRequest.first().getBytes(Charset.defaultCharset())),
                             new RecordHeader(StreamMarker.HEADER, StreamMarker.START.toString().getBytes(Charset.defaultCharset()))});
@@ -85,25 +104,6 @@ public class AkkaRunnableGraph {
                     //create the end of stream message
                     Headers endHeaders = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenAndRequest.first().getBytes(Charset.defaultCharset())),
                             new RecordHeader(StreamMarker.HEADER, StreamMarker.END.toString().getBytes(Charset.defaultCharset()))});
-
-                    //decidePartition
-                    Integer partition = Token.toPartition(tokenAndRequest.first(), outputTopic.getPartitions());
-
-                    BiFunction<AuditablePalisadeRequest, Headers, ProducerRecord<String, byte[]>> recordFunc = (value, headers) -> {
-                        // Make the AuditablePalisadeRequest an Optional
-                        Optional<AuditablePalisadeRequest> auditablePalisadeRequest = Optional.ofNullable(value);
-                        // Map the auditable request to either a PalisadeRequest or AuditErrorMessage
-                        return auditablePalisadeRequest.map(AuditablePalisadeRequest::getAuditErrorMessage).map(audit ->
-                                new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
-                                                SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
-                                .orElseGet(() ->
-                                        new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
-                                                    SerDesConfig.requestSerializer().serialize(null,
-                                                            auditablePalisadeRequest
-                                                                    .map(AuditablePalisadeRequest::getPalisadeRequest)
-                                                                    .orElse(null)), headers)
-                                );
-                    };
 
                     LOGGER.debug("token {} and request: {}", tokenAndRequest.first(), tokenAndRequest.second());
                     return Source.from(List.of(

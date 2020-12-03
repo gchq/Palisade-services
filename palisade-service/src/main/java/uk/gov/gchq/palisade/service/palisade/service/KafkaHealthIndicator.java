@@ -43,7 +43,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
-    private final List<String> topicNames = Arrays.asList("request", "error");
+    private static final List<String> TOPIC_NAMES = Arrays.asList("request", "error");
 
     /**
      * Requires the AdminClient to interact with Kafka
@@ -58,8 +58,8 @@ public class KafkaHealthIndicator implements HealthIndicator {
     public Health getHealth(final boolean includeDetails) {
         return Optional.of(performCheck())
                 .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("topics", topicNames).build())
-                .orElseGet(() -> Health.down().withDetail("topics", topicNames).build());
+                .map(up -> Health.up().withDetail("topics", TOPIC_NAMES).build())
+                .orElseGet(() -> Health.down().withDetail("topics", TOPIC_NAMES).build());
     }
 
     @Override
@@ -72,14 +72,14 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private boolean performCheck() {
         try {
-            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(topicNames).all().get(1, TimeUnit.SECONDS);
-            Boolean requestTopic = topicsResult.get("request").name().equals(topicNames.get(0));
-            Boolean errorTopic = topicsResult.get("error").name().equals(topicNames.get(1));
+            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(TOPIC_NAMES).all().get(1, TimeUnit.SECONDS);
+            Boolean requestTopic = topicsResult.get("request").name().equals(TOPIC_NAMES.get(0));
+            Boolean errorTopic = topicsResult.get("error").name().equals(TOPIC_NAMES.get(1));
 
             return errorTopic && requestTopic;
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", this.topicNames, e);
+            LOGGER.warn("Timeout during Kafka health check for group {}", TOPIC_NAMES, e);
             Thread.currentThread().interrupt();
             return false;
         }

@@ -27,7 +27,7 @@ import java.util.Optional;
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
 
-public class AuditablePalisadeRequest {
+public final class AuditablePalisadeRequest {
 
     @JsonProperty("palisadeRequest")
     private final PalisadeRequest palisadeRequest;
