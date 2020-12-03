@@ -1,4 +1,5 @@
-# Copyright 2019 Crown Copyright
+
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,21 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "audit-service.name" . }}
+  name: {{ include "audit-service.name" . }}-headless
   namespace: {{ include "palisade.namespace" . }}
-  labels:
-    {{- include "audit-service.labels" . | nindent 4 }}
+  labels: {{- include "audit-service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
   ports:
-  - name: web
-    port: {{ .Values.service.port }}
-    targetPort: {{ .Values.service.internalPort }}
+  - name: broker
+    port: {{ .Values.service.internalPort }}
   selector:
     app.kubernetes.io/name: {{ include "audit-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
