@@ -84,7 +84,7 @@ class AuditErrorMessageTest {
                         () -> assertThat(auditErrorMessageObject.getContext()).isEqualTo(auditErrorMessage.getContext()),
                         () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
                         () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
+                        () -> assertThat(auditErrorMessageObject.getServerHostname()).isEqualTo(auditErrorMessage.getServerHostname()),
                         () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
                         () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
                         // Note Throwable equals does not override Object's equal so two Throwables are only equal if they are the same instance of an object.

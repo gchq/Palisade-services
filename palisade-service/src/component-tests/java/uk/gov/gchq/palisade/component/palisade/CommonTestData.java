@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.component.palisade;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 
 import java.util.UUID;
@@ -38,4 +39,6 @@ public class CommonTestData {
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT);
+    public static final AuditablePalisadeRequest AUDITABLE_PALISADE_REQUEST =
+            AuditablePalisadeRequest.Builder.create().withPalisadeRequest(PALISADE_REQUEST);
 }

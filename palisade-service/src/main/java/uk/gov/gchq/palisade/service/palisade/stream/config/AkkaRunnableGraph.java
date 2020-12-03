@@ -33,14 +33,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.palisade.stream.SerDesConfig;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
@@ -60,12 +63,14 @@ public class AkkaRunnableGraph {
     @Bean
     RunnableGraph<Sink<TokenRequestPair, NotUsed>> runner(
             final Source<TokenRequestPair, Sink<TokenRequestPair, NotUsed>> source,
-            final Sink<ProducerRecord<String, PalisadeRequest>, CompletionStage<Done>> sink,
+            final Sink<ProducerRecord<String, byte[]>, CompletionStage<Done>> sink,
             final Function1<Throwable, Supervision.Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration) {
 
         // Get output topic from config
-        ProducerTopicConfiguration.Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        // Get error topic from config
+        Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
 
         return source
@@ -84,13 +89,26 @@ public class AkkaRunnableGraph {
                     //decidePartition
                     Integer partition = Token.toPartition(tokenAndRequest.first(), outputTopic.getPartitions());
 
-                    BiFunction<PalisadeRequest, Headers, ProducerRecord<String, PalisadeRequest>> recordFunc = (value, headers) ->
-                            new ProducerRecord<>(outputTopic.getName(), partition, (String) null, value, headers);
+                    BiFunction<AuditablePalisadeRequest, Headers, ProducerRecord<String, byte[]>> recordFunc = (value, headers) -> {
+                        // Make the AuditablePalisadeRequest an Optional
+                        Optional<AuditablePalisadeRequest> auditablePalisadeRequest = Optional.ofNullable(value);
+                        // Map the auditable request to either a PalisadeRequest or AuditErrorMessage
+                        return auditablePalisadeRequest.map(AuditablePalisadeRequest::getAuditErrorMessage).map(audit ->
+                                new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
+                                                SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
+                                .orElseGet(() ->
+                                        new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
+                                                    SerDesConfig.requestSerializer().serialize(null,
+                                                            auditablePalisadeRequest
+                                                                    .map(AuditablePalisadeRequest::getPalisadeRequest)
+                                                                    .orElse(null)), headers)
+                                );
+                    };
 
                     LOGGER.debug("token {} and request: {}", tokenAndRequest.first(), tokenAndRequest.second());
                     return Source.from(List.of(
                             recordFunc.apply(null, startHeaders), // Start of Stream Message
-                            recordFunc.apply(tokenAndRequest.second(), requestHeaders), //Body
+                            recordFunc.apply(tokenAndRequest.second(), requestHeaders), // Body
                             recordFunc.apply(null, endHeaders))); // End of Stream Message
                 })
                 // Send errors to supervisor
