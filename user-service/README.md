@@ -19,8 +19,10 @@ limitations under the License.
 # User Service
 
 The User Service is responsible for providing the other Palisade components with knowledge of the users of the system. 
-Note that we are avoiding having a separate notion of "Palisade" users that are distinct from the normal user accounts of the system. There is no such thing as a "Palisade" user.  
-One of the purposes of this service is to allow Palisade to adopt whatever notion of *user* the host environment has. For example, this may from a central directory service such as LDAP, 
+Note that we are avoiding having a separate notion of "Palisade" users that are distinct from the normal user accounts of the system. 
+There is no such thing as a "Palisade" user.  
+One of the purposes of this service is to allow Palisade to adopt whatever notion of *user* the host environment has. 
+For example, this may come from a central directory service such as LDAP, 
 host operating system account or PKI based user authentication.
 The User Service separates this concern from the rest of the system. Other components use this service's API to request user details. 
 Some deployments may also allow Palisade to add users to the system, hence the presence of the `addUser()` method in the `UserService` interface.
@@ -38,17 +40,22 @@ Some deployments may also allow Palisade to add users to the system, hence the p
   
 (fields marked with * are acquired from headers metadata)
 
-The service accepts a `UserRequest` and a token, then checks that the User is in the cache; the technology of which is chosen in the User Services application.yaml and Spring profiles.
-If the User exists in the cache, then it, alongside any attributes are retrieved, and used to create a `UserReponse` object which is then packaged into a `AuditableUserResponse` object with no errors, 
-and then this is sent via kafka, to the Resource Service for further processing. 
-If the User does not exist in the cache, then a `NoSuchUserIdException` is thrown within the Service, which is caught, and packaged in the `AuditableUserReponse`, alongside the original `UserRequest` and an `AuditErrorMessage`, 
-this is then sent to the Audit Service and logged appropriatly.
+The service accepts a `UserRequest` and a token, then checks if the User is in the cache; the technology of which is chosen in the User Services application.yaml 
+and Spring profiles. If the User exists in the cache, then it, alongside any additional attributes, are retrieved and used to create a `UserReponse` object 
+which is then packaged into a `AuditableUserResponse` object with no errors. This is then sent, via Kafka, to the [Resource Service](../resource-service) for further processing. 
+If the User does not exist in the cache then the request gets directed to the local implementation of the User service. If the User service implementation returns a User then a 
+`UserResponse` object gets created and added to an `AuditableUserResponse` object which is sent to the [Resource service](../resource-service).
+Should any errors get thrown when trying to access a User, for example a `NoSuchUserIdException`, then this information creates an `AuditErrorMessage` 
+that is then sent to the [Audit service](../audit-service) to be audited appropriately.
 
 ## REST Interface
 
 The application exposes two REST endpoints used for debugging or mocking kafka entrypoints:
 * `POST api/user`
-  - accepts an `x-request-token` `String` header, any number of extra headers, and an `UserRequest` body
+  - accepts an `x-request-token` `String` header, any number of extra headers, and a single `UserRequest` in the body
+  - returns a `202 ACCEPTED` after writing the headers and `AuditableUserResponse` to kafka
+* `POST api/user/multi`
+  - accepts an `x-request-token` `String` header, any number of extra headers, and a list of `UserRequest`s within the body
   - returns a `202 ACCEPTED` after writing the headers and `AuditableUserResponse` to kafka
 
 ## Example JSON Request
