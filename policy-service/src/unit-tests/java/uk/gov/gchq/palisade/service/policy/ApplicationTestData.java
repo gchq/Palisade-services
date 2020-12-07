@@ -28,11 +28,15 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -54,6 +58,7 @@ public class ApplicationTestData {
     public static final String PURPOSE = "test-purpose";
     public static final Context CONTEXT = new Context().purpose(PURPOSE);
     public static final String RULE_MESSAGE = "test-rule";
+    public static final Rules<LeafResource> RESOURCE_RULES = new Rules<LeafResource>().addRule(RULE_MESSAGE, new PassThroughRule<LeafResource>());
     public static final Rules<Serializable> RULES = new Rules<Serializable>().addRule(RULE_MESSAGE, new PassThroughRule<Serializable>());
     public static final PolicyRequest REQUEST = PolicyRequest.Builder.create()
             .withUserId(USER_ID.getId())
@@ -62,8 +67,16 @@ public class ApplicationTestData {
             .withUser(USER)
             .withResource(LEAF_RESOURCE);
     public static final PolicyResponse RESPONSE = PolicyResponse.Builder.create(REQUEST)
-            .withResource(LEAF_RESOURCE)
             .withRules(RULES);
+
+   public static final   AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
+            .withUserId(USER_ID.getId())
+            .withResourceId(RESOURCE_ID)
+            .withContext(CONTEXT)
+            .withAttributes((new HashMap<String, Object>()))
+            .withError(new Throwable("Something went wrong!"));
+
+    public static final AuditablePolicyRecordResponse AUDITABLE_POLICY_RECORD_RESPONSE = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
     public static final ProducerRecord<String, PolicyRequest> START = new ProducerRecord<>("resource", 0, null, null);
     public static final ProducerRecord<String, PolicyRequest> RECORD = new ProducerRecord<>("resource", 0, null, REQUEST);
     public static final ProducerRecord<String, PolicyRequest> END = new ProducerRecord<>("resource", 0, null, null);
