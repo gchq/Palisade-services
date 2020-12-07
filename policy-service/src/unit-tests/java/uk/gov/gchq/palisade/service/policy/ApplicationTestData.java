@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.model.Token;
@@ -75,6 +76,9 @@ public class ApplicationTestData {
             .withContext(CONTEXT)
             .withAttributes((new HashMap<String, Object>()))
             .withError(new Throwable("Something went wrong!"));
+
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(RULES).withNoErrors().withNoNoModifiedResponse();
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoNoModifiedResponse();
 
     public static final AuditablePolicyRecordResponse AUDITABLE_POLICY_RECORD_RESPONSE = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
     public static final ProducerRecord<String, PolicyRequest> START = new ProducerRecord<>("resource", 0, null, null);

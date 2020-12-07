@@ -33,6 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RULES;
@@ -127,7 +130,7 @@ class PolicyServiceAsyncProxyTest {
 
 
     /**
-     * Test for when Rules are not found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
+     * Test for when Rules are found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
      * with an {@code PolicyResponse} and no {@code AuditErrorMessage}
      *
      * @throws Exception if the test fails
@@ -136,46 +139,25 @@ class PolicyServiceAsyncProxyTest {
     void tesGetRecordRulesWhichFindsRules() throws Exception {
         when(hierarchyProxy.getRecordRules(any())).thenReturn(RULES);
 
-       // CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(REQUEST);
-       // AuditablePolicyRecordResponse response = completableFuture.get();
-      //  assertThat(response.getPolicyResponse()).isNotNull();
-      //  assertThat(response.getAuditErrorMessage()).isNull();
+        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE);
+        AuditablePolicyRecordResponse response = completableFuture.get();
+        assertThat(response.getPolicyResponse()).isNotNull();
+        assertThat(response.getAuditErrorMessage()).isNull();
     }
 
     /**
      * Test for when Rules are not found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
-     * without a {@code PolicyResponse} and no {@code AuditErrorMessage}.
+     * without a {@code PolicyResponse} and with {@code AuditErrorMessage}.
      *
      * @throws Exception if the test fails
      */
     @Test
     void tesGetRecordRulesWithNoPolicyRecord() throws Exception {
-        when(hierarchyProxy.getRecordRules(any())).thenReturn(RULES);
-
-        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(null);
-        AuditablePolicyRecordResponse response = completableFuture.get();
-        assertThat(response.getPolicyResponse()).isNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
-    }
-
-
-    /**
-     * Test for when there are no Rules.  This should produce an
-     * {@link AuditablePolicyRecordResponse} with an {@code AuditErrorMessage} holding the exception that was thrown
-     *
-     * @throws Exception if the test fails
-     */
-    @Test
-    void tesGetRecordRulesWhenItThrowsAnException() throws Exception {
-
         when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("Test"));
 
-      //  CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(REQUEST);
-      //  AuditablePolicyRecordResponse response = completableFuture.get();
-      //  assertThat(response.getPolicyResponse()).isNotNull();
-      //  assertThat(response.getAuditErrorMessage()).isNotNull();
-        //note the exception is a CompletionException with the cause being a NoSuchPolicyException
-      //  assertThat(response.getAuditErrorMessage().getError().getCause()).isInstanceOf(NoSuchPolicyException.class);
+        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES);
+        AuditablePolicyRecordResponse response = completableFuture.get();
+        assertThat(response.getPolicyResponse()).isNotNull();
+        assertThat(response.getAuditErrorMessage()).isNotNull();
     }
-
 }

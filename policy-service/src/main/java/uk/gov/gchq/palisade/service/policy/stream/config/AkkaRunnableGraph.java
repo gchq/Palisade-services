@@ -41,6 +41,7 @@ import scala.Function1;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
@@ -124,8 +125,6 @@ public class AkkaRunnableGraph {
 
                 // Materialize the stream, sending messages to the sink
                 .toMat(sink, Consumer::createDrainingControl);
-
-
 
     }
 }
