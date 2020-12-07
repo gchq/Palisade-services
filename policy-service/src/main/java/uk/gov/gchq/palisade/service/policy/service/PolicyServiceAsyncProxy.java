@@ -71,41 +71,47 @@ public class PolicyServiceAsyncProxy {
                                 .thenApply(rules -> AuditablePolicyResourceResponse.Builder.create()
                                         .withPolicyRequest(request)
                                         .withRules(rules)
-                                        .withAuditErrorMessage(null))
+                                        .withNoErrors()
+                                        .withNoNoModifiedResponse())
                                 .exceptionally(e -> AuditablePolicyResourceResponse.Builder.create()
                                         .withPolicyRequest(request)
                                         .withRules(null)
-                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e)))
+                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e))
+                                        .withNoNoModifiedResponse()
+                                )
                 )
                 .orElse(CompletableFuture.completedFuture(AuditablePolicyResourceResponse.Builder.create()
                         .withPolicyRequest(null)
                         .withRules(null)
-                        .withAuditErrorMessage(null)));
+                        .withNoErrors().withNoNoModifiedResponse()));
     }
 
     /**
      * Given a nullable request, unwrap and store the request if it is non-null, ignore it if it is null
      * Async call to the {@link PolicyServiceHierarchyProxy} getRecordRules that takes a resource and gets the record rules applied against it
      *
-     * @param nullableRequest the resource the user wants access to
+     * @param modifiedAuditable the resource the user wants access to
      * @return the record rules for the LeafResource, if null then an exception will be thrown
      */
-    public CompletableFuture<AuditablePolicyRecordResponse> getRecordRules(final @Nullable PolicyRequest nullableRequest) {
+    public CompletableFuture<AuditablePolicyRecordResponse> getRecordRules(final AuditablePolicyResourceResponse modifiedAuditable) {
 
+       PolicyRequest nullableRequest = modifiedAuditable.getPolicyRequest();
         return Optional.ofNullable(nullableRequest)
                 .map((PolicyRequest request) ->
                         CompletableFuture.supplyAsync(() -> service.getRecordRules(request.getResource()))
                                 .thenApply(rules -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
                                                 .withRules(rules))
-                                        .withAuditErrorMessage(null))
+                                        .withNoErrors())
                                 .exceptionally(e -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
-                                                .withRules(new Rules<>()))
+                                                .withRules(new Rules()))
                                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e)))
                 )
                 .orElse(CompletableFuture.completedFuture(AuditablePolicyRecordResponse.Builder.create()
                         .withPolicyResponse(null)
-                        .withAuditErrorMessage(null)));
+                        .withNoErrors()));
     }
+
+
 }
