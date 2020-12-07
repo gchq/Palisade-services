@@ -62,7 +62,7 @@ class AuditablePolicyRecordResponseTest {
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
                         () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.policyResponse.userId").isEqualTo("test-user-id"),
-                        () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isEqualTo(null)
+                        () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isNull()
                 ),
 
                 () -> assertAll("AuditDeserialisingComparedToObject",
@@ -97,7 +97,7 @@ class AuditablePolicyRecordResponseTest {
         AuditablePolicyRecordResponse auditablePolicyRecordResponseMessageObject = auditablePolicyRecordResponseObjectContent.getObject();
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.policyResponse").isEqualTo(null),
+                        () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.policyResponse").isNull(),
                         () -> assertThat(auditablePolicyRecordResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.userId").isEqualTo("test-user-id")
                 ),
 

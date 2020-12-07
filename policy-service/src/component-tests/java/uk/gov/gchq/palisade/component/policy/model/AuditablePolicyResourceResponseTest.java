@@ -67,8 +67,8 @@ class AuditablePolicyResourceResponseTest {
                 () -> assertAll("AuditSerialisingComparedToString",
                         () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
                         () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isEqualTo(null),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.modifiedResource").isEqualTo(null)
+                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isNull(),
+                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.modifiedResource").isNull()
                 ),
 
                 () -> assertAll("AuditDeserialisingComparedToObject",
@@ -111,7 +111,7 @@ class AuditablePolicyResourceResponseTest {
                 () -> assertAll("AuditSerialisingComparedToString",
                         () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
                         () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isEqualTo(null),
+                        () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isNull(),
                         () -> assertThat(auditablePolicyResourceResponseJsonContent).extractingJsonPathStringValue("$.modifiedResource.id").isEqualTo("/test/resourceId")
                 ),
 
