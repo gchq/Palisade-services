@@ -141,7 +141,7 @@ class RedisUserCachingTest {
         UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("purpose"));
         cacheProxy.addUser(user);
 
-        TimeUnit.MILLISECONDS.sleep(1000);
+        TimeUnit.SECONDS.sleep(1);
 
         // When - we try to access stale cache data
         Exception noSuchUserId = assertThrows(NoSuchUserIdException.class,

@@ -169,7 +169,7 @@ class KafkaContractTest {
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
                 () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                        .isEqualTo("test-user-id"),
+                        .isEqualTo(ContractTestData.REQUEST_OBJ.getUserId()),
                 () -> assertThat(results.get(0).value().get("user").get("auths").get(0).asText())
                         .isEqualTo("auth"),
                 () -> assertThat(results.get(0).value().get("user").get("roles").get(0).asText())

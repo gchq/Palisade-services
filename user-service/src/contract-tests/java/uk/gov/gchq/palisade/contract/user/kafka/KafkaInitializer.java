@@ -75,7 +75,7 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
 
         // test kafka config
         String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + KAFKA_CONTAINER.getFirstMappedPort();
+        String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
     }
 

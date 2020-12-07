@@ -19,30 +19,18 @@ package uk.gov.gchq.palisade.component.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.serializer.support.SerializationFailedException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 
 import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.component.user.service.UserServiceAsyncProxyErrorTest.RedisInitializer;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 import uk.gov.gchq.palisade.service.user.model.AuditableUserResponse;
@@ -52,7 +40,6 @@ import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -61,19 +48,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
-        properties = {"spring.cache.redis.timeToLive=1s"}
+        properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
 @EnableCaching
-@ContextConfiguration(initializers = {RedisInitializer.class})
-@Import(RedisAutoConfiguration.class)
-@ActiveProfiles({"redis"})
+@ActiveProfiles({"caffeine"})
 class UserServiceAsyncProxyErrorTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceAsyncProxyErrorTest.class);
-
-
-    private static final Function<Integer, String> REQUEST_FACTORY_JSON = i ->
-            String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}", i, i);
+    private static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    private static final String NO_USER_REQUEST_JSON = "{\"userId\":\"Not-a-real-user\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
 
     @Autowired
     private UserServiceAsyncProxy userServiceAsyncProxy;
@@ -81,7 +63,7 @@ class UserServiceAsyncProxyErrorTest {
     private ObjectMapper mapper;
     private final Function<Integer, JsonNode> requestFactoryNode = i -> {
         try {
-            return this.mapper.readTree(REQUEST_FACTORY_JSON.apply(i));
+            return this.mapper.readTree(REQUEST_JSON);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
@@ -93,23 +75,24 @@ class UserServiceAsyncProxyErrorTest {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
     };
-
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-
-    protected void cleanCache() {
-        requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
-    }
-
-    @AfterEach
-    void tearDown() {
-        cleanCache();
-    }
+    private final Function<Integer, JsonNode> noUserRequestFactoryNode = i -> {
+        try {
+            return this.mapper.readTree(NO_USER_REQUEST_JSON);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse contract test data", e);
+        }
+    };
+    private final Function<Integer, UserRequest> noUserRequestFactoryObj = i -> {
+        try {
+            return this.mapper.treeToValue(noUserRequestFactoryNode.apply(i), UserRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
+        }
+    };
 
     @Test
     void testContextLoads() {
         assertThat(userServiceAsyncProxy).isNotNull();
-        assertThat(redisTemplate).isNotNull();
     }
 
     @Test
@@ -142,12 +125,10 @@ class UserServiceAsyncProxyErrorTest {
 
     @Test
     void testGetUserFailure() {
-        // When adding a user
-        final User user = new User().userId("Not-a-real-user");
-        this.userServiceAsyncProxy.addUser(user);
+        // When user has been added
 
         // Then retrieving a different user
-        final UserRequest userRequest = requestFactoryObj.apply(1);
+        final UserRequest userRequest = noUserRequestFactoryObj.apply(1);
         final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(userRequest);
 
         // Check the CompletableFuture hasn't finished
@@ -165,32 +146,6 @@ class UserServiceAsyncProxyErrorTest {
         // Then check the error message contains the correct message
         assertThat(auditableUserResponse.getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching test-user-id found in cache");
+                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching Not-a-real-user found in cache");
     }
-
-    public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        private static final int REDIS_PORT = 6379;
-
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withNetwork(Network.SHARED)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NotNull final ConfigurableApplicationContext context) {
-            context.getEnvironment().setActiveProfiles("redis");
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the test container random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            UserServiceAsyncProxyErrorTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
-
 }

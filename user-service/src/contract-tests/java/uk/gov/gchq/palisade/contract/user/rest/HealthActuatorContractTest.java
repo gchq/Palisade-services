@@ -37,9 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(
         classes = UserApplication.class,
         webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = {"management.health.kafka.enabled=false", "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"}
+        properties = {"management.health.kafka.enabled=false"}
 )
-@ActiveProfiles("akka-test")
+@ActiveProfiles({"akka-test", "caffeine"})
 class HealthActuatorContractTest {
 
     @Autowired

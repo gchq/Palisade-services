@@ -67,8 +67,8 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
-    public static final Function<Integer, String> NO_USER_ID_REQUEST_FACTORY_JSON = i -> String.format(NO_USER_JSON, i, i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> REQUEST_JSON;
+    public static final Function<Integer, String> NO_USER_ID_REQUEST_FACTORY_JSON = i -> NO_USER_JSON;
 
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
