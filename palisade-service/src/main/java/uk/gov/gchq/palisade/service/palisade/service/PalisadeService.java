@@ -99,7 +99,7 @@ public abstract class PalisadeService {
     public void errorMessage(final PalisadeRequest request, final String token,
                              final Map<String, Object> attributes, final Throwable error) {
         // Sends the information to the "error" topic
-        // We need to include the PalisadeRequest information and the Error that occurred.
+        // We need to include the token, the PalisadeRequest information and the Error that occurred.
         AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes).withError(error);
         AuditablePalisadeRequest auditableRequest = AuditablePalisadeRequest.Builder.create().withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);

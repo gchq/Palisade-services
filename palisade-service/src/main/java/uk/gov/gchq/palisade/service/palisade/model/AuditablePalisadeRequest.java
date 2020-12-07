@@ -19,11 +19,13 @@ package uk.gov.gchq.palisade.service.palisade.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import uk.gov.gchq.palisade.Generated;
+
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This class is a container for {@code PalisadeResponse} and {@code AuditErrorMessage} during stream processing.
+ * This class is a container for {@code PalisadeRequest} and {@code AuditErrorMessage} during stream processing.
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
 
@@ -72,10 +74,12 @@ public final class AuditablePalisadeRequest {
         return Objects.hash(palisadeRequest, auditErrorMessage);
     }
 
+    @Generated
     public PalisadeRequest getPalisadeRequest() {
         return palisadeRequest;
     }
 
+    @Generated
     public AuditErrorMessage getAuditErrorMessage() {
         return auditErrorMessage;
     }
