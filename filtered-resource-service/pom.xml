@@ -31,11 +31,55 @@
     <!--  *********** Aritfact ID ***********    -->
 
     <properties>
+        <!-- Dependency versions -->
+        <scala.version>2.13</scala.version>
+        <akka.version>2.6.10</akka.version>
+        <akka.http.version>10.2.1</akka.http.version>
+        <alpakka.version>2.1.0-M1</alpakka.version>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
     </properties>
 
     <dependencies>
+        <!--
+        ~ Dependencies
+        -->
+        <dependency>
+            <!-- Core Akka streaming (more up-to-date than alpakka dependency) -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-typed_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Alpakka Kafka connectors -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Akka/SLF4j logging connector -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Akka HTTP/Websocket server -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-http_${scala.version}</artifactId>
+            <version>${akka.http.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Akka HTTP JSON serialisation -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-http-jackson_${scala.version}</artifactId>
+            <version>${akka.http.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Smarter discovery of Kafka servers -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-discovery_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
         <dependency>
             <!-- H2 local persistence store -->
             <groupId>com.h2database</groupId>
@@ -45,11 +89,6 @@
             <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <!-- REST controllers -->
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <!-- JPA persistence and CrudRepositories -->
@@ -67,7 +106,9 @@
             <artifactId>common</artifactId>
             <version>0.5.0-${common.revision}</version>
         </dependency>
-        <!-- Test Dependencies -->
+        <!--
+        ~ Test Dependencies
+        -->
         <dependency>
             <!-- SpringBootTest -->
             <groupId>org.springframework.boot</groupId>
@@ -79,6 +120,20 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
             <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka streams testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-testkit_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Alpakka Kafka testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream-kafka-testkit_${scala.version}</artifactId>
+            <version>${alpakka.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

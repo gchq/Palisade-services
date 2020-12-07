@@ -31,12 +31,12 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = {ApplicationConfiguration.class})
 @EntityScan(basePackages = {"uk.gov.gchq.palisade.service.resource.domain"})
 @EnableJpaRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.repository"})
-@ActiveProfiles({"h2", "web"})
+@ActiveProfiles({"dbtest"})
 class JpaPersistenceLayerTest {
     @Autowired
     private JpaPersistenceLayer persistenceLayer;
@@ -61,12 +61,14 @@ class JpaPersistenceLayerTest {
                 .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"));
 
         // addResource is only appropriate for runtime updates to an existing set, whereas put is appropriate for initialisation
-        persistenceLayer.withPersistenceById(resource.getParent().getId(), Stream.of(resource)).forEach(x -> {
-        });
-        persistenceLayer.withPersistenceByType(resource.getType(), Stream.of(resource)).forEach(x -> {
-        });
-        persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), Stream.of(resource)).forEach(x -> {
-        });
+        FunctionalIterator<LeafResource> resourceIterator = persistenceLayer.withPersistenceById(resource.getParent().getId(),
+                FunctionalIterator.fromIterator(Collections.singletonList(resource).iterator()));
+        resourceIterator = persistenceLayer.withPersistenceByType(resource.getType(), resourceIterator);
+        resourceIterator = persistenceLayer.withPersistenceBySerialisedFormat(resource.getSerialisedFormat(), resourceIterator);
+        // Consume the 'stream', applying the 'withPersistenceByXXX' functions
+        while (resourceIterator.hasNext()) {
+            resourceIterator.next();
+        }
     }
 
     @Test
@@ -78,42 +80,44 @@ class JpaPersistenceLayerTest {
 
     @Test
     @Transactional
-    public void testEmptyGetReturnsEmpty() {
-        // When
-        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
-        // Then
+    void testEmptyGetReturnsEmpty() {
+        // When getting a non-existent resourceId
+        Optional<Iterator<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById("file:/NON_EXISTENT_RESOURCE_ID");
+        // Then the iterator should be empty
         assertThat(persistenceResponse).isEmpty();
 
-        // When
+        // When getting a non-existent resource type
         persistenceResponse = persistenceLayer.getResourcesByType("NON_EXISTENT_RESOURCE_TYPE");
-        // Then
+        // Then the iterator should be empty
         assertThat(persistenceResponse).isEmpty();
 
-        // When
+        // When getting a non-existent resource serialised format
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat("NON_EXISTENT_RESOURCE_FORMAT");
-        // Then
+        // Then the iterator should be empty
         assertThat(persistenceResponse).isEmpty();
     }
 
     @Test
     @Transactional
-    public void testAddAndGetReturnsResource() {
-        // When
-        Optional<Stream<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
-        // Then
-        Stream<LeafResource> resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+    void testAddAndGetReturnsResource() {
+        // Given the setup
 
-        // When
+        // When getting a resource from the persistence layer by resourceId
+        Optional<Iterator<LeafResource>> persistenceResponse = persistenceLayer.getResourcesById(resource.getId());
+        // Then the returned resource should match the created resource
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
+
+        // When getting a resource from the persistence layer by type
         persistenceResponse = persistenceLayer.getResourcesByType(resource.getType());
-        // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        // Then the returned resource should match the created resource
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
 
-        // When
+        // When getting a resource from the persistence layer by serialised format
         persistenceResponse = persistenceLayer.getResourcesBySerialisedFormat(resource.getSerialisedFormat());
-        // Then
-        resourceStream = persistenceResponse.orElseThrow();
-        assertThat(resourceStream.collect(Collectors.toSet())).isEqualTo(Collections.singleton(resource));
+        // Then the returned resource should match the created resource
+        assertThat(persistenceResponse).isPresent().get()
+                .extracting(Iterator::next).isEqualTo(resource);
     }
 }

@@ -23,6 +23,17 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
+  application-akka.yaml: |
+    akka:
+      kafka:
+        consumer.topics:
+          input-topic.partitions: {{ .Values.replicaCount }}
+        producer.topics:
+          output-topic.partitions: {{ .Values.replicaCount }}
+          error-topic.partitions: {{ .Values.replicaCount }}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "palisade.kafka.fullname" . }}-headless
+        port: 9092
   application-redis.yaml: |
     {{- if and ($.Values.global.redis.install) ((index $.Values.global "redis-cluster").install) }}
       {{- fail "Cannot install Redis (master/worker) and Redis Cluster at the same time" }}

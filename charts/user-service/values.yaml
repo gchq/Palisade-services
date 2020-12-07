@@ -16,11 +16,12 @@ replicaCount: 1
 
 service:
   port: 80
+  internalPort: 8087
   type: ClusterIP
 
 image:
   name: user-service
-  tag: SNAPSHOT-d29bf35
+  tag: SNAPSHOT-898cc7b
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

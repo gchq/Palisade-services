@@ -34,20 +34,17 @@ public interface CompletenessRepository extends CrudRepository<CompletenessEntit
      * @param entityId   the Id of the entity
      * @return true/false based on if the object exists in the backing store
      */
-    default boolean compositeExistsByEntityTypeAndEntityId(EntityType entityType, String entityId) {
-        return existsById(new CompletenessEntity(entityType, entityId).hashCode());
-    }
-
-    boolean existsById(Integer id);
+    boolean existsByEntityTypeAndEntityId(EntityType entityType, String entityId);
 
     /**
      * Saves (aka inserts) the object into the backing store via a {@link CrudRepository}
      *
      * @param entityType Information about the resource Object
      * @param entityId   The Id of the entity
+     * @return the {@link CompletenessEntity} that was saved in the backing store
      */
-    default void save(EntityType entityType, String entityId) {
-        save(new CompletenessEntity(entityType, entityId));
+    default CompletenessEntity save(EntityType entityType, String entityId) {
+        return save(new CompletenessEntity(entityType, entityId));
     }
 
 }

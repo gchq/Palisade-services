@@ -12,8 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+spring:
+  profiles:
+    include:
+      - akka
+      - default-config
+---
 
 spring:
+  profiles: default-config
   application:
     name: palisade-service
   output:
@@ -29,10 +36,6 @@ spring:
 server:
   port: 8084
 
-eureka:
-  client:
-    enabled: false
-
 management:
   endpoints:
     web:
@@ -44,19 +47,6 @@ management:
     shutdown:
       enabled: true
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 60000
-        loggerLevel: basic
-    default-config: default
-
-# Default development & testing static config, not suitable for production
-web:
-  client:
-    audit-service: http://localhost:8089
-    policy-service: http://localhost:8085
-    resource-service: http://localhost:8086
-    user-service: http://localhost:8087
+logging:
+  level:
+    org.apache.kafka: WARN

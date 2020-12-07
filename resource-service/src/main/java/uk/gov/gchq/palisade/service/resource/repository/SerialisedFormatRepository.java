@@ -18,9 +18,9 @@ package uk.gov.gchq.palisade.service.resource.repository;
 import org.springframework.data.repository.CrudRepository;
 
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
+import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.Iterator;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link SerialisedFormatEntity}
@@ -29,17 +29,17 @@ import java.util.stream.StreamSupport;
 public interface SerialisedFormatRepository extends CrudRepository<SerialisedFormatEntity, String> {
 
     /**
-     * Returns a stream of {@link SerialisedFormatEntity} from a backing store by a serialisedFormat
+     * Returns an {@link Iterator} of {@link SerialisedFormatEntity} from a backing store by a serialisedFormat
      *
      * @param serialisedFormat the format of the resource
      * @return a stream of SerialisedFormatEntity from the backing store
      */
-    default Stream<SerialisedFormatEntity> streamFindAllBySerialisedFormat(String serialisedFormat) {
-        return StreamSupport.stream(findAllBySerialisedFormat(serialisedFormat).spliterator(), false);
+    default FunctionalIterator<SerialisedFormatEntity> iterateFindAllBySerialisedFormat(String serialisedFormat) {
+        return FunctionalIterator.fromIterator(findAllBySerialisedFormat(serialisedFormat).iterator());
     }
 
     /**
-     * Iterable used to create a stream of resources by serialisedFormat
+     * Iterator of a list of resources by serialisedFormat
      *
      * @param serialisedFormat the format of the Resource
      * @return a list of SerialisedFormatEntity from the backing store
