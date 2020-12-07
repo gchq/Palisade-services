@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
@@ -51,7 +50,9 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, PolicyRequest> INPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, PolicyResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
+    private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
+
+    //no in the attribute masking service why do we have it
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
 
     @Bean
@@ -80,11 +81,12 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Sink<Envelope<String, PolicyResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, PolicyResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
+    Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
                 SerDesConfig.ruleKeySerializer(),
-                SerDesConfig.ruleValueSerializer());
+               // SerDesConfig.ruleValueSerializer());
+                SerDesConfig.passthroughValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);

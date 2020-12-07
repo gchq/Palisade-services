@@ -85,8 +85,11 @@ public class PolicyServiceHierarchyProxy {
     }
 
     /**
-     * @param auditablePolicyResourceResponse
-     * @return
+     *  Applies the {@link Rules} to the {@link Resource}.
+     * @param auditablePolicyResourceResponse container for holding the {@code PolicyRequest}, {@code Rules} and the
+     * {@code AuditErrorMessage}
+     * @return either the same instance of {@code AuditablePolicyResourceResponse} or a new instance with the
+     * {@code Resource modified}
      */
     public static AuditablePolicyResourceResponse applyRulesToResource(final AuditablePolicyResourceResponse auditablePolicyResourceResponse) {
 

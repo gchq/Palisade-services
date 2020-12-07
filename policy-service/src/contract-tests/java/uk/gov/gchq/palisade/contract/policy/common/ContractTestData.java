@@ -26,9 +26,14 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.User;
+import uk.gov.gchq.palisade.UserId;
+import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 
+import java.io.Serializable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -54,6 +59,18 @@ public class ContractTestData {
     public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"file:/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
     public static final String NO_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"noResourceRulesUser\",\"resourceId\":\"file:/test/noRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"noResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/noRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
     public static final String REDACTED_RESOURCE_RULES_REQUEST_JSON = "{\"userId\":\"redactedResourceRulesUser\",\"resourceId\":\"/test/recordRulesResource\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"redactedResourceRulesUser\"},\"roles\":[\"role\"],\"auths\":[\"auth\"],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"file:/test/recordRulesResource\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.DirectoryResource\",\"id\":\"file:/test/\",\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"file:/\"}},\"serialisedFormat\":\"txt\",\"type\":\"test\"}}";
+
+    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
+        @Override
+        public T apply(final T record, final User user, final Context context) {
+            return record;
+        }
+    }
+
+    public static final UserId USER_ID = new UserId().id("test-user-id");
+    public static final String RESOURCE_ID = "/test/resourceId";
+    public static final String PURPOSE = "test-purpose";
+    public static final Context CONTEXT = new Context().purpose(PURPOSE);
 
 
     static {

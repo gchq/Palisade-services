@@ -34,6 +34,8 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -41,7 +43,6 @@ import scala.Function1;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
@@ -60,6 +61,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     KafkaProducerService kafkaProducerService(
@@ -71,7 +73,10 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> Supervision.resumingDecider().apply(ex);
+        return ex -> {
+            LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
+            return Supervision.resumingDecider().apply(ex);
+        };
     }
 
     @Bean
@@ -100,7 +105,7 @@ public class AkkaRunnableGraph {
                 .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, AuditablePolicyResourceResponse> messageAndModifiedRequest) ->
                         service.getRecordRules(messageAndModifiedRequest.second())
                                 //check to see if the first service request threw an exception and if so deal with it
-                        .thenApply( modifiedResource -> modifiedResource.chain(messageAndModifiedRequest.second().getAuditErrorMessage()))
+                        .thenApply(modifiedResource -> modifiedResource.chain(messageAndModifiedRequest.second().getAuditErrorMessage()))
                                 .thenApply(response -> Pair.create(messageAndModifiedRequest.first(), response))
                 )
 

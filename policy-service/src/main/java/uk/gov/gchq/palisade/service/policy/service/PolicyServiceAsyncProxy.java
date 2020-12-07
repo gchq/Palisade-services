@@ -18,13 +18,13 @@ package uk.gov.gchq.palisade.service.policy.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.lang.Nullable;
+
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 

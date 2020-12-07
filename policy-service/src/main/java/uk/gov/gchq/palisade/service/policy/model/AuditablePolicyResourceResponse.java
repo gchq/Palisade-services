@@ -17,6 +17,7 @@ package uk.gov.gchq.palisade.service.policy.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;

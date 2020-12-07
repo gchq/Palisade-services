@@ -29,9 +29,9 @@ import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDIT_ERROR_MESSAGE;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE;
 
 @JsonTest
 @ContextConfiguration(classes = AuditablePolicyRecordResponseTest.class)

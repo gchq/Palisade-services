@@ -101,7 +101,8 @@ public final class PolicyResponse {
             return MAPPER.treeToValue(this.user, User.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to get User", e);
-        }    }
+        }
+    }
 
     @Generated
     @JsonIgnore

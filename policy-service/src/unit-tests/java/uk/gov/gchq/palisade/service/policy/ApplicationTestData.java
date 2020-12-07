@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.gov.gchq.palisade.service.policy;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -37,7 +36,6 @@ import uk.gov.gchq.palisade.service.policy.model.Token;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 

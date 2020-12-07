@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
-import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
@@ -58,8 +57,8 @@ class PolicyServiceAsyncProxyTest {
 
     /**
      * Test with a PolicyRequest that is populated and the query finds related rules.
-     * The expected results should be a container {@link AuditablePolicyResourceResponse} with a {@code PolicyRequest,
-     * {@code Rules and no {@code AuditErrorMessage}.
+     * The expected results should be a container {@link AuditablePolicyResourceResponse} with a {@code PolicyRequest},
+     * {@code Rules} and no {@code AuditErrorMessage}.
      *
      * @throws Exception if the test fails
      */
