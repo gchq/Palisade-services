@@ -63,7 +63,7 @@ class PalisadeResponseTest {
                 ),
                 () -> assertAll("Object Comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeResponseObject).usingRecursiveComparison().isEqualTo(palisadeResponse)
+                        () -> assertThat(palisadeResponseObject).isEqualTo(palisadeResponse)
                 )
         );
     }
