@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -30,10 +31,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
+import uk.gov.gchq.palisade.service.user.service.KafkaHealthIndicator;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
+import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -98,13 +101,24 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     /**
      * The simplest implementation of a user service, allows unit tests and small services to use a lightweight user service
      *
-     * @return an instance of the nullUserService
+     * @return an instance of the {@link NullUserService}
      */
     @Bean
     @ConditionalOnProperty(prefix = "user-service", name = "service", havingValue = "null-user-service", matchIfMissing = true)
     public UserService nullUserService() {
         LOGGER.info("Instantiated NullUserService");
         return new NullUserService();
+    }
+
+    /**
+     * A bean for the Kafka Health Indicator
+     *
+     * @param adminClient the Kafka admin client
+     * @param topicConfiguration the details of the consumer topic(s)
+     * @return an instance of the {@link KafkaHealthIndicator}
+     */
+    public KafkaHealthIndicator kafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
+        return new KafkaHealthIndicator(adminClient, topicConfiguration);
     }
 
     /**

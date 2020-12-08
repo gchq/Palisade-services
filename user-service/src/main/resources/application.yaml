@@ -54,3 +54,6 @@ population:
 logging:
   level:
     org.apache.kafka: WARN
+
+user-service:
+  implementation: null-user-service

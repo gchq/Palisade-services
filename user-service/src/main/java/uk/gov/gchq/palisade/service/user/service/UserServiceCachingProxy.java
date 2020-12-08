@@ -35,16 +35,16 @@ public class UserServiceCachingProxy {
     /**
      * Default constructor used to create the UserServiceCachingProxy
      *
-     * @param service {@link UserService} this service calls
+     * @param service an implementation of the {@link UserService}
      */
     public UserServiceCachingProxy(final UserService service) {
         this.service = service;
     }
 
     /**
-     * Using the userId as the key, retrieves the {@link User} from the cache, if the User doesn't exist,
-     * then a message is Logged, and a {@link NullUserService} getUser() is called,
-     * which will throw a {@link uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException}.
+     * Using the userId as the key, retrieves the {@link User} from the cache. If the User doesn't exist
+     * then a message is Logged, and the request is passed to the service implementation.
+     * This will either return a user or an error if there was an issue.
      *
      * @param userId of the user wants to retrieve from the cache
      * @return the user returned from the cache

@@ -21,15 +21,14 @@ import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.stereotype.Component;
+
+import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -38,30 +37,31 @@ import java.util.concurrent.TimeoutException;
  * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
-@Component("kafka")
-@ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
-    @Value("${akka.kafka.consumer.kafka-clients.group.id}")
+    private final ConsumerTopicConfiguration topicConfiguration;
     private String groupId;
 
     /**
      * Requires the AdminClient to interact with Kafka
      *
      * @param adminClient of the cluster
+     * @param topicConfiguration the consumer topic configuration for the servide
      */
-    public KafkaHealthIndicator(final AdminClient adminClient) {
+    public KafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
         this.adminClient = adminClient;
+        this.topicConfiguration = topicConfiguration;
     }
 
     @Override
     public Health getHealth(final boolean includeDetails) {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("group", this.groupId).build())
-                .orElseGet(() -> Health.down().withDetail("group", this.groupId).build());
+        if (performCheck()) {
+            return Health.up().withDetail("group", this.groupId).build();
+        } else {
+            return Health.down().withDetail("group", this.groupId).build();
+        }
     }
 
     /**
@@ -71,36 +71,37 @@ public class KafkaHealthIndicator implements HealthIndicator {
      */
     @Override
     public Health health() {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().build())
-                .orElseGet(() -> Health.down().build());
+        if (performCheck()) {
+            return Health.up().build();
+        } else {
+            return Health.down().build();
+        }
     }
 
     private boolean performCheck() {
+        groupId = topicConfiguration.getKafkaClients().get("group.id");
         try {
             Map<String, ConsumerGroupDescription> groupDescriptionMap = this.adminClient.describeConsumerGroups(Collections.singletonList(this.groupId))
                     .all()
                     .get(1, TimeUnit.SECONDS);
 
+            boolean assignedGroupPartition = false;
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
-
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
-                boolean assignedGroupPartition = consumerGroupDescription.members().stream()
-                        .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
+                assignedGroupPartition = CompletableFuture.supplyAsync(() ->
+                        consumerGroupDescription.members().stream().noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()))
+                ).join();
                 if (!assignedGroupPartition) {
                     LOGGER.error("Failed to find kafka topic-partition assignments");
                 }
-                return assignedGroupPartition;
             }
+            return assignedGroupPartition;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOGGER.warn("Timeout during Kafka health check for group {}", this.groupId, e);
             Thread.currentThread().interrupt();
             return false;
         }
-        return true;
     }
 }
