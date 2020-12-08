@@ -113,6 +113,6 @@ class UserServiceAsyncProxyErrorTest {
         // Then check the error message contains the correct message
         assertThat(auditableUserResponse.getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching not-a-real-user found in cache");
+                .startsWith(NoSuchUserIdException.class.getName());
     }
 }
