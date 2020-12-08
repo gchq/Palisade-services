@@ -37,10 +37,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +68,7 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.contract.policy.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.Token;
@@ -87,7 +85,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -249,6 +246,10 @@ class KafkaContractTest {
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+        Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -262,8 +263,13 @@ class KafkaContractTest {
         // When - results are pulled from the output stream
         // record count set to 2, as one record will be removed as no policy exists for it
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
+        Probe<ConsumerRecord<String, JsonNode>> errorResultSeq = errorProbe.request(1);
+
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
+                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
@@ -292,6 +298,22 @@ class KafkaContractTest {
         results.removeFirst();
         results.removeLast();
         assertThat(results).isEmpty();
+
+        assertAll("Asserting on the error topic",
+                // One error is produced
+                () -> assertThat(errorResults)
+                        .hasSize(1),
+
+                // The error has the relevant headers, including the token
+                () -> assertThat(errorResults)
+                        .allSatisfy(result ->
+                                assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
+
+                // The error has a message that contains the throwable exception, and the message
+                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
+        );
     }
 
     /**
@@ -415,96 +437,6 @@ class KafkaContractTest {
         assertThat(results).isEmpty();
     }
 
-    @Test
-    @DirtiesContext
-    void testNoSuchPolicyException(){
-        // Create a variable number of requests
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
-    /*
-        final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
-                Stream.of(ContractTestData.START_RECORD),
-                ContractTestData.NO_SUCH_POLICY_NODE_FACTORY.get().limit(1L),
-                Stream.of(ContractTestData.END_RECORD))
-                .flatMap(Function.identity());
-
-        // Given - we are already listening to the output
-        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-        Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-
-        // When - we write to the input
-        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
-                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
-
-        Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
-
-
-        // When - results are pulled from the output stream
-        // record count set to 2, as one record will be removed as no policy exists for it
-        Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
-        Probe<ConsumerRecord<String, JsonNode>> errorResultSeq = errorProbe.request(1);
-
-        LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-        LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
-                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        // Then - the results are as expected
-
-        // All messages have a correct Token in the header
-        assertAll("Asserting on the output topic",
-                () -> assertThat(results)
-                        .hasSize(2),
-
-                () -> assertThat(results)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-
-                () -> assertAll("Start and End of stream markers have the correct headers",
-                        () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
-                                .isEqualTo(StreamMarker.START.toString().getBytes()),
-                        () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
-                                .isEqualTo(StreamMarker.END.toString().getBytes())
-                ),
-
-                () -> assertAll("After removing the start and end of stream message",
-                        results::removeFirst,
-                        results::removeLast,
-                        () -> assertThat(results).isEmpty()
-                )
-        );
-
-        assertAll("Asserting on the error topic",
-                // One error is produced
-                () -> assertThat(errorResults)
-                        .hasSize(1),
-
-                // The error has the relevant headers, including the token
-                () -> assertThat(errorResults)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-
-                // The error has a message that contains the throwable exception, and the message
-                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching invalid-user-id found in cache")
-        );
-        */
-
-    }
 
 
     // Serialiser for upstream test input

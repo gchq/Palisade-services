@@ -112,20 +112,21 @@ public class AkkaRunnableGraph {
                 // Build producer message, copying the partition, keeping track of original message
                 .map((Pair<CommittableMessage<String, PolicyRequest>, AuditablePolicyRecordResponse> messageAndResponse) -> {
                    ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
+                    Committable commitable = (Committable) messageAndResponse.first().committableOffset();
                     return Optional.ofNullable(messageAndResponse.second().getAuditErrorMessage())
-                            // Found an error, produce an error message to be sent to the Audit service
+                            // Found an application error, produce an error message to be sent to the Audit service
                             .map(audit -> ProducerMessage.single(
                                     new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                             SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
                                     (Committable) messageAndResponse.first().committableOffset()))
+                            //Found a response message, produce a policy message to be sent to the output
                             .orElse(ProducerMessage.single(
-                                    //Found a response message, produce a policy message to be sent to the output
                                     new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                             SerDesConfig.ruleValueSerializer().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
-                                    (Committable) messageAndResponse.first().committableOffset()));
+                                    commitable));
 
                     })
-                // Send errors to supervisor
+                // Send system errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
 
                 // Materialize the stream, sending messages to the sink
