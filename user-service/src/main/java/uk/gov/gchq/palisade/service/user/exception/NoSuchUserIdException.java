@@ -43,7 +43,7 @@ public class NoSuchUserIdException extends RuntimeException {
      */
     public NoSuchUserIdException(final String message) {
         super(message);
-        LOGGER.info("NoSuchUserIdException thrown with {}", message);
+        LOGGER.info("NoSuchUserIdException thrown with '{}'", message);
     }
 
     /**
@@ -54,6 +54,6 @@ public class NoSuchUserIdException extends RuntimeException {
      */
     public NoSuchUserIdException(final String message, final Throwable throwable) {
         super(message, throwable);
-        LOGGER.error("NoSuchUserIdException thrown with {}", message);
+        LOGGER.error("NoSuchUserIdException thrown with '{}'", message);
     }
 }

@@ -53,10 +53,10 @@ that is then sent to the [Audit service](../audit-service) to be audited appropr
 The application exposes two REST endpoints used for debugging or mocking kafka entrypoints:
 * `POST api/user`
   - accepts an `x-request-token` `String` header, any number of extra headers, and a single `UserRequest` in the body
-  - returns a `202 ACCEPTED` after writing the headers and `AuditableUserResponse` to kafka
+  - returns a `202 ACCEPTED` after writing the headers and `UserRequest` to kafka
 * `POST api/user/multi`
   - accepts an `x-request-token` `String` header, any number of extra headers, and a list of `UserRequest`s within the body
-  - returns a `202 ACCEPTED` after writing the headers and `AuditableUserResponse` to kafka
+  - returns a `202 ACCEPTED` after writing the headers and `UserRequest` to kafka
 
 ## Example JSON Request
 ```

@@ -16,8 +16,6 @@
 
 package uk.gov.gchq.palisade.component.user.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +23,9 @@ import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.ActiveProfiles;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
@@ -36,7 +34,6 @@ import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,41 +49,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({"caffeine"})
 class UserServiceAsyncProxyErrorTest {
 
-    private static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
-    private static final String NO_USER_REQUEST_JSON = "{\"userId\":\"Not-a-real-user\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}}}";
+    private static final Context CONTEXT = new Context().purpose("purpose");
+    private static final UserRequest USER_REQUEST = UserRequest.Builder.create().withUserId("test-user-id").withResourceId("/test/resourceId").withContext(CONTEXT);
+    private static final UserRequest NO_USER_REQUEST = UserRequest.Builder.create().withUserId("not-a-real-user").withResourceId("/test/resourceId").withContext(CONTEXT);
 
     @Autowired
     private UserServiceAsyncProxy userServiceAsyncProxy;
     @Autowired
     private ObjectMapper mapper;
-    private final Function<Integer, JsonNode> requestFactoryNode = i -> {
-        try {
-            return this.mapper.readTree(REQUEST_JSON);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to parse contract test data", e);
-        }
-    };
-    private final Function<Integer, UserRequest> requestFactoryObj = i -> {
-        try {
-            return this.mapper.treeToValue(requestFactoryNode.apply(i), UserRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
-    private final Function<Integer, JsonNode> noUserRequestFactoryNode = i -> {
-        try {
-            return this.mapper.readTree(NO_USER_REQUEST_JSON);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to parse contract test data", e);
-        }
-    };
-    private final Function<Integer, UserRequest> noUserRequestFactoryObj = i -> {
-        try {
-            return this.mapper.treeToValue(noUserRequestFactoryNode.apply(i), UserRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
-        }
-    };
+
 
     @Test
     void testContextLoads() {
@@ -96,13 +67,12 @@ class UserServiceAsyncProxyErrorTest {
     @Test
     void testGetUserSuccess() {
         // Given a user request
-        final UserRequest userRequest = requestFactoryObj.apply(1);
         final User user = new User().userId("test-user-id");
         // When adding to the cache
         this.userServiceAsyncProxy.addUser(user);
 
         // Then retrieving from the cache
-        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(userRequest);
+        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(USER_REQUEST);
 
         // Check the CompletableFuture hasn't finished
         assertThat(subject.isDone()).isFalse();
@@ -126,8 +96,7 @@ class UserServiceAsyncProxyErrorTest {
         // When user has been added
 
         // Then retrieving a different user
-        final UserRequest userRequest = noUserRequestFactoryObj.apply(1);
-        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(userRequest);
+        final CompletableFuture<AuditableUserResponse> subject = this.userServiceAsyncProxy.getUser(NO_USER_REQUEST);
 
         // Check the CompletableFuture hasn't finished
         assertThat(subject.isDone()).isFalse();
@@ -144,6 +113,6 @@ class UserServiceAsyncProxyErrorTest {
         // Then check the error message contains the correct message
         assertThat(auditableUserResponse.getAuditErrorMessage().getError().getMessage())
                 .as("verify that exception is propagated into an auditable object and returned")
-                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching Not-a-real-user found in cache");
+                .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching not-a-real-user found in cache");
     }
 }

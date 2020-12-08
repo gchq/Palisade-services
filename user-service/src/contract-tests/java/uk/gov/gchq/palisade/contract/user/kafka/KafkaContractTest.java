@@ -224,7 +224,8 @@ class KafkaContractTest {
 
         // Then - the results are as expected
 
-        // All messages have a correct Token in the header
+        // Assert that the `START` and `END` messages have been added to the output topic,
+        // check the header contains the token and check that there is no Response message on the topic
         assertAll("Asserting on the output topic",
                 () -> assertThat(results)
                         .hasSize(2),
@@ -248,21 +249,13 @@ class KafkaContractTest {
                 )
         );
 
-        assertAll("Asserting on the error topic",
-                // One error is produced
-                () -> assertThat(errorResults)
-                        .hasSize(1),
-
-                // The error has the relevant headers, including the token
-                () -> assertThat(errorResults)
-                        .allSatisfy(result ->
-                                assertThat(result.headers().lastHeader(Token.HEADER).value())
-                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
-
-                // The error has a message that contains the throwable exception, and the message
-                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching invalid-user-id found in cache")
-        );
+        // Assert that there is a message on the error topic, check the header contains the token and check the error message value
+        assertThat(errorResults)
+                .hasSize(1)
+                .allSatisfy(result -> assertThat(result.headers().lastHeader(Token.HEADER).value())
+                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
+                .allSatisfy(result -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .isEqualTo(NoSuchUserIdException.class.getName() + ": No userId matching invalid-user-id found in cache"));
     }
 
     @Test
