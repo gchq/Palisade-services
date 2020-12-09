@@ -111,19 +111,19 @@ public class AkkaRunnableGraph {
 
                 // Build producer message, copying the partition, keeping track of original message
                 .map((Pair<CommittableMessage<String, PolicyRequest>, AuditablePolicyRecordResponse> messageAndResponse) -> {
-                   ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
-                    Committable commitable = (Committable) messageAndResponse.first().committableOffset();
+                    ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
+                    Committable committable = messageAndResponse.first().committableOffset();
                     return Optional.ofNullable(messageAndResponse.second().getAuditErrorMessage())
-                            // Found an application error, produce an error message to be sent to the Audit service
+                            // If there is an application error, produce an error message to be sent to the error topic
                             .map(audit -> ProducerMessage.single(
                                     new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                             SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
-                                    (Committable) messageAndResponse.first().committableOffset()))
-                            //Found a response message, produce a policy message to be sent to the output
+                                    committable))
+                            // If there is a response message, produce a policy response to be sent to the output topic
                             .orElse(ProducerMessage.single(
                                     new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
                                             SerDesConfig.ruleValueSerializer().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
-                                    commitable));
+                                    committable));
 
                     })
                 // Send system errors to supervisor
