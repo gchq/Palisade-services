@@ -24,8 +24,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 
 /**
  * This class is a container for {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream
- * processing.  Under normal conditions {@code PolicyRequest} and { @code Rules} will be non-null, indicating
- * successful process or { @code AuditErrorMessage} when there has been an error in the process.  The class can be in
+ * processing.  Under normal conditions {@code PolicyRequest} and {@code Rules} will be non-null, indicating
+ * successful process or {@code AuditErrorMessage} when there has been an error in the process.  The class can be in
  * one of two states representing the data after making the request for the rules and second after the resource have
  * been modified by applying the rules.
  */
@@ -163,5 +163,4 @@ public class AuditablePolicyResourceResponse {
         }
     }
 }
-
 
