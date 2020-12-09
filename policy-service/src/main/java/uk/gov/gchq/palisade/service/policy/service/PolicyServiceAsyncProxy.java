@@ -66,7 +66,7 @@ public class PolicyServiceAsyncProxy {
     public CompletableFuture<AuditablePolicyResourceResponse> getResourceRules(final @Nullable PolicyRequest nullableRequest) {
 
         return Optional.ofNullable(nullableRequest)
-                .map((PolicyRequest request) ->
+                .map(request ->
                         CompletableFuture.supplyAsync(() -> service.getResourceRules(request.getResource()), executor)
                                 .thenApply(rules -> AuditablePolicyResourceResponse.Builder.create()
                                         .withPolicyRequest(request)
