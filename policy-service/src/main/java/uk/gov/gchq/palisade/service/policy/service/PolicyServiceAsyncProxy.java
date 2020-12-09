@@ -97,7 +97,7 @@ public class PolicyServiceAsyncProxy {
 
        PolicyRequest nullableRequest = modifiedAuditable.getPolicyRequest();
         return Optional.ofNullable(nullableRequest)
-                .map((PolicyRequest request) ->
+                .map(request ->
                         CompletableFuture.supplyAsync(() -> service.getRecordRules(request.getResource()))
                                 .thenApply(rules -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
