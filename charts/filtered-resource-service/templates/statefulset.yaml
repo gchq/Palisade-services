@@ -39,6 +39,16 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        command:
+        - bash
+        - "-c"
+        - |
+          [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          java -jar /usr/share/filtered-resource-service/filtered-resource-service.jar \
+            --akka.kafka.consumer.kafka-clients.group.id={{ include "filtered-resource-service.name" . }}-$ordinal \
+            --akka.kafka.consumer.topics.offset-topic.partitions={{ .Values.replicaCount }} \
+            --akka.kafka.consumer.topics.input-topic.partitions={{ .Values.replicaCount }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: web
