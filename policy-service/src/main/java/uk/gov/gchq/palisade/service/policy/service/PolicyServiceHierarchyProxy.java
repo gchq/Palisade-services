@@ -91,7 +91,6 @@ public class PolicyServiceHierarchyProxy {
      * @return either the same instance of {@code AuditablePolicyResourceResponse} or a new instance with the modified {@code Resource}
      */
     public static AuditablePolicyResourceResponse applyRulesToResource(final AuditablePolicyResourceResponse auditablePolicyResourceResponse) {
-
         Rules rules = auditablePolicyResourceResponse.getRules();
         if (!Objects.isNull(rules)) {
             //apply the rules to the resource - a coarse grain filtering
@@ -102,7 +101,6 @@ public class PolicyServiceHierarchyProxy {
             // do nothing and return
             return auditablePolicyResourceResponse;
         }
-
     }
 
     /**

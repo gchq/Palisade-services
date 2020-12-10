@@ -37,10 +37,8 @@ import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE;
 @ContextConfiguration(classes = AuditablePolicyRecordResponseTest.class)
 class AuditablePolicyRecordResponseTest {
 
-
     @Autowired
     private JacksonTester<AuditablePolicyRecordResponse> jsonTester;
-
 
     /**
      * Grouped assertion test for a {@link AuditablePolicyRecordResponse} which holds a PolicyResponse and no exception.
@@ -53,7 +51,6 @@ class AuditablePolicyRecordResponseTest {
      */
     @Test
     void testAuditablePolicyRecordResponseSerialisingAndDeserialising() throws IOException {
-
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
 
         JsonContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseJsonContent = jsonTester.write(auditablePolicyRecordResponse);
@@ -76,7 +73,6 @@ class AuditablePolicyRecordResponseTest {
                         () -> assertThat(auditablePolicyRecordResponseMessageObject).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
                 )
         );
-
     }
 
     /**
@@ -90,7 +86,6 @@ class AuditablePolicyRecordResponseTest {
      */
     @Test
     void testAuditablePolicyRecordResponseExceptionSerialisingAndDeserialising() throws IOException {
-
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(null).withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
         JsonContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseJsonContent = jsonTester.write(auditablePolicyRecordResponse);
         ObjectContent<AuditablePolicyRecordResponse> auditablePolicyRecordResponseObjectContent = jsonTester.parse(auditablePolicyRecordResponseJsonContent.getJson());
@@ -113,7 +108,6 @@ class AuditablePolicyRecordResponseTest {
                         () -> assertThat(auditablePolicyRecordResponseMessageObject).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
                 )
         );
-
     }
 
     /**
@@ -122,9 +116,8 @@ class AuditablePolicyRecordResponseTest {
      */
     @Test
     void testChainWithoutAnException() {
-
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
-        AuditablePolicyRecordResponse chainedResponse =  auditablePolicyRecordResponse.chain(null);
+        AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(null);
         //same object
         assertThat(chainedResponse).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse);
         assertThat(chainedResponse).isEqualTo(auditablePolicyRecordResponse);
@@ -136,9 +129,8 @@ class AuditablePolicyRecordResponseTest {
      */
     @Test
     void testChainWitAnException() {
-
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
-        AuditablePolicyRecordResponse chainedResponse =  auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
+        AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
         assertThat(chainedResponse).usingRecursiveComparison().isNotEqualTo(auditablePolicyRecordResponse);
         assertThat(chainedResponse.getAuditErrorMessage()).usingRecursiveComparison().isEqualTo(AUDIT_ERROR_MESSAGE);
         assertThat(chainedResponse.getAuditErrorMessage()).isEqualTo(AUDIT_ERROR_MESSAGE);

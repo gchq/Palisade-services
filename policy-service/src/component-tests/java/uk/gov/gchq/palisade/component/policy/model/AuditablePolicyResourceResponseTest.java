@@ -56,7 +56,6 @@ class AuditablePolicyResourceResponseTest {
      */
     @Test
     void testInitalAuditablePolicyResourceResponseSerialisingAndDeserialising() throws IOException {
-
         AuditablePolicyResourceResponse auditablePolicyResourceResponse = AuditablePolicyResourceResponse.Builder.create()
                 .withPolicyRequest(REQUEST).withRules(RULES).withNoErrors().withNoNoModifiedResponse();
 
@@ -85,7 +84,6 @@ class AuditablePolicyResourceResponseTest {
                         () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
                 )
         );
-
     }
 
     /**
@@ -100,7 +98,6 @@ class AuditablePolicyResourceResponseTest {
      */
     @Test
     void testModifiedAuditablePolicyResourceResponseSerialisingAndDeserialising() throws IOException {
-
         AuditablePolicyResourceResponse auditablePolicyResourceResponse = AuditablePolicyResourceResponse.Builder.create()
                 .withPolicyRequest(REQUEST).withRules(RULES).withNoErrors().withModifiedResource(LEAF_RESOURCE);
 
@@ -128,7 +125,6 @@ class AuditablePolicyResourceResponseTest {
                         () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
                 )
         );
-
     }
 
     /**
@@ -143,7 +139,6 @@ class AuditablePolicyResourceResponseTest {
      */
     @Test
     void testErrorAuditablePolicyResourceResponseSerialisingAndDeserialising() throws IOException {
-
         AuditablePolicyResourceResponse auditablePolicyResourceResponse = AuditablePolicyResourceResponse.Builder.create()
                 .withPolicyRequest(REQUEST).withRules(RULES).withAuditErrorMessage(AUDIT_ERROR_MESSAGE).withModifiedResource(LEAF_RESOURCE);
         JsonContent<AuditablePolicyResourceResponse> auditablePolicyResourceResponseJsonContent = jsonTester.write(auditablePolicyResourceResponse);
@@ -169,7 +164,6 @@ class AuditablePolicyResourceResponseTest {
                         () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
                 )
         );
-
     }
 
 }

@@ -437,8 +437,6 @@ class KafkaContractTest {
         assertThat(results).isEmpty();
     }
 
-
-
     // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
         @Override

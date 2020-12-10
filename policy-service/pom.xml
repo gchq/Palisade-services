@@ -155,10 +155,6 @@
             <version>${alpakka.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-        </dependency>
     </dependencies>
 
     <profiles>

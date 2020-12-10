@@ -63,19 +63,17 @@ class PolicyServiceAsyncProxyTest {
      * @throws Exception if the test fails
      */
     @Test
-    void tesGetResourceRulesWithAPolicyRequest() throws Exception {
-
-        //when
+    void testGetResourceRulesWithAPolicyRequest() throws Exception {
+        // When
         when(hierarchyProxy.getResourceRules(any())).thenReturn(RESOURCE_RULES);
         CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(REQUEST);
         AuditablePolicyResourceResponse response = completableFuture.get();
 
-        //then
+        // Then
         assertThat(response.getPolicyRequest()).isNotNull();
         assertThat(response.getRules()).isNotNull();
         assertThat(response.getAuditErrorMessage()).isNull();
         verify(hierarchyProxy, times(1)).getResourceRules(any());
-
     }
 
     /**
@@ -88,14 +86,14 @@ class PolicyServiceAsyncProxyTest {
      * @throws Exception if the test fails
      */
     @Test
-    void tesGetResourceRulesWithANullPolicyRequest() throws Exception {
+    void testGetResourceRulesWithANullPolicyRequest() throws Exception {
 
-        //when
+        // When
         CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(null);
         //getResourceRules is an asynchronous call so we need to force it get the response
         AuditablePolicyResourceResponse response = completableFuture.get();
 
-        //then
+        // Then
         assertThat(response.getPolicyRequest()).isNull();
         assertThat(response.getRules()).isNull();
         assertThat(response.getAuditErrorMessage()).isNull();
@@ -110,20 +108,19 @@ class PolicyServiceAsyncProxyTest {
      * @throws Exception if the test fails
      */
     @Test
-    void tesGetResourceRulesWhenItThrowsAnException() throws Exception {
-
-        //when
+    void testGetResourceRulesWhenItThrowsAnException() throws Exception {
+        // When
         when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("Test"));
 
         CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(REQUEST);
         // asynchronous call so we need to force it get the response
         AuditablePolicyResourceResponse response = completableFuture.get();
 
-        //then
+        // Then
         assertThat(response.getPolicyRequest()).isNotNull();
         assertThat(response.getRules()).isNull();
         assertThat(response.getAuditErrorMessage()).isNotNull();
-        //note the exception is a CompletionException with the cause being a NoSuchPolicyException
+        // Note the exception is a CompletionException with the cause being a NoSuchPolicyException
         assertThat(response.getAuditErrorMessage().getError().getCause()).isInstanceOf(NoSuchPolicyException.class);
     }
 
@@ -135,7 +132,7 @@ class PolicyServiceAsyncProxyTest {
      * @throws Exception if the test fails
      */
     @Test
-    void tesGetRecordRulesWhichFindsRules() throws Exception {
+    void testGetRecordRulesWhichFindsRules() throws Exception {
         when(hierarchyProxy.getRecordRules(any())).thenReturn(RULES);
 
         CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE);
@@ -151,7 +148,7 @@ class PolicyServiceAsyncProxyTest {
      * @throws Exception if the test fails
      */
     @Test
-    void tesGetRecordRulesWithNoPolicyRecord() throws Exception {
+    void testGetRecordRulesWithNoPolicyRecord() throws Exception {
         when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("Test"));
 
         CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES);

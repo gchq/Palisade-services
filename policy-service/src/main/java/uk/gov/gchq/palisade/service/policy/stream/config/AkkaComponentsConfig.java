@@ -52,19 +52,6 @@ public class AkkaComponentsConfig {
     private static final StreamComponents<String, PolicyRequest> INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
 
-    //no in the attribute masking service why do we have it
-    private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
-
-    @Bean
-    Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, PolicyRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.resourceKeySerializer(),
-                SerDesConfig.resourceValueSerializer());
-
-        return INPUT_COMPONENTS.plainProducer(producerSettings);
-    }
-
     @Bean
     Source<CommittableMessage<String, PolicyRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, PolicyRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
@@ -89,15 +76,5 @@ public class AkkaComponentsConfig {
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
-    }
-
-    @Bean
-    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
-
-        return ERROR_COMPONENTS.plainProducer(producerSettings);
     }
 }

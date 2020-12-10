@@ -64,7 +64,6 @@ public class PolicyServiceAsyncProxy {
      * @return the rules for the LeafResource, if null then an exception will be thrown
      */
     public CompletableFuture<AuditablePolicyResourceResponse> getResourceRules(final @Nullable PolicyRequest nullableRequest) {
-
         return Optional.ofNullable(nullableRequest)
                 .map(request ->
                         CompletableFuture.supplyAsync(() -> service.getResourceRules(request.getResource()), executor)
@@ -94,7 +93,6 @@ public class PolicyServiceAsyncProxy {
      * @return the record rules for the LeafResource, if null then an exception will be thrown
      */
     public CompletableFuture<AuditablePolicyRecordResponse> getRecordRules(final AuditablePolicyResourceResponse modifiedAuditable) {
-
         PolicyRequest nullableRequest = modifiedAuditable.getPolicyRequest();
         return Optional.ofNullable(nullableRequest)
                 .map(request ->
@@ -112,6 +110,4 @@ public class PolicyServiceAsyncProxy {
                         .withPolicyResponse(null)
                         .withNoErrors()));
     }
-
-
 }
