@@ -27,7 +27,7 @@ import java.util.Optional;
  * This class is a container for {@link PolicyResponse} and {@link AuditErrorMessage} during stream processing.
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
-public class AuditablePolicyRecordResponse {
+public final class AuditablePolicyRecordResponse {
     @JsonProperty("policyResponse")
     private final PolicyResponse policyResponse;
     @JsonProperty("auditErrorMessage")

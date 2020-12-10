@@ -85,7 +85,6 @@ public class AkkaComponentsConfig {
         ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
                 SerDesConfig.ruleKeySerializer(),
-               // SerDesConfig.ruleValueSerializer());
                 SerDesConfig.passthroughValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);

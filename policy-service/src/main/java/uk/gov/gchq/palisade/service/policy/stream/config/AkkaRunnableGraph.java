@@ -72,7 +72,7 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> {
+        return (Throwable ex) -> {
             LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
             return Supervision.resumingDecider().apply(ex);
         };
@@ -97,7 +97,7 @@ public class AkkaRunnableGraph {
                 // Apply coarse-grained resource-level rules
                 .mapAsync(PARALLELISM, messageAndRequest -> service.getResourceRules(messageAndRequest.second())
                         //need to change this only apply if we have rules and if we have a PolicyRequest
-                        .thenApply(auditable -> PolicyServiceHierarchyProxy.applyRulesToResource(auditable))
+                        .thenApply(PolicyServiceHierarchyProxy::applyRulesToResource)
                         .thenApply(modifiedAuditable -> Pair.create(messageAndRequest.first(), modifiedAuditable)))
 
                 // Get the record level rules for all resources that weren't course grain filtered

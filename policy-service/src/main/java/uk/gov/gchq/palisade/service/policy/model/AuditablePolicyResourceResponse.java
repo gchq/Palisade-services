@@ -29,7 +29,7 @@ import uk.gov.gchq.palisade.rule.Rules;
  * one of two states representing the data after making the request for the rules and second after the resource have
  * been modified by applying the rules.
  */
-public class AuditablePolicyResourceResponse {
+public final class AuditablePolicyResourceResponse {
 
     @JsonProperty("policyRequest")
     private final PolicyRequest policyRequest;

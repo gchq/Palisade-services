@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -85,7 +86,7 @@ public final class PolicyResponse {
         try {
             return MAPPER.treeToValue(this.context, Context.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to get Context", e);
+            throw new SerializationFailedException("Failed to get Context", e);
         }
     }
 
@@ -100,7 +101,7 @@ public final class PolicyResponse {
         try {
             return MAPPER.treeToValue(this.user, User.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to get User", e);
+            throw new SerializationFailedException("Failed to get User", e);
         }
     }
 
@@ -115,7 +116,7 @@ public final class PolicyResponse {
         try {
             return MAPPER.treeToValue(this.resource, LeafResource.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to get Resource", e);
+            throw new SerializationFailedException("Failed to get Resource", e);
         }
     }
 
