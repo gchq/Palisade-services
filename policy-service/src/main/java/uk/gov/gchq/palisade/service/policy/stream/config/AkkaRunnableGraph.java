@@ -41,7 +41,6 @@ import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
-import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
@@ -125,7 +124,7 @@ public class AkkaRunnableGraph {
                                             SerDesConfig.ruleValueSerializer().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
                                     committable));
 
-                    })
+                })
                 // Send system errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
 
