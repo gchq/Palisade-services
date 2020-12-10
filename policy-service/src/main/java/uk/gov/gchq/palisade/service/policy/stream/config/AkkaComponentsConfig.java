@@ -29,6 +29,9 @@ import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import com.typesafe.config.Config;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +42,13 @@ import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Top
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.policy.stream.StreamComponents;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
  * Configuration for all kafka connections for the application
@@ -66,6 +74,16 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
+    Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, PolicyRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.resourceKeySerializer(),
+                SerDesConfig.resourceValueSerializer());
+
+        return INPUT_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
     Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
         ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
@@ -74,5 +92,13 @@ public class AkkaComponentsConfig {
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
+    }
+
+    @Bean
+    AdminClient adminClient(final ActorSystem actorSystem) {
+        final List<? extends Config> servers = actorSystem.settings().config().getConfigList("akka.discovery.config.services.kafka.endpoints");
+        final String bootstrap = servers.stream().map(config -> String.format("%s:%d", config.getString("host"), config.getInt("port"))).collect(Collectors.joining(","));
+
+        return AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, bootstrap));
     }
 }
