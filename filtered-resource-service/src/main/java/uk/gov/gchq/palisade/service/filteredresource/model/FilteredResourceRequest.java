@@ -90,6 +90,12 @@ public final class FilteredResourceRequest {
         return MAPPER.treeToValue(this.resource, LeafResource.class);
     }
 
+    @Generated
+    @JsonIgnore
+    public JsonNode getResourceNode() {
+        return resource;
+    }
+
     /**
      * Builder class for the creation of instances of the FilteredResourceRequest.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.

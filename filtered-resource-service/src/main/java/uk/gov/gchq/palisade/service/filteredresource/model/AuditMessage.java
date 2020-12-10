@@ -71,14 +71,14 @@ public class AuditMessage {
     protected final String serverHostname;  //the hostname of the server hosting the service
 
     @JsonProperty("attributes")
-    protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
+    protected final Map<String, String> attributes;  //Map<String, Object> holding optional extra information
 
     @JsonCreator
     protected AuditMessage(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("attributes") Map<String, Object> attributes) {
+            final @JsonProperty("attributes") Map<String, String> attributes) {
 
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
@@ -133,7 +133,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public Map<String, Object> getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
