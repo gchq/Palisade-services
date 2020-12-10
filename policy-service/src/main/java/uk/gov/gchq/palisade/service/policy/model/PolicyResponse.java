@@ -17,10 +17,12 @@ package uk.gov.gchq.palisade.service.policy.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -50,11 +52,7 @@ public final class PolicyResponse {
     private final JsonNode context;  // Json Node representation of the Context
     private final JsonNode user;  //Json Node representation of the User
     private final JsonNode resource; // Json Node representation of the Resources
-
-    /**
-     * Holds all of the Rules applicable to this request
-     */
-    public final Rules rules;
+    private final Rules rules;  //Holds all of the Rules applicable to this request
 
     @JsonCreator
     private PolicyResponse(
@@ -84,19 +82,55 @@ public final class PolicyResponse {
     }
 
     @Generated
-    public Context getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.context, Context.class);
+    public Context getContext()  {
+        try {
+            return MAPPER.treeToValue(this.context, Context.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get Context", e);
+        }
     }
 
     @Generated
-    public User getUser() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.user, User.class);
+    @JsonIgnore
+    JsonNode getContextNode() {
+        return this.context;
     }
 
     @Generated
-    public LeafResource getResource() throws JsonProcessingException {
-        return MAPPER.treeToValue(this.resource, LeafResource.class);
+    public User getUser()  {
+        try {
+            return MAPPER.treeToValue(this.user, User.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get User", e);
+        }
     }
+
+    @Generated
+    @JsonIgnore
+    JsonNode getUserNode() {
+        return this.user;
+    }
+
+
+    public LeafResource getResource() {
+        try {
+            return MAPPER.treeToValue(this.resource, LeafResource.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get Resource", e);
+        }
+    }
+
+    @Generated
+    @JsonIgnore
+    JsonNode getResourceNode() {
+        return this.resource;
+    }
+
+    @Generated
+    public Rules getRules() {
+        return rules;
+    }
+
 
     /**
      * Builder class for the creation of instances of the PolicyResponse.  This is a variant of the Fluent Builder
@@ -122,12 +156,13 @@ public final class PolicyResponse {
          * @param request message that has been sent to the policy-service
          * @return interface {@link IRules} for the next step in the build.
          */
-        public static IResource create(final PolicyRequest request) {
+        public static IRules create(final PolicyRequest request) {
             return create()
                     .withUserId(request.getUserId())
                     .withResourceId(request.getResourceId())
                     .withContextNode(request.getContextNode())
-                    .withUserNode(request.getUserNode());
+                    .withUserNode(request.getUserNode())
+                    .withResourceNode(request.getResourceNode());
         }
 
         /**
