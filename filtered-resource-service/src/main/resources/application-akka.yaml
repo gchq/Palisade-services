@@ -42,10 +42,10 @@ akka:
       topics:
         input-topic:
           name: masked-resource
-          partitions: 3
+          partitions: 1
         offset-topic:
           name: masked-resource-offset
-          partitions: 3
+          partitions: 1
         error-topic:
           name: error
           partitions: 1
