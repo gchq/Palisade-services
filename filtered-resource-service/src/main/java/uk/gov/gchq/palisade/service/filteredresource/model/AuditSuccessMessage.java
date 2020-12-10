@@ -18,8 +18,10 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -49,7 +51,7 @@ public final class AuditSuccessMessage extends AuditMessage {
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") JsonNode context,
-            final @JsonProperty("attributes") Map<String, Object> attributes,
+            final @JsonProperty("attributes") Map<String, String> attributes,
             final @JsonProperty("leafResourceId") String leafResourceId) {
 
         super(userId, resourceId, context, attributes);
@@ -86,12 +88,17 @@ public final class AuditSuccessMessage extends AuditMessage {
          * @param attributes optional information stored in a Map
          * @return interface {@link ILeafResourceId} for the next step in the build.
          */
-        public static ILeafResourceId create(final FilteredResourceRequest request, final Map<String, Object> attributes) {
-            return create()
-                    .withUserId(request.getUserId())
-                    .withResourceId(request.getResourceId())
-                    .withContextNode(request.getContextNode())
-                    .withAttributes(attributes);
+        public static AuditSuccessMessage create(final FilteredResourceRequest request, final Map<String, String> attributes) {
+            try {
+                return create()
+                        .withUserId(request.getUserId())
+                        .withResourceId(request.getResourceId())
+                        .withContextNode(request.getContextNode())
+                        .withAttributes(attributes)
+                        .withLeafResourceId(request.getResource().getId());
+            } catch (JsonProcessingException ex) {
+                throw new SerializationFailedException("Failed to deserialize request's leafResource", ex);
+            }
         }
 
         /**
@@ -153,7 +160,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * @param attributes timestamp for the request.
              * @return interface {@link ILeafResourceId} for the next step in the build.
              */
-            ILeafResourceId withAttributes(Map<String, Object> attributes);
+            ILeafResourceId withAttributes(Map<String, String> attributes);
         }
 
         /**
