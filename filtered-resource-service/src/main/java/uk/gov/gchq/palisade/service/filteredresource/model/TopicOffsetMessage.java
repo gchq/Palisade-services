@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.filteredresource.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.Generated;
@@ -37,6 +38,7 @@ public final class TopicOffsetMessage {
      */
     public final Long queuePointer; //pointer reference for the request given to the client
 
+    @JsonCreator
     private TopicOffsetMessage(final @JsonProperty("queuePointer") Long queuePointer) {
         this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new IllegalArgumentException("Queue pointer cannot be null"));
     }
