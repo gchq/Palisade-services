@@ -40,12 +40,22 @@ class MessageSerialisationTest {
                     Arguments.of(ApplicationTestData.REQUEST),
                     Arguments.of(AuditSuccessMessage.Builder.create(
                             ApplicationTestData.REQUEST,
-                            Collections.emptyMap())
-                            .withLeafResourceId(ApplicationTestData.RESOURCE_ID)),
+                            Collections.emptyMap())),
                     Arguments.of(AuditErrorMessage.Builder.create(
                             ApplicationTestData.REQUEST,
                             Collections.emptyMap())
                             .withError(new Throwable("test exception"))),
+                    Arguments.of(FilteredResourceRequest.Builder.create()
+                            .withUserId(ApplicationTestData.USER_ID.getId())
+                            .withResourceId(ApplicationTestData.RESOURCE_ID)
+                            .withContext(ApplicationTestData.CONTEXT)
+                            .withResource(ApplicationTestData.LEAF_RESOURCE)),
+                    Arguments.of(TopicOffsetMessage.Builder.create()
+                            .withQueuePointer(ApplicationTestData.OFFSET)),
+                    Arguments.of(WebsocketMessage.Builder.create()
+                            .withType(MessageType.RESOURCE)
+                            .noHeaders()
+                            .withBody(ApplicationTestData.LEAF_RESOURCE)),
                     Arguments.of(ApplicationTestData.OFFSET_MESSAGE)
             );
         }
@@ -53,7 +63,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void serialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
+    <T> void testSerialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
         // Given some test data
 
         // When a Request is serialised and deserialised

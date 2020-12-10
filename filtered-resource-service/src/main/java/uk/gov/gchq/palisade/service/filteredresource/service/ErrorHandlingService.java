@@ -47,7 +47,7 @@ public interface ErrorHandlingService {
      * @param attributes map of additional attributes to add to the error message
      * @return an error message containing the given details
      */
-    default AuditErrorMessage createErrorMessage(final FilteredResourceRequest request, final Throwable error, final Map<String, Object> attributes) {
+    default AuditErrorMessage createErrorMessage(final FilteredResourceRequest request, final Throwable error, final Map<String, String> attributes) {
         return AuditErrorMessage.Builder.create(request, attributes)
                 .withError(error);
     }
