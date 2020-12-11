@@ -30,6 +30,9 @@ import akka.stream.javadsl.Partition;
 
 import java.util.Map;
 
+/**
+ * Class ConditionalGraph used in the {@link uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph}
+ */
 public final class ConditionalGraph {
 
     private ConditionalGraph() {
