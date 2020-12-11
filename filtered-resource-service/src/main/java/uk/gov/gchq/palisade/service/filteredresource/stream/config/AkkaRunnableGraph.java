@@ -229,7 +229,7 @@ public class AkkaRunnableGraph {
         return (String token) -> {
             // Create kafka headers with client's token
             Headers headers = new RecordHeaders();
-            headers.add(Token.HEADER, token.getBytes());
+            headers.add(Token.HEADER, token.getBytes(Charset.defaultCharset()));
             // Map the token to a partition
             final int partition = Token.toPartition(token, outputTopic.getPartitions());
 

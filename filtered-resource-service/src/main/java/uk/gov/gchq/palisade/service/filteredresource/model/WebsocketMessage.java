@@ -32,6 +32,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * WebsocketMessage contains the content of the message sent to the websocket and is used by {@link uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService}
+ */
 public final class WebsocketMessage {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -49,71 +52,50 @@ public final class WebsocketMessage {
         this.body = body;
     }
 
+    /**
+     * getType returns the type of Websocket message
+     *
+     * @return the type of websocket message
+     */
     @Generated
     public MessageType getType() {
         return type;
     }
 
+    /**
+     * Gets headers of the websocket message.
+     *
+     * @return the headers of the websocket message
+     */
     @Generated
     public Map<String, String> getHeaders() {
         return Optional.ofNullable(headers)
                 .orElse(Collections.emptyMap());
     }
 
+    /**
+     * Gets the body of the websocket message
+     *
+     * @return the body of the websocket message
+     */
     @Generated
     public String getBody() {
         return body;
     }
 
+    /**
+     * Gets the body as an object
+     *
+     * @param <T>   the type of Websocket Message
+     * @param clazz the clazz used in deserializing
+     * @return the body object
+     */
     @JsonIgnore
     public <T> T getBodyObject(final Class<T> clazz) {
         try {
             return MAPPER.readValue(body, clazz);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to deserialize message body as class " + clazz.getName(), e);
-        }
-    }
-
-    public static class Builder {
-
-        public static IType create() {
-            return type -> headers -> body -> new WebsocketMessage(type, headers, body);
-        }
-
-        public interface IType {
-            IHeaders withType(MessageType type);
-        }
-
-        public interface IHeaders {
-            IBody withHeaders(Map<String, String> headers);
-
-            default IHeaders withHeader(String key, String value) {
-                return partial -> {
-                    Map<String, String> headers = new HashMap<>(partial);
-                    headers.put(key, value);
-                    return withHeaders(headers);
-                };
-            }
-
-            default IBody noHeaders() {
-                return withHeaders(Collections.emptyMap());
-            }
-        }
-
-        public interface IBody {
-            WebsocketMessage withSerialisedBody(String serialisedBody);
-
-            default WebsocketMessage withBody(Object body) {
-                try {
-                    return withSerialisedBody(MAPPER.writeValueAsString(body));
-                } catch (JsonProcessingException e) {
-                    throw new SerializationFailedException("Failed to serialize message body", e);
-                }
-            }
-
-            default WebsocketMessage noBody() {
-                return withSerialisedBody(null);
-            }
         }
     }
 
@@ -146,5 +128,108 @@ public final class WebsocketMessage {
                 .add("headers=" + headers)
                 .add("body=" + body)
                 .toString();
+    }
+
+    /**
+     * Builder class for the creation of instances of the WebsocketMessage.
+     * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
+     */
+    public static class Builder {
+
+        /**
+         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * WebsocketMessage class.
+         *
+         * @return public interface {@link IType} for the next step in the build.
+         */
+        public static IType create() {
+            return type -> headers -> body -> new WebsocketMessage(type, headers, body);
+        }
+
+        /**
+         * Adds the type information to the object.
+         */
+        public interface IType {
+            /**
+             * Adds the Type of WebsocketMessage
+             *
+             * @param type of WebsocketMessage
+             * @return interface {@link IHeaders} for the next step in the build.
+             */
+            IHeaders withType(MessageType type);
+        }
+
+        /**
+         * Adds the header information to the object.
+         */
+        public interface IHeaders {
+            /**
+             * Adds the headers to the WebsocketMessage
+             *
+             * @param headers for the WebsocketMessage
+             * @return interface {@link IBody} for the next step in the build.
+             */
+            IBody withHeaders(Map<String, String> headers);
+
+            /**
+             * Default headers for the Websocket message
+             *
+             * @param key   the key, most often the token.HEADER
+             * @param value the value, most often the token
+             * @return interface {@link IBody} for the next step in the build.
+             */
+            default IHeaders withHeader(String key, String value) {
+                return (Map<String, String> partial) -> {
+                    Map<String, String> headers = new HashMap<>(partial);
+                    headers.put(key, value);
+                    return withHeaders(headers);
+                };
+            }
+
+            /**
+             * A Default noHeaders interface that adds an emptyMap of headers to the WebsocketMessage
+             *
+             * @return interface {@link IBody} for the next step in the build.
+             */
+            default IBody noHeaders() {
+                return withHeaders(Collections.emptyMap());
+            }
+        }
+
+        /**
+         * Adds the body to the object.
+         */
+        public interface IBody {
+            /**
+             * Adds a serialisedBody to the WebsocketMessage
+             *
+             * @param serialisedBody to add to the WebsocketMessage
+             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             */
+            WebsocketMessage withSerialisedBody(String serialisedBody);
+
+            /**
+             * Adds an object body to the WebsocketMessage which is then seralised before adding to the class
+             *
+             * @param body the body
+             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             */
+            default WebsocketMessage withBody(Object body) {
+                try {
+                    return withSerialisedBody(MAPPER.writeValueAsString(body));
+                } catch (JsonProcessingException e) {
+                    throw new SerializationFailedException("Failed to serialize message body", e);
+                }
+            }
+
+            /**
+             * An interface used to add a null body to the WebsocketMessage
+             *
+             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             */
+            default WebsocketMessage noBody() {
+                return withSerialisedBody(null);
+            }
+        }
     }
 }
