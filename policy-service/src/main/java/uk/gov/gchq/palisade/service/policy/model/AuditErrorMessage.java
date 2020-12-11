@@ -36,7 +36,6 @@ public final class AuditErrorMessage extends AuditMessage {
 
     private final Throwable error;  //Error that occurred
 
-
     @JsonCreator
     private AuditErrorMessage(
             final @JsonProperty("userId") String userId,
