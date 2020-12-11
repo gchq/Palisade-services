@@ -102,7 +102,7 @@ public class WebsocketEventService {
                 // Any messages with MessageTypes other than those listed here are dropped
                 .via(ConditionalGraph.map(x -> x.getType().ordinal(), Map.of(
                         // On PING message, do a PONG
-                        MessageType.PING.ordinal(), this.onPing(token),
+                        MessageType.PING.ordinal(), onPing(token),
                         // On CTS message, get the offset for the token from persistence, then return results
                         MessageType.CTS.ordinal(), this.onCts(token)
                 )));
@@ -115,7 +115,7 @@ public class WebsocketEventService {
      * @param token the token for this client
      * @return a flow from {@link MessageType#PING} client requests to {@link MessageType#PONG} server responses
      */
-    private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onPing(final String token) {
+    private static Flow<WebsocketMessage, WebsocketMessage, NotUsed> onPing(final String token) {
         return Flow.<WebsocketMessage>create()
                 // Reply to the client's PING request with a PONG (application-layer, not websocket TCP-frame layer)
                 .map(message -> WebsocketMessage.Builder.create()

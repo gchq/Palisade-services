@@ -21,9 +21,17 @@ import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceReque
 
 import java.util.Map;
 
+/**
+ * The class AuditEventService used to create {@link AuditSuccessMessage}s that can be sent to the AuditService
+ */
 public class AuditEventService {
     private final Map<String, String> additionalAttributes;
 
+    /**
+     * Instantiates a new Audit event service.
+     *
+     * @param additionalAttributes any additional attributes that can be added to the {@link AuditSuccessMessage}
+     */
     public AuditEventService(final Map<String, String> additionalAttributes) {
         this.additionalAttributes = additionalAttributes;
     }
