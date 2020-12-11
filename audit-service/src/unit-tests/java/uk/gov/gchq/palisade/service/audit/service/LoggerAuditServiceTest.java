@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2020 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,155 +16,126 @@
 
 package uk.gov.gchq.palisade.service.audit.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.RequestId;
-import uk.gov.gchq.palisade.User;
-import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.rule.Rules;
-import uk.gov.gchq.palisade.service.audit.request.AuditRequest;
+import uk.gov.gchq.palisade.service.audit.ApplicationTestData;
+import uk.gov.gchq.palisade.service.audit.model.AuditMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class LoggerAuditServiceTest extends AuditServiceTestCommon {
+@ExtendWith(MockitoExtension.class)
+class LoggerAuditServiceTest {
+
+    private static final String BAD_AUDIT_SUCCESS_MESSAGE = "An AuditSuccessMessage should only be sent by the filtered-resource-service or the data-service. Message received from {}";
 
     @Mock
     Logger logger;
+
     @Captor
-    ArgumentCaptor<String> logCaptor;
+    ArgumentCaptor<AuditMessage> infoCaptor;
+    @Captor
+    ArgumentCaptor<String> errorCaptor;
 
     private static LoggerAuditService auditService;
-    private UserId userId;
-    private User user;
-    private Context context;
-    private RequestId requestId;
-    private LeafResource resource;
-    private Exception exception;
-    private Rules rules;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         auditService = new LoggerAuditService(logger);
-
-        userId = mockUserID();
-        user = mockUser();
-        context = mockContext();
-        requestId = mockOriginalRequestId();
-        resource = mockResource();
-        exception = mockException();
-        rules = mockRules();
-    }
-
-
-    @Test
-    public void auditRegisterRequestSuccessful() {
-        // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResources(Sets.newSet(resource))
-                .withContext(context);
-
-        // When
-        auditService.audit(auditRequest);
-
-        // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                user.toString(),
-                context.toString(),
-                requestId.toString(),
-                LoggerAuditService.REGISTER_REQUEST_COMPLETE
-        );
     }
 
     @Test
-    public void auditRegisterRequestException() {
+    void testDataServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.RegisterRequestExceptionAuditRequest.create(requestId)
-                .withUserId(userId)
-                .withResourceId(resource.getId())
-                .withContext(context)
-                .withException(exception)
-                .withServiceName(ServiceName.USER_SERVICE.name());
+        Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.DATA_SERVICE.value));
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                userId.toString(),
-                context.toString(),
-                requestId.toString(),
-                resource.getId(),
-                exception.toString(),
-                LoggerAuditService.REGISTER_REQUEST_EXCEPTION
-        );
+        assertThat(infoCaptor.getAllValues())
+                .hasSize(1)
+                .first().isEqualTo(ApplicationTestData.auditSuccessMessage("data-service"));
     }
 
     @Test
-    public void auditReadRequestSuccessful() {
+    void testFilteredResourceServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestCompleteAuditRequest.create(requestId)
-                .withUser(user)
-                .withLeafResource(resource)
-                .withContext(context)
-                .withRulesApplied(rules)
-                .withNumberOfRecordsReturned(TEST_NUMBER_OF_RECORDS_RETURNED)
-                .withNumberOfRecordsProcessed(TEST_NUMBER_OF_RECORDS_PROCESSED);
+        Mockito.doNothing().when(logger).info(Mockito.anyString(), infoCaptor.capture());
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.FILTERED_RESOURCE_SERVICE.value));
 
         // Then
-        verify(logger, atLeastOnce()).info(logCaptor.capture());
-
-        assertThat(logCaptor.getValue()).contains(
-                user.toString(),
-                context.toString(),
-                rules.toString(),
-                resource.toString(),
-                LoggerAuditService.READ_REQUEST_COMPLETE,
-                String.valueOf(TEST_NUMBER_OF_RECORDS_RETURNED),
-                String.valueOf(TEST_NUMBER_OF_RECORDS_PROCESSED)
-        );
+        assertThat(infoCaptor.getAllValues())
+                .hasSize(1).first()
+                .isEqualTo(ApplicationTestData.auditSuccessMessage("filtered-resource-service"));
     }
 
     @Test
-    public void auditReadRequestException() {
-
+    void testOtherServiceAuditSuccessMessage() {
         // Given
-        final AuditRequest auditRequest = AuditRequest.ReadRequestExceptionAuditRequest.create(requestId)
-                .withToken(TEST_TOKEN)
-                .withLeafResource(resource)
-                .withException(exception);
+        Mockito.doNothing().when(logger).warn(errorCaptor.capture(), errorCaptor.capture());
 
         // When
-        auditService.audit(auditRequest);
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditSuccessMessage(ServiceName.USER_SERVICE.value));
 
         // Then
-        verify(logger, atLeastOnce()).error(logCaptor.capture());
+        assertThat(infoCaptor.getAllValues())
+                .isEmpty();
+        assertThat(errorCaptor.getAllValues())
+                .hasSize(2).contains(BAD_AUDIT_SUCCESS_MESSAGE, "user-service");
+    }
 
-        assertThat(logCaptor.getValue()).contains(
-                requestId.toString(),
-                resource.toString(),
-                exception.toString(),
-                LoggerAuditService.READ_REQUEST_EXCEPTION
-        );
+    @Test
+    void testUserServiceAuditErrorMessage() {
+        // Given
+        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.USER_SERVICE.value));
+
+        // Then
+        assertThat(infoCaptor.getAllValues())
+                .isEmpty();
+        assertThat(errorCaptor.getAllValues())
+                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("user-service"));
+    }
+
+    @Test
+    void testResourceServiceAuditErrorMessage() {
+        // Given
+        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.RESOURCE_SERVICE.value));
+
+        // Then
+        assertThat(infoCaptor.getAllValues())
+                .isEmpty();
+        assertThat(errorCaptor.getAllValues())
+                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("resource-service"));
+    }
+
+    @Test
+    void testOtherServiceAuditErrorMessage() {
+        // Given
+        Mockito.doNothing().when(logger).error(Mockito.anyString(), errorCaptor.capture());
+
+        // When
+        auditService.audit(ApplicationTestData.TEST_TOKEN, ApplicationTestData.auditErrorMessage(ServiceName.POLICY_SERVICE.value));
+
+        // Then
+        assertThat(infoCaptor.getAllValues())
+                .isEmpty();
+        assertThat(errorCaptor.getAllValues())
+                .hasSize(1).first().isEqualTo(ApplicationTestData.auditErrorMessage("policy-service"));
     }
 }

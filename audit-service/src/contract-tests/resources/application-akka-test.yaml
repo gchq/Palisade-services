@@ -32,7 +32,7 @@ akka:
       eos-draining-check-interval: 30ms
       partition-handler-warning: 5s
       kafka-clients:
-        group.id: filtered-resource-service
+        group.id: audit-service
         enable.auto.commit: true
       connection-checker:
         enable: true
@@ -40,11 +40,8 @@ akka:
         check-interval: 15s
         backoff-factor: 2.0
       topics:
-        input-topic:
-          name: masked-resource
-          partitions: 1
-        offset-topic:
-          name: masked-resource-offset
+        success-topic:
+          name: success
           partitions: 1
         error-topic:
           name: error
@@ -53,13 +50,6 @@ akka:
       discovery-method: akka.discovery
       service-name: kafka
       parallelism: 10000
-      topics:
-        success-topic:
-          name: success
-          partitions: 1
-        error-topic:
-          name: error
-          partitions: 1
     committer:
       max-batch: 1000
       max-interval: 10s

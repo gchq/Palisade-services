@@ -34,7 +34,7 @@ import java.util.StringJoiner;
  */
 public final class AuditErrorMessage extends AuditMessage {
 
-    private final Throwable error;  //Failure that occurred
+    private final Throwable error;  // Error that occurred
 
     @JsonCreator
     private AuditErrorMessage(

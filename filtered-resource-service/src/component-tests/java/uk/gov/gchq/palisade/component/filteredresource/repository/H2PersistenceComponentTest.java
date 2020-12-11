@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EnableJpaRepositories(basePackages = "uk.gov.gchq.palisade.service.filteredresource.repository")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("h2")
-class H2PersistenceTest {
+class H2PersistenceComponentTest {
 
     @Autowired
     private OffsetEventService service;

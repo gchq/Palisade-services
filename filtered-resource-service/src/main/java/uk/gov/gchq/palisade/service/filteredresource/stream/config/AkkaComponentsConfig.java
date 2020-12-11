@@ -72,8 +72,6 @@ public class AkkaComponentsConfig {
          * @param token  the client's token for this request, which is used for the consumer group-id and partition selection
          * @param offset the offset to start with for the given token
          * @return a new Kafka source
-         * @implNote the offset should come from the {@link uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController}
-         * to ensure it is accurate (i.e. it points to the start-of-stream message)
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
     }
