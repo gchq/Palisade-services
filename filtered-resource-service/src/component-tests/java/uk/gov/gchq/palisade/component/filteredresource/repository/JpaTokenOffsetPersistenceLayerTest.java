@@ -18,14 +18,16 @@ package uk.gov.gchq.palisade.component.filteredresource.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
-import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
@@ -35,7 +37,10 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepos
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = {FilteredResourceApplication.class, ApplicationConfiguration.class, AsyncConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
+@ContextConfiguration(classes = {ApplicationConfiguration.class, AsyncConfiguration.class, JpaTokenOffsetPersistenceLayer.class})
+@EnableAutoConfiguration
+@EntityScan(basePackages = "uk.gov.gchq.palisade.service.filteredresource.domain")
+@EnableJpaRepositories(basePackages = "uk.gov.gchq.palisade.service.filteredresource.repository")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("dbtest")
 class JpaTokenOffsetPersistenceLayerTest {

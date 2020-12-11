@@ -45,7 +45,7 @@ spec:
         - |
           [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
           ordinal=${BASH_REMATCH[1]}
-          java -jar /usr/share/policy-service/audit-service.jar \
+          java -jar /usr/share/audit-service/audit-service.jar \
           {{ if gt .Values.replicaCount 1.0 }}--akka.kafka.consumer.topics.error-topic.assignment=$ordinal \
             --akka.kafka.consumer.topics.success-topic.assignment=$ordinal {{ end }} \
             --akka.kafka.consumer.kafka-clients.group.id={{ include "audit-service.name" . }}-$ordinal

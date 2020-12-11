@@ -13,6 +13,16 @@
 # limitations under the License.
 
 spring:
+  profiles:
+    include:
+    - akka
+    - default-config
+
+---
+
+spring:
+  profiles: default-config
+
   application:
     name: filtered-resource-service
   output:
@@ -24,18 +34,6 @@ spring:
     redis:
       repositories:
         enabled: false
-
-server:
-  port: 8092
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    shutdown:
-      enabled: true
 
 async:
   corePoolSize: 6
