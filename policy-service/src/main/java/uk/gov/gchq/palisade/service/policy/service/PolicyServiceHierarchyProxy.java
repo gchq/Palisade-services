@@ -26,9 +26,12 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
+import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -79,6 +82,25 @@ public class PolicyServiceHierarchyProxy {
         LOGGER.debug("Merged rules: {} + {} -> {}", inheritedRules.getRules(), newRules.getRules(), mergedRules.getRules());
 
         return mergedRules;
+    }
+
+    /**
+     * Applies the {@link Rules} to the {@link Resource}.
+     *
+     * @param auditablePolicyResourceResponse container for holding the {@code PolicyRequest}, {@code Rules} and the {@code AuditErrorMessage}
+     * @return either the same instance of {@code AuditablePolicyResourceResponse} or a new instance with the modified {@code Resource}
+     */
+    public static AuditablePolicyResourceResponse applyRulesToResource(final AuditablePolicyResourceResponse auditablePolicyResourceResponse) {
+        Rules rules = auditablePolicyResourceResponse.getRules();
+        if (!Objects.isNull(rules)) {
+            //apply the rules to the resource - a coarse grain filtering
+            PolicyRequest policyRequest = auditablePolicyResourceResponse.getPolicyRequest();
+            Resource resource = PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules);
+            return AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(policyRequest).withRules(rules).withNoErrors().withModifiedResource(resource);
+        } else {
+            // do nothing and return
+            return auditablePolicyResourceResponse;
+        }
     }
 
     /**
