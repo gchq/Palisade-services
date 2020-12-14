@@ -25,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -121,7 +122,7 @@ class RestControllerWebMvcTest extends CommonTestData {
         Mockito.when(palisadeService.registerDataRequest(any()))
                 .thenThrow(somethingWentWrong);
 
-        this.mockMvc.perform(post("/api/registerDataRequest")
+        MvcResult result = this.mockMvc.perform(post("/api/registerDataRequest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(new HttpHeaders())
@@ -130,8 +131,12 @@ class RestControllerWebMvcTest extends CommonTestData {
                 .andDo(print())
                 .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) //no message
                 .andReturn();
+        String response = result.getResponse().getContentAsString();
 
-        //verify services have been called once
+        // Verify the response value is empty
+        assertThat(response).isEmpty();
+
+        // Verify the service methods have been called once, and only once
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);
         Mockito.verify(palisadeService, times(1)).errorMessage(any(), anyString(), any(), any());
     }
