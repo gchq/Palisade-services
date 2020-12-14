@@ -52,6 +52,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
      * Requires the AdminClient to interact with Kafka
      *
      * @param adminClient of the cluster
+     * @param topicConfiguration contains the producer topic configuration
      */
     public KafkaHealthIndicator(final AdminClient adminClient, final ProducerTopicConfiguration topicConfiguration) {
         this.adminClient = adminClient;
