@@ -78,7 +78,7 @@ public final class PolicyRequest {
     }
 
     @Generated
-    public Context getContext()  {
+    public Context getContext() {
         try {
             return MAPPER.treeToValue(this.context, Context.class);
         } catch (JsonProcessingException e) {
