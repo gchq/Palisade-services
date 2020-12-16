@@ -16,6 +16,7 @@
 package uk.gov.gchq.palisade.service.policy.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -32,11 +33,13 @@ import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.policy.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.service.ErrorHandlingService;
+import uk.gov.gchq.palisade.service.policy.service.KafkaHealthIndicator;
 import uk.gov.gchq.palisade.service.policy.service.NullPolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
+import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 
 import java.util.concurrent.Executor;
 
@@ -176,6 +179,17 @@ public class ApplicationConfiguration implements AsyncConfigurer {
             final @Qualifier("threadPoolTaskExecutor") Executor executor) {
         LOGGER.debug("Instantiated asyncUserServiceProxy");
         return new PolicyServiceAsyncProxy(hierarchy, executor);
+    }
+
+    /**
+     * A bean for the Kafka Health Indicator
+     *
+     * @param adminClient the Kafka admin client
+     * @param topicConfiguration the details of the consumer topic(s)
+     * @return an instance of the {@link KafkaHealthIndicator}
+     */
+    public KafkaHealthIndicator kafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
+        return new KafkaHealthIndicator(adminClient, topicConfiguration);
     }
 
     /**
