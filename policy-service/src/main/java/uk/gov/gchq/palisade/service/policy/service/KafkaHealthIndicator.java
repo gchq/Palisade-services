@@ -28,7 +28,6 @@ import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,10 +57,11 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     @Override
     public Health getHealth(final boolean includeDetails) {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("group", this.groupId).build())
-                .orElseGet(() -> Health.down().withDetail("group", this.groupId).build());
+        if (performCheck()) {
+            return Health.up().withDetail("group", this.groupId).build();
+        } else {
+            return Health.down().withDetail("group", this.groupId).build();
+        }
     }
 
     /**
@@ -70,10 +70,11 @@ public class KafkaHealthIndicator implements HealthIndicator {
      */
     @Override
     public Health health() {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().build())
-                .orElseGet(() -> Health.down().build());
+        if (performCheck()) {
+            return Health.up().build();
+        } else {
+            return Health.down().build();
+        }
     }
 
     private boolean performCheck() {
