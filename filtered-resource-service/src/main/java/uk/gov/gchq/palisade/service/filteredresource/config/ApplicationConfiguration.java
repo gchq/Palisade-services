@@ -53,7 +53,7 @@ public class ApplicationConfiguration {
     @Bean
     TokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(
             final TokenOffsetRepository repository,
-            final @Qualifier("threadPoolTaskExecutor") Executor executor) {
+            final @Qualifier("applicationTaskExecutor") Executor executor) {
         return new JpaTokenOffsetPersistenceLayer(repository, executor);
     }
 
