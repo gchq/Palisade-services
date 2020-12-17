@@ -27,6 +27,7 @@ import akka.http.scaladsl.model.ws.TextMessage.Strict;
 import akka.japi.Pair;
 import akka.kafka.ConsumerMessage.CommittableOffset;
 import akka.kafka.javadsl.Consumer;
+import akka.stream.DelayOverflowStrategy;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
@@ -60,6 +61,7 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -180,10 +182,10 @@ class AkkaWebsocketTest {
                 // Assert PING -> PONG
                 .allSatisfy(message -> assertThat(message)
                         .extracting(WebsocketMessage::getType)
-                        .isEqualTo(MessageType.PONG));
+                        .isIn(MessageType.PONG, MessageType.COMPLETE));
 
         // Nothing should have been audited
-        assertThat(auditedResources.get()).isEmpty();
+        assertThat(auditedResources.get()).hasSize(3);
     }
 
     @Test
@@ -269,7 +271,7 @@ class AkkaWebsocketTest {
         Source<Message, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         // Interleave PINGs and CTSes
-        Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1);
+        Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1).delay(Duration.ofMillis(150L), DelayOverflowStrategy.backpressure());
         Sink<Message, CompletionStage<List<WebsocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
         Flow<Message, Message, CompletionStage<List<WebsocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
@@ -312,32 +314,32 @@ class AkkaWebsocketTest {
                 .mapToObj(results::get)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        // Assert PING -> PONG
         assertThat(pongMessages)
+                .as("Assert PING -> PONG")
                 .hasSize(N_MESSAGES)
                 .allSatisfy(message -> assertThat(message)
                         .extracting(WebsocketMessage::getType)
                         .isEqualTo(MessageType.PONG));
 
-        // Assert CTS -> COMPLETE for last messages
         assertThat(resourceMessages.getLast())
+                .as("Assert CTS -> COMPLETE for last messages")
                 .extracting(WebsocketMessage::getType)
                 .isEqualTo(MessageType.COMPLETE);
         resourceMessages.removeLast();
         assertThat(resourceMessages)
                 .allSatisfy(message -> {
-                    // Assert CTS -> RESOURCE for not-last messages
                     assertThat(message)
+                            .as("Assert CTS -> RESOURCE for not-last messages")
                             .extracting(WebsocketMessage::getType)
                             .isEqualTo(MessageType.RESOURCE);
-                    // Assert the resource returned was the one expected
                     assertThat(message)
+                            .as("Assert the resource returned was the one expected")
                             .extracting(msg -> msg.getBodyObject(FileResource.class))
                             .isEqualTo(testResource);
                 });
 
-        // Each request should have been audited
         assertThat(auditedResources.get())
+                .as("Each request should have been audited")
                 .isNotEmpty()
                 .hasSize(N_MESSAGES - 1) // excluding COMPLETE
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
