@@ -38,6 +38,9 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * Configuration for the WebSocket endpoint
+ */
 @Configuration
 public class EndpointConfiguration {
     @Bean

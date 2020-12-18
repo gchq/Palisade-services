@@ -31,6 +31,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Class to create an http server for akka
+ */
 public class AkkaHttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaHttpServer.class);
 
@@ -41,6 +44,13 @@ public class AkkaHttpServer {
 
     private CompletableFuture<ServerBinding> serverBinding = new CompletableFuture<>();
 
+    /**
+     * Constructor for the {@code AkkaHttpServer}
+     *
+     * @param hostname the hostname value
+     * @param port the post value
+     * @param routeSuppliers a {@code Collection} of {@code RouteSupplier}s
+     */
     public AkkaHttpServer(final String hostname, final int port, final Collection<RouteSupplier> routeSuppliers) {
         this.hostname = hostname;
         this.port = port;
@@ -51,6 +61,11 @@ public class AkkaHttpServer {
                 .orElseThrow(() -> new IllegalArgumentException("No route suppliers found to create HTTP server bindings, check your config."));
     }
 
+    /**
+     * Creates the server bindings
+     *
+     * @param system the akka {@code ActorSystem}
+     */
     public void serveForever(final ActorSystem system) {
         this.serverBinding = Http.get(system)
                 .newServerAt(this.hostname, this.port)
@@ -61,6 +76,9 @@ public class AkkaHttpServer {
         LOGGER.debug("Bindings are: {}", routeSuppliers.stream().map(Object::getClass).map(Class::getSimpleName).collect(Collectors.toList()));
     }
 
+    /**
+     * Terminates the active server bindings
+     */
     public void terminate() {
         this.serverBinding.thenCompose(ServerBinding::unbind).join();
     }

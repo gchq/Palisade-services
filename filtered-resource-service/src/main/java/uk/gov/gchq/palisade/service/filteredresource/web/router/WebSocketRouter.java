@@ -18,9 +18,10 @@ package uk.gov.gchq.palisade.service.filteredresource.web.router;
 
 import akka.NotUsed;
 import akka.http.javadsl.model.ws.Message;
+import akka.http.javadsl.model.ws.TextMessage;
 import akka.http.javadsl.server.Directives;
 import akka.http.javadsl.server.Route;
-import akka.http.scaladsl.model.ws.TextMessage;
+import akka.http.scaladsl.model.ws.TextMessage.Strict;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Source;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,18 +29,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 
+/**
+ * A class to route web socket messages
+ */
 public class WebSocketRouter implements RouteSupplier {
-    private final WebSocketEventService websocketEventService;
+    private final WebSocketEventService webSocketEventService;
     private final ObjectMapper mapper;
 
-    public WebSocketRouter(final WebSocketEventService websocketEventService, final ObjectMapper mapper) {
-        this.websocketEventService = websocketEventService;
+    /**
+     * Public constructor
+     *
+     * @param webSocketEventService the {@code WebSocketEventService} value
+     * @param mapper an {@code ObjectMapper}
+     */
+    public WebSocketRouter(final WebSocketEventService webSocketEventService, final ObjectMapper mapper) {
+        this.webSocketEventService = webSocketEventService;
         this.mapper = mapper;
     }
 
     /**
      * Create a route from /resource/{token} to {@link WebSocketEventService#createFlowGraph(String token)}.
-     * This method also handles serialising and deserialising the client's websocket stream from Akka's {@link TextMessage}
+     * This method also handles serialising and deserialising the client's websocket stream from Akka's {@link }
      * to our own {@link WebSocketMessage}.
      * Control over the rest of the client's request is handled by the flow graph.
      *
@@ -48,37 +58,36 @@ public class WebSocketRouter implements RouteSupplier {
     @Override
     public Route get() {
         // ws://filtered-resource-service/resource/{token} -> serviceFactory.create(token) -> service.createFlowGraph()
-        return Directives.pathPrefix("resource", () -> Directives.path(token -> {
-            // The AkkaHttpServer handles converting the Strict BinaryMessage types to the WebsocketMessage type the service will use
-            return Directives.handleWebSocketMessages(Flow.<Message>create()
+        return Directives.pathPrefix("resource", () -> Directives.path(token -> Directives
+                .handleWebSocketMessages(Flow.<Message>create()
 
-                    // Use text messages over binary messages (expecting JSON)
-                    .map(Message::asTextMessage)
+                // Use text messages over binary messages (expecting JSON)
+                .map(Message::asTextMessage)
 
-                    // Deserialise to WebsocketMessage class
-                    .flatMapConcat(message -> {
-                        // Akka will sometimes convert between Strict and Streamed (if the websocket frames exceed ~5k 'PING' messages ~= 128KB)
-                        Source<StringBuilder, NotUsed> builderSource;
-                        if (message.isStrict()) {
-                            // In case of a strict, just use the bounded-length string as expected
-                            builderSource = Source.single(new StringBuilder(message.getStrictText()));
-                        } else {
-                            // In case of a stream, keep appending messages if they cross over separate frames
-                            // This could cause an error if the client sends a malicious single message with a massive body
-                            builderSource = message.getStreamedText()
-                                    .mapMaterializedValue(x -> NotUsed.notUsed())
-                                    .fold(new StringBuilder(), StringBuilder::append);
-                        }
-                        // Convert serialised data (JSON) to WebsocketMessage object
-                        return builderSource.map(builder -> this.mapper.readValue(builder.toString(), WebSocketMessage.class));
-                    })
+                // Deserialise to WebsocketMessage class
+                .flatMapConcat((TextMessage message) -> {
+                    // Akka will sometimes convert between Strict and Streamed (if the websocket frames exceed ~5k 'PING' messages ~= 128KB)
+                    Source<StringBuilder, NotUsed> builderSource;
+                    if (message.isStrict()) {
+                        // In case of a strict, just use the bounded-length string as expected
+                        builderSource = Source.single(new StringBuilder(message.getStrictText()));
+                    } else {
+                        // In case of a stream, keep appending messages if they cross over separate frames
+                        // This could cause an error if the client sends a malicious single message with a massive body
+                        builderSource = message.getStreamedText()
+                                .mapMaterializedValue(x -> NotUsed.notUsed())
+                                .fold(new StringBuilder(), StringBuilder::append);
+                    }
+                    // Convert serialised data (JSON) to WebsocketMessage object
+                    return builderSource.map(builder -> this.mapper.readValue(builder.toString(), WebSocketMessage.class));
+                })
 
-                    // Process messages using service's flow graph
-                    .via(websocketEventService.createFlowGraph(token))
+                // Process messages using service's flow graph
+                .via(webSocketEventService.createFlowGraph(token))
 
-                    // Serialise back to TextMessage
-                    // This is not worth treating as a TextMessage.Streamed as under normal usage we're communicating with a single-message request-response
-                    .map(websocketMessage -> new TextMessage.Strict(this.mapper.writeValueAsString(websocketMessage))));
-        }));
+                // Serialise back to TextMessage
+                // This is not worth treating as a TextMessage.Streamed as under normal usage we're communicating with a single-message request-response
+                .map(webSocketMessage -> new Strict(this.mapper.writeValueAsString(webSocketMessage))))
+        ));
     }
 }

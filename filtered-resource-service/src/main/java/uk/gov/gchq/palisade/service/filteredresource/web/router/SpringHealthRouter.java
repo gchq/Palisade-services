@@ -31,6 +31,9 @@ import org.springframework.boot.availability.ReadinessState;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Class to provide the health of the Spring application
+ */
 public class SpringHealthRouter implements RouteSupplier {
     // Map Spring health Statuses to HTTP status codes
     private static final Map<Status, Integer> SPRING_STATUS_LOOKUP = Map.of(
@@ -56,18 +59,24 @@ public class SpringHealthRouter implements RouteSupplier {
     private final HealthEndpoint springHealthEndpoint;
     private final ApplicationAvailability applicationAvailability;
 
+    /**
+     * Public constructor
+     *
+     * @param springHealthEndpoint the health endpoint for Spring
+     * @param applicationAvailability the availability of the application
+     */
     public SpringHealthRouter(final HealthEndpoint springHealthEndpoint, final ApplicationAvailability applicationAvailability) {
         this.springHealthEndpoint = springHealthEndpoint;
         this.applicationAvailability = applicationAvailability;
     }
 
-    private Route mapSpringToAkka(final HealthComponent healthComponent) {
+    private static Route mapSpringToAkka(final HealthComponent healthComponent) {
         return Optional.ofNullable(healthComponent)
                 // Get the component's status (UP/DOWN/UNKNOWN/etc...)
                 .map(HealthComponent::getStatus)
 
                 // Convert to an akka response with a status code
-                .map(status -> {
+                .map((Status status) -> {
                     Integer statusCode = SPRING_STATUS_LOOKUP.getOrDefault(status, STATUS_NOT_FOUND);
                     return (Route) Directives.complete(StatusCode.int2StatusCode(statusCode), status, Jackson.marshaller());
                 })
