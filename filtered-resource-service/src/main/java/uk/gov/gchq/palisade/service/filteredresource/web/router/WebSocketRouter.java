@@ -49,7 +49,7 @@ public class WebSocketRouter implements RouteSupplier {
 
     /**
      * Create a route from /resource/{token} to {@link WebSocketEventService#createFlowGraph(String token)}.
-     * This method also handles serialising and deserialising the client's websocket stream from Akka's {@link }
+     * This method also handles serialising and deserialising the client's websocket stream from Akka
      * to our own {@link WebSocketMessage}.
      * Control over the rest of the client's request is handled by the flow graph.
      *
