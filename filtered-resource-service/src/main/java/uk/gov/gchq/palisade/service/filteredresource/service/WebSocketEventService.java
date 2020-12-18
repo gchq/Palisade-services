@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
-import uk.gov.gchq.palisade.service.filteredresource.model.WebsocketMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
@@ -40,8 +40,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter}
- * creates an instance of the {@link WebsocketEventService#createFlowGraph(String)} to handle the rest of the request.
+ * When a client connects via websocket, the {@code uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter}
+ * creates an instance of the {@link WebSocketEventService#createFlowGraph(String)} to handle the rest of the request.
  * The service goes through the following steps while returning resources:
  * <ul>
  *   <li> get the topic offset for this token, defaulting to "now"
@@ -50,8 +50,8 @@ import java.util.Optional;
  * <!--  <li> send any "late" errors to the client (eg. resource-service or policy-service exceptions) -->
  * </ul>
  */
-public class WebsocketEventService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketEventService.class);
+public class WebSocketEventService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
     private final AuditServiceSinkFactory auditSinkFactory;
@@ -66,7 +66,7 @@ public class WebsocketEventService {
      * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
      * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
      */
-    public WebsocketEventService(
+    public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
@@ -77,7 +77,7 @@ public class WebsocketEventService {
 
     /**
      * Create a flow from incoming to outgoing Websocket {@link Message}s.
-     * These are expected to be {@link BinaryMessage}s of json-serialised {@link WebsocketMessage}s.
+     * These are expected to be {@link BinaryMessage}s of json-serialised {@link WebSocketMessage}s.
      * <p>
      * This flow will accept the client {@link MessageType}s and return server types as follows:
      * <ul>
@@ -90,10 +90,10 @@ public class WebsocketEventService {
      * @param token the token for this flowGraph - this is used when creating the audit {@link Sink} and resource {@link Source}
      * @return a flow from client requests to server responses
      */
-    public Flow<WebsocketMessage, WebsocketMessage, NotUsed> createFlowGraph(final String token) {
-        return Flow.<WebsocketMessage>create()
+    public Flow<WebSocketMessage, WebSocketMessage, NotUsed> createFlowGraph(final String token) {
+        return Flow.<WebSocketMessage>create()
                 // Log some details of each client request
-                .map((WebsocketMessage wsMsg) -> {
+                .map((WebSocketMessage wsMsg) -> {
                     LOGGER.trace("Received message {} from client", wsMsg);
                     return wsMsg;
                 })
@@ -115,10 +115,10 @@ public class WebsocketEventService {
      * @param token the token for this client
      * @return a flow from {@link MessageType#PING} client requests to {@link MessageType#PONG} server responses
      */
-    private static Flow<WebsocketMessage, WebsocketMessage, NotUsed> onPing(final String token) {
-        return Flow.<WebsocketMessage>create()
+    private static Flow<WebSocketMessage, WebSocketMessage, NotUsed> onPing(final String token) {
+        return Flow.<WebSocketMessage>create()
                 // Reply to the client's PING request with a PONG (application-layer, not websocket TCP-frame layer)
-                .map(message -> WebsocketMessage.Builder.create()
+                .map(message -> WebSocketMessage.Builder.create()
                         .withType(MessageType.PONG)
                         .withHeader(Token.HEADER, token).noHeaders()
                         .noBody()
@@ -138,8 +138,8 @@ public class WebsocketEventService {
      * @return a flow from {@link MessageType#CTS} client requests to {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or
      * {@link MessageType#COMPLETE} server responses
      */
-    private Flow<WebsocketMessage, WebsocketMessage, NotUsed> onCts(final String token) {
-        return Flow.<WebsocketMessage>create()
+    private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCts(final String token) {
+        return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
                 .zip(this.createResourceSource(token))
 
@@ -148,13 +148,13 @@ public class WebsocketEventService {
     }
 
     /**
-     * A finite stream of {@link WebsocketMessage}s, representing either {@link MessageType#RESOURCE}s
+     * A finite stream of {@link WebSocketMessage}s, representing either {@link MessageType#RESOURCE}s
      * or {@link MessageType#ERROR}s.
      *
      * @param token the token for this client
      * @return a source of {@link MessageType#RESOURCE}s or {@link MessageType#ERROR}s
      */
-    private Source<WebsocketMessage, NotUsed> createResourceSource(final String token) {
+    private Source<WebSocketMessage, NotUsed> createResourceSource(final String token) {
         // Connect to the client's stream of resources by retrieving the token's offset and connecting to kafka
         return Source.single(token)
                 // Get the offset for the given token
@@ -175,7 +175,7 @@ public class WebsocketEventService {
                                 .map(Pair::first)
 
                                 // Convert the leafResource into a WebsocketMessage response object, copying appropriate headers
-                                .map(request -> WebsocketMessage.Builder.create()
+                                .map(request -> WebSocketMessage.Builder.create()
                                         .withType(MessageType.RESOURCE)
                                         .withHeader(Token.HEADER, token).noHeaders()
                                         .withBody(request.getResourceNode()))
@@ -184,12 +184,12 @@ public class WebsocketEventService {
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
 
                         // If an error occurred finding the offset, emit a single ERROR message
-                        .orElse(Source.single(WebsocketMessage.Builder.create()
+                        .orElse(Source.single(WebSocketMessage.Builder.create()
                                 .withType(MessageType.ERROR)
                                 .withHeader(Token.HEADER, token).noHeaders()
                                 .withBody(offsetResponse.getException()))))
                 // Append COMPLETE message
-                .concat(Source.single(WebsocketMessage.Builder.create()
+                .concat(Source.single(WebSocketMessage.Builder.create()
                         .withType(MessageType.COMPLETE)
                         .withHeader(Token.HEADER, token).noHeaders()
                         .noBody()));

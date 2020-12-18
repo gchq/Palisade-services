@@ -25,22 +25,22 @@ import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Source;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import uk.gov.gchq.palisade.service.filteredresource.model.WebsocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
+import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 
-public class WebsocketRouter implements RouteSupplier {
-    private final WebsocketEventService websocketEventService;
+public class WebSocketRouter implements RouteSupplier {
+    private final WebSocketEventService websocketEventService;
     private final ObjectMapper mapper;
 
-    public WebsocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper mapper) {
+    public WebSocketRouter(final WebSocketEventService websocketEventService, final ObjectMapper mapper) {
         this.websocketEventService = websocketEventService;
         this.mapper = mapper;
     }
 
     /**
-     * Create a route from /resource/{token} to {@link WebsocketEventService#createFlowGraph(String token)}.
+     * Create a route from /resource/{token} to {@link WebSocketEventService#createFlowGraph(String token)}.
      * This method also handles serialising and deserialising the client's websocket stream from Akka's {@link TextMessage}
-     * to our own {@link WebsocketMessage}.
+     * to our own {@link WebSocketMessage}.
      * Control over the rest of the client's request is handled by the flow graph.
      *
      * @return a {@link Route} for /resource/{token} which will handle websocket requests for filtered resources
@@ -70,7 +70,7 @@ public class WebsocketRouter implements RouteSupplier {
                                     .fold(new StringBuilder(), StringBuilder::append);
                         }
                         // Convert serialised data (JSON) to WebsocketMessage object
-                        return builderSource.map(builder -> this.mapper.readValue(builder.toString(), WebsocketMessage.class));
+                        return builderSource.map(builder -> this.mapper.readValue(builder.toString(), WebSocketMessage.class));
                     })
 
                     // Process messages using service's flow graph

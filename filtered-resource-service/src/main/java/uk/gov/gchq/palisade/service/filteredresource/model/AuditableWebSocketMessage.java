@@ -25,21 +25,26 @@ import uk.gov.gchq.palisade.Generated;
 
 import java.util.Optional;
 
-public class AuditableWebsocketMessage {
-    private final WebsocketMessage websocketMessage;
+/**
+ * This class is a container for a {@code WebSocketMessage} and a {@code Pair} of {@code FilteredResourceRequest}
+ * and {@code CommittableOffset} during stream processing.
+ * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
+ */
+public class AuditableWebSocketMessage {
+    private final WebSocketMessage webSocketMessage;
     private final Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair;
 
-    protected AuditableWebsocketMessage(
-            final @NonNull WebsocketMessage websocketMessage,
+    protected AuditableWebSocketMessage(
+            final @NonNull WebSocketMessage webSocketMessage,
             final @Nullable Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair
     ) {
-        this.websocketMessage = websocketMessage;
+        this.webSocketMessage = webSocketMessage;
         this.auditSuccessPair = auditSuccessPair;
     }
 
     @Generated
-    public WebsocketMessage getWebsocketMessage() {
-        return websocketMessage;
+    public WebSocketMessage getWebSocketMessage() {
+        return webSocketMessage;
     }
 
     @Generated
@@ -47,23 +52,27 @@ public class AuditableWebsocketMessage {
         return Optional.ofNullable(auditSuccessPair);
     }
 
+    /**
+     * The static builder
+     */
     public static class Builder {
-        public static IWebsocketMessage create() {
-            return websocketMessage -> auditableRequest -> new AuditableWebsocketMessage(websocketMessage, auditableRequest);
+
+        public static IWebSocketMessage create() {
+            return webSocketMessage -> auditableRequest -> new AuditableWebSocketMessage(webSocketMessage, auditableRequest);
         }
 
-        public interface IWebsocketMessage {
-            IAuditable withWebsocketMessage(@NonNull WebsocketMessage websocketMessage);
+        public interface IWebSocketMessage {
+            IAuditable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
         }
 
         public interface IAuditable {
-            AuditableWebsocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
+            AuditableWebSocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
 
-            default AuditableWebsocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
+            default AuditableWebSocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
                 return withAuditablePair(Pair.create(request, committableOffset));
             }
 
-            default AuditableWebsocketMessage withoutAuditable() {
+            default AuditableWebSocketMessage withoutAuditable() {
                 return withAuditablePair(null);
             }
         }

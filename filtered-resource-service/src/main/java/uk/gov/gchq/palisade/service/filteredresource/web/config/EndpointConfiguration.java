@@ -26,13 +26,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.KafkaRestWriterRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringHealthRouter;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.SpringLoggersRouter;
-import uk.gov.gchq.palisade.service.filteredresource.web.router.WebsocketRouter;
+import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.net.InetAddress;
 import java.util.Collection;
@@ -49,8 +49,8 @@ public class EndpointConfiguration {
     }
 
     @Bean
-    WebsocketRouter websocketRouter(final WebsocketEventService websocketEventService, final ObjectMapper objectMapper) {
-        return new WebsocketRouter(websocketEventService, objectMapper);
+    WebSocketRouter websocketRouter(final WebSocketEventService websocketEventService, final ObjectMapper objectMapper) {
+        return new WebSocketRouter(websocketEventService, objectMapper);
     }
 
     @Bean
