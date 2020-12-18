@@ -57,21 +57,58 @@ public class AuditableWebSocketMessage {
      */
     public static class Builder {
 
+        /**
+         * The creator function
+         *
+         * @return the composed immutable object
+         */
         public static IWebSocketMessage create() {
             return webSocketMessage -> auditableRequest -> new AuditableWebSocketMessage(webSocketMessage, auditableRequest);
         }
 
+        /**
+         * compose with {@code WebSocketMessage}
+         */
         public interface IWebSocketMessage {
-            IAuditable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
+
+            /**
+             * compose value
+             *
+             * @param webSocketMessage value
+             * @return value object
+             */
+            IAuditable withWebSocketMessage(@NonNull WebSocketMessage webSocketMessage);
         }
 
+        /**
+         * compose with {@code Pair<FilteredResourceRequest, CommittableOffset>}
+         */
         public interface IAuditable {
+
+            /**
+             * compose value
+             *
+             * @param auditableRequest value or null
+             * @return value object
+             */
             AuditableWebSocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
 
+            /**
+             * compose value
+             *
+             * @param request value
+             * @param committableOffset value
+             * @return value object
+             */
             default AuditableWebSocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
                 return withAuditablePair(Pair.create(request, committableOffset));
             }
 
+            /**
+             * compose value
+             *
+             * @return value object
+             */
             default AuditableWebSocketMessage withoutAuditable() {
                 return withAuditablePair(null);
             }
