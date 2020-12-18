@@ -144,13 +144,7 @@ public class WebsocketEventService {
                 .zip(this.createResourceSource(token))
 
                 // Drop the CTS message, we don't care about it's contents beyond the MessageType
-                .map(Pair::second)
-
-                // Append COMPLETE message
-                .concat(Source.single(WebsocketMessage.Builder.create()
-                        .withType(MessageType.COMPLETE)
-                        .withHeader(Token.HEADER, token).noHeaders()
-                        .noBody()));
+                .map(Pair::second);
     }
 
     /**
@@ -193,7 +187,12 @@ public class WebsocketEventService {
                         .orElse(Source.single(WebsocketMessage.Builder.create()
                                 .withType(MessageType.ERROR)
                                 .withHeader(Token.HEADER, token).noHeaders()
-                                .withBody(offsetResponse.getException()))));
+                                .withBody(offsetResponse.getException()))))
+                // Append COMPLETE message
+                .concat(Source.single(WebsocketMessage.Builder.create()
+                        .withType(MessageType.COMPLETE)
+                        .withHeader(Token.HEADER, token).noHeaders()
+                        .noBody()));
 
     }
 }
