@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.palisade.CommonTestData;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeResponse;
-import uk.gov.gchq.palisade.service.palisade.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeRestController;
 
@@ -42,6 +41,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -60,8 +60,6 @@ class RestControllerWebMvcTest extends CommonTestData {
 
     @MockBean
     private PalisadeService palisadeService;
-    @MockBean
-    private ErrorHandlingService errorHandlingService;
     @Autowired
     private PalisadeRestController controller;
     @Autowired
@@ -76,7 +74,6 @@ class RestControllerWebMvcTest extends CommonTestData {
     @AfterEach
     void tearDown() {
         Mockito.reset(palisadeService);
-        Mockito.reset(errorHandlingService);
     }
 
     @Test
@@ -124,7 +121,7 @@ class RestControllerWebMvcTest extends CommonTestData {
         Mockito.when(palisadeService.registerDataRequest(any()))
                 .thenThrow(somethingWentWrong);
 
-        this.mockMvc.perform(post("/api/registerDataRequest")
+        MvcResult result = this.mockMvc.perform(post("/api/registerDataRequest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .headers(new HttpHeaders())
@@ -133,9 +130,13 @@ class RestControllerWebMvcTest extends CommonTestData {
                 .andDo(print())
                 .andExpect(jsonPath(KEY_NULL_VALUE).doesNotExist()) //no message
                 .andReturn();
+        String response = result.getResponse().getContentAsString();
 
-        //verify services have been called once
+        // Verify the response value is empty
+        assertThat(response).isEmpty();
+
+        // Verify the service methods have been called once, and only once
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);
-        Mockito.verify(errorHandlingService, times(1)).createErrorMessage(any(), any(), any());
+        Mockito.verify(palisadeService, times(1)).errorMessage(any(), anyString(), any(), any());
     }
 }

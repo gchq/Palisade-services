@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.gov.gchq.palisade.service.palisade.PalisadeApplication;
 
@@ -33,7 +34,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * and is being used to monitor the "health" of the palisade service.  If there is an indication that this service has
  * fallen over, this information can be used to restore the service.
  */
-@SpringBootTest(classes = {PalisadeApplication.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        classes = {PalisadeApplication.class},
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"management.health.kafka.enabled=false"}
+)
+@ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
 
     @Autowired
