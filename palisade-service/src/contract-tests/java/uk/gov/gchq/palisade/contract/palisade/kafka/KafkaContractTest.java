@@ -58,6 +58,7 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.contract.palisade.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.palisade.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.palisade.PalisadeApplication;
+import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
@@ -80,6 +81,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * An external requirement of the service is to connect to one kafka topic.
@@ -114,8 +116,8 @@ class KafkaContractTest {
      */
     @Test
     @DirtiesContext
-    void testRestEndpoint() {
-        Mockito.doReturn(ContractTestData.REQUEST_TOKEN).when(service).createToken(Mockito.any());
+    void testRestEndpointSuccess() {
+        Mockito.doReturn(ContractTestData.REQUEST_TOKEN).when(service).createToken(any());
 
         // Given - we are already listening to the service input
         ConsumerSettings<String, PalisadeRequest> consumerSettings = ConsumerSettings
@@ -164,6 +166,53 @@ class KafkaContractTest {
                             .isEqualTo(ContractTestData.REQUEST_OBJ);
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
+                });
+    }
+
+    /**
+     * Tests the rest endpoint used for mocking a kafka entry point exists and is working as expected, returns HTTP.INTERNAL_SERVER_ERROR.
+     * Then checks the token and message are correct.
+     */
+    @Test
+    @DirtiesContext
+    void testRestEndpointError() {
+        Mockito.when(service.registerDataRequest(any())).thenThrow(RuntimeException.class);
+
+        // Given - we are already listening to the service input
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
+                .withGroupId("test-group")
+                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        final long recordCount = 1;
+
+        Probe<ConsumerRecord<String, AuditErrorMessage>> probe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
+        // When - we POST to the rest endpoint
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.ERROR_TOKEN));
+        HttpEntity<PalisadeRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        ResponseEntity<Void> response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
+
+        // Then - the REST request encountered an error
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        // When - results are pulled from the error stream
+        Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = probe.request(recordCount);
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> results = LongStream.range(0, recordCount)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then - the results are as expected
+        // The request was written with the correct header
+        assertThat(results)
+                .hasSize(1)
+                .allSatisfy(result -> {
+                    assertThat(result.value()).usingRecursiveComparison()
+                            .ignoringFieldsOfTypes(Throwable.class).ignoringFields("timestamp")
+                            .isEqualTo(ContractTestData.ERROR_OBJ);
+                    assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .isEqualTo(ContractTestData.ERROR_TOKEN.getBytes());
                 });
     }
 
