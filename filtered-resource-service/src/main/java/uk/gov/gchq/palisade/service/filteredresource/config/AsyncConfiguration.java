@@ -47,7 +47,7 @@ public class AsyncConfiguration implements AsyncConfigurer {
     }
 
     @Override
-    @Bean("threadPoolTaskExecutor")
+    @Bean("applicationTaskExecutor")
     public ThreadPoolTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");

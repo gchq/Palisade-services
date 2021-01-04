@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeResponse;
-import uk.gov.gchq.palisade.service.palisade.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.util.HashMap;
@@ -43,17 +42,14 @@ public class PalisadeRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PalisadeRestController.class);
 
     private final PalisadeService palisadeService;
-    private final ErrorHandlingService errorHandlingService;
 
     /**
      * Constructor for the palisade-service Controller.
      *
      * @param palisadeService      service which processes the request
-     * @param errorHandlingService the error handling service
      */
-    public PalisadeRestController(final PalisadeService palisadeService, final ErrorHandlingService errorHandlingService) {
+    public PalisadeRestController(final PalisadeService palisadeService) {
         this.palisadeService = palisadeService;
-        this.errorHandlingService = errorHandlingService;
     }
 
     /**
@@ -70,7 +66,7 @@ public class PalisadeRestController {
 
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
         PalisadeResponse palisadeResponse = null;
-        String token;
+        String token = "";
 
         try {
             //instead of join we could do a .get(Time) and specify a timeout
@@ -81,7 +77,7 @@ public class PalisadeRestController {
             LOGGER.error("PalisadeRestController Exception thrown", e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             Map<String, Object> attributes = new HashMap<>();
-            errorHandlingService.createErrorMessage(request, attributes, e);
+            palisadeService.errorMessage(request, token, attributes, e);
         }
         return ResponseEntity.status(httpStatus)
                 .body(palisadeResponse);

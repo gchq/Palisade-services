@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.palisade.model;
+package uk.gov.gchq.palisade.service.filteredresource.web.router;
 
-import akka.japi.Pair;
+import akka.http.javadsl.server.Route;
 
-/**
- * The type Token request pair.
- */
-public class TokenRequestPair extends Pair<String, AuditablePalisadeRequest> {
-    private static final long serialVersionUID = 1L;
+import java.util.function.Supplier;
 
-    /**
-     * Instantiates a new Token request pair.
-     *
-     * @param token           the token
-     * @param palisadeRequest the original request
-     */
-    public TokenRequestPair(final String token, final AuditablePalisadeRequest palisadeRequest) {
-        super(token, palisadeRequest);
-    }
+public interface RouteSupplier extends Supplier<Route> {
+    // Marker interface for Spring autowiring
 }

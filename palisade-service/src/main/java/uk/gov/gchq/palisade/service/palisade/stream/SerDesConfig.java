@@ -50,7 +50,7 @@ public final class SerDesConfig {
     /**
      * Kafka value serialiser for downstream messages going out as output
      *
-     * @return an appropriate value serialiser for the topic's message content (PalisadeRequest)
+     * @return an appropriate value serialiser for the topic's message content
      */
     public static Serializer<PalisadeRequest> requestSerializer() {
         return (String ignored, PalisadeRequest palisadeRequest) -> {
@@ -63,7 +63,7 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka key serialiser for downstream messages going out as errors
+     * Kafka key serialiser for downstream messages going out as output
      *
      * @return an appropriate key serialiser for the topic's message content
      */
@@ -72,17 +72,26 @@ public final class SerDesConfig {
     }
 
     /**
-     * Kafka value serialiser for downstream messages going out as errors
+     * Kafka value serialiser for downstream messages going out as output
      *
-     * @return an appropriate value serialiser for the topic's message content (AuditMessage)
+     * @return an appropriate value serialiser for the topic's message content
      */
     public static Serializer<AuditErrorMessage> errorValueSerializer() {
-        return (String ignored, AuditErrorMessage auditErrorMessage) -> {
+        return (String ignored, AuditErrorMessage errorRequest) -> {
             try {
-                return MAPPER.writeValueAsBytes(auditErrorMessage);
+                return MAPPER.writeValueAsBytes(errorRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditErrorMessage.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + errorRequest.toString(), e);
             }
         };
+    }
+
+    /**
+     * Kafka value serialiser for downstream messages going out as output
+     *
+     * @return an appropriate value serialiser for the topic's message content
+     */
+    public static Serializer<byte[]> passthroughValueSerializer() {
+        return (String ignored, byte[] bytes) -> bytes;
     }
 }

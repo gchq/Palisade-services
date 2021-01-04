@@ -46,7 +46,7 @@ class PalisadeResponseTest {
      *                     This equates to a failure to seralise or deseralise the string.
      */
     @Test
-    void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
+    void testPalisadeResponseSerialisingAndDeserialising() throws IOException {
         PalisadeResponse palisadeResponse = new PalisadeResponse("tokenID");
 
         JsonContent<PalisadeResponse> responseJsonContent = jsonTester.write(palisadeResponse);
@@ -54,16 +54,16 @@ class PalisadeResponseTest {
         ObjectContent<PalisadeResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
         PalisadeResponse palisadeResponseObject = responseObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
+        assertAll("Palisade Response Serialising and Deseralising Comparison",
+                () -> assertAll("Palisade Response Serialising Compared To String",
                         () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token").isEqualTo("tokenID")
                 ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
+                () -> assertAll("Palisade Response Deserialising Compared To Object",
                         () -> assertThat(palisadeResponseObject.getToken()).isEqualTo(palisadeResponse.getToken())
                 ),
-                () -> assertAll("ObjectComparison",
+                () -> assertAll("Object Comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeResponseObject).usingRecursiveComparison().isEqualTo(palisadeResponse)
+                        () -> assertThat(palisadeResponseObject).isEqualTo(palisadeResponse)
                 )
         );
     }

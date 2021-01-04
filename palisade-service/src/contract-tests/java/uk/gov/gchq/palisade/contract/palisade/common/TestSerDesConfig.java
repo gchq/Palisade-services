@@ -20,6 +20,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public final class TestSerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
-     * @return an appropriate value deserialiser for the topic's message content (PalisadeRequest)
+     * @return an appropriate value deserialiser for the topic's message content
      */
     public static Deserializer<PalisadeRequest> requestValueDeserializer() {
         return (String ignored, byte[] palisadeRequest) -> {
@@ -59,6 +60,30 @@ public final class TestSerDesConfig {
                 return MAPPER.readValue(palisadeRequest, PalisadeRequest.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeRequest, Charset.defaultCharset()), e);
+            }
+        };
+    }
+
+    /**
+     * Kafka key deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate key deserialiser for the topic's message content
+     */
+    public static Deserializer<String> errorKeyDeserializer() {
+        return new StringDeserializer();
+    }
+
+    /**
+     * Kafka value deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate value deserialiser for the topic's message content
+     */
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+        return (String ignored, byte[] auditErrorMessage) -> {
+            try {
+                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditErrorMessage, Charset.defaultCharset()), e);
             }
         };
     }
