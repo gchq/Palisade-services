@@ -17,16 +17,12 @@ package uk.gov.gchq.palisade.service.palisade.config;
 
 import akka.stream.Materializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 
@@ -36,7 +32,6 @@ import uk.gov.gchq.palisade.service.palisade.service.UUIDPalisadeService;
 @Configuration
 @EnableAutoConfiguration
 public class ApplicationConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
     PalisadeService palisadeService(final Materializer materializer) {
@@ -52,18 +47,6 @@ public class ApplicationConfiguration {
     @Primary
     public ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    /**
-     * Logging only error handling.
-     * FIX_ME Replace this with a proper error handling mechanism (kafka queues etc.)
-     *
-     * @return a new implementation of a ErrorHandlingService
-     */
-    @Bean
-    ErrorHandlingService loggingErrorHandler() {
-        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception", token, message.getResourceId(), message.getError());
     }
 
 }

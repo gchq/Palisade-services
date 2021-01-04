@@ -21,7 +21,7 @@ import akka.japi.Pair;
 /**
  * The type Token request pair.
  */
-public class TokenRequestPair extends Pair<String, PalisadeRequest> {
+public class TokenRequestPair extends Pair<String, AuditablePalisadeRequest> {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -30,7 +30,7 @@ public class TokenRequestPair extends Pair<String, PalisadeRequest> {
      * @param token           the token
      * @param palisadeRequest the original request
      */
-    public TokenRequestPair(final String token, final PalisadeRequest palisadeRequest) {
+    public TokenRequestPair(final String token, final AuditablePalisadeRequest palisadeRequest) {
         super(token, palisadeRequest);
     }
 }
