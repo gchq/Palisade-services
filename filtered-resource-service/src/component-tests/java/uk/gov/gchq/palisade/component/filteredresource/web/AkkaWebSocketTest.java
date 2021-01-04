@@ -78,8 +78,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-class AkkaWebsocketTest {
-    static final Logger LOGGER = LoggerFactory.getLogger(AkkaWebsocketTest.class);
+class AkkaWebSocketTest {
+    static final Logger LOGGER = LoggerFactory.getLogger(AkkaWebSocketTest.class);
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final String HOST = "localhost";
     static final int PORT = 18080;
@@ -114,10 +114,10 @@ class AkkaWebsocketTest {
                     .flatMap(List::stream)
                     .collect(Collectors.toList())));
     // Finally, create the websocketEventService from its parts
-    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory);
+    final WebSocketEventService webSocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory);
 
     // Websocket endpoint to be tested
-    final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
+    final WebSocketRouter wsRouter = new WebSocketRouter(webSocketEventService, MAPPER);
     // Akka runtime
     final ActorSystem system = ActorSystem.create("websocket-test");
     final Materializer materializer = Materializer.createMaterializer(system);
@@ -140,7 +140,7 @@ class AkkaWebsocketTest {
     }
 
     @Test
-    void websocketManyPingTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketManyPing() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING messages and collect the responses to a list
         // **
@@ -189,7 +189,7 @@ class AkkaWebsocketTest {
     }
 
     @Test
-    void websocketReadResourcesTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketReadResources() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -258,7 +258,7 @@ class AkkaWebsocketTest {
     }
 
     @Test
-    void websocketInterleavedMessagesTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketInterleavedMessages() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING-followed-by-CTS message pairs and collect the responses to a list
         // **
