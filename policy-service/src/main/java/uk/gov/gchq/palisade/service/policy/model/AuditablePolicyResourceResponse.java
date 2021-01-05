@@ -22,6 +22,9 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 /**
  * This class is a container for {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream
  * processing.  Under normal conditions {@code PolicyRequest} and {@code Rules} will be non-null, indicating
@@ -161,6 +164,39 @@ public final class AuditablePolicyResourceResponse {
         public static IPolicyRequest create() {
             return request -> rules -> audit -> modifiedResource -> new AuditablePolicyResourceResponse(request, rules, audit, modifiedResource);
         }
+    }
+
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditablePolicyResourceResponse)) {
+            return false;
+        }
+        AuditablePolicyResourceResponse that = (AuditablePolicyResourceResponse) o;
+        return policyRequest.equals(that.policyRequest) &&
+                rules.equals(that.rules) &&
+                Objects.equals(auditErrorMessage, that.auditErrorMessage) &&
+                Objects.equals(modifiedResource, that.modifiedResource);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(policyRequest, rules, auditErrorMessage, modifiedResource);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditablePolicyResourceResponse.class.getSimpleName() + "[", "]")
+                .add("policyRequest=                " + policyRequest)
+                .add("rules=                " + rules)
+                .add("auditErrorMessage=                " + auditErrorMessage)
+                .add("modifiedResource=                " + modifiedResource)
+                .toString();
     }
 }
 
