@@ -81,7 +81,8 @@ class AuditablePolicyResourceResponseTest {
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceResponse),
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
                 )
         );
     }
@@ -122,7 +123,9 @@ class AuditablePolicyResourceResponseTest {
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceResponse),
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
+
                 )
         );
     }
@@ -161,7 +164,8 @@ class AuditablePolicyResourceResponseTest {
 
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceResponse),
+                        () -> assertThat(auditablePolicyResourceResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceResponse)
                 )
         );
     }
