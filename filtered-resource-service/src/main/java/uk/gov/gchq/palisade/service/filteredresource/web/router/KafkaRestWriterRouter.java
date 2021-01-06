@@ -36,9 +36,17 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * Class to deal with rest messages
+ */
 public class KafkaRestWriterRouter implements RouteSupplier {
+    private static final int STATUS_VALUE = 202;
     private final KafkaProducerService kafkaProducerService;
 
+    /**
+     * Public constructor for the {@code KafkaRestWriterRouter}
+     * @param kafkaProducerService the {@code KafkaProducerService} implementation
+     */
     public KafkaRestWriterRouter(final KafkaProducerService kafkaProducerService) {
         this.kafkaProducerService = kafkaProducerService;
     }
@@ -65,13 +73,13 @@ public class KafkaRestWriterRouter implements RouteSupplier {
                         Directives.extract(KafkaRestWriterRouter::getHeadersMap, headers ->
                                 Directives.entity(Jackson.unmarshaller(domainClass), (T request) -> {
                                     kafkaProduceMethod.apply(headers, Collections.singletonList(request)).join();
-                                    return Directives.complete(StatusCode.int2StatusCode(202));
+                                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE));
                                 })))),
                 Directives.pathPrefix("multi", () -> Directives.post(() ->
                         Directives.extract(KafkaRestWriterRouter::getHeadersMap, headers ->
                                 Directives.entity(Jackson.unmarshaller(domainCollectionClass), (List<T> requests) -> {
                                     kafkaProduceMethod.apply(headers, requests).join();
-                                    return Directives.complete(StatusCode.int2StatusCode(202));
+                                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE));
                                 }))))
         );
     }

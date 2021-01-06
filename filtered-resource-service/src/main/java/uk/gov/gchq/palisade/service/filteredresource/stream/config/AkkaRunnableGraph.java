@@ -55,7 +55,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetContr
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.KafkaProducerService;
-import uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration.Topic;
@@ -111,11 +111,11 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    WebsocketEventService websocketEventService(
+    WebSocketEventService websocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
             final AuditServiceSinkFactory auditSinkFactory,
             final FilteredResourceSourceFactory resourceSourceFactory) {
-        return new WebsocketEventService(tokenOffsetController, auditSinkFactory, resourceSourceFactory);
+        return new WebSocketEventService(tokenOffsetController, auditSinkFactory, resourceSourceFactory);
     }
 
     @Bean
