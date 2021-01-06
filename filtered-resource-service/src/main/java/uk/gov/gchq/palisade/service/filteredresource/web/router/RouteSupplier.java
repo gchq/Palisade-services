@@ -20,6 +20,9 @@ import akka.http.javadsl.server.Route;
 
 import java.util.function.Supplier;
 
+/**
+ * Interface for supplying akka routes
+ */
 public interface RouteSupplier extends Supplier<Route> {
     // Marker interface for Spring autowiring
 }

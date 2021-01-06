@@ -26,7 +26,13 @@ import org.springframework.boot.logging.LogLevel;
 
 import java.util.Map;
 
+/**
+ * A class to help with routing the log level changes
+ */
 public class SpringLoggersRouter implements RouteSupplier {
+
+    private static final int STATUS_VALUE = 200;
+
     /**
      * Provide Jackson with a zero-args-constructor creator method to call for incoming setLoggerLevel requests (POST LoggerLevels)
      */
@@ -38,6 +44,11 @@ public class SpringLoggersRouter implements RouteSupplier {
 
     private final LoggersEndpoint springLoggersEndpoint;
 
+    /**
+     * Public constructor
+     *
+     * @param springLoggersEndpoint the logging endpoint details
+     */
     public SpringLoggersRouter(final LoggersEndpoint springLoggersEndpoint) {
         this.springLoggersEndpoint = springLoggersEndpoint;
     }
@@ -45,7 +56,7 @@ public class SpringLoggersRouter implements RouteSupplier {
     private Route getLoggerLevel(final String path) {
         return Directives.get(() -> {
             LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
-            return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
+            return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
         });
     }
 
@@ -54,14 +65,14 @@ public class SpringLoggersRouter implements RouteSupplier {
                 Directives.entity(Jackson.unmarshaller(DeserializableLoggerLevels.class), (DeserializableLoggerLevels loggerLevel) -> {
                     springLoggersEndpoint.configureLogLevel(path, LogLevel.valueOf(loggerLevel.getConfiguredLevel()));
                     LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
-                    return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
+                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
                 }));
     }
 
     private Route getLoggers() {
         return Directives.get(() -> {
             Map<String, Object> entity = springLoggersEndpoint.loggers();
-            return Directives.complete(StatusCode.int2StatusCode(200), entity, Jackson.marshaller());
+            return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
         });
     }
 

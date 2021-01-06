@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,9 +34,9 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * WebsocketMessage contains the content of the message sent to the websocket and is used by {@link uk.gov.gchq.palisade.service.filteredresource.service.WebsocketEventService}
+ * WebSocketMessage contains the content of the message sent to the webSocket and is used by {@link WebSocketEventService}
  */
-public final class WebsocketMessage {
+public final class WebSocketMessage {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final MessageType type;
@@ -43,7 +44,7 @@ public final class WebsocketMessage {
     private final String body;
 
     @JsonCreator
-    private WebsocketMessage(
+    private WebSocketMessage(
             final @JsonProperty("type") MessageType type,
             final @JsonProperty("headers") Map<String, String> headers,
             final @JsonProperty("body") String body) {
@@ -105,10 +106,10 @@ public final class WebsocketMessage {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof WebsocketMessage)) {
+        if (!(o instanceof WebSocketMessage)) {
             return false;
         }
-        final WebsocketMessage that = (WebsocketMessage) o;
+        final WebSocketMessage that = (WebSocketMessage) o;
         return type == that.type &&
                 Objects.equals(headers, that.headers) &&
                 Objects.equals(body, that.body);
@@ -123,7 +124,7 @@ public final class WebsocketMessage {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", WebsocketMessage.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", WebSocketMessage.class.getSimpleName() + "[", "]")
                 .add("type=" + type)
                 .add("headers=" + headers)
                 .add("body=" + body)
@@ -131,19 +132,19 @@ public final class WebsocketMessage {
     }
 
     /**
-     * Builder class for the creation of instances of the WebsocketMessage.
+     * Builder class for the creation of instances of the WebSocketMessage.
      * This is a variant of the Fluent Builder which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * WebsocketMessage class.
+         * WebSocketMessage class.
          *
          * @return public interface {@link IType} for the next step in the build.
          */
         public static IType create() {
-            return type -> headers -> body -> new WebsocketMessage(type, headers, body);
+            return type -> headers -> body -> new WebSocketMessage(type, headers, body);
         }
 
         /**
@@ -151,9 +152,9 @@ public final class WebsocketMessage {
          */
         public interface IType {
             /**
-             * Adds the Type of WebsocketMessage
+             * Adds the Type of WebSocketMessage
              *
-             * @param type of WebsocketMessage
+             * @param type of WebSocketMessage
              * @return interface {@link IHeaders} for the next step in the build.
              */
             IHeaders withType(MessageType type);
@@ -164,9 +165,9 @@ public final class WebsocketMessage {
          */
         public interface IHeaders {
             /**
-             * Adds the headers to the WebsocketMessage
+             * Adds the headers to the WebSocketMessage
              *
-             * @param headers for the WebsocketMessage
+             * @param headers for the WebSocketMessage
              * @return interface {@link IBody} for the next step in the build.
              */
             IBody withHeaders(Map<String, String> headers);
@@ -187,7 +188,7 @@ public final class WebsocketMessage {
             }
 
             /**
-             * A Default noHeaders interface that adds an emptyMap of headers to the WebsocketMessage
+             * A Default noHeaders interface that adds an emptyMap of headers to the WebSocketMessage
              *
              * @return interface {@link IBody} for the next step in the build.
              */
@@ -201,20 +202,20 @@ public final class WebsocketMessage {
          */
         public interface IBody {
             /**
-             * Adds a serialisedBody to the WebsocketMessage
+             * Adds a serialisedBody to the WebSocketMessage
              *
-             * @param serialisedBody to add to the WebsocketMessage
-             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             * @param serialisedBody to add to the WebSocketMessage
+             * @return class {@link WebSocketMessage} for the completed class from the builder.
              */
-            WebsocketMessage withSerialisedBody(String serialisedBody);
+            WebSocketMessage withSerialisedBody(String serialisedBody);
 
             /**
-             * Adds an object body to the WebsocketMessage which is then seralised before adding to the class
+             * Adds an object body to the WebSocketMessage which is then seralised before adding to the class
              *
              * @param body the body
-             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             * @return class {@link WebSocketMessage} for the completed class from the builder.
              */
-            default WebsocketMessage withBody(Object body) {
+            default WebSocketMessage withBody(Object body) {
                 try {
                     return withSerialisedBody(MAPPER.writeValueAsString(body));
                 } catch (JsonProcessingException e) {
@@ -223,11 +224,11 @@ public final class WebsocketMessage {
             }
 
             /**
-             * An interface used to add a null body to the WebsocketMessage
+             * An interface used to add a null body to the WebSocketMessage
              *
-             * @return class {@link WebsocketMessage} for the completed class from the builder.
+             * @return class {@link WebSocketMessage} for the completed class from the builder.
              */
-            default WebsocketMessage noBody() {
+            default WebSocketMessage noBody() {
                 return withSerialisedBody(null);
             }
         }
