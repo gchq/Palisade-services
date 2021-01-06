@@ -32,7 +32,7 @@ public class OffsetEventService {
     /**
      * Default constructor for a new OffsetEventService, supplying the persistence layer for storing token offsets.
      * This will continually listen to kafka for START-OF-STREAM messages to communicate the commit-offsets to any
-     * running {@link WebsocketEventService}s as necessary.
+     * running {@link WebSocketEventService}s as necessary.
      *
      * @param persistenceLayer the persistence layer for storing token offsets
      */
