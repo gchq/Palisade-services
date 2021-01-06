@@ -52,7 +52,7 @@ class MessageSerialisationTest {
                             .withResource(ApplicationTestData.LEAF_RESOURCE)),
                     Arguments.of(TopicOffsetMessage.Builder.create()
                             .withQueuePointer(ApplicationTestData.OFFSET)),
-                    Arguments.of(WebsocketMessage.Builder.create()
+                    Arguments.of(WebSocketMessage.Builder.create()
                             .withType(MessageType.RESOURCE)
                             .noHeaders()
                             .withBody(ApplicationTestData.LEAF_RESOURCE)),
