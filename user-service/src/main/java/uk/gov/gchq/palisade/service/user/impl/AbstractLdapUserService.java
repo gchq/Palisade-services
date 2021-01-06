@@ -88,7 +88,7 @@ public abstract class AbstractLdapUserService implements UserService {
      * Constructs a {@link AbstractLdapUserService} with a given path to {@link LdapContext}.
      * </p>
      *
-     * @param ldapConfigPath the path to config for initialising {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
+     * @param ldapConfigPath the path to config for initializing {@link LdapContext} for making calls to LDAP. This can be a path to a file or a resource.
      * @throws IOException     if IO issues occur whilst loading the LDAP config.
      * @throws NamingException if a naming exception is encountered whilst constructing the LDAP context
      */
@@ -125,7 +125,7 @@ public abstract class AbstractLdapUserService implements UserService {
      * Returns an array of attribute names to be fetched from LDAP. This could contain
      * user auth attributes and user role attributes. This will avoid having
      * to make multiple calls to LDAP to look up different attributes.
-     * If this returns null or an empty array then the LDAP request will not be made.
+     * If this returns null, or an empty array then the LDAP request will not be made.
      *
      * @return the attributes to be fetched from LDAP.
      */

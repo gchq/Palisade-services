@@ -24,8 +24,6 @@ import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import uk.gov.gchq.palisade.service.user.model.Token;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
@@ -38,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -73,10 +72,9 @@ public class KafkaProducerService {
      *
      * @param headers  a map of request headers
      * @param requests a list of requests
-     * @return a {@link ResponseEntity} once all requests have been written to kafka
+     * @return a future completing once all requests have been written to kafka
      */
-    public ResponseEntity<Void> processRequest(final Map<String, String> headers,
-                                               final Collection<UserRequest> requests) {
+    public CompletableFuture<Void> processRequest(final Map<String, String> headers, final Collection<UserRequest> requests) {
         // Get token from headers
         String token = Optional.ofNullable(headers.get(Token.HEADER))
                 .orElseThrow(() -> new NoSuchElementException("No token specified in headers"));
@@ -92,15 +90,21 @@ public class KafkaProducerService {
                 .collect(Collectors.toList());
 
         // Process requests
-        // Akka reactive streams can't have null elements, so map to and from optional
-        Source.fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
-                .map(request -> new ProducerRecord<String, UserRequest>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
-                .toMat(this.upstreamSink, Keep.right())
-                .run(this.materializer)
-                .toCompletableFuture()
-                .join();
+        return Source
+                // Akka reactive streams can't have null elements, so map to and from optional
+                .fromJavaStream(() -> requests.stream().map(Optional::ofNullable))
 
-        // Return results
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                // Create kafka producer record from request
+                .map(request -> new ProducerRecord<String, UserRequest>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
+
+                // Sink records to this service's upstream topic (not downstream)
+                .toMat(this.upstreamSink, Keep.right())
+
+                // Run the graph
+                .run(this.materializer)
+
+                // Return a CompletableFuture<Void> result
+                .toCompletableFuture()
+                .thenApply(x -> null);
     }
 }

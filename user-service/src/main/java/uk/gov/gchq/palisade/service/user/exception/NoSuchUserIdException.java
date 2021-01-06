@@ -31,29 +31,29 @@ public class NoSuchUserIdException extends RuntimeException {
 
 
     /**
-     * Initialises this exception with no message or cause.
+     * Initializes this exception with no message or cause.
      */
     public NoSuchUserIdException() {
     }
 
     /**
-     * Initialises this exception with the given message.
+     * Initializes this exception with the given message.
      *
      * @param message message for the exception
      */
     public NoSuchUserIdException(final String message) {
         super(message);
-        LOGGER.info("NoSuchUserIdException thrown with {} message", message);
+        LOGGER.info("NoSuchUserIdException thrown with '{}'", message);
     }
 
     /**
-     * Initialises this exception with the given message and cause.
+     * Initializes this exception with the given message and cause.
      *
      * @param message   message to report
      * @param throwable the underlying cause of this exception
      */
     public NoSuchUserIdException(final String message, final Throwable throwable) {
         super(message, throwable);
-        LOGGER.error("NoSuchUserIdException thrown with {} message", message);
+        LOGGER.error("NoSuchUserIdException thrown with '{}'", message);
     }
 }

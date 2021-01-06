@@ -29,17 +29,9 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
 
 server:
   port: 8087
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -50,17 +42,18 @@ management:
     shutdown:
       enabled: true
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-    default-config: default
-
-user-service:
-  implementation: null-user-service
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
 
 population:
   userProvider: std
+
+logging:
+  level:
+    org.apache.kafka: WARN
+
+user-service:
+  implementation: null-user-service

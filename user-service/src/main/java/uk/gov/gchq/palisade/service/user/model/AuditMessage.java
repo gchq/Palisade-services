@@ -49,28 +49,21 @@ public class AuditMessage {
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     @JsonProperty("userId")
-    protected final String userId; //Unique identifier for the user.
-
+    protected final String userId; // Unique identifier for the user.
     @JsonProperty("resourceId")
-    protected final String resourceId;  //Resource that that is being asked to access.
-
+    protected final String resourceId;  // Resource that that is being asked to access.
     @JsonProperty("context")
-    protected final JsonNode context;   //Relevant context information about the request.
-
-    @JsonProperty("serviceName")
-    protected String serviceName = SERVICE_NAME;  //service that sent the message
-
+    protected final JsonNode context;   // Relevant context information about the request.
     @JsonProperty("timestamp")
-    protected final String timestamp;  //when the message was created
-
+    protected final String timestamp;  // When the message was created
     @JsonProperty("serverIP")
-    protected final String serverIP;  //the server IP address for the service
-
+    protected final String serverIP;  // The server IP address for the service
     @JsonProperty("serverHostname")
-    protected final String serverHostname;  //the hostname of the server hosting the service
-
+    protected final String serverHostname;  // The hostname of the server hosting the service
     @JsonProperty("attributes")
-    protected final Map<String, Object> attributes;  //Map<String, Object> holding optional extra information
+    protected final Map<String, Object> attributes;  // Map<String, Object> holding optional extra information
+    @JsonProperty("serviceName")
+    protected String serviceName = SERVICE_NAME;  // The Service that sent the message
 
 
     @JsonCreator
