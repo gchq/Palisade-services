@@ -21,7 +21,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+
+import java.util.HashMap;
 
 /**
  * Common test data used in the KafkaContractTest
@@ -30,9 +33,14 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 public class ContractTestData {
 
     public static final JsonNode REQUEST_NODE;
+    public static final JsonNode ERROR_NODE;
     public static final PalisadeRequest REQUEST_OBJ;
+    public static final AuditErrorMessage ERROR_OBJ;
     public static final String REQUEST_JSON = "{\"userId\":\"testUserId\",\"resourceId\":\"/test/resourceId\",\"context\":{\"contents\":{\"purpose\":\"testContext\"}}}";
+    public static final String ERROR_JSON;
     public static final String REQUEST_TOKEN = "test-request-token";
+    public static final String ERROR_TOKEN = "";
+    public static final Throwable ERROR = new Throwable("An error");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
@@ -45,6 +53,25 @@ public class ContractTestData {
             REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, PalisadeRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
+        }
+    }
+
+    static {
+        AuditErrorMessage error = AuditErrorMessage.Builder.create(REQUEST_OBJ, new HashMap<>()).withError(ERROR);
+        try {
+            ERROR_JSON = MAPPER.writeValueAsString(error);
+        } catch (JsonProcessingException ex) {
+            throw new SerializationFailedException("Failed to parse contract test error data", ex);
+        }
+        try {
+            ERROR_NODE = MAPPER.readTree(ERROR_JSON);
+        } catch (JsonProcessingException ex) {
+            throw new SerializationFailedException("Failed to parse contract test error data", ex);
+        }
+        try {
+            ERROR_OBJ = MAPPER.treeToValue(ERROR_NODE, AuditErrorMessage.class);
+        } catch (JsonProcessingException ex) {
+            throw new SerializationFailedException("Failed to parse contract test error data", ex);
         }
     }
 

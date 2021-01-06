@@ -76,7 +76,7 @@ class PalisadeServiceComponentTest extends CommonTestData {
                 () -> assertThat(sinkCollection)
                         .hasSize(1)
                         .usingRecursiveComparison()
-                        .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), PALISADE_REQUEST)))
+                        .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), AUDITABLE_WITH_REQUEST)))
         );
     }
 }

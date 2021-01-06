@@ -28,10 +28,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetContr
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,29 +39,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenOffsetControllerTest {
-    /**
-     * Map-based implementation of persistence layer for testing purposes
-     */
-    static class MapTokenOffsetPersistenceLayer implements TokenOffsetPersistenceLayer {
-        final Map<String, Long> offsets = new HashMap<>();
 
-        @Override
-        public CompletableFuture<Void> putOffsetIfAbsent(final String token, final Long offset) {
-            offsets.putIfAbsent(token, offset);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        @Override
-        public CompletableFuture<Void> overwriteOffset(final String token, final Long offset) {
-            offsets.put(token, offset);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        @Override
-        public CompletableFuture<Optional<Long>> findOffset(final String token) {
-            return CompletableFuture.completedFuture(Optional.ofNullable(offsets.get(token)));
-        }
-    }
 
     @Test
     void testOffsetSystemReturnsEarlyAndLateValues() throws InterruptedException, ExecutionException, TimeoutException {

@@ -37,3 +37,6 @@ spring:
 
 async:
   corePoolSize: 6
+
+server:
+  port: 8092
