@@ -35,7 +35,6 @@ import uk.gov.gchq.palisade.service.policy.service.PolicyService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
-import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 
 import java.util.concurrent.Executor;
 

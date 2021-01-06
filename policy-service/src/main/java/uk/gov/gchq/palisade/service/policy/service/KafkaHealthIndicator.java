@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -49,10 +48,12 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     /**
      * Requires the AdminClient to interact with Kafka
+     * *
      *
+     * @param groupId     of the cluster
      * @param adminClient of the cluster
      */
-    public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId , final AdminClient adminClient) {
+    public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId, final AdminClient adminClient) {
         this.groupId = groupId;
         this.adminClient = adminClient;
 
