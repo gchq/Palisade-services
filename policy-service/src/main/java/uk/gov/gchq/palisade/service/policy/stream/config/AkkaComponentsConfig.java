@@ -29,21 +29,26 @@ import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import com.typesafe.config.Config;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
 import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.policy.stream.StreamComponents;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
  * Configuration for all kafka connections for the application
@@ -51,18 +56,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, PolicyRequest> INPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, PolicyResponse> OUTPUT_COMPONENTS = new StreamComponents<>();
-    private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
-
-    @Bean
-    Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, PolicyRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.resourceKeySerializer(),
-                SerDesConfig.resourceValueSerializer());
-
-        return INPUT_COMPONENTS.plainProducer(producerSettings);
-    }
+    private static final StreamComponents<String, byte[]> OUTPUT_COMPONENTS = new StreamComponents<>();
 
     @Bean
     Source<CommittableMessage<String, PolicyRequest>, Control> committableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
@@ -80,23 +74,32 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Sink<Envelope<String, PolicyResponse, Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, PolicyResponse> producerSettings = OUTPUT_COMPONENTS.producerSettings(
+    Sink<ProducerRecord<String, PolicyRequest>, CompletionStage<Done>> plainRequestSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, PolicyRequest> producerSettings = INPUT_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.resourceKeySerializer(),
+                SerDesConfig.resourceValueSerializer());
+
+        return INPUT_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
+    Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> committableResponseSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, byte[]> producerSettings = OUTPUT_COMPONENTS.producerSettings(
                 actorSystem,
                 SerDesConfig.ruleKeySerializer(),
-                SerDesConfig.ruleValueSerializer());
+                SerDesConfig.passthroughValueSerializer());
 
         CommitterSettings committerSettings = OUTPUT_COMPONENTS.committerSettings(actorSystem);
         return OUTPUT_COMPONENTS.committableProducer(producerSettings, committerSettings);
     }
 
     @Bean
-    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.errorKeySerializer(),
-                SerDesConfig.errorValueSerializer());
+    AdminClient adminClient(final ActorSystem actorSystem) {
+        final List<? extends Config> servers = actorSystem.settings().config().getConfigList("akka.discovery.config.services.kafka.endpoints");
+        final String bootstrap = servers.stream().map(config -> String.format("%s:%d", config.getString("host"), config.getInt("port"))).collect(Collectors.joining(","));
 
-        return ERROR_COMPONENTS.plainProducer(producerSettings);
+        return AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, bootstrap));
     }
+
 }

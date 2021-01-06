@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package uk.gov.gchq.palisade.contract.policy.kafka;
 
 import akka.actor.ActorSystem;
@@ -69,6 +68,7 @@ import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.contract.policy.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.policy.common.StreamMarker;
 import uk.gov.gchq.palisade.service.policy.PolicyApplication;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.Token;
@@ -246,6 +246,10 @@ class KafkaContractTest {
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+        Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -259,8 +263,13 @@ class KafkaContractTest {
         // When - results are pulled from the output stream
         // record count set to 2, as one record will be removed as no policy exists for it
         Probe<ConsumerRecord<String, JsonNode>> resultSeq = probe.request(2);
+        Probe<ConsumerRecord<String, JsonNode>> errorResultSeq = errorProbe.request(1);
+
         LinkedList<ConsumerRecord<String, JsonNode>> results = LongStream.range(0, 2)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + 2, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, 1)
+                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
@@ -289,6 +298,22 @@ class KafkaContractTest {
         results.removeFirst();
         results.removeLast();
         assertThat(results).isEmpty();
+
+        assertAll("Asserting on the error topic",
+                // One error is produced
+                () -> assertThat(errorResults)
+                        .hasSize(1),
+
+                // The error has the relevant headers, including the token
+                () -> assertThat(errorResults)
+                        .allSatisfy(result ->
+                                assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
+
+                // The error has a message that contains the throwable exception, and the message
+                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
+        );
     }
 
     /**

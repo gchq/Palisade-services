@@ -42,7 +42,7 @@ akka:
       topics:
         input-topic:
           name: resource
-          partitions: 3
+          partitions: 1
     producer:
       discovery-method: akka.discovery
       service-name: kafka
@@ -50,7 +50,7 @@ akka:
       topics:
         output-topic:
           name: rule
-          partitions: 3
+          partitions: 1
         error-topic:
           name: error
           partitions: 1

@@ -34,22 +34,23 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
-import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.policy.stream.SerDesConfig;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -59,6 +60,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     KafkaProducerService kafkaProducerService(
@@ -70,68 +72,64 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> Supervision.resumingDecider().apply(ex);
+        return (Throwable ex) -> {
+            LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
+            return Supervision.resumingDecider().apply(ex);
+        };
     }
 
     @Bean
     RunnableGraph<DrainingControl<Done>> runner(
             final Source<CommittableMessage<String, PolicyRequest>, Control> source,
-            final Sink<Envelope<String, PolicyResponse, Committable>, CompletionStage<Done>> sink,
+            final Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
             final PolicyServiceAsyncProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         // Read messages from the stream source
+        //  return source
         return source
-                .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
+                .map(committableMessage -> new Pair<>(committableMessage, committableMessage.record().value()))
 
                 // Apply coarse-grained resource-level rules
-                .mapAsync(PARALLELISM, messageAndRequest -> messageAndRequest.second()
-                        // If is a real message, not start or end of stream messages then check the resource level rules
-                        .map(policyRequest -> service.getResourceRules(policyRequest.getResource())
-                                .thenApply(rules -> PolicyServiceHierarchyProxy.applyRulesToResource(policyRequest.getUser(), policyRequest.getResource(), policyRequest.getContext(), rules))
-                                // If this is a proper request (not start or end of stream)
-                                // If this is empty it could be a start/end of stream, or it could be a redacted resource, so keep track of both cases
-                                .thenApply(resource -> new Pair<>(messageAndRequest.first(), Optional.of(new Pair<>(policyRequest, Optional.ofNullable(resource))))))
-                        // If is a START/END of stream then treat as accessible
-                        .orElse(CompletableFuture.completedFuture(new Pair<>(messageAndRequest.first(), Optional.empty()))))
+                .mapAsync(PARALLELISM, messageAndRequest -> service.getResourceRules(messageAndRequest.second())
+                        //need to change this only apply if we have rules and if we have a PolicyRequest
+                        .thenApply(PolicyServiceHierarchyProxy::applyRulesToResource)
+                        .thenApply(modifiedAuditable -> Pair.create(messageAndRequest.first(), modifiedAuditable)))
 
-                // Now we get the record level rules for all resources that weren't course grain filtered out
-                .mapAsync(PARALLELISM, (Pair<CommittableMessage<String, PolicyRequest>, Optional<Pair<PolicyRequest, Optional<LeafResource>>>> messageRequestResource) -> messageRequestResource.second()
-                        // If this is a proper request (not start or end of stream)
-                        .map(requestAndResource -> requestAndResource.second()
-                                // If there were resource rules and the resource was not redacted (course grain filtering)
-                                .map(resource -> service.getRecordRules(resource)
-                                        .thenApply(rules -> Optional.of(Optional.of(PolicyResponse.Builder.create(requestAndResource.first()).withResource(resource).withRules(rules)))))
-                                // If the resource was redacted
-                                .orElse(CompletableFuture.completedFuture(Optional.of(Optional.empty()))))
-                        // If this is a start or end of stream
-                        .orElse(CompletableFuture.completedFuture(Optional.empty()))
-                        // Keep track of original committable
-                        .thenApply(response -> new Pair<>(messageRequestResource.first(), response)))
+                // Get the record level rules for all resources that weren't course grain filtered
+                .mapAsync(PARALLELISM,  messageAndModifiedRequest ->
+                        service.getRecordRules(messageAndModifiedRequest.second())
+                                //check to see if the first service request threw an exception and if so deal with it
+                                .thenApply(modifiedResource -> modifiedResource.chain(messageAndModifiedRequest.second().getAuditErrorMessage()))
+                                .thenApply(response -> Pair.create(messageAndModifiedRequest.first(), response))
+                )
 
-                // Now we build the producer message for kafka, adding the original committable
-                // Filtered out resources use a pass through message, they aren't sent downstream but are committed upstream
-                .map((Pair<CommittableMessage<String, PolicyRequest>, Optional<Optional<PolicyResponse>>> messageAndResponse) -> {
-                    Committable committable = messageAndResponse.first().committableOffset();
-                    ConsumerRecord<String, PolicyRequest> record = messageAndResponse.first().record();
-                    return messageAndResponse.second()
-                            // If this is a proper request
-                            .map(maybeResponse -> maybeResponse
-                                    // If the resource was not redacted
-                                    .map(response -> ProducerMessage.single(new ProducerRecord<>(outputTopic.getName(), record.partition(), record.key(), response, record.headers()), committable))
-                                    // If the resource was redacted
-                                    .orElse(ProducerMessage.passThrough(committable)))
-                            // If this is a start or end of stream
-                            .orElse(ProducerMessage.single(new ProducerRecord<>(outputTopic.getName(), record.partition(), record.key(), null, record.headers()), committable));
+                // Build producer message, copying the partition, keeping track of original message
+                .map((Pair<CommittableMessage<String, PolicyRequest>, AuditablePolicyRecordResponse> messageAndResponse) -> {
+                    ConsumerRecord<String, PolicyRequest> requestRecord = messageAndResponse.first().record();
+                    Committable committable =  messageAndResponse.first().committableOffset();
+                    return Optional.ofNullable(messageAndResponse.second().getAuditErrorMessage())
+                            // Found an application error, produce an error message to be sent to the Audit service
+                            .map(audit -> ProducerMessage.single(
+                                    new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                    committable))
+                            //Found a response message, produce a policy message to be sent to the output
+                            .orElse(ProducerMessage.single(
+                                    new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                            SerDesConfig.ruleValueSerializer().serialize(null, messageAndResponse.second().getPolicyResponse()), requestRecord.headers()),
+                                    committable));
+
                 })
-
-                // Send errors to supervisor
+                // Send system errors to supervisor
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
 
                 // Materialize the stream, sending messages to the sink
                 .toMat(sink, Consumer::createDrainingControl);
+
     }
 }
