@@ -56,7 +56,7 @@ public final class AuditablePolicyResourceResponse {
     }
 
     @Generated
-    public Rules<?> getRules() {
+    public Rules<LeafResource> getRules() {
         return rules;
     }
 
