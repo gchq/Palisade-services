@@ -25,6 +25,8 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.Executor;
+
 /**
  * Spring bean configuration and dependency injection graph for setting up async {@link java.util.concurrent.Executor}s
  */
@@ -48,7 +50,7 @@ public class AsyncConfiguration implements AsyncConfigurer {
 
     @Override
     @Bean("applicationTaskExecutor")
-    public ThreadPoolTaskExecutor getAsyncExecutor() {
+    public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");
         ex.setCorePoolSize(asyncConfigProperties.getCorePoolSize());

@@ -28,7 +28,6 @@ public final class Token {
         // Tokens are just strings, no need to actually have a class for them
     }
 
-
     /**
      * Map a token to a partition, given the maximum number of partitions on the topic.
      * This ensures that all messages in a single request remain ordered, but allows for scaling

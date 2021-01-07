@@ -32,7 +32,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Class to create an http server for akka
+ * The HTTP server will serve forever on the supplied {@code server.host} and {@code server.port}
+ * config values, binding all the given {@link RouteSupplier}s using their given
+ * {@link akka.http.javadsl.server.Route}s.
  */
 public class AkkaHttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaHttpServer.class);
@@ -45,11 +47,12 @@ public class AkkaHttpServer {
     private CompletableFuture<ServerBinding> serverBinding = new CompletableFuture<>();
 
     /**
-     * Constructor for the {@code AkkaHttpServer}
+     * Constructor for a new Akka-backed HTTP server, specifying the {@code hostname:port} to bind and the endpoints
+     * for the server to expose.
      *
-     * @param hostname the hostname value
-     * @param port the post value
-     * @param routeSuppliers a {@code Collection} of {@code RouteSupplier}s
+     * @param hostname       the hostname to bind the server to
+     * @param port           the port that the server will listen on (likely either :80 for standard HTTP or :80xx for palisade-services)
+     * @param routeSuppliers the endpoints to bind to this server and expose to any clients
      */
     public AkkaHttpServer(final String hostname, final int port, final Collection<RouteSupplier> routeSuppliers) {
         this.hostname = hostname;
@@ -62,9 +65,10 @@ public class AkkaHttpServer {
     }
 
     /**
-     * Creates the server bindings
+     * Start the server using the provided actor system and start to serve requests forever,
+     * or until {@link AkkaHttpServer#terminate()}d.
      *
-     * @param system the akka {@code ActorSystem}
+     * @param system the akka actor system (effectively providing the thread-pool to run this server on)
      */
     public void serveForever(final ActorSystem system) {
         this.serverBinding = Http.get(system)
@@ -73,11 +77,14 @@ public class AkkaHttpServer {
                 .toCompletableFuture();
 
         LOGGER.info("Started Akka Http server at {} with {} bindings", serverBinding.join().localAddress(), this.routeSuppliers.size());
-        LOGGER.debug("Bindings are: {}", routeSuppliers.stream().map(Object::getClass).map(Class::getSimpleName).collect(Collectors.toList()));
+        LOGGER.debug("Bindings are: {}", this.routeSuppliers.stream()
+                .map(Object::getClass)
+                .map(Class::getSimpleName)
+                .collect(Collectors.toList()));
     }
 
     /**
-     * Terminates the active server bindings
+     * Unbind the server from its {@code hostname:port} pair and terminate execution.
      */
     public void terminate() {
         this.serverBinding.thenCompose(ServerBinding::unbind).join();
