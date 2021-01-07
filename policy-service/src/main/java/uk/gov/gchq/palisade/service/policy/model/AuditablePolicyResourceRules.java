@@ -28,7 +28,7 @@ import java.util.StringJoiner;
  * {@code PolicyRequest} and {@code Rules} will be non-null, indicating successful process OR {@code AuditErrorMessage}
  * when there has been an error in the process.
  */
-public class AuditablePolicyResourceRules {
+public final class AuditablePolicyResourceRules {
 
     private final PolicyRequest policyRequest;
     private final Rules<LeafResource> rules;
