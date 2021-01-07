@@ -104,7 +104,7 @@ public class PolicyServiceAsyncProxy {
                                         .withNoErrors())
                                 .exceptionally(e -> AuditablePolicyRecordResponse.Builder.create()
                                         .withPolicyResponse(PolicyResponse.Builder.create(request)
-                                                .withRules(new Rules()))
+                                                .withRules(new Rules<>()))
                                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(request, Collections.emptyMap()).withError(e)))
                 )
                 .orElse(CompletableFuture.completedFuture(AuditablePolicyRecordResponse.Builder.create()
