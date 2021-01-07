@@ -77,7 +77,10 @@ public class AkkaHttpServer {
                 .toCompletableFuture();
 
         LOGGER.info("Started Akka Http server at {} with {} bindings", serverBinding.join().localAddress(), this.routeSuppliers.size());
-        LOGGER.debug("Bindings are: {}", routeSuppliers.stream().map(Object::getClass).map(Class::getSimpleName).collect(Collectors.toList()));
+        LOGGER.debug("Bindings are: {}", this.routeSuppliers.stream()
+                .map(Object::getClass)
+                .map(Class::getSimpleName)
+                .collect(Collectors.toList()));
     }
 
     /**
