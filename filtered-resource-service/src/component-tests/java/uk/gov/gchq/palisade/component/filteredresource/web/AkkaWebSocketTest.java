@@ -255,7 +255,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void testWebsocketInterleavedCTSAndPings() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketInterleavedCTSAndPings() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING-followed-by-CTS message pairs and collect the responses to a list
         // **

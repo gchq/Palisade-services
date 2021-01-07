@@ -27,10 +27,10 @@ to `ws://filtered-resource-service/resource/${token}`. The service will return e
 
 The above diagram shows the decision-making architecture of the Attribute-Masking Service (left), Topic-Offset Service (middle) and Filtered-Resource Service (right). The service connects to three kafka topics as inputs - "masked-resource" from the
 Attribute-Masking Service, "masked-resource-offset" from the Topic-Offset Service and "error" from all services that may produce errors. An additional kafka topic is used for auditing the client's access to each returned resource - this is the "success"
-topic, which will be read later by the audit-service.
+topic, which will be read later by the Audit Service.
 
 For a given token, the offset (on the "masked-resource" topic) for this token is received from the "masked-resource-offset" and used to create a consumer starting from this point. This flow of messages is then filtered by their `X-Request-Token` header to
-match the supplied token. Then, as each resource is requested over the websocket, the successful return of each resource to the client is audited to the audit-service's "success" topic.
+match the supplied token. Then, as each resource is requested over the websocket, the successful return of each resource to the client is audited to the Audit Service's "success" topic.
 
 As can be seen in the diagram, the service's functions generally fall into one of four responsibilities:
 
@@ -64,7 +64,7 @@ The lower-half is the websocket-event-service. An instance of this service is cr
 
 ### Akka Http Server
 
-The akka http-server plays a simple but key role in the service, providing both HTTP and WS endpoints for client connections (top-center of HLA diagram). It is not present of the above diagram as the decision flow is trivial (just a collection of
+The akka http-server plays a simple but key role in the service, providing both HTTP and WS endpoints for client connections (top-center of HLA diagram). It is not present in the above diagram as the decision flow is trivial (just a collection of
 endpoints, most backed by existing Spring mechanisms). It exposes the following HTTP REST endpoints:
 
 | Request Type   | Endpoint                       | Notes
@@ -81,7 +81,8 @@ It also exposes the following Websocket endpoint:
 
 ## Example Data Payloads
 
-The Filtered-Resource Service carries a moderate level of complexity; as such, orchestrating a manual interaction with the service is quite verbose. The steps required are as follows:
+The Filtered-Resource Service requires a number of inputs from separate services to produce its results; as such, orchestrating a manual interaction with the service is quite verbose. The steps required are as follows:
+
 1. POST onto the masked-resource queue (`http://filtered-resource-service/api/masked-resource`) as if an output has come from the Attribute-Masking Service
     * This includes an additional pair of empty `START` and `END` of stream messages before and after the data payload respectively
     * Additionally, all three of these messages (and all further messages) will include a `test-token` in the header - this is our token from the Palisade Service
@@ -123,7 +124,7 @@ The Filtered-Resource Service carries a moderate level of complexity; as such, o
       }
    }'
 
-   curl -X POST http://filtered-resource-service/api/masked-resource -H "X-Request-Token: test-request-token" -H "X-Stream-Marker: START"
+   curl -X POST http://filtered-resource-service/api/masked-resource -H "X-Request-Token: test-request-token" -H "X-Stream-Marker: END"
    ```
 
 1. Mimicking the Topic-Offset Service:
@@ -132,7 +133,9 @@ The Filtered-Resource Service carries a moderate level of complexity; as such, o
    ```
 
 ### JSON WS Interaction
+
 Using a preferred WebSocket command-line tool (using [ws](https://github.com/hashrocket/ws), where `>` is sent from the client to the server, and `<` is received by the client from the server):
+
 ```bash
 ws ws://filtered-resource-service/resource/test-token
 > {"type":"CTS","headers":{},"body":null}

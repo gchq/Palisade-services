@@ -13,3 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --->
+
+## Sources and Images for README.md
+
+The diagrams presented are compiled from .drawio files.
+See [draw.io](https://app.diagrams.net/) for the tools to reproduce the image from the provided diagram files.
+
+See [filtered-resource-service.drawio](./filtered-resource-service.drawio) for the source for this diagram:
+
+![Filtered Resource Service diagram](./filtered-resource-service.png)
