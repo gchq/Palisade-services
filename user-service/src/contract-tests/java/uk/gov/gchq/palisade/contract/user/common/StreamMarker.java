@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.user.model;
+package uk.gov.gchq.palisade.contract.user.common;
 
 /**
  * Marks the start or end of a stream of messages.

@@ -18,6 +18,12 @@ package uk.gov.gchq.palisade.service.user.service;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
+/**
+ * A default do-nothing User Service designed to work with the Caching and Hierarchy layers.
+ * Within cache TTL and cache size, the addUser method will add to the cache, getUser will return a NoSuchUserIdException
+ * as the user would not have been in the cache.
+ * After cache TTL timeout, the service will effectively be reset and empty
+ */
 public class NullUserService implements UserService {
 
     @Override

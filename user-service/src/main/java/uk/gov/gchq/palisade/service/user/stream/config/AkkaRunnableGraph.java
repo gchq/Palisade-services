@@ -34,18 +34,20 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.user.model.AuditableUserResponse;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.model.UserResponse;
 import uk.gov.gchq.palisade.service.user.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.user.stream.SerDesConfig;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -58,6 +60,7 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final int PARALLELISM = 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> sink,
@@ -68,43 +71,60 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> Supervision.resumingDecider().apply(ex);
+        return (Throwable ex) -> {
+            LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
+            return Supervision.resumingDecider().apply(ex);
+        };
     }
 
     @Bean
     RunnableGraph<DrainingControl<Done>> runner(
             final Source<CommittableMessage<String, UserRequest>, Control> source,
-            final Sink<Envelope<String, UserResponse, Committable>, CompletionStage<Done>> sink,
+            final Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> sink,
             final Function1<Throwable, Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration,
-            @Qualifier("asyncUserServiceProxy") final UserServiceAsyncProxy service) {
+            final UserServiceAsyncProxy service) {
         // Get output topic from config
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
+        // Get error topic from config
+        Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         // Read messages from the stream source
         return source
                 // Get the user from the userId, keeping track of original message and token
                 .mapAsync(PARALLELISM, (CommittableMessage<String, UserRequest> message) -> {
                     Optional<UserRequest> userRequest = Optional.ofNullable(message.record().value());
+
+                    /*
+                     Return the user as a Pair of CommittableMessage<token,UserRequest>
+                     and the auditableUserResponse from the UserServiceAsyncProxy.
+                     If an exception was thrown, return the ComittableMessage with a null AuditableUserResponse
+                    */
                     return userRequest.map(request -> service.getUser(request)
-                            .thenApply(user -> new Pair<>(message, UserResponse.Builder.create(request).withUser(user))))
-                            .orElse(CompletableFuture.completedFuture(new Pair<>(message, null)));
+                            .thenApply(auditableUserResponse -> Pair.create(message, auditableUserResponse)))
+                            .orElse(CompletableFuture.completedFuture(Pair.create(message, null)));
                 })
 
                 // Build producer record, copying the partition, keeping track of original message
-                .map((Pair<CommittableMessage<String, UserRequest>, UserResponse> messageTokenResponse) -> {
-                    ConsumerRecord<String, UserRequest> requestRecord = messageTokenResponse.first().record();
-                    return new Pair<>(messageTokenResponse.first(), new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                            messageTokenResponse.second(), requestRecord.headers()));
+                .map((Pair<CommittableMessage<String, UserRequest>, AuditableUserResponse> messageAndResponse) -> {
+                    ConsumerRecord<String, UserRequest> requestRecord = messageAndResponse.first().record();
+                    Optional<AuditableUserResponse> auditableUserResponse = Optional.ofNullable(messageAndResponse.second());
+                    return auditableUserResponse.map(AuditableUserResponse::getAuditErrorMessage).map(audit ->
+                            // Produce Audit Message
+                            ProducerMessage.single(
+                                    new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
+                                    (Committable) messageAndResponse.first().committableOffset()))
+                            .orElseGet(() ->
+                                    // Produce Response
+                                    ProducerMessage.single(
+                                            new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
+                                                    SerDesConfig.userValueSerializer().serialize(null, auditableUserResponse.map(AuditableUserResponse::getUserResponse).orElse(null)), requestRecord.headers()),
+                                            messageAndResponse.first().committableOffset()));
                 })
 
-                // Build producer message, applying the committable pass-thru consuming the original message
-                .map(messageAndRecord -> ProducerMessage.single(messageAndRecord.second(), (Committable) messageAndRecord.first().committableOffset()))
-
-                // Send errors to supervisor
+                // Supervise, commit & produce to sink
                 .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
-
-                // Materialize the stream, sending messages to the sink
                 .toMat(sink, Consumer::createDrainingControl);
     }
 

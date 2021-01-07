@@ -18,41 +18,38 @@ package uk.gov.gchq.palisade.component.user.service;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cache.CacheManager;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.test.context.ActiveProfiles;
 
-import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
-import uk.gov.gchq.palisade.component.user.KafkaTestConfiguration;
-import uk.gov.gchq.palisade.service.user.UserApplication;
 import uk.gov.gchq.palisade.service.user.config.ApplicationConfiguration;
-import uk.gov.gchq.palisade.service.user.model.UserRequest;
-import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ActiveProfiles({"caffeine", "akkatest"})
 @SpringBootTest(
-        classes = {UserApplication.class, ApplicationConfiguration.class, KafkaTestConfiguration.class},
+        classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
         webEnvironment = WebEnvironment.NONE,
         properties = {"spring.cache.caffeine.spec=expireAfterWrite=1s, maximumSize=100"}
 )
-@EnableAsync
+@EnableCaching
+@ActiveProfiles({"caffeine"})
 class CaffeineUserCachingTest {
 
     @Autowired
-    private UserServiceAsyncProxy userService;
+    private UserServiceCachingProxy userService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -65,7 +62,6 @@ class CaffeineUserCachingTest {
     void testAddedUserIsRetrievable() {
         // Given
         User user = new User().userId("added-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
 
         // When
         User addedUser = userService.addUser(user);
@@ -73,83 +69,72 @@ class CaffeineUserCachingTest {
         assertThat(addedUser).isEqualTo(user);
 
         // When
-        User getUser = userService.getUser(request).join();
+        User getUser = userService.getUser(user.getUserId().getId());
         // Then
         assertThat(getUser).isEqualTo(user);
     }
 
     @Test
     void testNonExistentUserRetrieveFails() {
-        // Given
-        UserId userId = new UserId().id("definitely-not-a-real-user");
-        UserRequest request = UserRequest.Builder.create().withUserId(userId.getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
+        // Given the user is not added to the cache
 
         // When
-        Exception noSuchUserId = assertThrows(CompletionException.class,
-                () -> userService.getUser(request).join(), "testNonExistentUser should throw noSuchIdException"
+        assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser("definitely-not-a-real-user"), "testNonExistentUser should throw noSuchIdException"
         );
-
-        //Then
-        assertThat(noSuchUserId.getMessage()).isEqualTo("uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException: No userId matching definitely-not-a-real-user found in cache");
     }
 
     @Test
     void testUpdateUser() {
-        // Given
-        User user = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
-        User update = new User().userId("updatable-user").addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
-        UserRequest userRequest = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
+        // Given we create an original user, and then update the users auths and roles
+        User originalUser = new User().userId("updatable-user").addAuths(Collections.singleton("auth")).addRoles(Collections.singleton("role"));
+        User updatedUser = new User().userId(originalUser.getUserId()).addAuths(Collections.singleton("newAuth")).addRoles(Collections.singleton("newRole"));
 
-        // When
-        userService.addUser(user);
-        userService.addUser(update);
+        // When we add the original User
+        userService.addUser(originalUser);
+        // Then update the original User
+        userService.addUser(updatedUser);
 
-        User updatedUser = userService.getUser(userRequest).join();
+        // When we get the updated user
+        User returnedUser = userService.getUser(updatedUser.getUserId().getId());
 
-        // Then
-        assertThat(updatedUser).isEqualTo(update);
+        // Then the User has been updated
+        assertThat(returnedUser).isEqualTo(updatedUser);
     }
 
     @Test
     void testMaxSize() {
         // Given - many users are added and cached (cache size set to 100 in application.yaml)
         Function<Integer, User> makeUser = i -> new User().userId(new UserId().id("max-size-" + i.toString() + "-test-user"));
-        Function<Integer, UserRequest> makeUserRequest = i -> UserRequest.Builder.create()
-                .withUserId("max-size-" + i.toString() + "-test-user")
-                .withResourceId("test/resource")
-                .withContext(new Context().purpose("purpose"));
+        Function<Integer, String> makeUserId = i -> "max-size-" + i.toString() + "-test-user";
         for (int count = 0; count <= 150; ++count) {
             userService.addUser(makeUser.apply(count));
         }
 
         // When - we try to get the first (now-evicted) user to be added
         forceCleanUp();
-        Exception noSuchUserId = assertThrows(CompletionException.class,
-                () -> userService.getUser(makeUserRequest.apply(0)).join(), "testMaxSizeTest should throw noSuchIdException"
+
+        // Then a NoSuchUserIdException is thrown as the User no longer exists
+        assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(makeUserId.apply(0)), "testMaxSizeTest should throw noSuchIdException"
         );
 
-        // Then - it is no longer found, it has been evicted
-        // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException: No userId matching max-size-0-test-user found in cache");
     }
 
     @Test
     void testTtl() throws InterruptedException {
         // Given - a user was added a long time ago (ttl set to 1s in application.yaml)
         User user = new User().userId("ttl-test-user").addAuths(Collections.singleton("authorisation")).addRoles(Collections.singleton("role"));
-        UserRequest request = UserRequest.Builder.create().withUserId(user.getUserId().getId()).withResourceId("test/resource").withContext(new Context().purpose("test"));
         userService.addUser(user);
 
-        TimeUnit.MILLISECONDS.sleep(1000);
+        TimeUnit.SECONDS.sleep(1);
 
         // When - we try to access stale cache data
         forceCleanUp();
-        Exception noSuchUserId = assertThrows(CompletionException.class,
-                () -> userService.getUser(request).join(), "testMaxSizeTest should throw noSuchIdException"
-        );
 
-        // Then - it is no longer found, it has been evicted
-        // ie. throw NoSuchUserIdException
-        assertThat(noSuchUserId.getMessage()).isEqualTo("uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException: No userId matching ttl-test-user found in cache");
+        // Then a NoSuchUserIdException is thrown as the User no longer exists
+        assertThrows(NoSuchUserIdException.class,
+                () -> userService.getUser(user.getUserId().getId()), "testMaxSizeTest should throw noSuchIdException"
+        );
     }
 }

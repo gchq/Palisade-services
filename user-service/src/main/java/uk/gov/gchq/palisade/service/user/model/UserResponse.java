@@ -42,15 +42,13 @@ import java.util.StringJoiner;
 public final class UserResponse {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private final String userId;  //Unique identifier for the user
-    private final String resourceId; //Resource that that is being asked to access
-    private final JsonNode context; //Represents the context information as a Json string.
-
     /**
      * Represents the User in the system corresponding to the given useId.
      */
     public final User user;
+    private final String userId;  //Unique identifier for the user
+    private final String resourceId; //Resource that that is being asked to access
+    private final JsonNode context; //Represents the context information as a Json string.
 
     @JsonCreator
     private UserResponse(
@@ -116,7 +114,7 @@ public final class UserResponse {
     }
 
     /**
-     * Builder class for the creation of instances of the UserResponse.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the UserResponse. This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
@@ -132,7 +130,7 @@ public final class UserResponse {
         }
 
         /**
-         * Starter method for the Builder class.  This method is called to start the process of creating the
+         * Starter method for the Builder class. This method is called to start the process of creating the
          * UserRequest class.
          * Starter method for the Builder class that uses a UserRequest and appends the User.
          * This method is called followed by the call to add user with the IUserId interface to create the

@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a {@link UserPrepopulationFactory} that uses Spring to configure a user from a yaml file
- * A factory for {@link User} objects, using a userId, a list of authorisations and a list of roles
+ * A factory for {@link User} objects, using a userId, a list of authorizations and a list of roles.
  */
 public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
 
@@ -51,9 +51,9 @@ public class StdUserPrepopulationFactory implements UserPrepopulationFactory {
      * Constructor with 3 arguments for a standard implementation
      * of the {@link UserPrepopulationFactory} interface.
      *
-     * @param userId    a {@link String} value of a user.
-     * @param roles     a {@link Set} of {@link String} role values for the user.
-     * @param auths     a {@link Set} of {@link String} auth values for the user.
+     * @param userId a {@link String} value of a user.
+     * @param roles  a {@link Set} of {@link String} role values for the user.
+     * @param auths  a {@link Set} of {@link String} auth values for the user.
      */
     public StdUserPrepopulationFactory(final String userId, final Set<String> roles, final Set<String> auths) {
         this.userId = userId;

@@ -48,7 +48,7 @@ public final class UserRequest {
     public final String userId;
 
     /**
-     * Unique identifier for the resource that that is being asked to access
+     * A unique identifier for the resource that that is being asked to access
      */
     private final String resourceId;
 
