@@ -21,7 +21,6 @@ List of third-party dependencies grouped by their license type
 * akka-stream ([com.typesafe.akka:akka-stream_2.13:2.6.8](https://akka.io/))
 * event-logging-api ([event-logging:event-logging:v4.0.5_schema-v3.2.4](no url defined))
 * embedded-redis ([it.ozimov:embedded-redis:0.7.3](https://github.com/ozimov/embedded-redis))
-* Apache Commons Compress ([org.apache.commons:commons-compress:1.19](https://commons.apache.org/proper/commons-compress/))
 * Apache Hadoop Common ([org.apache.hadoop:hadoop-common:3.2.1](no url defined))
 * Apache Hadoop Mini-Cluster ([org.apache.hadoop:hadoop-minicluster:3.2.1](no url defined))
 * Spring Web ([org.springframework:spring-web:5.2.7.RELEASE](https://github.com/spring-projects/spring-framework))
@@ -37,13 +36,12 @@ List of third-party dependencies grouped by their license type
 * Spring Cloud Commons ([org.springframework.cloud:spring-cloud-commons:2.2.2.RELEASE](https://projects.spring.io/spring-cloud/spring-cloud-commons/))
 * Spring Cloud Config Client ([org.springframework.cloud:spring-cloud-config-client:2.2.2.RELEASE](https://spring.io))
 * Spring Cloud Netflix Eureka Client ([org.springframework.cloud:spring-cloud-netflix-eureka-client:2.2.2.RELEASE](https://spring.io/spring-cloud/spring-cloud-netflix/spring-cloud-netflix-eureka-client))
-* Spring Cloud Starter Netflix Eureka Client ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter Netflix Eureka Server ([org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Cloud Starter OpenFeign ([org.springframework.cloud:spring-cloud-starter-openfeign:2.2.2.RELEASE](https://projects.spring.io/spring-cloud))
 * Spring Kafka Support ([org.springframework.kafka:spring-kafka:2.5.2.RELEASE](https://github.com/spring-projects/spring-kafka))
 * common ([uk.gov.gchq.palisade:common:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-common))
-* hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
-* hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.5.0-SNAPSHOT](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
+* hadoop-reader ([uk.gov.gchq.palisade:hadoop-reader:0.5.0-20210105.080722-26](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-reader))
+* hadoop-resource ([uk.gov.gchq.palisade:hadoop-resource:0.5.0-20210105.080640-26](https://github.com/gchq/Palisade-readers/tree/develop/hadoop-resource))
 
 ### [CDDL and GNU GPL 2 w/ Classpath Exception](./licenses/cddl_gplv2_ce.html):
 * JavaBeans Activation Framework API jar ([javax.activation:javax.activation-api:1.2.0](http://java.net/all/javax.activation-api/))

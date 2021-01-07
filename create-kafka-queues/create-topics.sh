@@ -52,15 +52,20 @@ else
     sleep 20
   done
 
+  echo "Zookeper now available"
+  ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
+
   #Search for all environmental variables starting with the word: KAFKATOPIC
   for topic in "${!KAFKATOPIC@}"; do
     # Check if topic already exists and store the returned value
     echo "Checking for topic ${!topic}"
+    ./bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic ${!topic}
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
       # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
       echo "Creating topic ${!topic}"
       write_to_kafka ${!topic}
+      ./bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic ${!topic}
     else
       echo "Topic ${!topic} already exists"
     fi
