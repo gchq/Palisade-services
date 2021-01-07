@@ -137,7 +137,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void websocketManyPingTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketManyPings() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING messages and collect the responses to a list
         // **
@@ -186,7 +186,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void websocketReadResourcesTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebSocketCTSReadResources() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -255,7 +255,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void websocketInterleavedMessagesTest() throws InterruptedException, ExecutionException, TimeoutException {
+    void testWebsocketInterleavedCTSAndPings() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING-followed-by-CTS message pairs and collect the responses to a list
         // **
