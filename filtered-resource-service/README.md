@@ -1,5 +1,5 @@
 <!---
-Copyright 2020 Crown Copyright
+Copyright 2021 Crown Copyright
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 # Filtered Resource Service
 
 The Filtered-Resource Service sits at the end of the stream pipeline and has the task of returning resources (and their connection details) back to the client. Given a token `$[token]` from the Palisade Service, it is accessed by a Websocket request
-to `ws://filtered-resource-service/resource/${token}`. The service will return each resource discovered by the palisade system one-by-one to the client as requested, auditing that the client is now aware of these resources.
+to `ws://filtered-resource-service/resource/${token}`. The service will return each resource discovered by the Palisade system one-by-one to the client as requested, auditing that the client is now aware of these resources.
 
 ## High-Level Architecture
 
