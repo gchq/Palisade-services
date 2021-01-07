@@ -35,6 +35,17 @@ spring:
       repositories:
         enabled: false
 
+management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
+
+logging:
+  level:
+    org.apache.kafka: WARN
+
 async:
   corePoolSize: 6
 

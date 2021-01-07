@@ -18,6 +18,7 @@ package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import akka.actor.typed.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,16 +29,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorEventService;
-import uk.gov.gchq.palisade.service.filteredresource.service.ErrorHandlingService;
+import uk.gov.gchq.palisade.service.filteredresource.service.KafkaHealthIndicator;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
 import java.util.concurrent.Executor;
@@ -48,20 +48,12 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableConfigurationProperties(ServerProperties.class)
 public class ApplicationConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
     TokenOffsetPersistenceLayer jpaTokenOffsetPersistenceLayer(
             final TokenOffsetRepository repository,
             final @Qualifier("applicationTaskExecutor") Executor executor) {
         return new JpaTokenOffsetPersistenceLayer(repository, executor);
-    }
-
-    // Replace this with a proper error reporting service (akka actors etc.)
-    @Bean
-    ErrorEventService loggingErrorReporterService() {
-        LOGGER.warn("Using a Logging-only error reporter, this should be replaced by a proper implementation!");
-        return (String token, Throwable exception) -> LOGGER.error("An error was reported for token {}:", token, exception);
     }
 
     @Bean
@@ -72,13 +64,6 @@ public class ApplicationConfiguration {
     @Bean
     OffsetEventService topicOffsetService(final TokenOffsetPersistenceLayer persistenceLayer) {
         return new OffsetEventService(persistenceLayer);
-    }
-
-    // Replace this with a proper error handling mechanism (kafka queues etc.)
-    @Bean
-    ErrorHandlingService loggingErrorHandler() {
-        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, FilteredResourceRequest request, Throwable error) -> LOGGER.error("Token {} and request {} threw exception", token, request, error);
     }
 
     /**
@@ -102,6 +87,17 @@ public class ApplicationConfiguration {
     @Bean("jsonSerialiser")
     ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
+    }
+
+    /**
+     * A bean for the Kafka Health Indicator
+     *
+     * @param adminClient the Kafka admin client
+     * @param topicConfiguration the details of the consumer topic(s)
+     * @return an instance of the {@link KafkaHealthIndicator}
+     */
+    public KafkaHealthIndicator kafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
+        return new KafkaHealthIndicator(adminClient, topicConfiguration);
     }
 
 }

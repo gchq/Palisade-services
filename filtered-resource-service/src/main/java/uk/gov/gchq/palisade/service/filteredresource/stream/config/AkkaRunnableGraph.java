@@ -135,7 +135,10 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> Supervision.resumingDecider().apply(ex);
+        return (Throwable ex) -> {
+            LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
+            return Supervision.resumingDecider().apply(ex);
+        };
     }
 
     @Bean
@@ -181,6 +184,7 @@ public class AkkaRunnableGraph {
                                     // Either a START message, or something else (resource or END marker)
                                     .ifPresentOrElse(
                                             startMarker -> observedStart.set(true),
+                                            //TODO message to error topic here
                                             () -> LOGGER.error("Never observed START marker")
                                     );
                         }
@@ -199,6 +203,8 @@ public class AkkaRunnableGraph {
                                             // Either an END marker or a START marker
                                             // .ifPresentOrElse => or else START marker, which should be ignored
                                             .ifPresent(endMarker -> LOGGER.error("Never observed any resources"))
+                                            //TODO message to error topic here
+
                             );
                         }
                         return tokenMarkerRequestCommittable;
