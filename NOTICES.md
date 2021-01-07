@@ -5,6 +5,7 @@ List of third-party dependencies grouped by their license type
 * Caffeine cache ([com.github.ben-manes.caffeine:caffeine:2.8.1](https://github.com/ben-manes/caffeine))
 * Gson ([com.google.code.gson:gson:2.8.5](https://github.com/google/gson/gson))
 * eureka-client ([com.netflix.eureka:eureka-client:1.9.16](https://github.com/Netflix/eureka))
+* akka-actor-testkit-typed ([com.typesafe.akka:akka-actor-testkit-typed_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.10](https://akka.io/))
 * akka-discovery ([com.typesafe.akka:akka-discovery_2.13:2.6.8](https://akka.io/))
 * akka-http-jackson ([com.typesafe.akka:akka-http-jackson_2.13:10.2.1](https://akka.io))

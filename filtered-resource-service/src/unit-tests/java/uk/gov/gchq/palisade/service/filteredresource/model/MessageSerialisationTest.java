@@ -37,26 +37,21 @@ class MessageSerialisationTest {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
             return Stream.of(
+                    // Upstream kafka messages
                     Arguments.of(ApplicationTestData.REQUEST),
+                    Arguments.of(ApplicationTestData.OFFSET_MESSAGE),
+
+                    // Downstream websocket message
+                    Arguments.of(ApplicationTestData.WS_MESSAGE),
+
+                    // Audit messages (upstream and downstream)
                     Arguments.of(AuditSuccessMessage.Builder.create(
                             ApplicationTestData.REQUEST,
                             Collections.emptyMap())),
                     Arguments.of(AuditErrorMessage.Builder.create(
                             ApplicationTestData.REQUEST,
                             Collections.emptyMap())
-                            .withError(new Throwable("test exception"))),
-                    Arguments.of(FilteredResourceRequest.Builder.create()
-                            .withUserId(ApplicationTestData.USER_ID.getId())
-                            .withResourceId(ApplicationTestData.RESOURCE_ID)
-                            .withContext(ApplicationTestData.CONTEXT)
-                            .withResource(ApplicationTestData.LEAF_RESOURCE)),
-                    Arguments.of(TopicOffsetMessage.Builder.create()
-                            .withQueuePointer(ApplicationTestData.OFFSET)),
-                    Arguments.of(WebSocketMessage.Builder.create()
-                            .withType(MessageType.RESOURCE)
-                            .noHeaders()
-                            .withBody(ApplicationTestData.LEAF_RESOURCE)),
-                    Arguments.of(ApplicationTestData.OFFSET_MESSAGE)
+                            .withError(new Throwable("test exception")))
             );
         }
     }

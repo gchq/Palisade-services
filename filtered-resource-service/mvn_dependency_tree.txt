@@ -140,6 +140,8 @@ uk.gov.gchq.palisade:filtered-resource-service:jar:0.5.0-SNAPSHOT
 |  |  \- com.kohlschutter.junixsocket:junixsocket-common:jar:2.0.4:test
 |  \- net.java.dev.jna:jna-platform:jar:5.5.0:test
 |     \- net.java.dev.jna:jna:jar:5.5.0:test
-+- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.10:test
++- org.testcontainers:kafka:jar:1.14.3:test
++- com.typesafe.akka:akka-actor-testkit-typed_2.13:jar:2.6.10:test
 |  \- com.typesafe.akka:akka-testkit_2.13:jar:2.6.10:test
++- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.10:test
 \- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.1.0-M1:test
