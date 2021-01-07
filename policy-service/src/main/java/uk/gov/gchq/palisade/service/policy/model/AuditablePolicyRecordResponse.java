@@ -15,29 +15,24 @@
  */
 package uk.gov.gchq.palisade.service.policy.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * This class is a container for {@link PolicyResponse} and {@link AuditErrorMessage} during stream processing.
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
 public final class AuditablePolicyRecordResponse {
-    @JsonProperty("policyResponse")
+
     private final PolicyResponse policyResponse;
-    @JsonProperty("auditErrorMessage")
     private final AuditErrorMessage auditErrorMessage;
 
-
-    @JsonCreator
     private AuditablePolicyRecordResponse(
-            final @JsonProperty("policyResponse") PolicyResponse policyResponse,
-            final @JsonProperty("auditErrorMessage") AuditErrorMessage auditErrorMessage) {
+            final PolicyResponse policyResponse,
+            final AuditErrorMessage auditErrorMessage) {
         this.policyResponse = policyResponse;
         this.auditErrorMessage = auditErrorMessage;
     }
@@ -130,5 +125,14 @@ public final class AuditablePolicyRecordResponse {
     @Generated
     public int hashCode() {
         return Objects.hash(policyResponse, auditErrorMessage);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditablePolicyRecordResponse.class.getSimpleName() + "[", "]")
+                .add("policyResponse=" + policyResponse)
+                .add("auditErrorMessage=" + auditErrorMessage)
+                .toString();
     }
 }

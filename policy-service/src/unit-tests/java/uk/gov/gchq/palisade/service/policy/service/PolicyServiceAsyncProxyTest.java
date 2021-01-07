@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
 import java.util.concurrent.CompletableFuture;
@@ -67,8 +68,8 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithAPolicyRequest() throws Exception {
         // When
         when(hierarchyProxy.getResourceRules(any())).thenReturn(RESOURCE_RULES);
-        CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(REQUEST);
-        AuditablePolicyResourceResponse response = completableFuture.get();
+        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
+        AuditablePolicyResourceRules response = completableFuture.get();
 
         // Then
         assertThat(response.getPolicyRequest()).isNotNull();
@@ -90,9 +91,9 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithANullPolicyRequest() throws Exception {
 
         // When
-        CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(null);
+        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(null);
         //getResourceRules is an asynchronous call so we need to force it get the response
-        AuditablePolicyResourceResponse response = completableFuture.get();
+        AuditablePolicyResourceRules response = completableFuture.get();
 
         // Then
         assertThat(response.getPolicyRequest()).isNull();
@@ -113,9 +114,9 @@ class PolicyServiceAsyncProxyTest {
         // When
         when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("Test"));
 
-        CompletableFuture<AuditablePolicyResourceResponse> completableFuture = asyncProxy.getResourceRules(REQUEST);
+        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
         // asynchronous call so we need to force it get the response
-        AuditablePolicyResourceResponse response = completableFuture.get();
+        AuditablePolicyResourceRules response = completableFuture.get();
 
         // Then
         assertThat(response.getPolicyRequest()).isNotNull();

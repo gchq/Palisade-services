@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceAsyncProxy;
-import uk.gov.gchq.palisade.service.policy.service.PolicyServiceHierarchyProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration.Topic;
@@ -97,7 +96,7 @@ public class AkkaRunnableGraph {
                 // Apply coarse-grained resource-level rules
                 .mapAsync(PARALLELISM, messageAndRequest -> service.getResourceRules(messageAndRequest.second())
                         //need to change this only apply if we have rules and if we have a PolicyRequest
-                        .thenApply(PolicyServiceHierarchyProxy::applyRulesToResource)
+                        .thenApply(PolicyServiceAsyncProxy::applyRulesToResource)
                         .thenApply(modifiedAuditable -> Pair.create(messageAndRequest.first(), modifiedAuditable)))
 
                 // Get the record level rules for all resources that weren't course grain filtered

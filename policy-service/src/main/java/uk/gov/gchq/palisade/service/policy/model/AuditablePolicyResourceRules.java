@@ -17,37 +17,31 @@ package uk.gov.gchq.palisade.service.policy.model;
 
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class represents the resource have been modified by applying the rules.  This class is a container for
- * {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream processing.  Under normal
- * conditions {@code PolicyRequest} and {@code Rules} will be non-null, indicating successful process or
- * {@code AuditErrorMessage} when there has been an error in the process.
+ * This class is a container for {@link PolicyRequest}, {@link Rules} and {@link AuditErrorMessage} during stream
+ * processing.  The class represents the data after making the request for the rules. Under normal conditions
+ * {@code PolicyRequest} and {@code Rules} will be non-null, indicating successful process OR {@code AuditErrorMessage}
+ * when there has been an error in the process.
  */
-public final class AuditablePolicyResourceResponse {
+public class AuditablePolicyResourceRules {
 
     private final PolicyRequest policyRequest;
     private final Rules<LeafResource> rules;
     private final AuditErrorMessage auditErrorMessage;
-    private final Resource modifiedResource;
 
-
-    private AuditablePolicyResourceResponse(
+    private AuditablePolicyResourceRules(
             final PolicyRequest policyRequest,
             final Rules<LeafResource> rules,
-            final AuditErrorMessage auditErrorMessage,
-            final Resource modifiedResource) {
+            final AuditErrorMessage auditErrorMessage) {
 
         this.policyRequest = policyRequest;
         this.rules = rules;
         this.auditErrorMessage = auditErrorMessage;
-        this.modifiedResource = modifiedResource;
-
     }
 
     @Generated
@@ -56,7 +50,7 @@ public final class AuditablePolicyResourceResponse {
     }
 
     @Generated
-    public Rules<?> getRules() {
+    public Rules<LeafResource> getRules() {
         return rules;
     }
 
@@ -65,10 +59,6 @@ public final class AuditablePolicyResourceResponse {
         return auditErrorMessage;
     }
 
-    @Generated
-    public Resource getModifiedResource() {
-        return modifiedResource;
-    }
 
     /**
      * The static builder
@@ -81,18 +71,7 @@ public final class AuditablePolicyResourceResponse {
          * @return the composed immutable object
          */
         public static IPolicyRequest create() {
-            return request -> rules -> audit -> modifiedResource -> new AuditablePolicyResourceResponse(request, rules, audit, modifiedResource);
-        }
-
-        /**
-         *
-         * @param auditablePolicyResourceRules  holds the data from the request and the related rules
-         * @return the composed immutable object
-         */
-        public static IModifiedResource create(final AuditablePolicyResourceRules auditablePolicyResourceRules) {
-            return create().withPolicyRequest(auditablePolicyResourceRules.getPolicyRequest())
-                    .withRules(auditablePolicyResourceRules.getRules())
-                    .withAuditErrorMessage(auditablePolicyResourceRules.getAuditErrorMessage());
+            return request -> rules -> audit -> new AuditablePolicyResourceRules(request, rules, audit);
         }
 
         /**
@@ -131,41 +110,17 @@ public final class AuditablePolicyResourceResponse {
              * @param audit or null
              * @return value object
              */
-            IModifiedResource withAuditErrorMessage(AuditErrorMessage audit);
+            AuditablePolicyResourceRules withAuditErrorMessage(AuditErrorMessage audit);
 
             /**
              * Without error audit
              *
              * @return the composed immutable object
              */
-            default IModifiedResource withNoErrors() {
+            default AuditablePolicyResourceRules withNoErrors() {
                 return this.withAuditErrorMessage(null);
             }
         }
-
-        /**
-         * Compose with {@code AuditErrorMessage}
-         */
-        public interface IModifiedResource {
-            /**
-             * Compose value
-             *
-             * @param modifiedResource or null
-             * @return value object
-             */
-            AuditablePolicyResourceResponse withModifiedResource(Resource modifiedResource);
-
-            /**
-             * Without error audit
-             *
-             * @return the composed immutable object
-             */
-            default AuditablePolicyResourceResponse withNoModifiedResource() {
-                return this.withModifiedResource(null);
-            }
-        }
-
-
     }
 
     @Override
@@ -174,31 +129,28 @@ public final class AuditablePolicyResourceResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditablePolicyResourceResponse)) {
+        if (!(o instanceof AuditablePolicyResourceRules)) {
             return false;
         }
-        AuditablePolicyResourceResponse that = (AuditablePolicyResourceResponse) o;
+        AuditablePolicyResourceRules that = (AuditablePolicyResourceRules) o;
         return policyRequest.equals(that.policyRequest) &&
-                rules.equals(that.rules) &&
-                Objects.equals(auditErrorMessage, that.auditErrorMessage) &&
-                Objects.equals(modifiedResource, that.modifiedResource);
+                Objects.equals(rules, that.rules) &&
+                Objects.equals(auditErrorMessage, that.auditErrorMessage);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(policyRequest, rules, auditErrorMessage, modifiedResource);
+        return Objects.hash(policyRequest, rules, auditErrorMessage);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditablePolicyResourceResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AuditablePolicyResourceRules.class.getSimpleName() + "[", "]")
                 .add("policyRequest=" + policyRequest)
                 .add("rules=" + rules)
                 .add("auditErrorMessage=" + auditErrorMessage)
-                .add("modifiedResource=" + modifiedResource)
                 .toString();
     }
 }
-

@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
@@ -70,10 +71,10 @@ public class ApplicationTestData {
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
             .withAttributes((new HashMap<>()))
-            .withError(new Throwable("Something went wrong!"));
+            .withError(new NoSuchPolicyException("Something went wrong!"));
 
-    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(RULES).withNoErrors().withNoNoModifiedResponse();
-    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoNoModifiedResponse();
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors().withNoModifiedResource();
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoModifiedResource();
 
 
     /**

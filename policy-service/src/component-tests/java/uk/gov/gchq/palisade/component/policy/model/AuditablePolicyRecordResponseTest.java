@@ -70,7 +70,9 @@ class AuditablePolicyRecordResponseTest {
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyRecordResponseMessageObject).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
+                        () -> assertThat(auditablePolicyRecordResponseMessageObject).as("Check using EqualTo").isEqualTo(auditablePolicyRecordResponse),
+                        () -> assertThat(auditablePolicyRecordResponseMessageObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
+
                 )
         );
     }
@@ -105,7 +107,9 @@ class AuditablePolicyRecordResponseTest {
                 ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyRecordResponseMessageObject).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
+                        () -> assertThat(auditablePolicyRecordResponseMessageObject).as("Check using EqualTo").isEqualTo(auditablePolicyRecordResponse),
+                        () -> assertThat(auditablePolicyRecordResponseMessageObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse)
+
                 )
         );
     }
