@@ -27,7 +27,6 @@ import akka.http.scaladsl.model.ws.TextMessage.Strict;
 import akka.japi.Pair;
 import akka.kafka.ConsumerMessage.CommittableOffset;
 import akka.kafka.javadsl.Consumer;
-import akka.stream.DelayOverflowStrategy;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
@@ -61,7 +60,6 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,7 +70,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,7 +98,7 @@ class AkkaWebSocketTest {
             .withResource(testResource);
     final CommittableOffset mockCommittable = Mockito.mock(CommittableOffset.class);
 
-    // Websocket test objects
+    // WebSocket test objects
     final TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
@@ -114,10 +111,10 @@ class AkkaWebSocketTest {
                     .flatMap(List::stream)
                     .collect(Collectors.toList())));
     // Finally, create the websocketEventService from its parts
-    final WebSocketEventService webSocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory);
+    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory);
 
-    // Websocket endpoint to be tested
-    final WebSocketRouter wsRouter = new WebSocketRouter(webSocketEventService, MAPPER);
+    // WebSocket endpoint to be tested
+    final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
     // Akka runtime
     final ActorSystem system = ActorSystem.create("websocket-test");
     final Materializer materializer = Materializer.createMaterializer(system);
@@ -140,7 +137,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void testWebSocketManyPing() throws InterruptedException, ExecutionException, TimeoutException {
+    void websocketManyPingTest() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING messages and collect the responses to a list
         // **
@@ -167,13 +164,13 @@ class AkkaWebSocketTest {
         // Get the (HTTP) response, a websocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
                 .get(N_MESSAGES, TimeUnit.SECONDS);
-        LOGGER.info("Websocket request got WebsocketUpgrade response: {}", wsUpgrade.response());
+        LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
         // **
         // Then - check all returned server responses are as expected
         // **
 
-        // Get the result of the client sink, a list of (Websocket) responses
+        // Get the result of the client sink, a list of (WebSocket) responses
         CompletableFuture<List<WebSocketMessage>> sinkFuture = request.second().toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
 
@@ -185,11 +182,11 @@ class AkkaWebSocketTest {
                         .isIn(MessageType.PONG, MessageType.COMPLETE));
 
         // Nothing should have been audited
-        assertThat(auditedResources.get()).hasSize(3);
+        assertThat(auditedResources.get()).isEmpty();
     }
 
     @Test
-    void testWebSocketReadResources() throws InterruptedException, ExecutionException, TimeoutException {
+    void websocketReadResourcesTest() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' CTS messages and collect the responses to a list
         // **
@@ -216,9 +213,9 @@ class AkkaWebSocketTest {
         // Get the (HTTP) response, a websocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
                 .get(N_MESSAGES, TimeUnit.SECONDS);
-        LOGGER.info("Websocket request got WebsocketUpgrade response: {}", wsUpgrade.response());
+        LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
-        // Get the result of the client sink, a list of (Websocket) responses
+        // Get the result of the client sink, a list of (WebSocket) responses
         CompletableFuture<List<WebSocketMessage>> sinkFuture = request.second().toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
 
@@ -226,7 +223,7 @@ class AkkaWebSocketTest {
         // Then - check all returned server responses are as expected
         // **
 
-        // Get the result of the client sink, a list of (Websocket) responses
+        // Get the result of the client sink, a list of (WebSocket) responses
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
         assertThat(results)
                 .hasSize(N_MESSAGES);
@@ -258,7 +255,7 @@ class AkkaWebSocketTest {
     }
 
     @Test
-    void testWebSocketInterleavedMessages() throws InterruptedException, ExecutionException, TimeoutException {
+    void websocketInterleavedMessagesTest() throws InterruptedException, ExecutionException, TimeoutException {
         // **
         // Given - the client will send 'n' PING-followed-by-CTS message pairs and collect the responses to a list
         // **
@@ -271,7 +268,7 @@ class AkkaWebSocketTest {
         Source<Message, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         // Interleave PINGs and CTSes
-        Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1).delay(Duration.ofMillis(150L), DelayOverflowStrategy.backpressure());
+        Source<Message, NotUsed> wsMsgSource = pingMsgSrc.interleave(ctsMsgSrc, 1);
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
         Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
@@ -289,9 +286,9 @@ class AkkaWebSocketTest {
         // Get the (HTTP) response, a websocket upgrade
         WebSocketUpgradeResponse wsUpgrade = request.first().toCompletableFuture()
                 .get(N_MESSAGES, TimeUnit.SECONDS);
-        LOGGER.info("Websocket request got WebsocketUpgrade response: {}", wsUpgrade.response());
+        LOGGER.info("WebSocket request got WebSocketUpgrade response: {}", wsUpgrade.response());
 
-        // Get the result of the client sink, a list of (Websocket) responses
+        // Get the result of the client sink, a list of (WebSocket) responses
         CompletableFuture<List<WebSocketMessage>> sinkFuture = request.second().toCompletableFuture()
                 .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
 
@@ -299,55 +296,54 @@ class AkkaWebSocketTest {
         // Then - check all returned server responses are as expected
         // **
 
-        // Get the result of the client sink, a list of (Websocket) responses
+        // Get the result of the client sink, a list of (WebSocket) responses
         List<WebSocketMessage> results = sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS);
         assertThat(results)
                 .hasSize(N_MESSAGES * 2);
 
-        // De-interleave the two lists (hopefully the even ones are PINGs and the odd ones RESOURCEs)
-        LinkedList<WebSocketMessage> pongMessages = IntStream.range(0, N_MESSAGES * 2)
-                .filter(x -> x % 2 == 0)
-                .mapToObj(results::get)
+        // De-interleave the two lists
+        // There is no guarantee that messages of different types are strictly ordered compared to one another, but messages of the same type are
+        // e.g. we might see CTS 1, PING 1, CTS 2, PING 2, CTS 3, PING 3 -> | SERVER | -> PONG 1, PONG 2, RESOURCE 1, PONG 3, RESOURCE 2, RESOURCE 3
+        LinkedList<WebSocketMessage> pongMessages = results.stream()
+                .filter(result -> result.getType().equals(MessageType.PONG))
                 .collect(Collectors.toCollection(LinkedList::new));
-        LinkedList<WebSocketMessage> resourceMessages = IntStream.range(0, N_MESSAGES * 2)
-                .filter(x -> x % 2 != 0)
-                .mapToObj(results::get)
+        LinkedList<WebSocketMessage> resourceMessages = results.stream()
+                .filter(result -> result.getType().equals(MessageType.RESOURCE) || result.getType().equals(MessageType.COMPLETE))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         assertThat(pongMessages)
-                .as("Assert PING -> PONG")
+                .as("All PINGs should be responded to with PONGs")
                 .hasSize(N_MESSAGES)
                 .allSatisfy(message -> assertThat(message)
                         .extracting(WebSocketMessage::getType)
                         .isEqualTo(MessageType.PONG));
 
         assertThat(resourceMessages.getLast())
-                .as("Assert CTS -> COMPLETE for last messages")
+                .as("Last response to a CTS should be COMPLETE")
                 .extracting(WebSocketMessage::getType)
                 .isEqualTo(MessageType.COMPLETE);
         resourceMessages.removeLast();
         assertThat(resourceMessages)
                 .allSatisfy(message -> {
                     assertThat(message)
-                            .as("Assert CTS -> RESOURCE for not-last messages")
+                            .as("All other responses to client CTS should be RESOURCE")
                             .extracting(WebSocketMessage::getType)
                             .isEqualTo(MessageType.RESOURCE);
                     assertThat(message)
-                            .as("Assert the resource returned was the one expected")
+                            .as("The RESOURCE returned should be the one expected")
                             .extracting(msg -> msg.getBodyObject(FileResource.class))
                             .isEqualTo(testResource);
                 });
 
         assertThat(auditedResources.get())
                 .as("Each request should have been audited")
-                .isNotEmpty()
                 .hasSize(N_MESSAGES - 1) // excluding COMPLETE
                 .allSatisfy(auditedFilteredResourceRequest -> assertThat(auditedFilteredResourceRequest)
                         .extracting(FilteredResourceRequest::getResourceNode)
                         .isEqualTo(MAPPER.valueToTree(testResource)));
     }
 
-    // Handle deserialising JSON TextMessages to WebsocketMessages
+    // Handle deserialising JSON TextMessages to WebSocketMessages
     private WebSocketMessage readTextMessage(final Message message) {
         // Akka will sometimes convert a StrictMessage to a StreamedMessage, so we have to handle both cases here
         StringBuilder builder;
@@ -365,7 +361,7 @@ class AkkaWebSocketTest {
         }
     }
 
-    // Handle serialising WebsocketMessages to JSON TextMessages
+    // Handle serialising WebSocketMessages to JSON TextMessages
     private Message writeTextMessage(final WebSocketMessage message) {
         try {
             return new Strict(MAPPER.writeValueAsString(message));

@@ -40,3 +40,12 @@ async:
 
 server:
   port: 8092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true

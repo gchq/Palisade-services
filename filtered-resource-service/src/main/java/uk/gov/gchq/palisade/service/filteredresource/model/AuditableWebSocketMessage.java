@@ -26,25 +26,25 @@ import uk.gov.gchq.palisade.Generated;
 import java.util.Optional;
 
 /**
- * This class is a container for a {@code WebSocketMessage} and a {@code Pair} of {@code FilteredResourceRequest}
- * and {@code CommittableOffset} during stream processing.
- * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
+ * Collect a {@link WebSocketMessage} prepared to be returned to the client with any other context
+ * required to correctly audit the message as a successful request or not (the original {@link Pair}
+ * from the {@link uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory}).
  */
 public class AuditableWebSocketMessage {
-    private final WebSocketMessage webSocketMessage;
+    private final WebSocketMessage websocketMessage;
     private final Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair;
 
     protected AuditableWebSocketMessage(
-            final @NonNull WebSocketMessage webSocketMessage,
+            final @NonNull WebSocketMessage websocketMessage,
             final @Nullable Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair
     ) {
-        this.webSocketMessage = webSocketMessage;
+        this.websocketMessage = websocketMessage;
         this.auditSuccessPair = auditSuccessPair;
     }
 
     @Generated
     public WebSocketMessage getWebSocketMessage() {
-        return webSocketMessage;
+        return websocketMessage;
     }
 
     @Generated
@@ -53,61 +53,59 @@ public class AuditableWebSocketMessage {
     }
 
     /**
-     * The static builder
+     * Builder for {@link AuditableWebSocketMessage} objects, combining an outbound {@link WebSocketMessage} with its inbound {@link FilteredResourceRequest}.
+     * This is later used to commit the inbound request to Kafka such that it will not be re-read.
      */
     public static class Builder {
-
         /**
-         * The creator function
+         * Create a new builder
          *
-         * @return the composed immutable object
+         * @return the next step in the builder chain
          */
         public static IWebSocketMessage create() {
-            return webSocketMessage -> auditableRequest -> new AuditableWebSocketMessage(webSocketMessage, auditableRequest);
+            return websocketMessage -> auditableRequest -> new AuditableWebSocketMessage(websocketMessage, auditableRequest);
         }
 
         /**
-         * compose with {@code WebSocketMessage}
+         * Compose outbound websocket message
          */
         public interface IWebSocketMessage {
-
             /**
-             * compose value
+             * Compose outbound websocket message
              *
-             * @param webSocketMessage value
-             * @return value object
+             * @param websocketMessage the outbound websocket message
+             * @return the next step in the builder
              */
-            IAuditable withWebSocketMessage(@NonNull WebSocketMessage webSocketMessage);
+            IAuditable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
         }
 
         /**
-         * compose with {@code Pair<FilteredResourceRequest, CommittableOffset>}
+         * Compose inbound request data
          */
         public interface IAuditable {
-
             /**
-             * compose value
+             * Compose inbound request data
              *
-             * @param auditableRequest value or null
-             * @return value object
+             * @param auditableRequest a pair of the inbound request and its offset
+             * @return a completed AuditableWebSocketMessage
              */
             AuditableWebSocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
 
             /**
-             * compose value
+             * Compose inbound request data
              *
-             * @param request value
-             * @param committableOffset value
-             * @return value object
+             * @param request           the inbound request
+             * @param committableOffset the inbound request's kafka offset to be committed back to kafka once done
+             * @return a completed AuditableWebSocketMessage
              */
             default AuditableWebSocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
                 return withAuditablePair(Pair.create(request, committableOffset));
             }
 
             /**
-             * compose value
+             * Don't add any audit information (e.g. an {@link AuditableWebSocketMessage} for a {@link MessageType#PING})
              *
-             * @return value object
+             * @return a completed AuditableWebSocketMessage
              */
             default AuditableWebSocketMessage withoutAuditable() {
                 return withAuditablePair(null);

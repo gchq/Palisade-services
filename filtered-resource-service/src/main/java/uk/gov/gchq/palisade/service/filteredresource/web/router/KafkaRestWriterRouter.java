@@ -37,15 +37,21 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Class to deal with rest messages
+ * Route for "/api/{topic}" to the {@link KafkaProducerService}.
+ * This allows POSTing to one of the given endpoints ( /api/masked-resource | /api/masked-resource-offset | /api/error )
+ * the object to be written to the respective kafka queue. This also exposes an additional /api/{topic}/multi that allows
+ * POSTing a List of objects.
+ * Any HTTP headers present are copied to the Kafka headers.
  */
 public class KafkaRestWriterRouter implements RouteSupplier {
-    private static final int STATUS_VALUE = 202;
+    private static final StatusCode HTTP_ACCEPTED = StatusCode.int2StatusCode(202);
+
     private final KafkaProducerService kafkaProducerService;
 
     /**
-     * Public constructor for the {@code KafkaRestWriterRouter}
-     * @param kafkaProducerService the {@code KafkaProducerService} implementation
+     * Default constructor specifying the {@link KafkaProducerService} to forward requests to.
+     *
+     * @param kafkaProducerService an instance of the service connected to kafka and capable of writing to the upstream queues
      */
     public KafkaRestWriterRouter(final KafkaProducerService kafkaProducerService) {
         this.kafkaProducerService = kafkaProducerService;
@@ -55,8 +61,8 @@ public class KafkaRestWriterRouter implements RouteSupplier {
     public Route get() {
         return Directives.pathPrefix("api", () ->
                 Directives.concat(
-                        Directives.pathPrefix("resource", this::resource),
-                        Directives.pathPrefix("offset", this::offset),
+                        Directives.pathPrefix("masked-resource", this::maskedResource),
+                        Directives.pathPrefix("masked-resource-offset", this::maskedResourceOffset),
                         Directives.pathPrefix("error", this::error)
                 ));
     }
@@ -73,22 +79,22 @@ public class KafkaRestWriterRouter implements RouteSupplier {
                         Directives.extract(KafkaRestWriterRouter::getHeadersMap, headers ->
                                 Directives.entity(Jackson.unmarshaller(domainClass), (T request) -> {
                                     kafkaProduceMethod.apply(headers, Collections.singletonList(request)).join();
-                                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE));
+                                    return Directives.complete(HTTP_ACCEPTED);
                                 })))),
                 Directives.pathPrefix("multi", () -> Directives.post(() ->
                         Directives.extract(KafkaRestWriterRouter::getHeadersMap, headers ->
                                 Directives.entity(Jackson.unmarshaller(domainCollectionClass), (List<T> requests) -> {
                                     kafkaProduceMethod.apply(headers, requests).join();
-                                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE));
+                                    return Directives.complete(HTTP_ACCEPTED);
                                 }))))
         );
     }
 
-    private Route resource() {
+    private Route maskedResource() {
         return apply(FilteredResourceRequest.class, kafkaProducerService::filteredResourceMulti);
     }
 
-    private Route offset() {
+    private Route maskedResourceOffset() {
         return apply(TopicOffsetMessage.class, kafkaProducerService::topicOffsetMulti);
     }
 

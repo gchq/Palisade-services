@@ -412,7 +412,7 @@ class KafkaContractTest {
 
             // test kafka config
             String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port" + kafka.getFirstMappedPort();
+            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + kafka.getFirstMappedPort();
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
         }
 

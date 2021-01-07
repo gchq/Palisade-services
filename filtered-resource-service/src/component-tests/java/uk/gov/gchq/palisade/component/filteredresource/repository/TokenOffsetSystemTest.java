@@ -38,8 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TokenOffsetControllerTest {
-
+class TokenOffsetSystemTest {
 
     @Test
     void testOffsetSystemReturnsEarlyAndLateValues() throws InterruptedException, ExecutionException, TimeoutException {

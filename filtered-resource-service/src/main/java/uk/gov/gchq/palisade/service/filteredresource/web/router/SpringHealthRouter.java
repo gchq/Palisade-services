@@ -32,7 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Class to provide the health of the Spring application
+ * Route for "/health[/|/liveliness|/readiness|/{component}]" to the Spring {@link HealthEndpoint}
+ * or {@link ApplicationAvailability} objects
  */
 public class SpringHealthRouter implements RouteSupplier {
     // Map Spring health Statuses to HTTP status codes
@@ -60,10 +61,10 @@ public class SpringHealthRouter implements RouteSupplier {
     private final ApplicationAvailability applicationAvailability;
 
     /**
-     * Public constructor
+     * Default constructor passing some internal Spring objects to use to expose health and availability status similarly to Spring's /actuator/health
      *
-     * @param springHealthEndpoint the health endpoint for Spring
-     * @param applicationAvailability the availability of the application
+     * @param springHealthEndpoint    backs the /health and /health/{component} endpoints
+     * @param applicationAvailability backs the /health/liveness and /health/readiness endpoints
      */
     public SpringHealthRouter(final HealthEndpoint springHealthEndpoint, final ApplicationAvailability applicationAvailability) {
         this.springHealthEndpoint = springHealthEndpoint;
