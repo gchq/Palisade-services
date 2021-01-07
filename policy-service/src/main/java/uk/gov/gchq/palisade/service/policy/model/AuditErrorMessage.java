@@ -71,7 +71,7 @@ public final class AuditErrorMessage extends AuditMessage {
 
         /**
          * Starter method for the Builder class that uses a PolicyRequest for the request specific part of the Audit message.
-         * This method is called followed by the call to add resource with the IResource interface to create the
+         * This method is called followed by the call to add resource with the IError interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
          * @param request    the request message that was sent to the palisade-service
