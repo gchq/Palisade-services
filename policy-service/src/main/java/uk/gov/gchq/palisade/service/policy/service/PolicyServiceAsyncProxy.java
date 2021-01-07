@@ -119,7 +119,7 @@ public class PolicyServiceAsyncProxy {
      * @return an instance of {@code AuditablePolicyResourceResponse} with the rules applied to the {@code Resource}
      */
     public static AuditablePolicyResourceResponse applyRulesToResource(final AuditablePolicyResourceRules auditablePolicyResourceRules) {
-        Rules rules = auditablePolicyResourceRules.getRules();
+        Rules<LeafResource> rules = auditablePolicyResourceRules.getRules();
         PolicyRequest policyRequest = auditablePolicyResourceRules.getPolicyRequest();
         if (!Objects.isNull(rules)) {
             //apply the rules to the resource - a coarse grain filtering
