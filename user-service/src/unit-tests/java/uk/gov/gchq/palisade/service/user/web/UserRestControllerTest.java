@@ -16,15 +16,10 @@
 
 package uk.gov.gchq.palisade.service.user.web;
 
-import akka.Done;
-import akka.actor.ActorSystem;
-import akka.stream.Materializer;
-import akka.stream.javadsl.Sink;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -38,13 +33,9 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.service.user.model.UserRequest;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
-import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
-import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -53,11 +44,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class UserRestControllerTest {
-    private final LinkedList<ProducerRecord<String, UserRequest>> sinkAggregation = new LinkedList<>();
-    private final Sink<ProducerRecord<String, UserRequest>, CompletionStage<Done>> aggregatorSink = Sink.foreach(sinkAggregation::addLast);
-    private final ConsumerTopicConfiguration mockTopicConfig = Mockito.mock(ConsumerTopicConfiguration.class);
-    private final Topic mockTopic = Mockito.mock(Topic.class);
-    private final Materializer materializer = Materializer.createMaterializer(ActorSystem.create());
     private final UserService service = Mockito.mock(UserService.class);
     private final UserServiceCachingProxy cacheProxy = new UserServiceCachingProxy(service);
 
@@ -99,14 +85,14 @@ class UserRestControllerTest {
         assertThat(addedUser).isEqualTo(expected);
 
         // When
-        User user = cacheProxy.getUser(request.userId);
+        User user = cacheProxy.getUser(request.getUserId());
         // Then
         assertThat(user).isEqualTo(expected);
 
-        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.DEBUG);
+        List<String> debugMessages = getMessages(event -> event.getLevel() == Level.INFO);
         assertThat(debugMessages).isNotEmpty();
         MatcherAssert.assertThat(debugMessages, Matchers.hasItems(
-                Matchers.containsString("Added user")
+                Matchers.containsString("Cache add for userId add-user-request-id")
         ));
     }
 }

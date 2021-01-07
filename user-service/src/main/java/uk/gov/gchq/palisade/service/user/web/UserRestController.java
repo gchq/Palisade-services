@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.service.user.web;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,7 +56,7 @@ public class UserRestController {
      *
      * @param headers a multi-value map of http request headers
      * @param request the (optional) request itself
-     * @return the response from the service, or an error if one occurred
+     * @return a HTTPStatus.ACCEPTED
      */
     @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> userRequest(
@@ -63,16 +64,19 @@ public class UserRestController {
             final @RequestBody(required = false) UserRequest request) {
 
         // Process the request and return results
-        return service.processRequest(headers, Collections.singletonList(request));
+        service.processRequest(headers, Collections.singletonList(request)).join();
+
+        // Return result
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     /**
      * REST endpoint for debugging the service, mimicking the Kafka API.
-     * Takes a list of requests and processes each of them with the given headers
+     * Takes a list of requests and processes each of them with the given headers.
      *
      * @param headers  a multi-value map of http request headers
      * @param requests a list of requests
-     * @return the response from the service, or an error if one occurred
+     * @return a HTTPStatus.ACCEPTED
      */
     @PostMapping(value = "/user/multi", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> userRequestMulti(
@@ -80,6 +84,9 @@ public class UserRestController {
             final @RequestBody Collection<UserRequest> requests) {
 
         // Process the request and return results
-        return service.processRequest(headers, requests);
+        service.processRequest(headers, requests).join();
+
+        // Return result
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

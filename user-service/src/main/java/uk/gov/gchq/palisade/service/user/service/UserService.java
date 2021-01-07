@@ -22,11 +22,11 @@ import uk.gov.gchq.palisade.service.user.exception.NoSuchUserIdException;
 
 /**
  * <p> The core API for the user service. </p> <p> The responsibility of the user service is to maintain the mapping
- * between currently active user IDs and the users they correspond to. Each user has a given ID which can be added to
+ * between currently active user IDs, and the users they correspond to. Each user has a given ID which can be added to
  * the user service and retrieved later by the client. </p> <p> <strong>Please note that it is not the responsibility of
  * any {@link UserService} implementation to provide the authentication of individual users, or to maintain a database
  * of 'Palisade' users.</strong> The actual authentication of users should be provided by an external service outside of
- * Palisade. For example, this could be via a centralised PKI service or by a SASL/Kerberos implementation. </p>
+ * Palisade. For example, this could be via a centralized PKI service or by a SASL/Kerberos implementation. </p>
  */
 public interface UserService extends Service {
     /**
@@ -42,7 +42,7 @@ public interface UserService extends Service {
 
     /**
      * Adds the user to the {@link UserService}. The {@link User} should be fully populated with all the necessary
-     * attributes about the user such as roles and authorisations.
+     * attributes about the user such as roles and authorizations.
      *
      * @param user the user with details to add
      * @return the instance of {@link User} which has been added (for caching reasons)

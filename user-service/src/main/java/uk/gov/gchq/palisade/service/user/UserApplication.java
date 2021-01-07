@@ -27,13 +27,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.UserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.user.service.UserService;
-import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
+import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
 import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.user.stream.ProducerTopicConfiguration;
 
@@ -47,9 +46,8 @@ import java.util.stream.Collectors;
 /**
  * SpringBoot application entry-point method for the {@link UserApplication} executable
  */
-@EnableDiscoveryClient
-@EnableCaching
 @SpringBootApplication
+@EnableCaching
 @EnableConfigurationProperties({ProducerTopicConfiguration.class, ConsumerTopicConfiguration.class})
 public class UserApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserApplication.class);
@@ -57,7 +55,7 @@ public class UserApplication {
     private final Set<RunnableGraph<?>> runners;
     private final Materializer materializer;
     private final Executor executor;
-    private final UserServiceAsyncProxy service;
+    private final UserServiceCachingProxy service;
     private final UserConfiguration userConfig;
 
     /**
@@ -72,9 +70,9 @@ public class UserApplication {
     public UserApplication(
             final Collection<RunnableGraph<?>> runners,
             final Materializer materializer,
-            @Qualifier("asyncUserServiceProxy") final UserServiceAsyncProxy service,
+            final UserServiceCachingProxy service,
             @Qualifier("userConfiguration") final UserConfiguration configuration,
-            @Qualifier("applicationTaskExecutor") final Executor executor) {
+            @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.service = service;
         this.userConfig = configuration;
         this.runners = new HashSet<>(runners);
@@ -88,30 +86,27 @@ public class UserApplication {
      * @param args command-line arguments passed to the application
      */
     public static void main(final String[] args) {
-        LOGGER.debug("UserApplication started with: {} {} {}", UserApplication.class, "main", args);
+        LOGGER.debug("UserApplication started with: {}", (Object) args);
         new SpringApplicationBuilder(UserApplication.class).web(WebApplicationType.SERVLET)
                 .run(args);
     }
 
     /**
-     * Adds a user from a configuration file to the cache of the {@link UserService}
+     * First pre-populates the cache using a configuration yaml file
+     * Then runs all available Akka {@link RunnableGraph}s until completion.
+     * The 'main' threads of the application during runtime are the completable futures spawned here.
      */
     @EventListener(ApplicationReadyEvent.class)
-    public void initPostConstruct() {
-        LOGGER.info("Prepopulating using user config: {}", userConfig.getClass());
+    public void serveForever() {
+        // First pre-populate the cache
+        LOGGER.info("Pre-populating using user config: {}", userConfig.getClass());
         // Add example users to the user-service cache
         userConfig.getUsers().stream()
                 .map(UserPrepopulationFactory::build)
                 .peek(user -> LOGGER.debug(user.toString()))
                 .forEach(service::addUser);
-    }
 
-    /**
-     * Runs all available Akka {@link RunnableGraph}s until completion.
-     * The 'main' threads of the application during runtime are the completable futures spawned here.
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void serveForever() {
+        // Then start up kafka
         Set<CompletableFuture<?>> runnerThreads = runners.stream()
                 .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
                 .collect(Collectors.toSet());
