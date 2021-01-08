@@ -16,16 +16,16 @@
 package uk.gov.gchq.palisade.service.filteredresource.exception;
 
 /**
- * A {@code NoStartMarkerObservedException} is a {@link RuntimeException} thrown by a
+ * A {@code NoResourcesObservedException} is a {@link RuntimeException} thrown by a
  * Filtered Resource implementation to indicate that the Start of stream doesn't exist or wasn't observed.
  */
-public class NoStartMarkerObservedException extends RuntimeException {
+public class NoResourcesObservedException extends RuntimeException {
 
 
     /**
      * Initializes this exception with no message or cause.
      */
-    public NoStartMarkerObservedException() {
+    public NoResourcesObservedException() {
     }
 
     /**
@@ -33,7 +33,7 @@ public class NoStartMarkerObservedException extends RuntimeException {
      *
      * @param message message for the exception
      */
-    public NoStartMarkerObservedException(final String message) {
+    public NoResourcesObservedException(final String message) {
         super(message);
     }
 
@@ -43,7 +43,7 @@ public class NoStartMarkerObservedException extends RuntimeException {
      * @param message   message to report
      * @param throwable the underlying cause of this exception
      */
-    public NoStartMarkerObservedException(final String message, final Throwable throwable) {
+    public NoResourcesObservedException(final String message, final Throwable throwable) {
         super(message, throwable);
     }
 }
