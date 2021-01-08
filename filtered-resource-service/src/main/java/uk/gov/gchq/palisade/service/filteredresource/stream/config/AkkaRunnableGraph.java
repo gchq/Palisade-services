@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
@@ -59,9 +60,11 @@ import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventServi
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration.Topic;
+import uk.gov.gchq.palisade.service.filteredresource.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaComponentsConfig.PartitionedOffsetSourceFactory;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -142,7 +145,7 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    FilteredResourceSourceFactory filteredResourceSourceFactory(final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory) {
+    FilteredResourceSourceFactory filteredResourceSourceFactory(final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory, final ProducerTopicConfiguration topicConfiguration) {
         return (String token, Long offset) -> {
             // Set-up some objects to hold a minimal amount of state for this stream
             // These are mostly used for sanity checks
@@ -150,6 +153,9 @@ public class AkkaRunnableGraph {
             final AtomicBoolean observedStart = new AtomicBoolean(false);
             // Has a stream resource message been seen
             final AtomicBoolean observedResource = new AtomicBoolean(false);
+            // Get error topic from config
+            Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
+            final int partition = Token.toPartition(token, errorTopic.getPartitions());
 
             // Connect to the stream of resources using this token and the offset from the persistence layer
             return sourceFactory.create(token, offset)
@@ -163,7 +169,7 @@ public class AkkaRunnableGraph {
                                 .map(StreamMarker::valueOf);
                         Optional<FilteredResourceRequest> request = Optional.ofNullable(message.record().value());
                         // Return each of the useful extracted objects, including the committable which will be passed to the audit service
-                        return new Tuple4<>(messageToken, streamMarker, request, message.committableOffset());
+                        return new Tuple4<>(messageToken, streamMarker, request, message));
                     })
 
                     // Filter for just this token's result set
@@ -177,7 +183,7 @@ public class AkkaRunnableGraph {
                     // We may have got an offset from persistence, in which case the stream has probably seeked to the START message.
                     // If not, the first element in the stream after filtering should still be the START message.
                     // This assumes that the START message, if present, is the first message (kafka has kept our messages ordered properly).
-                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableOffset> tokenMarkerRequestCommittable) -> {
+                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage> tokenMarkerRequestCommittable) -> {
                         if (!observedStart.get()) {
                             tokenMarkerRequestCommittable.t2()
                                     .filter(StreamMarker.START::equals)
@@ -185,10 +191,30 @@ public class AkkaRunnableGraph {
                                     .ifPresentOrElse(
                                             startMarker -> observedStart.set(true),
                                             //TODO message to error topic here
-                                            () -> LOGGER.error("Never observed START marker")
+                                            () -> {
+                                                // Extract the headers
+                                                Headers headers = tokenMarkerRequestCommittable.t4().record().headers();
+                                                // Extract the FilteredResourceRequest from the optional
+                                                tokenMarkerRequestCommittable.t3().map((FilteredResourceRequest filteredResourceRequest) -> {
+
+                                                    // Build the error message
+                                                    AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(filteredResourceRequest.getUserId())
+                                                            .withResourceId(filteredResourceRequest.getResourceId())
+                                                            .withContextNode(filteredResourceRequest.getContextNode())
+                                                                    .withAttributes(Collections.emptyMap())
+                                                            .withError(new NoStartMarkerObservedException());
+
+                                                    // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
+                                                    return new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
+                                                            SerDesConfig.errorValueSerializer().serialize(null, auditErrorMessage), headers);
+                                                });
+                                            }
                                     );
                         }
-                        return tokenMarkerRequestCommittable;
+                        return new Tuple4<>(tokenMarkerRequestCommittable.t1(),
+                                tokenMarkerRequestCommittable.t2(),
+                                tokenMarkerRequestCommittable.t3(),
+                                tokenMarkerRequestCommittable.t4().committableOffset());
                     })
 
                     // We must check for the specific case where the client made a request and all results were redacted.
