@@ -31,6 +31,7 @@ write_to_kafka () {
   read -r REPLICATION <<< $3
   echo ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME
   until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
+    ./bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic ${!topic}
     echo Retrying creation of topic $NAME $PARTITION $REPLICATION
     sleep 10
   done
