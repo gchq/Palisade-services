@@ -26,16 +26,16 @@
 #REPLICATION: The replication-factor to associate with this topic
 #e.g write_to_kafka palisade 1 1
 write_to_kafka () {
-  read -r NAME <<< "$1"
-  read -r PARTITION <<< "$2"
-  read -r REPLICATION <<< "$3"
+  read -r NAME <<< $1
+  read -r PARTITION <<< $2
+  read -r REPLICATION <<< $3
 
   attempts=0
   echo ./bin/kafka-topics.sh --create --replication-factor "$REPLICATION" --partitions "$PARTITION" --zookeeper "$ZOOKEEPER" --topic "$NAME"
   until ./bin/kafka-topics.sh --create --replication-factor "$REPLICATION" --partitions "$PARTITION" --zookeeper "$ZOOKEEPER" --topic "$NAME"; do
     ((attempts=attempts+1))
     if [ "$attempts" -ge 2 ]; then
-      printf "Failed after %s attempts, topics may have been created OK." $attempts
+      printf "Failed after %s attempts, topics may have been created OK.\n" $attempts
       break
     fi
     echo Retrying attempt "$attempts" creation of topic "$NAME" "$PARTITION" "$REPLICATION"
