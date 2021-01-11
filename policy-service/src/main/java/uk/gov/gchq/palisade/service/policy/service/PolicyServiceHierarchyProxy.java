@@ -81,6 +81,7 @@ public class PolicyServiceHierarchyProxy {
         return mergedRules;
     }
 
+
     /**
      * This is where any resource level access controls are enforced, taking the resource, user, context and rules.
      *

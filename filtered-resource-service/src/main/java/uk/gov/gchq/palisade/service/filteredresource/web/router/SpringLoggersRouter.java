@@ -27,12 +27,9 @@ import org.springframework.boot.logging.LogLevel;
 import java.util.Map;
 
 /**
- * A class to help with routing the log level changes
+ * Route for "/loggers/{classpath}" to the Spring {@link LoggersEndpoint} for setting logging levels
  */
 public class SpringLoggersRouter implements RouteSupplier {
-
-    private static final int STATUS_VALUE = 200;
-
     /**
      * Provide Jackson with a zero-args-constructor creator method to call for incoming setLoggerLevel requests (POST LoggerLevels)
      */
@@ -42,12 +39,14 @@ public class SpringLoggersRouter implements RouteSupplier {
         }
     }
 
+    private static final StatusCode HTTP_OK = StatusCode.int2StatusCode(200);
+
     private final LoggersEndpoint springLoggersEndpoint;
 
     /**
-     * Public constructor
+     * Default constructor exposing similar behaviour to Spring's /actuator/loggers
      *
-     * @param springLoggersEndpoint the logging endpoint details
+     * @param springLoggersEndpoint Spring's internal LoggersEndpoint object used by its stock actuator
      */
     public SpringLoggersRouter(final LoggersEndpoint springLoggersEndpoint) {
         this.springLoggersEndpoint = springLoggersEndpoint;
@@ -56,7 +55,7 @@ public class SpringLoggersRouter implements RouteSupplier {
     private Route getLoggerLevel(final String path) {
         return Directives.get(() -> {
             LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
-            return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
+            return Directives.complete(HTTP_OK, entity, Jackson.marshaller());
         });
     }
 
@@ -65,14 +64,14 @@ public class SpringLoggersRouter implements RouteSupplier {
                 Directives.entity(Jackson.unmarshaller(DeserializableLoggerLevels.class), (DeserializableLoggerLevels loggerLevel) -> {
                     springLoggersEndpoint.configureLogLevel(path, LogLevel.valueOf(loggerLevel.getConfiguredLevel()));
                     LoggerLevels entity = springLoggersEndpoint.loggerLevels(path);
-                    return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
+                    return Directives.complete(HTTP_OK, entity, Jackson.marshaller());
                 }));
     }
 
     private Route getLoggers() {
         return Directives.get(() -> {
             Map<String, Object> entity = springLoggersEndpoint.loggers();
-            return Directives.complete(StatusCode.int2StatusCode(STATUS_VALUE), entity, Jackson.marshaller());
+            return Directives.complete(HTTP_OK, entity, Jackson.marshaller());
         });
     }
 

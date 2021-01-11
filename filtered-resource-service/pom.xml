@@ -123,6 +123,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Kafka contract testing -->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Akka actor-system testing -->
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor-testkit-typed_${scala.version}</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Akka streams testing -->
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-stream-testkit_${scala.version}</artifactId>

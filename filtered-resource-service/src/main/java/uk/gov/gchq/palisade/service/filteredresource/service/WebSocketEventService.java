@@ -27,6 +27,7 @@ import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
@@ -58,7 +59,7 @@ public class WebSocketEventService {
     private final FilteredResourceSourceFactory resourceSourceFactory;
 
     /**
-     * Default constructor for a new WebsocketEventService, supplying the persistence layer for retrieving token offsets.
+     * Default constructor for a new WebSocketEventService, supplying the persistence layer for retrieving token offsets.
      * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
      * back to the client as required.
      *
@@ -76,7 +77,7 @@ public class WebSocketEventService {
     }
 
     /**
-     * Create a flow from incoming to outgoing Websocket {@link Message}s.
+     * Create a flow from incoming to outgoing WebSocket {@link Message}s.
      * These are expected to be {@link BinaryMessage}s of json-serialised {@link WebSocketMessage}s.
      * <p>
      * This flow will accept the client {@link MessageType}s and return server types as follows:
@@ -104,7 +105,7 @@ public class WebSocketEventService {
                         // On PING message, do a PONG
                         MessageType.PING.ordinal(), onPing(token),
                         // On CTS message, get the offset for the token from persistence, then return results
-                        MessageType.CTS.ordinal(), this.onCts(token)
+                        MessageType.CTS.ordinal(), onCts(token)
                 )));
     }
 
@@ -144,7 +145,18 @@ public class WebSocketEventService {
                 .zip(this.createResourceSource(token))
 
                 // Drop the CTS message, we don't care about it's contents beyond the MessageType
-                .map(Pair::second);
+                .map(Pair::second)
+
+                // Connect to the audit topic kafka stream for resources returned to the client
+                // Each filtered resource request is audited as soon as we receive a CTS message
+                // for it from the client (before the resource is returned to the client)
+                .alsoTo(Flow.<AuditableWebSocketMessage>create()
+                        .map(AuditableWebSocketMessage::getAuditSuccessPair)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .to(this.auditSinkFactory.create(token)))
+
+                .map(AuditableWebSocketMessage::getWebSocketMessage);
     }
 
     /**
@@ -152,9 +164,9 @@ public class WebSocketEventService {
      * or {@link MessageType#ERROR}s.
      *
      * @param token the token for this client
-     * @return a source of {@link MessageType#RESOURCE}s or {@link MessageType#ERROR}s
+     * @return a source of {@link WebSocketMessage}s paired with an auditable context
      */
-    private Source<WebSocketMessage, NotUsed> createResourceSource(final String token) {
+    private Source<AuditableWebSocketMessage, NotUsed> createResourceSource(final String token) {
         // Connect to the client's stream of resources by retrieving the token's offset and connecting to kafka
         return Source.single(token)
                 // Get the offset for the given token
@@ -166,33 +178,32 @@ public class WebSocketEventService {
                 .flatMapConcat(offsetResponse -> Optional.ofNullable(offsetResponse.getOffset())
                         // If an offset was successfully found for this token, emit many RESOURCE messages
                         .map(offset -> this.resourceSourceFactory.create(token, offset)
-                                // Connect to the audit topic kafka stream for resources returned to the client
-                                // Each filtered resource request is audited as soon as we receive a CTS message
-                                // for it from the client (before the resource is returned to the client)
-                                .alsoTo(this.auditSinkFactory.create(token))
-
-                                // Drop the now-committed offset from the pair, keeping just a filteredResourceRequest
-                                .map(Pair::first)
-
-                                // Convert the leafResource into a WebsocketMessage response object, copying appropriate headers
-                                .map(request -> WebSocketMessage.Builder.create()
-                                        .withType(MessageType.RESOURCE)
-                                        .withHeader(Token.HEADER, token).noHeaders()
-                                        .withBody(request.getResourceNode()))
+                                // Convert to an internal datatype capturing all necessary information
+                                .map(pair -> AuditableWebSocketMessage.Builder.create()
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.RESOURCE)
+                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .withBody(pair.first().getResourceNode()))
+                                        .withAuditablePair(pair))
 
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
 
                         // If an error occurred finding the offset, emit a single ERROR message
-                        .orElse(Source.single(WebSocketMessage.Builder.create()
-                                .withType(MessageType.ERROR)
-                                .withHeader(Token.HEADER, token).noHeaders()
-                                .withBody(offsetResponse.getException()))))
-                // Append COMPLETE message
-                .concat(Source.single(WebSocketMessage.Builder.create()
-                        .withType(MessageType.COMPLETE)
-                        .withHeader(Token.HEADER, token).noHeaders()
-                        .noBody()));
+                        .orElse(Source.single(AuditableWebSocketMessage.Builder.create()
+                                .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                        .withType(MessageType.ERROR)
+                                        .withHeader(Token.HEADER, token).noHeaders()
+                                        .withBody(offsetResponse.getException()))
+                                .withoutAuditable())))
 
+                // Append COMPLETE message
+                .concat(Source.single(AuditableWebSocketMessage.Builder.create()
+                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                .withType(MessageType.COMPLETE)
+                                .withHeader(Token.HEADER, token).noHeaders()
+                                .noBody())
+                        .withoutAuditable()));
     }
+
 }

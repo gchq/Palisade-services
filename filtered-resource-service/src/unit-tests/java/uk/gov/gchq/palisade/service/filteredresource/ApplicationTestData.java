@@ -24,7 +24,9 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 
 public final class ApplicationTestData {
     /**
@@ -64,5 +66,10 @@ public final class ApplicationTestData {
     public static final TokenOffsetEntity OFFSET_ENTITY = new TokenOffsetEntity(REQUEST_TOKEN, OFFSET);
     public static final TopicOffsetMessage OFFSET_MESSAGE = TopicOffsetMessage.Builder.create()
             .withQueuePointer(OFFSET);
+
+    public static final WebSocketMessage WS_MESSAGE = WebSocketMessage.Builder.create()
+            .withType(MessageType.RESOURCE)
+            .noHeaders()
+            .withBody(LEAF_RESOURCE);
 
 }

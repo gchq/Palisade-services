@@ -36,6 +36,7 @@ import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.slf4j.Logger;
@@ -155,7 +156,8 @@ public class AkkaRunnableGraph {
                         Headers headers = message.record().headers();
                         String messageToken = new String(headers.lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                         // Get the StreamMarker (START or END) from headers (maybe Optional::empty if no StreamMarker)
-                        Optional<StreamMarker> streamMarker = Optional.ofNullable(headers.lastHeader(StreamMarker.HEADER).value())
+                        Optional<StreamMarker> streamMarker = Optional.ofNullable(headers.lastHeader(StreamMarker.HEADER))
+                                .map(Header::value)
                                 .map(String::new)
                                 .map(StreamMarker::valueOf);
                         Optional<FilteredResourceRequest> request = Optional.ofNullable(message.record().value());
@@ -168,8 +170,9 @@ public class AkkaRunnableGraph {
 
                     // Drop everything after the END message
                     .takeWhile(tokenMarkerRequestCommittable -> tokenMarkerRequestCommittable.t2()
-                            .filter(StreamMarker.END::equals)
-                            .isEmpty())
+                                    .filter(StreamMarker.END::equals)
+                                    .isEmpty(),
+                            true) // include END
 
                     // We may have got an offset from persistence, in which case the stream has probably seeked to the START message.
                     // If not, the first element in the stream after filtering should still be the START message.
@@ -212,7 +215,6 @@ public class AkkaRunnableGraph {
                             .stream()));
         };
     }
-
 
     // Take an incoming flow of Optional FilteredResourceRequests and audit those which are present.
     // This should consume the provided {@link CommittableOffset} and commit it to kafka.
