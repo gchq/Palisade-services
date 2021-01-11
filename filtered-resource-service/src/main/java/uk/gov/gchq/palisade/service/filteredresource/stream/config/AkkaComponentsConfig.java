@@ -79,17 +79,19 @@ public class AkkaComponentsConfig {
          * @param token  the client's token for this request, which is used for the consumer group-id and partition selection
          * @param offset the offset to start with for the given token
          * @return a new Kafka source
+         * @implNote the offset should come from the {@link uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController}
+         * to ensure it is accurate (i.e. it points to the start-of-stream message)
          */
         Source<CommittableMessage<K, V>, Control> create(String token, Long offset);
     }
 
     @Bean
     PartitionedOffsetSourceFactory<String, FilteredResourceRequest> committableRequestSourceFactory(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+        Topic topic = configuration.getTopics().get("input-topic");
         ConsumerSettings<String, FilteredResourceRequest> consumerSettings = INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.maskedResourceKeyDeserializer(),
                 SerDesConfig.maskedResourceValueDeserializer());
-        Topic topic = configuration.getTopics().get("input-topic");
 
         return (String token, Long offset) -> {
             // Convert the token to a partition number
@@ -105,12 +107,11 @@ public class AkkaComponentsConfig {
 
     @Bean
     Source<CommittableMessage<String, TopicOffsetMessage>, Control> committableOffsetSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+        Topic topic = configuration.getTopics().get("offset-topic");
         ConsumerSettings<String, TopicOffsetMessage> consumerSettings = OFFSET_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.maskedResourceOffsetKeyDeserializer(),
                 SerDesConfig.maskedResourceOffsetValueDeserializer());
-
-        Topic topic = configuration.getTopics().get("input-topic");
         Subscription subscription = Optional.ofNullable(topic.getAssignment())
                 .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(topic.getName(), partition)))
                 .orElse(Subscriptions.topics(topic.getName()));

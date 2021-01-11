@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.filteredresource.service;
 
 import akka.Done;
 import akka.stream.Materializer;
-import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -103,10 +102,8 @@ public class KafkaProducerService {
                 .map(request -> new ProducerRecord<String, T>(topic.getName(), partition, null, request.orElse(null), kafkaHeaders))
 
                 // Sink records to this service's upstream topic (not downstream)
-                .toMat(sink, Keep.right())
-
                 // Run the graph
-                .run(this.materializer)
+                .runWith(sink, this.materializer)
 
                 // Return a CompletableFuture<Void> result
                 .toCompletableFuture()

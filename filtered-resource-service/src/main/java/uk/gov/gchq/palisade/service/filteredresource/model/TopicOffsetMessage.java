@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-
 /**
  * TopicOffsetMessage represents the output of the filtered-resource-service which will be forwarded to the client provide the
  * information needed to retrieve the data for this Resource.

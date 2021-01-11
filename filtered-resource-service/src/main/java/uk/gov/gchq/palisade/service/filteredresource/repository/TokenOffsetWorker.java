@@ -23,6 +23,8 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.DeregisterWorker;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetWorker.WorkerCommand;
@@ -34,6 +36,8 @@ import java.util.Optional;
  * given a token (from websocket url "ws://filtered-resource-service/resource/$token")
  */
 final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenOffsetWorker.class);
+
     protected interface WorkerCommand {
         // Marker interface for inputs of the worker
     }
@@ -138,10 +142,15 @@ final class TokenOffsetWorker extends AbstractBehavior<WorkerCommand> {
 
                 // Switch state to Setting mode
                 .onMessage(SetOffset.class, (SetOffset setOffset) -> {
-                    // Tell the replyTo actor the offset that has been received
-                    getCmd.replyTo.tell(setOffset);
-                    // Stop this actor
-                    return Behaviors.stopped();
+                    if (setOffset.token.equals(getCmd.token)) {
+                        // Tell the replyTo actor the offset that has been received
+                        getCmd.replyTo.tell(setOffset);
+                        // Stop this actor
+                        return Behaviors.stopped();
+                    } else {
+                        LOGGER.warn("Received setOffset for token '{}', but was expecting offset for token '{}'", setOffset.token, getCmd.token);
+                        return Behaviors.same();
+                    }
                 })
                 .build();
     }
