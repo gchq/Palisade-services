@@ -98,7 +98,9 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersi
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -301,8 +303,19 @@ class KafkaRestWebSocketContractTest {
             // Expected output
             final List<WebSocketMessage> websocketResponses,
             final List<AuditErrorMessage> auditErrorMessages
-    ) throws InterruptedException, ExecutionException, TimeoutException {
+    ) throws InterruptedException, ExecutionException, TimeoutException, IOException {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
+        LOGGER.info("Running with: {} {} {} {} {} {} {} {}", requestToken, maskedResourceTopic, maskedResourceOffsetTopic, errorTopic, offsetsPersistence, websocketRequests, websocketResponses, auditErrorMessages);
+
+        // Given
+        // Connect to the kafka error queue
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
+                .plainSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // Given
         // POST maskedResource to KafkaController
@@ -361,23 +374,18 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
+        Process p = new ProcessBuilder()
+                .command(List.of("kafkacat", "-b", KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers(), "-t", "error", "-C", "-f", "'Topic %t [%p] at offset %o: key %k: %s\\n'"))
+                .inheritIO()
+                .start();
+        p.waitFor(5, TimeUnit.SECONDS);
+        p.destroy();
+
         // When you read off the error queue
-        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-
-        Probe<ConsumerRecord<String, AuditErrorMessage>> errorResultSeq = errorProbe.request(errorTopic.size() + auditErrorMessages.size());
-        LongStream.range(0, errorTopic.size())
-                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
-                .forEach(ignored -> LOGGER.info("ignoring message {}", ignored));
-
-        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
-                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, errorTopic.size() + auditErrorMessages.size())
+                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20, TimeUnit.SECONDS)))
+                .peek(msg -> LOGGER.info("Received (but might drop) : {}", msg))
+                .skip(errorTopic.size())
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Assert that there is a message on the error topic, check the header contains the token and check the error message value
