@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
@@ -165,6 +166,9 @@ public class AkkaRunnableGraph {
                                             .orElse(!observedStart.get()))
 
                                     .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>> tokenMarkerRequestCommittable) -> {
+                                        // Only audit once, not for each resource in which the Start Marker is missing
+                                        observedStart.set(true);
+
                                         // Extract the headers
                                         Headers headers = tokenMarkerRequestCommittable.t4().record().headers();
                                         // Extract the FilteredResourceRequest from the optional
@@ -202,31 +206,24 @@ public class AkkaRunnableGraph {
                                             })
                                             // If we haven't seen any resources, then audit it
                                             .orElse(tokenMarkerRequestCommittable.t2()
-                                                    .filter(marker -> marker == StreamMarker.END)
-                                                    .map(endMarker -> !observedResource.get())
-                                                    .orElse(false)))
+                                                    .filter(StreamMarker.END::equals)
+                                                    .filter(endMarker -> !observedResource.get())
+                                                    .isPresent()))
 
                                     .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>> tokenMarkerRequestCommittable) -> {
                                         // Extract the headers
                                         Headers headers = tokenMarkerRequestCommittable.t4().record().headers();
-                                        // Extract the FilteredResourceRequest from the optional
-                                        return tokenMarkerRequestCommittable.t3().map((FilteredResourceRequest filteredResourceRequest) -> {
 
-                                            // Build the error message
-                                            AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(filteredResourceRequest.getUserId())
-                                                    .withResourceId(filteredResourceRequest.getResourceId())
-                                                    .withContextNode(filteredResourceRequest.getContextNode())
-                                                    .withAttributes(Collections.emptyMap())
-                                                    .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestCommittable.t1()));
+                                        // Build the error message
+                                        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create().withUserId("unknown")
+                                                .withResourceId("unknown")
+                                                .withContext(new Context().purpose("unknown"))
+                                                .withAttributes(Collections.emptyMap())
+                                                .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestCommittable.t1()));
 
-                                            // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
-                                            return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
-                                        });
+                                        // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
+                                        return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
                                     })
-
-                                    //Get the ProducerRecord<String, AuditErrorMessage>
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
 
                                     // Audit the error
                                     .to(auditErrorSink))

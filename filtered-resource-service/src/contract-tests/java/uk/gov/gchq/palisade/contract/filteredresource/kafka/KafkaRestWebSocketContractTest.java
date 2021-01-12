@@ -29,15 +29,24 @@ import akka.http.javadsl.model.ws.WebSocketRequest;
 import akka.http.javadsl.model.ws.WebSocketUpgradeResponse;
 import akka.http.scaladsl.model.ws.TextMessage.Strict;
 import akka.japi.Pair;
+import akka.kafka.ConsumerSettings;
+import akka.kafka.Subscriptions;
+import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Keep;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import akka.stream.testkit.TestSubscriber.Probe;
+import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -65,9 +74,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
+import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.KafkaInitializer;
+import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.RedisInitializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
@@ -84,8 +95,10 @@ import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -97,6 +110,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -121,6 +136,12 @@ class KafkaRestWebSocketContractTest {
 
     @Autowired
     private TokenOffsetPersistenceLayer persistenceLayer;
+    @Autowired
+    private ActorSystem akkaActorSystem;
+    @Autowired
+    private Materializer akkaMaterializer;
+    @Autowired
+    private ProducerTopicConfiguration producerTopicConfiguration;
 
     private static class ParameterizedArguments implements ArgumentsProvider {
         @Override
@@ -193,7 +214,7 @@ class KafkaRestWebSocketContractTest {
                             List.of(),
                             List.of(),
                             Map.of(
-                                    "test-token-2", 5L
+                                    "test-token-2", 0L
                             ),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
@@ -209,13 +230,14 @@ class KafkaRestWebSocketContractTest {
                     Arguments.of(
                             "test-token-3",
                             List.of(
+                                    //No Start Marker
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
                             ),
                             List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(10L))
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
                             ),
                             List.of(),
                             Map.of(),
@@ -233,16 +255,6 @@ class KafkaRestWebSocketContractTest {
                                             .withResourceId("file:/file/resource.1")
                                             .withContext(new Context().purpose("purpose"))
                                             .withAttributes(Collections.emptyMap())
-                                            .withError(new NoStartMarkerObservedException()),
-                                    AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file/resource.2")
-                                            .withContext(new Context().purpose("purpose"))
-                                            .withAttributes(Collections.emptyMap())
-                                            .withError(new NoStartMarkerObservedException()),
-                                    AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file/resource.3")
-                                            .withContext(new Context().purpose("purpose"))
-                                            .withAttributes(Collections.emptyMap())
                                             .withError(new NoStartMarkerObservedException())
                             )
                     ),
@@ -254,7 +266,7 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
                             ),
                             List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(15L))
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
                             ),
                             List.of(),
                             Map.of(),
@@ -265,11 +277,11 @@ class KafkaRestWebSocketContractTest {
                                     WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
                             ),
                             List.of(
-                                    AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("")
-                                            .withContext(new Context().purpose("purpose"))
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
                                             .withAttributes(Collections.emptyMap())
-                                            .withError(new NoResourcesObservedException())
+                                            .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-3"))
                             )
                     )
             );
@@ -349,6 +361,29 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
+        // When you read off the error queue
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
+        Probe<ConsumerRecord<String, AuditErrorMessage>> errorResultSeq = errorProbe.request(errorTopic.size() + auditErrorMessages.size());
+        LongStream.range(0, errorTopic.size())
+                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+                .forEach(ignored -> LOGGER.info("ignoring message {}", ignored));
+
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
+                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Assert that there is a message on the error topic, check the header contains the token and check the error message value
+        assertThat(errorResults)
+                .extracting(ConsumerRecord::value)
+                .isEqualTo(auditErrorMessages);
     }
 
 
@@ -391,19 +426,19 @@ class KafkaRestWebSocketContractTest {
 
 
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
+        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
                 .withReuse(true);
 
         @Override
         public void initialize(@NonNull final ConfigurableApplicationContext context) {
             // Start container
-            redis.start();
+            REDIS.start();
 
             // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
+            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
             // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
+            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
         }
@@ -411,18 +446,18 @@ class KafkaRestWebSocketContractTest {
 
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static KafkaContainer kafka = new KafkaContainer("5.5.1")
+        static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            kafka.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-            kafka.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-            kafka.start();
+            KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
+            KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
+            KAFKA_CONTAINER.start();
 
             // test kafka config
             String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + kafka.getFirstMappedPort();
+            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
         }
 
@@ -444,8 +479,8 @@ class KafkaRestWebSocketContractTest {
 
             @Bean
             KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, kafka);
-                return kafka;
+                createTopics(this.topics, KAFKA_CONTAINER);
+                return KAFKA_CONTAINER;
             }
 
             @Bean
@@ -470,6 +505,18 @@ class KafkaRestWebSocketContractTest {
             @Primary
             Materializer materializer(final ActorSystem system) {
                 return Materializer.createMaterializer(system);
+            }
+        }
+
+        // Deserializer for downstream test error output
+        static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+            @Override
+            public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
+                try {
+                    return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+                } catch (IOException e) {
+                    throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+                }
             }
         }
     }
