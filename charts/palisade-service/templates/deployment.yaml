@@ -62,9 +62,9 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
         - name: "LOADER_PATH"
-          value: {{ include "filtered-resource-service.deployment.path" . }}
+          value: {{ include "palisade-service.deployment.path" . }}
         - name: "SPRING_CONFIG_ADDITIONAL_LOCATION"
-          value: {{ include "filtered-resource-service.config.path" . }}
+          value: {{ include "palisade-service.config.path" . }}
           {{- $envVars := pluck .Values.global.deployment .Values.global.env | first | default .Values.global.env._default }}
           {{- range $item := $envVars }}
         - name: {{ $item.name }}
