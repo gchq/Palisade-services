@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(classes = {PalisadeServiceComponentTest.class, ApplicationConfiguration.class})
 class PalisadeServiceComponentTest extends CommonTestData {
@@ -66,17 +66,21 @@ class PalisadeServiceComponentTest extends CommonTestData {
     }
 
     @Test
-    void testRegisterRequestReturnsAValidTokenRequestPair() {
+    void testRegisterRequestReturnsAValidTokenRequestPair() throws InterruptedException {
         CompletableFuture<String> token = palisadeService.registerDataRequest(PALISADE_REQUEST);
         //UUID.fromString contains its own uuid validation and will throw an error if an incorrect UUID is returned
         UUID uuid = UUID.fromString(token.join());
-        assertAll("testRegisterRequest",
-                () -> assertThat(uuid).isNotNull()
-                        .isInstanceOf(UUID.class),
-                () -> assertThat(sinkCollection)
-                        .hasSize(1)
-                        .usingRecursiveComparison()
-                        .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), AUDITABLE_WITH_REQUEST)))
-        );
+        assertThat(uuid)
+                .isNotNull()
+                .isInstanceOf(UUID.class);
+
+        // Short grace period if the message hasn't been sent to the sink yet
+        if (sinkCollection.size() < 1) {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+        assertThat(sinkCollection)
+                .hasSize(1)
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), AUDITABLE_WITH_REQUEST)));
     }
 }
