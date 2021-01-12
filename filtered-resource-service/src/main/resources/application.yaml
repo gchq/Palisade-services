@@ -41,6 +41,12 @@ management:
       enabled: false
     kafka:
       enabled: true
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 logging:
   level:
@@ -51,12 +57,3 @@ async:
 
 server:
   port: 8092
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    shutdown:
-      enabled: true

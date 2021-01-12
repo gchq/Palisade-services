@@ -74,6 +74,8 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
+import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
+import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
@@ -85,6 +87,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersi
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +95,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -121,8 +125,6 @@ class KafkaRestWebSocketContractTest {
     private static class ParameterizedArguments implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
-            // Request token
-            String token = "test-token";
             // Builders
             Function<String, FilteredResourceRequest> resourceBuilder = resourceId -> FilteredResourceRequest.Builder.create()
                     .withUserId("userId")
@@ -137,30 +139,33 @@ class KafkaRestWebSocketContractTest {
                             .parent(new SystemResource().id("file:/file/")));
             Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
                     ::withQueuePointer;
-            Function<LeafResource, WebSocketMessage> responseBuilder = WebSocketMessage.Builder.create()
+            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.RESOURCE)
                     .withHeader(Token.HEADER, token)
                     .noHeaders()
-                    ::withBody;
+                    .withBody(leafResource);
             // Special instances
             HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
-            HttpHeader tokenHeader = RawHeader.create(Token.HEADER, token);
             HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
             WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-            WebSocketMessage completeMsg = WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, token).noHeaders().noBody();
+            Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.COMPLETE)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .noBody();
             return Stream.of(
                     // Test for 'early' client - topic offset message has offset
                     Arguments.of(
-                            token,
+                            "test-token-1",
                             List.of(
-                                    Pair.create(List.of(tokenHeader, startHeader), null),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(tokenHeader, endHeader), null)
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
                             ),
                             List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, token)), offsetBuilder.apply(0L))
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
                             ),
                             List.of(),
                             Map.of(),
@@ -168,35 +173,103 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    responseBuilder.apply(resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply(resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply(resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsg
-                            )
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-1")
+                            ),
+                            List.of()
                     ),
                     // Test for 'late' client - persistence has offset
                     Arguments.of(
-                            token,
+                            "test-token-2",
                             List.of(
-                                    Pair.create(List.of(tokenHeader, startHeader), null),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(tokenHeader), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(tokenHeader, endHeader), null)
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
                             ),
                             List.of(),
                             List.of(),
                             Map.of(
-                                    token, 0L
+                                    "test-token-2", 5L
                             ),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    responseBuilder.apply(resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply(resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply(resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsg
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-2")
+                            ),
+                            List.of()
+                    ),
+                    Arguments.of(
+                            "test-token-3",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(10L))
+                            ),
+                            List.of(),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-3")
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/resource.1")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new NoStartMarkerObservedException()),
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/resource.2")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new NoStartMarkerObservedException()),
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/resource.3")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new NoStartMarkerObservedException())
+                            )
+                    ),
+                    // Test no resources
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(15L))
+                            ),
+                            List.of(),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new NoResourcesObservedException())
                             )
                     )
             );
@@ -205,7 +278,7 @@ class KafkaRestWebSocketContractTest {
 
     @ParameterizedTest
     @ArgumentsSource(ParameterizedArguments.class)
-    void runContractTest(
+    void testRunKafka(
             // Parameterised input
             final String requestToken,
             final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
@@ -214,7 +287,8 @@ class KafkaRestWebSocketContractTest {
             final Map<String, Long> offsetsPersistence,
             final List<WebSocketMessage> websocketRequests,
             // Expected output
-            final List<WebSocketMessage> websocketResponses
+            final List<WebSocketMessage> websocketResponses,
+            final List<AuditErrorMessage> auditErrorMessages
     ) throws InterruptedException, ExecutionException, TimeoutException {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
 
@@ -272,7 +346,9 @@ class KafkaRestWebSocketContractTest {
         // Then
         // Assert each received response matches up with the expected
         assertThat(actualResponses)
+                .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
+
     }
 
 

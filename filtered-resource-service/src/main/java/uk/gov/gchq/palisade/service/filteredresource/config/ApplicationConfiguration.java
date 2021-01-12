@@ -18,9 +18,6 @@ package uk.gov.gchq.palisade.service.filteredresource.config;
 
 import akka.actor.typed.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,9 +32,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetContr
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
-import uk.gov.gchq.palisade.service.filteredresource.service.KafkaHealthIndicator;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
-import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
 import java.util.concurrent.Executor;
@@ -87,17 +82,6 @@ public class ApplicationConfiguration {
     @Bean("jsonSerialiser")
     ObjectMapper objectMapper() {
         return JSONSerialiser.createDefaultMapper();
-    }
-
-    /**
-     * A bean for the Kafka Health Indicator
-     *
-     * @param adminClient the Kafka admin client
-     * @param topicConfiguration the details of the consumer topic(s)
-     * @return an instance of the {@link KafkaHealthIndicator}
-     */
-    public KafkaHealthIndicator kafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
-        return new KafkaHealthIndicator(adminClient, topicConfiguration);
     }
 
 }

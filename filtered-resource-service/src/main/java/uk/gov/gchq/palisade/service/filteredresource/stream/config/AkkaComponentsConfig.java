@@ -158,11 +158,20 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
+    Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> plainErrorSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AuditErrorMessage> producerSettings = ERROR_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.errorKeySerializer(),
+                SerDesConfig.errorValueSerializer());
+
+        return ERROR_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
     AdminClient adminClient(final ActorSystem actorSystem) {
         final List<? extends Config> servers = actorSystem.settings().config().getConfigList("akka.discovery.config.services.kafka.endpoints");
         final String bootstrap = servers.stream().map(config -> String.format("%s:%d", config.getString("host"), config.getInt("port"))).collect(Collectors.joining(","));
 
         return AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, bootstrap));
     }
-
 }
