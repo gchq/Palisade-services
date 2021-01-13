@@ -215,7 +215,8 @@ public class AkkaRunnableGraph {
                                         Headers headers = tokenMarkerRequestCommittable.t4().record().headers();
 
                                         // Build the error message
-                                        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create().withUserId("unknown")
+                                        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
+                                                .withUserId("unknown")
                                                 .withResourceId("unknown")
                                                 .withContext(new Context().purpose("unknown"))
                                                 .withAttributes(Collections.emptyMap())

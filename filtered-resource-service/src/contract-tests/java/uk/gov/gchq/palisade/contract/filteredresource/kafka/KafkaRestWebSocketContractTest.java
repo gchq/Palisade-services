@@ -42,6 +42,7 @@ import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -115,7 +116,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
-import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.NONE, properties = {"akka.discovery.config.services.kafka.from-config=false"})
@@ -227,6 +227,7 @@ class KafkaRestWebSocketContractTest {
                             ),
                             List.of()
                     ),
+                    //Test no start of stream marker
                     Arguments.of(
                             "test-token-3",
                             List.of(
@@ -255,7 +256,7 @@ class KafkaRestWebSocketContractTest {
                                             .withResourceId("file:/file/resource.1")
                                             .withContext(new Context().purpose("purpose"))
                                             .withAttributes(Collections.emptyMap())
-                                            .withError(new NoStartMarkerObservedException())
+                                            .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + "test-token-3"))
                             )
                     ),
                     // Test no resources
@@ -301,7 +302,7 @@ class KafkaRestWebSocketContractTest {
             // Expected output
             final List<WebSocketMessage> websocketResponses,
             final List<AuditErrorMessage> auditErrorMessages
-    ) throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ) throws InterruptedException, ExecutionException, TimeoutException {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
         LOGGER.info("Running with: {}", requestToken);
 
@@ -346,7 +347,6 @@ class KafkaRestWebSocketContractTest {
                 .overwriteOffset(token, offset)
                 .join());
 
-
         // When
         // Send each websocketMessage request and receive responses
         Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
@@ -374,13 +374,21 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
-
         // When you read off the error queue
         LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, errorTopic.size() + auditErrorMessages.size())
                 .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20, TimeUnit.SECONDS)))
                 .peek(msg -> LOGGER.info("Received (but might drop) : {}", msg))
                 .skip(errorTopic.size())
                 .collect(Collectors.toCollection(LinkedList::new));
+
+//        Probe<ConsumerRecord<String, AuditErrorMessage>> errorResultSeq = errorProbe.request(errorTopic.size() + auditErrorMessages.size());
+//        LongStream.range(0, errorTopic.size())
+//                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+//                .forEach(ignored -> LOGGER.info("ignoring message {}", ignored));
+//
+//        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults2 = LongStream.range(0, auditErrorMessages.size())
+//                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
+//                .collect(Collectors.toCollection(LinkedList::new));
 
         // Then
         // The messages on the error topic are as expected
@@ -427,7 +435,6 @@ class KafkaRestWebSocketContractTest {
         }
     }
 
-
     public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
@@ -447,13 +454,22 @@ class KafkaRestWebSocketContractTest {
         }
     }
 
-
-    public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
                 .withReuse(true);
+        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
+        private static final ObjectMapper MAPPER = new ObjectMapper();
+
+        static void createTopics(final List<NewTopic> newTopics, KafkaContainer KAFKA_CONTAINER) throws ExecutionException, InterruptedException {
+            try (AdminClient admin = AdminClient.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KAFKA_CONTAINER.getFirstMappedPort())))) {
+                admin.createTopics(newTopics);
+                LOGGER.info("created topics: " + admin.listTopics().names().get());
+            }
+        }
 
         @Override
         public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
+            configurableApplicationContext.getEnvironment().setActiveProfiles("k8s", "debug");
             KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
             KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
             KAFKA_CONTAINER.start();
@@ -462,13 +478,6 @@ class KafkaRestWebSocketContractTest {
             String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
             String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
-        }
-
-        static void createTopics(final List<NewTopic> newTopics, final KafkaContainer kafka) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", kafka.getFirstMappedPort())))) {
-                admin.createTopics(newTopics);
-                LOGGER.info("Created topics: {}", admin.listTopics().names().get());
-            }
         }
 
         @Configuration
@@ -481,15 +490,15 @@ class KafkaRestWebSocketContractTest {
                     new NewTopic("error", 1, (short) 1));
 
             @Bean
-            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, KAFKA_CONTAINER);
-                return KAFKA_CONTAINER;
-            }
-
-            @Bean
             @ConditionalOnMissingBean
             static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
                 return new PropertiesConfigurer(resourceLoader, environment);
+            }
+
+            @Bean
+            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
+                createTopics(this.topics, KAFKA_CONTAINER);
+                return KAFKA_CONTAINER;
             }
 
             @Bean
