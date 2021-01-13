@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeResponse;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
@@ -77,9 +77,11 @@ public abstract class PalisadeService {
         String token = this.createToken(request);
 
         return futureSink.thenApply((Sink<TokenRequestPair, ?> sink) -> {
-            AuditablePalisadeRequest auditableRequest = AuditablePalisadeRequest.Builder.create().withPalisadeRequest(request);
+            AuditablePalisadeResponse auditableRequest = AuditablePalisadeResponse.Builder.create()
+                    .withPalisadeRequest(request);
             TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
-            Source.single(requestPair).runWith(sink, materializer);
+            Source.single(requestPair)
+                    .runWith(sink, materializer);
             LOGGER.debug("registerDataRequest returning with token {} for request {}", token, request);
             return token;
         });
@@ -100,8 +102,10 @@ public abstract class PalisadeService {
                              final Map<String, Object> attributes, final Throwable error) {
         // Sends the information to the "error" topic
         // We need to include the token, the PalisadeRequest information and the Error that occurred.
-        AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes).withError(error);
-        AuditablePalisadeRequest auditableRequest = AuditablePalisadeRequest.Builder.create().withAuditErrorMessage(errorMessage);
+        AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes)
+                .withError(error);
+        AuditablePalisadeResponse auditableRequest = AuditablePalisadeResponse.Builder.create()
+                .withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
 
         futureSink.thenApply(sink -> Source.single(requestPair).runWith(sink, materializer));

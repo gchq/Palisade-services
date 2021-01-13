@@ -36,7 +36,7 @@ public class ContractTestData {
     public static final JsonNode ERROR_NODE;
     public static final PalisadeRequest REQUEST_OBJ;
     public static final AuditErrorMessage ERROR_OBJ;
-    public static final String REQUEST_JSON = "{\"userId\":\"testUserId\",\"resourceId\":\"/test/resourceId\",\"context\":{\"contents\":{\"purpose\":\"testContext\"}}}";
+    public static final String REQUEST_JSON = "{\"userId\":\"testUserId\",\"resourceId\":\"/test/resourceId\",\"context\":{\"purpose\":\"testContext\"}}";
     public static final String ERROR_JSON;
     public static final String REQUEST_TOKEN = "test-request-token";
     public static final String ERROR_TOKEN = "";

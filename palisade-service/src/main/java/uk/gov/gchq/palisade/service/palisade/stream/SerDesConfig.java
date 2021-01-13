@@ -22,7 +22,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 
 /**
  * Static configuration for kafka key/value serialisers/deserialisers
@@ -52,12 +52,12 @@ public final class SerDesConfig {
      *
      * @return an appropriate value serialiser for the topic's message content
      */
-    public static Serializer<PalisadeRequest> requestSerializer() {
-        return (String ignored, PalisadeRequest palisadeRequest) -> {
+    public static Serializer<PalisadeSystemResponse> requestSerializer() {
+        return (String ignored, PalisadeSystemResponse request) -> {
             try {
-                return MAPPER.writeValueAsBytes(palisadeRequest);
+                return MAPPER.writeValueAsBytes(request);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + palisadeRequest.toString(), e);
+                throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + request.toString(), e);
             }
         };
     }

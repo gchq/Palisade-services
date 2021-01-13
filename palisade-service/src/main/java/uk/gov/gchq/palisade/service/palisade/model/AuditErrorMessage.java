@@ -78,10 +78,11 @@ public final class AuditErrorMessage extends AuditMessage {
          * @return interface {@link IError} for the next step in the build.
          */
         public static IError create(final PalisadeRequest request, final Map<String, Object> attributes) {
+            PalisadeSystemResponse response = PalisadeSystemResponse.Builder.create(request);
             return create()
-                    .withUserId(request.getUserId())
-                    .withResourceId(request.getResourceId())
-                    .withContext(request.getContext())
+                    .withUserId(response.getUserId())
+                    .withResourceId(response.getResourceId())
+                    .withContext(response.getContext())
                     .withAttributes(attributes);
         }
 

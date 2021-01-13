@@ -29,18 +29,18 @@ import java.util.Optional;
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
 
-public final class AuditablePalisadeRequest {
+public final class AuditablePalisadeResponse {
 
     @JsonProperty("palisadeRequest")
-    private final PalisadeRequest palisadeRequest;
+    private final PalisadeSystemResponse palisadeResponse;
     @JsonProperty("auditErrorMessage")
     private final AuditErrorMessage auditErrorMessage;
 
     @JsonCreator
-    private AuditablePalisadeRequest(
-            final @JsonProperty("palisadeRequest") PalisadeRequest palisadeRequest,
+    private AuditablePalisadeResponse(
+            final @JsonProperty("palisadeRequest") PalisadeSystemResponse palisadeResponse,
             final @JsonProperty("auditErrorMessage") AuditErrorMessage auditErrorMessage) {
-        this.palisadeRequest = palisadeRequest;
+        this.palisadeResponse = palisadeResponse;
         this.auditErrorMessage = auditErrorMessage;
     }
 
@@ -50,7 +50,7 @@ public final class AuditablePalisadeRequest {
      * @param audit the previous audit or null
      * @return a new instance of this object
      */
-    public AuditablePalisadeRequest chain(final AuditErrorMessage audit) {
+    public AuditablePalisadeResponse chain(final AuditErrorMessage audit) {
         return Optional.ofNullable(audit).map(message -> Builder.create()
                 .withAuditErrorMessage(message))
                 .orElse(this);
@@ -64,19 +64,19 @@ public final class AuditablePalisadeRequest {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final AuditablePalisadeRequest that = (AuditablePalisadeRequest) o;
-        return Objects.equals(palisadeRequest, that.palisadeRequest) &&
+        final AuditablePalisadeResponse that = (AuditablePalisadeResponse) o;
+        return Objects.equals(palisadeResponse, that.palisadeResponse) &&
                 Objects.equals(auditErrorMessage, that.auditErrorMessage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(palisadeRequest, auditErrorMessage);
+        return Objects.hash(palisadeResponse, auditErrorMessage);
     }
 
     @Generated
-    public PalisadeRequest getPalisadeRequest() {
-        return palisadeRequest;
+    public PalisadeSystemResponse getPalisadeResponse() {
+        return palisadeResponse;
     }
 
     @Generated
@@ -95,7 +95,7 @@ public final class AuditablePalisadeRequest {
          * @return the composed immutable object
          */
         public static IPalisadeRequest create() {
-            return AuditablePalisadeRequest::new;
+            return AuditablePalisadeResponse::new;
         }
 
         /**
@@ -108,7 +108,7 @@ public final class AuditablePalisadeRequest {
              * @param audit value or null
              * @return value object
              */
-            default AuditablePalisadeRequest withAuditErrorMessage(AuditErrorMessage audit) {
+            default AuditablePalisadeResponse withAuditErrorMessage(AuditErrorMessage audit) {
                 return withResponseAndError(null, audit);
             }
 
@@ -119,18 +119,18 @@ public final class AuditablePalisadeRequest {
              * @param request value or null
              * @return value object
              */
-            default AuditablePalisadeRequest withPalisadeRequest(PalisadeRequest request) {
-                return withResponseAndError(request, null);
+            default AuditablePalisadeResponse withPalisadeRequest(PalisadeRequest request) {
+                return withResponseAndError(PalisadeSystemResponse.Builder.create(request), null);
             }
 
             /**
              * Compose value
              *
-             * @param request          value or null
+             * @param request           value or null
              * @param auditErrorMessage value or null
              * @return value object
              */
-            AuditablePalisadeRequest withResponseAndError(PalisadeRequest request, AuditErrorMessage auditErrorMessage);
+            AuditablePalisadeResponse withResponseAndError(PalisadeSystemResponse request, AuditErrorMessage auditErrorMessage);
         }
 
     }

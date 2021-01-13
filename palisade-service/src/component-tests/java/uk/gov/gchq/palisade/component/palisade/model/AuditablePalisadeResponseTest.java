@@ -25,7 +25,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.component.palisade.CommonTestData;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeResponse;
 
 import java.io.IOException;
 
@@ -34,35 +34,35 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PalisadeRequestTest.class)
-class AuditablePalisadeRequestTest extends CommonTestData {
+class AuditablePalisadeResponseTest extends CommonTestData {
 
     @Autowired
-    private JacksonTester<AuditablePalisadeRequest> jsonTester;
+    private JacksonTester<AuditablePalisadeResponse> jsonTester;
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserializes and tests against the original response Object.
      *
-     * @throws IOException throws if the {@link AuditablePalisadeRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link AuditablePalisadeResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
     void testAuditablePalisadeRequestWithRequestSerialisingAndDeserialising() throws IOException {
 
-        JsonContent<AuditablePalisadeRequest> requestJsonContent = jsonTester.write(AUDITABLE_WITH_REQUEST);
-        ObjectContent<AuditablePalisadeRequest> requestObjectContent = jsonTester.parse(requestJsonContent.getJson());
-        AuditablePalisadeRequest requestObject = requestObjectContent.getObject();
+        JsonContent<AuditablePalisadeResponse> requestJsonContent = jsonTester.write(AUDITABLE_WITH_REQUEST);
+        ObjectContent<AuditablePalisadeResponse> requestObjectContent = jsonTester.parse(requestJsonContent.getJson());
+        AuditablePalisadeResponse requestObject = requestObjectContent.getObject();
 
-        assertAll("AuditablePalisadeRequest with request Serialising and Deseralising Comparison",
-                () -> assertAll("AuditablePalisadeRequest, with PalisadeRequest, Serialising Compared To String",
+        assertAll("AuditablePalisadeResponse with request Serialising and Deseralising Comparison",
+                () -> assertAll("AuditablePalisadeResponse, with PalisadeRequest, Serialising Compared To String",
                         () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.palisadeRequest.userId").isEqualTo("testUserId"),
                         () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.palisadeRequest.resourceId").isEqualTo("/test/resourceId"),
                         () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.palisadeRequest.context.contents.purpose").isEqualTo("testContext")
                 ),
-                () -> assertAll("AuditablePalisadeRequest, with PalisadeRequest, Deserialising Compared To Object",
-                        () -> assertThat(requestObject.getPalisadeRequest().getUserId()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeRequest().getUserId()),
-                        () -> assertThat(requestObject.getPalisadeRequest().getResourceId()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeRequest().getResourceId()),
-                        () -> assertThat(requestObject.getPalisadeRequest().getContext().getPurpose()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeRequest().getContext().getPurpose())
+                () -> assertAll("AuditablePalisadeResponse, with PalisadeRequest, Deserialising Compared To Object",
+                        () -> assertThat(requestObject.getPalisadeResponse().getUserId()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeResponse().getUserId()),
+                        () -> assertThat(requestObject.getPalisadeResponse().getResourceId()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeResponse().getResourceId()),
+                        () -> assertThat(requestObject.getPalisadeResponse().getContext().getPurpose()).isEqualTo(AUDITABLE_WITH_REQUEST.getPalisadeResponse().getContext().getPurpose())
                 ),
                 () -> assertAll("Object Comparison",
                         //compares the two objects using the objects equal method
@@ -75,25 +75,25 @@ class AuditablePalisadeRequestTest extends CommonTestData {
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserializes and tests against the original response Object.
      *
-     * @throws IOException throws if the {@link AuditablePalisadeRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link AuditablePalisadeResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
     void testAuditablePalisadeRequestWithErrorSerialisingAndDeserialising() throws IOException {
 
-        JsonContent<AuditablePalisadeRequest> errorJsonContent = jsonTester.write(AUDITABLE_WITH_ERROR);
-        ObjectContent<AuditablePalisadeRequest> errorObjectContent = jsonTester.parse(errorJsonContent.getJson());
-        AuditablePalisadeRequest errorObject = errorObjectContent.getObject();
+        JsonContent<AuditablePalisadeResponse> errorJsonContent = jsonTester.write(AUDITABLE_WITH_ERROR);
+        ObjectContent<AuditablePalisadeResponse> errorObjectContent = jsonTester.parse(errorJsonContent.getJson());
+        AuditablePalisadeResponse errorObject = errorObjectContent.getObject();
 
-        assertAll("AuditablePalisadeRequest with error Serialising and Deseralising Comparison",
-                () -> assertAll("AuditablePalisadeRequest, with AuditErrorMessage, Serialising Compared To String",
+        assertAll("AuditablePalisadeResponse with error Serialising and Deseralising Comparison",
+                () -> assertAll("AuditablePalisadeResponse, with AuditErrorMessage, Serialising Compared To String",
                         () -> assertThat(errorJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.userId").isEqualTo("testUserId"),
                         () -> assertThat(errorJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.resourceId").isEqualTo("/test/resourceId"),
                         () -> assertThat(errorJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.context.contents.purpose").isEqualTo("testContext"),
                         () -> assertThat(errorJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.serviceName").isEqualTo("palisade-service"),
                         () -> assertThat(errorJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.error.message").isEqualTo("An error")
                 ),
-                () -> assertAll("AuditablePalisadeRequest, with AuditErrorMessage, Deserialising Compared To Object",
+                () -> assertAll("AuditablePalisadeResponse, with AuditErrorMessage, Deserialising Compared To Object",
                         () -> assertThat(errorObject.getAuditErrorMessage().getUserId()).isEqualTo(AUDITABLE_WITH_ERROR.getAuditErrorMessage().getUserId()),
                         () -> assertThat(errorObject.getAuditErrorMessage().getResourceId()).isEqualTo(AUDITABLE_WITH_ERROR.getAuditErrorMessage().getResourceId()),
                         () -> assertThat(errorObject.getAuditErrorMessage().getContext().getPurpose()).isEqualTo(AUDITABLE_WITH_ERROR.getAuditErrorMessage().getContext().getPurpose()),

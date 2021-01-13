@@ -58,7 +58,7 @@ class PalisadeRequestTest extends CommonTestData {
                 () -> assertAll("PalisadeRequest Serialising Compared To String",
                         () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId"),
                         () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext")
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.purpose").isEqualTo("testContext")
                 ),
                 () -> assertAll("PalisadeRequest Deserialising Compared To Object",
                         () -> assertThat(palisadeRequestObject.getUserId()).isEqualTo(PALISADE_REQUEST.getUserId()),

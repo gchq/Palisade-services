@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import uk.gov.gchq.palisade.component.palisade.CommonTestData;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 import uk.gov.gchq.palisade.service.palisade.web.PalisadeRestController;
 
@@ -100,7 +100,7 @@ class RestControllerWebMvcTest extends CommonTestData {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(content().string(containsString(COMMON_UUID.toString())))
                 .andReturn();
-        PalisadeResponse response = MAPPER.readValue(result.getResponse().getContentAsString(), PalisadeResponse.class);
+        PalisadeClientResponse response = MAPPER.readValue(result.getResponse().getContentAsString(), PalisadeClientResponse.class);
 
         //THEN
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);

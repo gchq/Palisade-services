@@ -60,6 +60,7 @@ import uk.gov.gchq.palisade.contract.palisade.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.palisade.PalisadeApplication;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
@@ -120,14 +121,14 @@ class KafkaContractTest {
         Mockito.doReturn(ContractTestData.REQUEST_TOKEN).when(service).createToken(any());
 
         // Given - we are already listening to the service input
-        ConsumerSettings<String, PalisadeRequest> consumerSettings = ConsumerSettings
+        ConsumerSettings<String, PalisadeSystemResponse> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.requestKeyDeserializer(), TestSerDesConfig.requestValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 3;
 
-        Probe<ConsumerRecord<String, PalisadeRequest>> probe = Consumer
+        Probe<ConsumerRecord<String, PalisadeSystemResponse>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("output-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
@@ -139,8 +140,8 @@ class KafkaContractTest {
         // Then - the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, PalisadeRequest>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, PalisadeRequest>> results = LongStream.range(0, recordCount)
+        Probe<ConsumerRecord<String, PalisadeSystemResponse>> resultSeq = probe.request(recordCount);
+        LinkedList<ConsumerRecord<String, PalisadeSystemResponse>> results = LongStream.range(0, recordCount)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -163,7 +164,7 @@ class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
-                            .isEqualTo(ContractTestData.REQUEST_OBJ);
+                            .isEqualTo(PalisadeSystemResponse.Builder.create(ContractTestData.REQUEST_OBJ));
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
