@@ -98,9 +98,7 @@ import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersi
 import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -120,7 +118,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.NONE, properties = "akka.discovery.config.services.kafka.from-config=false")
+@SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.NONE, properties = {"akka.discovery.config.services.kafka.from-config=false"})
 @Import({KafkaRestWebSocketContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class, RedisInitializer.class})
 @ActiveProfiles("k8s")
@@ -283,7 +281,7 @@ class KafkaRestWebSocketContractTest {
                                             .withResourceId("unknown")
                                             .withContext(new Context().purpose("unknown"))
                                             .withAttributes(Collections.emptyMap())
-                                            .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-3"))
+                                            .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-4"))
                             )
                     )
             );
@@ -305,16 +303,17 @@ class KafkaRestWebSocketContractTest {
             final List<AuditErrorMessage> auditErrorMessages
     ) throws InterruptedException, ExecutionException, TimeoutException, IOException {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
-        LOGGER.info("Running with: {} {} {} {} {} {} {} {}", requestToken, maskedResourceTopic, maskedResourceOffsetTopic, errorTopic, offsetsPersistence, websocketRequests, websocketResponses, auditErrorMessages);
+        LOGGER.info("Running with: {}", requestToken);
 
         // Given
         // Connect to the kafka error queue
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withGroupId("error-topic-test-consumer")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
-                .plainSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .plainSource(consumerSettings, Subscriptions.topics("error"))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // Given
@@ -347,6 +346,7 @@ class KafkaRestWebSocketContractTest {
                 .overwriteOffset(token, offset)
                 .join());
 
+
         // When
         // Send each websocketMessage request and receive responses
         Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
@@ -374,12 +374,6 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
-        Process p = new ProcessBuilder()
-                .command(List.of("kafkacat", "-b", KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers(), "-t", "error", "-C", "-f", "'Topic %t [%p] at offset %o: key %k: %s\\n'"))
-                .inheritIO()
-                .start();
-        p.waitFor(5, TimeUnit.SECONDS);
-        p.destroy();
 
         // When you read off the error queue
         LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, errorTopic.size() + auditErrorMessages.size())
@@ -388,7 +382,8 @@ class KafkaRestWebSocketContractTest {
                 .skip(errorTopic.size())
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        // Assert that there is a message on the error topic, check the header contains the token and check the error message value
+        // Then
+        // The messages on the error topic are as expected
         assertThat(errorResults)
                 .extracting(ConsumerRecord::value)
                 .isEqualTo(auditErrorMessages);
