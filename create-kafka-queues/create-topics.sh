@@ -26,12 +26,20 @@
 #REPLICATION: The replication-factor to associate with this topic
 #e.g write_to_kafka palisade 1 1
 write_to_kafka () {
-  read -r NAME <<< $1
-  read -r PARTITION <<< $2
-  read -r REPLICATION <<< $3
-  echo ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME
-  until ./bin/kafka-topics.sh --create --replication-factor $REPLICATION --partitions $PARTITION --zookeeper $ZOOKEEPER --topic $NAME; do
-    echo Retrying creation of topic $NAME $PARTITION $REPLICATION
+  read -r NAME <<< "$1"
+  read -r PARTITION <<< "$2"
+  read -r REPLICATION <<< "$3"
+
+  echo ./bin/kafka-topics.sh --create --replication-factor "$REPLICATION" --partitions "$PARTITION" --zookeeper "$ZOOKEEPER" --topic "$NAME"
+  attempts=0
+
+  until ./bin/kafka-topics.sh --create --replication-factor "$REPLICATION" --partitions "$PARTITION" --zookeeper "$ZOOKEEPER" --topic "$NAME"; do
+    ((attempts=attempts+1))
+    if [ "$attempts" -ge 2 ]; then
+      printf "Failed after %s attempts, topics may have been created OK." $attempts
+      break
+    fi
+    echo Retrying attempt "$attempts" creation of topic "$NAME" "$PARTITION" "$REPLICATION"
     sleep 10
   done
 }
@@ -56,10 +64,12 @@ else
   for topic in "${!KAFKATOPIC@}"; do
     # Check if topic already exists and store the returned value
     echo "Checking for topic ${!topic}"
+    # shellcheck disable=SC2086
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
       # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
       echo "Creating topic ${!topic}"
+      # shellcheck disable=SC2086
       write_to_kafka ${!topic}
     else
       echo "Topic ${!topic} already exists"
