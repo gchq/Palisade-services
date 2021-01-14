@@ -34,7 +34,7 @@ public final class ContractTestData {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"queuePointer\":1}";
+    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"commitOffset\":1}";
     public static final String REQUEST_TOKEN = "test-request-token";
 
     public static final JsonNode TOPIC_OFFSET_MSG_JSON_NODE;

@@ -65,7 +65,7 @@ class H2PersistenceComponentTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        service.storeTokenOffset(token, request.queuePointer).join();
+        service.storeTokenOffset(token, request.commitOffset).join();
 
         // Then the offset is persisted in redis
         assertThat(tokenOffsetRepository.findByToken(token)).isPresent();

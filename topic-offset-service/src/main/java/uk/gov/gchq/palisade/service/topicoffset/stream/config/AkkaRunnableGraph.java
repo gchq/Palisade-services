@@ -34,6 +34,8 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -55,6 +57,7 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     KafkaProducerService kafkaProducerService(
@@ -80,6 +83,11 @@ public class AkkaRunnableGraph {
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         return source
+                .map(x -> {
+                    LOGGER.info("Peek: {}", x);
+                    return x;
+                })
+
                 // Create a topic offset response using the offset value of the original message
                 // We want to do a Source::filter, but can't because we still need to commit *every* message to the upstream source
                 // Instead, map to Optional, filtering for those that are offsets, but still keeping track of every original committableMessage (probably paired with an Optional::empty)

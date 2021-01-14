@@ -270,7 +270,7 @@ public class AkkaRunnableGraph {
                 .map(committableMessage -> Tuple3.create(
                         committableMessage.committableOffset(),
                         new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset()),
-                        committableMessage.record().value().queuePointer
+                        committableMessage.record().value().commitOffset
                 ))
 
                 // Write offset to persistence

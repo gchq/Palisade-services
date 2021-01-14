@@ -35,11 +35,11 @@ public final class TopicOffsetMessage {
     /**
      * {@link String} reference to where the data is located
      */
-    public final Long queuePointer; //pointer reference for the request given to the client
+    public final Long commitOffset; //pointer reference for the request given to the client
 
     @JsonCreator
-    private TopicOffsetMessage(final @JsonProperty("queuePointer") Long queuePointer) {
-        this.queuePointer = Optional.ofNullable(queuePointer).orElseThrow(() -> new IllegalArgumentException("Queue pointer cannot be null"));
+    private TopicOffsetMessage(final @JsonProperty("commitOffset") Long commitOffset) {
+        this.commitOffset = Optional.ofNullable(commitOffset).orElseThrow(() -> new IllegalArgumentException("Queue pointer cannot be null"));
     }
 
     /**
@@ -51,24 +51,24 @@ public final class TopicOffsetMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * TopicOffsetMessage class.
          *
-         * @return interface  {@link IQueuePointer} for the next step in the build.
+         * @return interface  {@link ICommitOffset} for the next step in the build.
          */
-        public static IQueuePointer create() {
+        public static ICommitOffset create() {
             return TopicOffsetMessage::new;
         }
 
         /**
          * Adds the queue pointer, a reference for the results for the request.
          */
-        public interface IQueuePointer {
+        public interface ICommitOffset {
 
             /**
              * Adds the queue pointer to the message.
              *
-             * @param queuePointer reference to the results for the request.
+             * @param commitOffset reference to the results for the request.
              * @return class {@link TopicOffsetMessage} for the completed class from the builder.
              */
-            TopicOffsetMessage withQueuePointer(Long queuePointer);
+            TopicOffsetMessage withCommitOffset(Long commitOffset);
         }
     }
 
@@ -82,20 +82,20 @@ public final class TopicOffsetMessage {
             return false;
         }
         TopicOffsetMessage that = (TopicOffsetMessage) o;
-        return queuePointer.equals(that.queuePointer);
+        return commitOffset.equals(that.commitOffset);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(queuePointer);
+        return Objects.hash(commitOffset);
     }
 
     @Override
     @Generated
     public String toString() {
         return new StringJoiner(", ", TopicOffsetMessage.class.getSimpleName() + "[", "]")
-                .add("queuePointer='" + queuePointer + "'")
+                .add("commitOffset='" + commitOffset + "'")
                 .add(super.toString())
                 .toString();
     }

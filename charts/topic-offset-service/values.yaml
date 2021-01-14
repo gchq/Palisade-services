@@ -21,7 +21,7 @@ service:
 
 image:
   name: topic-offset-service
-  tag: d0a6b79-SNAPSHOT
+  tag: c83d62d-SNAPSHOT
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

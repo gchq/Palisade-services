@@ -65,7 +65,7 @@ public final class ApplicationTestData {
     public static final Long OFFSET = 1L;
     public static final TokenOffsetEntity OFFSET_ENTITY = new TokenOffsetEntity(REQUEST_TOKEN, OFFSET);
     public static final TopicOffsetMessage OFFSET_MESSAGE = TopicOffsetMessage.Builder.create()
-            .withQueuePointer(OFFSET);
+            .withCommitOffset(OFFSET);
 
     public static final WebSocketMessage WS_MESSAGE = WebSocketMessage.Builder.create()
             .withType(MessageType.RESOURCE)
