@@ -13,63 +13,19 @@
 # limitations under the License.
 #
 
-# Not interpreted by any java code, simply used by reference in the population.resources section
 population:
-  userProvider: std
-  users:
-  - userId: noResourceRulesUser
-    auths:
-      auth
-    roles:
-      role
-
-  - userId: redactedResourceRulesUser
-    auths:
-      auth
-    roles:
-      role
-
-  - userId: test-user-id
-    auths:
-      auth
-    roles:
-      role
-
   policyProvider: std
   policies:
-  - resource: /test/noRulesResource
+  - resourceId: file:/test/noRulesResource
 
-  - resource: /test/resourceId
+  - resourceId: file:/test/resourceId
     resourceRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
     recordRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
 
-  - resource: /test/resourceRulesResource
+  - resourceId: file:/test/resourceRulesResource
     resourceRules:
       "1-Serialised-Format-Rule": uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule
     recordRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
-
-  resourceProvider: std
-  resources:
-  - resourceId: /test/resourceId
-    rootId: test
-    connectionDetail: test-data-service
-    attributes:
-      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
-      serialisedFormat: avro
-
-  - resourceId: /test/noRulesResource
-    rootId: test
-    connectionDetail: test-data-service
-    attributes:
-      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
-      serialisedFormat: avro
-
-  - resourceId: /test/resourceRulesResource
-    rootId: test
-    connectionDetail: test-data-service
-    attributes:
-      type: uk.gov.gchq.palisade.example.hrdatagenerator.types.Employee
-      serialisedFormat: txt
