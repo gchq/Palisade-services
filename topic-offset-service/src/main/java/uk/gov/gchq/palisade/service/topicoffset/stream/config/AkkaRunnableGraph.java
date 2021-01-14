@@ -83,11 +83,6 @@ public class AkkaRunnableGraph {
         Topic outputTopic = topicConfiguration.getTopics().get("output-topic");
 
         return source
-                .map(x -> {
-                    LOGGER.info("Peek: {}", x);
-                    return x;
-                })
-
                 // Create a topic offset response using the offset value of the original message
                 // We want to do a Source::filter, but can't because we still need to commit *every* message to the upstream source
                 // Instead, map to Optional, filtering for those that are offsets, but still keeping track of every original committableMessage (probably paired with an Optional::empty)
