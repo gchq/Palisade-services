@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
     private final ProducerTopicConfiguration topicConfiguration;
-    private List<String> topicNames;
+    private List<String> topicNames = new LinkedList<>();
 
     /**
      * Requires the AdminClient to interact with Kafka
