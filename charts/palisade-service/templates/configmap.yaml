@@ -13,18 +13,22 @@
 # limitations under the License.
 
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: {{ include "filtered-resource-service.name" . }}
+  name: {{ include "palisade-service.name" . }}-configmap
   namespace: {{ include "palisade.namespace" . }}
   labels:
-    {{- include "filtered-resource-service.labels" . | nindent 4 }}
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - name: web
-    port: {{ .Values.service.port }}
-    targetPort: {{ .Values.service.internalPort }}
-  selector:
-    app.kubernetes.io/name: {{ include "filtered-resource-service.name" . }}
+    app.kubernetes.io/name: {{ include "palisade-service.name" . }}
+    helm.sh/chart: {{ include "palisade-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  application-akka.yaml: |
+    akka:
+      kafka:
+        producer.topics:
+          output-topic.partitions: {{ .Values.replicaCount }}
+          error-topic.partitions: {{ .Values.replicaCount }}
+      discovery.config.services.kafka.endpoints:
+      - host: {{ include "palisade.kafka.fullname" . }}-headless
+        port: 9092
