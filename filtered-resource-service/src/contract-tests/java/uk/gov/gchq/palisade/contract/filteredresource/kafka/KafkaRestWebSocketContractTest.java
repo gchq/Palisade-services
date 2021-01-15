@@ -41,12 +41,8 @@ import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,30 +53,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.serializer.support.SerializationFailedException;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.KafkaInitializer;
-import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.KafkaInitializer.ErrorDeserializer;
-import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaRestWebSocketContractTest.RedisInitializer;
+import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -96,11 +78,8 @@ import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
-import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
-import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,25 +94,23 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = FilteredResourceApplication.class, webEnvironment = WebEnvironment.NONE, properties = {"akka.discovery.config.services.kafka.from-config=false"})
-@Import({KafkaRestWebSocketContractTest.KafkaInitializer.Config.class})
+@SpringBootTest(
+        classes = FilteredResourceApplication.class,
+        webEnvironment = WebEnvironment.NONE,
+        properties = {"akka.discovery.config.services.kafka.from-config=false"}
+)
+@Import({KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class, RedisInitializer.class})
-@ActiveProfiles("k8s")
+@ActiveProfiles({"k8s", "akka"})
 class KafkaRestWebSocketContractTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaRestWebSocketContractTest.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final int REDIS_PORT = 6379;
     private static final String HOST = "localhost";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     @Value("${server.port}")
     private Integer port;
-
-    private final ActorSystem system = ActorSystem.create("contract-test");
-    private final Materializer materializer = Materializer.createMaterializer(system);
-    private final Http http = Http.get(system);
-
     @Autowired
     private TokenOffsetPersistenceLayer persistenceLayer;
     @Autowired
@@ -141,7 +118,7 @@ class KafkaRestWebSocketContractTest {
     @Autowired
     private Materializer akkaMaterializer;
     @Autowired
-    private ProducerTopicConfiguration producerTopicConfiguration;
+    private ConsumerTopicConfiguration consumerTopicConfiguration;
 
     private static class ParameterizedArguments implements ArgumentsProvider {
         @Override
@@ -237,6 +214,7 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
                             ),
+
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
                             ),
@@ -304,6 +282,7 @@ class KafkaRestWebSocketContractTest {
             final List<AuditErrorMessage> auditErrorMessages
     ) throws InterruptedException, ExecutionException, TimeoutException {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
+        Http http = Http.get(akkaActorSystem);
         LOGGER.info("Running with: {}", requestToken);
 
         // Given
@@ -313,8 +292,9 @@ class KafkaRestWebSocketContractTest {
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withGroupId("error-topic-test-consumer")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
-                .plainSource(consumerSettings, Subscriptions.topics("error"))
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // Given
@@ -356,7 +336,7 @@ class KafkaRestWebSocketContractTest {
         Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = http.singleWebSocketRequest(
                 WebSocketRequest.create(String.format("ws://%s:%s/resource/" + requestToken, HOST, port)),
                 clientFlow,
-                materializer);
+                akkaMaterializer);
         // Get the (HTTP) response, a websocket upgrade
         request.first().toCompletableFuture()
                 .get(1, TimeUnit.SECONDS);
@@ -375,28 +355,17 @@ class KafkaRestWebSocketContractTest {
                 .isEqualTo(websocketResponses);
 
         // When you read off the error queue
-        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, errorTopic.size() + auditErrorMessages.size())
-                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20, TimeUnit.SECONDS)))
-                .peek(msg -> LOGGER.info("Received (but might drop) : {}", msg))
-                .skip(errorTopic.size())
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
+                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
-
-//        Probe<ConsumerRecord<String, AuditErrorMessage>> errorResultSeq = errorProbe.request(errorTopic.size() + auditErrorMessages.size());
-//        LongStream.range(0, errorTopic.size())
-//                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
-//                .forEach(ignored -> LOGGER.info("ignoring message {}", ignored));
-//
-//        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults2 = LongStream.range(0, auditErrorMessages.size())
-//                .mapToObj(i -> errorResultSeq.expectNext(new FiniteDuration(20, TimeUnit.SECONDS)))
-//                .collect(Collectors.toCollection(LinkedList::new));
 
         // Then
         // The messages on the error topic are as expected
         assertThat(errorResults)
                 .extracting(ConsumerRecord::value)
+                .usingRecursiveComparison()
                 .isEqualTo(auditErrorMessages);
     }
-
 
     // Handle deserialising JSON TextMessages to WebSocketMessages
     private WebSocketMessage readTextMessage(final Message message) {
@@ -406,7 +375,7 @@ class KafkaRestWebSocketContractTest {
             builder = new StringBuilder(message.asTextMessage().getStrictText());
         } else {
             builder = message.asTextMessage().getStreamedText()
-                    .runFold(new StringBuilder(), StringBuilder::append, this.system)
+                    .runFold(new StringBuilder(), StringBuilder::append, this.akkaActorSystem)
                     .toCompletableFuture().join();
         }
         return deserialize(builder.toString(), WebSocketMessage.class);
@@ -432,104 +401,6 @@ class KafkaRestWebSocketContractTest {
             return MAPPER.writeValueAsString(o);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to write message", e);
-        }
-    }
-
-    public static class RedisInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
-                .withExposedPorts(REDIS_PORT)
-                .withReuse(true);
-
-        @Override
-        public void initialize(@NonNull final ConfigurableApplicationContext context) {
-            // Start container
-            REDIS.start();
-
-            // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
-            // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
-            // Override the configuration at runtime
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
-        }
-    }
-
-    static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("5.5.1")
-                .withReuse(true);
-        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
-        private static final ObjectMapper MAPPER = new ObjectMapper();
-
-        static void createTopics(final List<NewTopic> newTopics, KafkaContainer KAFKA_CONTAINER) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KAFKA_CONTAINER.getFirstMappedPort())))) {
-                admin.createTopics(newTopics);
-                LOGGER.info("created topics: " + admin.listTopics().names().get());
-            }
-        }
-
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            configurableApplicationContext.getEnvironment().setActiveProfiles("k8s", "debug");
-            KAFKA_CONTAINER.addEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false");
-            KAFKA_CONTAINER.addEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
-            KAFKA_CONTAINER.start();
-
-            // test kafka config
-            String kafkaConfig = "akka.discovery.config.services.kafka.from-config=false";
-            String kafkaPort = "akka.discovery.config.services.kafka.endpoints[0].port=" + KAFKA_CONTAINER.getFirstMappedPort();
-            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(configurableApplicationContext, kafkaConfig, kafkaPort);
-        }
-
-        @Configuration
-        public static class Config {
-
-            private final List<NewTopic> topics = List.of(
-                    new NewTopic("masked-resource", 1, (short) 1),
-                    new NewTopic("masked-resource-offset", 1, (short) 1),
-                    new NewTopic("success", 1, (short) 1),
-                    new NewTopic("error", 1, (short) 1));
-
-            @Bean
-            @ConditionalOnMissingBean
-            static PropertiesConfigurer propertiesConfigurer(final ResourceLoader resourceLoader, final Environment environment) {
-                return new PropertiesConfigurer(resourceLoader, environment);
-            }
-
-            @Bean
-            KafkaContainer kafkaContainer() throws ExecutionException, InterruptedException {
-                createTopics(this.topics, KAFKA_CONTAINER);
-                return KAFKA_CONTAINER;
-            }
-
-            @Bean
-            @Primary
-            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
-                LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
-                return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream
-                        .concat(props.getAllActiveProperties().entrySet().stream()
-                                        .filter(kafkaPort -> !kafkaPort.getKey().equals("akka.discovery.config.services.kafka.endpoints[0].port")),
-                                Stream.of(new AbstractMap.SimpleEntry<>("akka.discovery.config.services.kafka.endpoints[0].port", Integer.toString(kafka.getFirstMappedPort()))))
-                        .peek(entry -> LOGGER.debug("Config key {} = {}", entry.getKey(), entry.getValue()))
-                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))));
-            }
-
-            @Bean
-            @Primary
-            Materializer materializer(final ActorSystem system) {
-                return Materializer.createMaterializer(system);
-            }
-        }
-
-        // Deserializer for downstream test error output
-        static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
-            @Override
-            public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
-                try {
-                    return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
-                } catch (IOException e) {
-                    throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
-                }
-            }
         }
     }
 }

@@ -183,6 +183,7 @@ public class AkkaRunnableGraph {
                                                             .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + tokenMarkerRequestCommittable.t1()));
 
                                                     // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
+                                                    LOGGER.info("NoStartMarkerObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
                                                     return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
                                                 });
                                     })
@@ -222,6 +223,7 @@ public class AkkaRunnableGraph {
                                                 .withAttributes(Collections.emptyMap())
                                                 .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestCommittable.t1()));
 
+                                        LOGGER.info("NoResourcesObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
                                         // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
                                         return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
                                     })

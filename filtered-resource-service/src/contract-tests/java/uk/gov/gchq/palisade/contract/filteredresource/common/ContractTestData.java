@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.filteredresource;
+package uk.gov.gchq.palisade.contract.filteredresource.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,23 +29,25 @@ import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
  */
 public final class ContractTestData {
 
-    private ContractTestData() {
-    }
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"queuePointer\":1}";
     public static final String REQUEST_TOKEN = "test-request-token";
-
+    public static final String REQUEST_JSON = "{\"userId\":\"test-user\",\"resourceId\":\"\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"resource\":null}";
+    public static final JsonNode REQUEST_NODE;
     public static final JsonNode TOPIC_OFFSET_MSG_JSON_NODE;
     public static final TopicOffsetMessage TOPIC_OFFSET_MESSAGE;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"queuePointer\":1}";
 
     static {
         try {
+            REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
             TOPIC_OFFSET_MSG_JSON_NODE = MAPPER.readTree(TOPIC_OFFSET_MESSAGE_JSON);
             TOPIC_OFFSET_MESSAGE = ContractTestData.MAPPER.treeToValue(ContractTestData.TOPIC_OFFSET_MSG_JSON_NODE, TopicOffsetMessage.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to setup contract test data", e);
         }
     }
+
+    private ContractTestData() {
+    }
+
 }
