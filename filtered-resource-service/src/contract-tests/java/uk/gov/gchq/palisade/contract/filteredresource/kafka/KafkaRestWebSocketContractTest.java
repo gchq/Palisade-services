@@ -44,6 +44,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -120,6 +122,23 @@ class KafkaRestWebSocketContractTest {
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
 
+    private Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe;
+
+    @BeforeEach
+    public void setup() {
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withGroupId("error-topic-test-consumer")
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+                .withProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        consumerSettings.stopTimeout();
+
+        errorProbe = Consumer
+                .plainSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+    }
+
     private static class ParameterizedArguments implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
@@ -165,7 +184,6 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
                             ),
-                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
@@ -188,7 +206,6 @@ class KafkaRestWebSocketContractTest {
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
                             ),
-                            List.of(),
                             List.of(),
                             Map.of(
                                     "test-token-2", 0L
@@ -218,7 +235,6 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
                             ),
-                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
@@ -247,7 +263,6 @@ class KafkaRestWebSocketContractTest {
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
                             ),
-                            List.of(),
                             Map.of(),
                             List.of(
                                     ctsMsg
@@ -274,7 +289,6 @@ class KafkaRestWebSocketContractTest {
             final String requestToken,
             final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
             final List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic,
-            final List<Pair<Iterable<HttpHeader>, AuditErrorMessage>> errorTopic,
             final Map<String, Long> offsetsPersistence,
             final List<WebSocketMessage> websocketRequests,
             // Expected output
@@ -284,18 +298,6 @@ class KafkaRestWebSocketContractTest {
         ContentType jsonType = ContentTypes.APPLICATION_JSON;
         Http http = Http.get(akkaActorSystem);
         LOGGER.info("Running with: {}", requestToken);
-
-        // Given
-        // Connect to the kafka error queue
-        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withGroupId("error-topic-test-consumer")
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // Given
         // POST maskedResource to KafkaController
@@ -311,14 +313,6 @@ class KafkaRestWebSocketContractTest {
                 .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource-offset", HOST, port))
                         .withHeaders(offset.first())
                         .withEntity(jsonType, serialize(offset.second()).getBytes()))
-                .toCompletableFuture()
-                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-        // POST error to KafkaController
-        errorTopic.forEach(error -> http
-                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/error", HOST, port))
-                        .withHeaders(error.first())
-                        .withEntity(jsonType, serialize(error.second()).getBytes()))
                 .toCompletableFuture()
                 .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
                 .join());
@@ -364,6 +358,8 @@ class KafkaRestWebSocketContractTest {
         assertThat(errorResults)
                 .extracting(ConsumerRecord::value)
                 .usingRecursiveComparison()
+                .ignoringFields("AuditErrorMessage.error", "AuditErrorMessage.timestamp")
+                .ignoringFieldsOfTypes(Throwable.class)
                 .isEqualTo(auditErrorMessages);
     }
 

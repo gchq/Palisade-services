@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.service.filteredresource.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.common.ConsumerGroupState;
+import org.apache.kafka.clients.admin.DescribeTopicsResult;
+import org.apache.kafka.clients.admin.TopicDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
@@ -26,86 +26,83 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
-@Component("kafka")
+@Component
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
-    private final ConsumerTopicConfiguration topicConfiguration;
-    private String groupId;
+    private final ProducerTopicConfiguration topicConfiguration;
 
     /**
      * Requires the AdminClient to interact with Kafka
      *
      * @param adminClient        of the cluster
-     * @param topicConfiguration the consumer topic configuration for the servide
+     * @param topicConfiguration contains the producer topic configuration
      */
-    public KafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
+    public KafkaHealthIndicator(final AdminClient adminClient, final ProducerTopicConfiguration topicConfiguration) {
         this.adminClient = adminClient;
         this.topicConfiguration = topicConfiguration;
     }
 
     @Override
-    public Health getHealth(final boolean includeDetails) {
-        if (performCheck()) {
-            return Health.up().withDetail("group", this.groupId).build();
-        } else {
-            return Health.down().withDetail("group", this.groupId).build();
-        }
-    }
-
-    /**
-     * Health endpoint
-     *
-     * @return the {@code Health} object
-     */
-    @Override
     public Health health() {
-        if (performCheck()) {
-            return Health.up().build();
+        Set<String> configTopics = topicsFromConfig(topicConfiguration);
+        Set<String> kafkaTopics = topicsFromKafka(adminClient.describeTopics(configTopics));
+
+        if (kafkaTopics.equals(configTopics)) {
+            return Health.up()
+                    .withDetail("topics", configTopics)
+                    .build();
         } else {
-            return Health.down().build();
+            return Health.down()
+                    .withDetail("configTopics", configTopics)
+                    .withDetail("kafkaTopics", kafkaTopics)
+                    .build();
         }
     }
 
-    private boolean performCheck() {
-        groupId = topicConfiguration.getKafkaClients().get("group.id");
+    private static Set<String> topicsFromConfig(final ProducerTopicConfiguration topicConfiguration) {
+        // Get topic names defined in config
+        return topicConfiguration.getTopics()
+                .values()
+                .stream()
+                .map(Topic::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private static Set<String> topicsFromKafka(final DescribeTopicsResult topicsResult) {
         try {
-            Map<String, ConsumerGroupDescription> groupDescriptionMap = this.adminClient.describeConsumerGroups(Collections.singletonList(this.groupId))
-                    .all()
-                    .get(1, TimeUnit.SECONDS);
-
-            boolean assignedGroupPartition = false;
-            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-            LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
-
-            if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
-                assignedGroupPartition = CompletableFuture.supplyAsync(() ->
-                        consumerGroupDescription.members().stream().noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()))
-                ).join();
-                if (!assignedGroupPartition) {
-                    LOGGER.error("Failed to find kafka topic-partition assignments");
-                }
-            }
-            return assignedGroupPartition;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", this.groupId, e);
+            // Get topic names registered with kafka
+            return topicsResult.all()
+                    .get(1, TimeUnit.SECONDS)
+                    .values()
+                    .stream()
+                    .map(TopicDescription::name)
+                    .collect(Collectors.toSet());
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
             Thread.currentThread().interrupt();
-            return false;
+        } catch (ExecutionException e) {
+            LOGGER.warn("Execution exception when completing kafka future", e);
+        } catch (TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
         }
+        // After logging any errors, return empty set
+        // The service will keep running, but appear unhealthy
+        return Collections.emptySet();
     }
 }
