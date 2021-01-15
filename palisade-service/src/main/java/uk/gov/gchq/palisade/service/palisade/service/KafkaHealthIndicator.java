@@ -17,6 +17,7 @@
 package uk.gov.gchq.palisade.service.palisade.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,26 +27,25 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration.Topic;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Kafka health indicator. Check that the producer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
-@Component("kafka")
+@Component
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
     private final ProducerTopicConfiguration topicConfiguration;
-    private List<String> topicNames;
 
     /**
      * Requires the AdminClient to interact with Kafka
@@ -59,34 +59,50 @@ public class KafkaHealthIndicator implements HealthIndicator {
     }
 
     @Override
-    public Health getHealth(final boolean includeDetails) {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("topics", topicNames).build())
-                .orElseGet(() -> Health.down().withDetail("topics", topicNames).build());
-    }
-
-    @Override
     public Health health() {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().build())
-                .orElseGet(() -> Health.down().build());
+        Set<String> configTopics = topicsFromConfig(topicConfiguration);
+        Set<String> kafkaTopics = topicsFromKafka(adminClient.describeTopics(configTopics));
+
+        if (kafkaTopics.equals(configTopics)) {
+            return Health.up()
+                    .withDetail("topics", configTopics)
+                    .build();
+        } else {
+            return Health.down()
+                    .withDetail("configTopics", configTopics)
+                    .withDetail("kafkaTopics", kafkaTopics)
+                    .build();
+        }
     }
 
-    private boolean performCheck() {
-        this.topicNames = List.of(topicConfiguration.getTopics().get("output-topic").getName(), topicConfiguration.getTopics().get("error-topic").getName());
+    private static Set<String> topicsFromConfig(final ProducerTopicConfiguration topicConfiguration) {
+        // Get topic names defined in config
+        return topicConfiguration.getTopics()
+                .values()
+                .stream()
+                .map(Topic::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private static Set<String> topicsFromKafka(final DescribeTopicsResult topicsResult) {
         try {
-            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(topicNames).all().get(1, TimeUnit.SECONDS);
-            Boolean requestTopic = topicsResult.get("request").name().equals(topicNames.get(0));
-            Boolean errorTopic = topicsResult.get("error").name().equals(topicNames.get(1));
-
-            return errorTopic && requestTopic;
-
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", topicNames, e);
+            // Get topic names registered with kafka
+            return topicsResult.all()
+                    .get(1, TimeUnit.SECONDS)
+                    .values()
+                    .stream()
+                    .map(TopicDescription::name)
+                    .collect(Collectors.toSet());
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
             Thread.currentThread().interrupt();
-            return false;
+        } catch (ExecutionException e) {
+            LOGGER.warn("Execution exception when completing kafka future", e);
+        } catch (TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
         }
+        // After logging any errors, return empty set
+        // The service will keep running, but appear unhealthy
+        return Collections.emptySet();
     }
 }
