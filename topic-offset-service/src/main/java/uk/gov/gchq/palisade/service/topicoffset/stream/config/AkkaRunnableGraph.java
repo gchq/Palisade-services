@@ -34,8 +34,6 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -57,7 +55,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     KafkaProducerService kafkaProducerService(
