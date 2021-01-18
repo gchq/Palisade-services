@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         try {
             LOGGER.debug("Adding rule {}", rule);
             return (Rule<?>) Class.forName(rule).getConstructor().newInstance();
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error(String.format("Error creating rule %s", rule), ex);
             return null;
         }
