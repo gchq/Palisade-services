@@ -16,11 +16,33 @@
 
 package uk.gov.gchq.palisade.contract.filteredresource.common;
 
+import akka.http.javadsl.model.HttpHeader;
+import akka.http.javadsl.model.headers.RawHeader;
+import akka.japi.Pair;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
+import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
+import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Strictly control content of messages by specifying exact JSON string contents, then converting to appropriate object types.
@@ -50,4 +72,99 @@ public final class ContractTestData {
     private ContractTestData() {
     }
 
+    public static class ParameterizedArguments implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
+            // Builders
+            Function<String, FilteredResourceRequest> resourceBuilder = getResourceBuilder();
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
+                    ::withQueuePointer;
+            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = getResponseBuilder();
+            // Special instances
+            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
+            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            Function<String, WebSocketMessage> completeMsgBuilder = getCompleteMsgBuilder();
+            return Stream.of(
+                    // Test for 'early' client - topic offset message has offset
+                    Arguments.of(
+                            "test-token-1",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-1")
+                            )
+                    ),
+                    // Test for 'late' client - persistence has offset
+                    Arguments.of(
+                            "test-token-2",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
+                            ),
+                            List.of(),
+                            Map.of(
+                                    "test-token-2", 0L
+                            ),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-2")
+                            )
+                    )
+            );
+        }
+    }
+
+    public static Function<String, WebSocketMessage> getCompleteMsgBuilder() {
+        return (token) -> WebSocketMessage.Builder.create()
+                .withType(MessageType.COMPLETE)
+                .withHeader(Token.HEADER, token)
+                .noHeaders()
+                .noBody();
+    }
+
+    public static BiFunction<String, LeafResource, WebSocketMessage> getResponseBuilder() {
+        return (token, leafResource) -> WebSocketMessage.Builder.create()
+                .withType(MessageType.RESOURCE)
+                .withHeader(Token.HEADER, token)
+                .noHeaders()
+                .withBody(leafResource);
+    }
+
+    public static Function<String, FilteredResourceRequest> getResourceBuilder() {
+        return resourceId -> FilteredResourceRequest.Builder.create()
+                .withUserId("userId")
+                .withResourceId("file:/file/")
+                .withContext(new Context().purpose("purpose"))
+                .withResource(new FileResource()
+                        .id("file:/file/" + resourceId)
+                        .serialisedFormat("fmt")
+                        .type("type")
+                        .connectionDetail(new SimpleConnectionDetail()
+                                .serviceName("data-service"))
+                        .parent(new SystemResource().id("file:/file/")));
+    }
 }

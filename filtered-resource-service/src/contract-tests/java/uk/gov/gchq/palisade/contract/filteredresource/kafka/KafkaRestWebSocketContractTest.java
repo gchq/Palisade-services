@@ -44,12 +44,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +61,9 @@ import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArguments;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
@@ -82,6 +77,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,9 +90,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.getCompleteMsgBuilder;
+import static uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.getResourceBuilder;
+import static uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.getResponseBuilder;
 
 @SpringBootTest(
         classes = FilteredResourceApplication.class,
@@ -124,6 +122,24 @@ class KafkaRestWebSocketContractTest {
 
     private Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe;
 
+    // Handle serializing Objects to JSON Strings
+    private static <T> T deserialize(final String json, final Class<T> clazz) {
+        try {
+            return MAPPER.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to write message", e);
+        }
+    }
+
+    // Handle serializing Objects to JSON Strings
+    private static String serialize(final Object o) {
+        try {
+            return MAPPER.writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to write message", e);
+        }
+    }
+
     @BeforeEach
     public void setup() {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
@@ -139,149 +155,6 @@ class KafkaRestWebSocketContractTest {
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
     }
 
-    private static class ParameterizedArguments implements ArgumentsProvider {
-        @Override
-        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
-            // Builders
-            Function<String, FilteredResourceRequest> resourceBuilder = resourceId -> FilteredResourceRequest.Builder.create()
-                    .withUserId("userId")
-                    .withResourceId("file:/file/")
-                    .withContext(new Context().purpose("purpose"))
-                    .withResource(new FileResource()
-                            .id("file:/file/" + resourceId)
-                            .serialisedFormat("fmt")
-                            .type("type")
-                            .connectionDetail(new SimpleConnectionDetail()
-                                    .serviceName("data-service"))
-                            .parent(new SystemResource().id("file:/file/")));
-            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
-                    ::withQueuePointer;
-            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
-                    .withType(MessageType.RESOURCE)
-                    .withHeader(Token.HEADER, token)
-                    .noHeaders()
-                    .withBody(leafResource);
-            // Special instances
-            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
-            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
-            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-            Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
-                    .withType(MessageType.COMPLETE)
-                    .withHeader(Token.HEADER, token)
-                    .noHeaders()
-                    .noBody();
-            return Stream.of(
-                    // Test for 'early' client - topic offset message has offset
-                    Arguments.of(
-                            "test-token-1",
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
-                            ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
-                            ),
-                            Map.of(),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
-                            List.of(
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-1")
-                            ),
-                            List.of()
-                    ),
-                    // Test for 'late' client - persistence has offset
-                    Arguments.of(
-                            "test-token-2",
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
-                            ),
-                            List.of(),
-                            Map.of(
-                                    "test-token-2", 0L
-                            ),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
-                            List.of(
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-2")
-                            ),
-                            List.of()
-                    ),
-                    //Test no start of stream marker
-                    Arguments.of(
-                            "test-token-3",
-                            List.of(
-                                    //No Start Marker
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
-                            ),
-
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
-                            ),
-                            Map.of(),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
-                            List.of(
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-3")
-                            ),
-                            List.of(
-                                    AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file/resource.1")
-                                            .withContext(new Context().purpose("purpose"))
-                                            .withAttributes(Collections.emptyMap())
-                                            .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + "test-token-3"))
-                            )
-                    ),
-                    // Test no resources
-                    Arguments.of(
-                            "test-token-4",
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
-                            ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
-                            ),
-                            Map.of(),
-                            List.of(
-                                    ctsMsg
-                            ),
-                            List.of(
-                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
-                            ),
-                            List.of(
-                                    AuditErrorMessage.Builder.create().withUserId("unknown")
-                                            .withResourceId("unknown")
-                                            .withContext(new Context().purpose("unknown"))
-                                            .withAttributes(Collections.emptyMap())
-                                            .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-4"))
-                            )
-                    )
-            );
-        }
-    }
-
     @ParameterizedTest
     @ArgumentsSource(ParameterizedArguments.class)
     void testRunKafka(
@@ -292,55 +165,53 @@ class KafkaRestWebSocketContractTest {
             final Map<String, Long> offsetsPersistence,
             final List<WebSocketMessage> websocketRequests,
             // Expected output
-            final List<WebSocketMessage> websocketResponses,
-            final List<AuditErrorMessage> auditErrorMessages
-    ) throws InterruptedException, ExecutionException, TimeoutException {
-        ContentType jsonType = ContentTypes.APPLICATION_JSON;
-        Http http = Http.get(akkaActorSystem);
-        LOGGER.info("Running with: {}", requestToken);
+            final List<WebSocketMessage> websocketResponses) {
+        LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, offsetsPersistence, websocketRequests);
 
-        // Given
-        // POST maskedResource to KafkaController
-        maskedResourceTopic.forEach(resource -> http
-                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource", HOST, port))
-                        .withHeaders(resource.first())
-                        .withEntity(jsonType, serialize(resource.second()).getBytes()))
-                .toCompletableFuture()
-                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-        // Given POST maskedResourceOffset to KafkaController - runnable is then called 'late' to simulate arrival of offsets *after* client request
-        Runnable postOffsets = () -> maskedResourceOffsetTopic.forEach(offset -> http
-                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource-offset", HOST, port))
-                        .withHeaders(offset.first())
-                        .withEntity(jsonType, serialize(offset.second()).getBytes()))
-                .toCompletableFuture()
-                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-        // Write offsets to persistence
-        offsetsPersistence.forEach((token, offset) -> persistenceLayer
-                .overwriteOffset(token, offset)
-                .join());
+        // Then
+        // Assert each received response matches up with the expected
+        assertThat(actualResponses)
+                .as("Testing Websocket Response")
+                .isEqualTo(websocketResponses);
 
-        // When
-        // Send each websocketMessage request and receive responses
-        Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
-        Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
-        // Create client Sink/Source Flow (send the payload, collect the responses)
-        Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
-        Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = http.singleWebSocketRequest(
-                WebSocketRequest.create(String.format("ws://%s:%s/resource/" + requestToken, HOST, port)),
-                clientFlow,
-                akkaMaterializer);
-        // Get the (HTTP) response, a websocket upgrade
-        request.first().toCompletableFuture()
-                .get(1, TimeUnit.SECONDS);
+    }
 
-        // Late POST of offsets after client request has been initialized
-        postOffsets.run();
+    @Test
+    void testNoStartMarkerObservedException() throws JsonProcessingException {
+        Function<String, FilteredResourceRequest> resourceBuilder = getResourceBuilder();
+        Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()::withQueuePointer;
+        BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = getResponseBuilder();
+        Function<String, WebSocketMessage> completeMsgBuilder = getCompleteMsgBuilder();
 
-        // Get the result of the client sink, a list of (WebSocket) responses
-        LinkedList<WebSocketMessage> actualResponses = new LinkedList<>(request.second().toCompletableFuture()
-                .get(30 + websocketRequests.size(), TimeUnit.SECONDS));
+        String requestToken = "test-token-3";
+
+        List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic = new ArrayList<>();
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")));
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
+
+        List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic = new ArrayList<>();
+        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L)));
+
+        List<WebSocketMessage> websocketRequests = new ArrayList<>();
+        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
+        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
+        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
+        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
+
+        // Expected output
+        List<WebSocketMessage> websocketResponses = new ArrayList<>();
+        websocketResponses.add(responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()));
+        websocketResponses.add(completeMsgBuilder.apply("test-token-3"));
+
+        List<AuditErrorMessage> auditErrorMessages = new ArrayList<>();
+        auditErrorMessages.add(AuditErrorMessage.Builder.create().withUserId("userId")
+                .withResourceId("file:/file/resource.1")
+                .withContext(new Context().purpose("purpose"))
+                .withAttributes(Collections.emptyMap())
+                .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + "test-token-3")));
+
+
+        LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, Map.of(), websocketRequests);
 
         // Then
         // Assert each received response matches up with the expected
@@ -363,6 +234,117 @@ class KafkaRestWebSocketContractTest {
                 .isEqualTo(auditErrorMessages);
     }
 
+    @Test
+    void testNoResourcesObservedException() {
+        Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()::withQueuePointer;
+        String requestToken = "test-token-4";
+
+        List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic = new ArrayList<>();
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START))), null));
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
+
+        List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic = new ArrayList<>();
+        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L)));
+
+        List<WebSocketMessage> websocketRequests = new ArrayList<>();
+        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
+
+
+        // Expected output
+        List<WebSocketMessage> websocketResponses = new ArrayList<>();
+        websocketResponses.add(WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody());
+
+        List<AuditErrorMessage> auditErrorMessages = new ArrayList<>();
+        auditErrorMessages.add(AuditErrorMessage.Builder.create().withUserId("unknown")
+                .withResourceId("unknown")
+                .withContext(new Context().purpose("unknown"))
+                .withAttributes(Collections.emptyMap())
+                .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-4")));
+
+
+        LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, Map.of(), websocketRequests);
+
+        // Then
+        // Assert each received response matches up with the expected
+        assertThat(actualResponses)
+                .as("Testing Websocket Response")
+                .isEqualTo(websocketResponses);
+
+        // When you read off the error queue
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
+                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then
+        // The messages on the error topic are as expected
+        assertThat(errorResults)
+                .extracting(ConsumerRecord::value)
+                .usingRecursiveComparison()
+                .ignoringFields("AuditErrorMessage.error", "AuditErrorMessage.timestamp")
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(auditErrorMessages);
+
+
+    }
+
+    private LinkedList<WebSocketMessage> runAkkaRunnableGraph(final String requestToken,
+                                                              final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
+                                                              final List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic,
+                                                              final Map<String, Long> offsetsPersistence,
+                                                              final List<WebSocketMessage> websocketRequests) {
+        try {
+            ContentType jsonType = ContentTypes.APPLICATION_JSON;
+            Http http = Http.get(akkaActorSystem);
+            LOGGER.info("Running with: {}", requestToken);
+
+            // Given
+            // POST maskedResource to KafkaController
+            maskedResourceTopic.forEach(resource -> {
+                http.singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource", HOST, port))
+                        .withHeaders(resource.first())
+                        .withEntity(jsonType, serialize(resource.second()).getBytes()))
+                        .toCompletableFuture()
+                        .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
+                        .join();
+            });
+            // Given POST maskedResourceOffset to KafkaController - runnable is then called 'late' to simulate arrival of offsets *after* client request
+            Runnable postOffsets = () -> maskedResourceOffsetTopic.forEach(offset -> http
+                    .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource-offset", HOST, port))
+                            .withHeaders(offset.first())
+                            .withEntity(jsonType, serialize(offset.second()).getBytes()))
+                    .toCompletableFuture()
+                    .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
+                    .join());
+            // Write offsets to persistence
+            offsetsPersistence.forEach((token, offset) -> persistenceLayer
+                    .overwriteOffset(token, offset)
+                    .join());
+
+            // When
+            // Send each websocketMessage request and receive responses
+            Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
+            Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
+            // Create client Sink/Source Flow (send the payload, collect the responses)
+            Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
+            Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = http.singleWebSocketRequest(
+                    WebSocketRequest.create(String.format("ws://%s:%s/resource/" + requestToken, HOST, port)),
+                    clientFlow,
+                    akkaMaterializer);
+            // Get the (HTTP) response, a websocket upgrade
+            request.first().toCompletableFuture()
+                    .get(1, TimeUnit.SECONDS);
+
+            // Late POST of offsets after client request has been initialized
+            postOffsets.run();
+
+            // Get the result of the client sink, a list of (WebSocket) responses
+            return new LinkedList<>(request.second().toCompletableFuture()
+                    .get(30 + websocketRequests.size(), TimeUnit.SECONDS));
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+            return null;
+        }
+    }
+
     // Handle deserialising JSON TextMessages to WebSocketMessages
     private WebSocketMessage readTextMessage(final Message message) {
         // Akka will sometimes convert a StrictMessage to a StreamedMessage, so we have to handle both cases here
@@ -380,23 +362,5 @@ class KafkaRestWebSocketContractTest {
     // Handle serialising WebSocketMessages to JSON TextMessages
     private Message writeTextMessage(final WebSocketMessage message) {
         return new Strict(serialize(message));
-    }
-
-    // Handle serializing Objects to JSON Strings
-    private static <T> T deserialize(final String json, final Class<T> clazz) {
-        try {
-            return MAPPER.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to write message", e);
-        }
-    }
-
-    // Handle serializing Objects to JSON Strings
-    private static String serialize(final Object o) {
-        try {
-            return MAPPER.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to write message", e);
-        }
     }
 }
