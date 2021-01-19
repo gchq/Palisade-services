@@ -31,6 +31,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
@@ -38,6 +39,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -72,72 +74,6 @@ public final class ContractTestData {
     private ContractTestData() {
     }
 
-    public static class ParameterizedArguments implements ArgumentsProvider {
-        @Override
-        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
-            // Builders
-            Function<String, FilteredResourceRequest> resourceBuilder = getResourceBuilder();
-            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
-                    ::withQueuePointer;
-            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = getResponseBuilder();
-            // Special instances
-            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
-            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
-            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
-            Function<String, WebSocketMessage> completeMsgBuilder = getCompleteMsgBuilder();
-            return Stream.of(
-                    // Test for 'early' client - topic offset message has offset
-                    Arguments.of(
-                            "test-token-1",
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
-                            ),
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
-                            ),
-                            Map.of(),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
-                            List.of(
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-1")
-                            )
-                    ),
-                    // Test for 'late' client - persistence has offset
-                    Arguments.of(
-                            "test-token-2",
-                            List.of(
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
-                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
-                            ),
-                            List.of(),
-                            Map.of(
-                                    "test-token-2", 0L
-                            ),
-                            List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
-                            ),
-                            List.of(
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-2")
-                            )
-                    )
-            );
-        }
-    }
-
     public static Function<String, WebSocketMessage> getCompleteMsgBuilder() {
         return (token) -> WebSocketMessage.Builder.create()
                 .withType(MessageType.COMPLETE)
@@ -166,5 +102,148 @@ public final class ContractTestData {
                         .connectionDetail(new SimpleConnectionDetail()
                                 .serviceName("data-service"))
                         .parent(new SystemResource().id("file:/file/")));
+    }
+
+    public static class ParameterizedArguments implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
+            // Builders
+            Function<String, FilteredResourceRequest> resourceBuilder = resourceId -> FilteredResourceRequest.Builder.create()
+                    .withUserId("userId")
+                    .withResourceId("file:/file/")
+                    .withContext(new Context().purpose("purpose"))
+                    .withResource(new FileResource()
+                            .id("file:/file/" + resourceId)
+                            .serialisedFormat("fmt")
+                            .type("type")
+                            .connectionDetail(new SimpleConnectionDetail()
+                                    .serviceName("data-service"))
+                            .parent(new SystemResource().id("file:/file/")));
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
+                    ::withQueuePointer;
+            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.RESOURCE)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .withBody(leafResource);
+            // Special instances
+            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
+            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.COMPLETE)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .noBody();
+            return Stream.of(
+                    // Test for 'early' client - topic offset message has offset
+                    Arguments.of(
+                            "test-token-1",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-1")
+                            ),
+                            List.of()
+                    ),
+                    // Test for 'late' client - persistence has offset
+                    Arguments.of(
+                            "test-token-2",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
+                            ),
+                            List.of(),
+                            Map.of(
+                                    "test-token-2", 0L
+                            ),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-2")
+                            ),
+                            List.of()
+                    ),
+                    //Test no start of stream marker
+                    Arguments.of(
+                            "test-token-3",
+                            List.of(
+                                    //No Start Marker
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-3")
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))
+                            )
+                    ),
+                    // Test no resources
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    //No Resources
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    )
+            );
+        }
     }
 }

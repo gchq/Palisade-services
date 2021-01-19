@@ -18,14 +18,12 @@ package uk.gov.gchq.palisade.contract.filteredresource.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -40,7 +38,6 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
 import java.io.IOException;
@@ -119,26 +116,15 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
     }
 
     // Deserializer for downstream test error output
-    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
+    static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
-        public AuditErrorMessage deserialize(final String s, final byte[] auditErrorMessage) {
+        public JsonNode deserialize(final String s, final byte[] errorResponse) {
             try {
-                return MAPPER.readValue(auditErrorMessage, AuditErrorMessage.class);
+                return MAPPER.readTree(errorResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(auditErrorMessage), e);
+                throw new SerializationFailedException("Failed to deserialize " + new String(errorResponse), e);
             }
         }
     }
 
-    // Serialiser for upstream test input
-    static class ErrorSerializer implements Serializer<JsonNode> {
-        @Override
-        public byte[] serialize(final String s, final JsonNode auditErrorMessage) {
-            try {
-                return MAPPER.writeValueAsBytes(auditErrorMessage);
-            } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + auditErrorMessage.toString(), e);
-            }
-        }
-    }
 }
