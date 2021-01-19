@@ -30,6 +30,7 @@ import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
+import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 
 import java.io.IOException;
 
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = {ResourceResponseTest.class})
+@ContextConfiguration(classes = {ResourceResponseTest.class, AkkaSystemConfig.class})
 class ResourceResponseTest {
 
     @Autowired

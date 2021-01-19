@@ -70,8 +70,8 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "resourceRules", key = "#resource.id")
     public Optional<Rules<LeafResource>> setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
-        LOGGER.info("ResourceId for {} with policy {} added to cache", resource, rules);
-        LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
+        LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, rules);
+        LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
         return service.setResourceRules(resource, rules);
     }
 
@@ -84,8 +84,8 @@ public class PolicyServiceCachingProxy {
      */
     @Cacheable(value = "recordRules", key = "#resource.id")
     public Optional<Rules<Serializable>> getRecordRules(final Resource resource) {
-        LOGGER.info("ResourceId for resource {} not found in cache", resource);
-        LOGGER.debug("Cache miss for resourceId {}", resource.getId());
+        LOGGER.debug("ResourceId for resource {} not found in cache", resource);
+        LOGGER.info("Cache miss for resourceId {}", resource.getId());
         return service.getRecordRules(resource);
     }
 
@@ -98,8 +98,8 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "recordRules", key = "#resource.id")
     public Optional<Rules<Serializable>> setRecordRules(final Resource resource, final Rules<Serializable> rules) {
-        LOGGER.info("ResourceId for {} with policy {} added to cache", resource, rules);
-        LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
+        LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, rules);
+        LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
         return service.setRecordRules(resource, rules);
     }
 }
