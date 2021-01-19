@@ -130,8 +130,6 @@ public class AkkaRunnableGraph {
             return sourceFactory.create(token, offset)
                     // Extract token, (maybe) stream marker and (maybe) request from message headers
                     .map((CommittableMessage<String, FilteredResourceRequest> message) -> {
-                        LOGGER.info("Running akkaRunnable with {}", token);
-
                         Headers headers = message.record().headers();
                         String messageToken = new String(headers.lastHeader(Token.HEADER).value(), Charset.defaultCharset());
                         // Get the StreamMarker (START or END) from headers (maybe Optional::empty if no StreamMarker)

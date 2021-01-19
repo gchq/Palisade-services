@@ -141,7 +141,7 @@ class KafkaRestWebSocketContractTest {
     }
 
     @BeforeEach
-    public void setup() {
+    public void setupErrorProbe() {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
@@ -157,7 +157,7 @@ class KafkaRestWebSocketContractTest {
 
     @ParameterizedTest
     @ArgumentsSource(ParameterizedArguments.class)
-    void testRunKafka(
+    void testEarlyAndLateClient(
             // Parameterised input
             final String requestToken,
             final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
@@ -166,14 +166,18 @@ class KafkaRestWebSocketContractTest {
             final List<WebSocketMessage> websocketRequests,
             // Expected output
             final List<WebSocketMessage> websocketResponses) {
-        LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, offsetsPersistence, websocketRequests);
+
+        LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken,
+                maskedResourceTopic,
+                maskedResourceOffsetTopic,
+                offsetsPersistence,
+                websocketRequests);
 
         // Then
         // Assert each received response matches up with the expected
         assertThat(actualResponses)
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
-
     }
 
     @Test
@@ -186,29 +190,28 @@ class KafkaRestWebSocketContractTest {
         String requestToken = "test-token-3";
 
         List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic = new ArrayList<>();
-        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")));
-        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
+        //No Start of stream marker here
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken)), resourceBuilder.apply("resource.1")));
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
 
         List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic = new ArrayList<>();
-        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L)));
+        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken)), offsetBuilder.apply(0L)));
 
         List<WebSocketMessage> websocketRequests = new ArrayList<>();
-        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
-        websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
         websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
         websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
 
         // Expected output
         List<WebSocketMessage> websocketResponses = new ArrayList<>();
-        websocketResponses.add(responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()));
-        websocketResponses.add(completeMsgBuilder.apply("test-token-3"));
+        websocketResponses.add(responseBuilder.apply(requestToken, resourceBuilder.apply("resource.1").getResource()));
+        websocketResponses.add(completeMsgBuilder.apply(requestToken));
 
         List<AuditErrorMessage> auditErrorMessages = new ArrayList<>();
         auditErrorMessages.add(AuditErrorMessage.Builder.create().withUserId("userId")
-                .withResourceId("file:/file/resource.1")
+                .withResourceId("file:/file/")
                 .withContext(new Context().purpose("purpose"))
                 .withAttributes(Collections.emptyMap())
-                .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + "test-token-3")));
+                .withError(new Throwable("No Start Marker was observed for token: " + requestToken)));
 
 
         LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, Map.of(), websocketRequests);
@@ -229,8 +232,7 @@ class KafkaRestWebSocketContractTest {
         assertThat(errorResults)
                 .extracting(ConsumerRecord::value)
                 .usingRecursiveComparison()
-                .ignoringFields("AuditErrorMessage.error", "AuditErrorMessage.timestamp")
-                .ignoringFieldsOfTypes(Throwable.class)
+                .ignoringFields("timestamp")
                 .isEqualTo(auditErrorMessages);
     }
 
@@ -240,11 +242,11 @@ class KafkaRestWebSocketContractTest {
         String requestToken = "test-token-4";
 
         List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic = new ArrayList<>();
-        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START))), null));
-        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START))), null));
+        maskedResourceTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken), RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END))), null));
 
         List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic = new ArrayList<>();
-        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L)));
+        maskedResourceOffsetTopic.add(Pair.create(List.of(RawHeader.create(Token.HEADER, requestToken)), offsetBuilder.apply(0L)));
 
         List<WebSocketMessage> websocketRequests = new ArrayList<>();
         websocketRequests.add(WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody());
@@ -252,14 +254,14 @@ class KafkaRestWebSocketContractTest {
 
         // Expected output
         List<WebSocketMessage> websocketResponses = new ArrayList<>();
-        websocketResponses.add(WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody());
+        websocketResponses.add(WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, requestToken).noHeaders().noBody());
 
         List<AuditErrorMessage> auditErrorMessages = new ArrayList<>();
         auditErrorMessages.add(AuditErrorMessage.Builder.create().withUserId("unknown")
                 .withResourceId("unknown")
                 .withContext(new Context().purpose("unknown"))
                 .withAttributes(Collections.emptyMap())
-                .withError(new NoResourcesObservedException("No Resources were observed for token: " + "test-token-4")));
+                .withError(new Throwable("No Resources were observed for token: " + "test-token-4")));
 
 
         LinkedList<WebSocketMessage> actualResponses = runAkkaRunnableGraph(requestToken, maskedResourceTopic, maskedResourceOffsetTopic, Map.of(), websocketRequests);
@@ -280,11 +282,8 @@ class KafkaRestWebSocketContractTest {
         assertThat(errorResults)
                 .extracting(ConsumerRecord::value)
                 .usingRecursiveComparison()
-                .ignoringFields("AuditErrorMessage.error", "AuditErrorMessage.timestamp")
-                .ignoringFieldsOfTypes(Throwable.class)
+                .ignoringFields("timestamp")
                 .isEqualTo(auditErrorMessages);
-
-
     }
 
     private LinkedList<WebSocketMessage> runAkkaRunnableGraph(final String requestToken,
