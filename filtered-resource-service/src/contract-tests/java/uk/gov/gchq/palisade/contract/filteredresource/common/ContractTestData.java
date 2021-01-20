@@ -204,10 +204,7 @@ public final class ContractTestData {
                                     ctsMsg, ctsMsg, ctsMsg, ctsMsg
                             ),
                             List.of(
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.1").getResource()),
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.2").getResource()),
-                                    responseBuilder.apply("test-token-3", resourceBuilder.apply("resource.3").getResource()),
-                                    completeMsgBuilder.apply("test-token-3")
+                                    // No Resources or WebSocketMessages are expected to be returned
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")

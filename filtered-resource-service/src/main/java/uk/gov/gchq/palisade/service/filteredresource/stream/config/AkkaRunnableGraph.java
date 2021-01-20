@@ -193,6 +193,7 @@ public class AkkaRunnableGraph {
                     .alsoTo(
                             Flow.<Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>>>create()
                                     .filter(tokenMarkerRequestCommittable -> tokenMarkerRequestCommittable.t2()
+                                            // Filter the results for a Start of Stream marker
                                             .filter(StreamMarker.START::equals)
                                             .map((StreamMarker startMarker) -> {
                                                 observedStart.set(true);
@@ -219,7 +220,7 @@ public class AkkaRunnableGraph {
                                                             .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + tokenMarkerRequestCommittable.t1()));
 
                                                     // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
-                                                    LOGGER.info("NoStartMarkerObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
+                                                    LOGGER.debug("NoStartMarkerObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
                                                     return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
                                                 });
                                     })
@@ -228,8 +229,12 @@ public class AkkaRunnableGraph {
                                     .filter(Optional::isPresent)
                                     .map(Optional::get)
 
+                                    // Limit the flow to run once
                                     // Audit the error
-                                    .to(auditErrorSink))
+                                    .alsoTo(auditErrorSink)
+                                    .to(Sink.foreach((ProducerRecord<String, AuditErrorMessage> x) -> {
+                                        throw new RuntimeException(x.value().getError().getMessage());
+                                    })))
 
                     // We must check for the specific case where the client made a request and all results were redacted.
                     // This is indicative of the client querying something forbidden, so it is uniquely audited as an error.
@@ -241,7 +246,7 @@ public class AkkaRunnableGraph {
                                                 observedResource.set(true);
                                                 return false;
                                             })
-                                            // If we haven't seen any resources, then audit it
+                                            // If we haven't seen any resources, but recieve the end of stream message, then audit it
                                             .orElse(tokenMarkerRequestCommittable.t2()
                                                     .filter(StreamMarker.END::equals)
                                                     .filter(endMarker -> !observedResource.get())
@@ -259,11 +264,10 @@ public class AkkaRunnableGraph {
                                                 .withAttributes(Collections.emptyMap())
                                                 .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestCommittable.t1()));
 
-                                        LOGGER.info("NoResourcesObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
+                                        LOGGER.debug("NoResourcesObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
                                         // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
                                         return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
                                     })
-
                                     // Audit the error
                                     .to(auditErrorSink))
 
@@ -348,41 +352,4 @@ public class AkkaRunnableGraph {
                         .map(committableTokenOffset -> (Committable) committableTokenOffset.t1())
                         .to(committerSink));
     }
-
-    /**
-     * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
-     * This should automatically connect to kafka at the given offset and filter headers by the given token.
-     * The result is a stream of {@link FilteredResourceRequest}s to be returned to the client.
-     */
-    public interface FilteredResourceSourceFactory {
-        /**
-         * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
-         * Connect to Kafka at the given offset for the partition decided by the token.
-         * Filter messages by their token.
-         *
-         * @param token  the client's unique token for their request
-         * @param offset the offset for this token retrieved by the {@link TokenOffsetController}
-         * @return {@link Source} of {@link FilteredResourceRequest} for the client's request
-         */
-        Source<Pair<FilteredResourceRequest, CommittableOffset>, Control> create(String token, Long offset);
-    }
-
-
-    /**
-     * Factory for Akka {@link Sink}s to the audit success queue for all {@link FilteredResourceRequest}s successfully
-     * returned to the client. This auditing occurs just before the client is sent the resource, and should also
-     * commit the given offset (for the upstream {@link FilteredResourceRequest} to kafka).
-     */
-    public interface AuditServiceSinkFactory {
-        /**
-         * Create a connection to the audit success queue for all {@link FilteredResourceRequest}s successfully
-         * returned to the client. This auditing occurs just before the client is sent the resource, and should also
-         * commit the given offset (for the upstream {@link FilteredResourceRequest} to kafka).
-         *
-         * @param token the token to re-attach as a header for kafka messages
-         * @return {@link Sink} to the audit success queue for {@link FilteredResourceRequest}s and their {@link CommittableOffset}s
-         */
-        Sink<Pair<FilteredResourceRequest, CommittableOffset>, CompletionStage<Done>> create(String token);
-    }
-
 }
