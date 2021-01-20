@@ -22,18 +22,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.reader.HadoopDataReader;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.common.SerialisedDataReader;
-import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
-import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
 import java.io.IOException;
@@ -46,19 +43,11 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
-    // Replace this with a proper error handling mechanism (kafka queues etc.)
-    @Bean
-    ErrorHandlingService loggingErrorHandler() {
-        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {} and resourceId {} threw exception", token, message.getResourceId(), message.getError());
-    }
+   // @Bean
+   // ErrorHandlingService loggingErrorHandler() {
+   //     return new ErrorMessageHandlingService();
+   // }
 
-    // Replace this with a proper audit mechanism (kafka queues etc.)
-    @Bean
-    AuditService loggingAuditService() {
-        LOGGER.warn("Using a Logging-only auditor, this should be replaced by a proper implementation!");
-        return (String token, AuditSuccessMessage message) -> LOGGER.warn("Token {} and resourceId {} read leafResourceId {}", token, message.getResourceId(), message.getLeafResourceId());
-    }
 
     /**
      * Bean for the {@link JpaPersistenceLayer}.
@@ -110,4 +99,12 @@ public class ApplicationConfiguration {
         return JSONSerialiser.createDefaultMapper();
     }
 
+    @Bean("threadPoolTaskExecutor")
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(6);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
+    }
 }

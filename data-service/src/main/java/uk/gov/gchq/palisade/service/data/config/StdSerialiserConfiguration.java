@@ -17,6 +17,8 @@
 package uk.gov.gchq.palisade.service.data.config;
 
 import uk.gov.gchq.palisade.Generated;
+import uk.gov.gchq.palisade.data.serialise.Serialiser;
+import uk.gov.gchq.palisade.service.data.service.DataService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,8 +30,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link StdSerialiserConfiguration} object that uses Spring to configure a list of policies from a yaml file
- * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.data.serialise.Serialiser}s
- * These serialisers will be used for prepopulating the {@link uk.gov.gchq.palisade.service.data.service.DataService}
+ * A container for a number of {@link StdSerialiserPrepopulationFactory} builders used for creating {@link Serialiser}s
+ * These serialisers will be used for prepopulating the {@link DataService}
  */
 public class StdSerialiserConfiguration {
 

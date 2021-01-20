@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package uk.gov.gchq.palisade.service.data.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
  * forwarded to the audit-service.
- * Note all of the services can potentially send an error message.
  */
 public final class AuditErrorMessage extends AuditMessage {
 
@@ -39,14 +36,18 @@ public final class AuditErrorMessage extends AuditMessage {
 
     @JsonCreator
     private AuditErrorMessage(
+            final @JsonProperty("leafResourceId") String leafResourceId,
+            final @JsonProperty("token") String token,
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") JsonNode context,
+            final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes,
             final @JsonProperty("error") Throwable error) {
 
-        super(userId, resourceId, context, attributes);
+        super(leafResourceId, token, userId, resourceId, context, attributes);
+
         this.error = Optional.ofNullable(error).orElseThrow(() -> new IllegalArgumentException("Error" + " cannot be null"));
+
     }
 
     @Generated
@@ -54,36 +55,87 @@ public final class AuditErrorMessage extends AuditMessage {
         return error;
     }
 
+
     /**
-     * Builder class for the creation of instances of the AuditSuccessMessage.  This is a variant of the Fluent Builder
+     * Builder class for the creation of instances of the AuditErrorMessage.  This is a variant of the Fluent Builder
      * which will use Java Objects or JsonNodes equivalents for the components in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * AuditSuccessMessage class.
+         * AuditErrorMessage class.
          *
-         * @return interface {@link IUserId} for the next step in the build.
+         * @return interface {@link IToken} for the next step in the build.
          */
-        public static IUserId create() {
-            return userId -> resourceId -> context -> attributes -> error ->
-                    new AuditErrorMessage(userId, resourceId, context, attributes, error);
+        public static ILeafResourceId create() {
+            return leafResourceId -> token -> userId -> resourceId -> context -> attributes -> error ->
+                    new AuditErrorMessage(leafResourceId, token, userId, resourceId, context, attributes, error);
         }
 
         /**
-         * Starter method for the Builder class that uses a DataRequest for the request specific part of the Audit message.
-         * This method is called followed by the call to add resource with the IResource interface to create the
-         * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
-         *
-         * @param dataRequest   the client request received by the data-service
-         * @param readerRequest the authorised request stored by the attribute-masking-service
+         * Starter method for the Builder class that uses both the {@link DataRequestModel} objects for the construction of
+         * the {@code AuditErrorMessage}.  This method expects there to be a {@code DataRequest} to start the build and
+         * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
+           *
+         * @param auditableDataReaderRequest   the client request received by the data-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
-        public static IAttributes create(final DataRequest dataRequest, final DataReaderRequest readerRequest) {
+
+        public static IAttributes create(final AuditableDataReaderRequest auditableDataReaderRequest) {
+            DataRequestModel dataRequestModel =  auditableDataReaderRequest.getDataRequestModel();
+            DataReaderRequestModel dataReaderRequestModel =  auditableDataReaderRequest.getDataReaderRequestModel();
+
             return create()
-                    .withUserId(readerRequest.getUser().getUserId().getId())
-                    .withResourceId(dataRequest.getLeafResourceId())
-                    .withContext(readerRequest.getContext());
+                    .withLeafResourceId(dataRequestModel.getLeafResourceId())
+                    .withToken(dataRequestModel.getToken())
+                    .withUserId(dataReaderRequestModel.getUser().getUserId().getId())
+                    .withResourceId(dataReaderRequestModel.getResource().getId())
+                    .withContext(dataReaderRequestModel.getContext());
+        }
+
+        /**
+         * Starter method for the Builder class that uses both the {@link DataRequestModel} and the {@link DataReaderRequest}
+         * objects for the construction of the {@code AuditErrorMessage}.
+         * This method expects there to be a {@code DataRequest} and a {@code DataReaderRequest} to start the build and
+         * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
+         *
+         * @param dataRequestModel the authorised request stored by the attribute-masking-service
+         * @return interface {@link IAttributes} for the next step in the build.
+         */
+
+        public static IAttributes create(final DataRequestModel dataRequestModel) {
+            return create()
+                    .withLeafResourceId(dataRequestModel.getLeafResourceId())
+                    .withToken(dataRequestModel.getToken())
+                    .withUserId(null)
+                    .withResourceId(null)
+                    .withContext(null);
+        }
+
+        /**
+         * Adds the Leaf Resource Id for this request to the message.
+         */
+        public interface ILeafResourceId {
+            /**
+             * Adds the leafResource Id.
+             *
+             * @param leafResourceId leaf resource id for this  request.
+             * @return interface {@link IToken} for the next step of the build.
+             */
+            IToken withLeafResourceId(String leafResourceId);
+        }
+
+        /**
+         * Adds the token information to the message.
+         */
+        public interface IToken {
+            /**
+             * Adds the token.
+             *
+             * @param token token to uniquely identify the request.
+             * @return interface {@link IUserId} for the for the next step in the build.
+             */
+            IUserId withToken(String token);
         }
 
         /**
@@ -120,19 +172,9 @@ public final class AuditErrorMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link IError} for the next step in the build.
-             */
-            default IAttributes withContext(Context context) {
-                return withContextNode(MAPPER.valueToTree(context));
-            }
-
-            /**
-             * Adds the user context information.  Uses a JsonNode string form of the information.
-             *
-             * @param context user context for the request.
              * @return interface {@link IAttributes} for the next step in the build.
              */
-            IAttributes withContextNode(JsonNode context);
+             IAttributes withContext(Context context);
         }
 
         /**
@@ -162,34 +204,4 @@ public final class AuditErrorMessage extends AuditMessage {
         }
     }
 
-    @Override
-    @Generated
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AuditErrorMessage)) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        AuditErrorMessage that = (AuditErrorMessage) o;
-        return error.equals(that.error);
-    }
-
-    @Override
-    @Generated
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), error);
-    }
-
-    @Override
-    @Generated
-    public String toString() {
-        return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
-                .add("error=" + error)
-                .add(super.toString())
-                .toString();
-    }
 }

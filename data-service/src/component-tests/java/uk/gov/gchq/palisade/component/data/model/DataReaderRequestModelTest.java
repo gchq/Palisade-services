@@ -23,42 +23,42 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_SUCCESS_MESSAGE;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_READER_REQUEST_MODEL;
 
 
 @JsonTest
-@ContextConfiguration(classes = {AuditSuccessMessageTest.class})
-class AuditSuccessMessageTest {
-
+@ContextConfiguration(classes = {DataRequestModelTest.class})
+class DataReaderRequestModelTest {
 
     @Autowired
-    private JacksonTester<AuditSuccessMessage> jacksonTester;
+    private JacksonTester<DataReaderRequestModel> jacksonTester;
 
     /**
-     * Creates the object with the builder and then convert to the Json equivalent.
+     * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link AuditSuccessMessage} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link DataReaderRequestModel} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
     void testGroupedDependantDataRequestReaderSerialisingAndDeserialising() throws IOException {
 
-        JsonContent<AuditSuccessMessage> auditSuccessMessageJsonContent = jacksonTester.write(AUDIT_SUCCESS_MESSAGE);
-        ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jacksonTester.parse(auditSuccessMessageJsonContent.getJson());
-        AuditSuccessMessage auditSuccessMessageObjectContentObject = auditSuccessMessageObjectContent.getObject();
+        JsonContent<DataReaderRequestModel> dataReaderRequestJsonContent = jacksonTester.write(DATA_READER_REQUEST_MODEL);
+        ObjectContent<DataReaderRequestModel> dataReaderRequestObjectContent = jacksonTester.parse(dataReaderRequestJsonContent.getJson());
+        DataReaderRequestModel dataReaderRequestModelObjectContentObject = dataReaderRequestObjectContent.getObject();
 
         assertAll("DataRequestSerialisingDeseralisingAndComparison",
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using equalTo").isEqualTo(AUDIT_SUCCESS_MESSAGE),
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
+                        () -> assertThat(dataReaderRequestModelObjectContentObject).as("Check using equalTo").isEqualTo(DATA_READER_REQUEST_MODEL),
+                        () -> assertThat(dataReaderRequestModelObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_READER_REQUEST_MODEL)
                 )
         );
     }
+
 }

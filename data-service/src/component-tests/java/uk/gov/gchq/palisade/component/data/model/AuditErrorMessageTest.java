@@ -23,15 +23,16 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_ERROR_MESSAGE;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditErrorMessageTest.class})
@@ -41,8 +42,7 @@ class AuditErrorMessageTest {
     private JacksonTester<AuditErrorMessage> jsonTester;
 
     /**
-     * Grouped assertion test
-     * Create the object with the builder and then convert to the Json equivalent.
+     * Creates the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
@@ -50,43 +50,43 @@ class AuditErrorMessageTest {
      */
     @Test
     void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
-        Context context = new Context().purpose("testContext");
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("messagesSent", "23");
 
-        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
-                .withUserId("originalUserID")
-                .withResourceId("testResourceId")
-                .withContext(context)
-                .withAttributes(attributes)
-                .withError(new InternalError("Something went wrong!"));
-
-        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(auditErrorMessage);
+        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("originalUserID"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("testResourceId"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName").isEqualTo("data-service"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent").isEqualTo("23"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message").isEqualTo("Something went wrong!")
-                ),
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditErrorMessageObject.getUserId()).isEqualTo(auditErrorMessage.getUserId()),
-                        () -> assertThat(auditErrorMessageObject.getResourceId()).isEqualTo(auditErrorMessage.getResourceId()),
-                        () -> assertThat(auditErrorMessageObject.getContext().getPurpose()).isEqualTo(auditErrorMessage.getContext().getPurpose()),
-                        () -> assertThat(auditErrorMessageObject.getServiceName()).isEqualTo(auditErrorMessage.getServiceName()),
-                        () -> assertThat(auditErrorMessageObject.getTimestamp()).isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostName()).isEqualTo(auditErrorMessage.getServerHostName()),
-                        () -> assertThat(auditErrorMessageObject.getServerIP()).isEqualTo(auditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).isEqualTo(auditErrorMessage.getError().getMessage())
-                ),
                 () -> assertAll("ObjectComparison",
                         //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditErrorMessageObject.equals(auditErrorMessage))
+                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
+                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
+                )
+        );
+    }
+
+    /**
+     * Grouped assertion test for the scenario that the error message only has the token and leaf resource id.
+     * This is a special case where the error occurs during the initial request to authenticate the data request.
+     * In this scenario, the {@link AuditErrorMessage} will  be based on the  {@link DataRequestModel} and there is no
+     * {@link DataReaderRequest}.
+     * DataCreate the object with the builder and then convert to the Json equivalent.
+     * Takes the JSON Object, deserialises and tests against the original Object
+     *
+     * @throws IOException throws if the {@link AuditErrorMessage} object cannot be converted to a JsonContent.
+     *                     This equates to a failure to serialise or deserialise the string.
+     */
+    @Test
+    void testGroupedDependantForFailedAuthenticationErrorMessageSerialisingAndDeserialising() throws IOException {
+
+        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
+        ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
+        AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
+
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
+                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
                 )
         );
     }
