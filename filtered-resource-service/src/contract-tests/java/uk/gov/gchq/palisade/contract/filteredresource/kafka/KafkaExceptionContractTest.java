@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpHeader;
 import akka.http.javadsl.model.HttpRequest;
+import akka.http.javadsl.model.headers.RawHeader;
 import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.WebSocketRequest;
 import akka.http.javadsl.model.ws.WebSocketUpgradeResponse;
@@ -44,7 +45,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,25 +60,30 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArguments;
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ResponseDeserializer;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
+import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -87,7 +96,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Import({KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaInitializer.class, RedisInitializer.class})
 @ActiveProfiles({"k8s", "akka"})
-class KafkaRestWebSocketContractTest {
+class KafkaExceptionContractTest {
     private static final String HOST = "localhost";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -121,13 +130,12 @@ class KafkaRestWebSocketContractTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(ParameterizedArguments.class)
-    void testAkkaRunnableGraph(
+    @ArgumentsSource(ParameterizedArgumentsNoResources.class)
+    void testNoResourcesObservedException(
             // Parameterised input
             final String requestToken,
             final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
             final List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic,
-            final Map<String, Long> offsetsPersistence,
             final List<WebSocketMessage> websocketRequests,
             // Expected output
             final List<WebSocketMessage> websocketResponses,
@@ -153,10 +161,6 @@ class KafkaRestWebSocketContractTest {
                         .withEntity(jsonType, serialize(offset.second()).getBytes()))
                 .toCompletableFuture()
                 .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-        // Write offsets to persistence
-        offsetsPersistence.forEach((token, offset) -> persistenceLayer
-                .overwriteOffset(token, offset)
                 .join());
 
         // When
@@ -186,38 +190,34 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
-        if (auditErrorMessages.size() > 0) {
+        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
+                .withGroupId("error-topic-test-consumer")
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-            ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                    .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                    .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                    .withGroupId("error-topic-test-consumer")
-                    .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
-            Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
-                    .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
-                    .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+        // When you read off the error queue
+        LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, auditErrorMessages.size())
+                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
 
+        // Then
+        // The messages on the error topic are as expected
+        assertAll("Asserting on the error topic",
+                // One error is produced
+                () -> assertThat(errorResults)
+                        .as("Assert that there is one error on the error topic")
+                        .hasSize(1),
 
-            // When you read off the error queue
-            LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, auditErrorMessages.size())
-                    .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
-                    .collect(Collectors.toCollection(LinkedList::new));
-
-            // Then
-            // The messages on the error topic are as expected
-            assertAll("Asserting on the error topic",
-                    // One error is produced
-                    () -> assertThat(errorResults)
-                            .as("Assert that there is one error on the error topic")
-                            .hasSize(1),
-
-                    // The error has a message that contains the throwable exception, and the message
-                    () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                            .as("When getting the error message from the error topic")
-                            .isEqualTo(auditErrorMessages.get(0).getError().getMessage())
-            );
-        }
+                // The error has a message that contains the throwable exception, and the message
+                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .as("When getting the error message from the error topic")
+                        .isEqualTo(auditErrorMessages.get(0).getError().getMessage())
+        );
     }
 
     // Handle deserialising JSON TextMessages to WebSocketMessages
@@ -237,5 +237,45 @@ class KafkaRestWebSocketContractTest {
     // Handle serialising WebSocketMessages to JSON TextMessages
     private Message writeTextMessage(final WebSocketMessage message) {
         return new Strict(serialize(message));
+    }
+
+    private static class ParameterizedArgumentsNoResources implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
+            // Builders
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
+                    ::withQueuePointer;
+            // Special instances
+            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
+            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            return Stream.of(
+                    // Test no resources
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    //No Resources
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    )
+            );
+        }
     }
 }
