@@ -220,4 +220,44 @@ public final class ContractTestData {
             );
         }
     }
+
+    public static class ParameterizedArgumentsNoResources implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
+            // Builders
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
+                    ::withQueuePointer;
+            // Special instances
+            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
+            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            return Stream.of(
+                    // Test no resources
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    //No Resources
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+                            ),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    )
+            );
+        }
+    }
 }
