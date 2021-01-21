@@ -201,14 +201,14 @@ public final class ContractTestData {
                             ),
                             Map.of(),
                             List.of(
-                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                                    ctsMsg
                             ),
                             List.of(
                                     // No Resources or WebSocketMessages are expected to be returned
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
-                                            .withResourceId("file:/file")
+                                            .withResourceId("file:/file/")
                                             .withContext(new Context().purpose("purpose"))
                                             .withAttributes(Collections.emptyMap())
                                             .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))

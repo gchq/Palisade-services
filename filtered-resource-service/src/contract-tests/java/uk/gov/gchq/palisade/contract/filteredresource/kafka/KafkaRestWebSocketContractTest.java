@@ -59,7 +59,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArguments;
 import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArgumentsNoResources;
-import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ResponseDeserializer;
+import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
@@ -190,19 +190,19 @@ class KafkaRestWebSocketContractTest {
 
         if (auditErrorMessages.size() > 0) {
 
-            ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                    .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+            ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                    .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
                     .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                     .withGroupId("error-topic-test-consumer")
                     .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-            Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
+            Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
                     .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
                     .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
 
             // When you read off the error queue
-            LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, auditErrorMessages.size())
+            LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
                     .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
                     .collect(Collectors.toCollection(LinkedList::new));
 
@@ -214,10 +214,11 @@ class KafkaRestWebSocketContractTest {
                             .as("Assert that there is one error on the error topic")
                             .hasSize(1),
 
-                    // The error has a message that contains the throwable exception, and the message
-                    () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                            .as("When getting the error message from the error topic")
-                            .isEqualTo(auditErrorMessages.get(0).getError().getMessage())
+                    () -> assertThat(errorResults.get(0).value())
+                            .usingRecursiveComparison()
+                            .ignoringFieldsOfTypes(Throwable.class)
+                            .ignoringFields("timestamp")
+                            .isEqualTo(auditErrorMessages.get(0))
             );
         }
     }
@@ -284,18 +285,18 @@ class KafkaRestWebSocketContractTest {
                 .as("Testing Websocket Response")
                 .isEqualTo(websocketResponses);
 
-        ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
                 .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withGroupId("error-topic-test-consumer")
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Probe<ConsumerRecord<String, JsonNode>> errorProbe = Consumer
+        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
         // When you read off the error queue
-        LinkedList<ConsumerRecord<String, JsonNode>> errorResults = LongStream.range(0, auditErrorMessages.size())
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
                 .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -307,10 +308,11 @@ class KafkaRestWebSocketContractTest {
                         .as("Assert that there is one error on the error topic")
                         .hasSize(1),
 
-                // The error has a message that contains the throwable exception, and the message
-                () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .as("When getting the error message from the error topic")
-                        .isEqualTo(auditErrorMessages.get(0).getError().getMessage())
+                () -> assertThat(errorResults.get(0).value())
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(Throwable.class)
+                        .ignoringFields("timestamp")
+                        .isEqualTo(auditErrorMessages.get(0))
         );
     }
 

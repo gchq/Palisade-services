@@ -38,6 +38,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
 
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.stream.PropertiesConfigurer;
 
 import java.io.IOException;
@@ -115,12 +116,11 @@ class KafkaInitializer implements ApplicationContextInitializer<ConfigurableAppl
         }
     }
 
-    // Deserializer for downstream test error output
-    static class ResponseDeserializer implements Deserializer<JsonNode> {
+    static class ErrorDeserializer implements Deserializer<AuditErrorMessage> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] errorResponse) {
+        public AuditErrorMessage deserialize(final String s, final byte[] errorResponse) {
             try {
-                return MAPPER.readTree(errorResponse);
+                return MAPPER.readValue(errorResponse, AuditErrorMessage.class);
             } catch (IOException e) {
                 throw new SerializationFailedException("Failed to deserialize " + new String(errorResponse), e);
             }
