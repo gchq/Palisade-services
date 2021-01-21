@@ -79,6 +79,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
     private static final Integer PARALLELISM = 1;
+    private static final String UNKNOWN = "unknown";
 
     /**
      * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
@@ -258,9 +259,9 @@ public class AkkaRunnableGraph {
 
                                         // Build the error message
                                         AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
-                                                .withUserId("unknown")
-                                                .withResourceId("unknown")
-                                                .withContext(new Context().purpose("unknown"))
+                                                .withUserId(UNKNOWN)
+                                                .withResourceId(UNKNOWN)
+                                                .withContext(new Context().purpose(UNKNOWN))
                                                 .withAttributes(Collections.emptyMap())
                                                 .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestCommittable.t1()));
 
