@@ -1,4 +1,4 @@
-# Copyright 2019 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,39 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 spring:
   profiles:
     include:
-      - akka
-      - default-config
+      - example-libs
+      - example-runner-config
+
 ---
 
 spring:
-  profiles: default-config
-  application:
-    name: palisade-service
-  output:
-    ansi:
-      enabled: always
-  main:
-    allow-bean-definition-overriding: true
+  profiles: example-runner-config
 
-server:
-  port: 8084
+example:
+  version: '@examples.app.version@'
+  path: ../Palisade-examples
+  model: ${example.path}/example-runner/target/example-runner-${example.version}-exec.jar
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-    shutdown:
-      enabled: true
-    kafka:
-      enabled: true
+manager:
+  mode: run
 
-logging:
-  level:
-    org.apache.kafka: WARN
+  schedule:
+    - palisade-task
+    - example-task
+
+  tasks:
+    example-task:
+      - rest-example
+
+  services:
+    rest-example:
+      jar: ${example.runner}
+      profiles:
+        - rest
+        - eureka
+      log: rest-example.log
+      err: rest-example.err

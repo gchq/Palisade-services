@@ -112,9 +112,9 @@ java -jar -Dspring.profiles.active=example-libs target/services-manager-0.5.0-SN
  * Services will start up with their cache/persistence-store prepopulated with example data
 
 
-#### `example-model` - Automated execution of Palisade client on example data (see [example-model](https://github.com/gchq/Palisade-examples/tree/develop/example-model))
+#### `example-runner` - Automated execution of Palisade client on example data (see [example-runner](https://github.com/gchq/Palisade-examples/tree/develop/example-runner))
 ```bash
-java -jar -Dspring.profiles.active=example-model target/services-manager-0.5.0-SNAPSHOT-exec.jar
+java -jar -Dspring.profiles.active=example-runner target/services-manager-0.5.0-SNAPSHOT-exec.jar
 ```
  * Ensure first to start the discovery-service as above
  * Services will start up with their cache/persistence-store prepopulated with example data
