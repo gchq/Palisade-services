@@ -54,8 +54,6 @@ import java.util.stream.Stream;
 public final class ContractTestData {
 
     public static final String REQUEST_TOKEN = "test-request-token";
-    public static final String REQUEST_JSON = "{\"userId\":\"test-user\",\"resourceId\":\"\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"purpose\"}},\"resource\":null}";
-    public static final JsonNode REQUEST_NODE;
     public static final JsonNode TOPIC_OFFSET_MSG_JSON_NODE;
     public static final TopicOffsetMessage TOPIC_OFFSET_MESSAGE;
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -63,7 +61,6 @@ public final class ContractTestData {
 
     static {
         try {
-            REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
             TOPIC_OFFSET_MSG_JSON_NODE = MAPPER.readTree(TOPIC_OFFSET_MESSAGE_JSON);
             TOPIC_OFFSET_MESSAGE = ContractTestData.MAPPER.treeToValue(ContractTestData.TOPIC_OFFSET_MSG_JSON_NODE, TopicOffsetMessage.class);
         } catch (JsonProcessingException e) {
@@ -72,36 +69,6 @@ public final class ContractTestData {
     }
 
     private ContractTestData() {
-    }
-
-    public static Function<String, WebSocketMessage> getCompleteMsgBuilder() {
-        return (token) -> WebSocketMessage.Builder.create()
-                .withType(MessageType.COMPLETE)
-                .withHeader(Token.HEADER, token)
-                .noHeaders()
-                .noBody();
-    }
-
-    public static BiFunction<String, LeafResource, WebSocketMessage> getResponseBuilder() {
-        return (token, leafResource) -> WebSocketMessage.Builder.create()
-                .withType(MessageType.RESOURCE)
-                .withHeader(Token.HEADER, token)
-                .noHeaders()
-                .withBody(leafResource);
-    }
-
-    public static Function<String, FilteredResourceRequest> getResourceBuilder() {
-        return resourceId -> FilteredResourceRequest.Builder.create()
-                .withUserId("userId")
-                .withResourceId("file:/file/")
-                .withContext(new Context().purpose("purpose"))
-                .withResource(new FileResource()
-                        .id("file:/file/" + resourceId)
-                        .serialisedFormat("fmt")
-                        .type("type")
-                        .connectionDetail(new SimpleConnectionDetail()
-                                .serviceName("data-service"))
-                        .parent(new SystemResource().id("file:/file/")));
     }
 
     public static class ParameterizedArguments implements ArgumentsProvider {

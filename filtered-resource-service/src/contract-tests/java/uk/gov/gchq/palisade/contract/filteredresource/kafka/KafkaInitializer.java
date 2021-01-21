@@ -18,7 +18,6 @@ package uk.gov.gchq.palisade.contract.filteredresource.kafka;
 
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
