@@ -21,13 +21,22 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Static configuration for kafka key/value serialisers/deserialisers
@@ -36,12 +45,18 @@ import java.nio.charset.Charset;
  * In general, the keys are not used so the choice of serialiser is not important
  */
 public final class SerDesConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerDesConfig.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
     private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
+    private static final Queue<Exception> SERDES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
+    }
+
+    public static Queue<Exception> getSerDesExceptions() {
+        return SERDES_EXCEPTIONS;
     }
 
     /**
@@ -65,6 +80,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
+                SERDES_EXCEPTIONS.add(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -89,7 +105,22 @@ public final class SerDesConfig {
             try {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
+                String failedAuditString = new String(auditRequest, Charset.defaultCharset());
+                try {
+                    String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
+                            .format(DateTimeFormatter.ISO_INSTANT);
+                    File classpath = new File(System.getProperty("java.class.path"));
+                    File parent = classpath.getAbsoluteFile().getParentFile();
+                    File timestampedFile = new File(parent, fileName);
+                    FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());
+                    fileWriter.write(failedAuditString);
+                    fileWriter.close();
+                    LOGGER.info("Successfully created error file {}", timestampedFile);
+                } catch (IOException ioException) {
+                    LOGGER.error("Failed to process audit request '{}'", failedAuditString, ioException);
+                }
+                SERDES_EXCEPTIONS.add(e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
     }
@@ -115,6 +146,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
+                SERDES_EXCEPTIONS.add(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -139,7 +171,21 @@ public final class SerDesConfig {
             try {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
+                String failedAuditString = new String(auditRequest, Charset.defaultCharset());
+                try {
+                    File classpath = new File(System.getProperty("java.class.path"));
+                    File parent = classpath.getAbsoluteFile().getParentFile();
+                    File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
+                            .format(DateTimeFormatter.ISO_INSTANT));
+                    FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());
+                    fileWriter.write(failedAuditString);
+                    fileWriter.close();
+                    LOGGER.info("Successfully created error file {}", timestampedFile);
+                } catch (IOException ex) {
+                    LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
+                }
+                SERDES_EXCEPTIONS.add(e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
     }

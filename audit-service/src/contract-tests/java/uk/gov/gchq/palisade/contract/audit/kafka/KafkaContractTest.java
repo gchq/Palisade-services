@@ -58,6 +58,7 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 
+import uk.gov.gchq.palisade.contract.audit.BadRequest;
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
@@ -233,6 +234,24 @@ class KafkaContractTest {
 
         // Then - check the audit service has invoked the audit method
         Mockito.verify(auditService, Mockito.timeout(3000).times(0)).audit(anyString(), any());
+    }
+
+    @Test
+    @DirtiesContext
+    void testFailedErrorDeserialization() {
+        // Add a message to the 'error' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_RECORD_NODE_FACTORY.get().limit(1L);
+
+        // When - we write to the input
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+
+        Source.fromJavaStream(() -> requests)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+
+        Mockito.verify(auditService, Mockito.timeout(3000).times(1)).audit(anyString(), any());
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
