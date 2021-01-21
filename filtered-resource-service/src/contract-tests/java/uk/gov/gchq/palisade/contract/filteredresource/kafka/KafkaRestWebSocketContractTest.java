@@ -208,16 +208,21 @@ class KafkaRestWebSocketContractTest {
             // Then
             // The messages on the error topic are as expected
             assertAll("Asserting on the error topic",
-                    // One error is produced
                     () -> assertThat(errorResults)
                             .as("Assert that there is one error on the error topic")
                             .hasSize(1),
 
                     () -> assertThat(errorResults.get(0).value())
+                            .as("Assert that after ignoring the Throwable object, and differences in timestamp, the AuditErrorMessages are the same")
                             .usingRecursiveComparison()
                             .ignoringFieldsOfTypes(Throwable.class)
                             .ignoringFields("timestamp")
-                            .isEqualTo(auditErrorMessages.get(0))
+                            .isEqualTo(auditErrorMessages.get(0)),
+
+                    () -> assertThat(errorResults.get(0).value().getError())
+                            .as("Assert that the error message inside the AuditErrorMessage is the same")
+                            .isExactlyInstanceOf(Throwable.class)
+                            .hasMessageContaining(auditErrorMessages.get(0).getError().getMessage())
             );
         }
     }
@@ -302,16 +307,21 @@ class KafkaRestWebSocketContractTest {
         // Then
         // The messages on the error topic are as expected
         assertAll("Asserting on the error topic",
-                // One error is produced
                 () -> assertThat(errorResults)
                         .as("Assert that there is one error on the error topic")
                         .hasSize(1),
 
                 () -> assertThat(errorResults.get(0).value())
+                        .as("Assert that after ignoring the Throwable object, and differences in timestamp, the AuditErrorMessages are the same")
                         .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(Throwable.class)
                         .ignoringFields("timestamp")
-                        .isEqualTo(auditErrorMessages.get(0))
+                        .isEqualTo(auditErrorMessages.get(0)),
+
+                () -> assertThat(errorResults.get(0).value().getError())
+                        .as("Assert that the error message inside the AuditErrorMessage is the same")
+                        .isExactlyInstanceOf(Throwable.class)
+                        .hasMessageContaining(auditErrorMessages.get(0).getError().getMessage())
         );
     }
 
