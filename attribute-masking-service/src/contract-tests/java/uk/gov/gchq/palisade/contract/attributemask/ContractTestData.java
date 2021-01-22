@@ -31,10 +31,12 @@ import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.UserId;
 import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.StreamMarker;
 import uk.gov.gchq.palisade.service.attributemask.model.Token;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -65,6 +67,12 @@ public class ContractTestData {
 
     public static final String REQUEST_JSON = "{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"uk.gov.gchq.palisade.test.TestType\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}";
     public static final JsonNode REQUEST_NODE;
+    public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
+            .withUserId(USER_ID.getId())
+            .withResourceId(RESOURCE_ID)
+            .withContext(CONTEXT)
+            .withAttributes(Map.of("method", "storeAuthorisedRequest"))
+            .withError(new Throwable("There was an issue with persisting the resource"));
     public static final AttributeMaskingRequest REQUEST_OBJ;
 
     static {
@@ -80,7 +88,7 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId%d\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format("{\"userId\":\"test-user-id\",\"resourceId\":\"/test/resourceId\",\"context\":{\"class\":\"uk.gov.gchq.palisade.Context\",\"contents\":{\"purpose\":\"test-purpose\"}},\"user\":{\"userId\":{\"id\":\"test-user-id\"},\"roles\":[],\"auths\":[],\"class\":\"uk.gov.gchq.palisade.User\"},\"resource\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.FileResource\",\"id\":\"/test/resourceId\",\"attributes\":{},\"connectionDetail\":{\"class\":\"uk.gov.gchq.palisade.service.SimpleConnectionDetail\",\"serviceName\":\"test-data-service\"},\"parent\":{\"class\":\"uk.gov.gchq.palisade.resource.impl.SystemResource\",\"id\":\"/test/\"},\"serialisedFormat\":\"avro\",\"type\":\"%d\"},\"rules\":{\"message\":\"no rules set\",\"rules\":{\"test-rule\":{\"class\":\"uk.gov.gchq.palisade.contract.attributemask.ContractTestData$PassThroughRule\"}}}}", i, i);
     public static final Function<Integer, JsonNode> REQUEST_FACTORY_NODE = i -> {
         try {
             return MAPPER.readTree(REQUEST_FACTORY_JSON.apply(i));
