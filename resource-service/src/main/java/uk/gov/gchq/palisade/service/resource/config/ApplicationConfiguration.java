@@ -19,7 +19,7 @@ package uk.gov.gchq.palisade.service.resource.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,6 +27,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -35,23 +38,22 @@ import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourceConfiguration;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
-import uk.gov.gchq.palisade.service.resource.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.resource.exception.ApplicationAsyncExceptionHandler;
 import uk.gov.gchq.palisade.service.resource.repository.CompletenessRepository;
-import uk.gov.gchq.palisade.service.resource.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
+import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
 import uk.gov.gchq.palisade.service.resource.repository.ResourceRepository;
 import uk.gov.gchq.palisade.service.resource.repository.SerialisedFormatRepository;
 import uk.gov.gchq.palisade.service.resource.repository.TypeRepository;
 import uk.gov.gchq.palisade.service.resource.service.ConfiguredHadoopResourceService;
-import uk.gov.gchq.palisade.service.resource.service.ErrorHandlingService;
 import uk.gov.gchq.palisade.service.resource.service.HadoopResourceService;
+import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceProxy;
 import uk.gov.gchq.palisade.service.resource.service.SimpleResourceService;
-import uk.gov.gchq.palisade.service.resource.service.StreamingResourceServiceProxy;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -60,10 +62,12 @@ import java.util.stream.Collectors;
  * Bean configuration and dependency injection graph
  */
 @Configuration
+@EnableR2dbcRepositories(basePackages = {"uk.gov.gchq.palisade.service.resource.reactive"})
 @EnableConfigurationProperties({ResourceServiceConfigProperties.class})
-public class ApplicationConfiguration {
+public class ApplicationConfiguration implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
+    private static final int THREAD_POOL = 6;
     private final ResourceServiceConfigProperties resourceServiceConfigProperties;
 
     @Value("${web.client.data-service:data-service}")
@@ -120,48 +124,38 @@ public class ApplicationConfiguration {
 
     /**
      * An implementation of the {@link PersistenceLayer} interface to be used by the {@link ResourceService} as if it were a cache
-     * See the {@link JpaPersistenceLayer} for an in-depth description of how and why each part is used
+     * See the {@link ReactivePersistenceLayer} for an in-depth description of how and why each part is used
      * While code introspection may suggest no beans found for these types, they will be created by Spring
      *
      * @param completenessRepository     the completeness repository to use, storing whether persistence will return a response for any given request
      * @param resourceRepository         the resource repository to use, a store of each available {@link LeafResource} and its parents
      * @param typeRepository             the type repository to use, a one-to-many relation of types to resource ids
      * @param serialisedFormatRepository the serialisedFormat repository to use, a one-to-many relation of serialisedFormats to resource ids
-     * @return a {@link JpaPersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
+     * @return a {@link ReactivePersistenceLayer} object with the appropriate repositories configured for storing resource (meta)data
      */
-    @Bean(name = "jpa-persistence")
-    public JpaPersistenceLayer persistenceLayer(
+    @Bean
+    public ReactivePersistenceLayer persistenceLayer(
             final CompletenessRepository completenessRepository,
             final ResourceRepository resourceRepository,
             final TypeRepository typeRepository,
             final SerialisedFormatRepository serialisedFormatRepository) {
-        return new JpaPersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
+        return new ReactivePersistenceLayer(completenessRepository, resourceRepository, typeRepository, serialisedFormatRepository);
     }
 
     /**
-     * Bean of ResourceConverter which is used to convert database objects such as columns to json
-     *
-     * @return a new instance of ResourceConverter
-     */
-    @Bean
-    public ResourceConverter resourceConverter() {
-        return new ResourceConverter();
-    }
-
-    /**
-     * A proxy-like object for a {@link ResourceService} using {@link java.util.stream.Stream}s to communicate with a {@link org.springframework.web.bind.annotation.RestController}
-     * This includes writing the {@link java.util.stream.Stream} of {@link Resource}s to the {@link java.io.OutputStream} of a {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
+     * A proxy-like object for a {@link ResourceService} using {@link akka.stream.javadsl.Source}s.
+     * This includes providing cache like behaviour and wrapping stream elements in success/error objects
      *
      * @param persistenceLayer a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate         a 'real' {@link ResourceService} to delegate requests to when not found in the persistenceLayer
      *                         This must be marked 'impl' to designate that it is the backing implementation to use as there may be multiple proxies, services etc.
-     * @return a {@link StreamingResourceServiceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
+     * @return a {@link ResourceServicePersistenceProxy} to handle the streams produced by the persistenceLayer and delegate {@link ResourceService}
      */
     @Bean
-    public StreamingResourceServiceProxy resourceServiceProxy(
+    public ResourceServicePersistenceProxy resourceServicePersistenceProxy(
             final PersistenceLayer persistenceLayer,
-            final @Qualifier("impl") ResourceService delegate) {
-        return new StreamingResourceServiceProxy(persistenceLayer, delegate);
+            final ResourceService delegate) {
+        return new ResourceServicePersistenceProxy(persistenceLayer, delegate);
     }
 
     /**
@@ -171,11 +165,11 @@ public class ApplicationConfiguration {
      * @return a new instance of SimpleResourceService with a string value dataServiceName retrieved from the relevant profiles yaml
      */
     @Bean("simpleResourceService")
-    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple")
-    @Qualifier("impl")
+    @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "simple", matchIfMissing = true)
     public ResourceService simpleResourceService() {
         return new SimpleResourceService(dataServiceName, resourceServiceConfigProperties.getDefaultType());
     }
+
 
     /**
      * A bean for the implementation of the HadoopResourceService which implements {@link ResourceService} used for retrieving resources from Hadoop
@@ -186,7 +180,6 @@ public class ApplicationConfiguration {
      */
     @Bean("hadoopResourceService")
     @ConditionalOnProperty(prefix = "resource", name = "implementation", havingValue = "hadoop")
-    @Qualifier("impl")
     public HadoopResourceService hadoopResourceService(final org.apache.hadoop.conf.Configuration config) throws IOException {
         return new ConfiguredHadoopResourceService(config);
     }
@@ -212,10 +205,19 @@ public class ApplicationConfiguration {
         return JSONSerialiser.createDefaultMapper();
     }
 
-    // Replace this with a proper error handling mechanism (kafka queues etc.)
-    @Bean
-    ErrorHandlingService loggingErrorHandler() {
-        LOGGER.warn("Using a Logging-only error handler, this should be replaced by a proper implementation!");
-        return (String token, AuditErrorMessage message) -> LOGGER.error("Token {}, userId {} and attributes {}, threw exception ", token, message.getUserId(), message.getAttributes(), message.getError());
+    @Override
+    @Bean("threadPoolTaskExecutor")
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
+        ex.setThreadNamePrefix("AppThreadPool-");
+        ex.setCorePoolSize(THREAD_POOL);
+        LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
+        return ex;
     }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new ApplicationAsyncExceptionHandler();
+    }
+
 }

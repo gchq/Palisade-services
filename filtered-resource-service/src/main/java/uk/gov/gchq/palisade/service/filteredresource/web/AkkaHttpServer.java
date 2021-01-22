@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class AkkaHttpServer {
     public AkkaHttpServer(final String hostname, final int port, final Collection<RouteSupplier> routeSuppliers) {
         this.hostname = hostname;
         this.port = port;
-        this.routeSuppliers = routeSuppliers;
+        this.routeSuppliers = Collections.unmodifiableCollection(routeSuppliers);
         this.bindings = this.routeSuppliers.stream()
                 .map(Supplier::get)
                 .reduce(Directives::concat)

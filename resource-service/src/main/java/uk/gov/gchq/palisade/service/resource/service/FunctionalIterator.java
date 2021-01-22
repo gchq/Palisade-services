@@ -16,6 +16,9 @@
 
 package uk.gov.gchq.palisade.service.resource.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -29,6 +32,7 @@ import java.util.function.UnaryOperator;
  * @param <T> the type of the {@link FunctionalIterator}
  */
 public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
+
 
     /**
      * A method used to create a {@link FunctionalIterator} from an iterator.
@@ -91,6 +95,16 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
      */
     default FunctionalIterator<T> peek(final Consumer<T> peek) {
         return new PeekIterator<>(this, peek);
+    }
+
+    /**
+     * A method that catches the errors that occur
+     *
+     * @param exceptionally the function used to propagate the error
+     * @return a {@link FunctionalIterator} of type {@link T}
+     */
+    default FunctionalIterator<T> exceptionally(final Function<Throwable, T> exceptionally) {
+        return new ExceptionallyIterator<>(this, exceptionally);
     }
 
     /**
@@ -277,7 +291,7 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
 
         @Override
         public boolean hasNext() {
-            return this.buffer.hasNext();
+            return (this.buffer != null && this.buffer.hasNext());
         }
 
         @Override
@@ -297,7 +311,7 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
         }
 
         private void rebuffer() {
-            while (!this.buffer.hasNext() && this.delegate.hasNext()) {
+            while (!(this.buffer != null && this.buffer.hasNext()) && this.delegate.hasNext()) {
                 this.buffer = this.flatMap.apply(this.delegate.next());
             }
         }
@@ -333,6 +347,46 @@ public interface FunctionalIterator<T> extends Iterator<T>, AutoCloseable {
             T next = this.delegate.next();
             this.peek.accept(next);
             return next;
+        }
+
+        @Override
+        public void close() throws Exception {
+            this.delegate.close();
+        }
+    }
+
+    /**
+     * A {@link FunctionalIterator} implementation that allows an iterator to catch thrown exceptions
+     *
+     * @param <T> the type of the iterator
+     */
+    class ExceptionallyIterator<T> implements FunctionalIterator<T> {
+        private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionallyIterator.class);
+        private final FunctionalIterator<T> delegate;
+        private final Function<Throwable, T> exceptionally;
+
+        public ExceptionallyIterator(final FunctionalIterator<T> delegate, final Function<Throwable, T> exceptionally) {
+            this.delegate = delegate;
+            this.exceptionally = exceptionally;
+        }
+
+        @Override
+        public boolean hasNext() {
+            try {
+                return this.delegate.hasNext();
+            } catch (RuntimeException throwable) {
+                LOGGER.warn("ExceptionallyIterator caught a Throwable while calling delegate.hasNext() ", throwable);
+                return false;
+            }
+        }
+
+        @Override
+        public T next() {
+            try {
+                return this.delegate.next();
+            } catch (RuntimeException throwable) {
+                return exceptionally.apply(throwable);
+            }
         }
 
         @Override
