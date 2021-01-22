@@ -16,17 +16,17 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.redis.core.index.Indexed;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import uk.gov.gchq.palisade.Generated;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
 
 import java.io.Serializable;
 import java.util.StringJoiner;
@@ -36,26 +36,17 @@ import java.util.StringJoiner;
  * In this case the ResourceID and type make up the key
  * This contains all objects that will be go into the database, including how they are serialised and indexed
  */
-@Entity
-@Table(name = "types",
-        indexes = {
-                @Index(name = "type", columnList = "type"),
-        })
-@RedisHash("TypeEntity")
-public class TypeEntity implements Serializable {
+@Table("types")
+public class TypeEntity implements Serializable, Persistable<String> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @org.springframework.data.annotation.Id
-    @Column(name = "resource_id", columnDefinition = "varchar(255)", nullable = false)
-    private String resourceId;
+    @Column("resource_id")
+    private final String resourceId;
 
     @Indexed
-    @Column(name = "type", columnDefinition = "varchar(255)", nullable = false)
-    private String type;
-
-    public TypeEntity() {
-    }
+    @Column("type")
+    private final String type;
 
     /**
      * Constructor used for the Database
@@ -65,9 +56,23 @@ public class TypeEntity implements Serializable {
      * @param resourceId the id of the resource that will be inserted into the backing store
      */
     @PersistenceConstructor
-    public TypeEntity(final String type, final String resourceId) {
+    @JsonCreator
+    public TypeEntity(final @JsonProperty("type") String type,
+                      final @JsonProperty("resourceId") String resourceId) {
         this.type = type;
         this.resourceId = resourceId;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getId() {
+        return this.resourceId;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return true;
     }
 
     @Generated

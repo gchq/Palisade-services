@@ -16,18 +16,16 @@
 
 package uk.gov.gchq.palisade.service.resource.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import uk.gov.gchq.palisade.Generated;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -38,31 +36,19 @@ import java.util.StringJoiner;
  * In this case the Id_pair_hash is the ID which is created by creating a hash of the entity_type object and entity_id
  * This contains all objects that will be go into the database, including how they are serialised and indexed
  */
-@Entity
-@Table(name = "completeness",
-        indexes = {
-                @Index(name = "id_pair_hash", columnList = "id_pair_hash", unique = true),
-                @Index(name = "entity_type", columnList = "entity_type"),
-                @Index(name = "entity_id", columnList = "entity_id"),
-        })
-@RedisHash("CompletenessEntity")
-public class CompletenessEntity implements Serializable {
+@Table("completeness")
+public class CompletenessEntity implements Serializable, Persistable<Integer> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @org.springframework.data.annotation.Id
-    @Column(name = "id_pair_hash", columnDefinition = "integer", nullable = false)
-    private Integer id;
+    @Column("id")
+    private final int id;
 
-    @Column(name = "entity_type", columnDefinition = "integer", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    protected EntityType entityType;
+    @Column("entity_type")
+    private final EntityType entityType;
 
-    @Column(name = "entity_id", columnDefinition = "varchar(255)", nullable = false)
-    protected String entityId;
-
-    public CompletenessEntity() {
-    }
+    @Column("entity_id")
+    private final String entityId;
 
     /**
      * Constructor used for the Database that takes a {@link EntityType} and EntityId
@@ -71,11 +57,37 @@ public class CompletenessEntity implements Serializable {
      * @param entityType The Entity type enum object.
      * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
      */
-    @PersistenceConstructor
     public CompletenessEntity(final EntityType entityType, final String entityId) {
+        this(entityType, entityId, idFor(entityType, entityId));
+    }
+
+    /**
+     * Constructor used for the Database that takes json
+     * Used for inserting objects into the backing store
+     *
+     * @param entityType the Entity type enum object
+     * @param entityId The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     * @param id the id of the stored entity
+     */
+    @PersistenceConstructor
+    @JsonCreator
+    public CompletenessEntity(final @JsonProperty("entityType") EntityType entityType,
+                              final @JsonProperty("entityId") String entityId,
+                              final @JsonProperty("id") int id) {
         this.entityType = entityType;
         this.entityId = entityId;
-        this.id = Objects.hash(entityType, entityId);
+        this.id = id;
+    }
+
+    @Generated
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return true;
     }
 
     @Generated
@@ -88,9 +100,15 @@ public class CompletenessEntity implements Serializable {
         return entityId;
     }
 
-    public Integer getId() {
-        this.id = hashCode();
-        return id;
+    /**
+     * Creates a hash value for the passed parameters
+     *
+     * @param entityType the Entity type enum object
+     * @param entityId The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     * @return the hash value used for the id, made up of the entity type and entity id values
+     */
+    public static Integer idFor(final EntityType entityType, final String entityId) {
+        return Objects.hash(entityType, entityId);
     }
 
     @Override

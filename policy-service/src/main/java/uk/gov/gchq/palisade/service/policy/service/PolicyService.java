@@ -38,34 +38,34 @@ public interface PolicyService extends Service {
      * If no rules are applied then an exception will be thrown
      * A resource rule may be applied at any point in the file tree, and could cause the record to be redacted.
      *
-     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @param resourceId the id of the {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
      * @return An optional {@link Rules} object, which contains the list of rules found that need to be applied to the resource.
      */
-    Optional<Rules<LeafResource>> getResourceRules(Resource resource);
+    Optional<Rules<LeafResource>> getResourceRules(final String resourceId);
 
     /**
      * GetRecordRules is used by the service to get any record rules that could be applied against the resource that the user has requested
      *
-     * @param resource a {@link Resource} to get rules for
+     * @param resourceId the id of the {@link Resource} to get rules for
      * @return An optional {@link Rules} object, which contains the list of rules found that need to be applied to the resource.
      */
-    Optional<Rules<Serializable>> getRecordRules(Resource resource);
+    Optional<Rules<Serializable>> getRecordRules(final String resourceId);
 
     /**
      * This method sets the resource rules against the resource for which the user will eventually request
      *
-     * @param resource {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
+     * @param resourceId the id of the {@link Resource} the user wants access to, this could be a Directory, stream, system resource or file
      * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
      * @return an Optional Rules for LeafResource object that contains the returned map of resource rules for each resource
      */
-    Optional<Rules<LeafResource>> setResourceRules(Resource resource, Rules<LeafResource> rules);
+    Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules);
 
     /**
      * This method sets the record rules against the resource for which the user will eventually request
      *
-     * @param resource {@link Resource} the resource which the user wants to apply rules against
+     * @param resourceId the id of the {@link Resource} the user wants to apply rules against
      * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
      * @return an Optional Serializable rules object that contains the returned map of record rules for each resource
      */
-    Optional<Rules<Serializable>> setRecordRules(Resource resource, Rules<Serializable> rules);
+    Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules);
 }

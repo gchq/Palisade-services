@@ -44,18 +44,17 @@ import java.util.stream.Collectors;
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
+    private static final String TOPIC_NAME = "request";
     private final AdminClient adminClient;
     private final ProducerTopicConfiguration topicConfiguration;
 
     /**
      * Requires the AdminClient to interact with Kafka
      *
-     * @param adminClient        of the cluster
-     * @param topicConfiguration contains the producer topic configuration
+     * @param adminClient of the cluster
      */
-    public KafkaHealthIndicator(final AdminClient adminClient, final ProducerTopicConfiguration topicConfiguration) {
+    public KafkaHealthIndicator(final AdminClient adminClient) {
         this.adminClient = adminClient;
-        this.topicConfiguration = topicConfiguration;
     }
 
     @Override

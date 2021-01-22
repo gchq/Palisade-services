@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.service.resource.web;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,7 +64,9 @@ public class ResourceRestController {
                                                 final @RequestBody(required = false) ResourceRequest request) {
 
         // Process the request and return the result
-        return service.resourceRequestMulti(headers, Collections.singletonList(request));
+        service.resourceRequestMulti(headers, Collections.singletonList(request)).join();
+
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     /**
@@ -79,6 +82,7 @@ public class ResourceRestController {
                                                      final @RequestBody Collection<ResourceRequest> requests) {
 
         // Process the request and return the results
-        return service.resourceRequestMulti(headers, requests);
+        service.resourceRequestMulti(headers, requests).join();
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

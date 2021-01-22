@@ -15,10 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
-import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
+import akka.NotUsed;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Source;
 
-import java.util.Iterator;
+import uk.gov.gchq.palisade.resource.LeafResource;
+
 import java.util.Optional;
 
 /**
@@ -34,58 +36,55 @@ public interface PersistenceLayer {
      * Given a resource id, return all {@link LeafResource}s underneath it
      *
      * @param resourceId the resource id to query
-     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
+     * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Iterator<LeafResource>> getResourcesById(String resourceId);
+    Optional<Source<LeafResource, NotUsed>> getResourcesById(String resourceId);
 
     /**
      * Given a type, return all leaf resources of that type
      *
      * @param type the type to query
-     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
+     * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Iterator<LeafResource>> getResourcesByType(String type);
+    Optional<Source<LeafResource, NotUsed>> getResourcesByType(String type);
 
     /**
      * Given a serialised format, return all leaf resources of that serialised format
      *
      * @param serialisedFormat the serialised format to query
-     * @return {@link Iterator} of {@link LeafResource}s if the persistence store is aware of these resources
+     * @return {@link Source} of {@link LeafResource}s if the persistence store is aware of these resources
      */
-    Optional<Iterator<LeafResource>> getResourcesBySerialisedFormat(String serialisedFormat);
+    Optional<Source<LeafResource, NotUsed>> getResourcesBySerialisedFormat(String serialisedFormat);
 
     /**
      * Add a {@link LeafResource} to persistence for a given resourceId
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param <T>            the type for the {@link FunctionalIterator}
-     * @param rootResourceId the resource id that was queried to return this {@link Iterator} of resources
-     * @param resources      the resource stream returned
-     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
+     * @param <T>            the type for the {@link Flow}
+     * @param rootResourceId the resource id that was queried to return this {@link Flow} of resources
+     * @return an {@link Flow} of {@link LeafResource}s added to the persistence
      */
-    <T> FunctionalIterator<T> withPersistenceById(String rootResourceId, FunctionalIterator<T> resources);
+    <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceById(String rootResourceId);
 
     /**
      * Add a {@link LeafResource} to persistence for a given type
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param <T>       the type for the {@link FunctionalIterator}
-     * @param type      the file type that was queried to return this {@link Iterator} of resources
-     * @param resources the resource stream returned
-     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
+     * @param <T>       the type for the {@link Flow}
+     * @param type      the file type that was queried to return this {@link Flow} of resources
+     * @return an {@link Flow} of {@link LeafResource}s added to the persistence
      */
-    <T> FunctionalIterator<T> withPersistenceByType(String type, FunctionalIterator<T> resources);
+    <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceByType(String type);
 
     /**
      * Add a {@link LeafResource} to persistence for a given serialised format
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param <T>              the type for the {@link FunctionalIterator}
-     * @param serialisedFormat the serialised format that was queried to return this {@link Iterator} of resources
-     * @param resources        the resource stream returned
-     * @return an {@link Iterator} of the {@link LeafResource}s added to the persistence
+     * @param <T>              the type for the {@link Flow}
+     * @param serialisedFormat the serialised format that was queried to return this {@link Flow} of resources
+     * @return a {@link Flow} of {@link LeafResource}s added to the persistence
      */
-    <T> FunctionalIterator<T> withPersistenceBySerialisedFormat(String serialisedFormat, FunctionalIterator<T> resources);
+    <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceBySerialisedFormat(String serialisedFormat);
 
 
     /**

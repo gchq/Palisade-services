@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.policy.service;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.io.Serializable;
@@ -32,22 +31,22 @@ import java.util.Optional;
 public class NullPolicyService implements PolicyService {
 
     @Override
-    public Optional<Rules<LeafResource>> getResourceRules(final Resource resource) {
+    public Optional<Rules<LeafResource>> getResourceRules(final String resourceId) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Rules<Serializable>> getRecordRules(final Resource resource) {
+    public Optional<Rules<Serializable>> getRecordRules(final String resourceId) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Rules<LeafResource>> setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
+    public Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules) {
         return Optional.of(rules);
     }
 
     @Override
-    public Optional<Rules<Serializable>> setRecordRules(final Resource resource, final Rules<Serializable> rules) {
+    public Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules) {
         return Optional.of(rules);
     }
 }
