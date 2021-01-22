@@ -34,11 +34,9 @@
     <properties>
         <!-- Dependency versions -->
         <scala.version>2.13</scala.version>
-        <akka.version>2.6.8</akka.version>
+        <akka.version>2.6.10</akka.version>
         <alpakka.version>2.0.4</alpakka.version>
-        <jackson.version>2.11.0</jackson.version>
         <hadoop.version>3.2.1</hadoop.version>
-        <embedded-redis.version>0.7.3</embedded-redis.version>
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
     </properties>
@@ -90,10 +88,6 @@
         ~ Spring Boot
         -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
             <!-- Health endpoint (and loggers, shutdown, metrics ...) -->
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -104,33 +98,19 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <!-- H2 implementation of CrudRepositories -->
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <!-- H2 implementation of ReactiveCrudRepositories -->
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-h2</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Reactive Redis (ReactiveCrudRepository impl done manually) -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
         <dependency>
             <!-- Caching/Persistence stores -->
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
         </dependency>
         <!--
         ~ Hadoop
@@ -146,7 +126,9 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Test dependencies -->
+        <!--
+        ~ Test dependencies
+        -->
         <dependency>
             <!-- JUnit, Jupiter, SpringBootTest etc... -->
             <groupId>org.springframework.boot</groupId>
@@ -175,6 +157,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Hadoop -->
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-minicluster</artifactId>
             <version>${hadoop.version}</version>
@@ -185,23 +168,6 @@
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>it.ozimov</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>${embedded-redis.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.gchq.palisade</groupId>
-            <artifactId>hadoop-reader</artifactId>
-            <version>0.5.0-${readers.revision}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
