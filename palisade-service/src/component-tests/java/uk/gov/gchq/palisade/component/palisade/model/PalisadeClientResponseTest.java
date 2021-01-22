@@ -46,7 +46,7 @@ class PalisadeClientResponseTest {
      *                     This equates to a failure to seralise or deseralise the string.
      */
     @Test
-    void testPalisadeResponseSerialisingAndDeserialising() throws IOException {
+    void testPalisadeClientResponseSerialisingAndDeserialising() throws IOException {
         PalisadeClientResponse palisadeClientResponse = new PalisadeClientResponse("tokenID");
 
         JsonContent<PalisadeClientResponse> responseJsonContent = jsonTester.write(palisadeClientResponse);
@@ -54,11 +54,11 @@ class PalisadeClientResponseTest {
         ObjectContent<PalisadeClientResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
         PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
 
-        assertAll("Palisade Response Serialising and Deseralising Comparison",
+        assertAll("Palisade Client Response Serialising and Deseralising Comparison",
                 () -> assertAll("Palisade Response Serialising Compared To String",
                         () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token").isEqualTo("tokenID")
                 ),
-                () -> assertAll("Palisade Response Deserialising Compared To Object",
+                () -> assertAll("Palisade Client Response Deserialising Compared To Object",
                         () -> assertThat(palisadeClientResponseObject.getToken()).isEqualTo(palisadeClientResponse.getToken())
                 ),
                 () -> assertAll("Object Comparison",

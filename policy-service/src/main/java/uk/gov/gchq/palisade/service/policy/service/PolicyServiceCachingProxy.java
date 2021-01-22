@@ -98,7 +98,7 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "recordRules", key = "#resource.id")
     public Optional<Rules<Serializable>> setRecordRules(final Resource resource, final Rules<Serializable> rules) {
-        LOGGER.info("ResourceId for {} with policy {} added to cache", resource, rules);
+        LOGGER.info("ResourceId for resource {} not found in cache", resource);
         LOGGER.debug("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
         return service.setRecordRules(resource, rules);
     }

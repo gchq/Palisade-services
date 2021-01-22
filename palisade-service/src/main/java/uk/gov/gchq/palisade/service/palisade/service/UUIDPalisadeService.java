@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.palisade.service;
 
 import akka.stream.Materializer;
 
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
 import java.util.UUID;
 
@@ -36,7 +36,7 @@ public class UUIDPalisadeService extends PalisadeService {
     }
 
     @Override
-    public String createToken(final PalisadeRequest palisadeRequest) {
+    public String createToken(final PalisadeClientRequest palisadeClientRequest) {
         return UUID.randomUUID().toString();
     }
 }

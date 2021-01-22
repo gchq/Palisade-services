@@ -59,7 +59,7 @@ import uk.gov.gchq.palisade.contract.palisade.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.palisade.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.palisade.PalisadeApplication;
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
@@ -134,7 +134,7 @@ class KafkaContractTest {
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
-        HttpEntity<PalisadeRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        HttpEntity<PalisadeClientRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
 
         // Then - the REST request was accepted
@@ -193,7 +193,7 @@ class KafkaContractTest {
 
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.ERROR_TOKEN));
-        HttpEntity<PalisadeRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        HttpEntity<PalisadeClientRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity(REGISTER_DATA_REQUEST, entity, Void.class);
 
         // Then - the REST request encountered an error

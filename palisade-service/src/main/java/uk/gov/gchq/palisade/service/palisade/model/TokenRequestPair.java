@@ -21,16 +21,16 @@ import akka.japi.Pair;
 /**
  * The type Token request pair.
  */
-public class TokenRequestPair extends Pair<String, AuditablePalisadeResponse> {
+public class TokenRequestPair extends Pair<String, AuditablePalisadeSystemResponse> {
     private static final long serialVersionUID = 1L;
 
     /**
      * Instantiates a new Token request pair.
      *
-     * @param token           the token
-     * @param palisadeRequest the original request
+     * @param token          the token
+     * @param systemResponse the original request from the client converted to be a response from the palisade-service onto kafka
      */
-    public TokenRequestPair(final String token, final AuditablePalisadeResponse palisadeRequest) {
-        super(token, palisadeRequest);
+    public TokenRequestPair(final String token, final AuditablePalisadeSystemResponse systemResponse) {
+        super(token, systemResponse);
     }
 }

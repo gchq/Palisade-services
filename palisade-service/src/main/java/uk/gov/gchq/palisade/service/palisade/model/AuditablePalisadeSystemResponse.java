@@ -17,7 +17,6 @@
 package uk.gov.gchq.palisade.service.palisade.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.gchq.palisade.Generated;
 
@@ -25,21 +24,19 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * This class is a container for {@code PalisadeRequest} and {@code AuditErrorMessage} during stream processing.
+ * This class is a container for {@code PalisadeClientRequest} and {@code AuditErrorMessage} during stream processing.
  * Under normal conditions only one of these will be non-null, indicating failed or successful processing.
  */
 
-public final class AuditablePalisadeResponse {
+public final class AuditablePalisadeSystemResponse {
 
-    @JsonProperty("palisadeRequest")
     private final PalisadeSystemResponse palisadeResponse;
-    @JsonProperty("auditErrorMessage")
     private final AuditErrorMessage auditErrorMessage;
 
     @JsonCreator
-    private AuditablePalisadeResponse(
-            final @JsonProperty("palisadeRequest") PalisadeSystemResponse palisadeResponse,
-            final @JsonProperty("auditErrorMessage") AuditErrorMessage auditErrorMessage) {
+    private AuditablePalisadeSystemResponse(
+            final PalisadeSystemResponse palisadeResponse,
+            final AuditErrorMessage auditErrorMessage) {
         this.palisadeResponse = palisadeResponse;
         this.auditErrorMessage = auditErrorMessage;
     }
@@ -50,28 +47,10 @@ public final class AuditablePalisadeResponse {
      * @param audit the previous audit or null
      * @return a new instance of this object
      */
-    public AuditablePalisadeResponse chain(final AuditErrorMessage audit) {
+    public AuditablePalisadeSystemResponse chain(final AuditErrorMessage audit) {
         return Optional.ofNullable(audit).map(message -> Builder.create()
                 .withAuditErrorMessage(message))
                 .orElse(this);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AuditablePalisadeResponse that = (AuditablePalisadeResponse) o;
-        return Objects.equals(palisadeResponse, that.palisadeResponse) &&
-                Objects.equals(auditErrorMessage, that.auditErrorMessage);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(palisadeResponse, auditErrorMessage);
     }
 
     @Generated
@@ -95,7 +74,7 @@ public final class AuditablePalisadeResponse {
          * @return the composed immutable object
          */
         public static IPalisadeRequest create() {
-            return AuditablePalisadeResponse::new;
+            return AuditablePalisadeSystemResponse::new;
         }
 
         /**
@@ -105,22 +84,31 @@ public final class AuditablePalisadeResponse {
             /**
              * Compose value
              *
-             * @param audit value or null
+             * @param audit non-null value
              * @return value object
              */
-            default AuditablePalisadeResponse withAuditErrorMessage(AuditErrorMessage audit) {
+            default AuditablePalisadeSystemResponse withAuditErrorMessage(AuditErrorMessage audit) {
                 return withResponseAndError(null, audit);
             }
-
 
             /**
              * Compose value
              *
-             * @param request value or null
+             * @param request non-null value
              * @return value object
              */
-            default AuditablePalisadeResponse withPalisadeRequest(PalisadeRequest request) {
-                return withResponseAndError(PalisadeSystemResponse.Builder.create(request), null);
+            default AuditablePalisadeSystemResponse withPalisadeRequest(PalisadeClientRequest request) {
+                return withPalisadeResponse(PalisadeSystemResponse.Builder.create(request));
+            }
+
+            /**
+             * Compose value
+             *
+             * @param response non-null value
+             * @return value object
+             */
+            default AuditablePalisadeSystemResponse withPalisadeResponse(PalisadeSystemResponse response) {
+                return withResponseAndError(response, null);
             }
 
             /**
@@ -130,8 +118,27 @@ public final class AuditablePalisadeResponse {
              * @param auditErrorMessage value or null
              * @return value object
              */
-            AuditablePalisadeResponse withResponseAndError(PalisadeSystemResponse request, AuditErrorMessage auditErrorMessage);
+            AuditablePalisadeSystemResponse withResponseAndError(PalisadeSystemResponse request, AuditErrorMessage auditErrorMessage);
         }
+    }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditablePalisadeSystemResponse)) {
+            return false;
+        }
+        final AuditablePalisadeSystemResponse that = (AuditablePalisadeSystemResponse) o;
+        return Objects.equals(palisadeResponse, that.palisadeResponse) &&
+                Objects.equals(auditErrorMessage, that.auditErrorMessage);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(palisadeResponse, auditErrorMessage);
     }
 }

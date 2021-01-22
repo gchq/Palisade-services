@@ -17,8 +17,9 @@
 package uk.gov.gchq.palisade.component.palisade;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeResponse;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,15 +39,14 @@ public class CommonTestData {
     public static final String KEY_NULL_VALUE = "$.keyToNull";
     public static final Throwable ERROR = new Throwable("An error");
 
-    public static final PalisadeRequest PALISADE_REQUEST = PalisadeRequest.Builder.create()
+    public static final PalisadeClientRequest PALISADE_REQUEST = PalisadeClientRequest.Builder.create()
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT);
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create(PALISADE_REQUEST, new HashMap<>()).withError(ERROR);
 
-    public static final AuditablePalisadeResponse AUDITABLE_WITH_REQUEST = AuditablePalisadeResponse.Builder.create()
-            .withPalisadeRequest(PALISADE_REQUEST);
-    public static final AuditablePalisadeResponse AUDITABLE_WITH_ERROR = AuditablePalisadeResponse.Builder.create()
+    public static final PalisadeSystemResponse SYSTEM_RESPONSE = PalisadeSystemResponse.Builder.create(PALISADE_REQUEST);
+    public static final AuditablePalisadeSystemResponse AUDITABLE_WITH_ERROR = AuditablePalisadeSystemResponse.Builder.create()
             .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
 }

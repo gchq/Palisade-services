@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.util.HashMap;
@@ -56,12 +56,12 @@ public class PalisadeRestController {
      * Takes the incoming RESTful request, forwards the request for further processing and returns a URL that can
      * later be used at the filtered-resource-service to view the requested data.
      *
-     * @param request body {@link PalisadeRequest} of the request message
+     * @param request body {@link PalisadeClientRequest} of the request message
      * @return dataURL a unique URL to identify the data available for this data request
      */
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")
     public ResponseEntity<PalisadeClientResponse> registerDataRequest(
-            final @RequestBody PalisadeRequest request) {
+            final @RequestBody PalisadeClientRequest request) {
         LOGGER.debug("registerDataRequest called with request {}", request);
 
         HttpStatus httpStatus = HttpStatus.ACCEPTED;

@@ -69,7 +69,7 @@ public final class AuditErrorMessage extends AuditMessage {
         }
 
         /**
-         * Starter method for the Builder class which uses a PalisadeRequest for the request specific part of the Audit message.
+         * Starter method for the Builder class which uses a PalisadeClientRequest for the request specific part of the Audit message.
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditErrorMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
@@ -77,7 +77,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * @param attributes optional information stored in a Map
          * @return interface {@link IError} for the next step in the build.
          */
-        public static IError create(final PalisadeRequest request, final Map<String, Object> attributes) {
+        public static IError create(final PalisadeClientRequest request, final Map<String, Object> attributes) {
             PalisadeSystemResponse response = PalisadeSystemResponse.Builder.create(request);
             return create()
                     .withUserId(response.getUserId())

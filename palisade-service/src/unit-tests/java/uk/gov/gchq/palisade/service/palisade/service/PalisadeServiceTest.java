@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.gchq.palisade.service.palisade.CommonTestData;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
 import java.util.HashMap;
@@ -87,7 +87,7 @@ class PalisadeServiceTest extends CommonTestData {
         }
 
         @Override
-        public String createToken(final PalisadeRequest palisadeRequest) {
+        public String createToken(final PalisadeClientRequest palisadeClientRequest) {
             return COMMON_UUID.toString();
         }
 

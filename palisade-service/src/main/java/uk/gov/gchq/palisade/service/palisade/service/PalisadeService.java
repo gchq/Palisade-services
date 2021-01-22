@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeResponse;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
 import java.util.Map;
@@ -55,14 +55,14 @@ public abstract class PalisadeService {
     /**
      * Create token string.
      *
-     * @param palisadeRequest the original request
+     * @param palisadeClientRequest the original request
      * @return the string
      */
-    public abstract String createToken(PalisadeRequest palisadeRequest);
+    public abstract String createToken(PalisadeClientRequest palisadeClientRequest);
 
     /**
      * This method will forward the data to the "request" Kafka topic where it can be retrieved by the user-service.
-     * The incoming request is in the form of a {@link PalisadeRequest} which contains all the information provided by the
+     * The incoming request is in the form of a {@link PalisadeClientRequest} which contains all the information provided by the
      * client for registering this data request. The service will include a unique token to identify this data request and
      * the data relevant to the request.
      * If an error is thrown then an {@link uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage} will be created and
@@ -71,13 +71,13 @@ public abstract class PalisadeService {
      * @param request information about the data, user requesting the data and the context of the request.
      * @return the token for later accessing the results of the request at the Filtered-Resource-Service.
      */
-    public CompletableFuture<String> registerDataRequest(final PalisadeRequest request) {
+    public CompletableFuture<String> registerDataRequest(final PalisadeClientRequest request) {
         // Sends the information to the "request" topic
         // what is needed is to include the token, and the Palisade request as part of the source
         String token = this.createToken(request);
 
         return futureSink.thenApply((Sink<TokenRequestPair, ?> sink) -> {
-            AuditablePalisadeResponse auditableRequest = AuditablePalisadeResponse.Builder.create()
+            AuditablePalisadeSystemResponse auditableRequest = AuditablePalisadeSystemResponse.Builder.create()
                     .withPalisadeRequest(request);
             TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
             Source.single(requestPair)
@@ -89,7 +89,7 @@ public abstract class PalisadeService {
 
     /**
      * This method will forward the data to the "error" Kafka topic where it can be retrieved by the audit-service.
-     * The incoming request is in the form of a {@link PalisadeRequest} which contains all the information provided by the
+     * The incoming request is in the form of a {@link PalisadeClientRequest} which contains all the information provided by the
      * client for registering this data request. The service will include a unique token to identify this data request and
      * the data relevant to the request and the error details.
      *
@@ -98,13 +98,13 @@ public abstract class PalisadeService {
      * @param attributes a {@link Map} of attributes associated with the request
      * @param error      the error encountered
      */
-    public void errorMessage(final PalisadeRequest request, final String token,
+    public void errorMessage(final PalisadeClientRequest request, final String token,
                              final Map<String, Object> attributes, final Throwable error) {
         // Sends the information to the "error" topic
-        // We need to include the token, the PalisadeRequest information and the Error that occurred.
+        // We need to include the token, the PalisadeClientRequest information and the Error that occurred.
         AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes)
                 .withError(error);
-        AuditablePalisadeResponse auditableRequest = AuditablePalisadeResponse.Builder.create()
+        AuditablePalisadeSystemResponse auditableRequest = AuditablePalisadeSystemResponse.Builder.create()
                 .withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
 

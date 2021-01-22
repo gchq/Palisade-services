@@ -17,8 +17,8 @@
 package uk.gov.gchq.palisade.service.palisade;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeResponse;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,10 +31,10 @@ public class CommonTestData {
     public static final Map<String, String> CONTEXT = Collections.singletonMap("purpose", "testContext");
     public static final Map<String, Object> ATTRIBUTES = new HashMap<>();
     public static final Throwable ERROR = new Throwable("An error");
-    public static final PalisadeRequest PALISADE_REQUEST;
+    public static final PalisadeClientRequest PALISADE_REQUEST;
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE;
-    public static final AuditablePalisadeResponse AUDITABLE_PALISADE_REQUEST;
-    public static final AuditablePalisadeResponse AUDITABLE_PALISADE_ERROR;
+    public static final AuditablePalisadeSystemResponse AUDITABLE_PALISADE_REQUEST;
+    public static final AuditablePalisadeSystemResponse AUDITABLE_PALISADE_ERROR;
     public static final UUID COMMON_UUID = java.util.UUID.fromString("df3fc6ef-3f8c-48b4-ae1b-5f3d8ad32ead");
 
     static {
@@ -42,7 +42,7 @@ public class CommonTestData {
     }
 
     static {
-        PALISADE_REQUEST = PalisadeRequest.Builder.create()
+        PALISADE_REQUEST = PalisadeClientRequest.Builder.create()
                 .withUserId(USER_ID)
                 .withResourceId(RESOURCE_ID)
                 .withContext(CONTEXT);
@@ -54,12 +54,12 @@ public class CommonTestData {
     }
 
     static {
-        AUDITABLE_PALISADE_REQUEST = AuditablePalisadeResponse.Builder
+        AUDITABLE_PALISADE_REQUEST = AuditablePalisadeSystemResponse.Builder
                 .create().withPalisadeRequest(PALISADE_REQUEST);
     }
 
     static {
-        AUDITABLE_PALISADE_ERROR = AuditablePalisadeResponse.Builder
+        AUDITABLE_PALISADE_ERROR = AuditablePalisadeSystemResponse.Builder
                 .create().withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
     }
 }

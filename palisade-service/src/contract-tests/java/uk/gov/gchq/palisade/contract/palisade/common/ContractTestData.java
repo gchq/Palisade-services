@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
 import java.util.HashMap;
 
@@ -34,7 +34,7 @@ public class ContractTestData {
 
     public static final JsonNode REQUEST_NODE;
     public static final JsonNode ERROR_NODE;
-    public static final PalisadeRequest REQUEST_OBJ;
+    public static final PalisadeClientRequest REQUEST_OBJ;
     public static final AuditErrorMessage ERROR_OBJ;
     public static final String REQUEST_JSON = "{\"userId\":\"testUserId\",\"resourceId\":\"/test/resourceId\",\"context\":{\"purpose\":\"testContext\"}}";
     public static final String ERROR_JSON;
@@ -50,7 +50,7 @@ public class ContractTestData {
             throw new SerializationFailedException("Failed to parse contract test data", e);
         }
         try {
-            REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, PalisadeRequest.class);
+            REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, PalisadeClientRequest.class);
         } catch (JsonProcessingException e) {
             throw new SerializationFailedException("Failed to convert contract test data to objects", e);
         }
