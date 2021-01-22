@@ -40,6 +40,7 @@ async:
 
 server:
   port: 8092
+  address: "0.0.0.0"
 
 management:
   endpoints:

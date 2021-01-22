@@ -36,10 +36,16 @@ kafkaCreateTopics:
   - name: masked-resource-offset
     replicationFactor: 1
     partitions: 1
+  - name: error
+    replicationFactor: 1
+    partitions: 1
+  - name: success
+    replicationFactor: 1
+    partitions: 1
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-d0a6b79
+  tag: SNAPSHOT-d5003ef
   pullPolicy: IfNotPresent
 
 resources:

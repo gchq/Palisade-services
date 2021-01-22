@@ -30,12 +30,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.PolicyConfiguration;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
-import uk.gov.gchq.palisade.service.ResourceConfiguration;
-import uk.gov.gchq.palisade.service.UserConfiguration;
 import uk.gov.gchq.palisade.service.policy.service.PolicyServiceCachingProxy;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
@@ -63,8 +60,6 @@ public class PolicyApplication {
     private final Executor executor;
     private final PolicyServiceCachingProxy service;
     private final PolicyConfiguration policyConfig;
-    private final UserConfiguration userConfig;
-    private final ResourceConfiguration resourceConfig;
 
     /**
      * Autowire Akka objects in constructor for application ready event
@@ -73,8 +68,6 @@ public class PolicyApplication {
      * @param materializer   the Akka {@link Materializer} configured to be used
      * @param service        specifically policyServiceCachingProxy used for pre-population
      * @param policyConfig   resourceConfig used to create the policy object used in pre-population
-     * @param userConfig     resourceConfig used to create the user object used in pre-population
-     * @param resourceConfig resourceConfig used to create the resource object used in pre-population
      * @param executor       an executor for any {@link CompletableFuture}s (preferably the application task executor)
      */
     public PolicyApplication(
@@ -82,15 +75,11 @@ public class PolicyApplication {
             final Materializer materializer,
             final PolicyServiceCachingProxy service,
             final PolicyConfiguration policyConfig,
-            final UserConfiguration userConfig,
-            final ResourceConfiguration resourceConfig,
             @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = new HashSet<>(runners);
         this.materializer = materializer;
         this.service = service;
         this.policyConfig = policyConfig;
-        this.userConfig = userConfig;
-        this.resourceConfig = resourceConfig;
         this.executor = executor;
     }
 
@@ -113,16 +102,14 @@ public class PolicyApplication {
     public void serveForever() {
         //Prepopulate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
-        LOGGER.debug("Pre-populating using user config: {}", userConfig.getClass());
-        LOGGER.debug("Pre-populating using resource config: {}", resourceConfig.getClass());
         policyConfig.getPolicies().stream()
                 .forEach((PolicyPrepopulationFactory factory) -> {
                     //Build Resource Rules
-                    Entry<Resource, Rules<LeafResource>> resourceMap = factory.buildResourceRules(resourceConfig.getResources());
+                    Entry<String, Rules<LeafResource>> resourceMap = factory.buildResourceRules();
                     service.setResourceRules(resourceMap.getKey(), resourceMap.getValue());
 
                     //Build Record Rules
-                    Entry<Resource, Rules<Serializable>> recordMap = factory.buildRecordRules(resourceConfig.getResources());
+                    Entry<String, Rules<Serializable>> recordMap = factory.buildRecordRules();
                     service.setRecordRules(recordMap.getKey(), recordMap.getValue());
                 });
 
@@ -132,7 +119,5 @@ public class PolicyApplication {
                 .collect(Collectors.toSet());
         LOGGER.info("Started {} runner threads", runnerThreads.size());
         runnerThreads.forEach(CompletableFuture::join);
-
-
     }
 }

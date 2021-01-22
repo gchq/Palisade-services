@@ -57,7 +57,7 @@ public class EndpointConfiguration {
     AkkaHttpServer akkaHttpServer(final ServerProperties properties, final Collection<RouteSupplier> routeSuppliers) {
         String hostname = Optional.ofNullable(properties.getAddress())
                 .map(InetAddress::getHostAddress)
-                .orElse("localhost");
+                .orElse("0.0.0.0");
         return new AkkaHttpServer(hostname, properties.getPort(), routeSuppliers);
     }
 
