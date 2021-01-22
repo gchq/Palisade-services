@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ResourceService;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator.PlainIterator;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
@@ -32,7 +33,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -41,29 +41,7 @@ import java.util.stream.Stream;
  * The Simple implementation of type {@link ResourceService} which extends {@link uk.gov.gchq.palisade.service.Service}
  */
 public class SimpleResourceService implements ResourceService {
-    /**
-     * A {@link FunctionalIterator} implementation wrapping a stream.
-     * Avoid using unless essential, which in this case is because of {@link Files#walk}.
-     *
-     * @param <T> iterator and stream type
-     */
-    private static class StreamClosingIterator<T> extends PlainIterator<T> {
-
-        private final Stream<T> closeableStream;
-
-        StreamClosingIterator(final Stream<T> stream) {
-            super(stream.iterator());
-            this.closeableStream = stream;
-        }
-
-        @Override
-        public void close() {
-            this.closeableStream.close();
-        }
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleResourceService.class);
-
     private final String dataServiceName;
     private final String resourceType;
 
@@ -86,7 +64,7 @@ public class SimpleResourceService implements ResourceService {
             Stream<Path> filesWalk = Files.walk(path);
             return new StreamClosingIterator<>(filesWalk)
                     .map(Path::toFile)
-                    .map(file -> {
+                    .map((File file) -> {
                         try {
                             return file.getCanonicalFile();
                         } catch (IOException e) {
@@ -96,9 +74,7 @@ public class SimpleResourceService implements ResourceService {
                     })
                     .filter(File::isFile);
         } catch (IOException ex) {
-            LOGGER.error("Could not walk {}", path);
-            LOGGER.error("Error was: ", ex);
-            return FunctionalIterator.fromIterator(Collections.emptyIterator());
+            throw new NoSuchResourceException("Failed to walk path " + path, ex);
         }
     }
 
@@ -128,7 +104,7 @@ public class SimpleResourceService implements ResourceService {
                 .filter(pred);
     }
 
-    private URI stringToURI(final String uriString) {
+    private static URI stringToURI(final String uriString) {
         try {
             return new URI(uriString);
         } catch (URISyntaxException ex) {
@@ -136,7 +112,7 @@ public class SimpleResourceService implements ResourceService {
         }
     }
 
-    private URI filesystemURI(final String fileString) {
+    private static URI filesystemURI(final String fileString) {
         try {
             return new File(fileString).getCanonicalFile().toURI();
         } catch (IOException ex) {
@@ -167,5 +143,26 @@ public class SimpleResourceService implements ResourceService {
     @Override
     public Boolean addResource(final LeafResource leafResource) {
         return false;
+    }
+
+    /**
+     * A {@link FunctionalIterator} implementation wrapping a stream.
+     * Avoid using unless essential, which in this case is because of {@link Files#walk}.
+     *
+     * @param <T> iterator and stream type
+     */
+    private static class StreamClosingIterator<T> extends PlainIterator<T> {
+
+        private final Stream<T> closeableStream;
+
+        StreamClosingIterator(final Stream<T> stream) {
+            super(stream.iterator());
+            this.closeableStream = stream;
+        }
+
+        @Override
+        public void close() {
+            this.closeableStream.close();
+        }
     }
 }
