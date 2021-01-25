@@ -121,8 +121,8 @@ class AttributeMaskingServiceErrorTest {
                 .isEqualTo("Cannot mask");
 
         assertThat(subject)
-                .extracting(AuditableAttributeMaskingResponse::getAttributeMaskingResponse)
                 .as("verify that auditable object has no payload")
+                .extracting(AuditableAttributeMaskingResponse::getAttributeMaskingResponse)
                 .isNull();
     }
 
