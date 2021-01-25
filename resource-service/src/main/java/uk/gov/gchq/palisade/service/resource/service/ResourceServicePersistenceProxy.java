@@ -56,7 +56,6 @@ public class ResourceServicePersistenceProxy {
      * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate    a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
      */
-
     public ResourceServicePersistenceProxy(final PersistenceLayer persistence, final ResourceService delegate) {
         this.persistence = persistence;
         this.delegate = delegate;
@@ -172,6 +171,12 @@ public class ResourceServicePersistenceProxy {
 
     }
 
+    /**
+     * Add a single resource to the service (if possible) and on success, also add it to persistence.
+     *
+     * @param leafResource the new leafResource created at runtime
+     * @return whether the add operation succeeded or failed
+     */
     public Boolean addResource(final LeafResource leafResource) {
         boolean success = delegate.addResource(leafResource);
         if (success) {

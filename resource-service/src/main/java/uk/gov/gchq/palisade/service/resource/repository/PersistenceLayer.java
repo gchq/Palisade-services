@@ -88,9 +88,9 @@ public interface PersistenceLayer {
 
 
     /**
-     * Add a new resource that has been created during runtime to the persistence store
-     * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method)
-     * Used for updating the persistence store when the source of 'truth' has changed
+     * Add a new resource that has been created during runtime to the persistence store.
+     * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method).
+     * Used for updating the persistence store when the source of 'truth' has changed.
      * As long as this is called for every new resource created and added to the resource-service,
      * this should guarantee consistency between persistence and resource-service
      *
