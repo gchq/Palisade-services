@@ -22,11 +22,6 @@ package uk.gov.gchq.palisade.service.filteredresource.exception;
 public class NoResourcesObservedException extends RuntimeException {
 
 
-    /**
-     * Initializes this exception with no message or cause.
-     */
-    public NoResourcesObservedException() {
-    }
 
     /**
      * Initializes this exception with the given message.

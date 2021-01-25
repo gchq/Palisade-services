@@ -102,7 +102,7 @@ The Filtered Resource Service will send audit messages, specifically an `AuditEr
 ## Message Model
 | FilteredResourceRequest | WebSocketMessage | TopicOffsetMessage | AuditSuccessMessage | AuditErrorMessage |
 |-------------------------|------------------|--------------------|---------------------|-------------------|
-| *Token                  | *Token           | queuePointer       | *Token              | *Token            |
+| *token                  | *token           | queuePointer       | *token              | *token            |
 | userId                  | messageType      |                    | userId              | userId            |
 | resourceId              | LeafResource     |                    | resourceId          | resourceId        |
 | context                 |                  |                    | context             | context           |
