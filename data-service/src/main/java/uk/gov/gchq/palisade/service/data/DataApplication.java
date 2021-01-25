@@ -15,58 +15,59 @@
  */
 package uk.gov.gchq.palisade.service.data;
 
+import akka.NotUsed;
 import akka.stream.Materializer;
 import akka.stream.javadsl.RunnableGraph;
+import akka.stream.javadsl.Sink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
 
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
-
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
+import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
+import uk.gov.gchq.palisade.service.data.service.AuditService;
+import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 
 /**
  * Starter for the data-service.  Will start the service and initalise all of the components needed to run the service.
  */
 @SpringBootApplication
+@EnableConfigurationProperties({ProducerTopicConfiguration.class})
 public class DataApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataApplication.class);
 
     private final DataReader dataReader;
+    private final AuditService auditService;
+
     private final StdSerialiserConfiguration serialiserConfiguration;
-    private final Set<RunnableGraph<?>> runners;
+    private final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner;
     private final Materializer materializer;
-    private final Executor executor;
 
     /**
-     * @param dataReader a reader for retrieving the request resources.
+     * @param dataReader              a reader for retrieving the request resources.
      * @param serialiserConfiguration a configuration and initialising the {@link DataReader}
-     * @param runners runnable graphs for sending messages on the Kafka stream
-     * @param materializer the Akka {@link Materializer} configured to be used
-     * @param executor used for asynchronous processing of {@link CompletableFuture}s
+     * @param runner                  runnable graphs for sending messages on the Kafka stream
+     * @param materializer            the Akka {@link Materializer} configured to be used
      */
     public DataApplication(
             final DataReader dataReader,
+            final AuditService auditService,
             final StdSerialiserConfiguration serialiserConfiguration,
-            final Set<RunnableGraph<?>> runners,
-            final Materializer materializer,
-            final Executor executor) {
+            final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner,
+            final Materializer materializer) {
 
         this.dataReader = dataReader;
+        this.auditService = auditService;
         this.serialiserConfiguration = serialiserConfiguration;
-        this.runners = runners;
-        this.materializer = materializer;
-        this.executor = executor;
-    }
+        this.runner = runner;
+        this.materializer = materializer; }
 
     /**
      * Application entry point
@@ -82,11 +83,13 @@ public class DataApplication {
 
     /**
      * Performs the tasks that need to be done after Spring initialisation.  This includes the configuration of the
-     * serialiser and the starting of the Kafka consumer used for sending audit messages to the audit-service.
+     * serialiser and the starting of the Kafka consumer needed for sending audit messages to the audit-service.
      */
     @EventListener(ApplicationReadyEvent.class)
-
     public void initPostConstruct() {
+
+        //start the Kafka consumer for sending success and error messages to audit-service
+        auditService.registerRequestSink(runner.run(materializer));
 
         // Add serialiser to the data-service
         LOGGER.debug("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
@@ -94,12 +97,5 @@ public class DataApplication {
                 .map(StdSerialiserPrepopulationFactory::build)
                 .peek(entry -> LOGGER.debug(entry.toString()))
                 .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));
-
-        //start the Kafka consumer for sending success and error messages to audit-service
-        Set<CompletableFuture<?>> runnerThreads = runners.stream()
-                .map(runner -> CompletableFuture.supplyAsync(() -> runner.run(materializer), executor))
-                .collect(Collectors.toSet());
-        LOGGER.info("Started {} runner threads", runnerThreads.size());
-        runnerThreads.forEach(CompletableFuture::join);
     }
 }
