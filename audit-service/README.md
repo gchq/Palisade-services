@@ -1,5 +1,5 @@
 <!---
-Copyright 2020 Crown Copyright
+Copyright 2018-2021 Crown Copyright
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ curl -X POST api/audit -H "content-type: application/json" --data \
       }
    },
    "serviceName":"testServicename",
-   "timestamp":"2020-11-26T10:28:54.118082Z",
+   "timestamp":"2018-2021-11-26T10:28:54.118082Z",
    "serverIP":"testServerIP",
    "serverHostname":"testServerHostname",
    "attributes":{
@@ -105,7 +105,7 @@ curl -X POST api/audit -H "content-type: application/json" --data \
       }
    },
    "serviceName":"testServicename",
-   "timestamp":"2020-11-26T10:32:28.818842Z",
+   "timestamp":"2018-2021-11-26T10:32:28.818842Z",
    "serverIP":"testServerIP",
    "serverHostname":"testServerHostname",
    "attributes":{

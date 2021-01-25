@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public final class ApplicationTestData {
     public static final String TEST_RESOURCE_ID = "a pointer to a data resource";
     public static final String TEST_PURPOSE = "the purpose for the data access request";
     public static final Context TEST_CONTEXT = new Context().purpose(TEST_PURPOSE);
-    public static final String TEST_TIMESTAMP = "2020-02-20";
+    public static final String TEST_TIMESTAMP = "2018-2021-02-20";
     public static final String TEST_SERVER_IP = "the IP address of the server";
     public static final String TEST_SERVER_NAME = "the name of the server";
     public static final Map<String, Object> TEST_ATTRIBUTES = new HashMap<>();
