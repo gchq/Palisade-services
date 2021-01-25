@@ -19,12 +19,12 @@ spring:
     exclude:
     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
     - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
   datasource:
-    url: jdbc:h2:file:./resource-cache-h2;LOCK_TIMEOUT=10000
+    url: r2dbc:h2:file:./resource-cache-h2;LOCK_TIMEOUT=10000
     username:
     password:
     initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false

@@ -16,8 +16,11 @@
 
 package uk.gov.gchq.palisade.service.resource;
 
+import akka.Done;
 import akka.stream.Materializer;
 import akka.stream.javadsl.RunnableGraph;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +34,6 @@ import org.springframework.context.event.EventListener;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
-import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -61,10 +64,10 @@ public class ResourceApplication {
     /**
      * Autowire Akka objects in constructor for application ready event
      *
-     * @param runners       collection of all Akka {@link RunnableGraph}s discovered for the application
-     * @param materializer  the Akka {@link Materializer} configured to be used
+     * @param runners         collection of all Akka {@link RunnableGraph}s discovered for the application
+     * @param materializer    the Akka {@link Materializer} configured to be used
      * @param persistence     a {@link PersistenceLayer} for persisting resources in, as if it were a cache
-     * @param executor      an executor for any {@link CompletableFuture}s (preferably the application task executor)
+     * @param executor        an executor for any {@link CompletableFuture}s (preferably the application task executor)
      * @param resourceBuilder a {@link Supplier} of resources as built by a {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory},
      *                        but with a connection detail attached
      */
@@ -72,7 +75,7 @@ public class ResourceApplication {
                                final Materializer materializer,
                                final PersistenceLayer persistence,
                                @Qualifier("configuredResourceBuilder") final Supplier<List<Entry<Resource, LeafResource>>> resourceBuilder,
-                               @Qualifier("applicationTaskExecutor") final Executor executor) {
+                               @Qualifier("threadPoolTaskExecutor") final Executor executor) {
         this.runners = Collections.unmodifiableSet(runners);
         this.materializer = materializer;
         this.persistence = persistence;
@@ -97,26 +100,24 @@ public class ResourceApplication {
      *     <li>Adds resource(s) from a configuration file to the persistence of the {@link uk.gov.gchq.palisade.service.ResourceService}</li>
      *     <li>Runs all available Akka {@link RunnableGraph}s until completion.</li>
      * </ol>
-     *
      * The 'main' threads of the application during runtime are the completable futures spawned here.
      */
     @EventListener(ApplicationReadyEvent.class)
     public void serverForever() {
         // Add resources to persistence
         LOGGER.info("Prepopulating using resource builder: {}", resourceBuilder);
+
         resourceBuilder.get()
                 .forEach((Entry<Resource, LeafResource> entry) -> {
                     Resource rootResource = entry.getKey();
                     LeafResource leafResource = entry.getValue();
-                    LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), leafResource.getId());
-                    FunctionalIterator<LeafResource> resourceIterator = FunctionalIterator.fromIterator(Collections.singletonList(leafResource).iterator());
-                    resourceIterator = persistence.withPersistenceById(rootResource.getId(), resourceIterator);
-                    resourceIterator = persistence.withPersistenceByType(leafResource.getType(), resourceIterator);
-                    resourceIterator = persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat(), resourceIterator);
-                    while (resourceIterator.hasNext()) {
-                        LeafResource resource = resourceIterator.next();
-                        LOGGER.debug("Resource {} persisted", resource.getId());
-                    }
+                    Sink<LeafResource, CompletionStage<Done>> loggingSink = Sink.foreach(
+                            persistedResource -> LOGGER.info("Persistence add for {} -> {}", rootResource.getId(), persistedResource.getId()));
+                    Source.single(leafResource)
+                            .via(persistence.withPersistenceById(rootResource.getId()))
+                            .via(persistence.withPersistenceByType(leafResource.getType()))
+                            .via(persistence.withPersistenceBySerialisedFormat(leafResource.getSerialisedFormat()))
+                            .runWith(loggingSink, materializer);
                 });
 
         // Then start up kafka

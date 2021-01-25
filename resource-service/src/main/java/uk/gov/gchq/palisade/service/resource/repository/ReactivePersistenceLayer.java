@@ -15,6 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import akka.NotUsed;
+import akka.stream.javadsl.Flow;
+import akka.stream.javadsl.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,17 +25,17 @@ import uk.gov.gchq.palisade.resource.ChildResource;
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.ParentResource;
 import uk.gov.gchq.palisade.resource.Resource;
+import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
 import uk.gov.gchq.palisade.service.resource.domain.EntityType;
 import uk.gov.gchq.palisade.service.resource.domain.OrphanedChildJsonMixin;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
+import uk.gov.gchq.palisade.service.resource.exception.UnknownResourceTypeException;
 import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
@@ -40,11 +43,14 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
-public class JpaPersistenceLayer implements PersistenceLayer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPersistenceLayer.class);
-    private static final String RESOURCE_IS = "Resource {} is {}";
-    private static final String TYPE_IS = "Type {} is {}";
-    private static final String FORMAT_IS = "SerialisedFormat {} is {}";
+/**
+ * A class that allows the Resource Service to reactively interact with the persistence backing store
+ */
+public class ReactivePersistenceLayer implements PersistenceLayer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReactivePersistenceLayer.class);
+    private static final String RESOURCE_IS = "Resource '{}' is {}";
+    private static final String TYPE_IS = "Type '{}' is {}";
+    private static final String FORMAT_IS = "SerialisedFormat '{}' is {}";
     private static final String COMPLETE = "complete";
     private static final String NOT_COMPLETE = "not complete";
 
@@ -53,7 +59,16 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private final TypeRepository typeRepository;
     private final SerialisedFormatRepository serialisedFormatRepository;
 
-    public JpaPersistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository, final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
+    /**
+     * Constructor for {@link ReactivePersistenceLayer}
+     *
+     * @param completenessRepository the completeness repository
+     * @param resourceRepository the resource repository
+     * @param typeRepository the type repository
+     * @param serialisedFormatRepository the serialisedFormat repository
+     */
+    public ReactivePersistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository,
+                                    final TypeRepository typeRepository, final SerialisedFormatRepository serialisedFormatRepository) {
         this.completenessRepository = requireNonNull(completenessRepository, "CompletenessRepository cannot be null");
         this.resourceRepository = requireNonNull(resourceRepository, "ResourceRepository cannot be null");
         this.typeRepository = requireNonNull(typeRepository, "TypeRepository cannot be null");
@@ -75,7 +90,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private BiPredicate<ParentResource, ChildResource> recurseToRootId(final String rootResourceId, final AtomicReference<Resource> rootReference) {
         // Return a predicate with the method arguments bound to the lambda
-        return (parent, child) -> {
+        return (ParentResource parent, ChildResource child) -> {
             LOGGER.debug("Looking for root '{}'", rootResourceId);
             if (parent.getId().equals(rootResourceId)) {
                 // If the parent is the root resource
@@ -108,7 +123,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private boolean isResourceIdComplete(final String resourceId) {
         // Check details with completeness db
-        boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.RESOURCE, resourceId);
+        boolean complete = completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.RESOURCE, resourceId).join();
         if (complete) {
             LOGGER.debug(RESOURCE_IS, resourceId, COMPLETE);
         } else {
@@ -125,7 +140,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private boolean isTypeComplete(final String type) {
         // Check details with completeness db
-        boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.TYPE, type);
+        boolean complete = completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.TYPE, type).join();
         if (complete) {
             LOGGER.debug(TYPE_IS, type, COMPLETE);
         } else {
@@ -142,7 +157,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private boolean isSerialisedFormatComplete(final String serialisedFormat) {
         // Check details with completeness db
-        boolean complete = completenessRepository.existsByEntityTypeAndEntityId(EntityType.FORMAT, serialisedFormat);
+        boolean complete = completenessRepository.futureExistsByEntityTypeAndEntityId(EntityType.FORMAT, serialisedFormat).join();
         if (complete) {
             LOGGER.debug(FORMAT_IS, serialisedFormat, COMPLETE);
         } else {
@@ -160,11 +175,11 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private boolean isResourceIdPersisted(final String resourceId) {
         // Get entity from db
-        boolean persisted = resourceRepository.findByResourceId(resourceId).isPresent();
+        boolean persisted = resourceRepository.futureExistsByResourceId(resourceId).join();
         if (persisted) {
-            LOGGER.debug(RESOURCE_IS, resourceId, COMPLETE);
+            LOGGER.debug(RESOURCE_IS, resourceId, "persisted");
         } else {
-            LOGGER.debug(RESOURCE_IS, resourceId, NOT_COMPLETE);
+            LOGGER.debug(RESOURCE_IS, resourceId, "not persisted");
         }
         return persisted;
     }
@@ -181,16 +196,20 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      */
     private <T extends Resource> T traverseParentsByEntity(final T resource, final BiPredicate<ParentResource, ChildResource> callbackPred) {
         if (resource instanceof ChildResource) {
+            LOGGER.debug("Traversing child '{}' until predicate is not satisfied", resource.getId());
             // Treat resource as a ChildResource
             ChildResource childResource = (ChildResource) resource;
-            ResourceEntity childEntity = resourceRepository.findByResourceId(childResource.getId())
-                    .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource " + childResource.getId()));
+            LOGGER.debug("Getting ResourceEntity for childResource '{}'", childResource.getId());
+            ResourceEntity childEntity = resourceRepository.findOneByResourceId(childResource.getId()).toFuture().join();
+            LOGGER.debug("ChildEntity: {}", childEntity);
             // Get the parent
-            ResourceEntity parentEntity = resourceRepository.findByResourceId(childEntity.getParentId())
-                    .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource " + childEntity.getParentId()));
+            LOGGER.debug("Getting ResourceEntity for parentResource '{}'", childEntity.getParentId());
+            ResourceEntity parentEntity = resourceRepository.findOneByResourceId(childEntity.getParentId()).toFuture().join();
+            LOGGER.debug("Parent Resource found '{}'", parentEntity.getResource().getId());
             ParentResource parentResource = (ParentResource) parentEntity.getResource();
             // Recurse if desired
             if (callbackPred.test(parentResource, childResource)) {
+                LOGGER.debug("Pair '{}' and '{}' satisfied predicate, recursing", parentResource.getId(), childResource.getId());
                 traverseParentsByEntity(parentResource, callbackPred);
             }
         }
@@ -225,23 +244,21 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param resource the top-level resource to get the leaves of
      * @return a {@link Stream} of {@link LeafResource}s from the resource repository persistence store
      */
-    private FunctionalIterator<LeafResource> collectLeaves(final Resource resource) {
+    private Source<LeafResource, NotUsed> collectLeaves(final Resource resource) {
         if (resource instanceof ParentResource) {
             // Treat resource as a ParentResource
             ParentResource parentResource = (ParentResource) resource;
             // Get the children
-            FunctionalIterator<ResourceEntity> childEntities = resourceRepository.iterateFindAllByParentId(parentResource.getId());
-            FunctionalIterator<Resource> childResources = childEntities
-                    .map(ResourceEntity::getResource);
-            // Recurse over all further children
-            return childResources.flatMap(this::collectLeaves)
+            return resourceRepository.streamFindAllByParentId(parentResource.getId())
+                    .map(ResourceEntity::getResource)
+                    // Recurse over further children
+                    .flatMapConcat(this::collectLeaves)
                     .map(leafResource -> resolveParentsUpto(leafResource, resource));
-        } else {
+        } else if (resource instanceof LeafResource) {
             // If we have reached a leaf, then done
-            // Return one-element iterator (this could probably lead to some performance penalty)
-            // It should be a negligible hit to performance, relative how much other processing happens per-leaf
-            return FunctionalIterator.fromIterator(
-                    Collections.singletonList((LeafResource) resource).iterator());
+            return Source.single((LeafResource) resource);
+        } else {
+            throw new UnknownResourceTypeException(String.format("Resource '%s' is neither Parent nor Leaf", resource.getId()));
         }
     }
 
@@ -258,7 +275,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     private <T extends Resource> T resolveParents(final T childResource) {
         return traverseParentsByEntity(
                 childResource,
-                (parent, child) -> {
+                (ParentResource parent, ChildResource child) -> {
                     child.setParent(parent);
                     return true;
                 }
@@ -282,9 +299,16 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         if (!childResource.getId().equals(rootResource.getId())) {
             return traverseParentsByEntity(
                     childResource,
-                    (parent, child) -> {
-                        child.setParent(parent);
-                        return !parent.getId().equals(rootResource.getId());
+                    (ParentResource parent, ChildResource child) -> {
+                        if (parent.getId().equals(rootResource.getId())) {
+                            if (rootResource instanceof ParentResource) {
+                                child.setParent((ParentResource) rootResource);
+                            }
+                            return false;
+                        } else {
+                            child.setParent(parent);
+                            return true;
+                        }
                     }
             );
         } else {
@@ -309,7 +333,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
             ResourceEntity entity = new ResourceEntity(resource);
             LOGGER.debug("Persistence save for incomplete resource entity '{}' with parent '{}'", entity.getResourceId(), entity.getParentId());
             // Save to db
-            resourceRepository.save(entity);
+            resourceRepository.futureSave(entity).join();
             // Don't save to completeness db
         }
     }
@@ -328,8 +352,8 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         // Otherwise, overwrite
         if (!isResourceIdComplete(resource.getId())) {
             // Mark resource entity as complete
-            LOGGER.debug("Persistence save for entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId());
-            completenessRepository.save(EntityType.RESOURCE, resource.getId());
+            LOGGER.debug("Persistence save for complete entity '{}' with id '{}'", EntityType.RESOURCE, resource.getId());
+            completenessRepository.futureSave(EntityType.RESOURCE, resource.getId()).join();
         }
         saveIncompleteResource(resource);
     }
@@ -355,7 +379,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
         // This is a 'high-quality' set of information (as it is complete) that the persistence layer will report as 'truth'
         traverseParentsByResource(
                 leafResource,
-                (parent, child) -> {
+                (ParentResource parent, ChildResource child) -> {
                     saveCompleteResource(child);
                     return recurseToRootId(parentResourceId, parentReference).test(parent, child);
                 }
@@ -392,9 +416,12 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param leafResource the resource with an id that will be saved in the type repository
      */
     private void saveType(final String type, final LeafResource leafResource) {
-        TypeEntity entity = new TypeEntity(type, leafResource.getId());
-        LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType());
-        typeRepository.save(entity);
+        boolean valueExists = typeRepository.futureExistsByResourceId(leafResource.getId()).join();
+        if (!valueExists) {
+            TypeEntity entity = new TypeEntity(type, leafResource.getId());
+            LOGGER.debug("Persistence save for type entity '{}' with type '{}'", entity.getResourceId(), entity.getType());
+            typeRepository.futureSave(entity).join();
+        }
     }
 
     /**
@@ -406,9 +433,12 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param leafResource     the resource with an id that will be saved in the serialised format repository
      */
     private void saveSerialisedFormat(final String serialisedFormat, final LeafResource leafResource) {
-        SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
-        LOGGER.debug("Persistence save for serialised format entity '{}' with serialised format '{}'", entity.getResourceId(), entity.getSerialisedFormat());
-        serialisedFormatRepository.save(entity);
+        boolean valueExists = serialisedFormatRepository.futureExistsFindOneByResourceId(leafResource.getId()).join();
+        if (!valueExists) {
+            SerialisedFormatEntity entity = new SerialisedFormatEntity(serialisedFormat, leafResource.getId());
+            LOGGER.debug("Persistence save for serialised format entity '{}' with serialised format '{}'", entity.getResourceId(), entity.getSerialisedFormat());
+            serialisedFormatRepository.futureSave(entity).join();
+        }
     }
 
     /**
@@ -417,9 +447,9 @@ public class JpaPersistenceLayer implements PersistenceLayer {
      * @param resourceId the id of the resource to get
      * @return {@link FunctionalIterator} of a {@link Resource} in persistence, empty {@link FunctionalIterator} if not found
      */
-    private Optional<Resource> getResourceById(final String resourceId) {
+    private Source<Resource, NotUsed> getResourceById(final String resourceId) {
         // Get resource entity from db
-        return resourceRepository.findByResourceId(resourceId)
+        return resourceRepository.streamFindOneByResourceId(resourceId)
                 // Get resource from db entity
                 .map(ResourceEntity::getResource)
                 // Resolve this resource's parents until no more parents found in db
@@ -430,13 +460,13 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     // Given a resource, return all leaf resources underneath it with all parents resolved
     @Override
-    public Optional<Iterator<LeafResource>> getResourcesById(final String resourceId) {
-        LOGGER.debug("Getting resources by id '{}'", resourceId);
+    public Optional<Source<LeafResource, NotUsed>> getResourcesById(final String resourceId) {
+        LOGGER.info("Getting resources by id '{}'", resourceId);
         // Only return info on complete sets of information
         if (isResourceIdComplete(resourceId)) {
             LOGGER.info("Persistence hit for resourceId {}", resourceId);
             // Get resource entity from db
-            return Optional.of(resourceRepository.findByResourceId(resourceId)
+            return Optional.of(resourceRepository.streamFindOneByResourceId(resourceId)
                     // Get resource from db entity
                     .map(ResourceEntity::getResource)
                     // Optimisation - resolve this resource's parents as itself is a parent of each leaf
@@ -445,9 +475,7 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     .map(this::resolveParents)
                     // Get all leaves of this resource with parents resolved up to this resource
                     // See above, all parents are now resolved
-                    .<Iterator<LeafResource>>map(this::collectLeaves)
-                    // If we never found a resource for this id, we have needed persist an empty stream, so return that here
-                    .orElse(Collections.emptyIterator()));
+                    .flatMapConcat(this::collectLeaves));
         } else {
             LOGGER.info("Persistence miss for resourceId {}", resourceId);
             // The persistence store has nothing stored for this resource id, or the store is incomplete
@@ -457,22 +485,21 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     // Given a type, return all leaf resources of that type with all parents resolved
     @Override
-    public Optional<Iterator<LeafResource>> getResourcesByType(final String type) {
-        LOGGER.debug("Getting resources by type '{}'", type);
+    public Optional<Source<LeafResource, NotUsed>> getResourcesByType(final String type) {
+        LOGGER.info("Getting resources by type '{}'", type);
         // Only return info on complete sets of information
         if (isTypeComplete(type)) {
             LOGGER.info("Persistence hit for type {}", type);
             // Get type entity from db
-            return Optional.of(typeRepository.iterateFindAllByType(type)
-                    // Get resource id for each entity (pair of resourceId - type)
+            return Optional.of(typeRepository.streamFindAllByType(type)
+                    // Get the resourceId from the TypeEntity
                     .map(TypeEntity::getResourceId)
-                    // Get resource for this id
-                    .map(this::getResourceById)
+                    // Get the resource for this id
+                    .flatMapConcat(this::getResourceById)
                     // Some enforcement of db assumptions
                     // If we have a type entity, we have a resource entity AND the resource is a leaf
                     // May throw ClassCastException or NoSuchElementException if database is malformed
-                    .map(resource -> (LeafResource) resource
-                            .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource while traversing type " + type))));
+                    .map(resource -> (LeafResource) resource));
         } else {
             LOGGER.info("Persistence miss for type {}", type);
             return Optional.empty();
@@ -481,22 +508,21 @@ public class JpaPersistenceLayer implements PersistenceLayer {
 
     // Given a serialisedFormat, return all leaf resources of that serialisedFormat with all parents resolved
     @Override
-    public Optional<Iterator<LeafResource>> getResourcesBySerialisedFormat(final String serialisedFormat) {
-        LOGGER.debug("Getting resources by serialisedFormat '{}'", serialisedFormat);
+    public Optional<Source<LeafResource, NotUsed>> getResourcesBySerialisedFormat(final String serialisedFormat) {
+        LOGGER.info("Getting resources by serialisedFormat '{}'", serialisedFormat);
         // Only return info on complete sets of information
         if (isSerialisedFormatComplete(serialisedFormat)) {
             LOGGER.info("Persistence hit for serialisedFormat {}", serialisedFormat);
             // Get serialisedFormat entity from db
-            return Optional.of(serialisedFormatRepository.iterateFindAllBySerialisedFormat(serialisedFormat)
+            return Optional.of(serialisedFormatRepository.streamFindAllBySerialisedFormat(serialisedFormat)
                     // Get resource id for each entity (pair of resourceId - serialisedFormat)
                     .map(SerialisedFormatEntity::getResourceId)
                     // Get resource for this id
-                    .map(this::getResourceById)
+                    .flatMapConcat(this::getResourceById)
                     // Some enforcement of db assumptions
                     // If we have a serialisedFormat entity, we have a resource entity AND the resource is a leaf
                     // May throw ClassCastException or NoSuchElementException if database is malformed
-                    .map(resource -> (LeafResource) resource
-                            .orElseThrow(() -> new NoSuchElementException("Could not find resource entity for resource while traversing serialisedFormat " + serialisedFormat))));
+                    .map(resource -> (LeafResource) resource));
         } else {
             LOGGER.info("Persistence miss for serialisedFormat {}", serialisedFormat);
             return Optional.empty();
@@ -506,21 +532,23 @@ public class JpaPersistenceLayer implements PersistenceLayer {
     // Add a leaf resource and mark it and its parents as complete up to a given root resource id
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public <T> FunctionalIterator<T> withPersistenceById(final String rootResourceId, final FunctionalIterator<T> resources) {
+    public <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceById(final String rootResourceId) {
         LOGGER.info("Persistence add for resources by id '{}'", rootResourceId);
         // Persist that this resource id has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        completenessRepository.save(EntityType.RESOURCE, rootResourceId);
+        if (!isResourceIdComplete(rootResourceId)) {
+            completenessRepository.futureSave(EntityType.RESOURCE, rootResourceId).join();
+        }
 
         final AtomicBoolean persistedRootAndParents = new AtomicBoolean(false);
-        return resources.peek(leafResource -> {
+        return Flow.<T>create().map((T leafResource) -> {
             // Persist each leaf resource, with each being complete up-to the root resource id
-            Optional<Resource> rootResource = saveChildrenOfCompleteResource(rootResourceId, (Resource) leafResource);
+            Optional<Resource> rootResource = saveChildrenOfCompleteResource(rootResourceId, leafResource);
             // Persist the root resource and its parents
             rootResource.ifPresentOrElse(
                     // If the root reference was found (ie. the leafResource had a grand*parent with id matching the root resource id)
                     // Then persist the root as the final complete entity, with all further parents marked as incomplete
-                    resource -> {
+                    (Resource resource) -> {
                         // This only needs to be done once per withPersistenceById call
                         if (persistedRootAndParents.compareAndSet(false, true)) {
                             saveResourceWithIncompleteParents(resource);
@@ -528,39 +556,54 @@ public class JpaPersistenceLayer implements PersistenceLayer {
                     },
                     // Otherwise... not sure?
                     () -> {
-                        Resource noRootResource = (Resource) leafResource;
-                        LOGGER.warn("Putting resource {} into resource repository never led to traversal of the apparent root {} for this put update", noRootResource.getId(), rootResourceId);
+                        LOGGER.warn("Putting resource {} into resource repository never led to traversal of the apparent root {} for this put update", leafResource.getId(), rootResourceId);
                         LOGGER.warn("This erroneous behaviour may be a sign of database corruption and should be investigated, but hasn't caused a critical error yet");
                     });
+            return leafResource;
         });
     }
 
-    // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given type
-    // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public <T> FunctionalIterator<T> withPersistenceByType(final String type, final FunctionalIterator<T> resources) {
+    public <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceByType(final String type) {
         LOGGER.info("Persistence add for resources by type '{}'", type);
         // Persist that this type has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        completenessRepository.save(EntityType.TYPE, type);
-        return resources.peek(leafResource -> {
-            saveResourceWithIncompleteParents((LeafResource) leafResource);
-            saveType(type, (LeafResource) leafResource);
-        });
+        return Flow.lazyCompletionStageFlow(() -> {
+            CompletableFuture<CompletenessEntity> entityCompletableFuture;
+            if (!isTypeComplete(type)) {
+                entityCompletableFuture = completenessRepository.futureSave(EntityType.TYPE, type);
+            } else {
+                entityCompletableFuture = CompletableFuture.completedFuture(null);
+            }
+            return entityCompletableFuture.thenApply(ignored -> Flow.<T>create().map((T leafResource) -> {
+                saveResourceWithIncompleteParents(leafResource);
+                saveType(type, leafResource);
+                return leafResource;
+            }));
+        }).mapMaterializedValue(ignored -> NotUsed.notUsed());
     }
 
     // Add a leaf resource, (mark the leaf as complete,) and mark the leaf as a given serialisedFormat
     // Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
     @Override
-    public <T> FunctionalIterator<T> withPersistenceBySerialisedFormat(final String serialisedFormat, final FunctionalIterator<T> resources) {
+    public <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceBySerialisedFormat(final String serialisedFormat) {
         LOGGER.info("Persistence add for resources by serialisedFormat '{}'", serialisedFormat);
         // Persist that this serialisedFormat has (a potentially empty stream of) persisted info
         // Next time it is requested, it will be handled by persistence
-        completenessRepository.save(EntityType.FORMAT, serialisedFormat);
-        return resources.peek(leafResource -> {
-            saveResourceWithIncompleteParents((LeafResource) leafResource);
-            saveSerialisedFormat(serialisedFormat, (LeafResource) leafResource);
-        });
+        return Flow.lazyCompletionStageFlow(() -> {
+            CompletableFuture<CompletenessEntity> entityCompletableFuture;
+            if (!isSerialisedFormatComplete(serialisedFormat)) {
+                entityCompletableFuture = completenessRepository.futureSave(EntityType.FORMAT, serialisedFormat);
+            } else {
+                entityCompletableFuture = CompletableFuture.completedFuture(null);
+            }
+
+            return entityCompletableFuture.thenApply(ignored -> Flow.<T>create().map((T leafResource) -> {
+                saveResourceWithIncompleteParents(leafResource);
+                saveSerialisedFormat(serialisedFormat, leafResource);
+                return leafResource;
+            }));
+        }).mapMaterializedValue(ignored -> NotUsed.notUsed());
     }
 
     // Add a new resource that has been created during runtime to the persistence store

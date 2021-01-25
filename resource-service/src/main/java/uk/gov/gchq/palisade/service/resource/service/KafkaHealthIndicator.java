@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.palisade.service;
+package uk.gov.gchq.palisade.service.resource.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.admin.ConsumerGroupDescription;
+import org.apache.kafka.common.ConsumerGroupState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -33,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Kafka health indicator. Check that the producer group can be accessed and is registered with the cluster,
+ * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
 @Component("kafka")
@@ -41,8 +43,9 @@ import java.util.concurrent.TimeoutException;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
-    private static final String TOPIC_NAME = "request";
     private final AdminClient adminClient;
+    @Value("${akka.kafka.consumer.kafka-clients.group.id}")
+    private String groupId;
 
     /**
      * Requires the AdminClient to interact with Kafka
@@ -57,10 +60,15 @@ public class KafkaHealthIndicator implements HealthIndicator {
     public Health getHealth(final boolean includeDetails) {
         return Optional.of(performCheck())
                 .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("topic", TOPIC_NAME).build())
-                .orElseGet(() -> Health.down().withDetail("topic", TOPIC_NAME).build());
+                .map(up -> Health.up().withDetail("group", this.groupId).build())
+                .orElseGet(() -> Health.down().withDetail("group", this.groupId).build());
     }
 
+    /**
+     * Health endpoint
+     *
+     * @return the {@code Health} object
+     */
     @Override
     public Health health() {
         return Optional.of(performCheck())
@@ -71,14 +79,28 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     private boolean performCheck() {
         try {
+            Map<String, ConsumerGroupDescription> groupDescriptionMap = this.adminClient.describeConsumerGroups(Collections.singletonList(this.groupId))
+                    .all()
+                    .get(1, TimeUnit.SECONDS);
 
-            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(Collections.singleton(TOPIC_NAME)).all().get(1, TimeUnit.SECONDS);
-            return topicsResult.get(TOPIC_NAME).name().equals(TOPIC_NAME);
+            ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
 
+            LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
+
+
+            if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
+                boolean assignedGroupPartition = consumerGroupDescription.members().stream()
+                        .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
+                if (!assignedGroupPartition) {
+                    LOGGER.error("Failed to find kafka topic-partition assignments");
+                }
+                return assignedGroupPartition;
+            }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", TOPIC_NAME, e);
+            LOGGER.warn("Exception during Kafka health check for group {}", this.groupId, e);
             Thread.currentThread().interrupt();
             return false;
         }
+        return true;
     }
 }
