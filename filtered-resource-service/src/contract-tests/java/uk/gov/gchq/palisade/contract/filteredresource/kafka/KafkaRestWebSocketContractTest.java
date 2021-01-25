@@ -43,7 +43,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,6 @@ import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArguments;
-import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArgumentsNoResources;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
@@ -225,104 +223,6 @@ class KafkaRestWebSocketContractTest {
                             .hasMessageContaining(auditErrorMessages.get(0).getError().getMessage())
             );
         }
-    }
-
-    @ParameterizedTest
-    @ArgumentsSource(ParameterizedArgumentsNoResources.class)
-    @Disabled
-    void testNoResourcesObservedException(
-            // Parameterised input
-            final String requestToken,
-            final List<Pair<Iterable<HttpHeader>, FilteredResourceRequest>> maskedResourceTopic,
-            final List<Pair<Iterable<HttpHeader>, TopicOffsetMessage>> maskedResourceOffsetTopic,
-            final List<WebSocketMessage> websocketRequests,
-            // Expected output
-            final List<WebSocketMessage> websocketResponses,
-            final List<AuditErrorMessage> auditErrorMessages
-    ) throws InterruptedException, ExecutionException, TimeoutException {
-
-        ContentType jsonType = ContentTypes.APPLICATION_JSON;
-        Http http = Http.get(akkaActorSystem);
-
-        // Given
-        // POST maskedResource to KafkaController
-        maskedResourceTopic.forEach(resource -> http
-                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource", HOST, port))
-                        .withHeaders(resource.first())
-                        .withEntity(jsonType, serialize(resource.second()).getBytes()))
-                .toCompletableFuture()
-                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-        // Given POST maskedResourceOffset to KafkaController - runnable is then called 'late' to simulate arrival of offsets *after* client request
-        Runnable postOffsets = () -> maskedResourceOffsetTopic.forEach(offset -> http
-                .singleRequest(HttpRequest.POST(String.format("http://%s:%d/api/masked-resource-offset", HOST, port))
-                        .withHeaders(offset.first())
-                        .withEntity(jsonType, serialize(offset.second()).getBytes()))
-                .toCompletableFuture()
-                .thenAccept(response -> assertThat(response.status().intValue()).isEqualTo(202))
-                .join());
-
-        // When
-        // Send each websocketMessage request and receive responses
-        Source<Message, NotUsed> wsMsgSource = Source.fromIterator(websocketRequests::iterator).map(this::writeTextMessage);
-        Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
-        // Create client Sink/Source Flow (send the payload, collect the responses)
-        Flow<Message, Message, CompletionStage<List<WebSocketMessage>>> clientFlow = Flow.fromSinkAndSourceMat(listSink, wsMsgSource, Keep.left());
-        Pair<CompletionStage<WebSocketUpgradeResponse>, CompletionStage<List<WebSocketMessage>>> request = http.singleWebSocketRequest(
-                WebSocketRequest.create(String.format("ws://%s:%s/resource/" + requestToken, HOST, port)),
-                clientFlow,
-                akkaMaterializer);
-        // Get the (HTTP) response, a websocket upgrade
-        request.first().toCompletableFuture()
-                .get(1, TimeUnit.SECONDS);
-
-        // Late POST of offsets after client request has been initialized
-        postOffsets.run();
-
-        // Get the result of the client sink, a list of (WebSocket) responses
-        LinkedList<WebSocketMessage> actualResponses = new LinkedList<>(request.second().toCompletableFuture()
-                .get(30 + websocketRequests.size(), TimeUnit.SECONDS));
-
-        // Then
-        // Assert each received response matches up with the expected
-        assertThat(actualResponses)
-                .as("Testing Websocket Response")
-                .isEqualTo(websocketResponses);
-
-        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, new StringDeserializer(), new ErrorDeserializer())
-                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
-                .withGroupId("error-topic-test-consumer")
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
-                .atMostOnceSource(consumerSettings, Subscriptions.topics(consumerTopicConfiguration.getTopics().get("error-topic").getName()))
-                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-
-        // When you read off the error queue
-        LinkedList<ConsumerRecord<String, AuditErrorMessage>> errorResults = LongStream.range(0, auditErrorMessages.size())
-                .mapToObj(i -> errorProbe.requestNext(FiniteDuration.create(20 + auditErrorMessages.size(), TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        // Then
-        // The messages on the error topic are as expected
-        assertAll("Asserting on the error topic",
-                () -> assertThat(errorResults)
-                        .as("Assert that there is one error on the error topic")
-                        .hasSize(1),
-
-                () -> assertThat(errorResults.get(0).value())
-                        .as("Assert that after ignoring the Throwable object, and differences in timestamp, the AuditErrorMessages are the same")
-                        .usingRecursiveComparison()
-                        .ignoringFieldsOfTypes(Throwable.class)
-                        .ignoringFields("timestamp")
-                        .isEqualTo(auditErrorMessages.get(0)),
-
-                () -> assertThat(errorResults.get(0).value().getError())
-                        .as("Assert that the error message inside the AuditErrorMessage is the same")
-                        .isExactlyInstanceOf(Throwable.class)
-                        .hasMessageContaining(auditErrorMessages.get(0).getError().getMessage())
-        );
     }
 
     // Handle deserialising JSON TextMessages to WebSocketMessages
