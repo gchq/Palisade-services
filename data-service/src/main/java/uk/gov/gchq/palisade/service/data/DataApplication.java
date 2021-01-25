@@ -95,7 +95,6 @@ public class DataApplication {
         LOGGER.debug("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
         serialiserConfiguration.getSerialisers().stream()
                 .map(StdSerialiserPrepopulationFactory::build)
-                .peek(entry -> LOGGER.debug(entry.toString()))
                 .forEach(entry -> dataReader.addSerialiser(entry.getKey(), entry.getValue()));
     }
 }
