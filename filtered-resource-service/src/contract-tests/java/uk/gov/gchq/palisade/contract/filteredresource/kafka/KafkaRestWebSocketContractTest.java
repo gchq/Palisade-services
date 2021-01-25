@@ -23,6 +23,7 @@ import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.HttpHeader;
 import akka.http.javadsl.model.HttpRequest;
+import akka.http.javadsl.model.headers.RawHeader;
 import akka.http.javadsl.model.ws.Message;
 import akka.http.javadsl.model.ws.WebSocketRequest;
 import akka.http.javadsl.model.ws.WebSocketUpgradeResponse;
@@ -43,7 +44,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,16 +59,24 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData.ParameterizedArguments;
+import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.contract.filteredresource.kafka.KafkaInitializer.ErrorDeserializer;
+import uk.gov.gchq.palisade.resource.LeafResource;
+import uk.gov.gchq.palisade.resource.impl.FileResource;
+import uk.gov.gchq.palisade.resource.impl.SystemResource;
+import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.FilteredResourceApplication;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
+import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
+import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
+import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +84,11 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -101,21 +116,145 @@ class KafkaRestWebSocketContractTest {
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
 
-    // Handle serializing Objects to JSON Strings
-    private static <T> T deserialize(final String json, final Class<T> clazz) {
-        try {
-            return MAPPER.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to write message", e);
-        }
-    }
 
-    // Handle serializing Objects to JSON Strings
-    private static String serialize(final Object o) {
-        try {
-            return MAPPER.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Failed to write message", e);
+
+    public static class ParameterizedArguments implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) throws Exception {
+            // Builders
+            Function<String, FilteredResourceRequest> resourceBuilder = resourceId -> FilteredResourceRequest.Builder.create()
+                    .withUserId("userId")
+                    .withResourceId("file:/file/")
+                    .withContext(new Context().purpose("purpose"))
+                    .withResource(new FileResource()
+                            .id("file:/file/" + resourceId)
+                            .serialisedFormat("fmt")
+                            .type("type")
+                            .connectionDetail(new SimpleConnectionDetail()
+                                    .serviceName("data-service"))
+                            .parent(new SystemResource().id("file:/file/")));
+            Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
+                    ::withQueuePointer;
+            BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.RESOURCE)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .withBody(leafResource);
+            // Special instances
+            HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
+            HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.COMPLETE)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .noBody();
+            return Stream.of(
+                    // Test for 'early' client - topic offset message has offset
+                    Arguments.of(
+                            "test-token-1",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-1")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-1")
+                            ),
+                            List.of()
+                    ),
+                    // Test for 'late' client - persistence has offset
+                    Arguments.of(
+                            "test-token-2",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), startHeader), null),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-2"), endHeader), null)
+                            ),
+                            List.of(),
+                            Map.of(
+                                    "test-token-2", 0L
+                            ),
+                            List.of(
+                                    ctsMsg, ctsMsg, ctsMsg, ctsMsg
+                            ),
+                            List.of(
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
+                                    responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    completeMsgBuilder.apply("test-token-2")
+                            ),
+                            List.of()
+                    ),
+                    //Test no start of stream marker
+                    Arguments.of(
+                            "test-token-3",
+                            List.of(
+                                    //No Start Marker
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.1")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.2")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), resourceBuilder.apply("resource.3")),
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-3")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    // No Resources or WebSocketMessages are expected to be returned
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("userId")
+                                            .withResourceId("file:/file/")
+                                            .withContext(new Context().purpose("purpose"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))
+                            )
+                    )
+//                    ,
+//                    // Test no resources
+//                    Arguments.of(
+//                            "test-token-4",
+//                            List.of(
+//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+//                                    //No Resources
+//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+//                            ),
+//                            List.of(
+//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+//                            ),
+//                            List.of(
+//                                    ctsMsg
+//                            ),
+//                            List.of(
+//                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+//                            ),
+//                            List.of(
+//                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+//                                            .withResourceId("unknown")
+//                                            .withContext(new Context().purpose("unknown"))
+//                                            .withAttributes(Collections.emptyMap())
+//                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+//                            )
+//                    )
+            );
         }
     }
 
@@ -242,5 +381,23 @@ class KafkaRestWebSocketContractTest {
     // Handle serialising WebSocketMessages to JSON TextMessages
     private Message writeTextMessage(final WebSocketMessage message) {
         return new Strict(serialize(message));
+    }
+
+    // Handle serializing Objects to JSON Strings
+    private static <T> T deserialize(final String json, final Class<T> clazz) {
+        try {
+            return MAPPER.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to write message", e);
+        }
+    }
+
+    // Handle serializing Objects to JSON Strings
+    private static String serialize(final Object o) {
+        try {
+            return MAPPER.writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to write message", e);
+        }
     }
 }

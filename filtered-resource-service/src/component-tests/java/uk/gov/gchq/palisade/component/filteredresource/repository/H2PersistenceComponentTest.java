@@ -27,7 +27,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData;
+import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;

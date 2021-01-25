@@ -34,7 +34,7 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
 
 import uk.gov.gchq.palisade.component.filteredresource.repository.RedisPersistenceComponentTest.Initializer;
-import uk.gov.gchq.palisade.contract.filteredresource.common.ContractTestData;
+import uk.gov.gchq.palisade.contract.filteredresource.ContractTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.RedisTtlConfiguration;
