@@ -82,7 +82,8 @@ public final class AuditablePalisadeSystemResponse {
          */
         public interface IPalisadeRequest {
             /**
-             * Compose value
+             * Create an {@link AuditablePalisadeSystemResponse} with only an {@link AuditErrorMessage}
+             * This is indicative that something went wrong.
              *
              * @param audit non-null value
              * @return value object
@@ -92,7 +93,8 @@ public final class AuditablePalisadeSystemResponse {
             }
 
             /**
-             * Compose value
+             * Create an {@link AuditablePalisadeSystemResponse} from  a {@link PalisadeClientRequest}.
+             * This will be converted into an {@link PalisadeSystemResponse}.
              *
              * @param request non-null value
              * @return value object
@@ -102,7 +104,8 @@ public final class AuditablePalisadeSystemResponse {
             }
 
             /**
-             * Compose value
+             * Create an {@link AuditablePalisadeSystemResponse} from a {@link PalisadeSystemResponse} and no error.
+             * This is indicative of a successful request registered.
              *
              * @param response non-null value
              * @return value object
@@ -112,7 +115,8 @@ public final class AuditablePalisadeSystemResponse {
             }
 
             /**
-             * Compose value
+             * Create an {@link AuditablePalisadeSystemResponse} supplying both the {@link PalisadeSystemResponse} and the {@link AuditErrorMessage}.
+             * It is expected that exactly one of these is null and the other non-null.
              *
              * @param request           value or null
              * @param auditErrorMessage value or null
