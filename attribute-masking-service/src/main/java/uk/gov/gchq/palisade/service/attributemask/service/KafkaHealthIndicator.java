@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Kafka health indicator. Check that the producer group can be accessed and is registered with the cluster,
+ * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
 @Component
