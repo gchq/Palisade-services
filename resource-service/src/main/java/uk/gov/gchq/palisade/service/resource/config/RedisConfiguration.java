@@ -30,6 +30,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import uk.gov.gchq.palisade.service.resource.domain.CompletenessEntity;
+import uk.gov.gchq.palisade.service.resource.domain.ResourceConverter;
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
 import uk.gov.gchq.palisade.service.resource.domain.SerialisedFormatEntity;
 import uk.gov.gchq.palisade.service.resource.domain.TypeEntity;
@@ -65,16 +66,14 @@ public class RedisConfiguration {
     /**
      * Creates the {@link ReactiveRedisTemplate}
      *
-     * @param hkClass the class for the key
-     * @param hvClass the class for the value
+     * @param kSerde the serializer class for the key
+     * @param vSerde the serializer class for the value
      * @param <K> the key
      * @param <V> the value
      * @return a {@link ReactiveRedisTemplate}
      */
-    public <K, V> ReactiveRedisTemplate<String, V> reactiveRedisTemplate(final Class<K> hkClass, final Class<V> hvClass) {
+    public <K, V> ReactiveRedisTemplate<String, V> reactiveRedisTemplate(final RedisSerializer<K> kSerde, final RedisSerializer<V> vSerde) {
         StringRedisSerializer tSerde = new StringRedisSerializer();
-        RedisSerializer<K> kSerde = new Jackson2JsonRedisSerializer<>(hkClass);
-        RedisSerializer<V> vSerde = new Jackson2JsonRedisSerializer<>(hvClass);
         RedisSerializationContext<String, V> context =
                 RedisSerializationContext.<String, V>newSerializationContext()
                         .key(tSerde)
@@ -88,24 +87,33 @@ public class RedisConfiguration {
     @Primary
     @Bean
     CompletenessRepositoryAdapter completenessRepositoryAdapter() {
-        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(Integer.class, CompletenessEntity.class));
+        RedisSerializer<Integer> kSerde = new Jackson2JsonRedisSerializer<>(Integer.class);
+        RedisSerializer<CompletenessEntity> vSerde = new Jackson2JsonRedisSerializer<>(CompletenessEntity.class);
+        return new CompletenessRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
     }
 
     @Primary
     @Bean
     ResourceRepositoryAdapter resourceRepositoryAdapter() {
-        return new ResourceRepositoryAdapter(reactiveRedisTemplate(String.class, ResourceEntity.class));
+        RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
+        Jackson2JsonRedisSerializer<ResourceEntity> vSerde = new Jackson2JsonRedisSerializer<>(ResourceEntity.class);
+        vSerde.setObjectMapper(ResourceConverter.RESOURCE_MAPPER);
+        return new ResourceRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
     }
 
     @Primary
     @Bean
     TypeRepositoryAdapter typeRepositoryAdapter() {
-        return new TypeRepositoryAdapter(reactiveRedisTemplate(String.class, TypeEntity.class));
+        RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
+        RedisSerializer<TypeEntity> vSerde = new Jackson2JsonRedisSerializer<>(TypeEntity.class);
+        return new TypeRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
     }
 
     @Primary
     @Bean
     SerialisedFormatRepositoryAdapter serialisedFormatRepositoryAdapter() {
-        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(String.class, SerialisedFormatEntity.class));
+        RedisSerializer<String> kSerde = new Jackson2JsonRedisSerializer<>(String.class);
+        RedisSerializer<SerialisedFormatEntity> vSerde = new Jackson2JsonRedisSerializer<>(SerialisedFormatEntity.class);
+        return new SerialisedFormatRepositoryAdapter(reactiveRedisTemplate(kSerde, vSerde));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,17 +104,18 @@ public class ResourceServicePersistenceProxy {
                                         .map(leafResource -> AuditableResourceResponse.Builder.create()
                                                 .withResourceResponse(ResourceResponse.Builder.create(request)
                                                         .withResource(leafResource)))
-                                        // Service threw an error for a single resource, create an AuditErrorMessage
+                                        // An error occurred when requesting resource from delegate, create an AuditErrorMessage
                                         .exceptionally(ex -> AuditableResourceResponse.Builder.create()
                                                 .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
                                                         Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.REQUEST.toString()))
-                                                        .withError(new NoSuchResourceException("Exception thrown while querying the delegate service", ex))));
+                                                        .withError(new NoSuchResourceException(ex.getMessage(), ex))));
                             } catch (RuntimeException ex) {
-                                // If the initial connection to the service fails, audit as a request error rather than service error
+                                LOGGER.error("Exception encountered connecting to the service: {}", ex.getMessage());
+                                // If the initial request to the service fails, audit as a service error rather than a request error
                                 return Collections.singleton(AuditableResourceResponse.Builder.create()
                                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
                                                 Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.SERVICE.toString()))
-                                                .withError(new NoSuchResourceException("Exception thrown while connecting to the service", ex))))
+                                                .withError(new NoSuchResourceException(ex.getMessage(), ex))))
                                         .iterator();
                             }
                         })

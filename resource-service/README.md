@@ -38,15 +38,15 @@ added to the `resource` Kafka topic to be processed by the Policy service.
 (fields marked with * are acquired from headers metadata)
 
 The service accepts a `ResourceRequest` from the User service, finds all the resources associated with the resourceId as a stream, the stream is 
-then consumed and for each resource a `ResourceResponse` is created is then sent onto the Policy service for further processing.
+then consumed and for each resource a `ResourceResponse` is created and then sent to the Policy service for further processing.
 
 ## Kafka Interface
 
-The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. The `START` gets 
-consumed by the service but no action taken on it and it gets written to the `resource` Kafka topic. The `ResourceRequest` message then gets consumed 
-by the service and for each resource a `ResourceResponse` object is created. This then gets written to the `resource` Kafka topic. Once all the 
-`ResourceResponse`s have been written to the topic the `END` message gets written to the `resource` topic to mark the end of the resources for this 
-request. In case any errors are encountered, the original request, along with the thrown exception are both captured in an 
+The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. The `START` gets
+consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic. 
+The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. This then gets written 
+to the `resource` Kafka topic. Once all the`ResourceResponse`s have been written to the topic, the `END` message gets written to the `resource` topic to 
+mark the end of the resources for this request. If any errors are thrown within the service, the original request, along with the thrown exception are captured in an
 `AuditErrorMessage` and written to the Kafka `error` topic.
 
 ## REST Interface
@@ -138,9 +138,9 @@ using Spring to upload resource(s) to the service from a yaml file. An example o
 
 ## Hadoop and Windows
 
-Windows users will have problems with Hadoop integration testing. Included [here](../../Palisade-services/resource-service/src/contract-tests/test/resources/hadoop-3.2.1) is a Windows-compatible set of hadoop binaries.
+Windows users will have problems with Hadoop integration testing. Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries.
 
-To 'install' on Windows, an additional step is required - copy the [hadoop.dll](../../Palisade-services/resource-service/src/contract-tests/test/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
+To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
 the `HadoopResourceServiceTest` to run correctly.
 
 ## Database Entities and Structuring
@@ -166,7 +166,7 @@ the `HadoopResourceServiceTest` to run correctly.
 To ease load on an external resource-service provider, a cache-like storage mechanism is used to return data for previously-queried resources. The code for this can be found in
 the [StreamingResourceServiceProxy](src/main/java/uk/gov/gchq/palisade/service/resource/service/StreamingResourceServiceProxy.java) and [JpaPersistenceLayer](src/main/java/uk/gov/gchq/palisade/service/resource/repository/JpaPersistenceLayer.java).
 
-Due to the tree-structure of filesystems, naïve caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. For example, requesting `/some/directory/with-lots-of-files` may return (and
+Due to the tree-structure of filesystems, native caching of requests-responses results in a large amount of data while not providing any "smart" methods to the caching mechanism. For example, requesting `/some/directory/with-lots-of-files` may return (and
 cache) 1000 resources, but requesting `/some/directory` will result in a cache miss, as would `/some/directory/with-lots-of-files/big-subdirectory`. Instead, a persistence store is used to break resource trees apart into their individual nodes and store
 them separately, reconstructing parents and tree structure when requested again.
 

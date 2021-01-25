@@ -60,8 +60,8 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A factory for a map of {@link uk.gov.gchq.palisade.rule.Rules} to {@link uk.gov.gchq.palisade.resource.Resource} objects, using:
-     * - a {@link uk.gov.gchq.palisade.resource.Resource} resource
+     * A factory for a map of {@link uk.gov.gchq.palisade.rule.Rules} to a resourceId, using:
+     * - a {@link String} value of the resourceId
      * - a list of {@link uk.gov.gchq.palisade.rule.Rule} resource-level rules operating on a {@link uk.gov.gchq.palisade.resource.Resource}
      * - a list of {@link uk.gov.gchq.palisade.rule.Rule} record-level rules operating on the type of a {@link uk.gov.gchq.palisade.resource.LeafResource}
      *
@@ -71,56 +71,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     @ConditionalOnProperty(prefix = "population", name = "policyProvider", havingValue = "std", matchIfMissing = true)
     public StdPolicyPrepopulationFactory policyPrepopulationFactory() {
         return new StdPolicyPrepopulationFactory();
-    }
-
-    /**
-     * A container for a number of {@link StdUserPrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.User}s
-     * These users will be attached to {@link uk.gov.gchq.palisade.rule.Rules}s from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
-     * These policies will be used for prepopulating the {@link PolicyService}
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory}s
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdUserConfiguration userConfiguration() {
-        return new StdUserConfiguration();
-    }
-
-    /**
-     * A factory for {@link uk.gov.gchq.palisade.User} objects, using a userId, a list of authorisations and a list of roles
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.UserPrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.User} from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "userProvider", havingValue = "std", matchIfMissing = true)
-    public StdUserPrepopulationFactory userPrepopulationFactory() {
-        return new StdUserPrepopulationFactory();
-    }
-
-    /**
-     * A container for a number of {@link StdResourcePrepopulationFactory} builders used for creating {@link uk.gov.gchq.palisade.resource.Resource}s
-     * These resources will be mapped to {@link uk.gov.gchq.palisade.rule.Rules} from the {@link uk.gov.gchq.palisade.service.PolicyConfiguration}
-     * These policies will be used for prepopulating the {@link PolicyService}
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.ResourceConfiguration} containing a list of {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory}s
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
-    @ConfigurationProperties(prefix = "population")
-    public StdResourceConfiguration resourceConfiguration() {
-        return new StdResourceConfiguration();
-    }
-
-    /**
-     * A factory for {@link uk.gov.gchq.palisade.resource.Resource} objects, wrapping the {@link uk.gov.gchq.palisade.util.ResourceBuilder} with a type and serialisedFormat
-     *
-     * @return a standard {@link uk.gov.gchq.palisade.service.ResourcePrepopulationFactory} capable of building a {@link uk.gov.gchq.palisade.resource.Resource} from configuration
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "population", name = "resourceProvider", havingValue = "std", matchIfMissing = true)
-    public StdResourcePrepopulationFactory resourcePrepopulationFactory() {
-        return new StdResourcePrepopulationFactory();
     }
 
     /**

@@ -168,7 +168,7 @@ public class PolicyServiceHierarchyProxy {
      * @return the record rules that apply to the LeafResource
      */
     public Rules<Serializable> getRecordRules(final LeafResource resource) {
-        var optionalRules = getRecordRules(resource, service::getRecordRules);
+        Optional<Rules<Serializable>> optionalRules = getRecordRules(resource, rulesResource -> service.getRecordRules(rulesResource.getId()));
 
         return optionalRules
                 .filter(rules -> !rules.getRules().isEmpty())
@@ -184,7 +184,7 @@ public class PolicyServiceHierarchyProxy {
      * @return rules {@link Rules} object, which contains the list of rules found that need to be applied to the resource
      */
     public Rules<LeafResource> getResourceRules(final LeafResource resource) {
-        Optional<Rules<LeafResource>> optionalRules = getResourceRules(resource, service::getResourceRules);
+        Optional<Rules<LeafResource>> optionalRules = getResourceRules(resource, ruleResource -> service.getResourceRules(ruleResource.getId()));
 
         return optionalRules
                 .filter(rules -> !rules.getRules().isEmpty())
@@ -198,7 +198,7 @@ public class PolicyServiceHierarchyProxy {
      * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
      */
     public void setRecordRules(final Resource resource, final Rules<Serializable> rules) {
-        this.service.setRecordRules(resource, rules);
+        this.service.setRecordRules(resource.getId(), rules);
     }
 
     /**
@@ -208,6 +208,6 @@ public class PolicyServiceHierarchyProxy {
      * @param rules    {@link Rules} object, which contains the list of rules to be applied to the resource.
      */
     public void setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
-        this.service.setResourceRules(resource, rules);
+        this.service.setResourceRules(resource.getId(), rules);
     }
 }

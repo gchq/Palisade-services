@@ -90,7 +90,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
      */
     private BiPredicate<ParentResource, ChildResource> recurseToRootId(final String rootResourceId, final AtomicReference<Resource> rootReference) {
         // Return a predicate with the method arguments bound to the lambda
-        return (parent, child) -> {
+        return (ParentResource parent, ChildResource child) -> {
             LOGGER.debug("Looking for root '{}'", rootResourceId);
             if (parent.getId().equals(rootResourceId)) {
                 // If the parent is the root resource
@@ -258,7 +258,7 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
             // If we have reached a leaf, then done
             return Source.single((LeafResource) resource);
         } else {
-            throw new UnknownResourceTypeException(String.format("Resource %s is neither Parent nor Leaf", resource));
+            throw new UnknownResourceTypeException(String.format("Resource '%s' is neither Parent nor Leaf", resource.getId()));
         }
     }
 

@@ -23,7 +23,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
-import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.rule.Rules;
 
 import java.io.Serializable;
@@ -52,54 +51,55 @@ public class PolicyServiceCachingProxy {
      * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesnt exist a message is sent to the logs
      * and a {@link PolicyService} getResourceRules() is called
      *
-     * @param resource the resource the user wants resource rules against
+     * @param resourceId the resourceId the user wants resource rules against
      * @return the resource rules that apply to the resource
      */
-    @Cacheable(value = "resourceRules", key = "#resource.id")
-    public Optional<Rules<LeafResource>> getResourceRules(final Resource resource) {
-        LOGGER.info("Cache miss for resourceId {}", resource.getId());
-        return service.getResourceRules(resource);
+    @Cacheable(value = "resourceRules", key = "#resourceId")
+    public Optional<Rules<LeafResource>> getResourceRules(final String resourceId) {
+        LOGGER.info("ResourceId '{}' not found in cache", resourceId);
+        LOGGER.debug("Cache miss for resourceId {}", resourceId);
+        return service.getResourceRules(resourceId);
     }
 
     /**
      * Using the resourceId as the key, adds the resource, and any resource rules against that resource, to the cache
      *
-     * @param resource the resource the user wants to apply resource rules to
+     * @param resourceId the resourceId the user wants to apply resource rules to
      * @param rules    the resource rules that apply to this resource
      * @return the resource rules that apply to this LeafResource
      */
-    @CachePut(value = "resourceRules", key = "#resource.id")
-    public Optional<Rules<LeafResource>> setResourceRules(final Resource resource, final Rules<LeafResource> rules) {
-        LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, rules);
-        LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
-        return service.setResourceRules(resource, rules);
+    @CachePut(value = "resourceRules", key = "#resourceId")
+    public Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules) {
+        LOGGER.info("ResourceId '{}' with ResourceRules {} added to cache", resourceId, rules);
+        LOGGER.debug("Cache add for resourceId '{}' and policy message {}", resourceId, rules.getMessage());
+        return service.setResourceRules(resourceId, rules);
     }
 
     /**
      * Using the resourceId as they key, retrieves the resource from the cache, if the resource doesnt exist a message is sent to the logs
      * and a {@link PolicyService} getRecordRules() is called
      *
-     * @param resource the resource the user wants record rules against
+     * @param resourceId the resourceId the user wants record rules against
      * @return the record rules that apply to the resource
      */
-    @Cacheable(value = "recordRules", key = "#resource.id")
-    public Optional<Rules<Serializable>> getRecordRules(final Resource resource) {
-        LOGGER.debug("ResourceId for resource {} not found in cache", resource);
-        LOGGER.info("Cache miss for resourceId {}", resource.getId());
-        return service.getRecordRules(resource);
+    @Cacheable(value = "recordRules", key = "#resourceId")
+    public Optional<Rules<Serializable>> getRecordRules(final String resourceId) {
+        LOGGER.info("ResourceId '{}' not found in cache", resourceId);
+        LOGGER.debug("Cache miss for resourceId {}", resourceId);
+        return service.getRecordRules(resourceId);
     }
 
     /**
      * Using the resourceId as the key, adds the resource, and any record rules against that resource, to the cache
      *
-     * @param resource the resource the user wants to apply record rules to
+     * @param resourceId the resourceId the user wants to apply record rules to
      * @param rules    the record rules that apply to this resource
      * @return the record rules that apply to this LeafResource
      */
-    @CachePut(value = "recordRules", key = "#resource.id")
-    public Optional<Rules<Serializable>> setRecordRules(final Resource resource, final Rules<Serializable> rules) {
-        LOGGER.debug("ResourceId for {} with policy {} added to cache", resource, rules);
-        LOGGER.info("Cache add for resourceId {} and policy message {}", resource.getId(), rules.getMessage());
-        return service.setRecordRules(resource, rules);
+    @CachePut(value = "recordRules", key = "#resourceId")
+    public Optional<Rules<Serializable>> setRecordRules(final String resourceId, final Rules<Serializable> rules) {
+        LOGGER.info("ResourceId '{}' with RecordRules {} added to cache", resourceId, rules);
+        LOGGER.debug("Cache add for resourceId {} and policy message {}", resourceId, rules.getMessage());
+        return service.setRecordRules(resourceId, rules);
     }
 }

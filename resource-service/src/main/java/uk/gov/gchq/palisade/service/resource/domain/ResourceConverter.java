@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public final class ResourceConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceConverter.class);
-    private static final ObjectMapper RESOURCE_MAPPER;
+    public static final ObjectMapper RESOURCE_MAPPER;
 
     static {
         // Intentionally uses a different ObjectMapper to the one in ApplicationConfiguration because of this OrphanedChildMixin

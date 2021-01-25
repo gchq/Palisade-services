@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +89,7 @@ class ReactivePersistenceLayerTest {
     }
 
     @Test
-    void testEmptyGetReturnsEmpty() throws InterruptedException, ExecutionException {
+    void testEmptyGetReturnsEmpty() {
         // Given the setup
 
         // When getting a non-existent resourceId

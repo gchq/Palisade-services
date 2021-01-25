@@ -116,7 +116,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -126,7 +126,7 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
@@ -188,7 +188,7 @@ class KafkaContractTest {
         // Given - we are already listening to the output and error topics
         ConsumerSettings<String, JsonNode> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, new StringDeserializer(), new ResponseDeserializer())
-                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, JsonNode>> probe = Consumer
@@ -202,7 +202,7 @@ class KafkaContractTest {
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
                 .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
-                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
@@ -215,26 +215,32 @@ class KafkaContractTest {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
-        assertAll("Asserting on the output topic",
+        assertAll(
                 () -> assertThat(results)
+                        .as("The 'output' topic has 2 messages")
                         .hasSize(2),
 
                 () -> assertThat(results)
+                        .as("Check the token is in the header")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
-                () -> assertAll("Start and End of stream markers have the correct headers",
+                () -> assertAll(
                         () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                                .as("The Start message has the correct stream marker")
                                 .isEqualTo(StreamMarker.START.toString().getBytes()),
                         () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                                .as("The End message has the correct stream marker")
                                 .isEqualTo(StreamMarker.END.toString().getBytes())
                 ),
 
-                () -> assertAll("After removing the start and end of stream message",
+                () -> assertAll(
                         results::removeFirst,
                         results::removeLast,
-                        () -> assertThat(results).isEmpty()
+                        () -> assertThat(results)
+                                .as("Removing the start and end messages leaves the results empty")
+                                .isEmpty()
                 )
         );
 
@@ -249,17 +255,20 @@ class KafkaContractTest {
         assertAll("Asserting on the error topic",
                 // One error is produced
                 () -> assertThat(errorResults)
+                        .as("The 'error' topic has 1 message")
                         .hasSize(1),
 
                 // The error has the relevant headers, including the token
                 () -> assertThat(errorResults)
+                        .as("Check the token is in the header")
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
-                        .startsWith("Exception thrown while connecting to the service")
+                        .as("Check the exception message")
+                        .startsWith("Failed to walk path /not/a/resource")
         );
     }
 
@@ -270,7 +279,7 @@ class KafkaContractTest {
         ConsumerSettings<String, ResourceRequest> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, SerDesConfig.userKeyDeserializer(), SerDesConfig.userValueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers())
+                .withBootstrapServers(KafkaInitializer.KAFKA_CONTAINER.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         Probe<ConsumerRecord<String, ResourceRequest>> probe = Consumer

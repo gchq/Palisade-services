@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,16 +89,16 @@ public final class AuditableResourceResponse {
          *
          * @return the composed immutable object
          */
-        public static IUserResponse create() {
+        public static IResourceResponse create() {
             return AuditableResourceResponse::new;
         }
 
         /**
          * Compose with {@code UserResponse}
          */
-        public interface IUserResponse {
+        public interface IResourceResponse {
             /**
-             * Compose value
+             * Create an {@code AuditableResourceResponse} with an {@code AuditErrorMessage} value
              *
              * @param audit value or null
              * @return value object
@@ -109,7 +109,7 @@ public final class AuditableResourceResponse {
 
 
             /**
-             * Compose value
+             * Create an {@code AuditableResourceResponse} with a {@code ResourceResponse} value
              *
              * @param response value or null
              * @return value object
@@ -119,7 +119,7 @@ public final class AuditableResourceResponse {
             }
 
             /**
-             * Compose value
+             * Create an {@code AuditableResourceResponse} with an {@code AuditErrorMessage} value and a {@code ResourceResponse} value
              *
              * @param response          value or null
              * @param auditErrorMessage value or null

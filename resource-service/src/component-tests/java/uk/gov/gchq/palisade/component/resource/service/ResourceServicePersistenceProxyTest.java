@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.resource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.resource.config.R2dbcConfiguration;
+import uk.gov.gchq.palisade.service.resource.exception.NoSuchResourceException;
 import uk.gov.gchq.palisade.service.resource.model.AuditableResourceResponse;
 import uk.gov.gchq.palisade.service.resource.model.ResourceRequest;
 import uk.gov.gchq.palisade.service.resource.repository.ReactivePersistenceLayer;
@@ -84,7 +85,7 @@ class ResourceServicePersistenceProxyTest {
             .withUser(new User().userId("test-user"));
 
     @BeforeEach
-    void setup() throws ExecutionException, InterruptedException {
+    void setup() throws InterruptedException {
         Source.single(FILE_1)
                 .via(persistenceLayer.withPersistenceById(FILE_1.getId()))
                 .via(persistenceLayer.withPersistenceByType(FILE_1.getType()))
@@ -132,9 +133,10 @@ class ResourceServicePersistenceProxyTest {
         assertAll(
                 () -> assertThat(result).hasSize(1),
                 () -> assertThat(result.get(0).getResourceResponse()).isNull(),
-                () -> assertThat(result.get(0).getAuditErrorMessage()).isNotNull(),
-                () -> assertThat(result.get(0).getAuditErrorMessage().getError().getCause().getMessage())
-                        .startsWith("Failed to walk path")
+                () -> assertThat(result.get(0).getAuditErrorMessage().getError())
+                        .isExactlyInstanceOf(NoSuchResourceException.class)
+                        .getCause()
+                        .hasMessageContaining("Failed to walk path /test/resourceId/data2.txt")
         );
     }
 }
