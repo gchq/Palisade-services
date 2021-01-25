@@ -91,7 +91,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
                 if (!assignedGroupPartition) {
-                    LOGGER.error("Failed to find kafka topic-partition assignments");
+                    LOGGER.error("Failed to find kafka group id assignments");
                 }
                 return assignedGroupPartition;
             }
