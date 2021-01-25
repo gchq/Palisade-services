@@ -234,7 +234,7 @@ public class AkkaRunnableGraph {
                                     // Audit the error
                                     .alsoTo(auditErrorSink)
                                     .to(Sink.foreach((ProducerRecord<String, AuditErrorMessage> x) -> {
-                                        throw new RuntimeException(x.value().getError().getMessage());
+                                        throw x.value().getError();
                                     })))
 
                     // We must check for the specific case where the client made a request and all results were redacted.
@@ -267,7 +267,7 @@ public class AkkaRunnableGraph {
 
                                         LOGGER.debug("NoResourcesObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestCommittable.t1(), partition, errorTopic.getName());
                                         // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
-                                        return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
+                                        throw x.value().getError();
                                     })
                                     // Audit the error
                                     .to(auditErrorSink))
