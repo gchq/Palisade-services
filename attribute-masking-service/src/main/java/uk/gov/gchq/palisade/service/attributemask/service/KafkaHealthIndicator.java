@@ -83,9 +83,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .get(1, TimeUnit.SECONDS);
 
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
-
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
@@ -95,11 +93,13 @@ public class KafkaHealthIndicator implements HealthIndicator {
                 }
                 return assignedGroupPartition;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Exception during Kafka health check for group {}", this.groupId, e);
+
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
             Thread.currentThread().interrupt();
-            return false;
+        } catch (ExecutionException | TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
         }
-        return true;
+        return false;
     }
 }
