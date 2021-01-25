@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,31 +29,35 @@ import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
-import uk.gov.gchq.palisade.service.data.service.AuditService;
-import uk.gov.gchq.palisade.service.data.service.KafkaDataService;
+import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
+import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
+import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 
 import java.io.OutputStream;
 
+/**
+ * Controller for data-service.  Provides the front end RESTFul web service for resources that have already been
+ * registered with the Palisade Service.  The request is in the form of information that will uniquely identify the
+ * resource request and will return a data stream of the response data.
+ *
+ */
 @RestController
 @RequestMapping(path = "/")
 public class DataController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
-    private final KafkaDataService kafkaDataService;
-    private final AuditService auditService;
-
-    private static final String EMPTY_TOKEN = "";
-
+    private final AuditableDataService auditableDataService;
+    private final AuditMessageService auditMessageService;
 
     /**
      *
-     * @param kafkaDataService sdf
-     * @param auditService asd
+     * @param auditableDataService service for providing auditable data for the request
+     * @param auditMessageService service for sending audit messages
      */
-    public DataController(final KafkaDataService kafkaDataService, final AuditService auditService) {
-        this.kafkaDataService = kafkaDataService;
-        this.auditService = auditService;
+    public DataController(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
+        this.auditableDataService = auditableDataService;
+        this.auditMessageService = auditMessageService;
     }
 
     /**
@@ -64,28 +68,31 @@ public class DataController {
      */
     @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final DataRequestModel dataRequestModel) {
-        LOGGER.info("Invoking read (chunked): {}", dataRequestModel);
+        LOGGER.debug("Invoking read (chunked): {}", dataRequestModel);
 
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
         StreamingResponseBody stream = null;
 
-        //first given the client information about the request, retrieve the authorised resource information
-        AuditableDataReaderRequest auditableDataReaderRequest = kafkaDataService.authoriseRequest(dataRequestModel).join();
-        AuditErrorMessage auditErrorMessage = auditableDataReaderRequest.getAuditErrorMessage();
+        //first with the client information about the request, retrieve the authorised resource information
+        AuditableDataReaderRequest auditableDataReaderRequest = auditableDataService.authoriseRequest(dataRequestModel).join();
+        AuditErrorMessage firstErrorMessage = auditableDataReaderRequest.getAuditErrorMessage();
 
-        if (auditErrorMessage != null) {
-            LOGGER.error("Error occurred processing the authoriseRequest for  {}", auditErrorMessage);
+        if (firstErrorMessage != null) {
+            LOGGER.error("Error occurred processing the authoriseRequest for  {}", firstErrorMessage);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            auditService.auditMessage(AuditableDataReaderResponse.Builder.create()
-                    .withToken(EMPTY_TOKEN)
-                    .withSuccessMessage(null)
-                    .withAuditErrorMessage(auditErrorMessage));
+            auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), firstErrorMessage)).join();
         } else {
 
             //retrieve the outputstream that links to the resources
             stream = (OutputStream outputStream) -> {
-                AuditableDataReaderResponse auditableDataReaderResponse = kafkaDataService.read(auditableDataReaderRequest, outputStream).join();
-                auditService.auditMessage(auditableDataReaderResponse);
+                AuditableDataReaderResponse auditableDataReaderResponse = auditableDataService.read(auditableDataReaderRequest, outputStream).join();
+                auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), auditableDataReaderResponse.getAuditSuccessMessage())).join();
+
+                AuditErrorMessage secondErrorMessage = auditableDataReaderResponse.getAuditErrorMessage();
+                if (secondErrorMessage != null) {
+                    LOGGER.error("Error occurred processing the authoriseRequest for  {}", secondErrorMessage);
+                    auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), secondErrorMessage)).join();
+                }
             };
         }
         return new ResponseEntity<>(stream, httpStatus);

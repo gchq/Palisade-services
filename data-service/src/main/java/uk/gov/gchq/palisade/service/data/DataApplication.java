@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserConfiguration;
 import uk.gov.gchq.palisade.service.data.config.StdSerialiserPrepopulationFactory;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.service.AuditService;
+import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 
 /**
@@ -44,7 +44,7 @@ public class DataApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataApplication.class);
 
     private final DataReader dataReader;
-    private final AuditService auditService;
+    private final AuditMessageService auditMessageService;
 
     private final StdSerialiserConfiguration serialiserConfiguration;
     private final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner;
@@ -58,13 +58,13 @@ public class DataApplication {
      */
     public DataApplication(
             final DataReader dataReader,
-            final AuditService auditService,
+            final AuditMessageService auditMessageService,
             final StdSerialiserConfiguration serialiserConfiguration,
             final RunnableGraph<Sink<TokenMessagePair, NotUsed>> runner,
             final Materializer materializer) {
 
         this.dataReader = dataReader;
-        this.auditService = auditService;
+        this.auditMessageService = auditMessageService;
         this.serialiserConfiguration = serialiserConfiguration;
         this.runner = runner;
         this.materializer = materializer; }
@@ -89,7 +89,7 @@ public class DataApplication {
     public void initPostConstruct() {
 
         //start the Kafka consumer for sending success and error messages to audit-service
-        auditService.registerRequestSink(runner.run(materializer));
+        auditMessageService.registerRequestSink(runner.run(materializer));
 
         // Add serialiser to the data-service
         LOGGER.debug("Prepopulating using serialiser config: {}", serialiserConfiguration.getClass());
