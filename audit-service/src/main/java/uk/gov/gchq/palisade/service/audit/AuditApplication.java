@@ -28,6 +28,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
 
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
  * Application entrypoint and main process runner
  */
 @SpringBootApplication
-@EnableConfigurationProperties({ConsumerTopicConfiguration.class})
+@EnableConfigurationProperties({ConsumerTopicConfiguration.class, AuditServiceConfigProperties.class})
 public class AuditApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditApplication.class);
 

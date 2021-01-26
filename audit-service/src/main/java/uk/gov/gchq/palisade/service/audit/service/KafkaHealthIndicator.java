@@ -18,8 +18,6 @@ package uk.gov.gchq.palisade.service.audit.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.clients.admin.DescribeTopicsResult;
-import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,16 +27,11 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.audit.stream.ProducerTopicConfiguration;
-import uk.gov.gchq.palisade.service.audit.stream.ProducerTopicConfiguration.Topic;
-
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 /**
  * Kafka health indicator. Check that the producer group can be accessed and is registered with the cluster,
@@ -56,7 +49,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
      * Requires the AdminClient to interact with Kafka
      *
      * @param groupId     of the cluster
-     * @param adminClient        of the cluster
+     * @param adminClient of the cluster
      */
     public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId, final AdminClient adminClient) {
         this.adminClient = adminClient;

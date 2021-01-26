@@ -28,11 +28,14 @@ import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import com.typesafe.config.Config;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
@@ -40,8 +43,13 @@ import uk.gov.gchq.palisade.service.audit.stream.ProducerTopicConfiguration.Topi
 import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.audit.stream.StreamComponents;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
  * Configuration for all kafka connections for the application
@@ -64,11 +72,13 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+    Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem,
+                                                                                                     final ConsumerTopicConfiguration configuration,
+                                                                                                     final AuditServiceConfigProperties configProperties) {
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = SUCCESS_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.successKeyDeserializer(),
-                SerDesConfig.successValueDeserializer());
+                SerDesConfig.successValueDeserializer(configProperties));
 
         Topic successTopic = configuration.getTopics().get("success-topic");
         Subscription successSubscription = Optional.ofNullable(successTopic.getAssignment())
@@ -95,11 +105,13 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Source<CommittableMessage<String, AuditErrorMessage>, Control> errorCommittableRequestSource(final ActorSystem actorSystem, final ConsumerTopicConfiguration configuration) {
+    Source<CommittableMessage<String, AuditErrorMessage>, Control> errorCommittableRequestSource(final ActorSystem actorSystem,
+                                                                                                 final ConsumerTopicConfiguration configuration,
+                                                                                                 final AuditServiceConfigProperties configProperties) {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ERROR_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.errorKeyDeserializer(),
-                SerDesConfig.errorValueDeserializer());
+                SerDesConfig.errorValueDeserializer(configProperties));
 
         Topic errorTopic = configuration.getTopics().get("error-topic");
         Subscription errorSubscription = Optional.ofNullable(errorTopic.getAssignment())
@@ -117,5 +129,14 @@ public class AkkaComponentsConfig {
     @Bean
     Sink<Committable, CompletionStage<Done>> committableSink(final ActorSystem actorSystem) {
         return OUTPUT_COMPONENTS.committableSink(OUTPUT_COMPONENTS.committerSettings(actorSystem));
+    }
+
+    @Bean
+    AdminClient adminClient(final ActorSystem actorSystem) {
+        final List<? extends Config> servers = actorSystem.settings().config().getConfigList("akka.discovery.config.services.kafka.endpoints");
+        final String bootstrap = servers.stream()
+                .map(config -> String.format("%s:%d", config.getString("host"), config.getInt("port")))
+                .collect(Collectors.joining(","));
+        return AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, bootstrap));
     }
 }

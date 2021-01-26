@@ -23,8 +23,10 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
@@ -100,7 +102,7 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
@@ -109,8 +111,8 @@ public final class SerDesConfig {
                 try {
                     String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ISO_INSTANT);
-                    File classpath = new File(System.getProperty("java.class.path"));
-                    File parent = classpath.getAbsoluteFile().getParentFile();
+                    File directory = new File(configProperties.getErrorDirectory());
+                    File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, fileName);
                     FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
@@ -166,15 +168,15 @@ public final class SerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content (AuditSuccessMessage)
      */
-    public static Deserializer<AuditSuccessMessage> successValueDeserializer() {
+    public static Deserializer<AuditSuccessMessage> successValueDeserializer(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
                 try {
-                    File classpath = new File(System.getProperty("java.class.path"));
-                    File parent = classpath.getAbsoluteFile().getParentFile();
+                    File directory = new File(configProperties.getErrorDirectory());
+                    File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ISO_INSTANT));
                     FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());

@@ -147,6 +147,8 @@ public class ContractTestData {
             .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, GOOD_SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
     public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> BAD_SUCCESS_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, BAD_SUCCESS_FACTORY_NODE.apply(i), REQUEST_HEADERS));
-    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> BAD_RECORD_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> BAD_ERROR_MESSAGE_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
             .map(i -> new ProducerRecord<String, JsonNode>("error", 0, null, BAD_FACTORY_NODE.apply(i), REQUEST_HEADERS));
+    public static final Supplier<Stream<ProducerRecord<String, JsonNode>>> BAD_SUCCESS_MESSAGE_NODE_FACTORY = () -> Stream.iterate(0, i -> i + 1)
+            .map(i -> new ProducerRecord<String, JsonNode>("success", 0, null, BAD_FACTORY_NODE.apply(i), REQUEST_HEADERS));
 }

@@ -58,9 +58,9 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 
-import uk.gov.gchq.palisade.contract.audit.BadRequest;
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
@@ -68,12 +68,17 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.audit.stream.PropertiesConfigurer;
 
+import java.io.File;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -123,6 +128,8 @@ class KafkaContractTest {
     private Materializer akkaMaterializer;
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
+    @Autowired
+    private AuditServiceConfigProperties auditServiceConfigProperties;
     @SpyBean
     private AuditService auditService;
 
@@ -238,10 +245,10 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testFailedErrorDeserialization() {
+    void testFailedErrorDeserialization() throws InterruptedException {
         // Add a message to the 'error' topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
-        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_RECORD_NODE_FACTORY.get().limit(1L);
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_ERROR_MESSAGE_NODE_FACTORY.get().limit(1L);
 
         // When - we write to the input
         ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
@@ -251,7 +258,37 @@ class KafkaContractTest {
         Source.fromJavaStream(() -> requests)
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
 
-        Mockito.verify(auditService, Mockito.timeout(3000).times(1)).audit(anyString(), any());
+        TimeUnit.SECONDS.sleep(3);
+
+        // Then check an "Error-..." file has been created
+        Set<File> fileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith("Error")).collect(Collectors.toSet());
+
+        assertThat(fileSet).as("Test that 1 `Error` file has been created").hasSize(1);
+    }
+
+    @Test
+    @DirtiesContext
+    void testFailedSuccessDeserialization() throws InterruptedException {
+        // Add a message to the 'error' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_SUCCESS_MESSAGE_NODE_FACTORY.get().limit(1L);
+
+        // When - we write to the input
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+
+        Source.fromJavaStream(() -> requests)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+
+        TimeUnit.SECONDS.sleep(3);
+
+        // Then check an "Error-..." file has been created
+        Set<File> fileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith("Success")).collect(Collectors.toSet());
+
+        assertThat(fileSet).as("Test that 1 `Success` file has been created").hasSize(1);
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
