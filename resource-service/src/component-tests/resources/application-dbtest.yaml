@@ -11,23 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 spring:
   autoconfigure:
     exclude:
-    - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-    - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-  data:
-    redis:
-      repositories:
-        enabled: false
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   datasource:
-    url: jdbc:h2:mem:testdb
-    username:
-    password:
-    initialization-mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+    url: r2dbc:h2:file:./resource-cache-h2;LOCK_TIMEOUT=10000

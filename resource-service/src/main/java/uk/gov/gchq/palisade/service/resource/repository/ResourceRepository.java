@@ -15,44 +15,76 @@
  */
 package uk.gov.gchq.palisade.service.resource.repository;
 
+import akka.NotUsed;
+import akka.stream.javadsl.Source;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import uk.gov.gchq.palisade.service.resource.domain.ResourceEntity;
-import uk.gov.gchq.palisade.service.resource.service.FunctionalIterator;
 
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Low-level requirement for a database used for persistence, see {@link ResourceEntity}
  * for more details
  */
-public interface ResourceRepository extends CrudRepository<ResourceEntity, String> {
+public interface ResourceRepository extends ReactiveCrudRepository<ResourceEntity, String> {
 
     /**
      * Find resource in backing store by ResourceId
      *
      * @param resourceId the resource id of the resource in the backing store
-     * @return {@link Iterable} value of ResourceEntity stored in the backing store
+     * @return {@link Mono} value of ResourceEntity stored in the backing store
      */
-    Optional<ResourceEntity> findByResourceId(String resourceId);
+    Mono<ResourceEntity> findOneByResourceId(String resourceId);
 
     /**
-     * Returns an {@link Iterator} of Resources from a backing store by ParentId
+     * Converts the {@code findOneByResourceId} result to an akka {@link Source}
      *
-     * @param parentId the parent id of the Resource
-     * @return an {@link Iterator} of ResourceEntity resources from the backing store
+     * @param resourceId the id of the Resource
+     * @return a {@link Source} of the returned {@link ResourceEntity}
      */
-    default FunctionalIterator<ResourceEntity> iterateFindAllByParentId(String parentId) {
-        return FunctionalIterator.fromIterator(findAllByParentId(parentId).iterator());
+    default Source<ResourceEntity, NotUsed> streamFindOneByResourceId(String resourceId) {
+        return Source.fromPublisher(this.findOneByResourceId(resourceId));
     }
 
     /**
-     * Iterator of a list of resources by parentId
+     * Checks if there is a {@link ResourceEntity} for a resource id
+     *
+     * @param resourceId the id of the Resource
+     * @return a {@link CompletableFuture} of a {@link Boolean} if a ResourceEntity is returned
+     */
+    default CompletableFuture<Boolean> futureExistsByResourceId(String resourceId) {
+        return this.findOneByResourceId(resourceId).hasElement().toFuture();
+    }
+
+    /**
+     * A {@link Flux} of resources by parentId
      *
      * @param parentId the parent id of the Resource
-     * @return an {@link Iterable} of ResourceEntity resources from the backing store
+     * @return a {@link Flux} of ResourceEntity resources from the backing store
      */
-    Iterable<ResourceEntity> findAllByParentId(String parentId);
+    Flux<ResourceEntity> findAllByParentId(String parentId);
 
+    /**
+     * Converts the {@code findAllByParentId} result to an akka {@link Source}
+     *
+     * @param parentId the parent id of the Resource
+     * @return a {@link Source} of the returned {@link ResourceEntity}s
+     */
+    default Source<ResourceEntity, NotUsed> streamFindAllByParentId(String parentId) {
+        return Source.fromPublisher(this.findAllByParentId(parentId));
+    }
+
+    /**
+     * Saves (aka inserts) the object into the backing store via a {@link CrudRepository}
+     *
+     * @param entity Information about the resource Object
+     * @return the {@link ResourceEntity} that was saved in the backing store
+     */
+    default CompletableFuture<ResourceEntity> futureSave(ResourceEntity entity) {
+        return this.save(entity).toFuture();
+    }
 }

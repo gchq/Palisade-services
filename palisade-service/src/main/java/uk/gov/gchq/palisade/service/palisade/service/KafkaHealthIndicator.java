@@ -25,9 +25,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-import uk.gov.gchq.palisade.service.palisade.stream.ProducerTopicConfiguration;
-
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -43,27 +41,24 @@ import java.util.concurrent.TimeoutException;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
+    private static final String TOPIC_NAME = "request";
     private final AdminClient adminClient;
-    private final ProducerTopicConfiguration topicConfiguration;
-    private List<String> topicNames;
 
     /**
      * Requires the AdminClient to interact with Kafka
      *
-     * @param adminClient        of the cluster
-     * @param topicConfiguration contains the producer topic configuration
+     * @param adminClient of the cluster
      */
-    public KafkaHealthIndicator(final AdminClient adminClient, final ProducerTopicConfiguration topicConfiguration) {
+    public KafkaHealthIndicator(final AdminClient adminClient) {
         this.adminClient = adminClient;
-        this.topicConfiguration = topicConfiguration;
     }
 
     @Override
     public Health getHealth(final boolean includeDetails) {
         return Optional.of(performCheck())
                 .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("topics", topicNames).build())
-                .orElseGet(() -> Health.down().withDetail("topics", topicNames).build());
+                .map(up -> Health.up().withDetail("topic", TOPIC_NAME).build())
+                .orElseGet(() -> Health.down().withDetail("topic", TOPIC_NAME).build());
     }
 
     @Override
@@ -75,16 +70,13 @@ public class KafkaHealthIndicator implements HealthIndicator {
     }
 
     private boolean performCheck() {
-        this.topicNames = List.of(topicConfiguration.getTopics().get("output-topic").getName(), topicConfiguration.getTopics().get("error-topic").getName());
         try {
-            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(topicNames).all().get(1, TimeUnit.SECONDS);
-            Boolean requestTopic = topicsResult.get("request").name().equals(topicNames.get(0));
-            Boolean errorTopic = topicsResult.get("error").name().equals(topicNames.get(1));
 
-            return errorTopic && requestTopic;
+            Map<String, TopicDescription> topicsResult = adminClient.describeTopics(Collections.singleton(TOPIC_NAME)).all().get(1, TimeUnit.SECONDS);
+            return topicsResult.get(TOPIC_NAME).name().equals(TOPIC_NAME);
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", topicNames, e);
+            LOGGER.warn("Timeout during Kafka health check for group {}", TOPIC_NAME, e);
             Thread.currentThread().interrupt();
             return false;
         }

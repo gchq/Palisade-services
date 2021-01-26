@@ -143,4 +143,13 @@ public final class SerDesConfig {
             }
         };
     }
+
+    /**
+     * Kafka value serialiser for downstream messages going out as output
+     *
+     * @return an appropriate value serialiser for the topic's message content
+     */
+    public static Serializer<byte[]> passthroughValueSerializer() {
+        return (String ignored, byte[] bytes) -> bytes;
+    }
 }

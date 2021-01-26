@@ -79,15 +79,15 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
     @BeforeEach
     void setup() {
         // Add the system resource to the policy service
-        cacheProxy.setResourceRules(TXT_SYSTEM, TXT_POLICY);
+        cacheProxy.setResourceRules(TXT_SYSTEM.getId(), TXT_POLICY);
 
         // Add the directory resources to the policy service
-        cacheProxy.setResourceRules(JSON_DIRECTORY, JSON_POLICY);
-        cacheProxy.setResourceRules(SECRET_DIRECTORY, SECRET_POLICY);
+        cacheProxy.setResourceRules(JSON_DIRECTORY.getId(), JSON_POLICY);
+        cacheProxy.setResourceRules(SECRET_DIRECTORY.getId(), SECRET_POLICY);
 
         // Add the file resources to the policy service
         for (FileResource fileResource : FILE_RESOURCES) {
-            cacheProxy.setResourceRules(fileResource, PASS_THROUGH_POLICY);
+            cacheProxy.setResourceRules(fileResource.getId(), PASS_THROUGH_POLICY);
         }
     }
 
@@ -113,7 +113,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Rules<LeafResource>> resourceRules = cacheProxy.getResourceRules(resource);
+            Optional<Rules<LeafResource>> resourceRules = cacheProxy.getResourceRules(resource.getId());
 
             // Then
             assertThat(resourceRules)
@@ -127,7 +127,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Rules<Serializable>> recordRules = cacheProxy.getRecordRules(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist")));
+        Optional<Rules<Serializable>> recordRules = cacheProxy.getRecordRules("does not exist");
 
         // Then
         assertThat(recordRules).isEmpty();
@@ -139,15 +139,15 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         final SystemResource systemResource = new SystemResource().id("/txt");
         final Rules<LeafResource> policy = new Rules<LeafResource>()
                 .addRule("Resource serialised format is txt", new IsTextResourceRule());
-        cacheProxy.setResourceRules(systemResource, policy);
+        cacheProxy.setResourceRules(systemResource.getId(), policy);
 
         //Then I update the Policies resourceLevelRules
         final Rules<LeafResource> newPolicy = new Rules<LeafResource>()
                 .addRule("NewSerialisedFormat", new IsTextResourceRule());
-        cacheProxy.setResourceRules(systemResource, newPolicy);
+        cacheProxy.setResourceRules(systemResource.getId(), newPolicy);
 
         // When
-        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(systemResource);
+        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(systemResource.getId());
 
         // Then the returned policy should have the updated resource rules
         assertThat(recordRules).isPresent();
@@ -157,13 +157,13 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
-        assertThat(cacheProxy.getResourceRules((ACCESSIBLE_JSON_TXT_FILE))).get().isNotNull();
+        assertThat(cacheProxy.getResourceRules((ACCESSIBLE_JSON_TXT_FILE.getId()))).get().isNotNull();
 
         // Given - a sufficient amount of time has passed
         TimeUnit.SECONDS.sleep(1);
 
         // When - an old entry is requested
-        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+        Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
         assertThat(recordRules).isEmpty();

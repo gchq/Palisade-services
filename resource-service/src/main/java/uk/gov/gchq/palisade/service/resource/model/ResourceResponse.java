@@ -82,7 +82,6 @@ public final class ResourceResponse {
         return resourceId;
     }
 
-
     @Generated
     public Context getContext() throws JsonProcessingException {
         return MAPPER.treeToValue(context, Context.class);
@@ -91,6 +90,11 @@ public final class ResourceResponse {
     @Generated
     public User getUser() throws JsonProcessingException {
         return MAPPER.treeToValue(user, User.class);
+    }
+
+    @Generated
+    public LeafResource getResource() {
+        return resource;
     }
 
     /**

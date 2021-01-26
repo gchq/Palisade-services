@@ -29,10 +29,6 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
   data:
     redis:
       repositories:
@@ -41,9 +37,6 @@ spring:
 server:
   port: 8086
 
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -52,6 +45,11 @@ management:
         include: "*"
   endpoint:
     shutdown:
+      enabled: true
+  health:
+    redis:
+      enabled: false
+    kafka:
       enabled: true
 
 population:
@@ -70,3 +68,7 @@ web:
 async:
   webMvcTimeout: 60000
   corePoolSize: 6
+
+logging:
+  level:
+    org.apache.kafka: WARN

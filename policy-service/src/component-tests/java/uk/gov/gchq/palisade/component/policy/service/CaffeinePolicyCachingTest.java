@@ -32,7 +32,6 @@ import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.resource.StubResource;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
-import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.config.ApplicationConfiguration;
@@ -76,15 +75,15 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @BeforeEach
     void setup() {
         // Add the system resource to the policy service
-        policyService.setResourceRules(TXT_SYSTEM, TXT_POLICY);
+        policyService.setResourceRules(TXT_SYSTEM.getId(), TXT_POLICY);
 
         // Add the directory resources to the policy service
-        policyService.setResourceRules(JSON_DIRECTORY, JSON_POLICY);
-        policyService.setResourceRules(SECRET_DIRECTORY, SECRET_POLICY);
+        policyService.setResourceRules(JSON_DIRECTORY.getId(), JSON_POLICY);
+        policyService.setResourceRules(SECRET_DIRECTORY.getId(), SECRET_POLICY);
 
         // Add the file resources to the policy service
         for (FileResource fileResource : FILE_RESOURCES) {
-            policyService.setResourceRules(fileResource, PASS_THROUGH_POLICY);
+            policyService.setResourceRules(fileResource.getId(), PASS_THROUGH_POLICY);
         }
     }
 
@@ -106,7 +105,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
 
         for (Resource resource : FILE_RESOURCES) {
             // When
-            Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(resource);
+            Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(resource.getId());
 
             // Then
             assertThat(recordRules).isPresent();
@@ -121,7 +120,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         // Given - the requested resource is not added
 
         // When
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(new FileResource().id("does not exist").type("null").serialisedFormat("null").parent(new SystemResource().id("also does not exist")));
+        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules("does not exist");
 
         // Then
         assertThat(recordRules).isEmpty();
@@ -133,15 +132,18 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheMaxSize() {
         /// Given - the cache is overfilled
-        Function<Integer, Resource> makeResource = i -> new StubResource(i.toString(), i.toString(), i.toString(), new SimpleConnectionDetail().serviceName(i.toString()));
+        Function<Integer, Resource> makeResource = i -> new StubResource(
+                i.toString(), i.toString(), i.toString(),
+                new SimpleConnectionDetail().serviceName(i.toString())
+        );
         Function<Integer, Rules<LeafResource>> makeRule = i -> new Rules<LeafResource>().addRule(i.toString(), new PassThroughRule<>());
         for (int count = 0; count <= 100; ++count) {
-            policyService.setResourceRules(makeResource.apply(count), makeRule.apply(count));
+            policyService.setResourceRules(makeResource.apply(count).getId(), makeRule.apply(count));
         }
 
         // When - we try to get the first (now-evicted) entry
         forceCleanUp();
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(makeResource.apply(0));
+        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(makeResource.apply(0).getId());
 
         // Then - it has been evicted
         assertThat(recordRules).isEmpty();
@@ -155,14 +157,14 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testCacheTtl() throws InterruptedException {
         // Given - the requested resource has policies available
-        assertThat(policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE)).isPresent();
+        assertThat(policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId())).isPresent();
         // Given - a sufficient amount of time has passed
 
         TimeUnit.SECONDS.sleep(1);
         forceCleanUp();
 
         // When - an old entry is requested
-        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
+        Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
         assertThat(recordRules).isEmpty();
