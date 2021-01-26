@@ -21,7 +21,7 @@ service:
 
 image:
   name: filtered-resource-service
-  tag: SNAPSHOT-d5003ef
+  tag: SNAPSHOT-168e76b
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 
