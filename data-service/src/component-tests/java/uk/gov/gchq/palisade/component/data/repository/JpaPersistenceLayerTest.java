@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.component.data.repository;
 
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +34,6 @@ import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ContextConfiguration(classes = {ApplicationConfiguration.class, TestAsyncConfiguration.class})
@@ -83,6 +72,7 @@ class JpaPersistenceLayerTest {
             new Rules<>()
     );
 
+    /*
     @Test
     void testSpringDiscoversJpaPersistenceLayer() {
         // When the spring application is started
@@ -104,6 +94,8 @@ class JpaPersistenceLayerTest {
                 .isEmpty();
     }
 
+
+     */
     /**
      * @implNote
      * Because of the CompletableFuture, we will be scheduling a job in Spring-managed test within the scope of a Spring transaction.
@@ -111,6 +103,7 @@ class JpaPersistenceLayerTest {
      * To fix this, for this specific case (synchronous save, then asynchronous find), we must disable the test transaction.
      * Similar tests (asynchronous save, then synchronous find) are unaffected by this quirk (eg. the dual to this data store in the attribute-masking-service).
      */
+    /*
     @Transactional(TxType.NEVER)
     @Test
     void testGetReturnsAuthorisedRequest() {
@@ -130,4 +123,6 @@ class JpaPersistenceLayerTest {
                         .get()
                         .isEqualTo(entity));
     }
+
+     */
 }
