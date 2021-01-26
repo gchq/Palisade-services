@@ -1,5 +1,19 @@
 uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 +- com.google.code.gson:gson:jar:2.8.5:compile
++- com.typesafe.akka:akka-stream_2.13:jar:2.6.8:compile
+|  +- org.scala-lang:scala-library:jar:2.13.1:compile
+|  +- com.typesafe.akka:akka-actor_2.13:jar:2.6.8:compile
+|  |  +- com.typesafe:config:jar:1.4.0:compile
+|  |  \- org.scala-lang.modules:scala-java8-compat_2.13:jar:0.9.0:compile
+|  +- com.typesafe.akka:akka-protobuf-v3_2.13:jar:2.6.8:compile
+|  +- org.reactivestreams:reactive-streams:jar:1.0.3:compile
+|  \- com.typesafe:ssl-config-core_2.13:jar:0.4.1:compile
+|     \- org.scala-lang.modules:scala-parser-combinators_2.13:jar:1.1.2:compile
++- com.typesafe.akka:akka-stream-kafka_2.13:jar:2.0.4:compile
+|  \- org.scala-lang.modules:scala-collection-compat_2.13:jar:2.1.6:compile
++- com.typesafe.akka:akka-slf4j_2.13:jar:2.6.8:compile
+|  \- org.slf4j:slf4j-api:jar:1.7.30:compile
++- com.typesafe.akka:akka-discovery_2.13:jar:2.6.8:compile
 +- org.springframework.boot:spring-boot-starter-actuator:jar:2.3.1.RELEASE:compile
 |  +- org.springframework.boot:spring-boot-starter:jar:2.3.1.RELEASE:compile
 |  |  +- org.springframework.boot:spring-boot:jar:2.3.1.RELEASE:compile
@@ -72,7 +86,6 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |     |  \- io.netty:netty-codec:jar:4.1.50.Final:compile
 |     +- io.netty:netty-transport:jar:4.1.50.Final:compile
 |     \- io.projectreactor:reactor-core:jar:3.3.6.RELEASE:compile
-|        \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
 +- uk.gov.gchq.palisade:hadoop-reader:jar:0.5.0-SNAPSHOT:compile
 |  +- ch.qos.logback:logback-core:jar:1.2.3:compile
 |  +- ch.qos.logback:logback-classic:jar:1.2.3:compile
@@ -126,8 +139,7 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |     +- org.apache.commons:commons-text:jar:1.4:compile
 |     +- org.slf4j:slf4j-log4j12:jar:1.7.30:compile
 |     +- org.apache.avro:avro:jar:1.7.7:compile
-|     |  +- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
-|     |  \- org.xerial.snappy:snappy-java:jar:1.0.5:compile
+|     |  \- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
 |     +- com.google.re2j:re2j:jar:1.1:compile
 |     +- com.google.protobuf:protobuf-java:jar:3.11.4:compile
 |     +- org.apache.hadoop:hadoop-auth:jar:3.2.1:compile
@@ -191,17 +203,24 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |  |  \- org.springframework:spring-jcl:jar:5.2.7.RELEASE:compile
 |  +- org.springframework:spring-test:jar:5.2.7.RELEASE:test
 |  \- org.xmlunit:xmlunit-core:jar:2.7.0:test
-\- org.testcontainers:testcontainers:jar:1.14.3:test
-   +- junit:junit:jar:4.13:test
-   |  \- org.hamcrest:hamcrest-core:jar:2.2:test
-   +- org.slf4j:slf4j-api:jar:1.7.30:compile
-   +- org.jetbrains:annotations:jar:19.0.0:test
-   +- org.apache.commons:commons-compress:jar:1.20:compile
-   +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
-   +- org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test
-   +- org.rnorth:tcp-unix-socket-proxy:jar:1.0.2:test
-   |  +- com.kohlschutter.junixsocket:junixsocket-native-common:jar:2.0.4:test
-   |  |  \- org.scijava:native-lib-loader:jar:2.0.2:test
-   |  \- com.kohlschutter.junixsocket:junixsocket-common:jar:2.0.4:test
-   \- net.java.dev.jna:jna-platform:jar:5.5.0:test
-      \- net.java.dev.jna:jna:jar:5.5.0:test
++- org.testcontainers:testcontainers:jar:1.14.3:test
+|  +- junit:junit:jar:4.13:test
+|  |  \- org.hamcrest:hamcrest-core:jar:2.2:test
+|  +- org.jetbrains:annotations:jar:19.0.0:test
+|  +- org.apache.commons:commons-compress:jar:1.20:compile
+|  +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+|  +- org.rnorth.visible-assertions:visible-assertions:jar:2.1.2:test
+|  +- org.rnorth:tcp-unix-socket-proxy:jar:1.0.2:test
+|  |  +- com.kohlschutter.junixsocket:junixsocket-native-common:jar:2.0.4:test
+|  |  |  \- org.scijava:native-lib-loader:jar:2.0.2:test
+|  |  \- com.kohlschutter.junixsocket:junixsocket-common:jar:2.0.4:test
+|  \- net.java.dev.jna:jna-platform:jar:5.5.0:test
+|     \- net.java.dev.jna:jna:jar:5.5.0:test
++- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.8:test
+|  \- com.typesafe.akka:akka-testkit_2.13:jar:2.6.8:test
++- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.0.4:test
++- org.testcontainers:kafka:jar:1.14.3:test
+\- org.apache.kafka:kafka-clients:jar:2.5.0:compile
+   +- com.github.luben:zstd-jni:jar:1.4.4-7:compile
+   +- org.lz4:lz4-java:jar:1.7.1:compile
+   \- org.xerial.snappy:snappy-java:jar:1.1.7.3:compile
