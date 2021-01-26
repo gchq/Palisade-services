@@ -273,10 +273,14 @@ class KafkaContractTest {
         TimeUnit.SECONDS.sleep(2);
 
         // Then check an "Error-..." file has been created
-        Set<File> fileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-                .filter(file -> file.getName().startsWith("Error")).collect(Collectors.toSet());
+        Set<File> expectedFileSet = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Error"))
+                .collect(Collectors.toSet());
+        Set<File> actualFileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith("Error"))
+                .collect(Collectors.toSet());
 
-        assertThat(fileSet).as("Test that 1 `Error` file has been created").hasSize(1);
+        assertThat(actualFileSet).as("Test that an `Error` file has been created").containsAll(expectedFileSet);
     }
 
     @Test
@@ -297,10 +301,14 @@ class KafkaContractTest {
         TimeUnit.SECONDS.sleep(2);
 
         // Then check an "Success-..." file has been created
+        Set<File> expectedFileSet = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Success"))
+                .collect(Collectors.toSet());
         Set<File> fileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-                .filter(file -> file.getName().startsWith("Success")).collect(Collectors.toSet());
+                .filter(file -> file.getName().startsWith("Success"))
+                .collect(Collectors.toSet());
 
-        assertThat(fileSet).as("Test that 1 `Success` file has been created").hasSize(1);
+        assertThat(fileSet).as("Test that a `Success` file has been created").containsAll(expectedFileSet);
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

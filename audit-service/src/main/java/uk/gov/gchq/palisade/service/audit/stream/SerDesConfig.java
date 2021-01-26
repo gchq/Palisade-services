@@ -100,6 +100,7 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
+     * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
      */
     public static Deserializer<AuditErrorMessage> errorValueDeserializer(final AuditServiceConfigProperties configProperties) {
@@ -166,6 +167,7 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
+     * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditSuccessMessage)
      */
     public static Deserializer<AuditSuccessMessage> successValueDeserializer(final AuditServiceConfigProperties configProperties) {
