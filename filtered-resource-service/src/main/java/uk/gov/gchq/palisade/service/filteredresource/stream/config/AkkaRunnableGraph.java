@@ -45,6 +45,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
+import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.service.filteredresource.exception.NoResourcesObservedException;
+import uk.gov.gchq.palisade.service.filteredresource.exception.NoStartMarkerObservedException;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
@@ -63,6 +66,7 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfigu
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaComponentsConfig.PartitionedOffsetSourceFactory;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,6 +79,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
     private static final Integer PARALLELISM = 1;
+    private static final String UNKNOWN = "unknown";
 
     /**
      * Factory for Akka {@link Source} of {@link FilteredResourceRequest}.
@@ -111,6 +116,7 @@ public class AkkaRunnableGraph {
         Sink<Pair<FilteredResourceRequest, CommittableOffset>, CompletionStage<Done>> create(String token);
     }
 
+
     @Bean
     WebSocketEventService websocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
@@ -136,11 +142,16 @@ public class AkkaRunnableGraph {
 
     @Bean
     Function1<Throwable, Directive> supervisor() {
-        return ex -> Supervision.resumingDecider().apply(ex);
+        return (Throwable ex) -> {
+            LOGGER.error("Fatal error during stream processing, element will be dropped: ", ex);
+            return Supervision.resumingDecider().apply(ex);
+        };
     }
 
     @Bean
-    FilteredResourceSourceFactory filteredResourceSourceFactory(final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory) {
+    FilteredResourceSourceFactory filteredResourceSourceFactory(final PartitionedOffsetSourceFactory<String, FilteredResourceRequest> sourceFactory,
+                                                                final ProducerTopicConfiguration topicConfiguration,
+                                                                final Sink<ProducerRecord<String, AuditErrorMessage>, CompletionStage<Done>> auditErrorSink) {
         return (String token, Long offset) -> {
             // Set-up some objects to hold a minimal amount of state for this stream
             // These are mostly used for sanity checks
@@ -148,6 +159,9 @@ public class AkkaRunnableGraph {
             final AtomicBoolean observedStart = new AtomicBoolean(false);
             // Has a stream resource message been seen
             final AtomicBoolean observedResource = new AtomicBoolean(false);
+            // Get error topic from config
+            Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
+            final int partition = Token.toPartition(token, errorTopic.getPartitions());
 
             // Connect to the stream of resources using this token and the offset from the persistence layer
             return sourceFactory.create(token, offset)
@@ -162,14 +176,14 @@ public class AkkaRunnableGraph {
                                 .map(StreamMarker::valueOf);
                         Optional<FilteredResourceRequest> request = Optional.ofNullable(message.record().value());
                         // Return each of the useful extracted objects, including the committable which will be passed to the audit service
-                        return new Tuple4<>(messageToken, streamMarker, request, message.committableOffset());
+                        return new Tuple4<>(messageToken, streamMarker, request, message);
                     })
 
                     // Filter for just this token's result set
-                    .filter(tokenMarkerRequestCommittable -> token.equals(tokenMarkerRequestCommittable.t1()))
+                    .filter(tokenMarkerRequestMessage -> token.equals(tokenMarkerRequestMessage.t1()))
 
                     // Drop everything after the END message
-                    .takeWhile(tokenMarkerRequestCommittable -> tokenMarkerRequestCommittable.t2()
+                    .takeWhile(tokenMarkerRequestMessage -> tokenMarkerRequestMessage.t2()
                                     .filter(StreamMarker.END::equals)
                                     .isEmpty(),
                             true) // include END
@@ -177,41 +191,93 @@ public class AkkaRunnableGraph {
                     // We may have got an offset from persistence, in which case the stream has probably seeked to the START message.
                     // If not, the first element in the stream after filtering should still be the START message.
                     // This assumes that the START message, if present, is the first message (kafka has kept our messages ordered properly).
-                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableOffset> tokenMarkerRequestCommittable) -> {
-                        if (!observedStart.get()) {
-                            tokenMarkerRequestCommittable.t2()
-                                    .filter(StreamMarker.START::equals)
-                                    // Either a START message, or something else (resource or END marker)
-                                    .ifPresentOrElse(
-                                            startMarker -> observedStart.set(true),
-                                            () -> LOGGER.error("Never observed START marker")
-                                    );
-                        }
-                        return tokenMarkerRequestCommittable;
-                    })
+                    .alsoTo(
+                            Flow.<Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>>>create()
+                                    .filter(tokenMarkerRequestMessage -> tokenMarkerRequestMessage.t2()
+                                            // Filter the results for a Start of Stream marker
+                                            .filter(StreamMarker.START::equals)
+                                            .map((StreamMarker startMarker) -> {
+                                                observedStart.set(true);
+                                                return false;
+                                            })
+                                            // If we haven't seen the start message then we want to audit it
+                                            .orElse(!observedStart.get()))
+
+                                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>> tokenMarkerRequestMessage) -> {
+                                        // Only audit once, not for each resource in which the Start Marker is missing
+                                        observedStart.set(true);
+
+                                        // Extract the headers
+                                        Headers headers = tokenMarkerRequestMessage.t4().record().headers();
+                                        // Extract the FilteredResourceRequest from the optional
+                                        return tokenMarkerRequestMessage.t3()
+                                                .map((FilteredResourceRequest filteredResourceRequest) -> {
+
+                                                    // Build the error message
+                                                    AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create().withUserId(filteredResourceRequest.getUserId())
+                                                            .withResourceId(filteredResourceRequest.getResourceId())
+                                                            .withContextNode(filteredResourceRequest.getContextNode())
+                                                            .withAttributes(Collections.emptyMap())
+                                                            .withError(new NoStartMarkerObservedException("No Start Marker was observed for token: " + tokenMarkerRequestMessage.t1()));
+
+                                                    // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
+                                                    LOGGER.debug("NoStartMarkerObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestMessage.t1(), partition, errorTopic.getName());
+                                                    return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
+                                                });
+                                    })
+
+                                    // If we reach this error state with an end message, just ignore it
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+
+                                    // Limit the flow to run once
+                                    // Audit the error
+                                    .alsoTo(auditErrorSink)
+                                    .to(Sink.foreach((ProducerRecord<String, AuditErrorMessage> tokenAndErrorMessage) -> {
+                                        throw new RuntimeException(tokenAndErrorMessage.value().getError());
+                                    })))
 
                     // We must check for the specific case where the client made a request and all results were redacted.
                     // This is indicative of the client querying something forbidden, so it is uniquely audited as an error.
-                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableOffset> tokenMarkerRequestCommittable) -> {
-                        if (!observedResource.get()) {
-                            // Either a masked resource or a stream marker (START or END)
-                            tokenMarkerRequestCommittable.t3().ifPresentOrElse(
-                                    resource -> observedResource.set(true),
-                                    () -> tokenMarkerRequestCommittable.t2()
-                                            .filter(StreamMarker.END::equals)
-                                            // Either an END marker or a START marker
-                                            // .ifPresentOrElse => or else START marker, which should be ignored
-                                            .ifPresent(endMarker -> LOGGER.error("Never observed any resources"))
-                            );
-                        }
-                        return tokenMarkerRequestCommittable;
-                    })
+                    .alsoTo(
+                            Flow.<Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>>>create()
+                                    .filter(tokenMarkerRequestMessage -> tokenMarkerRequestMessage.t3()
+                                            // If there are resources, set the observedResource boolean to true
+                                            .map((FilteredResourceRequest request) -> {
+                                                observedResource.set(true);
+                                                return false;
+                                            })
+                                            // If we haven't seen any resources, but recieve the end of stream message, then audit it
+                                            .orElse(tokenMarkerRequestMessage.t2()
+                                                    .filter(StreamMarker.END::equals)
+                                                    .filter(endMarker -> !observedResource.get())
+                                                    .isPresent()))
+
+                                    .map((Tuple4<String, Optional<StreamMarker>, Optional<FilteredResourceRequest>, CommittableMessage<String, FilteredResourceRequest>> tokenMarkerRequestMessage) -> {
+                                        // Extract the headers
+                                        Headers headers = tokenMarkerRequestMessage.t4().record().headers();
+
+                                        // Build the error message
+                                        AuditErrorMessage auditErrorMessage = AuditErrorMessage.Builder.create()
+                                                .withUserId(UNKNOWN)
+                                                .withResourceId(UNKNOWN)
+                                                .withContext(new Context().purpose(UNKNOWN))
+                                                .withAttributes(Collections.emptyMap())
+                                                .withError(new NoResourcesObservedException("No Resources were observed for token: " + tokenMarkerRequestMessage.t1()));
+
+                                        LOGGER.debug("NoResourcesObservedException thrown for token {}, on partition {} and topic {}", tokenMarkerRequestMessage.t1(), partition, errorTopic.getName());
+                                        // Create the ProducerRecord, on the error topic, on the right partition, with the audit error message
+
+                                        return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, auditErrorMessage, headers);
+                                    })
+                                    // Audit the error
+                                    .to(auditErrorSink))
 
                     // Strip start-of-stream and end-of-stream
                     // At runtime, this predicate (marker.isPresent/isEmpty) should be equivalent to request.isEmpty/Present
                     // For the sake of handling errors, it only matters that a message exists
-                    .flatMapConcat(tokenMarkerRequestCommittable -> Source.fromJavaStream(() -> tokenMarkerRequestCommittable.t3()
-                            .map(request -> new Pair<>(request, tokenMarkerRequestCommittable.t4()))
+                    .flatMapConcat(tokenMarkerRequestMessage -> Source.fromJavaStream(() -> tokenMarkerRequestMessage.t3()
+                            .map(request -> new Pair<>(request, tokenMarkerRequestMessage.t4().committableOffset()))
                             .stream()));
         };
     }
@@ -288,5 +354,4 @@ public class AkkaRunnableGraph {
                         .map(committableTokenOffset -> (Committable) committableTokenOffset.t1())
                         .to(committerSink));
     }
-
 }

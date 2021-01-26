@@ -172,10 +172,10 @@ public class ResourceServicePersistenceProxy {
     }
 
     /**
-     * Add a single resource to the service (if possible) and on success, also add it to persistence.
+     * Adds a {@link LeafResource} to the backing store and returns a boolean value if this was successful or not
      *
-     * @param leafResource the new leafResource created at runtime
-     * @return whether the add operation succeeded or failed
+     * @param leafResource the resource that will be persisted via the {@link PersistenceLayer}
+     * @return a boolean true or false if the resource has been persisted or not
      */
     public Boolean addResource(final LeafResource leafResource) {
         boolean success = delegate.addResource(leafResource);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.attributemask.service;
+package uk.gov.gchq.palisade.service.filteredresource.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
@@ -89,7 +89,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
                 if (!assignedGroupPartition) {
-                    LOGGER.error("Failed to find kafka group id assignments");
+                    LOGGER.error("Failed to find kafka topic-partition assignments");
                 }
                 return assignedGroupPartition;
             }
