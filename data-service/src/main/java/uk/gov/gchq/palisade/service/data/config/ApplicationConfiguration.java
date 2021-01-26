@@ -77,7 +77,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    AuditableDataService kafkaDataService(final DataService dataService) {
+    AuditableDataService auditableDataService(final DataService dataService) {
         return new AuditableDataService(dataService);
     }
 
