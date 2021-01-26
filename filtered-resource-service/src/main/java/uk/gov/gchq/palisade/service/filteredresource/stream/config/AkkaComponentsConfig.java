@@ -29,6 +29,8 @@ import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer.Control;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
+import com.typesafe.config.Config;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
@@ -44,8 +46,13 @@ import uk.gov.gchq.palisade.service.filteredresource.stream.ProducerTopicConfigu
 import uk.gov.gchq.palisade.service.filteredresource.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.filteredresource.stream.StreamComponents;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
  * Configuration for all kafka connections for the application
@@ -158,5 +165,13 @@ public class AkkaComponentsConfig {
                 SerDesConfig.errorValueSerializer());
 
         return ERROR_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
+    AdminClient adminClient(final ActorSystem actorSystem) {
+        final List<? extends Config> servers = actorSystem.settings().config().getConfigList("akka.discovery.config.services.kafka.endpoints");
+        final String bootstrap = servers.stream().map(config -> String.format("%s:%d", config.getString("host"), config.getInt("port"))).collect(Collectors.joining(","));
+
+        return AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, bootstrap));
     }
 }
