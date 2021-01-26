@@ -15,47 +15,48 @@
  */
 package uk.gov.gchq.palisade.contract.data.rest;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import uk.gov.gchq.palisade.service.data.DataApplication;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 
 /**
- * An external requirement of the service is to keep-alive in k8s.
- * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
- * This should return 200 OK if the service is healthy.
+ * SpringBoot Starter Actuator is a service loaded-up by adding the spring-boot-starter-actuator as a dependency to the
+ * project and configured in the application.yaml file.  It is a service which provides information on the application
+ * and is being used to monitor the "health" of the palisade service.  If there is an indication that this service has
+ * fallen over, this information can be used to restore the service.
  */
-@SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"dbtest", "akkatest"})
-@TestPropertySource(properties = "management.health.kafka.enabled=false")
+@SpringBootTest(
+        classes = {DataApplication.class},
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"management.health.kafka.enabled=false"}
+)
+@ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
-    /*
-    @Test
-    void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
-    }
-
-    @Test
-    void testServiceIsHealthy() {
-        // Given that the service is running (and presumably healthy)
-
-        // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCodeValue()).isEqualTo(200);
-    }
-
-
+    /**
+     * RESTful test to confirm the Spring Health Actuator service is up and running.
      */
+
+    @Test
+    void testHealthActuatorServiceIsRunning() {
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String body = responseEntity.getBody();
+        assertThat(body).contains("\"status\":\"UP\"");
+    }
+
 }

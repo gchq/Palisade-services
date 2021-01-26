@@ -17,7 +17,6 @@ spring:
     include:
       - akka
       - default-config
-
 ---
 
 spring:
@@ -52,3 +51,8 @@ population:
 async:
   webMvcTimeout: 60000
   corePoolSize: 6
+
+logging:
+  level:
+    org.apache.kafka: WARN
+
