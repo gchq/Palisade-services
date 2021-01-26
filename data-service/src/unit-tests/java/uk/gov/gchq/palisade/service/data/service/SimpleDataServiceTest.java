@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -34,7 +35,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.exception.ReadException;
+import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
 import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
@@ -46,6 +47,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,6 +80,10 @@ class SimpleDataServiceTest {
 
     public static final String RULE_MESSAGE = "test-rule";
 
+    public static final AtomicLong recordsReturned = new AtomicLong(0);
+    public static final AtomicLong recordsProcessed = new AtomicLong(0);
+
+
     public static class PassThroughRule<T extends Serializable> implements Rule<T> {
         @Override
         public T apply(final T record, final User user, final Context context) {
@@ -86,7 +92,6 @@ class SimpleDataServiceTest {
     }
 
     public static final Rules<Serializable> RULES = new Rules<Serializable>().addRule(RULE_MESSAGE, new PassThroughRule<Serializable>());
-
 
     // Mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
@@ -110,7 +115,14 @@ class SimpleDataServiceTest {
             .context(CONTEXT)
             .rules(RULES);
 
+    final DataReaderRequestModel dataReaderRequestModel = DataReaderRequestModel.Builder.create()
+            .withResource(LEAF_RESOURCE)
+            .withUser(USER)
+            .withContext(CONTEXT)
+            .withRules(RULES);
+
     final String testResponseMessage = "test response for data request";
+
     final ResponseWriter responseWriter = new ResponseWriter() {
         String testData = testResponseMessage;
 
@@ -139,10 +151,6 @@ class SimpleDataServiceTest {
 
         @Override
         public ResponseWriter write(final OutputStream outputStream) throws IOException {
-
-           // InputStream testInputStream = new ByteArrayInputStream(testData.getBytes());
-           // testInputStream.transferTo(outputStream);
-          //  testInputStream.close();
             throw new IOException("Something went wrong");
 
         }
@@ -168,9 +176,9 @@ class SimpleDataServiceTest {
         when(persistenceLayer.getAsync(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(authorisedEntity)));
 
-        /*
+
         //when
-        CompletableFuture<DataReaderRequest> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequestModel);
+        CompletableFuture<DataReaderRequestModel> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequestModel);
 
         //then
         assertThat(dataReaderRequestCompletableFuture.join())
@@ -178,7 +186,7 @@ class SimpleDataServiceTest {
                 .isEqualTo(readerRequest);
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
 
-         */
+
     }
 
     /**
@@ -196,10 +204,9 @@ class SimpleDataServiceTest {
         Exception unauthorisedAccessException = assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequestModel), "should throw UnauthorisedAccessException");
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
-//{@link SimpleDataService#read(DataReaderRequest, OutputStream)}
 
     /**
-     * Test for .  For an authorised request,
+     * Test for an authorised request,
      * the method will return the filtered requested data.
      * Note updating the AtomicLong object occurs in the dataReader which is mocked in this test.  Processing of
      * the OutputStream is done in the DataService and is used to verify the method is working as expected in this test.
@@ -209,40 +216,17 @@ class SimpleDataServiceTest {
 
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        /*
+
         //given
         when(dataReader.read(any(), any(), any())).thenReturn(dataReaderResponse);
-        //when
-        CompletableFuture<Pair<AtomicLong, AtomicLong>> futureProgress = simpleDataService.read(readerRequest, outputStream);
-        Pair<AtomicLong, AtomicLong> progress = futureProgress.join();
 
+        //when
+        CompletableFuture<Boolean> completed = simpleDataService
+                .read(dataReaderRequestModel, outputStream, recordsProcessed, recordsReturned);
+        completed.join();
         String outputString = new String(outputStream.toByteArray());
         assertThat(outputString).isEqualTo(testResponseMessage);
         verify(dataReader, times(1)).read(any(), any(), any());
 
-         */
-    }
-
-    //{@link SimpleDataService#read(DataReaderRequest, OutputStream)}.
-    /**
-     * Test for   The call to the {@code read} method
-     * will throw a {@link ReadException} if there is a failure to transfer the data to the output stream.
-     */
-    @Test
-    void testAuthoriseRequestWithAFailedRead() {
-
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        //given
-        when(dataReader.read(any(), any(), any())).thenReturn(errorDataReaderResponse);
-
-        /*
-        //when & then
-        Exception readException = assertThrows(ReadException.class, () -> simpleDataService.read(readerRequest, outputStream), "should throw ReadException");
-        String outputString = new String(outputStream.toByteArray());
-        assertThat(outputString).isEmpty();
-        verify(dataReader, times(1)).read(any(), any(), any());
-
-         */
     }
 }
