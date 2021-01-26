@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,12 @@ public class SimpleDataService implements DataService {
         this.dataReader = dataReader;
     }
 
+    /**
+     * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
+     * data to be returned, a {@link ForbiddenException} is thrown.
+     * @param dataRequestModel data provided by the client for requesting the resource
+     * @return reference to the resources that are to be returned to client
+     */
     public CompletableFuture<DataReaderRequestModel> authoriseRequest(final DataRequestModel dataRequestModel) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequestModel.getToken(), dataRequestModel.getLeafResourceId());
         CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequestModel.getToken(), dataRequestModel.getLeafResourceId());
@@ -73,8 +79,16 @@ public class SimpleDataService implements DataService {
         );
     }
 
-
-    public CompletableFuture<Boolean> read(final DataReaderRequestModel readerRequestModel, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
+    /**
+     * Includes the resources into the OutputStream that is to be provided to the client
+     * @param readerRequestModel the information for the resources in the context of the request
+     * @param out an {@link OutputStream} to write the stream of resources to (after applying rules)
+     * @param recordsProcessed number of records that have been processed
+     * @param recordsReturned number of records that have been returned
+     * @return boolean indicating that the process has been successful
+     */
+    public CompletableFuture<Boolean> read(final DataReaderRequestModel readerRequestModel, final OutputStream out,
+                                           final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
 
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.debug("Reading from reader with request {}", readerRequestModel);
