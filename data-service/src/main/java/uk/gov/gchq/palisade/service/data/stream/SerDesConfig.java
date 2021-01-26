@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,9 @@ public final class SerDesConfig {
      *
      * @return an appropriate key serialiser for the topic's message content
      */
-    public static Serializer<String> maskedResourceKeySerializer() {
+    public static Serializer<String> requestKeySerializer() {
         return new StringSerializer();
     }
-
 
     /**
      * Kafka value serialiser for downstream messages going out as output

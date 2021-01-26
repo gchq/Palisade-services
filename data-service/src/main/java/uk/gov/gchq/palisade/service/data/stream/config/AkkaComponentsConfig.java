@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 package uk.gov.gchq.palisade.service.data.stream.config;
 
 import akka.Done;
+import akka.NotUsed;
 import akka.actor.ActorSystem;
-import akka.kafka.CommitterSettings;
-import akka.kafka.ConsumerMessage.Committable;
-import akka.kafka.ProducerMessage.Envelope;
 import akka.kafka.ProducerSettings;
+import akka.stream.javadsl.MergeHub;
 import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
 import com.typesafe.config.Config;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import uk.gov.gchq.palisade.service.data.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.data.stream.StreamComponents;
 
@@ -45,6 +46,7 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
  */
 @Configuration
 public class AkkaComponentsConfig {
+
     private static final StreamComponents<String, AuditErrorMessage> ERROR_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_COMPONENTS = new StreamComponents<>();
 
@@ -57,14 +59,8 @@ public class AkkaComponentsConfig {
     }
 
     @Bean
-    Sink<Envelope<String, AuditSuccessMessage, Committable>, CompletionStage<Done>> committableSuccessSink(final ActorSystem actorSystem) {
-        ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_COMPONENTS.producerSettings(
-                actorSystem,
-                SerDesConfig.successKeySerializer(),
-                SerDesConfig.successValueSerializer());
-        CommitterSettings committerSettings = SUCCESS_COMPONENTS.committerSettings(actorSystem);
-
-        return SUCCESS_COMPONENTS.committableProducer(producerSettings, committerSettings);
+    Source<TokenMessagePair, Sink<TokenMessagePair, NotUsed>> auditSourceAndSink() {
+      return   MergeHub.of(TokenMessagePair.class);
     }
 
     @Bean
@@ -75,6 +71,16 @@ public class AkkaComponentsConfig {
                 SerDesConfig.errorValueSerializer());
 
         return ERROR_COMPONENTS.plainProducer(producerSettings);
+    }
+
+    @Bean
+    Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> plainSuccessSink(final ActorSystem actorSystem) {
+        ProducerSettings<String, AuditSuccessMessage> producerSettings = SUCCESS_COMPONENTS.producerSettings(
+                actorSystem,
+                SerDesConfig.successKeySerializer(),
+                SerDesConfig.successValueSerializer());
+
+        return SUCCESS_COMPONENTS.plainProducer(producerSettings);
     }
 }
 
