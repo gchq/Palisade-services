@@ -73,14 +73,15 @@ public final class AuditablePalisadeSystemResponse {
          *
          * @return the composed immutable object
          */
-        public static IPalisadeSystemResponse create() {
+        public static IAuditable create() {
             return AuditablePalisadeSystemResponse::new;
         }
 
         /**
-         * Compose with {@code UserResponse}
+         * Create an {@link AuditablePalisadeSystemResponse} supplying either the {@link PalisadeSystemResponse} or the {@link AuditErrorMessage}.
+         * The non-supplied object is internally set to null.
          */
-        public interface IPalisadeRequest {
+        public interface IAuditable {
             /**
              * Create an {@link AuditablePalisadeSystemResponse} with only an {@link AuditErrorMessage}
              * This is indicative that something went wrong.
