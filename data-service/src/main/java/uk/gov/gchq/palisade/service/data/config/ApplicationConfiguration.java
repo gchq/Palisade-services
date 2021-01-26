@@ -33,8 +33,8 @@ import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository
 import uk.gov.gchq.palisade.service.data.repository.JpaPersistenceLayer;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.service.SimpleDataService;
 
 import java.io.IOException;
