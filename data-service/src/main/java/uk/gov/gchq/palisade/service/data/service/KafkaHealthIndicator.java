@@ -15,7 +15,6 @@
  */
 package uk.gov.gchq.palisade.service.data.service;
 
-
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.common.ConsumerGroupState;
@@ -38,16 +37,13 @@ import java.util.concurrent.TimeoutException;
  * Kafka health indicator. Check that the consumer group can be accessed and is registered with the cluster,
  * if not mark the service as unhealthy.
  */
-@Component("kafka")
+@Component
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
-
+    private final AdminClient adminClient;
     @Value("${akka.kafka.consumer.kafka-clients.group.id}")
     private String groupId;
-
-    private final AdminClient adminClient;
 
     /**
      * Requires the AdminClient to interact with Kafka
@@ -86,19 +82,23 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .get(1, TimeUnit.SECONDS);
 
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
-                return consumerGroupDescription.members().stream()
+                boolean assignedGroupPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
+                if (!assignedGroupPartition) {
+                    LOGGER.error("Failed to find kafka topic-partition assignments");
+                }
+                return assignedGroupPartition;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", this.groupId, e);
-            Thread.currentThread().interrupt();
-            return false;
-        }
 
-        return true;
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
+        }
+        return false;
     }
 }

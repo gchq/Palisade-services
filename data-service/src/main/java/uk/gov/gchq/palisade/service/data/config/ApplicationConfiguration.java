@@ -86,11 +86,6 @@ public class ApplicationConfiguration {
         return new AuditMessageService(materializer);
     }
 
-
-
-
-
-
     /**
      * Bean implementation for {@link HadoopDataReader} which extends {@link SerialisedDataReader} and is used for setting hadoopConfigurations and reading raw data.
      *
