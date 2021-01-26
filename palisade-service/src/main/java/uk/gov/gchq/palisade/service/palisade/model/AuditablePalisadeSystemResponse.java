@@ -73,7 +73,7 @@ public final class AuditablePalisadeSystemResponse {
          *
          * @return the composed immutable object
          */
-        public static IPalisadeRequest create() {
+        public static IPalisadeSystemResponse create() {
             return AuditablePalisadeSystemResponse::new;
         }
 
