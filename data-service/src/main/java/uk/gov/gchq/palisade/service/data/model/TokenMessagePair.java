@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.data.model;
 
 import akka.japi.Pair;
 
-public class TokenMessagePair  extends Pair<String, AuditMessage>{
+public class TokenMessagePair  extends Pair<String, AuditMessage> {
     /**
      * The type Token request pair.
      */

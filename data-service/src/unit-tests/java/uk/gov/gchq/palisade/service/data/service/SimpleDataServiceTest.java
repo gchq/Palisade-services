@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -49,13 +48,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 class SimpleDataServiceTest {
 
@@ -80,8 +79,8 @@ class SimpleDataServiceTest {
 
     public static final String RULE_MESSAGE = "test-rule";
 
-    public static final AtomicLong recordsReturned = new AtomicLong(0);
-    public static final AtomicLong recordsProcessed = new AtomicLong(0);
+    public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
+    public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
 
 
     public static class PassThroughRule<T extends Serializable> implements Rule<T> {
@@ -222,7 +221,7 @@ class SimpleDataServiceTest {
 
         //when
         CompletableFuture<Boolean> completed = simpleDataService
-                .read(dataReaderRequestModel, outputStream, recordsProcessed, recordsReturned);
+                .read(dataReaderRequestModel, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
         completed.join();
         String outputString = new String(outputStream.toByteArray());
         assertThat(outputString).isEqualTo(testResponseMessage);

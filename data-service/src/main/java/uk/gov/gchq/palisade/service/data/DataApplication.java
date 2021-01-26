@@ -51,7 +51,9 @@ public class DataApplication {
     private final Materializer materializer;
 
     /**
+     *
      * @param dataReader              a reader for retrieving the request resources.
+     * @param auditMessageService     service for sending audit success and error messages
      * @param serialiserConfiguration a configuration and initialising the {@link DataReader}
      * @param runner                  runnable graphs for sending messages on the Kafka stream
      * @param materializer            the Akka {@link Materializer} configured to be used

@@ -19,9 +19,6 @@ package uk.gov.gchq.palisade.service.data.stream;
 
 import akka.Done;
 import akka.actor.ActorSystem;
-import akka.kafka.CommitterSettings;
-import akka.kafka.ConsumerMessage;
-import akka.kafka.ProducerMessage;
 import akka.kafka.ProducerSettings;
 import akka.kafka.javadsl.DiscoverySupport;
 import akka.kafka.javadsl.Producer;

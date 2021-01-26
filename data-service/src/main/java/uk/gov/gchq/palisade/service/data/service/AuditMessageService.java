@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +19,44 @@ import akka.stream.Materializer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderResponse;
+import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 
 import java.util.concurrent.CompletableFuture;
 
-public class AuditService {
+/**
+ * Service for sending messages to the audit-service. Messages can be either success or error messages.
+ */
+public class AuditMessageService {
 
     private final Materializer materializer;
-    private final CompletableFuture<Sink<AuditableDataReaderResponse, ?>> successFutureSink;
+    private final CompletableFuture<Sink<TokenMessagePair, ?>> futureSink;
 
-    AuditService(final Materializer materializer) {
-        this.successFutureSink = new CompletableFuture<>();
+  public AuditMessageService(final Materializer materializer) {
+        this.futureSink = new CompletableFuture<>();
         this.materializer = materializer;
     }
 
     /**
-     * Audit a successful read to the audit-service
+     *  audit-service
      *
-     * @param auditableDataReaderResponse the constructed message detailing the resource read, the rules applied and other metadata
+     * @param tokenMessagePair the constructed message detailing the resource read, the rules applied and other metadata
      * @implNote Any implementation of this should ensure it has confirmation that the message has been persisted downstream.
      * This provides assurances that the audit logs won't go missing due to processing failures.
      * This is probably implemented as blocking until the persistence-write (kafka/redis/etc.) completes and throwing a
      * {@link RuntimeException} if processing fails.
+     * @return void
      */
-    public void auditMessage(final AuditableDataReaderResponse auditableDataReaderResponse) {
-        //how do it integrate the token value into header for this message?
-        successFutureSink.thenApply(sink -> Source.single(auditableDataReaderResponse).runWith(sink, materializer));
+    public CompletableFuture<Void> auditMessage(final TokenMessagePair tokenMessagePair) {
+        return futureSink.thenAccept(sink -> Source.single(tokenMessagePair).runWith(sink, materializer));
     }
+
+    /**
+     * Register request sink.
+     *
+     * @param sink the sink
+     */
+    public void registerRequestSink(final Sink<TokenMessagePair, ?> sink) {
+        this.futureSink.complete(sink);
+    }
+
 }

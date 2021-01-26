@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
+ * Provides an auditable wrapper to the {@link DataService}.  For each of the methods provided in the in the
+ * {@code DataService}, there is a corresponding method in this class for requesting the information and providing a
+ * response wrapped with the data or the exception when an error has occurred.
  */
-public class KafkaDataService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaDataService.class);
+public class AuditableDataService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditableDataService.class);
 
     private final DataService dataService;
 
-    public KafkaDataService(final DataService dataService) {
+    public AuditableDataService(final DataService dataService) {
         this.dataService = dataService;
     }
 
     /**
-     *
-     * @param dataRequestModel asd
-     * @return asd
+     * Provides a wrapped message with the reference to the resources that are to be provided to the client or an
+     * error message
+     * @param dataRequestModel request information from the client
+     * @return reference to the resource information or error message
      */
     public CompletableFuture<AuditableDataReaderRequest> authoriseRequest(final DataRequestModel dataRequestModel) {
         return dataService.authoriseRequest(dataRequestModel)
@@ -62,7 +65,7 @@ public class KafkaDataService {
     }
 
     /**
-     *
+     * Provides an {@link OutputStream}
      * @param auditableDataReaderRequest saf
      * @param outputStream asdf
      * @return asd
