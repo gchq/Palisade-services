@@ -35,8 +35,14 @@
         <scala.version>2.13</scala.version>
         <akka.version>2.6.8</akka.version>
         <alpakka.version>2.0.4</alpakka.version>
+
         <!-- Test dependency versions -->
         <testcontainers.version>1.14.3</testcontainers.version>
+
+        <!-- Dockerfile-maven-plugin configurable base image - openjdk:11.0-jre-slim -->
+        <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
+        <!-- Prefix image tag with image type being used -->
+        <dockerfile.base.tag>jre</dockerfile.base.tag>
     </properties>
 
     <dependencies>
@@ -160,6 +166,22 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <!-- Use a JRE image, mirrors base config -->
+            <id>jrei</id>
+            <properties>
+                <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
+                <dockerfile.base.tag>jre</dockerfile.base.tag>
+            </properties>
+        </profile>
+        <profile>
+            <!-- Use a JDK image -->
+            <id>jdki</id>
+            <properties>
+                <dockerfile.base.image>openjdk@sha256:c1c4bcec5505761f98034d17d0fbfd00b44b79cb472def03d9f1e231f150dc6d</dockerfile.base.image>
+                <dockerfile.base.tag>jdk</dockerfile.base.tag>
+            </properties>
         </profile>
     </profiles>
 
@@ -300,9 +322,10 @@
                     <repository>${image.repository}${project.artifactId}</repository>
                     <dockerfile>Dockerfile</dockerfile>
                     <!--suppress UnresolvedMavenProperty -->
-                    <tag>${image.tag}</tag>
+                    <tag>${dockerfile.base.tag}-${image.tag}</tag>
                     <finalName>${project.artifactId}</finalName>
                     <buildArgs>
+                        <BASE_IMG>${dockerfile.base.image}</BASE_IMG>
                         <JAR_FILE>target/${project.build.finalName}-exec.jar</JAR_FILE>
                     </buildArgs>
                 </configuration>

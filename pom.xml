@@ -131,12 +131,14 @@
             <!-- Snapshot repositories can be build on each commit to develop branch -->
             <id>nexus</id>
             <name>releases</name>
+            <!--suppress UnresolvedMavenProperty -->
             <url>${release.url}</url>
         </repository>
         <snapshotRepository>
             <!-- Snapshot repositories can be build on each commit to develop branch -->
             <id>nexus</id>
             <name>snapshots</name>
+            <!--suppress UnresolvedMavenProperty -->
             <url>${snapshot.url}</url>
         </snapshotRepository>
     </distributionManagement>

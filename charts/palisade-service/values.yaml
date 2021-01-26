@@ -20,7 +20,8 @@ service:
 
 image:
   name: palisade-service
-  tag: SNAPSHOT-d5003ef
+  base: jre
+  tag: SNAPSHOT-09dfaba
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 
