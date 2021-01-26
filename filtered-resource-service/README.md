@@ -91,6 +91,25 @@ The Filtered-Resource Service requires a number of inputs from separate services
 1. Open a WS connection to `ws://filtered-resource-service/resource/$token` (this example will use [Hashrocket's ws tool](https://github.com/hashrocket/ws))
 1. Send CTS messages from the client until the server responds with COMPLETE
 
+### Auditing within the Filtered Resource Service
+The Filtered Resource Service will send audit messages, specifically an `AuditErrorMessage` to the Audit Service via the error topic for the two following cases:
+1. No start marker was observed before reading the resources. If resources are processed by the Filtered Resource Service before a start marker is observed, 
+   it could indicate that there is an issue earlier on in the system which could cause the messages to fall out of ordered. In this case, an Audit Error Message is created, containing a `NoStartMarkerObserved` exception, 
+   which is then sent to the Audit Service, and finally, the processing of the request is stopped. 
+2. No Resources were contained in the request. If a start marker is observed, but no resources are contained in the request, the request could be invalid, for resources that aren't known to Paliasde, 
+   or for resources that have been redacted. In this case, an Audit Error Message is created, containing a `NoResourcesObserved` exception, and is then sent to the Audit Service. 
+
+## Message Model
+| FilteredResourceRequest | WebSocketMessage | TopicOffsetMessage | AuditSuccessMessage | AuditErrorMessage |
+|-------------------------|------------------|--------------------|---------------------|-------------------|
+| *token                  | *token           | queuePointer       | *token              | *token            |
+| userId                  | messageType      |                    | userId              | userId            |
+| resourceId              | LeafResource     |                    | resourceId          | resourceId        |
+| context                 |                  |                    | context             | context           |
+| LeafResource            |                  |                    | serverMetadata      | exception         |
+|                         |                  |                    | attributes          | serverMetadata    |
+|                         |                  |                    |                     | attributes        |
+
 ### JSON REST Requests
 
 1. Mimicking the Attribute-Masking Service:

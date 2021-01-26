@@ -43,6 +43,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.attributemask.AttributeMaskingApplication;
 import uk.gov.gchq.palisade.service.attributemask.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.attributemask.model.AttributeMaskingRequest;
+import uk.gov.gchq.palisade.service.attributemask.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingRequest;
 import uk.gov.gchq.palisade.service.attributemask.model.AuditableAttributeMaskingResponse;
 import uk.gov.gchq.palisade.service.attributemask.repository.PersistenceLayer;
@@ -111,12 +112,17 @@ class AttributeMaskingServiceErrorTest {
         // When masking
         final AuditableAttributeMaskingResponse subject = this.attributeMaskingService.maskResourceAttributes(attributeMaskingRequest);
         // Then the service suppresses exception and populates Audit object
-        assertThat(subject.getAuditErrorMessage().getError().getMessage())
+        assertThat(subject)
                 .as("verify that exception is propagated into an auditable object and returned")
+                .extracting(AuditableAttributeMaskingResponse::getAuditErrorMessage)
+                .isNotNull()
+                .extracting(AuditErrorMessage::getError)
+                .extracting(Throwable::getMessage)
                 .isEqualTo("Cannot mask");
 
-        assertThat(subject.getAttributeMaskingResponse())
+        assertThat(subject)
                 .as("verify that auditable object has no payload")
+                .extracting(AuditableAttributeMaskingResponse::getAttributeMaskingResponse)
                 .isNull();
     }
 

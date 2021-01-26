@@ -26,13 +26,11 @@ import uk.gov.gchq.palisade.rule.Rule;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.PolicyPrepopulationFactory;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
-import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
-import uk.gov.gchq.palisade.util.ResourceBuilder;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -48,7 +46,7 @@ import java.util.Optional;
 public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(StdPolicyPrepopulationFactory.class);
 
-    private String resource;
+    private String resourceId;
     private Map<String, String> resourceRules;
     private Map<String, String> recordRules;
 
@@ -56,7 +54,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
      * Empty constructor
      */
     public StdPolicyPrepopulationFactory() {
-        resource = "";
+        resourceId = "";
         resourceRules = Collections.emptyMap();
         recordRules = Collections.emptyMap();
     }
@@ -64,12 +62,12 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     /**
      * Create a StdPolicyPrepopulationFactory, passing each member as an argument
      *
-     * @param resource      the {@link Resource} to attach a to
+     * @param resourceId    the id of the {@link Resource} to attach a policy to
      * @param resourceRules the {@link Rule}s that apply to this {@link Resource} - used for canAccess requests
      * @param recordRules   the {@link Rule}s that apply to the record represented by this {@link Resource} - used by the data-service
      */
-    public StdPolicyPrepopulationFactory(final String resource, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
-        this.resource = resource;
+    public StdPolicyPrepopulationFactory(final String resourceId, final Map<String, String> resourceRules, final Map<String, String> recordRules) {
+        this.resourceId = resourceId;
         this.resourceRules = resourceRules;
         this.recordRules = recordRules;
     }
@@ -78,20 +76,20 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
         try {
             LOGGER.debug("Adding rule {}", rule);
             return (Rule<?>) Class.forName(rule).getConstructor().newInstance();
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error(String.format("Error creating rule %s", rule), ex);
             return null;
         }
     }
 
     @Generated
-    public String getResource() {
-        return resource;
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Generated
-    public void setResource(final String resource) {
-        this.resource = Optional.ofNullable(resource)
+    public void setResourceId(final String resourceId) {
+        this.resourceId = Optional.ofNullable(resourceId)
                 .orElseThrow(() -> new IllegalArgumentException("resource cannot be null"));
     }
 
@@ -118,35 +116,19 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     }
 
     @Override
-    public Entry<Resource, Rules<LeafResource>> buildResourceRules(final List<? extends ResourcePrepopulationFactory> resources) {
+    public Entry<String, Rules<LeafResource>> buildResourceRules() {
         Rules<LeafResource> rules = new Rules<>();
-
         resourceRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
-        Resource unconfiguredResource = ResourceBuilder.create(this.resource);
-        Resource policyResource = resources.stream()
-                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().serviceName("")).getValue())
-                .filter(builtResource -> builtResource.getId().equals(unconfiguredResource.getId()))
-                .findFirst()
-                .orElse(unconfiguredResource);
-
-        return new SimpleImmutableEntry<>(policyResource, rules);
+        return new SimpleImmutableEntry<>(resourceId, rules);
     }
 
     @Override
-    public Entry<Resource, Rules<Serializable>> buildRecordRules(final List<? extends ResourcePrepopulationFactory> resources) {
+    public Entry<String, Rules<Serializable>> buildRecordRules() {
         Rules<Serializable> rules = new Rules<>();
-
         recordRules.forEach((message, rule) -> rules.addRule(message, createRule(rule)));
 
-        Resource unconfiguredResource = ResourceBuilder.create(this.resource);
-        Resource policyResource = resources.stream()
-                .map(factory -> (Resource) factory.build(x -> new SimpleConnectionDetail().serviceName("")).getValue())
-                .filter(builtResource -> builtResource.getId().equals(unconfiguredResource.getId()))
-                .findFirst()
-                .orElse(unconfiguredResource);
-
-        return new SimpleImmutableEntry<>(policyResource, rules);
+        return new SimpleImmutableEntry<>(resourceId, rules);
     }
 
     @Override
@@ -159,7 +141,7 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
             return false;
         }
         final StdPolicyPrepopulationFactory that = (StdPolicyPrepopulationFactory) o;
-        return Objects.equals(resource, that.resource) &&
+        return Objects.equals(resourceId, that.resourceId) &&
                 Objects.equals(resourceRules, that.resourceRules) &&
                 Objects.equals(recordRules, that.recordRules);
     }
@@ -167,6 +149,6 @@ public class StdPolicyPrepopulationFactory implements PolicyPrepopulationFactory
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(resource, resourceRules, recordRules);
+        return Objects.hash(resourceId, resourceRules, recordRules);
     }
 }
