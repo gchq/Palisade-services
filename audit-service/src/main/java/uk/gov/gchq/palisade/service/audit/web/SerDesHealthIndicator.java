@@ -21,6 +21,10 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 
 import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
 
+/**
+ * A health indicator for the Serialising and Deserialising of audit messages. If there are no logged exceptions
+ * then the service is healthy, otherwise mark the service has unhealthy.
+ */
 public class SerDesHealthIndicator implements HealthIndicator {
 
     @Override

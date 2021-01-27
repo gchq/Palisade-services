@@ -36,6 +36,7 @@ import java.nio.charset.Charset;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -57,7 +58,7 @@ public final class SerDesConfig {
     }
 
     public static Queue<Exception> getSerDesExceptions() {
-        return SERDES_EXCEPTIONS;
+        return (Queue<Exception>) Collections.unmodifiableCollection(SERDES_EXCEPTIONS);
     }
 
     /**
@@ -114,7 +115,7 @@ public final class SerDesConfig {
                     File directory = new File(configProperties.getErrorDirectory());
                     File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, fileName);
-                    FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());
+                    FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
                     fileWriter.close();
                     LOGGER.info("Successfully created error file {}", timestampedFile);
@@ -180,7 +181,7 @@ public final class SerDesConfig {
                     File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ISO_INSTANT));
-                    FileWriter fileWriter = new FileWriter(timestampedFile, !timestampedFile.createNewFile());
+                    FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
                     fileWriter.close();
                     LOGGER.info("Successfully created error file {}", timestampedFile);

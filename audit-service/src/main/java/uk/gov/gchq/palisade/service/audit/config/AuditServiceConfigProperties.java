@@ -20,13 +20,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Configuration class for the Audit Service. Used to define the directory for any error files
  */
 @ConfigurationProperties("audit")
-public class AuditServiceConfigProperties {
+public final class AuditServiceConfigProperties {
 
     private List<String> implementations;
     private String errorDirectory;
@@ -46,11 +47,11 @@ public class AuditServiceConfigProperties {
 
     @Generated
     public List<String> getImplementations() {
-        return implementations;
+        return Collections.unmodifiableList(implementations);
     }
 
     @Generated
     public void setImplementations(final List<String> implementations) {
-        this.implementations = implementations;
+        this.implementations = Collections.unmodifiableList(implementations);
     }
 }
