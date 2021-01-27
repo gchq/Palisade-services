@@ -42,7 +42,11 @@ public class CommonTestData {
     private CommonTestData() {
     }
 
+    public static final String SERVICE_URL ="/read/chunked";
+
     public static final String TOKEN = "test-request-token";
+    public static final String ERROR_TOKEN = "";
+
 
     public static final String LEAF_RESOURCE_ID = "test leaf resource id";
 

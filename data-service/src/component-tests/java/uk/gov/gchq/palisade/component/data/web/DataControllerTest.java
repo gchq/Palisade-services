@@ -115,12 +115,8 @@ class DataControllerTest {
     @Test
     void testControllerWithForbiddenException() throws Exception {
 
-
         when(serviceMock.authoriseRequest(any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_REQUEST_WITH_ERROR));
-
-        when(serviceMock.read(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_RESPONSE));
 
         when(auditMessageServiceMock.auditMessage(any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
