@@ -28,14 +28,11 @@ import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_SUCCESS_MESSAGE;
-
 
 @JsonTest
 @ContextConfiguration(classes = {AuditSuccessMessageTest.class})
 class AuditSuccessMessageTest {
-
 
     @Autowired
     private JacksonTester<AuditSuccessMessage> jacksonTester;
@@ -54,11 +51,8 @@ class AuditSuccessMessageTest {
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jacksonTester.parse(auditSuccessMessageJsonContent.getJson());
         AuditSuccessMessage auditSuccessMessageObjectContentObject = auditSuccessMessageObjectContent.getObject();
 
-        assertAll("DataRequestSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using equalTo").isEqualTo(AUDIT_SUCCESS_MESSAGE),
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
-                )
-        );
+        assertThat(auditSuccessMessageObjectContentObject)
+                .usingRecursiveComparison()
+                .isEqualTo(AUDIT_SUCCESS_MESSAGE);
     }
 }

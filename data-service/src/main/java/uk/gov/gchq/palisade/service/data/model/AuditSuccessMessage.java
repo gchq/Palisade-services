@@ -85,16 +85,16 @@ public final class AuditSuccessMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param auditableDataReaderRequest the authorised request stored by the attribute-masking-service
+         * @param auditableDataRequest the authorised request stored by the attribute-masking-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
-        public static IAttributes create(final  AuditableDataReaderRequest auditableDataReaderRequest) {
-            DataRequestModel dataRequestModel = auditableDataReaderRequest.getDataRequestModel();
-            DataReaderRequestModel  readerRequestModel  = auditableDataReaderRequest.getDataReaderRequestModel();
+        public static IAttributes create(final AuditableDataRequest auditableDataRequest) {
+            DataRequest dataRequest = auditableDataRequest.getDataRequest();
+            DataResponse readerRequestModel  = auditableDataRequest.getDataResponse();
 
             return create()
-                    .withLeafResourceId(dataRequestModel.getLeafResourceId())
-                    .withToken(dataRequestModel.getToken())
+                    .withLeafResourceId(dataRequest.getLeafResourceId())
+                    .withToken(dataRequest.getToken())
                     .withUserId(readerRequestModel.getUser().getUserId().getId())
                     .withResourceId(readerRequestModel.getResource().getId())
                     .withContext(readerRequestModel.getContext());

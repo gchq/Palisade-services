@@ -15,6 +15,11 @@
  */
 package uk.gov.gchq.palisade.contract.data.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.resource.LeafResource;
@@ -25,10 +30,10 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderRequest;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderResponse;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 
 import java.util.Collections;
@@ -37,25 +42,38 @@ import java.util.Map;
 /**
  * Set of constants that are used in the testing
  */
-public class CommonTestData {
+public class ContractTestData {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private CommonTestData() {
+
+    private ContractTestData() {
     }
 
-    public static final String TOKEN = "test-request-token";
-
-    public static final String LEAF_RESOURCE_ID = "test leaf resource id";
-
-    public static final DataRequestModel DATA_REQUEST_MODEL = DataRequestModel.Builder.create()
-            .withToken(TOKEN)
+    public static final String REQUEST_TOKEN = "test-request-token";
+    public static final String LEAF_RESOURCE_ID = "file:/test/resource/file.txt";
+    public static final DataRequest DATA_REQUEST = DataRequest.Builder.create()
+            .withToken(REQUEST_TOKEN)
             .withLeafResourceId(LEAF_RESOURCE_ID);
+    public static final JsonNode REQUEST_NODE;
+    public static final String REQUEST_JSON = "{\"token\":\"test-request-token\",\"leafResourceId\":\"file:/test/resource/file.txt\"}";
+    public static final DataRequest REQUEST_OBJ;
+
+    static {
+        try {
+            REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to parse contract test data", e);
+        }
+        try {
+            REQUEST_OBJ = MAPPER.treeToValue(REQUEST_NODE, DataRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to convert contract test data to objects", e);
+        }
+    }
 
     public static final Context CONTEXT = new Context().purpose("testContext");
-
     public static final String USER_ID = "testUserId";
-
     public static final User USER = new User().userId(USER_ID);
-
     public static final String RESOURCE_ID = "test resource id";
 
     public static final LeafResource RESOURCE = new FileResource().id("/test/file.format")
@@ -65,12 +83,11 @@ public class CommonTestData {
             .parent(new SystemResource().id("/test"));
 
     public static final Rules<LeafResource> RULES = new Rules<>();
-
     public static final Map<String, Object> ATTRIBUTES = Collections.singletonMap("test key", "test value");
 
     public static final AuditSuccessMessage AUDIT_SUCCESS_MESSAGE = AuditSuccessMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(TOKEN)
+            .withToken(REQUEST_TOKEN)
             .withUserId(USER_ID)
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
@@ -78,7 +95,7 @@ public class CommonTestData {
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
-            .withToken(TOKEN)
+            .withToken(REQUEST_TOKEN)
             .withUserId(null)
             .withResourceId(null)
             .withContext(null)
@@ -86,33 +103,33 @@ public class CommonTestData {
             .withError(new ForbiddenException("Something went wrong!"));
 
 
-    public static final DataReaderRequestModel DATA_READER_REQUEST_MODEL = DataReaderRequestModel.Builder.create()
+    public static final DataResponse DATA_RESPONSE = DataResponse.Builder.create()
             .withResource(RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
             .withRules(RULES);
 
-    public static final AuditableDataReaderRequest AUDITABLE_DATA_READER_REQUEST = AuditableDataReaderRequest.Builder.create()
-            .withDataRequestModel(DATA_REQUEST_MODEL)
-            .withDataReaderRequestModel(DATA_READER_REQUEST_MODEL)
+    public static final AuditableDataRequest AUDITABLE_DATA_REQUEST = AuditableDataRequest.Builder.create()
+            .withDataRequest(DATA_REQUEST)
+            .withDataResponse(DATA_RESPONSE)
             .withErrorMessage(null);
 
 
-    public static final AuditableDataReaderRequest AUDITABLE_DATA_READER_REQUEST_WITH_ERROR = AuditableDataReaderRequest.Builder.create()
-            .withDataRequestModel(DATA_REQUEST_MODEL)
-            .withDataReaderRequestModel(null)
+    public static final AuditableDataRequest AUDITABLE_DATA_REQUEST_WITH_ERROR = AuditableDataRequest.Builder.create()
+            .withDataRequest(DATA_REQUEST)
+            .withDataResponse(null)
             .withErrorMessage(AUDIT_ERROR_MESSAGE);
 
 
-    public static final AuditableDataReaderResponse AUDITABLE_DATA_READER_RESPONSE = AuditableDataReaderResponse.Builder.create()
-            .withToken(TOKEN)
+    public static final AuditableDataResponse AUDITABLE_DATA_RESPONSE = AuditableDataResponse.Builder.create()
+            .withToken(REQUEST_TOKEN)
             .withSuccessMessage(AUDIT_SUCCESS_MESSAGE)
             .withAuditErrorMessage(null);
 
-    public static final AuditableDataReaderResponse AUDITABLE_DATA_READER_RESPONSE_WITH_ERROR = AuditableDataReaderResponse.Builder.create()
-            .withToken(TOKEN)
+    public static final AuditableDataResponse AUDITABLE_DATA_RESPONSE_WITH_ERROR = AuditableDataResponse.Builder.create()
+            .withToken(REQUEST_TOKEN)
             .withSuccessMessage(null)
             .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
 
-    public static final TokenMessagePair TOKEN_MESSAGE_PAIR = new TokenMessagePair(TOKEN, AUDIT_SUCCESS_MESSAGE);
+    public static final TokenMessagePair TOKEN_MESSAGE_PAIR = new TokenMessagePair(REQUEST_TOKEN, AUDIT_SUCCESS_MESSAGE);
 }

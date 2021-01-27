@@ -23,36 +23,35 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST_MODEL;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.LEAF_RESOURCE_ID;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.TOKEN;
 
 @JsonTest
-@ContextConfiguration(classes = {DataRequestModelTest.class})
-class DataRequestModelTest {
+@ContextConfiguration(classes = {DataRequestTest.class})
+class DataRequestTest {
 
     @Autowired
-    private JacksonTester<DataRequestModel> jacksonTester;
+    private JacksonTester<DataRequest> jacksonTester;
 
     /**
      * Creates the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link DataRequestModel} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link DataRequest} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
     void testGroupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
-
-        JsonContent<DataRequestModel> dataRequestJsonContent = jacksonTester.write(DATA_REQUEST_MODEL);
-        ObjectContent<DataRequestModel> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
-        DataRequestModel dataRequestModelMessageObject = dataRequestObjectContent.getObject();
+        JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(DATA_REQUEST);
+        ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
+        DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
         assertAll("DataRequestSerialisingDeseralisingAndComparison",
                 () -> assertAll("DataRequestSerialisingComparedToString",
@@ -65,15 +64,17 @@ class DataRequestModelTest {
                                 .isEqualTo(LEAF_RESOURCE_ID)
                 ),
                 () -> assertAll("DataRequestDeserialisingComparedToObject",
-                        () -> assertThat(dataRequestModelMessageObject.getToken())
+                        () -> assertThat(dataRequestMessageObject.getToken())
                                 .isEqualTo(TOKEN),
 
-                        () -> assertThat(dataRequestModelMessageObject.getLeafResourceId())
+                        () -> assertThat(dataRequestMessageObject.getLeafResourceId())
                                 .isEqualTo(LEAF_RESOURCE_ID)
                 ),
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataRequestModelMessageObject).as("Check using equalTo").isEqualTo(DATA_REQUEST_MODEL),
-                        () -> assertThat(dataRequestModelMessageObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_REQUEST_MODEL)
+                        () -> assertThat(dataRequestMessageObject)
+                                .as("Check using recursion")
+                                .usingRecursiveComparison()
+                                .isEqualTo(DATA_REQUEST)
                 )
         );
     }

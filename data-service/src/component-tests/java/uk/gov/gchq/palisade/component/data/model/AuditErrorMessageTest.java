@@ -25,13 +25,11 @@ import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
-
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_ERROR_MESSAGE;
 
 @JsonTest
@@ -55,19 +53,16 @@ class AuditErrorMessageTest {
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
-                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
-                )
-        );
+        assertThat(auditErrorMessageObject)
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(AUDIT_ERROR_MESSAGE);
     }
 
     /**
      * Grouped assertion test for the scenario that the error message only has the token and leaf resource id.
      * This is a special case where the error occurs during the initial request to authenticate the data request.
-     * In this scenario, the {@link AuditErrorMessage} will  be based on the  {@link DataRequestModel} and there is no
+     * In this scenario, the {@link AuditErrorMessage} will  be based on the  {@link DataRequest} and there is no
      * {@link DataReaderRequest}.
      * DataCreate the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
@@ -77,17 +72,13 @@ class AuditErrorMessageTest {
      */
     @Test
     void testGroupedDependantForFailedAuthenticationErrorMessageSerialisingAndDeserialising() throws IOException {
-
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
-                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
-                )
-        );
+        assertThat(auditErrorMessageObject)
+                .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(AUDIT_ERROR_MESSAGE);
     }
 }

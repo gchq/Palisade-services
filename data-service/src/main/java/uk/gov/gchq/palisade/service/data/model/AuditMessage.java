@@ -24,7 +24,6 @@ import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
 
-
 import javax.annotation.Nullable;
 
 import java.net.InetAddress;
@@ -58,10 +57,12 @@ public class AuditMessage {
     private final String token;  //token for this request
 
     @JsonProperty("userId")
-    protected final @Nullable String userId; //Unique identifier for the user.
+    protected final @Nullable
+    String userId; //Unique identifier for the user.
 
     @JsonProperty("resourceId")
-    protected final @Nullable String resourceId;  //Resource that that is being asked to access.
+    protected final @Nullable
+    String resourceId;  //Resource that that is being asked to access.
 
     @JsonProperty("context")
     protected final @Nullable

@@ -28,8 +28,6 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
@@ -50,7 +48,6 @@ import java.util.concurrent.CompletionStage;
  */
 @Configuration
 public class AkkaRunnableGraph {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
     @Bean
     Function1<Throwable, Supervision.Directive> supervisor() {
@@ -75,7 +72,7 @@ public class AkkaRunnableGraph {
                 .alsoTo(Flow
                         .<TokenMessagePair>create()
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditSuccessMessage)
-                        .map(tokenMessagePair -> {
+                        .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), successTopic.getPartitions());
                             Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.first().getBytes(Charset.defaultCharset()))});
                             return new ProducerRecord<>(successTopic.getName(), partition, (String) null, (AuditSuccessMessage) tokenMessagePair.second(), headers);
@@ -84,7 +81,7 @@ public class AkkaRunnableGraph {
                 .to(Flow
                         .<TokenMessagePair>create()
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditErrorMessage)
-                        .map(tokenMessagePair -> {
+                        .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), errorTopic.getPartitions());
                             Headers headers = new RecordHeaders(new Header[]{new RecordHeader(Token.HEADER, tokenMessagePair.first().getBytes(Charset.defaultCharset()))});
                             return new ProducerRecord<>(errorTopic.getName(), partition, (String) null, (AuditErrorMessage) tokenMessagePair.second(), headers);

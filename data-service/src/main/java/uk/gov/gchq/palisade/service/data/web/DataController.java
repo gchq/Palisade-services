@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderRequest;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderResponse;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
@@ -39,10 +39,9 @@ import java.io.OutputStream;
  * Controller for data-service.  Provides the front end RESTFul web service for resources that have already been
  * registered with the Palisade Service.  The request is in the form of information that will uniquely identify the
  * resource request and will return a data stream of the response data.
- *
  */
 @RestController
-@RequestMapping(path = "/")
+@RequestMapping(path = "/api")
 public class DataController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
@@ -51,9 +50,10 @@ public class DataController {
     private final AuditMessageService auditMessageService;
 
     /**
+     * Constructor for the DataController
      *
      * @param auditableDataService service for providing auditable data for the request
-     * @param auditMessageService service for sending audit messages
+     * @param auditMessageService  service for sending audit messages
      */
     public DataController(final AuditableDataService auditableDataService, final AuditMessageService auditMessageService) {
         this.auditableDataService = auditableDataService;
@@ -63,35 +63,35 @@ public class DataController {
     /**
      * REST endpoint to read a resource and return a streaming response.
      *
-     * @param dataRequestModel the request to read the data from a leafResource
+     * @param dataRequest the request to read the data from a leafResource
      * @return a stream of bytes representing the contents of the resource
      */
-    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
-    public ResponseEntity<StreamingResponseBody> readChunked(@RequestBody final DataRequestModel dataRequestModel) {
-        LOGGER.debug("Invoking read (chunked): {}", dataRequestModel);
+    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<StreamingResponseBody> readChunked(
+            @RequestBody final DataRequest dataRequest) {
+        LOGGER.info("Invoking read (chunked): {}", dataRequest);
 
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
         StreamingResponseBody stream = null;
 
         //first with the client information about the request, retrieve the authorised resource information
-        AuditableDataReaderRequest auditableDataReaderRequest = auditableDataService.authoriseRequest(dataRequestModel).join();
-        AuditErrorMessage firstErrorMessage = auditableDataReaderRequest.getAuditErrorMessage();
+        AuditableDataRequest auditableDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
+        AuditErrorMessage firstErrorMessage = auditableDataRequest.getAuditErrorMessage();
 
         if (firstErrorMessage != null) {
             LOGGER.error("Error occurred processing the authoriseRequest for  {}", firstErrorMessage);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), firstErrorMessage)).join();
+            auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), firstErrorMessage)).join();
         } else {
-
             //retrieve the outputstream that links to the resources
             stream = (OutputStream outputStream) -> {
-                AuditableDataReaderResponse auditableDataReaderResponse = auditableDataService.read(auditableDataReaderRequest, outputStream).join();
-                auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), auditableDataReaderResponse.getAuditSuccessMessage())).join();
+                AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableDataRequest, outputStream).join();
+                auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), auditableDataResponse.getAuditSuccessMessage())).join();
 
-                AuditErrorMessage secondErrorMessage = auditableDataReaderResponse.getAuditErrorMessage();
+                AuditErrorMessage secondErrorMessage = auditableDataResponse.getAuditErrorMessage();
                 if (secondErrorMessage != null) {
                     LOGGER.error("Error occurred processing the authoriseRequest for  {}", secondErrorMessage);
-                    auditMessageService.auditMessage(new TokenMessagePair(dataRequestModel.getToken(), secondErrorMessage)).join();
+                    auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), secondErrorMessage)).join();
                 }
             };
         }

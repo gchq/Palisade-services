@@ -42,30 +42,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_READER_REQUEST;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_READER_REQUEST_WITH_ERROR;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_READER_RESPONSE;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST_MODEL;
-
-@WebMvcTest(controllers = {DataController.class})
-@ContextConfiguration(classes = {DataControllerTest.class, DataController.class})
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
 
 /**
  * Tests for the DataController web service endpoint.
  */
+@WebMvcTest(controllers = {DataController.class})
+@ContextConfiguration(classes = {DataControllerTest.class, DataController.class})
 class DataControllerTest {
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     private DataController controller;
-
     @MockBean
     private AuditableDataService serviceMock;
-
     @MockBean
     private AuditMessageService auditMessageServiceMock;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -76,26 +71,26 @@ class DataControllerTest {
     }
 
     /**
-     * Tests that the endpoint is expecting a Json string for a DataRequestModel.  A return will be a OutputStream.
+     * Tests that the endpoint is expecting a Json string for a DataRequestModel.
+     * A return will be a OutputStream.
      *
      * @throws Exception if the test fails to run
      */
     @Test
     void testControllerReturnsAccepted() throws Exception {
-
         when(serviceMock.authoriseRequest(any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_REQUEST));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
         when(serviceMock.read(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_RESPONSE));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
         when(auditMessageServiceMock.auditMessage(any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
-        MvcResult result = mockMvc.perform(post("/read/chunked")
+        MvcResult result = mockMvc.perform(post("/api/read/chunked")
                 .contentType("application/json")
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .content(MAPPER.writeValueAsBytes(DATA_REQUEST_MODEL)))
+                .content(MAPPER.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -114,21 +109,19 @@ class DataControllerTest {
      */
     @Test
     void testControllerWithForbiddenException() throws Exception {
-
-
         when(serviceMock.authoriseRequest(any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_REQUEST_WITH_ERROR));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST_WITH_ERROR));
 
         when(serviceMock.read(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_RESPONSE));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
         when(auditMessageServiceMock.auditMessage(any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
-        MvcResult result = mockMvc.perform(post("/read/chunked")
+        MvcResult result = mockMvc.perform(post("/api/read/chunked")
                 .contentType("application/json")
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .content(MAPPER.writeValueAsBytes(DATA_REQUEST_MODEL)))
+                .content(MAPPER.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(request().asyncNotStarted())
                 .andExpect(status().is5xxServerError())
                 .andDo(print())
