@@ -16,6 +16,7 @@
 #For List of rules to ignore see: https://github.com/hadolint/hadolint#rules
 #and add in this format: - DL3000
 ignored:
+- DL3006
 
 trustedRegistries:
 - docker.io
