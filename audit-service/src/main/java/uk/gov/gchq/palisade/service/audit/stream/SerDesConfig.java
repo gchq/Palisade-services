@@ -185,10 +185,10 @@ public final class SerDesConfig {
                     File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ISO_INSTANT));
                     FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
-                    /*FileOutputStream fos = new FileOutputStream(timestampedFile);
-                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));*/
-                    fileWriter.write(failedAuditString);
-                    fileWriter.close();
+                    FileOutputStream fos = new FileOutputStream(timestampedFile);
+                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
+                    out.write(failedAuditString);
+                    out.close();
                     LOGGER.info("Successfully created error file {}", timestampedFile);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
