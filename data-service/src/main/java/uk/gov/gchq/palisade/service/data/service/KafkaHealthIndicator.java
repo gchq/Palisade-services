@@ -16,24 +16,19 @@
 package uk.gov.gchq.palisade.service.data.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.TopicDescription;
-import org.apache.kafka.common.ConsumerGroupState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
+
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration.Topic;
 
-
 import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;

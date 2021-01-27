@@ -15,12 +15,13 @@
 spring:
   profiles:
     include:
-      - akka
-      - default-config
+    - akka
+    - default-config
 ---
 
 spring:
   profiles: default-config
+
   application:
     name: data-service
   output:
@@ -33,17 +34,17 @@ server:
   port: 8082
 
 management:
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
+    shutdown:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: "*"
-  endpoint:
-    health:
-      show-details: always
-    shutdown:
-      enabled: true
-    kafka:
-      enabled: true
 
 population:
   serialiserProvder: std
