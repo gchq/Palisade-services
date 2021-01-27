@@ -42,6 +42,12 @@ management:
     shutdown:
       enabled: true
 
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
+
 audit:
   implementations:
     stroom:
