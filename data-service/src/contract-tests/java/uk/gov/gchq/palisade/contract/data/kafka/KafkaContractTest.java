@@ -21,9 +21,8 @@ import akka.kafka.ConsumerSettings;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
-import akka.stream.testkit.TestSubscriber.Probe;
+import akka.stream.testkit.TestSubscriber;
 import akka.stream.testkit.javadsl.TestSink;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -47,27 +45,22 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
-
-import reactor.core.publisher.Mono;
 import scala.concurrent.duration.FiniteDuration;
+
+import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.Token;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
-import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 
@@ -85,10 +78,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.AUDIT_SUCCESS_MESSAGE;
-import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.DATA_REQUEST_MODEL;
-import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.SERVICE_URL;
-import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.TOKEN;
 
 /**
  * An external requirement of the service is to audit the client's requests.
@@ -96,20 +85,17 @@ import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.TOKEN;
  */
 @SpringBootTest(
         classes = DataApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
 )
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles("akka-test")
+@ActiveProfiles({"akka-test", "debug"})
 public class KafkaContractTest {
+    public static final String READ_CHUNKED = "/api/read/chunked";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @SpyBean
-    AuditMessageService auditMessageService;
-   // @Autowired
-  //  private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -117,8 +103,47 @@ public class KafkaContractTest {
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
-    @Autowired
-    private WebTestClient webTestClient;
+    /**
+     * Tests the rest endpoint used for mocking a kafka entry point exists and is working as expected, returns HTTP.ACCEPTED.
+     * Then checks the token and headers are correct.
+     */
+    @Test
+    @DirtiesContext
+    void testRestEndpointError() {
+        // Given - we are already listening to the service input
+        ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
+                .withGroupId("test-group")
+                .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
+                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        Probe<ConsumerRecord<String, AuditMessage>> errorProbe = Consumer
+                .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
+                .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
+
+        // When - we POST to the rest endpoint
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        HttpEntity<DataRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        ResponseEntity<Void> response = restTemplate.postForEntity(READ_CHUNKED, entity, Void.class);
+
+        // Then - the REST request was accepted
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        // When - results are pulled from the output stream
+        Probe<ConsumerRecord<String, AuditMessage>> resultSeq = errorProbe.request(1);
+        LinkedList<ConsumerRecord<String, AuditMessage>> results = LongStream.range(0, 1)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(21, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then - the results are as expected
+        assertThat(results)
+                .hasSize(1)
+                .allSatisfy(result -> {
+                    assertThat(result.value())
+                            .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
+                    assertThat(result.key())
+                            .isEqualTo(ContractTestData.REQUEST_TOKEN);
+                });
+    }
 
     /**
      * test the data-service will send a successful message when a request is processed and the client is returned a
@@ -126,9 +151,9 @@ public class KafkaContractTest {
      */
     @Test
     @DirtiesContext
-    void testRestEndpointSuccess() throws Exception {
+    void testRestEndpointSuccess() {
 
-        //   TokenMessagePair tokenMessagePair = new TokenMessagePair(TOKEN, AUDIT_SUCCESS_MESSAGE);
+        TokenMessagePair tokenMessagePair = new TokenMessagePair(ContractTestData.REQUEST_TOKEN, ContractTestData.AUDIT_SUCCESS_MESSAGE);
 
         webTestClient.post()
                 .uri(SERVICE_URL)
@@ -144,7 +169,7 @@ public class KafkaContractTest {
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 
-        Probe<ConsumerRecord<String, AuditMessage>> probe = Consumer
+        TestSubscriber.Probe<ConsumerRecord<String, AuditMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("success-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
@@ -216,8 +241,8 @@ public class KafkaContractTest {
         public static class Config {
 
             private final List<NewTopic> topics = List.of(
-                    new NewTopic("request", 3, (short) 1),
-                    new NewTopic("error", 3, (short) 1));
+                    new NewTopic("success", 1, (short) 1),
+                    new NewTopic("error", 1, (short) 1));
 
             @Bean
             @ConditionalOnMissingBean

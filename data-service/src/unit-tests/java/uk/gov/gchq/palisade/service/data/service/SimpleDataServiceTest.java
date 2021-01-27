@@ -34,8 +34,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.ByteArrayInputStream;
@@ -99,7 +99,7 @@ class SimpleDataServiceTest {
 
 
     // Test data
-    final DataRequestModel dataRequestModel = DataRequestModel.Builder.create().withToken(REQUEST_TOKEN).withLeafResourceId(RESOURCE_ID);
+    final DataRequest dataRequest = DataRequest.Builder.create().withToken(REQUEST_TOKEN).withLeafResourceId(RESOURCE_ID);
     final AuthorisedRequestEntity authorisedEntity = new AuthorisedRequestEntity(
             REQUEST_TOKEN,
             USER,
@@ -114,7 +114,7 @@ class SimpleDataServiceTest {
             .context(CONTEXT)
             .rules(RULES);
 
-    final DataReaderRequestModel dataReaderRequestModel = DataReaderRequestModel.Builder.create()
+    final DataResponse dataResponse = DataResponse.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
@@ -123,7 +123,7 @@ class SimpleDataServiceTest {
     final String testResponseMessage = "test response for data request";
 
     final ResponseWriter responseWriter = new ResponseWriter() {
-        String testData = testResponseMessage;
+        final String testData = testResponseMessage;
 
         @Override
         public void close() throws IOException {
@@ -141,10 +141,10 @@ class SimpleDataServiceTest {
     };
 
     final ResponseWriter errorProneResponseWriter = new ResponseWriter() {
-        String testData = testResponseMessage;
+        final String testData = testResponseMessage;
 
         @Override
-        public void close() throws IOException {
+        public void close() {
 
         }
 
@@ -164,43 +164,38 @@ class SimpleDataServiceTest {
             .writer(errorProneResponseWriter);
 
     /**
-     * Test for {@link SimpleDataService#authoriseRequest(DataRequestModel)}.  If the request is found to be
+     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is found to be
      * authorised, the response will be the relevant information needed to proceed with the request. This will be in the
      * form of a {@code DataReaderRequest}.
      */
     @Test
     void testAuthoriseRequestWithAValidRequest() {
-
-        //given
+        // Given
         when(persistenceLayer.getAsync(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(authorisedEntity)));
 
+        // When
+        CompletableFuture<DataResponse> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
 
-        //when
-        CompletableFuture<DataReaderRequestModel> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequestModel);
-
-        //then
+        // Then
         assertThat(dataReaderRequestCompletableFuture.join())
                 .usingRecursiveComparison()
                 .isEqualTo(readerRequest);
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
-
-
     }
 
     /**
-     * Test for {@link SimpleDataService#authoriseRequest(DataRequestModel)}.  If the request is not valid/not authorised,
+     * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is not valid/not authorised,
      * the method will throw an {@code UnauthorisedAccessException}
      */
     @Test
     void testAuthoriseRequestWithAnInvalidRequest() {
-
-        //given
+        // Given
         when(persistenceLayer.getAsync(any(), any()))
                 .thenThrow(new ForbiddenException("test exception")); // temp dataRequest
 
-        // when & then
-        Exception unauthorisedAccessException = assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequestModel), "should throw UnauthorisedAccessException");
+        // When & Then
+        Exception unauthorisedAccessException = assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequest), "should throw UnauthorisedAccessException");
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
@@ -212,18 +207,16 @@ class SimpleDataServiceTest {
      */
     @Test
     void testAuthoriseRequestWithARead() {
-
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-
-        //given
+        // Given
         when(dataReader.read(any(), any(), any())).thenReturn(dataReaderResponse);
 
-        //when
+        // When
         CompletableFuture<Boolean> completed = simpleDataService
-                .read(dataReaderRequestModel, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
+                .read(dataResponse, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
         completed.join();
-        String outputString = new String(outputStream.toByteArray());
+        String outputString = outputStream.toString();
         assertThat(outputString).isEqualTo(testResponseMessage);
         verify(dataReader, times(1)).read(any(), any(), any());
 

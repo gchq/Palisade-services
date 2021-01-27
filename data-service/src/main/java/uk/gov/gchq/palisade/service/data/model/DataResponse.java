@@ -26,17 +26,17 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The DataReaderRequest represents reference for the filtered resource that the user is authorised to retrieve.
+ * The DataResponse represents reference for the filtered resource that the user is authorised to retrieve.
  * This will be used to provide the link to the resource that will be forwarded to the user to be streamed.
  */
-public class DataReaderRequestModel {
+public final class DataResponse {
 
     private final LeafResource resource; //resource that is to be viewed
     private final User user; //user that is requesting the information
     private final Context context;  //context of the request
     private final Rules<?> rules;  //rules that apply to the resource
 
-    private DataReaderRequestModel(
+    private DataResponse(
             final LeafResource resource,
             final User user,
             final Context context,
@@ -86,7 +86,7 @@ public class DataReaderRequestModel {
          */
         public static IResource create() {
             return resource -> user -> context -> rules ->
-                    new DataReaderRequestModel(resource, user, context, rules);
+                    new DataResponse(resource, user, context, rules);
         }
 
         /**
@@ -136,9 +136,9 @@ public class DataReaderRequestModel {
              * Adds the rules to apply to the resource
              *
              * @param rules that are to apply to the resource
-             * @return interface {@link DataReaderRequestModel} for the completed class from the builder
+             * @return interface {@link DataResponse} for the completed class from the builder
              */
-            DataReaderRequestModel withRules(Rules<?> rules);
+            DataResponse withRules(Rules<?> rules);
 
         }
     }
@@ -150,10 +150,10 @@ public class DataReaderRequestModel {
             return true;
         }
 
-        if (!(o instanceof DataReaderRequestModel)) {
+        if (!(o instanceof DataResponse)) {
             return false;
         }
-        DataReaderRequestModel that = (DataReaderRequestModel) o;
+        DataResponse that = (DataResponse) o;
         return resource.equals(that.resource) &&
                 user.equals(that.user) &&
                 context.equals(that.context) &&
@@ -169,11 +169,11 @@ public class DataReaderRequestModel {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", DataReaderRequestModel.class.getSimpleName() + "[", "]")
-                .add("resource=                " + resource)
-                .add("user=                " + user)
-                .add("context=                " + context)
-                .add("rules=                " + rules)
+        return new StringJoiner(", ", DataResponse.class.getSimpleName() + "[", "]")
+                .add("resource" + resource)
+                .add("user=" + user)
+                .add("context=" + context)
+                .add("rules=" + rules)
                 .toString();
     }
 }

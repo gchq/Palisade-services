@@ -39,8 +39,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
@@ -109,11 +109,11 @@ class RedisPersistenceContractTest {
         //should   be using the PersistenceLayer not the SimpleDataService
 
         // When
-        DataRequestModel dataRequestModel = DataRequestModel.Builder.create()
+        DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
                 .withLeafResourceId(readerRequest.getResource().getId());
-        CompletableFuture<DataReaderRequestModel> futureDataReaderRequestModel = service.authoriseRequest(dataRequestModel);
-        DataReaderRequestModel dataReaderRequestModel = futureDataReaderRequestModel.join();
+        CompletableFuture<DataResponse> futureDataReaderRequestModel = service.authoriseRequest(dataRequest);
+        DataResponse dataResponse = futureDataReaderRequestModel.join();
         // Then
         /*
         assertThat(isRequestAuthorised.join())

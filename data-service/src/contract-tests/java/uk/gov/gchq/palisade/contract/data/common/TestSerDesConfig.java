@@ -21,7 +21,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -54,10 +54,10 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<DataRequestModel> requestValueDeserializer() {
+    public static Deserializer<DataRequest> requestValueDeserializer() {
         return (String ignored, byte[] palisadeResponse) -> {
             try {
-                return MAPPER.readValue(palisadeResponse, DataRequestModel.class);
+                return MAPPER.readValue(palisadeResponse, DataRequest.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeResponse, Charset.defaultCharset()), e);
             }
@@ -79,11 +79,11 @@ public final class TestSerDesConfig {
      * @return an appropriate value deserialiser for the topic's message content
      */
     public static Deserializer<AuditMessage> valueDeserializer() {
-        return (String ignored, byte[] auditErrorMessage) -> {
+        return (String ignored, byte[] auditMessage) -> {
             try {
-                return MAPPER.readValue(auditErrorMessage, AuditMessage.class);
+                return MAPPER.readValue(auditMessage, AuditMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditErrorMessage, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
             }
         };
     }

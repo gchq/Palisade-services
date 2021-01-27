@@ -23,14 +23,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class AuditableDataReaderResponse {
+public class AuditableDataResponse {
 
     private final String token;
     private final @Nullable AuditSuccessMessage auditSuccessMessage;
     private final @Nullable AuditErrorMessage auditErrorMessage;
 
 
-    private AuditableDataReaderResponse(
+    private AuditableDataResponse(
             final String token,
             final @Nullable AuditSuccessMessage auditSuccessMessage,
             final @Nullable AuditErrorMessage auditErrorMessage) {
@@ -71,7 +71,7 @@ public class AuditableDataReaderResponse {
          * @return the composed immutable object
          */
         public static IToken create() {
-            return  token ->  success -> error ->  new AuditableDataReaderResponse(token, success, error);
+            return  token ->  success -> error ->  new AuditableDataResponse(token, success, error);
         }
 
         /**
@@ -109,9 +109,9 @@ public class AuditableDataReaderResponse {
              * Adds the attributes for the message.
              *
              * @param auditErrorMessage timestamp for the request.
-             * @return interface {@link AuditableDataReaderResponse} for the final step in the build.
+             * @return interface {@link AuditableDataResponse} for the final step in the build.
              */
-            AuditableDataReaderResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage);
+            AuditableDataResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage);
         }
 
     }
@@ -122,10 +122,10 @@ public class AuditableDataReaderResponse {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditableDataReaderResponse)) {
+        if (!(o instanceof AuditableDataResponse)) {
             return false;
         }
-        AuditableDataReaderResponse that = (AuditableDataReaderResponse) o;
+        AuditableDataResponse that = (AuditableDataResponse) o;
         return Objects.equals(auditSuccessMessage, that.auditSuccessMessage) &&
                 Objects.equals(auditErrorMessage, that.auditErrorMessage);
     }
@@ -139,7 +139,7 @@ public class AuditableDataReaderResponse {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditableDataReaderResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AuditableDataResponse.class.getSimpleName() + "[", "]")
                 .add("auditSuccessMessage=                " + auditSuccessMessage)
                 .add("auditErrorMessage=                " + auditErrorMessage)
                 .toString();

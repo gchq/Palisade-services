@@ -23,42 +23,36 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_READER_REQUEST_MODEL;
-
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.DATA_RESPONSE;
 
 @JsonTest
-@ContextConfiguration(classes = {DataRequestModelTest.class})
-class DataReaderRequestModelTest {
+@ContextConfiguration(classes = {DataRequestTest.class})
+class DataResponseTest {
 
     @Autowired
-    private JacksonTester<DataReaderRequestModel> jacksonTester;
+    private JacksonTester<DataResponse> jacksonTester;
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link DataReaderRequestModel} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link DataResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
     void testGroupedDependantDataRequestReaderSerialisingAndDeserialising() throws IOException {
+        JsonContent<DataResponse> dataResponseJsonContent = jacksonTester.write(DATA_RESPONSE);
+        ObjectContent<DataResponse> dataResponseObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
+        DataResponse dataResponseObjectContentObject = dataResponseObjectContent.getObject();
 
-        JsonContent<DataReaderRequestModel> dataReaderRequestJsonContent = jacksonTester.write(DATA_READER_REQUEST_MODEL);
-        ObjectContent<DataReaderRequestModel> dataReaderRequestObjectContent = jacksonTester.parse(dataReaderRequestJsonContent.getJson());
-        DataReaderRequestModel dataReaderRequestModelObjectContentObject = dataReaderRequestObjectContent.getObject();
-
-        assertAll("DataRequestSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataReaderRequestModelObjectContentObject).as("Check using equalTo").isEqualTo(DATA_READER_REQUEST_MODEL),
-                        () -> assertThat(dataReaderRequestModelObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_READER_REQUEST_MODEL)
-                )
-        );
+        assertThat(dataResponseObjectContentObject)
+                .usingRecursiveComparison().
+                isEqualTo(DATA_RESPONSE);
     }
 
 }

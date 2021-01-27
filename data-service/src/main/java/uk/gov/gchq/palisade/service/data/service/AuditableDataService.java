@@ -15,15 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.data.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderRequest;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataReaderResponse;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 
 import java.io.OutputStream;
 import java.util.Collections;
@@ -36,10 +33,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * response wrapped with the data or the exception when an error has occurred.
  */
 public class AuditableDataService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditableDataService.class);
-
     private final DataService dataService;
 
+    /**
+     * AuditableDataService constructor
+     *
+     * @param dataService the current Data Service implemetation
+     */
     public AuditableDataService(final DataService dataService) {
         this.dataService = dataService;
     }
@@ -47,46 +47,48 @@ public class AuditableDataService {
     /**
      * Provides a wrapped message with the reference to the resources that are to be provided to the client or an
      * error message
-     * @param dataRequestModel request information from the client
+     *
+     * @param dataRequest request information from the client
      * @return reference to the resource information or error message
      */
-    public CompletableFuture<AuditableDataReaderRequest> authoriseRequest(final DataRequestModel dataRequestModel) {
-        return dataService.authoriseRequest(dataRequestModel)
-                .thenApply(dataReaderRequest -> AuditableDataReaderRequest.Builder.create()
-                        .withDataRequestModel(dataRequestModel)
-                        .withDataReaderRequestModel(dataReaderRequest)
+    public CompletableFuture<AuditableDataRequest> authoriseRequest(final DataRequest dataRequest) {
+        return dataService.authoriseRequest(dataRequest)
+                .thenApply(dataResponse -> AuditableDataRequest.Builder.create()
+                        .withDataRequest(dataRequest)
+                        .withDataResponse(dataResponse)
                         .withErrorMessage(null))
-                .exceptionally(e -> AuditableDataReaderRequest.Builder.create()
-                        .withDataRequestModel(dataRequestModel)
-                        .withDataReaderRequestModel(null)
-                        .withErrorMessage(AuditErrorMessage.Builder.create(dataRequestModel)
+                .exceptionally(e -> AuditableDataRequest.Builder.create()
+                        .withDataRequest(dataRequest)
+                        .withDataResponse(null)
+                        .withErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
                                 .withAttributes(Collections.singletonMap("method", "authoriseRequest"))
                                 .withError(e)));
     }
 
     /**
      * Provides an {@link OutputStream}
-     * @param auditableDataReaderRequest saf
-     * @param outputStream asdf
+     *
+     * @param auditableDataRequest saf
+     * @param outputStream         asdf
      * @return asd
      */
-    public CompletableFuture<AuditableDataReaderResponse> read(final AuditableDataReaderRequest auditableDataReaderRequest, final OutputStream outputStream) {
-        DataRequestModel dataRequestModel = auditableDataReaderRequest.getDataRequestModel();
-        DataReaderRequestModel dataReaderRequestModel = auditableDataReaderRequest.getDataReaderRequestModel();
+    public CompletableFuture<AuditableDataResponse> read(final AuditableDataRequest auditableDataRequest, final OutputStream outputStream) {
+        DataRequest dataRequest = auditableDataRequest.getDataRequest();
+        DataResponse dataResponse = auditableDataRequest.getDataResponse();
         AtomicLong recordsProcessed = new AtomicLong(0);
         AtomicLong recordsReturned = new AtomicLong(0);
 
-        return dataService.read(dataReaderRequestModel, outputStream, recordsProcessed, recordsReturned)
-                .thenApply(pair -> AuditableDataReaderResponse.Builder.create()
-                        .withToken(dataRequestModel.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataReaderRequest)
+        return dataService.read(dataResponse, outputStream, recordsProcessed, recordsReturned)
+                .thenApply(pair -> AuditableDataResponse.Builder.create()
+                        .withToken(dataRequest.getToken())
+                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
                         .withAuditErrorMessage(null))
-                .exceptionally(e -> AuditableDataReaderResponse.Builder.create()
-                        .withToken(dataRequestModel.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataReaderRequest)
+                .exceptionally(e -> AuditableDataResponse.Builder.create()
+                        .withToken(dataRequest.getToken())
+                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
-                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableDataReaderRequest)
+                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableDataRequest)
                                 .withAttributes(Collections.singletonMap("method", "read"))
                                 .withError(e)));
     }

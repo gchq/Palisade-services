@@ -73,40 +73,40 @@ public final class AuditErrorMessage extends AuditMessage {
         }
 
         /**
-         * Starter method for the Builder class that uses both the {@link DataRequestModel} objects for the construction of
+         * Starter method for the Builder class that uses both the {@link DataRequest} objects for the construction of
          * the {@code AuditErrorMessage}.  This method expects there to be a {@code DataRequest} to start the build and
          * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
            *
-         * @param auditableDataReaderRequest   the client request received by the data-service
+         * @param auditableDataRequest   the client request received by the data-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
-        public static IAttributes create(final AuditableDataReaderRequest auditableDataReaderRequest) {
-            DataRequestModel dataRequestModel =  auditableDataReaderRequest.getDataRequestModel();
-            DataReaderRequestModel dataReaderRequestModel =  auditableDataReaderRequest.getDataReaderRequestModel();
+        public static IAttributes create(final AuditableDataRequest auditableDataRequest) {
+            DataRequest dataRequest =  auditableDataRequest.getDataRequest();
+            DataResponse dataResponse =  auditableDataRequest.getDataResponse();
 
             return create()
-                    .withLeafResourceId(dataRequestModel.getLeafResourceId())
-                    .withToken(dataRequestModel.getToken())
-                    .withUserId(dataReaderRequestModel.getUser().getUserId().getId())
-                    .withResourceId(dataReaderRequestModel.getResource().getId())
-                    .withContext(dataReaderRequestModel.getContext());
+                    .withLeafResourceId(dataRequest.getLeafResourceId())
+                    .withToken(dataRequest.getToken())
+                    .withUserId(dataResponse.getUser().getUserId().getId())
+                    .withResourceId(dataResponse.getResource().getId())
+                    .withContext(dataResponse.getContext());
         }
 
         /**
-         * Starter method for the Builder class that uses both the {@link DataRequestModel} and the {@link DataReaderRequest}
+         * Starter method for the Builder class that uses both the {@link DataRequest} and the {@link DataReaderRequest}
          * objects for the construction of the {@code AuditErrorMessage}.
          * This method expects there to be a {@code DataRequest} and a {@code DataReaderRequest} to start the build and
          * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
          *
-         * @param dataRequestModel the authorised request stored by the attribute-masking-service
+         * @param dataRequest the authorised request stored by the attribute-masking-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
-        public static IAttributes create(final DataRequestModel dataRequestModel) {
+        public static IAttributes create(final DataRequest dataRequest) {
             return create()
-                    .withLeafResourceId(dataRequestModel.getLeafResourceId())
-                    .withToken(dataRequestModel.getToken())
+                    .withLeafResourceId(dataRequest.getLeafResourceId())
+                    .withToken(dataRequest.getToken())
                     .withUserId(null)
                     .withResourceId(null)
                     .withContext(null);

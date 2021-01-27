@@ -28,18 +28,18 @@ import java.util.StringJoiner;
 
 /**
  * The DataRequest represents the client's request for resource after is has been prepared by the Palisade services.
- * This message is created with the information provided to the client by the filtered-resource-service.  It is then
+ * This message is created with the information provided to the client by the filtered-resource-service. It is then
  * routed via the resource's connectionDetail to the appropriate instance of a data-service.
  * This message is used to retrieve the {@link DataReaderRequest} which contains the references to the requested resource.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class DataRequestModel {
+public final class DataRequest {
 
     private final String token;  // Unique identifier for the client's request
     private final String leafResourceId;  // Leaf Resource ID that that is being asked to access
 
     @JsonCreator
-    private DataRequestModel(
+    private DataRequest(
             final @JsonProperty("token") String token,
             final @JsonProperty("leafResourceId") String leafResourceId) {
 
@@ -73,7 +73,7 @@ public final class DataRequestModel {
          */
         public static IToken create() {
             return token -> leafResourceId ->
-                    new DataRequestModel(token, leafResourceId);
+                    new DataRequest(token, leafResourceId);
         }
 
         /**
@@ -99,7 +99,7 @@ public final class DataRequestModel {
              * @param leafResourceId resource ID for the request.
              * @return the completed DataRequest object
              */
-            DataRequestModel withLeafResourceId(String leafResourceId);
+            DataRequest withLeafResourceId(String leafResourceId);
         }
 
     }
@@ -110,10 +110,10 @@ public final class DataRequestModel {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DataRequestModel)) {
+        if (!(o instanceof DataRequest)) {
             return false;
         }
-        final DataRequestModel that = (DataRequestModel) o;
+        final DataRequest that = (DataRequest) o;
         return Objects.equals(token, that.token) &&
                 Objects.equals(leafResourceId, that.leafResourceId);
     }
@@ -127,7 +127,7 @@ public final class DataRequestModel {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", DataRequestModel.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", DataRequest.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .add("leafResourceId='" + leafResourceId + "'")
                 .toString();

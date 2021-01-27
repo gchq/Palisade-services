@@ -22,34 +22,34 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class contains the authorised access to the resource.  This class is a container for the {@link DataRequestModel}
- * {@link DataReaderRequestModel} and {@link AuditErrorMessage} during stream processing.  The container will hold the
+ * The class contains the authorised access to the resource.  This class is a container for the {@link DataRequest}
+ * {@link DataResponse} and {@link AuditErrorMessage} during stream processing.  The container will hold the
  * {@code AuditErrorMessage} when there has been an error in the process.
  */
-public class AuditableDataReaderRequest {
+public class AuditableDataRequest {
 
-    private final DataRequestModel dataRequestModel;
-    private final DataReaderRequestModel dataReaderRequestModel;
+    private final DataRequest dataRequest;
+    private final DataResponse dataResponse;
     private final AuditErrorMessage auditErrorMessage;
 
-    private AuditableDataReaderRequest(
-            final DataRequestModel dataRequestModel,
-            final DataReaderRequestModel dataReaderRequestModel,
+    private AuditableDataRequest(
+            final DataRequest dataRequest,
+            final DataResponse dataResponse,
             final AuditErrorMessage auditErrorMessage) {
 
-        this.dataRequestModel = dataRequestModel;
-        this.dataReaderRequestModel = dataReaderRequestModel;
+        this.dataRequest = dataRequest;
+        this.dataResponse = dataResponse;
         this.auditErrorMessage = auditErrorMessage;
     }
 
     @Generated
-    public DataRequestModel getDataRequestModel() {
-        return dataRequestModel;
+    public DataRequest getDataRequest() {
+        return dataRequest;
     }
 
     @Generated
-    public DataReaderRequestModel getDataReaderRequestModel() {
-        return dataReaderRequestModel;
+    public DataResponse getDataResponse() {
+        return dataResponse;
     }
 
     @Generated
@@ -67,36 +67,36 @@ public class AuditableDataReaderRequest {
          *
          * @return the composed immutable object
          */
-        public static IDataRequestModel create() {
-            return dataRequest -> readerRequestModel -> error ->
-                    new AuditableDataReaderRequest(dataRequest, readerRequestModel, error);
+        public static IDataRequest create() {
+            return dataRequest -> dataResponse -> error ->
+                    new AuditableDataRequest(dataRequest, dataResponse, error);
         }
 
         /**
-         * Adds the {@link DataRequestModel} to the container
+         * Adds the {@link DataRequest} to the container
          */
-        public interface IDataRequestModel {
+        public interface IDataRequest {
             /**
              * Adds the dataRequest.
              *
              * @param dataRequest initial request data
-             * @return interface {@link IDataReaderRequestModel} for the next step of the build
+             * @return interface {@link IDataResponse} for the next step of the build
              */
-            IDataReaderRequestModel withDataRequestModel(DataRequestModel dataRequest);
+            IDataResponse withDataRequest(DataRequest dataRequest);
 
         }
 
         /**
-         * Compose with {@link DataReaderRequestModel}
+         * Compose with {@link DataResponse}
          */
-        public interface IDataReaderRequestModel {
+        public interface IDataResponse {
             /**
              * Adds the data from the
              *
-             * @param dataReaderRequestModel or null
+             * @param dataResponse or null
              * @return interface {@link IError} for the next step of the build.
              */
-            IError withDataReaderRequestModel(DataReaderRequestModel dataReaderRequestModel);
+            IError withDataResponse(DataResponse dataResponse);
 
         }
 
@@ -110,7 +110,7 @@ public class AuditableDataReaderRequest {
              * @param auditErrorMessage or null
              * @return interface {@link IError} for the completed class from the builder.
              */
-            AuditableDataReaderRequest withErrorMessage(AuditErrorMessage auditErrorMessage);
+            AuditableDataRequest withErrorMessage(AuditErrorMessage auditErrorMessage);
 
         }
     }
@@ -121,27 +121,27 @@ public class AuditableDataReaderRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditableDataReaderRequest)) {
+        if (!(o instanceof AuditableDataRequest)) {
             return false;
         }
-        AuditableDataReaderRequest that = (AuditableDataReaderRequest) o;
-        return dataRequestModel.equals(that.dataRequestModel) &&
-                Objects.equals(dataReaderRequestModel, that.dataReaderRequestModel) &&
+        AuditableDataRequest that = (AuditableDataRequest) o;
+        return dataRequest.equals(that.dataRequest) &&
+                Objects.equals(dataResponse, that.dataResponse) &&
                 Objects.equals(auditErrorMessage, that.auditErrorMessage);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(dataRequestModel, dataReaderRequestModel, auditErrorMessage);
+        return Objects.hash(dataRequest, dataResponse, auditErrorMessage);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditableDataReaderRequest.class.getSimpleName() + "[", "]")
-                .add("dataRequestModel=                " + dataRequestModel)
-                .add("dataReaderRequestModel=                " + dataReaderRequestModel)
+        return new StringJoiner(", ", AuditableDataRequest.class.getSimpleName() + "[", "]")
+                .add("dataRequestModel=                " + dataRequest)
+                .add("dataResponse=                " + dataResponse)
                 .add("auditErrorMessage=                " + auditErrorMessage)
                 .toString();
     }

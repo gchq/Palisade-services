@@ -17,20 +17,20 @@ package uk.gov.gchq.palisade.service.data.model;
 
 import akka.japi.Pair;
 
-public class TokenMessagePair  extends Pair<String, AuditMessage> {
+/**
+ * The type Token request pair.
+ */
+public class TokenMessagePair extends Pair<String, AuditMessage> {
+
+    private static final long serialVersionUID = 1L;
+
     /**
-     * The type Token request pair.
+     * Instantiates a new Token request pair.
+     *
+     * @param token        the token
+     * @param auditMessage the original request
      */
-
-        private static final long serialVersionUID = 1L;
-
-        /**
-         * Instantiates a new Token request pair.
-         *
-         * @param token           the token
-         * @param auditMessage the original request
-         */
-        public TokenMessagePair(final String token, final AuditMessage auditMessage) {
-            super(token, auditMessage);
-        }
+    public TokenMessagePair(final String token, final AuditMessage auditMessage) {
+        super(token, auditMessage);
+    }
 }

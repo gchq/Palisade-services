@@ -27,8 +27,8 @@ import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
-import uk.gov.gchq.palisade.service.data.model.DataReaderRequestModel;
-import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.IOException;
@@ -63,14 +63,15 @@ public class SimpleDataService implements DataService {
     /**
      * Query for the references.  It will return the information needed to retrieve the resources.  If there is no
      * data to be returned, a {@link ForbiddenException} is thrown.
-     * @param dataRequestModel data provided by the client for requesting the resource
+     *
+     * @param dataRequest data provided by the client for requesting the resource
      * @return reference to the resources that are to be returned to client
      */
-    public CompletableFuture<DataReaderRequestModel> authoriseRequest(final DataRequestModel dataRequestModel) {
-        LOGGER.debug("Querying persistence for token {} and resource {}", dataRequestModel.getToken(), dataRequestModel.getLeafResourceId());
-        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequestModel.getToken(), dataRequestModel.getLeafResourceId());
+    public CompletableFuture<DataResponse> authoriseRequest(final DataRequest dataRequest) {
+        LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
+        CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
         return futureRequestEntity.thenApply(maybeEntity -> maybeEntity.map(
-                entity -> DataReaderRequestModel.Builder.create()
+                entity -> DataResponse.Builder.create()
                         .withResource(entity.getLeafResource())
                         .withUser(entity.getUser())
                         .withContext(entity.getContext())
@@ -81,13 +82,14 @@ public class SimpleDataService implements DataService {
 
     /**
      * Includes the resources into the OutputStream that is to be provided to the client
+     *
      * @param readerRequestModel the information for the resources in the context of the request
-     * @param out an {@link OutputStream} to write the stream of resources to (after applying rules)
-     * @param recordsProcessed number of records that have been processed
-     * @param recordsReturned number of records that have been returned
+     * @param out                an {@link OutputStream} to write the stream of resources to (after applying rules)
+     * @param recordsProcessed   number of records that have been processed
+     * @param recordsReturned    number of records that have been returned
      * @return boolean indicating that the process has been successful
      */
-    public CompletableFuture<Boolean> read(final DataReaderRequestModel readerRequestModel, final OutputStream out,
+    public CompletableFuture<Boolean> read(final DataResponse readerRequestModel, final OutputStream out,
                                            final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
 
         return CompletableFuture.supplyAsync(() -> {
