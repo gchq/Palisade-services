@@ -16,7 +16,6 @@
 
 package uk.gov.gchq.palisade.contract.data.redis;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -28,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.GenericContainer;
+
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.User;
 import uk.gov.gchq.palisade.contract.data.config.model.Employee;
@@ -44,7 +44,6 @@ import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,7 +85,7 @@ class RedisPersistenceContractTest {
         assertThat(service).isNotNull();
     }
 
-  //  @Test
+    //  @Test
     void testAuthorisedRequestsAreRetrievedFromRedis() {
         // Given
         String token = "token";

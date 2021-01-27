@@ -28,7 +28,6 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +48,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.KafkaContainer;
+
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
-import uk.gov.gchq.palisade.service.data.service.DataService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 
@@ -67,7 +65,6 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.mockito.ArgumentMatchers.any;
 import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.AUDIT_SUCCESS_MESSAGE;
 import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.TOKEN;
 
@@ -79,7 +76,7 @@ import static uk.gov.gchq.palisade.contract.data.common.CommonTestData.TOKEN;
         classes = DataApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {"akka.discovery.config.services.kafka.from-config=false"}
-        )
+)
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
 @ActiveProfiles("akka-test")
@@ -102,7 +99,7 @@ public class KafkaContractTest {
      */
     @Test
     @DirtiesContext
-    void testRestEndpointSuccess(){
+    void testRestEndpointSuccess() {
 
         TokenMessagePair tokenMessagePair = new TokenMessagePair(TOKEN, AUDIT_SUCCESS_MESSAGE);
 

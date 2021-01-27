@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
+
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequestModel;
 
