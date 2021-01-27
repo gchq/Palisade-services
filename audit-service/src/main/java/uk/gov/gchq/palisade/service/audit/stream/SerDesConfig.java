@@ -29,9 +29,12 @@ import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -181,9 +184,10 @@ public final class SerDesConfig {
                     File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ISO_INSTANT));
-                    FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
-                    fileWriter.write(failedAuditString);
-                    fileWriter.close();
+                    FileOutputStream fos = new FileOutputStream(timestampedFile);
+                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
+                    out.write(failedAuditString);
+                    out.close();
                     LOGGER.info("Successfully created error file {}", timestampedFile);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
