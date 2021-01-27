@@ -65,7 +65,7 @@ akka:
       services:
         kafka:
           endpoints:
-            - host: "localhost"
+          - host: "localhost"
 
 logging:
   level:

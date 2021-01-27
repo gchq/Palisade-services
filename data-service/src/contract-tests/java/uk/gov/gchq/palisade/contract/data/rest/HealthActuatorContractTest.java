@@ -15,6 +15,7 @@
  */
 package uk.gov.gchq.palisade.contract.data.rest;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,9 +36,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * and is being used to monitor the "health" of the palisade service.  If there is an indication that this service has
  * fallen over, this information can be used to restore the service.
  */
-@SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"akka-test"})
-@TestPropertySource(properties = "management.health.kafka.enabled=false")
+@SpringBootTest(
+        classes = {DataApplication.class},
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"management.health.kafka.enabled=false"}
+)
+@ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
 
     @Autowired
@@ -50,13 +54,10 @@ class HealthActuatorContractTest {
 
     @Test
     void testServiceIsHealthy() {
-        // Given that the service is running (and presumably healthy)
-
-        // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCodeValue()).isEqualTo(200);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String body = responseEntity.getBody();
+        assertThat(body).contains("\"status\":\"UP\"");
     }
 
 }

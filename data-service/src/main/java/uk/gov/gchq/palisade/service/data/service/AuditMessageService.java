@@ -24,7 +24,7 @@ import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Service for sending messages to the audit-service. Messages can be either success or error messages.
+ * Service for sending messages to the audit-service. Messages can be either success or error message type.
  */
 public class AuditMessageService {
 
@@ -37,7 +37,7 @@ public class AuditMessageService {
     }
 
     /**
-     *  audit-service
+     *  Sends messages to the audit-service using a Kafka stream.
      *
      * @param tokenMessagePair the constructed message detailing the resource read, the rules applied and other metadata
      * @implNote Any implementation of this should ensure it has confirmation that the message has been persisted downstream.
