@@ -119,6 +119,13 @@ public final class PalisadeSystemResponse {
                     new PalisadeSystemResponse(userId, resourceId, context);
         }
 
+        /**
+         * Taking a request, returns a {@link PalisadeSystemResponse} containing the same userId,
+         * resourceId and a newly created Context object for use downstream
+         *
+         * @param request the request that has been sent from the client, containing a userId, resourceId and context
+         * @return a PalisadeSystemResponse used downstream containing the new Context object
+         */
         public static PalisadeSystemResponse create(final PalisadeClientRequest request) {
             return new PalisadeSystemResponse(
                     request.getUserId(),
