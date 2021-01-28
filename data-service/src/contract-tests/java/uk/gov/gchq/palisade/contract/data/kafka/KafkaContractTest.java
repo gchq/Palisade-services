@@ -22,6 +22,7 @@ import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
 import akka.stream.testkit.TestSubscriber;
+import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -155,12 +156,6 @@ public class KafkaContractTest {
 
         TokenMessagePair tokenMessagePair = new TokenMessagePair(ContractTestData.REQUEST_TOKEN, ContractTestData.AUDIT_SUCCESS_MESSAGE);
 
-        webTestClient.post()
-                .uri(SERVICE_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(DATA_REQUEST_MODEL), DataRequestModel.class);
-
-/*
         // Given - we are already listening to the service input
         ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
@@ -173,41 +168,7 @@ public class KafkaContractTest {
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("success-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
-        /**
-         * MvcResult result = mockMvc.perform(post("/read/chunked")
-         *                 .contentType("application/json")
-         *                 .characterEncoding(StandardCharsets.UTF_8.name())
-         *                 .content(MAPPER.writeValueAsBytes(DATA_REQUEST_MODEL)))
-         */
 
-
-        //Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(TOKEN));
-        // HttpEntity<DataRequestModel> entity = new HttpEntity<>(DATA_REQUEST_MODEL, new LinkedMultiValueMap<>(headers));
-        // ResponseEntity<Void> response = restTemplate.postForEntity(SERVICE_URL, entity, Void.class);
-
-        // Then - the REST request was accepted
-        //   assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
-        // When - results are pulled from the output stream
-        /*
-        Probe<ConsumerRecord<String, AuditMessage>> resultSeq = probe.request(recordCount);
-        LinkedList<ConsumerRecord<String, AuditMessage>> results = LongStream.range(0, recordCount)
-                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(20 + recordCount, TimeUnit.SECONDS)))
-                .collect(Collectors.toCollection(LinkedList::new));
-
-
-
-         */
-
-
-        /*
-
-        // Then - the results are as expected
-        // The request was written with the correct header
-        assertAll("Records returned are correct",
-                () -> assertThat(results)
-
-                        .hasSize((int) recordCount),
-*/
     }
 
 
