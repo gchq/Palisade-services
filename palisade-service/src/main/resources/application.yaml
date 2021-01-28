@@ -15,8 +15,8 @@
 spring:
   profiles:
     include:
-      - akka
-      - default-config
+    - akka
+    - default-config
 ---
 
 spring:

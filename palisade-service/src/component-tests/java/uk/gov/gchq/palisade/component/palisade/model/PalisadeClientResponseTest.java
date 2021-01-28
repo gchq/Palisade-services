@@ -23,7 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
 
 import java.io.IOException;
 
@@ -31,39 +31,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
-@ContextConfiguration(classes = PalisadeResponseTest.class)
-class PalisadeResponseTest {
+@ContextConfiguration(classes = PalisadeClientResponseTest.class)
+class PalisadeClientResponseTest {
 
     @Autowired
-    private JacksonTester<PalisadeResponse> jsonTester;
+    private JacksonTester<PalisadeClientResponse> jsonTester;
 
     /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, de-serialises and tests against the original response Object.
      *
-     * @throws IOException throws if the {@link PalisadeResponse} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link PalisadeClientResponse} object cannot be converted to a JsonContent.
      *                     This equates to a failure to seralise or deseralise the string.
      */
     @Test
-    void testPalisadeResponseSerialisingAndDeserialising() throws IOException {
-        PalisadeResponse palisadeResponse = new PalisadeResponse("tokenID");
+    void testPalisadeClientResponseSerialisingAndDeserialising() throws IOException {
+        PalisadeClientResponse palisadeClientResponse = new PalisadeClientResponse("tokenID");
 
-        JsonContent<PalisadeResponse> responseJsonContent = jsonTester.write(palisadeResponse);
+        JsonContent<PalisadeClientResponse> responseJsonContent = jsonTester.write(palisadeClientResponse);
 
-        ObjectContent<PalisadeResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
-        PalisadeResponse palisadeResponseObject = responseObjectContent.getObject();
+        ObjectContent<PalisadeClientResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
+        PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
 
-        assertAll("Palisade Response Serialising and Deseralising Comparison",
+        assertAll("Palisade Client Response Serialising and Deseralising Comparison",
                 () -> assertAll("Palisade Response Serialising Compared To String",
                         () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token").isEqualTo("tokenID")
                 ),
-                () -> assertAll("Palisade Response Deserialising Compared To Object",
-                        () -> assertThat(palisadeResponseObject.getToken()).isEqualTo(palisadeResponse.getToken())
+                () -> assertAll("Palisade Client Response Deserialising Compared To Object",
+                        () -> assertThat(palisadeClientResponseObject.getToken()).isEqualTo(palisadeClientResponse.getToken())
                 ),
                 () -> assertAll("Object Comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeResponseObject).isEqualTo(palisadeResponse)
+                        () -> assertThat(palisadeClientResponseObject).isEqualTo(palisadeClientResponse)
                 )
         );
     }

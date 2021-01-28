@@ -25,5 +25,5 @@ public enum StreamMarker {
     START,
     END;
 
-    public static final String HEADER = "X-Stream-Marker";
+    public static final String HEADER = "x-stream-marker";
 }

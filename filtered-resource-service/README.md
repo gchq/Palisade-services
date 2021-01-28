@@ -148,7 +148,7 @@ The Filtered Resource Service will send audit messages, specifically an `AuditEr
 
 1. Mimicking the Topic-Offset Service:
    ```bash
-   curl -X POST http://filtered-resource-service/api/masked-resource-offset -H "X-Request-Token: test-request-token" -H "content-type: application/json" --data '{"queuePointer":0}'
+   curl -X POST http://filtered-resource-service/api/masked-resource-offset -H "X-Request-Token: test-request-token" -H "content-type: application/json" --data '{"commitOffset":0}'
    ```
 
 ### JSON WS Interaction

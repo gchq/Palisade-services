@@ -22,7 +22,7 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
  * If desired, this could extend eg. UUID if more meaningful Token processing was desired
  */
 public final class Token {
-    public static final String HEADER = "X-Request-Token";
+    public static final String HEADER = "x-request-token";
 
     private Token() {
         // Tokens are just strings, no need to actually have a class for them

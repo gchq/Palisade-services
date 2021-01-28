@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 
 import uk.gov.gchq.palisade.component.palisade.CommonTestData;
 import uk.gov.gchq.palisade.service.palisade.config.ApplicationConfiguration;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
@@ -78,9 +79,10 @@ class PalisadeServiceComponentTest extends CommonTestData {
         if (sinkCollection.size() < 1) {
             TimeUnit.MILLISECONDS.sleep(100);
         }
+        AuditablePalisadeSystemResponse auditableResponse = AuditablePalisadeSystemResponse.Builder.create().withPalisadeResponse(SYSTEM_RESPONSE);
         assertThat(sinkCollection)
                 .hasSize(1)
                 .usingRecursiveComparison()
-                .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), AUDITABLE_WITH_REQUEST)));
+                .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), auditableResponse)));
     }
 }

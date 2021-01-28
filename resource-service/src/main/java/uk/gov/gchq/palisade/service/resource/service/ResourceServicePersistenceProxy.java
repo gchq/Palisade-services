@@ -56,7 +56,6 @@ public class ResourceServicePersistenceProxy {
      * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate    a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
      */
-
     public ResourceServicePersistenceProxy(final PersistenceLayer persistence, final ResourceService delegate) {
         this.persistence = persistence;
         this.delegate = delegate;

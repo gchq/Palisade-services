@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeResponse;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class PalisadeRestController {
     /**
      * Constructor for the palisade-service Controller.
      *
-     * @param palisadeService      service which processes the request
+     * @param palisadeService service which processes the request
      */
     public PalisadeRestController(final PalisadeService palisadeService) {
         this.palisadeService = palisadeService;
@@ -56,22 +56,22 @@ public class PalisadeRestController {
      * Takes the incoming RESTful request, forwards the request for further processing and returns a URL that can
      * later be used at the filtered-resource-service to view the requested data.
      *
-     * @param request body {@link PalisadeRequest} of the request message
+     * @param request body {@link PalisadeClientRequest} of the request message
      * @return dataURL a unique URL to identify the data available for this data request
      */
     @PostMapping(value = "/registerDataRequest", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<PalisadeResponse> registerDataRequest(
-            final @RequestBody PalisadeRequest request) {
+    public ResponseEntity<PalisadeClientResponse> registerDataRequest(
+            final @RequestBody PalisadeClientRequest request) {
         LOGGER.debug("registerDataRequest called with request {}", request);
 
         HttpStatus httpStatus = HttpStatus.ACCEPTED;
-        PalisadeResponse palisadeResponse = null;
+        PalisadeClientResponse palisadeClientResponse = null;
         String token = "";
 
         try {
             //instead of join we could do a .get(Time) and specify a timeout
             token = palisadeService.registerDataRequest(request).join();
-            palisadeResponse = new PalisadeResponse(token);
+            palisadeClientResponse = new PalisadeClientResponse(token);
             LOGGER.debug("registerDataRequest token is {}", token);
         } catch (Exception e) {
             LOGGER.error("PalisadeRestController Exception thrown", e);
@@ -80,6 +80,6 @@ public class PalisadeRestController {
             palisadeService.errorMessage(request, token, attributes, e);
         }
         return ResponseEntity.status(httpStatus)
-                .body(palisadeResponse);
+                .body(palisadeClientResponse);
     }
 }

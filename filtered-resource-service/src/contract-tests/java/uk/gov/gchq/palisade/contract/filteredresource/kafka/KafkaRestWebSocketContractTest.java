@@ -134,7 +134,7 @@ class KafkaRestWebSocketContractTest {
                                     .serviceName("data-service"))
                             .parent(new SystemResource().id("file:/file/")));
             Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
-                    ::withQueuePointer;
+                    ::withCommitOffset;
             BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.RESOURCE)
                     .withHeader(Token.HEADER, token)

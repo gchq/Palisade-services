@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -34,11 +35,11 @@ import java.util.StringJoiner;
  * This version represents the original request.
  * Next in the sequence is the input for user-service where this data will be used as a request for a User.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest is the client request that has come into the Palisade Service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class PalisadeRequest {
+public final class PalisadeClientRequest {
 
     private final String userId;  //Unique identifier for the user.
     private final String resourceId;  //Resource that that is being asked to access.
@@ -46,13 +47,13 @@ public final class PalisadeRequest {
     // Ignore class type on context object
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, defaultImpl = Context.class)
-    private final Context context;
+    private final Map<String, String> context;
 
     @JsonCreator
-    private PalisadeRequest(
+    private PalisadeClientRequest(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
-            final @JsonProperty("context") Context context) {
+            final @JsonProperty("context") Map<String, String> context) {
 
         this.userId = Optional.ofNullable(userId).orElseThrow(() -> new IllegalArgumentException("User ID cannot be null"));
         this.resourceId = Optional.ofNullable(resourceId).orElseThrow(() -> new IllegalArgumentException("Resource ID  cannot be null"));
@@ -70,7 +71,7 @@ public final class PalisadeRequest {
     }
 
     @Generated
-    public Context getContext() {
+    public Map<String, String> getContext() {
         return context;
     }
 
@@ -80,10 +81,10 @@ public final class PalisadeRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PalisadeRequest)) {
+        if (!(o instanceof PalisadeClientRequest)) {
             return false;
         }
-        PalisadeRequest that = (PalisadeRequest) o;
+        PalisadeClientRequest that = (PalisadeClientRequest) o;
         return userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
                 context.equals(that.context);
@@ -98,7 +99,7 @@ public final class PalisadeRequest {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", PalisadeRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PalisadeClientRequest.class.getSimpleName() + "[", "]")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
@@ -107,20 +108,20 @@ public final class PalisadeRequest {
     }
 
     /**
-     * Builder class for the creation of the PalisadeRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of the PalisadeClientRequest.  This is a variant of the Fluent Builder
      * which will use String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PalisadeRequest class.
+         * PalisadeClientRequest class.
          *
          * @return interface  {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
             return userId -> resourceId -> context ->
-                    new PalisadeRequest(userId, resourceId, context);
+                    new PalisadeClientRequest(userId, resourceId, context);
         }
 
         /**
@@ -157,9 +158,9 @@ public final class PalisadeRequest {
              * Adds the user context information.
              *
              * @param context information about this request.
-             * @return class {@link PalisadeRequest} this builder is set-up to create.
+             * @return class {@link PalisadeClientRequest} this builder is set-up to create.
              */
-            PalisadeRequest withContext(Context context);
+            PalisadeClientRequest withContext(Map<String, String> context);
         }
     }
 }
