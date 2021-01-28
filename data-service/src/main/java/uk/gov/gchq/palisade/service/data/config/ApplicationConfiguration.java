@@ -47,6 +47,7 @@ import java.util.concurrent.Executor;
 public class ApplicationConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
+    private static final int CORE_POOL_SIZE = 6;
 
     /**
      * Bean for the {@link JpaPersistenceLayer}.
@@ -112,7 +113,7 @@ public class ApplicationConfiguration {
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setThreadNamePrefix("AppThreadPool-");
-        ex.setCorePoolSize(6);
+        ex.setCorePoolSize(CORE_POOL_SIZE);
         LOGGER.info("Starting ThreadPoolTaskExecutor with core = [{}] max = [{}]", ex.getCorePoolSize(), ex.getMaxPoolSize());
         return ex;
     }

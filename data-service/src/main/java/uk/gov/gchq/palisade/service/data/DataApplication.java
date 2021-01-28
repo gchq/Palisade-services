@@ -51,6 +51,7 @@ public class DataApplication {
     private final Materializer materializer;
 
     /**
+     * AuditErrorMessage Akka objects in constructor and serialisation for application ready event
      *
      * @param dataReader              a reader for retrieving the request resources.
      * @param auditMessageService     service for sending audit success and error messages
@@ -69,7 +70,8 @@ public class DataApplication {
         this.auditMessageService = auditMessageService;
         this.serialiserConfiguration = serialiserConfiguration;
         this.runner = runner;
-        this.materializer = materializer; }
+        this.materializer = materializer;
+    }
 
     /**
      * Application entry point

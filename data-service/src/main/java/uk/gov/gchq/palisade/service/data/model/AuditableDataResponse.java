@@ -23,7 +23,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class AuditableDataResponse {
+/**
+ * The class contains the audit message from the processing of the request.  This will be a {@link AuditSuccessMessage}
+ * or possibly an {@link AuditErrorMessage} message generated in the processing of the request.
+ * */
+public final class AuditableDataResponse {
 
     private final String token;
     private final @Nullable AuditSuccessMessage auditSuccessMessage;

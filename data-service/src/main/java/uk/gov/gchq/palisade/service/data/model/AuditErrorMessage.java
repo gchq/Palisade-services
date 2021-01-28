@@ -24,7 +24,9 @@ import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * Represents information for an error that has occurred during the processing of a request. This information is
@@ -204,4 +206,31 @@ public final class AuditErrorMessage extends AuditMessage {
         }
     }
 
+    @Override
+    @Generated
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuditErrorMessage)) {
+            return false;
+        }
+        if (!super.equals(o)) return false;
+        AuditErrorMessage that = (AuditErrorMessage) o;
+        return error.equals(that.error);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), error);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
+                .add("error=                " + error)
+                .toString();
+    }
 }

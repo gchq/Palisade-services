@@ -31,7 +31,12 @@ public class AuditMessageService {
     private final Materializer materializer;
     private final CompletableFuture<Sink<TokenMessagePair, ?>> futureSink;
 
-  public AuditMessageService(final Materializer materializer) {
+    /**
+     * Autowires the {@link Materializer}
+     *
+     * @param materializer
+     */
+    public AuditMessageService(final Materializer materializer) {
         this.futureSink = new CompletableFuture<>();
         this.materializer = materializer;
     }

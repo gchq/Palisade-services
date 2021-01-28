@@ -60,7 +60,7 @@ public class AkkaComponentsConfig {
 
     @Bean
     Source<TokenMessagePair, Sink<TokenMessagePair, NotUsed>> auditSourceAndSink() {
-      return   MergeHub.of(TokenMessagePair.class);
+      return MergeHub.of(TokenMessagePair.class);
     }
 
     @Bean

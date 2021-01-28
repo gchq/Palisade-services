@@ -20,7 +20,7 @@ package uk.gov.gchq.palisade.service.data.model;
  * Since the content of tokens are strings, there is no need for further implementation
  * If desired, this could extend eg. UUID if more meaningful Token processing was desired.
  */
-public class Token {
+public final class Token {
 
     public static final String HEADER = "x-request-token";
 

@@ -26,7 +26,7 @@ import java.util.StringJoiner;
  * {@link DataResponse} and {@link AuditErrorMessage} during stream processing.  The container will hold the
  * {@code AuditErrorMessage} when there has been an error in the process.
  */
-public class AuditableDataRequest {
+public final class AuditableDataRequest {
 
     private final DataRequest dataRequest;
     private final DataResponse dataResponse;
