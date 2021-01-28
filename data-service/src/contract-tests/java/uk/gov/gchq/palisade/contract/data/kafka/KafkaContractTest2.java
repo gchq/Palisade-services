@@ -16,23 +16,93 @@
 
 package uk.gov.gchq.palisade.contract.data.kafka;
 
+import akka.actor.ActorSystem;
+import akka.kafka.ConsumerSettings;
+import akka.kafka.Subscriptions;
+import akka.kafka.javadsl.Consumer;
+import akka.stream.Materializer;
+import akka.stream.testkit.TestSubscriber;
+import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.testcontainers.containers.KafkaContainer;
+import scala.concurrent.duration.FiniteDuration;
 
+import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
+import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
+import uk.gov.gchq.palisade.service.data.DataApplication;
+import uk.gov.gchq.palisade.service.data.model.AuditMessage;
+import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.Token;
+import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
+import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
+import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
+import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
+import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.data.web.DataController;
 
-@WebMvcTest(controllers = {DataController.class})
-@ContextConfiguration(classes = {KafkaContractTest2.class, DataController.class})
-@ActiveProfiles("akka-test")
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_RESPONSE;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.DATA_REQUEST;
+
+@Import({KafkaContractTest2.KafkaInitializer.Config.class})
+@WebMvcTest(controllers = {DataController.class}, properties = {"akka.discovery.config.services.kafka.from-config=false"})
+@ContextConfiguration(initializers = {KafkaContractTest2.KafkaInitializer.class}, classes = {KafkaContractTest2.class, DataController.class})
+@ActiveProfiles({"akka-test", "debug"})
 public class KafkaContractTest2 {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    /*
+
     @MockBean
     private AuditableDataService serviceMock;
 
@@ -41,10 +111,12 @@ public class KafkaContractTest2 {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
     private Materializer akkaMaterializer;
+
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
 
@@ -53,47 +125,34 @@ public class KafkaContractTest2 {
     void testControllerReturnsAccepted() throws Exception {
 
         when(serviceMock.authoriseRequest(any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_REQUEST));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
         when(serviceMock.read(any(), any()))
-                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_READER_RESPONSE));
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
         when(auditMessageServiceMock.auditMessage(any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
- */
-
-/*
         // Given - we are already listening to the service input
         ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
                 .withGroupId("test-group")
-                .withBootstrapServers(KafkaContractTest.KafkaInitializer.KAFKA.getBootstrapServers())
-                .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        final long recordCount = 1;
-
-
-/*
-        // Given - we are already listening to the service input
-        ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
-                .withGroupId("test-group")
-                .withBootstrapServers(KafkaContractTest.KafkaInitializer.KAFKA.getBootstrapServers())
+                .withBootstrapServers(KafkaContractTest2.KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 
         TestSubscriber.Probe<ConsumerRecord<String, AuditMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
-*/
 
         /*
         MvcResult result = mockMvc.perform(post("/read/chunked")
                 .contentType("application/json")
                 .characterEncoding(StandardCharsets.UTF_8.name())
-                .content(MAPPER.writeValueAsBytes(DATA_REQUEST_MODEL)))
+                .content(MAPPER.writeValueAsBytes(DATA_REQUEST)))
                 .andExpect(request().asyncStarted())
                 .andReturn();
+
 
         ResultActions resultActions = mockMvc.perform(asyncDispatch(result))
                 .andDo(print())
@@ -101,16 +160,19 @@ public class KafkaContractTest2 {
 
         verify(serviceMock, times(1)).authoriseRequest(any());
         verify(auditMessageServiceMock, times(1)).auditMessage(any());
+         */
+
     }
 
+
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest.KafkaInitializer.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(KafkaContractTest2.KafkaInitializer.class);
 
         static final KafkaContainer KAFKA = new KafkaContainer("5.5.1")
                 .withReuse(true);
 
         static void createTopics(final List<NewTopic> newTopics) throws ExecutionException, InterruptedException {
-            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaContractTest.KafkaInitializer.KAFKA.getFirstMappedPort())))) {
+            try (AdminClient admin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d", "localhost", KafkaContractTest2.KafkaInitializer.KAFKA.getFirstMappedPort())))) {
                 admin.createTopics(newTopics);
                 LOGGER.info("created topics: " + admin.listTopics().names().get());
             }
@@ -167,4 +229,6 @@ public class KafkaContractTest2 {
             }
         }
     }
+
 }
+
