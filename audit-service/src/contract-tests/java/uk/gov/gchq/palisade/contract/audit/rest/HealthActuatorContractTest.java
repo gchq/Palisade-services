@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = {"management.health.kafka.enabled=false"}
 )
 @ActiveProfiles({"akka-test"})
- class HealthActuatorContractTest {
+class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;

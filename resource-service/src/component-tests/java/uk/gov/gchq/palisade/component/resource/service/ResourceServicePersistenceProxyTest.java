@@ -45,6 +45,7 @@ import uk.gov.gchq.palisade.service.resource.service.ResourceServicePersistenceP
 import uk.gov.gchq.palisade.service.resource.stream.config.AkkaSystemConfig;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -136,7 +137,7 @@ class ResourceServicePersistenceProxyTest {
                 () -> assertThat(result.get(0).getAuditErrorMessage().getError())
                         .isExactlyInstanceOf(NoSuchResourceException.class)
                         .getCause()
-                        .hasMessageContaining("Failed to walk path /test/resourceId/data2.txt")
+                        .hasMessageContaining("Failed to walk path "+ File.separator + "not" + File.separator + "a" + File.separator + "resource")
         );
     }
 }

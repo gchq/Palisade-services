@@ -59,6 +59,7 @@ import uk.gov.gchq.palisade.service.resource.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.resource.stream.SerDesConfig;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -268,7 +269,7 @@ class KafkaContractTest {
                 // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
                         .as("Check the exception message")
-                        .startsWith("Failed to walk path /not/a/resource")
+                        .startsWith("Failed to walk path "+ File.separator + "not" + File.separator + "a" + File.separator + "resource")
         );
     }
 

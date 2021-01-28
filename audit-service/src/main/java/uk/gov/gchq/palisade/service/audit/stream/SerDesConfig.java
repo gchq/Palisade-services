@@ -58,7 +58,11 @@ public final class SerDesConfig {
     }
 
     public static Queue<Exception> getSerDesExceptions() {
-        return (Queue<Exception>) Collections.unmodifiableCollection(SERDES_EXCEPTIONS);
+        return new ConcurrentLinkedQueue<>(SERDES_EXCEPTIONS);
+    }
+
+    public static void setSerDesExceptions(final Exception exception) {
+        SERDES_EXCEPTIONS.add(exception);
     }
 
     /**
