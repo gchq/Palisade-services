@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * This version represents the original request.
  * Next in the sequence is the input for user-service where this data will be used as a request for a User.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest is the client request that has come into the Palisade Service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -103,14 +103,14 @@ public final class PalisadeSystemResponse {
     }
 
     /**
-     * Builder class for the creation of the PalisadeRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of the PalisadeClientRequest.  This is a variant of the Fluent Builder
      * which will use String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PalisadeRequest class.
+         * PalisadeClientRequest class.
          *
          * @return interface  {@link IUserId} for the next step in the build.
          */
@@ -119,7 +119,7 @@ public final class PalisadeSystemResponse {
                     new PalisadeSystemResponse(userId, resourceId, context);
         }
 
-        public static PalisadeSystemResponse create(final PalisadeRequest request) {
+        public static PalisadeSystemResponse create(final PalisadeClientRequest request) {
             return new PalisadeSystemResponse(
                     request.getUserId(),
                     request.getResourceId(),

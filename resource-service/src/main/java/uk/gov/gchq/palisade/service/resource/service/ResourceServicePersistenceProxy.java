@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ public class ResourceServicePersistenceProxy {
      * @param persistence a {@link PersistenceLayer} for persisting resources in, as if it were a cache
      * @param delegate    a 'real' {@link ResourceService} to delegate requests to when not found in the persistence layer
      */
-
     public ResourceServicePersistenceProxy(final PersistenceLayer persistence, final ResourceService delegate) {
         this.persistence = persistence;
         this.delegate = delegate;
@@ -172,6 +171,12 @@ public class ResourceServicePersistenceProxy {
 
     }
 
+    /**
+     * Adds a {@link LeafResource} to the backing store and returns a boolean value if this was successful or not
+     *
+     * @param leafResource the resource that will be persisted via the {@link PersistenceLayer}
+     * @return a boolean true or false if the resource has been persisted or not
+     */
     public Boolean addResource(final LeafResource leafResource) {
         boolean success = delegate.addResource(leafResource);
         if (success) {

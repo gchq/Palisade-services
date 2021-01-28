@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class MessageSerialisationTest {
 
     @ParameterizedTest
     @ArgumentsSource(MessageTypeSource.class)
-    <T> void serialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
+    <T> void testSerialiseDeserialiseIsConsistent(final T message) throws JsonProcessingException {
         // Given some test data
 
         // When a Request is serialised and deserialised

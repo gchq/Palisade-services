@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class ConsumerTopicConfiguration {
     private String useDispatcher;
     private Map<String, String> kafkaClients = new HashMap<>();
     private Map<String, String> connectionChecker = new HashMap<>();
-    private Map<String, ProducerTopicConfiguration.Topic> topics = new HashMap<>();
+    private Map<String, Topic> topics = new HashMap<>();
 
     @Generated
     public String getDiscoveryMethod() {
