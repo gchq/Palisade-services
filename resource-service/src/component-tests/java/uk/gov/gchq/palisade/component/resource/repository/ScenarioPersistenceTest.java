@@ -197,7 +197,6 @@ class ScenarioPersistenceTest {
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
-        returnedAuditable.clear();
         LOGGER.debug("");
         LOGGER.debug("");
 
@@ -223,7 +222,6 @@ class ScenarioPersistenceTest {
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
-        returnedAuditable.clear();
         LOGGER.debug("");
         LOGGER.debug("");
 
@@ -250,7 +248,6 @@ class ScenarioPersistenceTest {
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
-        returnedAuditable.clear();
         LOGGER.debug("");
         LOGGER.debug("");
 
@@ -277,7 +274,6 @@ class ScenarioPersistenceTest {
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
-        returnedAuditable.clear();
         LOGGER.debug("");
         LOGGER.debug("");
 
@@ -304,7 +300,6 @@ class ScenarioPersistenceTest {
         expectedPersisted.forEach(resource -> LOGGER.debug("Expected:  {}", resource.getId()));
         persisted.forEach(resource -> LOGGER.debug("Persisted: {}", resource.getId()));
         assertThat(persisted).isEqualTo(expectedPersisted);
-        returnedAuditable.clear();
         LOGGER.debug("");
         LOGGER.debug("");
     }
