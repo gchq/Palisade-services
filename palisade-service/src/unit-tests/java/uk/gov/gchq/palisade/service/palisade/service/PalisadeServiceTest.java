@@ -63,7 +63,7 @@ class PalisadeServiceTest extends CommonTestData {
     @Test
     void testErrorMessage() {
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
-        service.errorMessage(PALISADE_REQUEST, token.join(), attributes, ERROR);
+        service.errorMessage(PALISADE_REQUEST, token.join(), attributes, ERROR).join();
         assertThat(token.join()).isEqualTo(COMMON_UUID.toString());
         assertAll(
                 () -> assertThat(sinkCollection.getLast().first()).isEqualTo(token.join()),
