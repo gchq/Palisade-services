@@ -214,8 +214,11 @@ public final class AuditErrorMessage extends AuditMessage {
         }
         if (!(o instanceof AuditErrorMessage)) {
             return false;
+
         }
-        if (!super.equals(o)) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
         AuditErrorMessage that = (AuditErrorMessage) o;
         return error.getMessage().equals(that.error.getMessage());
     }

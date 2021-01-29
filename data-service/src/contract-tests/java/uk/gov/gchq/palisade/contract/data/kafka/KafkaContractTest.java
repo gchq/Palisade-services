@@ -53,7 +53,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
-import scala.concurrent.duration.FiniteDuration;
 
 import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
@@ -67,13 +66,9 @@ import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;

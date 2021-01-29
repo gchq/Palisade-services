@@ -34,7 +34,7 @@ public class AuditMessageService {
     /**
      * Autowires the {@link Materializer}
      *
-     * @param materializer
+     * @param materializer the Akka {@link Materializer} configured to be used
      */
     public AuditMessageService(final Materializer materializer) {
         this.futureSink = new CompletableFuture<>();

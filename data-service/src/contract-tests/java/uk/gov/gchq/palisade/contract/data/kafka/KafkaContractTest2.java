@@ -17,28 +17,17 @@
 package uk.gov.gchq.palisade.contract.data.kafka;
 
 import akka.actor.ActorSystem;
-import akka.kafka.ConsumerSettings;
-import akka.kafka.Subscriptions;
-import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
-import akka.stream.testkit.TestSubscriber;
-import akka.stream.testkit.javadsl.TestSink;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,52 +36,26 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
-import scala.concurrent.duration.FiniteDuration;
 
-import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
-import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
-import uk.gov.gchq.palisade.service.data.DataApplication;
-import uk.gov.gchq.palisade.service.data.model.AuditMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.Token;
-import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
-import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 import uk.gov.gchq.palisade.service.data.web.DataController;
 
 import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST;
-import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_RESPONSE;
-import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.DATA_REQUEST;
 
 @Import({KafkaContractTest2.KafkaInitializer.Config.class})
 @WebMvcTest(controllers = {DataController.class}, properties = {"akka.discovery.config.services.kafka.from-config=false"})
