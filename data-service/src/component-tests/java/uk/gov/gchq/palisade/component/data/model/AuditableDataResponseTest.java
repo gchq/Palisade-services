@@ -68,6 +68,10 @@ class AuditableDataResponseTest {
 
         assertThat(auditableDataResponseObjectContentObject)
                 .usingRecursiveComparison()
+                .ignoringFieldsOfTypes(Throwable.class)
+                .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR);
+
+        assertThat(auditableDataResponseObjectContentObject)
                 .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR);
     }
 }
