@@ -19,7 +19,8 @@ package uk.gov.gchq.palisade.service.audit.web;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
-import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A health indicator for the Serialising and Deserialising of audit messages. If there are no logged exceptions
@@ -27,15 +28,21 @@ import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
  */
 public class SerDesHealthIndicator implements HealthIndicator {
 
+    protected static final Queue<Exception> SERDES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
+
+    public static void addSerDesExceptions(final Exception exception) {
+        SERDES_EXCEPTIONS.add(exception);
+    }
+
     @Override
     public Health health() {
 
-        if (SerDesConfig.getSerDesExceptions().isEmpty()) {
+        if (SERDES_EXCEPTIONS.isEmpty()) {
             return Health.up()
                     .build();
         } else {
             return Health.down()
-                    .withDetail("errors", SerDesConfig.getSerDesExceptions())
+                    .withDetail("errors", SERDES_EXCEPTIONS)
                     .build();
         }
     }

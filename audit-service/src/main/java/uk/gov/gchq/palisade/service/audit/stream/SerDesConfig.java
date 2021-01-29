@@ -28,6 +28,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.audit.web.SerDesHealthIndicator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,8 +37,6 @@ import java.nio.charset.Charset;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Static configuration for kafka key/value serialisers/deserialisers
@@ -50,18 +49,9 @@ public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
     private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
-    private static final Queue<Exception> SERDES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
-    }
-
-    public static Queue<Exception> getSerDesExceptions() {
-        return new ConcurrentLinkedQueue<>(SERDES_EXCEPTIONS);
-    }
-
-    public static void setSerDesExceptions(final Exception exception) {
-        SERDES_EXCEPTIONS.add(exception);
     }
 
     /**
@@ -85,7 +75,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
-                SERDES_EXCEPTIONS.add(e);
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -125,7 +115,7 @@ public final class SerDesConfig {
                 } catch (IOException ioException) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ioException);
                 }
-                SERDES_EXCEPTIONS.add(e);
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
@@ -152,7 +142,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
-                SERDES_EXCEPTIONS.add(e);
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -191,7 +181,7 @@ public final class SerDesConfig {
                 } catch (IOException ex) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
                 }
-                SERDES_EXCEPTIONS.add(e);
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };

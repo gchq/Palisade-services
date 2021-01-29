@@ -52,4 +52,4 @@ audit:
     stroom:
     logger:
     simple:
-  errorDirectory: "/tmp"
+  errorDirectory: "."

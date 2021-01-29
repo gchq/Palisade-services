@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.contract.audit.web;
+package uk.gov.gchq.palisade.service.audit.web;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-
-import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
-import uk.gov.gchq.palisade.service.audit.web.SerDesHealthIndicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -30,8 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class SerDesHealthIndicatorTest {
 
     private final SerDesHealthIndicator healthIndicator = new SerDesHealthIndicator();
-    @Autowired
-    private SerDesConfig serDesConfig;
+
+    @AfterEach
+    void tearDown() {
+        SerDesHealthIndicator.SERDES_EXCEPTIONS.clear();
+    }
 
     @Test
     void testHealthUp() {
@@ -47,7 +47,7 @@ class SerDesHealthIndicatorTest {
     @Test
     void testHealthDown() {
         // Given the service has encountered at least 1 serialisation exception
-        SerDesConfig.setSerDesExceptions(new Exception("This is a test"));
+        SerDesHealthIndicator.addSerDesExceptions(new Exception("This is a test"));
 
         // When getting the health
         Health actual = healthIndicator.health();

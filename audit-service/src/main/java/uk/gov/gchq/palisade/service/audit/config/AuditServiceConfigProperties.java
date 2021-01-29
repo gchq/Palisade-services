@@ -21,11 +21,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import uk.gov.gchq.palisade.Generated;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Configuration class for the Audit Service. Used to define the directory for any error files
@@ -35,6 +33,10 @@ public final class AuditServiceConfigProperties {
 
     private Map<String, Object> implementations;
     private String errorDirectory;
+
+    public AuditServiceConfigProperties() {
+        // Empty constructor for spring
+    }
 
     @Generated
     public String getErrorDirectory() {
