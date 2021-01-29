@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ class KafkaRestWebSocketContractTest {
                                     .serviceName("data-service"))
                             .parent(new SystemResource().id("file:/file/")));
             Function<Long, TopicOffsetMessage> offsetBuilder = TopicOffsetMessage.Builder.create()
-                    ::withQueuePointer;
+                    ::withCommitOffset;
             BiFunction<String, LeafResource, WebSocketMessage> responseBuilder = (token, leafResource) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.RESOURCE)
                     .withHeader(Token.HEADER, token)

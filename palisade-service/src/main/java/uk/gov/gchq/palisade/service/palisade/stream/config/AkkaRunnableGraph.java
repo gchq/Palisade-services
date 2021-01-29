@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Function1;
 
-import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.AuditablePalisadeSystemResponse;
 import uk.gov.gchq.palisade.service.palisade.model.StreamMarker;
 import uk.gov.gchq.palisade.service.palisade.model.Token;
 import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
@@ -79,18 +79,18 @@ public class AkkaRunnableGraph {
                     //decidePartition
                     Integer partition = Token.toPartition(tokenAndRequest.first(), outputTopic.getPartitions());
 
-                    BiFunction<AuditablePalisadeRequest, Headers, ProducerRecord<String, byte[]>> recordFunc = (AuditablePalisadeRequest value, Headers headers) -> {
-                        // Make the AuditablePalisadeRequest an Optional
-                        Optional<AuditablePalisadeRequest> auditablePalisadeRequest = Optional.ofNullable(value);
-                        // Map the auditable request to either a PalisadeRequest or AuditErrorMessage
-                        return auditablePalisadeRequest.map(AuditablePalisadeRequest::getAuditErrorMessage).map(audit ->
+                    BiFunction<AuditablePalisadeSystemResponse, Headers, ProducerRecord<String, byte[]>> recordFunc = (AuditablePalisadeSystemResponse value, Headers headers) -> {
+                        // Make the AuditablePalisadeSystemResponse an Optional
+                        Optional<AuditablePalisadeSystemResponse> auditablePalisadeRequest = Optional.ofNullable(value);
+                        // Map the auditable request to either a PalisadeClientRequest or AuditErrorMessage
+                        return auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getAuditErrorMessage).map(audit ->
                                 new ProducerRecord<>(errorTopic.getName(), partition, (String) null,
-                                                SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
+                                        SerDesConfig.errorValueSerializer().serialize(null, audit), headers))
                                 .orElseGet(() ->
                                         new ProducerRecord<>(outputTopic.getName(), partition, (String) null,
-                                                    SerDesConfig.requestSerializer().serialize(null,
-                                                            auditablePalisadeRequest.map(AuditablePalisadeRequest::getPalisadeRequest)
-                                                                    .orElse(null)), headers)
+                                                SerDesConfig.requestSerializer().serialize(null,
+                                                        auditablePalisadeRequest.map(AuditablePalisadeSystemResponse::getPalisadeResponse)
+                                                                .orElse(null)), headers)
                                 );
                     };
 

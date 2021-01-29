@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.palisade.exception;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import uk.gov.gchq.palisade.Generated;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 
 /**
  * Capture a thrown exception, and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
@@ -26,7 +26,7 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
  * These exceptions are elevated to {@link RuntimeException}s.
  */
 public class AuditableException extends RuntimeException {
-    private final transient ConsumerRecord<String, PalisadeRequest> request;
+    private final transient ConsumerRecord<String, PalisadeClientRequest> request;
 
     /**
      * Capture a thrown exception, and a kafka consumer record, wrapping them in a message to be caught by the supervisor.
@@ -35,13 +35,13 @@ public class AuditableException extends RuntimeException {
      * @param request the original request to the service that caused the exception
      * @param cause   the exception that was thrown
      */
-    public AuditableException(final ConsumerRecord<String, PalisadeRequest> request, final Exception cause) {
+    public AuditableException(final ConsumerRecord<String, PalisadeClientRequest> request, final Exception cause) {
         super(cause);
         this.request = request;
     }
 
     @Generated
-    public ConsumerRecord<String, PalisadeRequest> getRequest() {
+    public ConsumerRecord<String, PalisadeClientRequest> getRequest() {
         return request;
     }
 }
