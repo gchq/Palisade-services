@@ -20,8 +20,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Configuration class for the Audit Service. Used to define the directory for any error files
@@ -29,11 +33,8 @@ import java.util.List;
 @ConfigurationProperties("audit")
 public final class AuditServiceConfigProperties {
 
-    private List<String> implementations;
+    private Map<String, Object> implementations;
     private String errorDirectory;
-
-    private AuditServiceConfigProperties() {
-    }
 
     @Generated
     public String getErrorDirectory() {
@@ -42,16 +43,18 @@ public final class AuditServiceConfigProperties {
 
     @Generated
     public void setErrorDirectory(final String errorDirectory) {
-        this.errorDirectory = errorDirectory;
+        this.errorDirectory = Optional.ofNullable(errorDirectory)
+                .orElseThrow(() -> new IllegalArgumentException("errorDirectory cannot be null"));
     }
 
     @Generated
     public List<String> getImplementations() {
-        return Collections.unmodifiableList(implementations);
+        return new ArrayList<>(implementations.keySet());
     }
 
     @Generated
-    public void setImplementations(final List<String> implementations) {
-        this.implementations = Collections.unmodifiableList(implementations);
+    public void setImplementations(final Map<String, Object> implementations) {
+        this.implementations = Optional.ofNullable(implementations)
+                .orElseThrow(() -> new IllegalArgumentException("implementations cannot be null"));
     }
 }

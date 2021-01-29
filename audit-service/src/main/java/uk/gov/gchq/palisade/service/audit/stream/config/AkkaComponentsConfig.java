@@ -32,6 +32,7 @@ import com.typesafe.config.Config;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,10 +56,17 @@ import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS
  * Configuration for all kafka connections for the application
  */
 @Configuration
+@EnableConfigurationProperties(AuditServiceConfigProperties.class)
 public class AkkaComponentsConfig {
     private static final StreamComponents<String, AuditSuccessMessage> SUCCESS_INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<String, AuditErrorMessage> ERROR_INPUT_COMPONENTS = new StreamComponents<>();
     private static final StreamComponents<Committable, CompletionStage<Done>> OUTPUT_COMPONENTS = new StreamComponents<>();
+
+    private final AuditServiceConfigProperties configProperties;
+
+    public AkkaComponentsConfig(final AuditServiceConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
 
     @Bean
     Sink<ProducerRecord<String, AuditSuccessMessage>, CompletionStage<Done>> successRequestSink(final ActorSystem actorSystem) {
@@ -73,8 +81,7 @@ public class AkkaComponentsConfig {
 
     @Bean
     Source<CommittableMessage<String, AuditSuccessMessage>, Control> successCommittableRequestSource(final ActorSystem actorSystem,
-                                                                                                     final ConsumerTopicConfiguration configuration,
-                                                                                                     final AuditServiceConfigProperties configProperties) {
+                                                                                                     final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = SUCCESS_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.successKeyDeserializer(),
@@ -106,8 +113,7 @@ public class AkkaComponentsConfig {
 
     @Bean
     Source<CommittableMessage<String, AuditErrorMessage>, Control> errorCommittableRequestSource(final ActorSystem actorSystem,
-                                                                                                 final ConsumerTopicConfiguration configuration,
-                                                                                                 final AuditServiceConfigProperties configProperties) {
+                                                                                                 final ConsumerTopicConfiguration configuration) {
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ERROR_INPUT_COMPONENTS.consumerSettings(
                 actorSystem,
                 SerDesConfig.errorKeyDeserializer(),

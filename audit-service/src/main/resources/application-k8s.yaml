@@ -23,4 +23,4 @@ spring:
   profiles: k8s-config
 
 audit:
-  errordirectory: "/usr/share/audit-service/"
+  errorDirectory: "/usr/share/audit-service/"
