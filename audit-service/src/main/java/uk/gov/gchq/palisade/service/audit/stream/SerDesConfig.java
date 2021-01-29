@@ -36,7 +36,6 @@ import java.nio.charset.Charset;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -122,7 +121,7 @@ public final class SerDesConfig {
                     FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
                     fileWriter.close();
-                    LOGGER.info("Successfully created error file {}", timestampedFile);
+                    LOGGER.info("Successfully created 'Error' file {}", timestampedFile);
                 } catch (IOException ioException) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ioException);
                 }
@@ -188,7 +187,7 @@ public final class SerDesConfig {
                     FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
                     fileWriter.close();
-                    LOGGER.info("Successfully created error file {}", timestampedFile);
+                    LOGGER.info("Successfully created 'Success' file {}", timestampedFile);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
                 }

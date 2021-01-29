@@ -137,7 +137,7 @@ class ResourceServicePersistenceProxyTest {
                 () -> assertThat(result.get(0).getAuditErrorMessage().getError())
                         .isExactlyInstanceOf(NoSuchResourceException.class)
                         .getCause()
-                        .hasMessageContaining("Failed to walk path "+ File.separator + "not" + File.separator + "a" + File.separator + "resource")
+                        .hasMessageContaining("Failed to walk path " + File.separator + "test" + File.separator + "resourceId" + File.separator + "data2.txt")
         );
     }
 }

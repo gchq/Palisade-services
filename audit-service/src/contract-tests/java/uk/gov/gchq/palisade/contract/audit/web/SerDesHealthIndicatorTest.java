@@ -20,14 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import uk.gov.gchq.palisade.service.audit.AuditApplication;
 import uk.gov.gchq.palisade.service.audit.stream.SerDesConfig;
 import uk.gov.gchq.palisade.service.audit.web.SerDesHealthIndicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class SerDesHealthIndicatorTest {
 
@@ -43,18 +41,21 @@ class SerDesHealthIndicatorTest {
         Health actual = healthIndicator.health();
 
         // Then check the health is UP
-        assertThat(actual.getStatus()).as("Check the health of the service").isEqualTo(Status.UP);
+        assertThat(actual.getStatus()).as("Check the health status is UP").isEqualTo(Status.UP);
     }
 
     @Test
     void testHealthDown() {
-        // Given the service has encountered at least 1 error
+        // Given the service has encountered at least 1 serialisation exception
         SerDesConfig.setSerDesExceptions(new Exception("This is a test"));
 
         // When getting the health
         Health actual = healthIndicator.health();
 
         // Then check the health is DOWN
-        assertThat(actual.getStatus()).as("Check the health of the service").isEqualTo(Status.DOWN);
+        assertAll(
+                () -> assertThat(actual.getStatus()).as("Check the health status is DOWN").isEqualTo(Status.DOWN),
+                () -> assertThat(actual.getDetails()).as("Check the health details are not empty").isNotEmpty()
+        );
     }
 }

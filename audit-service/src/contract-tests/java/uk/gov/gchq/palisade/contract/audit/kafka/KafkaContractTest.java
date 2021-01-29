@@ -84,6 +84,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -280,7 +281,10 @@ class KafkaContractTest {
                 .filter(file -> file.getName().startsWith("Error"))
                 .collect(Collectors.toSet());
 
-        assertThat(actualFileSet).as("Test that an `Error` file has been created").containsAll(expectedFileSet);
+        assertAll(
+                () -> assertThat(actualFileSet).as("Check at least 1 'Error' file has been created").isNotEmpty(),
+                () -> assertThat(actualFileSet).as("Check the 'Error' files are the same").containsAll(expectedFileSet)
+        );
     }
 
     @Test
@@ -304,11 +308,14 @@ class KafkaContractTest {
         Set<File> expectedFileSet = Arrays.stream(new File(".").listFiles())
                 .filter(file -> file.getName().startsWith("Success"))
                 .collect(Collectors.toSet());
-        Set<File> fileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+        Set<File> actualFileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
                 .filter(file -> file.getName().startsWith("Success"))
                 .collect(Collectors.toSet());
 
-        assertThat(fileSet).as("Test that a `Success` file has been created").containsAll(expectedFileSet);
+        assertAll(
+                () -> assertThat(actualFileSet).as("Check at least 1 'Success' file has been created").isNotEmpty(),
+                () -> assertThat(actualFileSet).as("Check the 'Success' files are the same").containsAll(expectedFileSet)
+        );
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
