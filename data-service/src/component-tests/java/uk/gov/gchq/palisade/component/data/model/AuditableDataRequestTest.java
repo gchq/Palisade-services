@@ -28,6 +28,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
 
@@ -38,7 +39,6 @@ class AuditableDataRequestTest {
     @Autowired
     private JacksonTester<AuditableDataRequest> jsonTester;
 
-
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
@@ -47,26 +47,30 @@ class AuditableDataRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantAuditableDataRequestSerialisingAndDeserialising() throws IOException {
+    void testAuditableDataRequestSerialisingAndDeserialising() throws IOException {
         JsonContent<AuditableDataRequest> auditableDataRequestJsonContent = jsonTester.write(AUDITABLE_DATA_REQUEST);
         ObjectContent<AuditableDataRequest> auditableDataRequestObjectContent = jsonTester.parse(auditableDataRequestJsonContent.getJson());
         AuditableDataRequest auditableDataRequestObject = auditableDataRequestObjectContent.getObject();
 
-        assertThat(auditableDataRequestObject)
-                .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Throwable.class)
-                .isEqualTo(AUDITABLE_DATA_REQUEST);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditableDataRequestObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_REQUEST),
+                        () -> assertThat(auditableDataRequestObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_REQUEST)
+                )
+        );
     }
 
-
     @Test
-    void testGroupedDependantAuditableDataRequestWithErrorMessageSerialisingAndDeserialising() throws IOException {
+    void testAuditableDataRequestWithErrorMessageSerialisingAndDeserialising() throws IOException {
         JsonContent<AuditableDataRequest> auditableDataReaderRequestJsonContent = jsonTester.write(AUDITABLE_DATA_REQUEST_WITH_ERROR);
         ObjectContent<AuditableDataRequest> auditableDataReaderRequestObjectContent = jsonTester.parse(auditableDataReaderRequestJsonContent.getJson());
         AuditableDataRequest auditableDataRequestObject = auditableDataReaderRequestObjectContent.getObject();
 
-        assertThat(auditableDataRequestObject)
-                .usingRecursiveComparison()
-                .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditableDataRequestObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
+                        () -> assertThat(auditableDataRequestObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
+                )
+        );
     }
 }

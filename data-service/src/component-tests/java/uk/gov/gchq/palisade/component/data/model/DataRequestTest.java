@@ -30,8 +30,6 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.LEAF_RESOURCE_ID;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.TOKEN;
 
 @JsonTest
 @ContextConfiguration(classes = {DataRequestTest.class})
@@ -48,33 +46,15 @@ class DataRequestTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantDataRequestSerialisingAndDeserialising() throws IOException {
+    void testDataRequestSerialisingAndDeserialising() throws IOException {
         JsonContent<DataRequest> dataRequestJsonContent = jacksonTester.write(DATA_REQUEST);
         ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
         DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
-        assertAll("DataRequestSerialisingDeseralisingAndComparison",
-                () -> assertAll("DataRequestSerialisingComparedToString",
-                        () -> assertThat(dataRequestJsonContent)
-                                .extractingJsonPathStringValue("$.token")
-                                .isEqualTo(TOKEN),
-
-                        () -> assertThat(dataRequestJsonContent)
-                                .extractingJsonPathStringValue("$.leafResourceId")
-                                .isEqualTo(LEAF_RESOURCE_ID)
-                ),
-                () -> assertAll("DataRequestDeserialisingComparedToObject",
-                        () -> assertThat(dataRequestMessageObject.getToken())
-                                .isEqualTo(TOKEN),
-
-                        () -> assertThat(dataRequestMessageObject.getLeafResourceId())
-                                .isEqualTo(LEAF_RESOURCE_ID)
-                ),
+        assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataRequestMessageObject)
-                                .as("Check using recursion")
-                                .usingRecursiveComparison()
-                                .isEqualTo(DATA_REQUEST)
+                        () -> assertThat(dataRequestMessageObject).as("Check using equalTo").isEqualTo(DATA_REQUEST),
+                        () -> assertThat(dataRequestMessageObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_REQUEST)
                 )
         );
     }

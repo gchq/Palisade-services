@@ -28,6 +28,8 @@ import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.DATA_RESPONSE;
 
 @JsonTest
@@ -45,14 +47,17 @@ class DataResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantDataRequestReaderSerialisingAndDeserialising() throws IOException {
+    void testDataRequestReaderSerialisingAndDeserialising() throws IOException {
         JsonContent<DataResponse> dataResponseJsonContent = jacksonTester.write(DATA_RESPONSE);
         ObjectContent<DataResponse> dataResponseObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
         DataResponse dataResponseObjectContentObject = dataResponseObjectContent.getObject();
 
-        assertThat(dataResponseObjectContentObject)
-                .usingRecursiveComparison().
-                isEqualTo(DATA_RESPONSE);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(dataResponseObjectContentObject).as("Check using equalTo").isEqualTo(DATA_RESPONSE),
+                        () -> assertThat(dataResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_RESPONSE)
+                )
+        );
     }
 
 }

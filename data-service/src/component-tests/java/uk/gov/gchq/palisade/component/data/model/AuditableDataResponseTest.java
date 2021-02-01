@@ -29,6 +29,9 @@ import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE_WITH_ERROR;
 
@@ -48,30 +51,31 @@ class AuditableDataResponseTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantAuditableDataResponseSerialisingAndDeserialising() throws IOException {
-
+    void testAuditableDataResponseSerialisingAndDeserialising() throws IOException {
         JsonContent<AuditableDataResponse> auditableDataResponseJsonContent = jsonTester.write(AUDITABLE_DATA_RESPONSE);
         ObjectContent<AuditableDataResponse> auditableDataResponseObjectContent = jsonTester.parse(auditableDataResponseJsonContent.getJson());
         AuditableDataResponse auditableDataResponseObjectContentObject = auditableDataResponseObjectContent.getObject();
 
-        assertThat(auditableDataResponseObjectContentObject)
-                .usingRecursiveComparison()
-                .isEqualTo(AUDITABLE_DATA_RESPONSE);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_RESPONSE),
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_RESPONSE)
+                )
+        );
+
     }
 
     @Test
-    void testGroupedDependantAuditableDataResponseWithErrorMessageSerialisingAndDeserialising() throws IOException {
-
+    void testAuditableDataResponseWithErrorMessageSerialisingAndDeserialising() throws IOException {
         JsonContent<AuditableDataResponse> auditableDataResponseJsonContent = jsonTester.write(AUDITABLE_DATA_RESPONSE_WITH_ERROR);
         ObjectContent<AuditableDataResponse> auditableDataResponseObjectContent = jsonTester.parse(auditableDataResponseJsonContent.getJson());
         AuditableDataResponse auditableDataResponseObjectContentObject = auditableDataResponseObjectContent.getObject();
 
-        assertThat(auditableDataResponseObjectContentObject)
-                .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Throwable.class)
-                .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR);
-
-        assertThat(auditableDataResponseObjectContentObject)
-                .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR),
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR)
+                )
+        );
     }
 }

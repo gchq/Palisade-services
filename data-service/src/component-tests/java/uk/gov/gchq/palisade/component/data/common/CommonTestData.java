@@ -23,6 +23,7 @@ import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
+import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
@@ -73,11 +74,21 @@ public class CommonTestData {
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withLeafResourceId(LEAF_RESOURCE_ID)
             .withToken(TOKEN)
+            .withUserId(USER_ID)
+            .withResourceId(RESOURCE_ID)
+            .withContext(CONTEXT)
+            .withAttributes(ATTRIBUTES)
+            .withError(new ReadException("Reading problems!"));
+
+    public static final AuditErrorMessage AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION = AuditErrorMessage.Builder.create()
+            .withLeafResourceId(LEAF_RESOURCE_ID)
+            .withToken(TOKEN)
             .withUserId(null)
             .withResourceId(null)
             .withContext(null)
             .withAttributes(null)
             .withError(new ForbiddenException("Something went wrong!"));
+
 
 
     public static final DataResponse DATA_READER_REQUEST = DataResponse.Builder.create()

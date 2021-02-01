@@ -30,7 +30,10 @@ import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE_WITH_ERROR;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_ERROR_MESSAGE;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditErrorMessageTest.class})
@@ -47,16 +50,17 @@ class AuditErrorMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantErrorMessageSerialisingAndDeserialising() throws IOException {
-
+    void testAuditErrorMessageSerialisingAndDeserialising() throws IOException {
         JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertThat(auditErrorMessageObject)
-                .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Throwable.class)
-                .isEqualTo(AUDIT_ERROR_MESSAGE);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
+                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
+                )
+        );
     }
 
     /**
@@ -71,14 +75,16 @@ class AuditErrorMessageTest {
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
-    void testGroupedDependantForFailedAuthenticationErrorMessageSerialisingAndDeserialising() throws IOException {
-        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE);
+    void testForFailedAuthenticationAuditErrorMessageSerialisingAndDeserialising() throws IOException {
+        JsonContent<AuditErrorMessage> auditErrorMessageJsonContent = jsonTester.write(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION);
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertThat(auditErrorMessageObject)
-                .usingRecursiveComparison()
-                .ignoringFieldsOfTypes(Throwable.class)
-                .isEqualTo(AUDIT_ERROR_MESSAGE);
+        assertAll("AuditSerialisingDeseralisingAndComparison",
+                () -> assertAll("ObjectComparison",
+                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
+                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION)
+                )
+        );
     }
 }
