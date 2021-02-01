@@ -104,7 +104,7 @@ public final class SerDesConfig {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
                 try {
                     String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
-                            .format(DateTimeFormatter.ISO_INSTANT);
+                            .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
                     File directory = new File(configProperties.getErrorDirectory());
                     File parent = directory.getAbsoluteFile().getParentFile();
                     File timestampedFile = new File(parent, fileName);
@@ -170,10 +170,11 @@ public final class SerDesConfig {
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
                 try {
+                    String fileName = "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
+                            .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
                     File directory = new File(configProperties.getErrorDirectory());
                     File parent = directory.getAbsoluteFile().getParentFile();
-                    File timestampedFile = new File(parent, "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
-                            .format(DateTimeFormatter.ISO_INSTANT));
+                    File timestampedFile = new File(parent, fileName);
                     FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
                     fileWriter.write(failedAuditString);
                     fileWriter.close();
