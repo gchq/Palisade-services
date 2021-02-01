@@ -54,8 +54,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
-
 import scala.concurrent.duration.FiniteDuration;
+
 import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.data.DataApplication;

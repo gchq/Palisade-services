@@ -29,7 +29,6 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.DATA_REQUEST;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.DATA_RESPONSE;
 
 @JsonTest

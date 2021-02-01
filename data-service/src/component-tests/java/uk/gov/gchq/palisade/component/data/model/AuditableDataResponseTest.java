@@ -30,8 +30,6 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
-import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE_WITH_ERROR;
 

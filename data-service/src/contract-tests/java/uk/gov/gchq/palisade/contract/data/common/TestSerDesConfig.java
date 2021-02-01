@@ -21,7 +21,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
@@ -83,13 +82,13 @@ public final class TestSerDesConfig {
     public static Deserializer<AuditSuccessMessage> valueDeserializer() {
         return (String ignored, byte[] auditMessage) -> {
             try {
-                System.out.println("######valueDeserializer: " +new String(auditMessage));
                 return MAPPER.readValue(auditMessage, AuditSuccessMessage.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
             }
         };
     }
+
     /**
      * Kafka key deserialiser for upstream messages coming in as input
      *
@@ -107,7 +106,6 @@ public final class TestSerDesConfig {
     public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
         return (String ignored, byte[] auditMessage) -> {
             try {
-                System.out.println("auditMessage: " +new String(auditMessage));
                 return MAPPER.readValue(auditMessage, AuditErrorMessage.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
