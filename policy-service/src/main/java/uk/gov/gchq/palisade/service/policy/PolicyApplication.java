@@ -102,7 +102,7 @@ public class PolicyApplication {
     public void serveForever() {
         //Prepopulate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
-        policyConfig.getPolicies().stream()
+        policyConfig.getPolicies()
                 .forEach((PolicyPrepopulationFactory factory) -> {
                     //Build Resource Rules
                     Entry<String, Rules<LeafResource>> resourceMap = factory.buildResourceRules();

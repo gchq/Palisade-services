@@ -69,7 +69,7 @@ public class PolicyServiceCachingProxy {
      */
     @CachePut(value = "resourceRules", key = "#resourceId")
     public Optional<Rules<LeafResource>> setResourceRules(final String resourceId, final Rules<LeafResource> rules) {
-        LOGGER.info("Cache add for resourceId '{}' and rules message {}", resourceId, rules.getMessage());
+        LOGGER.info("Cache add for resourceId {} and rules message {}", resourceId, rules.getMessage());
         LOGGER.debug("ResourceRules {} added to cache", rules);
         return service.setResourceRules(resourceId, rules);
     }
