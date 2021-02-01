@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@ package uk.gov.gchq.palisade.service.topicoffset.service;
 
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.gov.gchq.palisade.service.topicoffset.model.StreamMarker;
 import uk.gov.gchq.palisade.service.topicoffset.model.TopicOffsetResponse;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 /**
  * Simple implementation of the Topic Offset Service. This service will check to see if there is a header with the
  * start marker in the collection of headers. If this condition is met, the response will be to return true.
  */
 public class SimpleTopicOffsetService implements TopicOffsetService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTopicOffsetService.class);
 
     /**
      * Checks for the presence of the start marker in the collection of headers.
@@ -39,7 +41,11 @@ public class SimpleTopicOffsetService implements TopicOffsetService {
     @Override
     public boolean isOffsetForTopic(final Headers headers) {
         Header x = headers.lastHeader(StreamMarker.HEADER);
-        return ((x != null) && (Arrays.equals(x.value(), StreamMarker.START.toString().getBytes(Charset.defaultCharset()))));
+        boolean isOffset = ((x != null) && (new String(x.value(), Charset.defaultCharset()).equals(StreamMarker.START.toString())));
+        if (isOffset) {
+            LOGGER.info("Found topic offset: {}", headers);
+        }
+        return isOffset;
     }
 
     /**

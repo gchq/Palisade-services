@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ class RedisPersistenceComponentTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        service.storeTokenOffset(token, request.queuePointer).join();
+        service.storeTokenOffset(token, request.commitOffset).join();
 
         // Then the offset is persisted in redis
         final String redisKey = "TokenOffsetEntity:" + token;
@@ -118,7 +118,7 @@ class RedisPersistenceComponentTest {
         final Map<Object, Object> redisHash = redisTemplate.boundHashOps(redisKey).entries();
         assertThat(redisHash)
                 .containsEntry("token", ContractTestData.REQUEST_TOKEN)
-                .containsEntry("offset", ContractTestData.TOPIC_OFFSET_MESSAGE.queuePointer.toString());
+                .containsEntry("offset", ContractTestData.TOPIC_OFFSET_MESSAGE.commitOffset.toString());
     }
 
     @Test
@@ -128,7 +128,7 @@ class RedisPersistenceComponentTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        service.storeTokenOffset(token, request.queuePointer).join();
+        service.storeTokenOffset(token, request.commitOffset).join();
         TimeUnit.SECONDS.sleep(1);
 
         // Then the offset is persisted in redis

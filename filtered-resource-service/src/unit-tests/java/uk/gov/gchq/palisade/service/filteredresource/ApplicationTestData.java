@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public final class ApplicationTestData {
     public static final Long OFFSET = 1L;
     public static final TokenOffsetEntity OFFSET_ENTITY = new TokenOffsetEntity(REQUEST_TOKEN, OFFSET);
     public static final TopicOffsetMessage OFFSET_MESSAGE = TopicOffsetMessage.Builder.create()
-            .withQueuePointer(OFFSET);
+            .withCommitOffset(OFFSET);
 
     public static final WebSocketMessage WS_MESSAGE = WebSocketMessage.Builder.create()
             .withType(MessageType.RESOURCE)

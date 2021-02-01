@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class H2PersistenceComponentTest {
         TopicOffsetMessage request = ContractTestData.TOPIC_OFFSET_MESSAGE;
 
         // When a request is made to store the topic offset for a given token
-        service.storeTokenOffset(token, request.queuePointer).join();
+        service.storeTokenOffset(token, request.commitOffset).join();
 
         // Then the offset is persisted in redis
         assertThat(tokenOffsetRepository.findByToken(token)).isPresent();

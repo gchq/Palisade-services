@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,7 +336,7 @@ public class AkkaRunnableGraph {
                 .map(committableMessage -> Tuple3.create(
                         committableMessage.committableOffset(),
                         new String(committableMessage.record().headers().lastHeader(Token.HEADER).value(), Charset.defaultCharset()),
-                        committableMessage.record().value().queuePointer
+                        committableMessage.record().value().commitOffset
                 ))
 
                 // Write offset to persistence
