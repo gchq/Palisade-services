@@ -20,7 +20,9 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.IOException;
@@ -78,10 +80,35 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<AuditMessage> valueDeserializer() {
+    public static Deserializer<AuditSuccessMessage> valueDeserializer() {
         return (String ignored, byte[] auditMessage) -> {
             try {
-                return MAPPER.readValue(auditMessage, AuditMessage.class);
+                System.out.println("######valueDeserializer: " +new String(auditMessage));
+                return MAPPER.readValue(auditMessage, AuditSuccessMessage.class);
+            } catch (IOException e) {
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
+            }
+        };
+    }
+    /**
+     * Kafka key deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate key deserialiser for the topic's message content
+     */
+    public static Deserializer<String> errorKeyDeserializer() {
+        return new StringDeserializer();
+    }
+
+    /**
+     * Kafka value deserialiser for upstream messages coming in as input
+     *
+     * @return an appropriate value deserialiser for the topic's message content
+     */
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+        return (String ignored, byte[] auditMessage) -> {
+            try {
+                System.out.println("auditMessage: " +new String(auditMessage));
+                return MAPPER.readValue(auditMessage, AuditErrorMessage.class);
             } catch (IOException e) {
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditMessage, Charset.defaultCharset()), e);
             }

@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -54,26 +55,38 @@ import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testcontainers.containers.KafkaContainer;
 
+import scala.concurrent.duration.FiniteDuration;
 import uk.gov.gchq.palisade.contract.data.common.ContractTestData;
 import uk.gov.gchq.palisade.contract.data.common.TestSerDesConfig;
 import uk.gov.gchq.palisade.service.data.DataApplication;
-import uk.gov.gchq.palisade.service.data.model.AuditMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.Token;
-import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
+import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITABLE_DATA_RESPONSE;
 
 /**
  * An external requirement of the service is to audit the client's requests.
@@ -92,6 +105,8 @@ public class KafkaContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+    @MockBean
+    private AuditableDataService serviceMock;
     @Autowired
     private ActorSystem akkaActorSystem;
     @Autowired
@@ -106,14 +121,18 @@ public class KafkaContractTest {
     @Test
     @DirtiesContext
     void testRestEndpointError() {
+
+        when(serviceMock.authoriseRequest(any()))
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST_WITH_ERROR));
+
         // Given - we are already listening to the service input
-        ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
-                .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
+        ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
+                .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Probe<ConsumerRecord<String, AuditMessage>> errorProbe = Consumer
+        Probe<ConsumerRecord<String, AuditErrorMessage>> errorProbe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("error-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
@@ -125,24 +144,22 @@ public class KafkaContractTest {
         // Then - the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         // When - results are pulled from the output stream
-        Probe<ConsumerRecord<String, AuditMessage>> resultSeq = errorProbe.request(1);
-       /*
-        LinkedList<ConsumerRecord<String, AuditMessage>> results = LongStream.range(0, 1)
+        Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = errorProbe.request(1);
+
+
+        LinkedList<ConsumerRecord<String, AuditErrorMessage>> results = LongStream.range(0, 1)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(21, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // Then - the results are as expected
-
         assertThat(results)
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
                             .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
-                    assertThat(result.key())
-                            .isEqualTo(ContractTestData.REQUEST_TOKEN);
+                    assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
-
-         */
     }
 
     /**
@@ -153,21 +170,48 @@ public class KafkaContractTest {
     @DirtiesContext
     void testRestEndpointSuccess() {
 
-        TokenMessagePair tokenMessagePair = new TokenMessagePair(ContractTestData.REQUEST_TOKEN, ContractTestData.AUDIT_SUCCESS_MESSAGE);
+        //   TokenMessagePair tokenMessagePair = new TokenMessagePair(ContractTestData.REQUEST_TOKEN, ContractTestData.AUDIT_SUCCESS_MESSAGE);
+        when(serviceMock.authoriseRequest(any()))
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
+
+        when(serviceMock.read(any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
         // Given - we are already listening to the service input
-        ConsumerSettings<String, AuditMessage> consumerSettings = ConsumerSettings
+        ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         final long recordCount = 1;
 
-        TestSubscriber.Probe<ConsumerRecord<String, AuditMessage>> probe = Consumer
+        TestSubscriber.Probe<ConsumerRecord<String, AuditSuccessMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("success-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
+        Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
+        HttpEntity<DataRequest> entity = new HttpEntity<>(ContractTestData.REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
+        ResponseEntity<Void> response = restTemplate.postForEntity(READ_CHUNKED, entity, Void.class);
 
+        // Then - the REST request was accepted
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        // When - results are pulled from the output stream
+        Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
+
+
+        LinkedList<ConsumerRecord<String, AuditSuccessMessage>> results = LongStream.range(0, 1)
+                .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(21, TimeUnit.SECONDS)))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        // Then - the results are as expected
+        assertThat(results)
+                .hasSize(1)
+                .allSatisfy(result -> {
+                    assertThat(result.value())
+                            .isEqualTo(ContractTestData.AUDIT_SUCCESS_MESSAGE);
+                    assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
+                });
     }
 
 

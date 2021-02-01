@@ -158,7 +158,7 @@ public class AuditMessage {
     }
 
     @Generated
-    public String getServerHostName() {
+    public String getServerHostname() {
         return serverHostname;
     }
 
