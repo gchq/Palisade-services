@@ -91,7 +91,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
 @Import(KafkaTestConfiguration.class)
-@ActiveProfiles("akkatest")
+@ActiveProfiles("akka-test")
 class KafkaContractTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
