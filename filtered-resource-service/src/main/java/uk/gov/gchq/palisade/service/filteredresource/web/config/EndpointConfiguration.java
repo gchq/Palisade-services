@@ -99,7 +99,6 @@ public class EndpointConfiguration {
     @Bean
     SpringActuatorRouter springActuatorRouter(final Collection<ActuatorSupplier> actuatorSuppliers) {
         return new SpringActuatorRouter(actuatorSuppliers);
-        new URI()
     }
 
     /**
