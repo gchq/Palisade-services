@@ -85,24 +85,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "masked-resource" topic is written to by the attribute-masking-service and read by this service.
- * The downstream "masked-resource-offset" topic is written to by this service and read by the filtered-resource-service.
+ * The upstream "attribute-masking-service" topic is and read by this service.
+ * The downstream "filtered-resource-offset" topic is written to by this service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")
 @Import(KafkaTestConfiguration.class)
 @ActiveProfiles("akka-test")
 class KafkaContractTest {
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // Serialiser for upstream test input
     static class RequestSerializer implements Serializer<JsonNode> {
         @Override
-        public byte[] serialize(final String s, final JsonNode attributeMaskingRequest) {
+        public byte[] serialize(final String s, final JsonNode topicOffsetRequest) {
             try {
-                return MAPPER.writeValueAsBytes(attributeMaskingRequest);
+                return MAPPER.writeValueAsBytes(topicOffsetRequest);
             } catch (JsonProcessingException e) {
-                throw new SerializationFailedException("Failed to serialize " + attributeMaskingRequest.toString(), e);
+                throw new SerializationFailedException("Failed to serialize " + topicOffsetRequest.toString(), e);
             }
         }
     }
@@ -110,11 +111,11 @@ class KafkaContractTest {
     // Deserialiser for downstream test output
     static class ResponseDeserializer implements Deserializer<JsonNode> {
         @Override
-        public JsonNode deserialize(final String s, final byte[] attributeMaskingResponse) {
+        public JsonNode deserialize(final String s, final byte[] topicOffsetResponse) {
             try {
-                return MAPPER.readTree(attributeMaskingResponse);
+                return MAPPER.readTree(topicOffsetResponse);
             } catch (IOException e) {
-                throw new SerializationFailedException("Failed to deserialize " + new String(attributeMaskingResponse), e);
+                throw new SerializationFailedException("Failed to deserialize " + new String(topicOffsetResponse), e);
             }
         }
     }
