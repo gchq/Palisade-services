@@ -102,16 +102,14 @@ public final class SerDesConfig {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
-                try {
-                    String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
-                            .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
-                    File directory = new File(configProperties.getErrorDirectory());
-                    File parent = directory.getAbsoluteFile().getParentFile();
-                    File timestampedFile = new File(parent, fileName);
-                    FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
+                String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
+                        .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
+                File directory = new File(configProperties.getErrorDirectory());
+                File parent = directory.getAbsoluteFile().getParentFile();
+                File timestampedFile = new File(parent, fileName);
+                try(FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
                     fileWriter.write(failedAuditString);
-                    fileWriter.close();
-                    LOGGER.info("Successfully created 'Error' file {}", timestampedFile);
+                    LOGGER.info("Failed to deserialize an 'error' audit message. Created file {}", timestampedFile);
                 } catch (IOException ioException) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ioException);
                 }
@@ -169,16 +167,14 @@ public final class SerDesConfig {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
-                try {
-                    String fileName = "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
-                            .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
-                    File directory = new File(configProperties.getErrorDirectory());
-                    File parent = directory.getAbsoluteFile().getParentFile();
-                    File timestampedFile = new File(parent, fileName);
-                    FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile());
+                String fileName = "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
+                        .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
+                File directory = new File(configProperties.getErrorDirectory());
+                File parent = directory.getAbsoluteFile().getParentFile();
+                File timestampedFile = new File(parent, fileName);
+                try(FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
                     fileWriter.write(failedAuditString);
-                    fileWriter.close();
-                    LOGGER.info("Successfully created 'Success' file {}", timestampedFile);
+                    LOGGER.info("Failed to deserialize a 'success' audit message. Created file {}", timestampedFile);
                 } catch (IOException ex) {
                     LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
                 }
