@@ -37,7 +37,7 @@ example:
     - ${example.path}/example-library/target/example-library-${example.version}.jar
     - ${example.path}/hr-data-generator/target/hr-data-generator-${example.version}.jar
   service-profiles: &profiles
-    - eureka
+    - static
     - example
 
 manager:
