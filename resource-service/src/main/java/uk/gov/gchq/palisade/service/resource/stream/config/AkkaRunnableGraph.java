@@ -62,7 +62,7 @@ public class AkkaRunnableGraph {
 
     // "Optional" should not be used for parameters, but this is a private interface for what is just
     // a nice name for a BiFunction, and it is implemented by our single messageBuilder object.
-    @SuppressWarnings("squid:S3553")
+    @SuppressWarnings("java:S3553")
     private interface ProducerMessageBuilder {
         /**
          * Build a {@link ProducerMessage} output from {@link CommittableMessage} input and {@link AuditableResourceResponse} service output.
