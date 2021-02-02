@@ -77,3 +77,12 @@ manager:
 
     user-service:
       profiles: *profiles
+
+    attribute-masking-service:
+      profiles: *profiles
+
+    filtered-resource-service:
+      profiles: *profiles
+
+    topic-offset-service:
+      profiles: *profiles

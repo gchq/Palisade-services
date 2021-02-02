@@ -28,7 +28,7 @@ public class ConfigPrinter implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigPrinter.class);
 
     // Autowired through constructor
-    private ManagerConfiguration config;
+    private final ManagerConfiguration config;
 
     public ConfigPrinter(final ManagerConfiguration config) {
         this.config = config;

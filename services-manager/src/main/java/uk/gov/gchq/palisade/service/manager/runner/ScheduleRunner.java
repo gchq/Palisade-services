@@ -31,7 +31,6 @@ import java.util.function.Supplier;
 
 /**
  * An ApplicationRunner to run through a start-up schedule.
- *
  * A schedule is an ordered collection of tasks
  * A task is an unordered collection of services
  * Every service in a task must complete before the next task is started
@@ -39,11 +38,12 @@ import java.util.function.Supplier;
  */
 public class ScheduleRunner implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleRunner.class);
+    private static final String BAR = "========================";
 
     // Autowired through constructor
-    private File rootDir;
-    private List<Map.Entry<String, TaskConfiguration>> schedule;
-    private Function<String, ManagedService> serviceProducer;
+    private final File rootDir;
+    private final List<Map.Entry<String, TaskConfiguration>> schedule;
+    private final Function<String, ManagedService> serviceProducer;
 
     public ScheduleRunner(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.rootDir = managerConfiguration.getRoot();
@@ -74,9 +74,9 @@ public class ScheduleRunner implements Runnable {
     public void run() {
         schedule.forEach(taskEntry -> {
             LOGGER.info("");
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.info("STARTING TASK :: {}", taskEntry.getKey());
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.debug("Will be running {}", taskEntry.getValue());
 
             Map<String, List<Supplier<Boolean>>> taskCompleteIndicators = taskEntry.getValue().runTask(rootDir, serviceProducer);
@@ -85,7 +85,7 @@ public class ScheduleRunner implements Runnable {
 
             LOGGER.info("");
             LOGGER.info("Task complete");
-            LOGGER.info("========================");
+            LOGGER.info(BAR);
             LOGGER.info("");
         });
     }

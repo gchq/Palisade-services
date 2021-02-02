@@ -85,10 +85,6 @@ manager:
     #     my.service.MainApplication: "INFO"                    :: ALSO http POST address /actuator/loggers/${key}, body "configuredLevel=${value}"   - classpath to change and logging level to change to
     ###
 
-eureka:
-  client:
-    enabled: false
-
 feign:
   client:
     config:

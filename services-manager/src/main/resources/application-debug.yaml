@@ -39,3 +39,12 @@ manager:
 
     user-service:
       level: *debug
+
+    attribute-masking-service:
+      level: *debug
+
+    filtered-resource-service:
+      level: *debug
+
+    topic-offset-service:
+      level: *debug

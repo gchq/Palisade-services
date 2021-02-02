@@ -51,3 +51,9 @@ web:
       - http://localhost:8086
     user-service:
       - http://localhost:8087
+    attribute-masking-service:
+    - http://localhost:8091
+    filtered-resource-service:
+    - http://localhost:8092
+    topic-offset-service:
+    - http://localhost:8093

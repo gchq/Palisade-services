@@ -16,7 +16,7 @@
 spring:
   profiles:
     include:
-      - eureka
+      - static
       - example-libs-config
 
 # Spring profile dependency resolution forces this two-profile setup
@@ -79,3 +79,21 @@ manager:
       profiles: *profiles
       log: user-service-example.log
       err: user-service-example.err
+
+    attribute-masking-service:
+      paths: *libraries
+      profiles: *profiles
+      log: attribute-masking-service-example.log
+      err: attribute-masking-service-example.err
+
+    filtered-resource-service:
+      paths: *libraries
+      profiles: *profiles
+      log: filtered-resource-service-example.log
+      err: filtered-resource-service-example.err
+
+    topic-offset-service:
+      paths: *libraries
+      profiles: *profiles
+      log: topic-offset-service-example.log
+      err: topic-offset-service-example.err

@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 /**
  * An ApplicationRunner to shutdown all available services in the reverse-order to the start-up schedule
- *
  * There is no verification that services have successfully shut down
  * This could be implemented by checking the health endpoint
  */
@@ -38,8 +37,8 @@ public class ScheduleShutdown implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleShutdown.class);
 
     // Autowired through constructor
-    private List<String> serviceNames;
-    private Function<String, ManagedService> serviceProducer;
+    private final List<String> serviceNames;
+    private final Function<String, ManagedService> serviceProducer;
 
     public ScheduleShutdown(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         // Initially not reversed

@@ -32,6 +32,9 @@ manager:
       - policy-service
       - resource-service
       - user-service
+      - attribute-masking-service
+      - filtered-resource-service
+      - topic-offset-service
 
   services:
     audit-service:
@@ -57,3 +60,15 @@ manager:
     user-service:
       jar: user-service/target/user-service-${app.version}-exec.jar
       log: user-service.log
+
+    attribute-masking-service:
+      jar: attribute-masking-service/target/attribute-masking-service-${app.version}-exec.jar
+      log: attribute-masking-service.log
+
+    filtered-resource-service:
+      jar: filtered-resource-service/target/filtered-resource-service-${app.version}-exec.jar
+      log: filtered-resource-service.log
+
+    topic-offset-service:
+      jar: topic-offset-service/target/topic-offset-service-${app.version}-exec.jar
+      log: topic-offset-service.log

@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 /**
  * A helper class for running a single task from a schedule (list of tasks)
- *
  * A task is an unordered collection of services
  * Every service in a task must complete before the task is reported as complete
  */

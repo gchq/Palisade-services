@@ -38,3 +38,12 @@ manager:
 
     user-service:
       level: *warn
+
+    attribute-masking-service:
+      level: *warn
+
+    filtered-resource-service:
+      level: *warn
+
+    topic-offset-service:
+      level: *warn

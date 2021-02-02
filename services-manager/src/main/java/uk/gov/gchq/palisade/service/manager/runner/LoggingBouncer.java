@@ -34,8 +34,8 @@ public class LoggingBouncer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingBouncer.class);
 
     // Autowired through constructor
-    private Map<String, ServiceConfiguration> loggingConfiguration;
-    private Function<String, ManagedService> serviceProducer;
+    private final Map<String, ServiceConfiguration> loggingConfiguration;
+    private final Function<String, ManagedService> serviceProducer;
 
     public LoggingBouncer(final ManagerConfiguration managerConfiguration, final Function<String, ManagedService> serviceProducer) {
         this.loggingConfiguration = managerConfiguration.getServices();
