@@ -51,7 +51,8 @@ public class DataApplication {
     private final Materializer materializer;
 
     /**
-     * AuditErrorMessage Akka objects in constructor and serialisation for application ready event
+     * Autowires Akka objects and the seraliser for the data reader.  These are initalised after the application has
+     * been started.
      *
      * @param dataReader              a reader for retrieving the request resources.
      * @param auditMessageService     service for sending audit success and error messages

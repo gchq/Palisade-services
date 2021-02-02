@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.contract.data.redis;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -47,6 +48,7 @@ import uk.gov.gchq.palisade.service.data.service.DataService;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(classes = DataApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles({"redis"})
@@ -80,15 +82,16 @@ class RedisPersistenceContractTest {
     @Autowired
     private AuthorisedRequestsRepository repository;
 
-    //@Test
+    @Test
     void testContextLoads() {
         assertThat(service).isNotNull();
     }
 
-    //  @Test
+    @Test
     void testAuthorisedRequestsAreRetrievedFromRedis() {
         // Given
         String token = "token";
+
         DataReaderRequest readerRequest = new DataReaderRequest()
                 .user(new User().userId("test-user"))
                 .resource(new FileResource().id("/resource/id")
@@ -98,6 +101,16 @@ class RedisPersistenceContractTest {
                         .parent(new SystemResource().id("/")))
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
+
+        DataResponse dataResponse =   DataResponse.Builder.create().withResource(new FileResource().id("/resource/id")
+                        .serialisedFormat("avro")
+                        .type(Employee.class.getTypeName())
+                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
+                        .parent(new SystemResource().id("/")))                .withUser(new User().userId("test-user"))
+                .withContext(new Context().purpose("test-purpose"))
+                .withRules(new Rules<>());
+
+
         repository.save(new AuthorisedRequestEntity(
                 token,
                 readerRequest.getUser(),
@@ -106,21 +119,18 @@ class RedisPersistenceContractTest {
                 readerRequest.getRules()
         ));
 
-        //should   be using the PersistenceLayer not the SimpleDataService
-
         // When
         DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
                 .withLeafResourceId(readerRequest.getResource().getId());
-        CompletableFuture<DataResponse> futureDataReaderRequestModel = service.authoriseRequest(dataRequest);
-        DataResponse dataResponse = futureDataReaderRequestModel.join();
+        CompletableFuture<DataResponse> futureDataResponse = service.authoriseRequest(dataRequest);
+        DataResponse dataResponseFromResource = futureDataResponse.join();
         // Then
-        /*
-        assertThat(isRequestAuthorised.join())
-                .isPresent()
-                .get()
-                .isEqualTo(readerRequest);
-                */
+        assertAll("ObjectComparison",
+                () -> assertThat(dataResponseFromResource).as("Comparison using the DataResponse's equals method").isEqualTo(dataResponse),
+                () -> assertThat(dataResponseFromResource).as("Comparison of content using all of the DataResponse's components recursively").usingRecursiveComparison().isEqualTo(dataResponse)
+        );
+
 
     }
 }
