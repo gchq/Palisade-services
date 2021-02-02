@@ -77,7 +77,6 @@ public class ResourceServicePersistenceProxy {
      * @param request the the {@link ResourceRequest} that contains the resourceId used to retrieve resources
      * @return a {@link Source} of {@link LeafResource}s associated with the resourceId
      */
-    @SuppressWarnings("squid:S1188")
     public Source<AuditableResourceResponse, NotUsed> getResourcesById(final ResourceRequest request) {
         LOGGER.info(STORE);
         // Try first from persistence

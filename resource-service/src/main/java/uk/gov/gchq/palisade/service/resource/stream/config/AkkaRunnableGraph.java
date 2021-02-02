@@ -77,7 +77,6 @@ public class AkkaRunnableGraph {
     }
 
     @Bean
-    @SuppressWarnings("S1188")
     RunnableGraph<DrainingControl<Done>> runner(
             final Source<CommittableMessage<String, ResourceRequest>, Control> source,
             final Sink<Envelope<String, byte[], Committable>, CompletionStage<Done>> sink,
