@@ -103,6 +103,12 @@ public class ConsumerTopicConfiguration {
                 .orElseThrow(() -> new IllegalArgumentException("topics cannot be null"));
     }
 
+    /**
+     * Gets the topic using the parameter name value
+     *
+     * @param topic the name of the topic
+     * @return the {@link Topic} from the configuration
+     */
     public Topic getTopic(final String topic) {
         return topics.get(topic);
     }
