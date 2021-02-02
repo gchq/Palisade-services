@@ -107,7 +107,7 @@ public final class SerDesConfig {
                 File directory = new File(configProperties.getErrorDirectory());
                 File parent = directory.getAbsoluteFile().getParentFile();
                 File timestampedFile = new File(parent, fileName);
-                try(FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
+                try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
                     fileWriter.write(failedAuditString);
                     LOGGER.info("Failed to deserialize an 'error' audit message. Created file {}", timestampedFile);
                 } catch (IOException ioException) {
@@ -172,7 +172,7 @@ public final class SerDesConfig {
                 File directory = new File(configProperties.getErrorDirectory());
                 File parent = directory.getAbsoluteFile().getParentFile();
                 File timestampedFile = new File(parent, fileName);
-                try(FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
+                try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
                     fileWriter.write(failedAuditString);
                     LOGGER.info("Failed to deserialize a 'success' audit message. Created file {}", timestampedFile);
                 } catch (IOException ex) {
