@@ -54,11 +54,9 @@ class AuditErrorMessageTest {
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE),
-                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using the AuditErrorMessage's equals").isEqualTo(AUDIT_ERROR_MESSAGE),
+                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE)
         );
     }
 
@@ -79,11 +77,9 @@ class AuditErrorMessageTest {
         ObjectContent<AuditErrorMessage> auditErrorMessageObjectContent = jsonTester.parse(auditErrorMessageJsonContent.getJson());
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditErrorMessageObject).as("Check using equalTo").isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
-                        () -> assertThat(auditErrorMessageObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using the AuditErrorMessage's equals").isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
+                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION)
         );
     }
 }

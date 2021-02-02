@@ -52,11 +52,9 @@ class AuditableDataRequestTest {
         ObjectContent<AuditableDataRequest> auditableDataRequestObjectContent = jsonTester.parse(auditableDataRequestJsonContent.getJson());
         AuditableDataRequest auditableDataRequestObject = auditableDataRequestObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditableDataRequestObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_REQUEST),
-                        () -> assertThat(auditableDataRequestObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_REQUEST)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(auditableDataRequestObject).as("Comparison assertion using the AuditableDataRequest's equals").isEqualTo(AUDITABLE_DATA_REQUEST),
+                () -> assertThat(auditableDataRequestObject).as("Comparison assertion using all of the AuditableDataRequest's components recursively").usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_REQUEST)
         );
     }
 
@@ -66,11 +64,9 @@ class AuditableDataRequestTest {
         ObjectContent<AuditableDataRequest> auditableDataReaderRequestObjectContent = jsonTester.parse(auditableDataReaderRequestJsonContent.getJson());
         AuditableDataRequest auditableDataRequestObject = auditableDataReaderRequestObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditableDataRequestObject).as("Check using equalTo").isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
-                        () -> assertThat(auditableDataRequestObject).as("Check using recursion").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(auditableDataRequestObject).as("Comparison using the AuditableDataRequest's equals method").isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
+                () -> assertThat(auditableDataRequestObject).as("Comparison of content using all of the AuditableDataRequest's components recursively").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
         );
     }
 }

@@ -51,11 +51,9 @@ class DataRequestTest {
         ObjectContent<DataRequest> dataRequestObjectContent = jacksonTester.parse(dataRequestJsonContent.getJson());
         DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(dataRequestMessageObject).as("Check using equalTo").isEqualTo(DATA_REQUEST),
-                        () -> assertThat(dataRequestMessageObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(DATA_REQUEST)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(dataRequestMessageObject).as("Comparison assertion using the DataRequest's equals").isEqualTo(DATA_REQUEST),
+                () -> assertThat(dataRequestMessageObject).as("Comparison assertion using all of the DataRequest's components recursively").usingRecursiveComparison().isEqualTo(DATA_REQUEST)
         );
     }
 }

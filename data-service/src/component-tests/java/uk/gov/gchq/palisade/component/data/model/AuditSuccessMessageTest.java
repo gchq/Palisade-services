@@ -51,11 +51,9 @@ class AuditSuccessMessageTest {
         ObjectContent<AuditSuccessMessage> auditSuccessMessageObjectContent = jacksonTester.parse(auditSuccessMessageJsonContent.getJson());
         AuditSuccessMessage auditSuccessMessageObjectContentObject = auditSuccessMessageObjectContent.getObject();
 
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using equalTo").isEqualTo(AUDIT_SUCCESS_MESSAGE),
-                        () -> assertThat(auditSuccessMessageObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
-                )
+        assertAll("ObjectComparison",
+                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using the AuditSuccessMessage's equals").isEqualTo(AUDIT_SUCCESS_MESSAGE),
+                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using all of the AuditSuccessMessage's components recursively").usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
         );
     }
 }
