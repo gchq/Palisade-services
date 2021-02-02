@@ -153,7 +153,7 @@ class KafkaContractTest {
     @DirtiesContext
     void testVariousRequestSets(final long messageCount) {
         // Create a variable number of requests
-        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
                 Stream.of(ContractTestData.START_RECORD),
                 ContractTestData.RECORD_NODE_FACTORY.get().limit(messageCount),
