@@ -19,9 +19,28 @@ limitations under the License.
 
 ## Overview
 
-The core API for the data service.
+The core API for the data service. It accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.
 
-The responsibilities of the data service is to provide the client with access to the resource that was requested.  This data will have been filtered based the user and context.
+The client request will contain the token that was returned from the initial resource request for uniquely identifying this request and the resource id that identifies this specific part of this request.
 
-**Note:** A resource could be a file, stream, directory or even the system
-resource (policies added to the system resource would be applied globally).
+
+## Message Model and Database Domain
+
+
+
+| Client Resource request to               | Client Request to 
+| palisade-service for access to resources | data-services for prepared resources                                        
+| PalisadeRequest | PalisadeClientResponse | DataRequest | Response                   AuditSuccessMessage | AuditErrorMessage | 
+|:----------------|:-----------------------|:-----------------------------------------|:--------------------|:------------------|
+| userId          | token                  | token       | **StreamingResponseBody    | *token              | *token            |
+| resourceId      |                        |             |                            | userId              | *token            |
+| context         |                        | resourceId  |                            | resourceId             | userId            |  
+| context         |                        |             |                            | context                | resourceId        |
+|                 |                        |             |                            | leafResourceId                                           |                                               context           | 
+|                 |                        |             |                            | ***attributes                                                    exception         | 
+|                 |                        |             |                            |                      serverMetadata    | 
+
+(* token is contained in the header metadata for the AuditSuccessMessage and AuditErrorMessage)
+(** holds an OutputStream of the data)
+(** holds amoung other things, the number of records processed and the number of records returned)
+
