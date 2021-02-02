@@ -92,7 +92,7 @@ public class AkkaComponentsConfig {
                 SerDesConfig.successKeyDeserializer(),
                 SerDesConfig.successValueDeserializer(configProperties));
 
-        Topic successTopic = configuration.getTopics().get("success-topic");
+        Topic successTopic = configuration.getTopic("success-topic");
         Subscription successSubscription = Optional.ofNullable(successTopic.getAssignment())
                 .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(successTopic.getName(), partition)))
                 .orElse(Subscriptions.topics(successTopic.getName()));
@@ -124,7 +124,7 @@ public class AkkaComponentsConfig {
                 SerDesConfig.errorKeyDeserializer(),
                 SerDesConfig.errorValueDeserializer(configProperties));
 
-        Topic errorTopic = configuration.getTopics().get("error-topic");
+        Topic errorTopic = configuration.getTopic("error-topic");
         Subscription errorSubscription = Optional.ofNullable(errorTopic.getAssignment())
                 .map(partition -> (Subscription) Subscriptions.assignment(new TopicPartition(errorTopic.getName(), partition)))
                 .orElse(Subscriptions.topics(errorTopic.getName()));

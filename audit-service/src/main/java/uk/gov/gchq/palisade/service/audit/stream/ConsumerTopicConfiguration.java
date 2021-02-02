@@ -102,4 +102,8 @@ public class ConsumerTopicConfiguration {
         this.topics = Optional.ofNullable(topics)
                 .orElseThrow(() -> new IllegalArgumentException("topics cannot be null"));
     }
+
+    public Topic getTopic(final String topic) {
+        return topics.get(topic);
+    }
 }

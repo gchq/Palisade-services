@@ -45,10 +45,10 @@ public class SerDesHealthIndicator implements HealthIndicator {
         if (SERDES_EXCEPTIONS.isEmpty()) {
             return Health.up()
                     .build();
-        } else {
-            return Health.down()
-                    .withDetail("errors", SERDES_EXCEPTIONS)
-                    .build();
         }
+
+        return Health.down()
+                .withDetail("errors", SERDES_EXCEPTIONS)
+                .build();
     }
 }
