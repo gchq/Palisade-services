@@ -95,7 +95,7 @@ public class WebSocketEventService {
         return Flow.<WebSocketMessage>create()
                 // Log some details of each client request
                 .map((WebSocketMessage wsMsg) -> {
-                    LOGGER.trace("Received message {} from client", wsMsg);
+                    LOGGER.debug("Received message {} from client", wsMsg);
                     return wsMsg;
                 })
 
@@ -106,7 +106,12 @@ public class WebSocketEventService {
                         MessageType.PING.ordinal(), onPing(token),
                         // On CTS message, get the offset for the token from persistence, then return results
                         MessageType.CTS.ordinal(), onCts(token)
-                )));
+                )))
+
+                .map((WebSocketMessage wsMsg) -> {
+                    LOGGER.debug("Returning message {} to client", wsMsg);
+                    return wsMsg;
+                });
     }
 
     /**

@@ -62,9 +62,9 @@ public class ReactivePersistenceLayer implements PersistenceLayer {
     /**
      * Constructor for {@link ReactivePersistenceLayer}
      *
-     * @param completenessRepository the completeness repository
-     * @param resourceRepository the resource repository
-     * @param typeRepository the type repository
+     * @param completenessRepository     the completeness repository
+     * @param resourceRepository         the resource repository
+     * @param typeRepository             the type repository
      * @param serialisedFormatRepository the serialisedFormat repository
      */
     public ReactivePersistenceLayer(final CompletenessRepository completenessRepository, final ResourceRepository resourceRepository,
