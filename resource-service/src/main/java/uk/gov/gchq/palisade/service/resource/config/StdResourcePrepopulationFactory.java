@@ -24,6 +24,7 @@ import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
 import uk.gov.gchq.palisade.util.UriBuilder;
 
+import java.io.File;
 import java.net.URI;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
@@ -117,8 +118,9 @@ public class StdResourcePrepopulationFactory implements ResourcePrepopulationFac
         String serialisedFormat = requireNonNull(attributes.get("serialisedFormat"), "Attribute 'serialisedFormat' cannot be null");
         ConnectionDetail simpleConnectionDetail = connectionDetailMapper.apply(connectionDetail);
         Resource rootResource = ResourceBuilder.create(rootId);
-        URI resourceURI = UriBuilder.create().withScheme("file").withoutAuthority().withPath(resourceId).withoutQuery().withoutFragment();
-        return new SimpleImmutableEntry<>(rootResource, ResourceBuilder.create(resourceURI, simpleConnectionDetail, type, serialisedFormat, attributes));
+        URI resourceURI = new File(resourceId).getAbsoluteFile().toURI();
+        LeafResource leafResource = ResourceBuilder.create(resourceURI, simpleConnectionDetail, type, serialisedFormat, attributes);
+        return new SimpleImmutableEntry<>(rootResource, leafResource);
     }
 
     @Override
