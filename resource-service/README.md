@@ -18,11 +18,9 @@ limitations under the License.
 
 # Resource Service
 
-The Resource service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed 
-(this could be an actual file, or a directory that could contain many files and/or sub-directories). The service will then query the backing store to
-see if the requested resourceId has been stored. If this is not the case then the request will be passed onto the local implementation of 
-the Resource service. All the returned resources will be within an Akka stream, each element in the stream is then consumed and
-added to the `resource` Kafka topic to be processed by the Policy service.
+The Resource service accepts an incoming message from the `user` Kafka topic which contains the resourceId that is being accessed
+(this could be an actual file, or a directory that could contain many files and/or sub-directories). The service will then query the backing store to see if the requested resourceId has been stored. If this is not the case then the request will be passed
+onto the local implementation of the Resource service. All the returned resources will be within an Akka stream, each element in the stream is then consumed and added to the `resource` Kafka topic to be processed by the Policy service.
 
 ## Message Model and Database Domain
 
@@ -37,16 +35,14 @@ added to the `resource` Kafka topic to be processed by the Policy service.
 
 (fields marked with * are acquired from headers metadata)
 
-The service accepts a `ResourceRequest` from the User service, finds all the resources associated with the resourceId as a stream, the stream is 
-then consumed and for each resource a `ResourceResponse` is created and then sent to the Policy service for further processing.
+The service accepts a `ResourceRequest` from the User service, finds all the resources associated with the resourceId as a stream, the stream is then consumed and for each resource a `ResourceResponse` is created and then sent to the Policy service for
+further processing.
 
 ## Kafka Interface
 
-The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. The `START` gets
-consumed by the service, it is then acknowledged as the start of the resources and is then written to the `resource` Kafka topic. 
-The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. This then gets written 
-to the `resource` Kafka topic. Once all the`ResourceResponse`s have been written to the topic, the `END` message gets written to the `resource` topic to 
-mark the end of the resources for this request. If any errors are thrown within the service, the original request, along with the thrown exception are captured in an
+The application receives 3 messages for each token, a `START` message, a message containing a `ResourceRequest` and an `END` message. The `START` gets consumed by the service, it is then acknowledged as the start of the resources and is then written to
+the `resource` Kafka topic. The `ResourceRequest` message then gets consumed by the service and for each resource a `ResourceResponse` object is created. This then gets written to the `resource` Kafka topic. Once all the`ResourceResponse`s have been
+written to the topic, the `END` message gets written to the `resource` topic to mark the end of the resources for this request. If any errors are thrown within the service, the original request, along with the thrown exception are captured in an
 `AuditErrorMessage` and written to the Kafka `error` topic.
 
 ## REST Interface
@@ -132,16 +128,15 @@ curl -X POST api/resource -H "content-type: application/json" --data \
 
 ## Uploading resources to the backing store on service start-up
 
-It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by 
-using Spring to upload resource(s) to the service from a yaml file. An example of this can be seen in this
+It may be that some example resources may need to be added to the backing store before, for example, a test run of the Palisade system gets performed. This is solved by using Spring to upload resource(s) to the service from a yaml file. An example of this
+can be seen in this
 [testresource.yaml](src/contract-tests/resources/application-testresource.yaml) file which adds the resource information to the backing store when the service starts up.
 
 ## Hadoop and Windows
 
 Windows users will have problems with Hadoop integration testing. Included [here](src/component-tests/resources/hadoop-3.2.1/bin) is a Windows-compatible set of hadoop binaries.
 
-To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable
-the `HadoopResourceServiceTest` to run correctly.
+To 'install' on Windows, an additional step is required - copy the [hadoop.dll](src/component-tests/resources/hadoop-3.2.1/bin/hadoop.dll) to `C:\Windows\System32`. This should enable the `HadoopResourceServiceTest` to run correctly.
 
 ## Database Entities and Structuring
 

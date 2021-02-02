@@ -33,7 +33,6 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,6 @@ import uk.gov.gchq.palisade.service.resource.stream.SerDesConfig;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiFunction;
 
 /**
  * Configuration for the Akka Runnable Graph used by the {@link uk.gov.gchq.palisade.service.resource.ResourceApplication}
@@ -69,7 +67,7 @@ public class AkkaRunnableGraph {
          * If the service did not produce a response and instead returned {@link Optional#empty()} then produce a {@link akka.kafka.ProducerMessage.PassThroughMessage}
          * to commit the input.
          *
-         * @param committableMessage the upstream input
+         * @param committableMessage        the upstream input
          * @param auditableResourceResponse the service's output (or empty if the upstream input carried no request)
          * @return a downstream message using upstream's committable offset
          */

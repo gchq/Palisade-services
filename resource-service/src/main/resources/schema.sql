@@ -16,26 +16,67 @@
 
 CREATE TABLE IF NOT EXISTS completeness
 (
-    `id`          INTEGER PRIMARY KEY,
-    `entity_type` INTEGER,
-    `entity_id`   VARCHAR(255)
-);
+    `id`
+    INTEGER
+    PRIMARY
+    KEY,
+    `entity_type`
+    INTEGER,
+    `entity_id`
+    VARCHAR
+(
+    255
+)
+    );
 CREATE TABLE IF NOT EXISTS resources
 (
-    `id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-    `resource_id` VARCHAR(255) UNIQUE NOT NULL,
-    `parent_id`   VARCHAR(255),
-    `resource`    VARCHAR
-);
+    `id`
+    INTEGER
+    PRIMARY
+    KEY
+    AUTO_INCREMENT,
+    `resource_id`
+    VARCHAR
+(
+    255
+) UNIQUE NOT NULL,
+    `parent_id` VARCHAR
+(
+    255
+),
+    `resource` VARCHAR
+    );
 CREATE TABLE IF NOT EXISTS types
 (
-    `id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-    `resource_id` VARCHAR(255) UNIQUE NOT NULL,
-    `type`        VARCHAR(255)
-);
+    `id`
+    INTEGER
+    PRIMARY
+    KEY
+    AUTO_INCREMENT,
+    `resource_id`
+    VARCHAR
+(
+    255
+) UNIQUE NOT NULL,
+    `type` VARCHAR
+(
+    255
+)
+    );
 CREATE TABLE IF NOT EXISTS serialised_formats
 (
-    `id`                INTEGER PRIMARY KEY AUTO_INCREMENT,
-    `resource_id`       VARCHAR(255) UNIQUE NOT NULL,
-    `serialised_format` VARCHAR(255)
-);
+    `id`
+    INTEGER
+    PRIMARY
+    KEY
+    AUTO_INCREMENT,
+    `resource_id`
+    VARCHAR
+(
+    255
+) UNIQUE NOT NULL,
+    `serialised_format` VARCHAR
+(
+    255
+)
+    );
