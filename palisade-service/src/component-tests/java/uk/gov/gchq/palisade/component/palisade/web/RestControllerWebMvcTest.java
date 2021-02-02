@@ -104,7 +104,9 @@ class RestControllerWebMvcTest extends CommonTestData {
 
         //THEN
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);
-        assertThat(response.getToken()).isEqualTo(COMMON_UUID.toString());
+        assertThat(response.getToken())
+                .as("Check the value of the response Token")
+                .isEqualTo(COMMON_UUID.toString());
     }
 
     /**
@@ -133,7 +135,9 @@ class RestControllerWebMvcTest extends CommonTestData {
         String response = result.getResponse().getContentAsString();
 
         // Verify the response value is empty
-        assertThat(response).isEmpty();
+        assertThat(response)
+                .as("Check the response value is empty")
+                .isEmpty();
 
         // Verify the service methods have been called once, and only once
         Mockito.verify(palisadeService, times(1)).registerDataRequest(PALISADE_REQUEST);

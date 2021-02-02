@@ -72,7 +72,9 @@ class PalisadeServiceComponentTest extends CommonTestData {
         //UUID.fromString contains its own uuid validation and will throw an error if an incorrect UUID is returned
         UUID uuid = UUID.fromString(token.join());
         assertThat(uuid)
+                .as("Check the uuid value is not null")
                 .isNotNull()
+                .as("Check the uuid is of type UUID class")
                 .isInstanceOf(UUID.class);
 
         // Short grace period if the message hasn't been sent to the sink yet
@@ -81,8 +83,10 @@ class PalisadeServiceComponentTest extends CommonTestData {
         }
         AuditablePalisadeSystemResponse auditableResponse = AuditablePalisadeSystemResponse.Builder.create().withPalisadeResponse(SYSTEM_RESPONSE);
         assertThat(sinkCollection)
+                .as("Check the sinkCollection has 1 entry")
                 .hasSize(1)
                 .usingRecursiveComparison()
+                .as("Check the value of the sinkCollection item")
                 .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), auditableResponse)));
     }
 }

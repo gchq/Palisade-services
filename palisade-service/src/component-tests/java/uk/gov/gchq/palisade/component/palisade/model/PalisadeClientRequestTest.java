@@ -47,27 +47,41 @@ class PalisadeClientRequestTest extends CommonTestData {
      *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
-    void testPalisadeRequestSerialisingAndDeserialising() throws IOException {
+    void testPalisadeRequestSerializingAndDeserializing() throws IOException {
 
         JsonContent<PalisadeClientRequest> requestJsonContent = jsonTester.write(PALISADE_REQUEST);
 
         ObjectContent<PalisadeClientRequest> requestObjectContent = jsonTester.parse(requestJsonContent.getJson());
         PalisadeClientRequest palisadeClientRequestObject = requestObjectContent.getObject();
 
-        assertAll("PalisadeClientRequest Serialising and Deseralising Comparison",
-                () -> assertAll("PalisadeClientRequest Serialising Compared To String",
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.purpose").isEqualTo("testContext")
+        assertAll("PalisadeClientRequest serializing and deserializing comparison",
+                () -> assertAll("PalisadeClientRequest serializing compared to string",
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId")
+                                .as("Check the serialized userId value")
+                                .isEqualTo("testUserId"),
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId")
+                                .as("Check the serialized resourceId value")
+                                .isEqualTo("/test/resourceId"),
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.purpose")
+                                .as("Check the serialized context value")
+                                .isEqualTo("testContext")
                 ),
-                () -> assertAll("PalisadeClientRequest Deserialising Compared To Object",
-                        () -> assertThat(palisadeClientRequestObject.getUserId()).isEqualTo(PALISADE_REQUEST.getUserId()),
-                        () -> assertThat(palisadeClientRequestObject.getResourceId()).isEqualTo(PALISADE_REQUEST.getResourceId()),
-                        () -> assertThat(palisadeClientRequestObject.getContext()).isEqualTo(PALISADE_REQUEST.getContext())
+                () -> assertAll("PalisadeClientRequest deserializing compared to object",
+                        () -> assertThat(palisadeClientRequestObject.getUserId())
+                                .as("Check the deserialized userId value")
+                                .isEqualTo(PALISADE_REQUEST.getUserId()),
+                        () -> assertThat(palisadeClientRequestObject.getResourceId())
+                                .as("Check the deserialized resourceId value")
+                                .isEqualTo(PALISADE_REQUEST.getResourceId()),
+                        () -> assertThat(palisadeClientRequestObject.getContext())
+                                .as("Check the deserialized context value")
+                                .isEqualTo(PALISADE_REQUEST.getContext())
                 ),
-                () -> assertAll("Object Comparison",
+                () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeClientRequestObject).usingRecursiveComparison().isEqualTo(PALISADE_REQUEST)
+                        () -> assertThat(palisadeClientRequestObject).usingRecursiveComparison()
+                                .as("Recursively compare the PalisadeClientRequest object")
+                                .isEqualTo(PALISADE_REQUEST)
                 )
         );
     }

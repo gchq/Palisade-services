@@ -53,7 +53,8 @@ class HealthActuatorContractTest {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         String body = responseEntity.getBody();
-        assertThat(body).contains("\"status\":\"UP\"");
+        assertThat(body).as("Check the body value of the returned ResponseEntity")
+                .contains("\"status\":\"UP\"");
     }
 
 }

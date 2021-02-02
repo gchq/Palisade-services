@@ -149,14 +149,25 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check the number of results from the request probe")
                         .hasSize((int) recordCount),
 
-                () -> assertThat(results.getFirst().headers().lastHeader(Token.HEADER).value()).isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()),
-                () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value()).isEqualTo(StreamMarker.START.toString().getBytes()),
+                () -> assertThat(results.getFirst().headers().lastHeader(Token.HEADER).value())
+                        .as("Check the byte value of the request-token header for the first result")
+                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()),
+                () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the byte value of the stream-marker header for the first result")
+                        .isEqualTo(StreamMarker.START.toString().getBytes()),
 
-                () -> assertThat(results.getLast().headers().lastHeader(Token.HEADER).value()).isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()),
-                () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value()).isEqualTo(StreamMarker.END.toString().getBytes())
+                () -> assertThat(results.getLast().headers().lastHeader(Token.HEADER).value())
+                        .as("Check the byte value of the request-token header for the last result")
+                        .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()),
+                () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the byte value of the stream-marker header for the last result")
+                        .isEqualTo(StreamMarker.END.toString().getBytes())
         );
+
+        // Remove the START and END messages from the results
         results.removeFirst();
         results.removeLast();
 
@@ -164,8 +175,10 @@ class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
+                            .as("Check the value of the returned PalisadeSystemResponse")
                             .isEqualTo(PalisadeSystemResponse.Builder.create(ContractTestData.REQUEST_OBJ));
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .as("Check the byte value of the request-token header")
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
     }
@@ -207,12 +220,15 @@ class KafkaContractTest {
         // Then - the results are as expected
         // The request was written with the correct header
         assertThat(results)
+                .as("Check there is only 1 result from the error probe")
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value()).usingRecursiveComparison()
                             .ignoringFieldsOfTypes(Throwable.class).ignoringFields("timestamp")
+                            .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable and TimeStamp values")
                             .isEqualTo(ContractTestData.ERROR_OBJ);
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .as("Check the byte value of the request-token header")
                             .isEqualTo(ContractTestData.ERROR_TOKEN.getBytes());
                 });
     }

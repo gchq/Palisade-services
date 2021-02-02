@@ -40,13 +40,13 @@ class PalisadeClientResponseTest {
     /**
      * Grouped assertion test
      * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, de-serialises and tests against the original response Object.
+     * Takes the JSON Object, deserializes and tests against the original response Object.
      *
      * @throws IOException throws if the {@link PalisadeClientResponse} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to seralise or deseralise the string.
+     *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
-    void testPalisadeClientResponseSerialisingAndDeserialising() throws IOException {
+    void testPalisadeClientResponseSerializingAndDeserializing() throws IOException {
         PalisadeClientResponse palisadeClientResponse = new PalisadeClientResponse("tokenID");
 
         JsonContent<PalisadeClientResponse> responseJsonContent = jsonTester.write(palisadeClientResponse);
@@ -54,16 +54,22 @@ class PalisadeClientResponseTest {
         ObjectContent<PalisadeClientResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
         PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
 
-        assertAll("Palisade Client Response Serialising and Deseralising Comparison",
-                () -> assertAll("Palisade Response Serialising Compared To String",
-                        () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token").isEqualTo("tokenID")
+        assertAll("PalisadeClientResponse serializing and deserializing comparison",
+                () -> assertAll("PalisadeClientResponse serializing compared to string",
+                        () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token")
+                                .as("Check the serialized token value")
+                                .isEqualTo("tokenID")
                 ),
-                () -> assertAll("Palisade Client Response Deserialising Compared To Object",
-                        () -> assertThat(palisadeClientResponseObject.getToken()).isEqualTo(palisadeClientResponse.getToken())
+                () -> assertAll("PalisadeClientResponse deserializing compared to object",
+                        () -> assertThat(palisadeClientResponseObject.getToken())
+                                .as("Check the deserialized token value")
+                                .isEqualTo(palisadeClientResponse.getToken())
                 ),
-                () -> assertAll("Object Comparison",
+                () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeClientResponseObject).isEqualTo(palisadeClientResponse)
+                        () -> assertThat(palisadeClientResponseObject).usingRecursiveComparison()
+                                .as("Recursively compare the PalisadeClientResponse object")
+                                .isEqualTo(palisadeClientResponse)
                 )
         );
     }

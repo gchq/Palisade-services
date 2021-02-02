@@ -47,26 +47,40 @@ class PalisadeSystemResponseTest extends CommonTestData {
      *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
-    void testPalisadeSystemResponseSerialisingAndDeserialising() throws IOException {
+    void testPalisadeSystemResponseSerializingAndDeserializing() throws IOException {
 
         JsonContent<PalisadeSystemResponse> requestJsonContent = jsonTester.write(SYSTEM_RESPONSE);
         ObjectContent<PalisadeSystemResponse> requestObjectContent = jsonTester.parse(requestJsonContent.getJson());
         PalisadeSystemResponse requestObject = requestObjectContent.getObject();
 
-        assertAll("PalisadeSystemResponse with request Serialising and Deseralising Comparison",
-                () -> assertAll("PalisadeSystemResponse, with PalisadeClientRequest, Serialising Compared To String",
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose").isEqualTo("testContext")
+        assertAll("PalisadeSystemResponse with request serializing and deserializing comparison",
+                () -> assertAll("PalisadeSystemResponse serializing compared to string",
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId")
+                                .as("Check the serialized userId value")
+                                .isEqualTo("testUserId"),
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId")
+                                .as("Check the serialized resourceId value")
+                                .isEqualTo("/test/resourceId"),
+                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose")
+                                .as("Check the serialized context value")
+                                .isEqualTo("testContext")
                 ),
-                () -> assertAll("PalisadeSystemResponse, with PalisadeClientRequest, Deserialising Compared To Object",
-                        () -> assertThat(requestObject.getUserId()).isEqualTo(SYSTEM_RESPONSE.getUserId()),
-                        () -> assertThat(requestObject.getResourceId()).isEqualTo(SYSTEM_RESPONSE.getResourceId()),
-                        () -> assertThat(requestObject.getContext().getPurpose()).isEqualTo(SYSTEM_RESPONSE.getContext().getPurpose())
+                () -> assertAll("PalisadeSystemResponse deserializing compared to object",
+                        () -> assertThat(requestObject.getUserId())
+                                .as("Check the deserialized userId value")
+                                .isEqualTo(SYSTEM_RESPONSE.getUserId()),
+                        () -> assertThat(requestObject.getResourceId())
+                                .as("Check the deserialized resourceId value")
+                                .isEqualTo(SYSTEM_RESPONSE.getResourceId()),
+                        () -> assertThat(requestObject.getContext().getPurpose())
+                                .as("Check the deserialized context value")
+                                .isEqualTo(SYSTEM_RESPONSE.getContext().getPurpose())
                 ),
-                () -> assertAll("Object Comparison",
+                () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
-                        () -> assertThat(requestObject).usingRecursiveComparison().isEqualTo(SYSTEM_RESPONSE)
+                        () -> assertThat(requestObject).usingRecursiveComparison()
+                                .as("Recursively compare the PalisadeSystemResponse object")
+                                .isEqualTo(SYSTEM_RESPONSE)
                 )
         );
     }

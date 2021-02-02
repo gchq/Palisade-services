@@ -56,18 +56,29 @@ class PalisadeServiceTest extends CommonTestData {
     @Test
     void testRegisterDataRequest() {
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
-        assertThat(token.join()).isEqualTo(COMMON_UUID.toString());
-        assertThat(sinkCollection).usingRecursiveComparison().isEqualTo(List.of(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_REQUEST)));
+
+        assertThat(token.join())
+                .as("Check the value of the returned Token")
+                .isEqualTo(COMMON_UUID.toString());
+        assertThat(sinkCollection).as("Recursively check the returned TokenRequestPair")
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_REQUEST)));
     }
 
     @Test
     void testErrorMessage() {
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
         service.errorMessage(PALISADE_REQUEST, token.join(), attributes, ERROR);
-        assertThat(token.join()).isEqualTo(COMMON_UUID.toString());
+        assertThat(token.join())
+                .as("Check the value of the returned Token")
+                .isEqualTo(COMMON_UUID.toString());
         assertAll(
-                () -> assertThat(sinkCollection.getLast().first()).isEqualTo(token.join()),
-                () -> assertThat(sinkCollection.getLast().second().getAuditErrorMessage()).usingRecursiveComparison().ignoringFields("timestamp")
+                () -> assertThat(sinkCollection.getLast().first())
+                        .as("Check the Token value from the error-topic")
+                        .isEqualTo(token.join()),
+                () -> assertThat(sinkCollection.getLast().second().getAuditErrorMessage())
+                        .as("Recursively check the value of the AuditErrorMessage")
+                        .usingRecursiveComparison().ignoringFields("timestamp")
                         .isEqualTo(List.of(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_ERROR)).get(0).second().getAuditErrorMessage())
         );
     }
