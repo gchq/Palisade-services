@@ -78,9 +78,11 @@ class AuditErrorMessageTest {
 
                         () -> assertThat(auditErrorMessageObject)
                                 .extracting(AuditErrorMessage::getError)
-                                .extracting(Throwable::getCause)
-                                .as("Check the class of the thrown Error")
-                                .isInstanceOf(auditErrorMessage.getError().getCause().getClass())
+                                .as("Check that there is an error value")
+                                .isNotNull()
+                                .extracting(Throwable::getMessage)
+                                .as("Check the message of the thrown error")
+                                .isEqualTo(auditErrorMessage.getError().getMessage())
                 )
         );
     }
