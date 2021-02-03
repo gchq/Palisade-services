@@ -70,44 +70,17 @@ class AuditErrorMessageTest {
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
         assertAll("AuditErrorMessage serializing and deserializing comparison",
-                () -> assertAll("AuditErrorMessage serializing compared to string",
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.userId")
-                                .as("Check the serialized userId value").isEqualTo("originalUserID"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.resourceId")
-                                .as("Check the serialized resourceId value").isEqualTo("testResourceId"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.context.contents.purpose")
-                                .as("Check the serialized context value").isEqualTo("testContext"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.serviceName")
-                                .as("Check the serialized serviceName value").isEqualTo("palisade-service"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.attributes.messagesSent")
-                                .as("Check the serialized messageSent attribute value").isEqualTo("23"),
-                        () -> assertThat(auditErrorMessageJsonContent).extractingJsonPathStringValue("$.error.message")
-                                .as("Check the serialized error message value").isEqualTo("Something went wrong!")
-                ),
-                () -> assertAll("AuditErrorMessage deserializing compared to object",
-                        () -> assertThat(auditErrorMessageObject.getUserId()).as("Check the deserialized userId value")
-                                .isEqualTo(auditErrorMessage.getUserId()),
-                        () -> assertThat(auditErrorMessageObject.getResourceId()).as("Check the deserialized resourceId value")
-                                .isEqualTo(auditErrorMessage.getResourceId()),
-                        () -> assertThat(auditErrorMessageObject.getContext()).as("Check the deserialized context value")
-                                .isEqualTo(auditErrorMessage.getContext()),
-                        () -> assertThat(auditErrorMessageObject.getServiceName()).as("Check the deserialized serviceName value")
-                                .isEqualTo(auditErrorMessage.getServiceName()),
-                        () -> assertThat(auditErrorMessageObject.getTimestamp()).as("Check the deserialized timeStamp value")
-                                .isEqualTo(auditErrorMessage.getTimestamp()),
-                        () -> assertThat(auditErrorMessageObject.getServerHostname()).as("Check the deserialized serverHostname value")
-                                .isEqualTo(auditErrorMessage.getServerHostname()),
-                        () -> assertThat(auditErrorMessageObject.getServerIP()).as("Check the deserialized serverIP value")
-                                .isEqualTo(auditErrorMessage.getServerIP()),
-                        () -> assertThat(auditErrorMessageObject.getError().getMessage()).as("Check the deserialized error message value")
-                                .isEqualTo(auditErrorMessage.getError().getMessage())
-                        // Note Throwable equals does not override Object's equal so two Throwables are only equal if they are the same instance of an object.
-                ),
                 () -> assertAll("Object comparison",
                         () -> assertThat(auditErrorMessageObject).usingRecursiveComparison()
                                 .ignoringFieldsOfTypes(Throwable.class)
                                 .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable value")
-                                .isEqualTo(auditErrorMessage)
+                                .isEqualTo(auditErrorMessage),
+
+                        () -> assertThat(auditErrorMessageObject)
+                                .extracting(AuditErrorMessage::getError)
+                                .extracting(Throwable::getCause)
+                                .as("Check the class of the thrown Error")
+                                .isInstanceOf(auditErrorMessage.getError().getCause().getClass())
                 )
         );
     }

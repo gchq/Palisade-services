@@ -55,16 +55,6 @@ class PalisadeClientResponseTest {
         PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
 
         assertAll("PalisadeClientResponse serializing and deserializing comparison",
-                () -> assertAll("PalisadeClientResponse serializing compared to string",
-                        () -> assertThat(responseJsonContent).extractingJsonPathStringValue("$.token")
-                                .as("Check the serialized token value")
-                                .isEqualTo("tokenID")
-                ),
-                () -> assertAll("PalisadeClientResponse deserializing compared to object",
-                        () -> assertThat(palisadeClientResponseObject.getToken())
-                                .as("Check the deserialized token value")
-                                .isEqualTo(palisadeClientResponse.getToken())
-                ),
                 () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
                         () -> assertThat(palisadeClientResponseObject).usingRecursiveComparison()

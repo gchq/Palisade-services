@@ -54,28 +54,6 @@ class PalisadeSystemResponseTest extends CommonTestData {
         PalisadeSystemResponse requestObject = requestObjectContent.getObject();
 
         assertAll("PalisadeSystemResponse with request serializing and deserializing comparison",
-                () -> assertAll("PalisadeSystemResponse serializing compared to string",
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId")
-                                .as("Check the serialized userId value")
-                                .isEqualTo("testUserId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId")
-                                .as("Check the serialized resourceId value")
-                                .isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.contents.purpose")
-                                .as("Check the serialized context value")
-                                .isEqualTo("testContext")
-                ),
-                () -> assertAll("PalisadeSystemResponse deserializing compared to object",
-                        () -> assertThat(requestObject.getUserId())
-                                .as("Check the deserialized userId value")
-                                .isEqualTo(SYSTEM_RESPONSE.getUserId()),
-                        () -> assertThat(requestObject.getResourceId())
-                                .as("Check the deserialized resourceId value")
-                                .isEqualTo(SYSTEM_RESPONSE.getResourceId()),
-                        () -> assertThat(requestObject.getContext().getPurpose())
-                                .as("Check the deserialized context value")
-                                .isEqualTo(SYSTEM_RESPONSE.getContext().getPurpose())
-                ),
                 () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
                         () -> assertThat(requestObject).usingRecursiveComparison()

@@ -55,28 +55,6 @@ class PalisadeClientRequestTest extends CommonTestData {
         PalisadeClientRequest palisadeClientRequestObject = requestObjectContent.getObject();
 
         assertAll("PalisadeClientRequest serializing and deserializing comparison",
-                () -> assertAll("PalisadeClientRequest serializing compared to string",
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId")
-                                .as("Check the serialized userId value")
-                                .isEqualTo("testUserId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId")
-                                .as("Check the serialized resourceId value")
-                                .isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.purpose")
-                                .as("Check the serialized context value")
-                                .isEqualTo("testContext")
-                ),
-                () -> assertAll("PalisadeClientRequest deserializing compared to object",
-                        () -> assertThat(palisadeClientRequestObject.getUserId())
-                                .as("Check the deserialized userId value")
-                                .isEqualTo(PALISADE_REQUEST.getUserId()),
-                        () -> assertThat(palisadeClientRequestObject.getResourceId())
-                                .as("Check the deserialized resourceId value")
-                                .isEqualTo(PALISADE_REQUEST.getResourceId()),
-                        () -> assertThat(palisadeClientRequestObject.getContext())
-                                .as("Check the deserialized context value")
-                                .isEqualTo(PALISADE_REQUEST.getContext())
-                ),
                 () -> assertAll("Object comparison",
                         //compares the two objects using the objects equal method
                         () -> assertThat(palisadeClientRequestObject).usingRecursiveComparison()
