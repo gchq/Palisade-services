@@ -164,15 +164,15 @@ public final class SerDesConfig {
         };
     }
 
-    private static void createFile(final String name, final String failedAuditString, final AuditServiceConfigProperties configProperties) {
-        String fileName = name + ZonedDateTime.now(ZoneOffset.UTC)
+    private static void createFile(final String prefix, final String failedAuditString, final AuditServiceConfigProperties configProperties) {
+        String fileName = prefix + ZonedDateTime.now(ZoneOffset.UTC)
                 .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
         File directory = new File(configProperties.getErrorDirectory());
         File parent = directory.getAbsoluteFile().getParentFile();
         File timestampedFile = new File(parent, fileName);
         try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
             fileWriter.write(failedAuditString);
-            LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", name, timestampedFile);
+            LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", prefix, timestampedFile);
         } catch (IOException ex) {
             LOGGER.error("Failed to write file to directory: {}", directory.getAbsoluteFile());
             LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);

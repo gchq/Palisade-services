@@ -172,7 +172,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        sleep(1);
+        waitForService();
 
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
@@ -194,7 +194,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        sleep(1);
+        waitForService();
 
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
@@ -220,7 +220,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        sleep(1);
+        waitForService();
 
         // Then - check the audit service has invoked the audit method for the 2 `Good` requests
         Mockito.verify(auditService, Mockito.timeout(3000).times(2)).audit(anyString(), any());
@@ -235,7 +235,7 @@ class KafkaContractTest {
         HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
-        sleep(1);
+        waitForService();
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -253,7 +253,7 @@ class KafkaContractTest {
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
-        sleep(1);
+        waitForService();
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -271,7 +271,7 @@ class KafkaContractTest {
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
-        sleep(1);
+        waitForService();
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -296,7 +296,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        sleep(2);
+        waitForService();
 
         // Then check an "Error-..." file has been created
         after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
@@ -322,7 +322,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        TimeUnit.SECONDS.sleep(2);
+        waitForService();
 
         // Then check a "Success-..." file has been created
         after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
@@ -332,8 +332,8 @@ class KafkaContractTest {
         assertThat(after).as("Check at least 1 'Success' file has been created").isEqualTo(successBefore + 1);
     }
 
-    private void sleep(final int sleep) throws InterruptedException {
-        TimeUnit.SECONDS.sleep(sleep);
+    private void waitForService() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(2);
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
