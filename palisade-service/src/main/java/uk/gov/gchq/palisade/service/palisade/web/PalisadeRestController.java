@@ -77,7 +77,7 @@ public class PalisadeRestController {
             LOGGER.error("PalisadeRestController Exception thrown", e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             Map<String, Object> attributes = new HashMap<>();
-            palisadeService.errorMessage(request, token, attributes, e);
+            palisadeService.errorMessage(request, token, attributes, e).join();
         }
         return ResponseEntity.status(httpStatus)
                 .body(palisadeClientResponse);
