@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public final class ContractTestData {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"queuePointer\":1}";
+    private static final String TOPIC_OFFSET_MESSAGE_JSON = "{\"commitOffset\":1}";
     public static final String REQUEST_TOKEN = "test-request-token";
 
     public static final JsonNode TOPIC_OFFSET_MSG_JSON_NODE;

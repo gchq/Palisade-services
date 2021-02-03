@@ -1,4 +1,4 @@
-# Copyright 2020 Crown Copyright
+# Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 population:
   policyProvider: std
   policies:
-  - resourceId: file:/test/noRulesResource
+  - resourceId: /test/noRulesResource
 
-  - resourceId: file:/test/resourceId
+  - resourceId: /test/resourceId
     resourceRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
     recordRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
 
-  - resourceId: file:/test/resourceRulesResource
+  - resourceId: /test/resourceRulesResource
     resourceRules:
       "1-Serialised-Format-Rule": uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule
     recordRules:

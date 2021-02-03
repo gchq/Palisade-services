@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class PolicyApplication {
     public void serveForever() {
         //Prepopulate the cache
         LOGGER.debug("Pre-populating using policy config: {}", policyConfig.getClass());
-        policyConfig.getPolicies().stream()
+        policyConfig.getPolicies()
                 .forEach((PolicyPrepopulationFactory factory) -> {
                     //Build Resource Rules
                     Entry<String, Rules<LeafResource>> resourceMap = factory.buildResourceRules();

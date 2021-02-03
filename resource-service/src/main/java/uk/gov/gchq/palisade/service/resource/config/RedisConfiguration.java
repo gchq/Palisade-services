@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ public class RedisConfiguration {
      *
      * @param kSerde the serializer class for the key
      * @param vSerde the serializer class for the value
-     * @param <K> the key
-     * @param <V> the value
+     * @param <K>    the key
+     * @param <V>    the value
      * @return a {@link ReactiveRedisTemplate}
      */
     public <K, V> ReactiveRedisTemplate<String, V> reactiveRedisTemplate(final RedisSerializer<K> kSerde, final RedisSerializer<V> vSerde) {

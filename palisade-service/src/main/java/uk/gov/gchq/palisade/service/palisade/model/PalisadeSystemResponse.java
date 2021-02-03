@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ package uk.gov.gchq.palisade.service.palisade.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * Represents the original data that has been sent from the client to Palisade Service for a request to access data.
@@ -34,22 +34,18 @@ import java.util.StringJoiner;
  * This version represents the original request.
  * Next in the sequence is the input for user-service where this data will be used as a request for a User.
  * Note there are two classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest is the client request that has come into the Palisade Service.
+ * uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest is the client request that has come into the Palisade Service.
  * uk.gov.gchq.palisade.service.user.request.UserRequest is the input for the User Service.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class PalisadeRequest {
+public final class PalisadeSystemResponse {
 
     private final String userId;  //Unique identifier for the user.
     private final String resourceId;  //Resource that that is being asked to access.
-
-    // Ignore class type on context object
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, defaultImpl = Context.class)
     private final Context context;
 
     @JsonCreator
-    private PalisadeRequest(
+    private PalisadeSystemResponse(
             final @JsonProperty("userId") String userId,
             final @JsonProperty("resourceId") String resourceId,
             final @JsonProperty("context") Context context) {
@@ -80,10 +76,10 @@ public final class PalisadeRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PalisadeRequest)) {
+        if (!(o instanceof PalisadeSystemResponse)) {
             return false;
         }
-        PalisadeRequest that = (PalisadeRequest) o;
+        PalisadeSystemResponse that = (PalisadeSystemResponse) o;
         return userId.equals(that.userId) &&
                 resourceId.equals(that.resourceId) &&
                 context.equals(that.context);
@@ -98,7 +94,7 @@ public final class PalisadeRequest {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", PalisadeRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PalisadeSystemResponse.class.getSimpleName() + "[", "]")
                 .add("userId='" + userId + "'")
                 .add("resourceId='" + resourceId + "'")
                 .add("context=" + context)
@@ -107,20 +103,37 @@ public final class PalisadeRequest {
     }
 
     /**
-     * Builder class for the creation of the PalisadeRequest.  This is a variant of the Fluent Builder
+     * Builder class for the creation of the PalisadeClientRequest.  This is a variant of the Fluent Builder
      * which will use String or optionally JsonNodes for the components in the build.
      */
     public static class Builder {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * PalisadeRequest class.
+         * PalisadeClientRequest class.
          *
          * @return interface  {@link IUserId} for the next step in the build.
          */
         public static IUserId create() {
             return userId -> resourceId -> context ->
-                    new PalisadeRequest(userId, resourceId, context);
+                    new PalisadeSystemResponse(userId, resourceId, context);
+        }
+
+        /**
+         * Taking a request, returns a {@link PalisadeSystemResponse} containing the same userId,
+         * resourceId and a newly created Context object for use downstream
+         *
+         * @param request the request that has been sent from the client, containing a userId, resourceId and context
+         * @return a PalisadeSystemResponse used downstream containing the new Context object
+         */
+        public static PalisadeSystemResponse create(final PalisadeClientRequest request) {
+            return new PalisadeSystemResponse(
+                    request.getUserId(),
+                    request.getResourceId(),
+                    new Context().contents(request.getContext().entrySet().stream()
+                            // Downcast String to Object
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+            );
         }
 
         /**
@@ -157,9 +170,9 @@ public final class PalisadeRequest {
              * Adds the user context information.
              *
              * @param context information about this request.
-             * @return class {@link PalisadeRequest} this builder is set-up to create.
+             * @return class {@link PalisadeSystemResponse} this builder is set-up to create.
              */
-            PalisadeRequest withContext(Context context);
+            PalisadeSystemResponse withContext(Context context);
         }
     }
 }

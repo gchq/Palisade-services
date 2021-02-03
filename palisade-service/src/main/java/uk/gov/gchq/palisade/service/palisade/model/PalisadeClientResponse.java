@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.StringJoiner;
  * for access to the data and be used in a subsequent request to see the resources.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public final class PalisadeResponse {
+public final class PalisadeClientResponse {
 
     private final String token;  //unique identifier for the request.
 
@@ -40,7 +40,7 @@ public final class PalisadeResponse {
      * @param token the token
      */
     @JsonCreator
-    public PalisadeResponse(final @JsonProperty("token") String token) {
+    public PalisadeClientResponse(final @JsonProperty("token") String token) {
         this.token = Optional.ofNullable(token).orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
     }
 
@@ -57,7 +57,7 @@ public final class PalisadeResponse {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", PalisadeResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PalisadeClientResponse.class.getSimpleName() + "[", "]")
                 .add("token='" + token + "'")
                 .toString();
     }
@@ -71,8 +71,8 @@ public final class PalisadeResponse {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final PalisadeResponse palisadeResponse = (PalisadeResponse) o;
-        return Objects.equals(token, palisadeResponse.token);
+        final PalisadeClientResponse palisadeClientResponse = (PalisadeClientResponse) o;
+        return Objects.equals(token, palisadeClientResponse.token);
     }
 
     @Override

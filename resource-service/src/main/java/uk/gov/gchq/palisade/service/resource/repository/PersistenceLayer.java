@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ public interface PersistenceLayer {
      * Add a {@link LeafResource} to persistence for a given type
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param <T>       the type for the {@link Flow}
-     * @param type      the file type that was queried to return this {@link Flow} of resources
+     * @param <T>  the type for the {@link Flow}
+     * @param type the file type that was queried to return this {@link Flow} of resources
      * @return an {@link Flow} of {@link LeafResource}s added to the persistence
      */
     <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceByType(String type);
@@ -88,9 +88,9 @@ public interface PersistenceLayer {
 
 
     /**
-     * Add a new resource that has been created during runtime to the persistence store
-     * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method)
-     * Used for updating the persistence store when the source of 'truth' has changed
+     * Add a new resource that has been created during runtime to the persistence store.
+     * This behaviour will otherwise invalidate the persistence store (it may still if desired in this method).
+     * Used for updating the persistence store when the source of 'truth' has changed.
      * As long as this is called for every new resource created and added to the resource-service,
      * this should guarantee consistency between persistence and resource-service
      *

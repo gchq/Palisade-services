@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.palisade.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.palisade.model.PalisadeRequest;
+import uk.gov.gchq.palisade.service.palisade.model.PalisadeSystemResponse;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -54,12 +54,12 @@ public final class TestSerDesConfig {
      *
      * @return an appropriate value deserialiser for the topic's message content
      */
-    public static Deserializer<PalisadeRequest> requestValueDeserializer() {
-        return (String ignored, byte[] palisadeRequest) -> {
+    public static Deserializer<PalisadeSystemResponse> requestValueDeserializer() {
+        return (String ignored, byte[] palisadeResponse) -> {
             try {
-                return MAPPER.readValue(palisadeRequest, PalisadeRequest.class);
+                return MAPPER.readValue(palisadeResponse, PalisadeSystemResponse.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeRequest, Charset.defaultCharset()), e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeResponse, Charset.defaultCharset()), e);
             }
         };
     }

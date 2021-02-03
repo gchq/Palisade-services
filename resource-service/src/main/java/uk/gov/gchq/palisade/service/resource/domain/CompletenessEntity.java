@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ public class CompletenessEntity implements Serializable, Persistable<Integer> {
      * Used for inserting objects into the backing store
      *
      * @param entityType the Entity type enum object
-     * @param entityId The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
-     * @param id the id of the stored entity
+     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     * @param id         the id of the stored entity
      */
     @PersistenceConstructor
     @JsonCreator
@@ -104,7 +104,7 @@ public class CompletenessEntity implements Serializable, Persistable<Integer> {
      * Creates a hash value for the passed parameters
      *
      * @param entityType the Entity type enum object
-     * @param entityId The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
+     * @param entityId   The Id of the entity, which eventually becomes a hash of the type and Id as a primary key
      * @return the hash value used for the id, made up of the entity type and entity id values
      */
     public static Integer idFor(final EntityType entityType, final String entityId) {
