@@ -52,8 +52,11 @@ class AuditSuccessMessageTest {
         AuditSuccessMessage auditSuccessMessageObjectContentObject = auditSuccessMessageObjectContent.getObject();
 
         assertAll("ObjectComparison",
-                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using the AuditSuccessMessage's equals").isEqualTo(AUDIT_SUCCESS_MESSAGE),
-                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using all of the AuditSuccessMessage's components recursively").usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
+                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using the AuditSuccessMessage's equals")
+                        .isEqualTo(AUDIT_SUCCESS_MESSAGE),
+                () -> assertThat(auditSuccessMessageObjectContentObject).as("Comparison assertion using all of the AuditSuccessMessage's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUDIT_SUCCESS_MESSAGE)
         );
     }
 }

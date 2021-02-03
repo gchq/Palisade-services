@@ -55,8 +55,11 @@ class AuditableAuthorisedDataTest {
         AuditableDataResponse auditableDataResponseObjectContentObject = auditableDataResponseObjectContent.getObject();
 
         assertAll("ObjectComparison",
-                () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using the AuditableDataResponse's equals").isEqualTo(AUDITABLE_DATA_RESPONSE),
-                () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using all of the AuditableDataResponse's components recursively").usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_RESPONSE)
+                () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using the AuditableDataResponse's equals")
+                        .isEqualTo(AUDITABLE_DATA_RESPONSE),
+                () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using all of the AuditableDataResponse's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUDITABLE_DATA_RESPONSE)
         );
 
     }
@@ -69,8 +72,10 @@ class AuditableAuthorisedDataTest {
 
         assertAll("AuditSerialisingDeseralisingAndComparison",
                 () -> assertAll("ObjectComparison",
-                        () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using the AuditableDataResponse's equals").isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR),
-                        () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using all of the AuditableDataResponse's components recursively").usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR)
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using the AuditableDataResponse's equals")
+                                .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR),
+                        () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using all of the AuditableDataResponse's components recursively")
+                                .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR)
                 )
         );
     }
