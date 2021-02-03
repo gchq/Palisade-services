@@ -116,10 +116,10 @@ class H2ComponentTest {
     void setup() throws InterruptedException {
         for (FileResource file : Arrays.asList(EMPLOYEE_JSON_FILE, EMPLOYEE_AVRO_FILE, CLIENT_AVRO_FILE)) {
             Source.single(file)
-                .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
-                .via(persistenceLayer.withPersistenceByType(file.getType()))
-                .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
-                .runWith(Sink.ignore(), materializer);
+                    .via(persistenceLayer.withPersistenceById(TEST_DIRECTORY.getId()))
+                    .via(persistenceLayer.withPersistenceByType(file.getType()))
+                    .via(persistenceLayer.withPersistenceBySerialisedFormat(file.getSerialisedFormat()))
+                    .runWith(Sink.ignore(), materializer);
         }
 
         TimeUnit.SECONDS.sleep(1);
@@ -130,7 +130,7 @@ class H2ComponentTest {
         // Given - setup
 
         // When making a get request to the resource service by resource for a directory
-        List<LeafResource> resourceResult =  proxy.getResourcesByResource(TEST_DIRECTORY_REQUEST)
+        List<LeafResource> resourceResult = proxy.getResourcesByResource(TEST_DIRECTORY_REQUEST)
                 .map(auditableResponse -> {
                     if (auditableResponse.getAuditErrorMessage() != null) {
                         auditableResponse.getAuditErrorMessage().getError().printStackTrace();
