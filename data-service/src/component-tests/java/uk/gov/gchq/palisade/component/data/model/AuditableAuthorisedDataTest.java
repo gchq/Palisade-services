@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE_WITH_ERROR;
+import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION;
 
 @JsonTest
 @ContextConfiguration(classes = {AuditableAuthorisedDataTest.class})
@@ -75,7 +76,10 @@ class AuditableAuthorisedDataTest {
                         () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using the AuditableDataResponse's equals")
                                 .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR),
                         () -> assertThat(auditableDataResponseObjectContentObject).as("Comparison assertion using all of the AuditableDataResponse's components recursively")
-                                .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR)
+                                .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR),
+                        () -> assertThat(auditableDataResponseObjectContentObject.getAuditErrorMessage().getError().getMessage()).as("Assertion check of the error message")
+                                .isEqualTo(AUDITABLE_DATA_RESPONSE_WITH_ERROR.getAuditErrorMessage().getError().getMessage())
+
                 )
         );
     }
