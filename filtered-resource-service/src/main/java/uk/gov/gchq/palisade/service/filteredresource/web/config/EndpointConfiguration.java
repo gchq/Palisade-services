@@ -39,7 +39,6 @@ import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringL
 import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.SpringShutdownRouter;
 
 import java.net.InetAddress;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 
