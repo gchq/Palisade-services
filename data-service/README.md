@@ -38,58 +38,25 @@ The client request will contain the token and resource id that is used to unique
 |                 |                        |                      | serverMetadata    |
   
 *token is stored in the header metadata  
+
 **attributes will include the numbers for records processed and records returned
+
 ***data that may not be available depending on when the error occurred
 
 ## REST Interface
 
-The application exposes one endpoint for retrieving the resourses that were processed bu the  requestsitting on debugging or mocking kafka entrypoints:
-* `POST api/user`
-    - accepts an `x-request-token` `String` header, any number of extra headers, and a single `UserRequest` in the body
-    - returns a `202 ACCEPTED` after writing the headers and `UserRequest` to kafka
-* `POST api/user/multi`
-    - accepts an `x-request-token` `String` header, any number of extra headers, and a list of `UserRequest`s within the body
-    - returns a `202 ACCEPTED` after writing the headers and `UserRequest` to kafka
+The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
+been requested and prepared in the initial request to Palisade services. 
+* `POST api/read/chunked`
+    - returns a `202 ACCEPTED` and an OutputStream which will provides the resource.
 
 ## Example JSON Request
 ```
-curl -X POST user-service/api/user -H "x-request-token: test-request-token" -H "content-type: application/json" --data \
+curl -X POST data-dervcie/api/user  -H "content-type: application/json" --data \
 '{
-   "userId": "test-user-id",
-   "resourceId": "/test/resourceId",
-   "context": {
-     "class": "uk.gov.gchq.palisade.Context",
-     "contents": {
-       "purpose": "purpose"
-     }
-   }
+   "token": "test-token",
+   "leafResourceId": "test-leafResourceId"
  }'
 ```
 
-
-## Example JSON Response
-```
-'{
-  "userId": "test-user-id",
-  "resourceId": "/test/resourceId",
-  "context": {
-    "class": "uk.gov.gchq.palisade.Context",
-    "contents": {
-      "purpose": "purpose"
-    }
-  },
-  "user": {
-    "userId": {
-      "id": "test-user-id"
-    },
-    "roles": [
-      "roles"
-    ],
-    "auths": [
-      "auths"
-    ],
-    "class": "uk.gov.gchq.palisade.User"
-  }
-}'
-```
   
