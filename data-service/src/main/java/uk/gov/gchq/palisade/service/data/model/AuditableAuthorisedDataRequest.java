@@ -22,23 +22,24 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * The class contains the authorised access to the resource.  This class is a container for the {@link DataRequest}
- * {@link DataResponse} and {@link AuditErrorMessage} during stream processing.  The container will hold the
- * {@code AuditErrorMessage} when there has been an error in the process.
+ * The class contains the authorised access to the resource.  This class is a container for the original data,
+ * {@link DataRequest}, the reference to the data that is authorised to be seen, {@link AuthorisedData} and
+ * {@link AuditErrorMessage} processing.  The container will hold the {@code AuditErrorMessage} if there was an error
+ * in getting the authorised data.
  */
-public final class AuditableDataRequest {
+public final class AuditableAuthorisedDataRequest {
 
     private final DataRequest dataRequest;
-    private final DataResponse dataResponse;
+    private final AuthorisedData authorisedData;
     private final AuditErrorMessage auditErrorMessage;
 
-    private AuditableDataRequest(
+    private AuditableAuthorisedDataRequest(
             final DataRequest dataRequest,
-            final DataResponse dataResponse,
+            final AuthorisedData authorisedData,
             final AuditErrorMessage auditErrorMessage) {
 
         this.dataRequest = dataRequest;
-        this.dataResponse = dataResponse;
+        this.authorisedData = authorisedData;
         this.auditErrorMessage = auditErrorMessage;
     }
 
@@ -48,9 +49,10 @@ public final class AuditableDataRequest {
     }
 
     @Generated
-    public DataResponse getDataResponse() {
-        return dataResponse;
+    public AuthorisedData getAuthorisedData() {
+        return authorisedData;
     }
+
 
     @Generated
     public AuditErrorMessage getAuditErrorMessage() {
@@ -69,7 +71,7 @@ public final class AuditableDataRequest {
          */
         public static IDataRequest create() {
             return dataRequest -> dataResponse -> error ->
-                    new AuditableDataRequest(dataRequest, dataResponse, error);
+                    new AuditableAuthorisedDataRequest(dataRequest, dataResponse, error);
         }
 
         /**
@@ -87,16 +89,16 @@ public final class AuditableDataRequest {
         }
 
         /**
-         * Compose with {@link DataResponse}
+         * Compose with {@link AuthorisedData}
          */
         public interface IDataResponse {
             /**
              * Adds the data from the
              *
-             * @param dataResponse or null
+             * @param authorisedData or null
              * @return interface {@link IError} for the next step of the build.
              */
-            IError withDataResponse(DataResponse dataResponse);
+            IError withDataResponse(AuthorisedData authorisedData);
 
         }
 
@@ -110,7 +112,7 @@ public final class AuditableDataRequest {
              * @param auditErrorMessage or null
              * @return interface {@link IError} for the completed class from the builder.
              */
-            AuditableDataRequest withErrorMessage(AuditErrorMessage auditErrorMessage);
+            AuditableAuthorisedDataRequest withErrorMessage(AuditErrorMessage auditErrorMessage);
 
         }
     }
@@ -121,27 +123,27 @@ public final class AuditableDataRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AuditableDataRequest)) {
+        if (!(o instanceof AuditableAuthorisedDataRequest)) {
             return false;
         }
-        AuditableDataRequest that = (AuditableDataRequest) o;
+        AuditableAuthorisedDataRequest that = (AuditableAuthorisedDataRequest) o;
         return dataRequest.equals(that.dataRequest) &&
-                Objects.equals(dataResponse, that.dataResponse) &&
+                Objects.equals(authorisedData, that.authorisedData) &&
                 Objects.equals(auditErrorMessage, that.auditErrorMessage);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(dataRequest, dataResponse, auditErrorMessage);
+        return Objects.hash(dataRequest, authorisedData, auditErrorMessage);
     }
 
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuditableDataRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AuditableAuthorisedDataRequest.class.getSimpleName() + "[", "]")
                 .add("dataRequestModel=                " + dataRequest)
-                .add("dataResponse=                " + dataResponse)
+                .add("authorisedData=                " + authorisedData)
                 .add("auditErrorMessage=                " + auditErrorMessage)
                 .toString();
     }

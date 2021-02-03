@@ -17,10 +17,10 @@ package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 
 import java.io.OutputStream;
 import java.util.Collections;
@@ -51,13 +51,13 @@ public class AuditableDataService {
      * @param dataRequest request information from the client
      * @return reference to the resource information or error message
      */
-    public CompletableFuture<AuditableDataRequest> authoriseRequest(final DataRequest dataRequest) {
+    public CompletableFuture<AuditableAuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         return dataService.authoriseRequest(dataRequest)
-                .thenApply(dataResponse -> AuditableDataRequest.Builder.create()
+                .thenApply(dataResponse -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
                         .withDataResponse(dataResponse)
                         .withErrorMessage(null))
-                .exceptionally(e -> AuditableDataRequest.Builder.create()
+                .exceptionally(e -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
                         .withDataResponse(null)
                         .withErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
@@ -66,29 +66,30 @@ public class AuditableDataService {
     }
 
     /**
-     * Provides an {@link OutputStream}
+     * Reads the authorised resource and passes this onto the client in the form an {@link OutputStream}.  The response
+     * is used in the construction of the audit message for this request.
      *
-     * @param auditableDataRequest saf
-     * @param outputStream         asdf
-     * @return asd
+     * @param auditableAuthorisedDataRequest provides the reference to the authorised data request
+     * @param outputStream         is used to provide the requested data to be forwarded to the client
+     * @return information on the resources that have been provided
      */
-    public CompletableFuture<AuditableDataResponse> read(final AuditableDataRequest auditableDataRequest, final OutputStream outputStream) {
-        DataRequest dataRequest = auditableDataRequest.getDataRequest();
-        DataResponse dataResponse = auditableDataRequest.getDataResponse();
+    public CompletableFuture<AuditableDataResponse> read(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest, final OutputStream outputStream) {
+        DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
+        AuthorisedData authorisedData = auditableAuthorisedDataRequest.getAuthorisedData();
         AtomicLong recordsProcessed = new AtomicLong(0);
         AtomicLong recordsReturned = new AtomicLong(0);
 
-        return dataService.read(dataResponse, outputStream, recordsProcessed, recordsReturned)
+        return dataService.read(authorisedData, outputStream, recordsProcessed, recordsReturned)
                 .thenApply(pair -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataRequest)
+                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
                         .withAuditErrorMessage(null))
                 .exceptionally(e -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
-                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableDataRequest)
+                        .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
-                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableDataRequest)
+                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withAttributes(Collections.singletonMap("method", "read"))
                                 .withError(e)));
     }

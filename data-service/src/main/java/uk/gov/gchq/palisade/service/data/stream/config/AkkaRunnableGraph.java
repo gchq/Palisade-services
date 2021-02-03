@@ -62,15 +62,15 @@ public class AkkaRunnableGraph {
             final Function1<Throwable, Supervision.Directive> supervisionStrategy,
             final ProducerTopicConfiguration topicConfiguration) {
 
-        // Get output topic from config
+        // Get success topic from config
         Topic successTopic = topicConfiguration.getTopics().get("success-topic");
         // Get error topic from config
         Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         return source
-                //product record
                 .alsoTo(Flow
                         .<TokenMessagePair>create()
+                        //for AuditSuccessMessage send to the audit-service success topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditSuccessMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), successTopic.getPartitions());
@@ -80,6 +80,7 @@ public class AkkaRunnableGraph {
                         .to(successSink))
                 .to(Flow
                         .<TokenMessagePair>create()
+                        //for AuditErrorMessage send to the audit-service error topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditErrorMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), errorTopic.getPartitions());

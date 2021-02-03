@@ -19,17 +19,13 @@ package uk.gov.gchq.palisade.service.data.stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 
 /**
@@ -40,30 +36,11 @@ import java.nio.charset.Charset;
 public final class SerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
-    private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
 
     private SerDesConfig() {
         // Static collection of objects, class should never be instantiated
     }
 
-
-    /**
-     * Kafka key serialiser for downstream messages going out as output
-     *
-     * @return an appropriate key serialiser for the topic's message content
-     */
-    public static Serializer<String> requestKeySerializer() {
-        return new StringSerializer();
-    }
-
-    /**
-     * Kafka value serialiser for downstream messages going out as output
-     *
-     * @return an appropriate value serialiser for the topic's message content (AttributeMaskingResponse)
-     */
-    public static Serializer<byte[]> passthroughValueSerializer() {
-        return (String ignored, byte[] bytes) -> bytes;
-    }
 
     /**
      * Kafka key serialiser for downstream messages going out as success
@@ -85,21 +62,6 @@ public final class SerDesConfig {
                 return MAPPER.writeValueAsBytes(auditSuccessMessage);
             } catch (JsonProcessingException e) {
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditSuccessMessage.toString(), e);
-            }
-        };
-    }
-
-    /**
-     * Kafka value deserialiser for upstream messages coming in as input
-     *
-     * @return an appropriate value deserialiser for the topic's message content (PolicyRequest)
-     */
-    public static Deserializer<DataRequest> requestValueDeserializer() {
-        return (String ignored, byte[] policyRequest) -> {
-            try {
-                return MAPPER.readValue(policyRequest, DataRequest.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(policyRequest, Charset.defaultCharset()), e);
             }
         };
     }

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
@@ -75,8 +75,8 @@ public class DataController {
         StreamingResponseBody stream = null;
 
         //first with the client information about the request, retrieve the authorised resource information
-        AuditableDataRequest auditableDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
-        AuditErrorMessage firstErrorMessage = auditableDataRequest.getAuditErrorMessage();
+        AuditableAuthorisedDataRequest auditableAuthorisedDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
+        AuditErrorMessage firstErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
         if (firstErrorMessage != null) {
             LOGGER.error("Error occurred processing the authoriseRequest for  {}", firstErrorMessage);
@@ -85,7 +85,7 @@ public class DataController {
         } else {
             //retrieve the outputstream that links to the resources
             stream = (OutputStream outputStream) -> {
-                AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableDataRequest, outputStream).join();
+                AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
                 auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), auditableDataResponse.getAuditSuccessMessage())).join();
 
                 AuditErrorMessage secondErrorMessage = auditableDataResponse.getAuditErrorMessage();

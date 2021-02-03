@@ -26,17 +26,17 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The DataResponse represents reference for the filtered resource that the user is authorised to retrieve.
+ * The AuthorisedData represents reference for the filtered resource that the user is authorised to retrieve.
  * This will be used to provide the link to the resource that will be forwarded to the user to be streamed.
  */
-public final class DataResponse {
+public final class AuthorisedData {
 
     private final LeafResource resource; //resource that is to be viewed
     private final User user; //user that is requesting the information
     private final Context context;  //context of the request
     private final Rules<?> rules;  //rules that apply to the resource
 
-    private DataResponse(
+    private AuthorisedData(
             final LeafResource resource,
             final User user,
             final Context context,
@@ -73,20 +73,20 @@ public final class DataResponse {
     }
 
     /**
-     * Builder class for the creation of instances of the DataReaderRequest.
+     * Builder class for the creation of instances of the AuthorisedData.
      * This is a variant of the Fluent Builder which will use Java Objects for the components
      * in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.
-         * This method is called to start the process of creating the DataReaderRequest class.
+         * This method is called to start the process of creating the AuthorisedData class.
          *
          * @return interface {@link IResource} for the next step in the build.
          */
         public static IResource create() {
             return resource -> user -> context -> rules ->
-                    new DataResponse(resource, user, context, rules);
+                    new AuthorisedData(resource, user, context, rules);
         }
 
         /**
@@ -136,9 +136,9 @@ public final class DataResponse {
              * Adds the rules to apply to the resource
              *
              * @param rules that are to apply to the resource
-             * @return interface {@link DataResponse} for the completed class from the builder
+             * @return interface {@link AuthorisedData} for the completed class from the builder
              */
-            DataResponse withRules(Rules<?> rules);
+            AuthorisedData withRules(Rules<?> rules);
 
         }
     }
@@ -150,10 +150,10 @@ public final class DataResponse {
             return true;
         }
 
-        if (!(o instanceof DataResponse)) {
+        if (!(o instanceof AuthorisedData)) {
             return false;
         }
-        DataResponse that = (DataResponse) o;
+        AuthorisedData that = (AuthorisedData) o;
         return resource.equals(that.resource) &&
                 user.equals(that.user) &&
                 context.equals(that.context) &&
@@ -169,7 +169,7 @@ public final class DataResponse {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", DataResponse.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AuthorisedData.class.getSimpleName() + "[", "]")
                 .add("resource" + resource)
                 .add("user=" + user)
                 .add("context=" + context)

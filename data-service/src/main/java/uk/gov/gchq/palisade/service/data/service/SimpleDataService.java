@@ -19,16 +19,14 @@ package uk.gov.gchq.palisade.service.data.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.reader.request.DataReaderRequest;
 import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.IOException;
@@ -67,11 +65,11 @@ public class SimpleDataService implements DataService {
      * @param dataRequest data provided by the client for requesting the resource
      * @return reference to the resources that are to be returned to client
      */
-    public CompletableFuture<DataResponse> authoriseRequest(final DataRequest dataRequest) {
+    public CompletableFuture<AuthorisedData> authoriseRequest(final DataRequest dataRequest) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
         CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
         return futureRequestEntity.thenApply(maybeEntity -> maybeEntity.map(
-                entity -> DataResponse.Builder.create()
+                entity -> AuthorisedData.Builder.create()
                         .withResource(entity.getLeafResource())
                         .withUser(entity.getUser())
                         .withContext(entity.getContext())
@@ -83,22 +81,22 @@ public class SimpleDataService implements DataService {
     /**
      * Includes the resources into the OutputStream that is to be provided to the client
      *
-     * @param readerRequestModel the information for the resources in the context of the request
+     * @param authorisedData the information for the resources in the context of the request
      * @param out                an {@link OutputStream} to write the stream of resources to (after applying rules)
      * @param recordsProcessed   number of records that have been processed
      * @param recordsReturned    number of records that have been returned
      * @return boolean indicating that the process has been successful
      */
-    public CompletableFuture<Boolean> read(final DataResponse readerRequestModel, final OutputStream out,
+    public CompletableFuture<Boolean> read(final AuthorisedData authorisedData, final OutputStream out,
                                            final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
 
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("Reading from reader with request {}", readerRequestModel);
+            LOGGER.debug("Reading from reader with request {}", authorisedData);
             DataReaderRequest readerRequest = new DataReaderRequest()
-                    .context(readerRequestModel.getContext())
-                    .user(readerRequestModel.getUser())
-                    .resource(readerRequestModel.getResource())
-                    .rules(readerRequestModel.getRules());
+                    .context(authorisedData.getContext())
+                    .user(authorisedData.getUser())
+                    .resource(authorisedData.getResource())
+                    .rules(authorisedData.getRules());
             DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
             LOGGER.debug("Writing reader response {} to output stream", readerResponse);
@@ -112,15 +110,5 @@ public class SimpleDataService implements DataService {
             LOGGER.debug("Output stream closed, {} processed and {} returned, auditing success with audit service", recordsProcessed.get(), recordsReturned.get());
             return true;
         });
-    }
-
-    /**
-     * Seraliser is is added to the {@link DataReader} after the application has started.
-     */
-    @Override
-    public Boolean addSerialiser(final DataFlavour flavour, final Serialiser<?> serialiser) {
-        LOGGER.info("Adding serialiser {} for DataFlavour {}", serialiser, flavour);
-        this.dataReader.addSerialiser(flavour, serialiser);
-        return true;
     }
 }

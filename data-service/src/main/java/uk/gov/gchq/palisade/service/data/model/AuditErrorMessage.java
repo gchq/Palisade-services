@@ -79,20 +79,20 @@ public final class AuditErrorMessage extends AuditMessage {
          * the {@code AuditErrorMessage}.  This method expects there to be a {@code DataRequest} to start the build and
          * will need an {@code attributes} and {@code error} to finish the build of an {@code AuditErrorMessage}
            *
-         * @param auditableDataRequest   the client request received by the data-service
+         * @param auditableAuthorisedDataRequest   the client request received by the data-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
 
-        public static IAttributes create(final AuditableDataRequest auditableDataRequest) {
-            DataRequest dataRequest =  auditableDataRequest.getDataRequest();
-            DataResponse dataResponse =  auditableDataRequest.getDataResponse();
+        public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
+            DataRequest dataRequest =  auditableAuthorisedDataRequest.getDataRequest();
+            AuthorisedData authorisedData =  auditableAuthorisedDataRequest.getAuthorisedData();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
                     .withToken(dataRequest.getToken())
-                    .withUserId(dataResponse.getUser().getUserId().getId())
-                    .withResourceId(dataResponse.getResource().getId())
-                    .withContext(dataResponse.getContext());
+                    .withUserId(authorisedData.getUser().getUserId().getId())
+                    .withResourceId(authorisedData.getResource().getId())
+                    .withContext(authorisedData.getContext());
         }
 
         /**

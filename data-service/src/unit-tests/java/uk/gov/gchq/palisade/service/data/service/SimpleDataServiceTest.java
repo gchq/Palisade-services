@@ -34,8 +34,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
 import java.io.ByteArrayInputStream;
@@ -114,7 +114,7 @@ class SimpleDataServiceTest {
             .context(CONTEXT)
             .rules(RULES);
 
-    final DataResponse dataResponse = DataResponse.Builder.create()
+    final AuthorisedData authorisedData = AuthorisedData.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
@@ -175,7 +175,7 @@ class SimpleDataServiceTest {
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(authorisedEntity)));
 
         // When
-        CompletableFuture<DataResponse> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
+        CompletableFuture<AuthorisedData> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
 
         // Then
         assertThat(dataReaderRequestCompletableFuture.join())
@@ -214,7 +214,7 @@ class SimpleDataServiceTest {
 
         // When
         CompletableFuture<Boolean> completed = simpleDataService
-                .read(dataResponse, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
+                .read(authorisedData, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
         completed.join();
         String outputString = outputStream.toString();
         assertThat(outputString).isEqualTo(testResponseMessage);

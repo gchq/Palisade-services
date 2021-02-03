@@ -30,10 +30,10 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 
 import java.util.Collections;
@@ -103,19 +103,19 @@ public class ContractTestData {
             .withError(new ForbiddenException("Something went wrong!"));
 
 
-    public static final DataResponse DATA_RESPONSE = DataResponse.Builder.create()
+    public static final AuthorisedData AUTHORISED_DATA = AuthorisedData.Builder.create()
             .withResource(RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
             .withRules(RULES);
 
-    public static final AuditableDataRequest AUDITABLE_DATA_REQUEST = AuditableDataRequest.Builder.create()
+    public static final AuditableAuthorisedDataRequest AUDITABLE_DATA_REQUEST = AuditableAuthorisedDataRequest.Builder.create()
             .withDataRequest(DATA_REQUEST)
-            .withDataResponse(DATA_RESPONSE)
+            .withDataResponse(AUTHORISED_DATA)
             .withErrorMessage(null);
 
 
-    public static final AuditableDataRequest AUDITABLE_DATA_REQUEST_WITH_ERROR = AuditableDataRequest.Builder.create()
+    public static final AuditableAuthorisedDataRequest AUDITABLE_DATA_REQUEST_WITH_ERROR = AuditableAuthorisedDataRequest.Builder.create()
             .withDataRequest(DATA_REQUEST)
             .withDataResponse(null)
             .withErrorMessage(AUDIT_ERROR_MESSAGE);

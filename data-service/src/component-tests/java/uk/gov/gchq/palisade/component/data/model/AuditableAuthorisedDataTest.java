@@ -23,7 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.data.model.AuditableDataRequest;
+import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 
 import java.io.IOException;
@@ -34,8 +34,8 @@ import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABL
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_RESPONSE_WITH_ERROR;
 
 @JsonTest
-@ContextConfiguration(classes = {AuditableDataResponseTest.class})
-class AuditableDataResponseTest {
+@ContextConfiguration(classes = {AuditableAuthorisedDataTest.class})
+class AuditableAuthorisedDataTest {
 
     @Autowired
     private JacksonTester<AuditableDataResponse> jsonTester;
@@ -45,7 +45,7 @@ class AuditableDataResponseTest {
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link AuditableDataRequest} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link AuditableAuthorisedDataRequest} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test

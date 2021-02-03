@@ -40,8 +40,8 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 import uk.gov.gchq.palisade.service.data.repository.AuthorisedRequestsRepository;
 import uk.gov.gchq.palisade.service.data.service.DataService;
 
@@ -102,7 +102,7 @@ class RedisPersistenceContractTest {
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
 
-        DataResponse dataResponse =   DataResponse.Builder.create().withResource(new FileResource().id("/resource/id")
+        AuthorisedData authorisedData =   AuthorisedData.Builder.create().withResource(new FileResource().id("/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
                         .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
@@ -123,12 +123,12 @@ class RedisPersistenceContractTest {
         DataRequest dataRequest = DataRequest.Builder.create()
                 .withToken(token)
                 .withLeafResourceId(readerRequest.getResource().getId());
-        CompletableFuture<DataResponse> futureDataResponse = service.authoriseRequest(dataRequest);
-        DataResponse dataResponseFromResource = futureDataResponse.join();
+        CompletableFuture<AuthorisedData> futureDataResponse = service.authoriseRequest(dataRequest);
+        AuthorisedData authorisedDataFromResource = futureDataResponse.join();
         // Then
         assertAll("ObjectComparison",
-                () -> assertThat(dataResponseFromResource).as("Comparison using the DataResponse's equals method").isEqualTo(dataResponse),
-                () -> assertThat(dataResponseFromResource).as("Comparison of content using all of the DataResponse's components recursively").usingRecursiveComparison().isEqualTo(dataResponse)
+                () -> assertThat(authorisedDataFromResource).as("Comparison using the DataResponse's equals method").isEqualTo(authorisedData),
+                () -> assertThat(authorisedDataFromResource).as("Comparison of content using all of the DataResponse's components recursively").usingRecursiveComparison().isEqualTo(authorisedData)
         );
 
 

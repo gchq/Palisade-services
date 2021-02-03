@@ -29,11 +29,11 @@ import java.util.Optional;
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
- * uk.gov.gchq.palisade.service.audit.request.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.results.request.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.data.request.AuditSuccessMessage is the message sent by the data-service.
- * This one version is unique in that it includes the leafResourceId, token and the two counters for the number of
- * records process and records returned as part of the message.
+ * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
+ * uk.gov.gchq.palisade.service.results.model.AuditSuccessMessage is the message sent by the results-service.
+ * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the data-service.
+ * The one version produced by the data-service is unique in that it includes the leafResourceId, token and the
+ * two counters for the number of records process and records returned as part of the message.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class AuditSuccessMessage extends AuditMessage {
@@ -71,9 +71,9 @@ public final class AuditSuccessMessage extends AuditMessage {
 
         /**
          * Starter method for the Builder class.  This method is called to start the process of creating the
-         * AuditErrorMessage class.
+         * AuditSuccessMessage class.
          *
-         * @return interface {@link AuditErrorMessage.Builder.IToken} for the next step in the build.
+         * @return interface {@link ILeafResourceId} for the next step in the build.
          */
         public static ILeafResourceId create() {
             return leafResourceId -> token -> userId -> resourceId -> context -> attributes ->
@@ -85,12 +85,12 @@ public final class AuditSuccessMessage extends AuditMessage {
          * This method is called followed by the call to add resource with the IResource interface to create the
          * AuditSuccessMessage class. The service specific information is generated in the parent class, AuditMessage.
          *
-         * @param auditableDataRequest the authorised request stored by the attribute-masking-service
+         * @param auditableAuthorisedDataRequest the authorised request stored by the attribute-masking-service
          * @return interface {@link IAttributes} for the next step in the build.
          */
-        public static IAttributes create(final AuditableDataRequest auditableDataRequest) {
-            DataRequest dataRequest = auditableDataRequest.getDataRequest();
-            DataResponse readerRequestModel  = auditableDataRequest.getDataResponse();
+        public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
+            DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
+            AuthorisedData readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedData();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
@@ -161,7 +161,7 @@ public final class AuditSuccessMessage extends AuditMessage {
              * Adds the user context information.
              *
              * @param context user context for the request.
-             * @return interface {@link AuditSuccessMessage.Builder.ILeafResourceId} for the next step in the build.
+             * @return interface {@link IAttributes} for the next step in the build.
              */
             IAttributes withContext(Context context);
         }

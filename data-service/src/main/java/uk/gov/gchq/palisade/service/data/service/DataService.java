@@ -16,12 +16,10 @@
 
 package uk.gov.gchq.palisade.service.data.service;
 
-import uk.gov.gchq.palisade.data.serialise.Serialiser;
-import uk.gov.gchq.palisade.reader.common.DataFlavour;
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.DataResponse;
 
 import java.io.OutputStream;
 import java.util.concurrent.CompletableFuture;
@@ -41,9 +39,9 @@ public interface DataService extends Service {
      * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc)
      *
      * @param request the client's request for a leaf resource and their unique request token
-     * @return asynchronous what rules apply when accessing the data, returned as a {@link DataResponse} to pass to the data-reader
+     * @return asynchronous what rules apply when accessing the data, returned as a {@link AuthorisedData} to pass to the data-reader
      */
-    CompletableFuture<DataResponse> authoriseRequest(final DataRequest request);
+    CompletableFuture<AuthorisedData> authoriseRequest(final DataRequest request);
 
     /**
      * Read a resource and write each record to the given {@link OutputStream}.
@@ -54,15 +52,5 @@ public interface DataService extends Service {
      * @param recordsReturned  number of records that have been returned
      * @return boolean of true for a successful completion
      */
-    CompletableFuture<Boolean> read(final DataResponse request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
-
-    /**
-     * Used to add a new serialiser to the data reader
-     *
-     * @param dataFlavour the {@link DataFlavour} to be added
-     * @param serialiser  the {@link Serialiser} to be added
-     * @return a {@link Boolean} true/false on success/failure
-     */
-    Boolean addSerialiser(final DataFlavour dataFlavour, final Serialiser<?> serialiser);
-
+    CompletableFuture<Boolean> read(final AuthorisedData request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
 }
