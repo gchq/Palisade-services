@@ -68,8 +68,8 @@ public class RedisConfiguration {
      *
      * @param kSerde the serializer class for the key
      * @param vSerde the serializer class for the value
-     * @param <K> the key
-     * @param <V> the value
+     * @param <K>    the key
+     * @param <V>    the value
      * @return a {@link ReactiveRedisTemplate}
      */
     public <K, V> ReactiveRedisTemplate<String, V> reactiveRedisTemplate(final RedisSerializer<K> kSerde, final RedisSerializer<V> vSerde) {

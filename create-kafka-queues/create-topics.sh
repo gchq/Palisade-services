@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Uses Busybox shell commands
-# busybox sh is based on ash that implements a subset of the
-# POSIX specification of sh (in the POSIX locale, it is compliant for the most
-# part) with very few extensions, and in particular, not this one.
-# This is for compatability reasons, N.B some of the kafka client commands
-# make use of bash.
 
 #write_to_kafka(NAME PARTITION REPLICATIONFACTOR)
 #NAME: The name of the topic to create
