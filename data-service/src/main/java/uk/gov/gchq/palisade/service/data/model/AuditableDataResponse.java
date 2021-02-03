@@ -79,11 +79,11 @@ public final class AuditableDataResponse {
         }
 
         /**
-         * Adds the token to the message
+         * Adds the token to the response
          */
         public interface IToken {
             /**
-             * Adds the token to the request
+             * Adds the token to the response
              *
              * @param token the client's unique token
              * @return interface {@link ISuccess} for the next step in the build.
@@ -92,13 +92,13 @@ public final class AuditableDataResponse {
         }
 
         /**
-         * Adds the auditSuccessMessage for the message.
+         * Adds the auditSuccessMessage for the response.
          */
         public interface ISuccess {
             /**
-             * Adds the su for the message.
+             * Adds the AuditSuccessMessage for the response.
              *
-             * @param auditSuccessMessage timestamp for the request.
+             * @param auditSuccessMessage success message for the request.
              * @return interface {@link IError} for the next step in the build.
              */
             IError withSuccessMessage(AuditSuccessMessage auditSuccessMessage);
@@ -106,14 +106,14 @@ public final class AuditableDataResponse {
         }
 
         /**
-         * Adds the attributes for the message.
+         * Adds the attributes for the response.
          */
         public interface IError {
             /**
-             * Adds the attributes for the message.
+             * Adds the AuditErrorMessage for the response.
              *
-             * @param auditErrorMessage timestamp for the request.
-             * @return interface {@link AuditableDataResponse} for the final step in the build.
+             * @param auditErrorMessage error message for the request.
+             * @return class {@link AuditableDataResponse} for the final step in the build.
              */
             AuditableDataResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage);
         }
@@ -144,8 +144,8 @@ public final class AuditableDataResponse {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditableDataResponse.class.getSimpleName() + "[", "]")
-                .add("auditSuccessMessage=                " + auditSuccessMessage)
-                .add("auditErrorMessage=                " + auditErrorMessage)
+                .add("auditSuccessMessage= " + auditSuccessMessage)
+                .add("auditErrorMessage= " + auditErrorMessage)
                 .toString();
     }
 }

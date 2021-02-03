@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The DataRequest represents the client's request for resource after is has been prepared by the Palisade services.
+ * The DataRequest represents the client's request for a resource after is has been prepared by the Palisade services.
  * This message is created with the information provided to the client by the filtered-resource-service. It is then
  * routed via the resource's connectionDetail to the appropriate instance of a data-service.
  * This message is used to retrieve the {@link AuthorisedData} which contains the references to the requested resource.

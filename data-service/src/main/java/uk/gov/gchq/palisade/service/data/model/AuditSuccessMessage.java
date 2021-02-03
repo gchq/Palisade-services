@@ -25,6 +25,7 @@ import uk.gov.gchq.palisade.Generated;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
@@ -219,5 +220,20 @@ public final class AuditSuccessMessage extends AuditMessage {
     @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), leafResourceId);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
+                .add("userId= " + userId + "'")
+                .add("resourceId= " + resourceId + "'")
+                .add("context= " + context)
+                .add("serviceName= " + serviceName + "'")
+                .add("timestamp= " + timestamp + "'")
+                .add("serverIP= " + serverIP + "'")
+                .add("serverHostname= " + serverHostname + "'")
+                .add("attributes= " + attributes)
+                .toString();
     }
 }

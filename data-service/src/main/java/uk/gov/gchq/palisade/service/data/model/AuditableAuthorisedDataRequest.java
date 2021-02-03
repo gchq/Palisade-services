@@ -142,9 +142,9 @@ public final class AuditableAuthorisedDataRequest {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditableAuthorisedDataRequest.class.getSimpleName() + "[", "]")
-                .add("dataRequestModel=                " + dataRequest)
-                .add("authorisedData=                " + authorisedData)
-                .add("auditErrorMessage=                " + auditErrorMessage)
+                .add("dataRequestModel= " + dataRequest)
+                .add("authorisedData= " + authorisedData)
+                .add("auditErrorMessage= " + auditErrorMessage)
                 .toString();
     }
 }

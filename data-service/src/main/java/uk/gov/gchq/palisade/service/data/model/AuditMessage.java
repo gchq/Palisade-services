@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * This is the parent class for Audit information.  It represents the common component of the data that is to be
@@ -196,5 +197,21 @@ public class AuditMessage {
         return Objects.hash(leafResourceId, token, userId, resourceId, context, serviceName, timestamp, serverIP, serverHostname, attributes);
     }
 
+    @Override
+    @Generated
+    public String toString() {
+        return new StringJoiner(", ", AuditMessage.class.getSimpleName() + "[", "]")
+                .add("leafResourceId= " + leafResourceId + "'")
+                .add("token= " + token + "'")
+                .add("userId= " + userId + "'")
+                .add("resourceId= " + resourceId + "'")
+                .add("context= " + context)
+                .add("serviceName= " + serviceName + "'")
+                .add("timestamp= " + timestamp + "'")
+                .add("serverIP= " + serverIP + "'")
+                .add("serverHostname= " + serverHostname + "'")
+                .add("attributes= " + attributes)
+                .toString();
+    }
 }
 

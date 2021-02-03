@@ -115,8 +115,8 @@ public class KafkaContractTest {
     private ProducerTopicConfiguration producerTopicConfiguration;
 
     /**
-     * Tests the rest endpoint used for mocking a kafka entry point exists and is working as expected, returns HTTP.ACCEPTED.
-     * Then checks the token and headers are correct.
+     * Tests the handling of the error messages on the kafka stream for data-service.  The expected results will be an
+     * AuditErrorMessage on a Kafka stream to the "error-topic" and return HTTP Internal Server Error.
      */
     @Test
     @DirtiesContext
@@ -156,15 +156,17 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
+                            .as("Check the result is an AuditErrorMessage")
                             .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .as("Check the bytes of the request token")
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
     }
 
     /**
-     * test the data-service will send a successful message when a request is processed and the client is returned a
-     * stream of the resource
+     * Tests the handling of the successful messages on the kafka stream for data-service.  The expected results will be an
+     * AuditSuccessMessage on a Kafka stream to the "success-topic" and return HTTP Accepted.
      */
     @Test
     @DirtiesContext
@@ -208,8 +210,10 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
+                            .as("Check the result is an AuditSuccessMessage")
                             .isEqualTo(ContractTestData.AUDIT_SUCCESS_MESSAGE);
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
+                            .as("Check the bytes of the request token")
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
     }
