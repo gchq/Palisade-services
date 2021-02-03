@@ -102,17 +102,7 @@ public final class SerDesConfig {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
-                String fileName = "Error-" + ZonedDateTime.now(ZoneOffset.UTC)
-                        .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
-                File directory = new File(configProperties.getErrorDirectory());
-                File parent = directory.getAbsoluteFile().getParentFile();
-                File timestampedFile = new File(parent, fileName);
-                try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
-                    fileWriter.write(failedAuditString);
-                    LOGGER.info("Failed to deserialize an 'error' audit message. Created file {}", timestampedFile);
-                } catch (IOException ioException) {
-                    LOGGER.error("Failed to process audit request '{}'", failedAuditString, ioException);
-                }
+                createFile("Error-", failedAuditString, configProperties);
                 SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
@@ -167,20 +157,25 @@ public final class SerDesConfig {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
                 String failedAuditString = new String(auditRequest, Charset.defaultCharset());
-                String fileName = "Success-" + ZonedDateTime.now(ZoneOffset.UTC)
-                        .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
-                File directory = new File(configProperties.getErrorDirectory());
-                File parent = directory.getAbsoluteFile().getParentFile();
-                File timestampedFile = new File(parent, fileName);
-                try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
-                    fileWriter.write(failedAuditString);
-                    LOGGER.info("Failed to deserialize a 'success' audit message. Created file {}", timestampedFile);
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
-                }
+                createFile("Success-", failedAuditString, configProperties);
                 SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
+    }
+
+    private static void createFile(final String name, final String failedAuditString, final AuditServiceConfigProperties configProperties) {
+        String fileName = name + ZonedDateTime.now(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
+        File directory = new File(configProperties.getErrorDirectory());
+        File parent = directory.getAbsoluteFile().getParentFile();
+        File timestampedFile = new File(parent, fileName);
+        try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
+            fileWriter.write(failedAuditString);
+            LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", name, timestampedFile);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to write file to directory: {}", directory.getAbsoluteFile());
+            LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
+        }
     }
 }

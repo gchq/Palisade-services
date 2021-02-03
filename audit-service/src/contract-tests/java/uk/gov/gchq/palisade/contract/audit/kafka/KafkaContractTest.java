@@ -30,6 +30,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -75,7 +76,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -134,6 +134,19 @@ class KafkaContractTest {
     private AuditServiceConfigProperties auditServiceConfigProperties;
     @SpyBean
     private AuditService auditService;
+    private int errorBefore;
+    private int successBefore;
+    private int after;
+
+    @BeforeEach
+    void setup() {
+        errorBefore = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Error"))
+                .collect(Collectors.toSet()).size();
+        successBefore = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Success"))
+                .collect(Collectors.toSet()).size();
+    }
 
     @AfterAll
     static void tearDown() {
@@ -159,7 +172,7 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
@@ -178,9 +191,10 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
@@ -203,9 +217,10 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the audit service has invoked the audit method for the 2 `Good` requests
         Mockito.verify(auditService, Mockito.timeout(3000).times(2)).audit(anyString(), any());
@@ -220,7 +235,7 @@ class KafkaContractTest {
         HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -238,7 +253,7 @@ class KafkaContractTest {
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -256,7 +271,7 @@ class KafkaContractTest {
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
-        TimeUnit.SECONDS.sleep(1);
+        sleep(1);
 
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -278,22 +293,17 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
-        TimeUnit.SECONDS.sleep(2);
+        sleep(2);
 
         // Then check an "Error-..." file has been created
-        Set<File> expectedFileSet = Arrays.stream(new File(".").listFiles())
+        after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
                 .filter(file -> file.getName().startsWith("Error"))
-                .collect(Collectors.toSet());
-        Set<File> actualFileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-                .filter(file -> file.getName().startsWith("Error"))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()).size();
 
-        assertAll(
-                () -> assertThat(actualFileSet).as("Check at least 1 'Error' file has been created").isNotEmpty(),
-                () -> assertThat(actualFileSet).as("Check the 'Error' files are the same").containsAll(expectedFileSet)
-        );
+        assertThat(after).as("Check at least 1 'Error' file has been created").isEqualTo(errorBefore + 1);
     }
 
     @Test
@@ -309,22 +319,21 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
 
         TimeUnit.SECONDS.sleep(2);
 
-        // Then check an "Success-..." file has been created
-        Set<File> expectedFileSet = Arrays.stream(new File(".").listFiles())
+        // Then check a "Success-..." file has been created
+        after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
                 .filter(file -> file.getName().startsWith("Success"))
-                .collect(Collectors.toSet());
-        Set<File> actualFileSet = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
-                .filter(file -> file.getName().startsWith("Success"))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()).size();
 
-        assertAll(
-                () -> assertThat(actualFileSet).as("Check at least 1 'Success' file has been created").isNotEmpty(),
-                () -> assertThat(actualFileSet).as("Check the 'Success' files are the same").containsAll(expectedFileSet)
-        );
+        assertThat(after).as("Check at least 1 'Success' file has been created").isEqualTo(successBefore + 1);
+    }
+
+    private void sleep(final int sleep) throws InterruptedException {
+        TimeUnit.SECONDS.sleep(sleep);
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
