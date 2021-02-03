@@ -75,7 +75,7 @@ public class AttributeMaskingService {
      * @return a completable future representing the asynchronous completion of the storage operation
      */
     private CompletableFuture<AttributeMaskingRequest> storeAuthorisedRequest(final String token, final User user, final LeafResource resource, final Context context, final Rules<?> rules) {
-        LOGGER.info("Storing authorised request for token {} and leaf resource id {}", token, resource.getId());
+        LOGGER.debug("Storing authorised request for token {} and leaf resource id {}", token, resource.getId());
         return this.persistenceLayer.putAsync(token, user, resource, context, rules);
     }
 
@@ -114,7 +114,7 @@ public class AttributeMaskingService {
      * @return a copy of the resource with sensitive data masked or redacted
      */
     private LeafResource mask(final AttributeMaskingRequest attributeMaskingRequest) {
-        LOGGER.info("Masking resource attributes for leaf resource id {}", attributeMaskingRequest.getResource().getId());
+        LOGGER.debug("Masking resource attributes for leaf resource id {}", attributeMaskingRequest.getResource().getId());
         return resourceMasker.apply(attributeMaskingRequest.getResource());
     }
 

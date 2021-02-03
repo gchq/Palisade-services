@@ -35,6 +35,7 @@ import uk.gov.gchq.palisade.service.resource.model.ResourceResponse;
 import uk.gov.gchq.palisade.service.resource.repository.PersistenceLayer;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -94,30 +95,7 @@ public class ResourceServicePersistenceProxy {
                                                 Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.PERSISTENCE.toString()))
                                                 .withError(new NoSuchResourceException("Exception thrown while querying persistence", ex)))).build()))
                 // If persistence is empty, a "cache miss"
-                .orElseGet(() -> Source
-                        .fromIterator(() -> {
-                            try {
-                                // Try to call out to implemented delegate service
-                                return FunctionalIterator.fromIterator(delegate.getResourcesById(request.resourceId))
-                                        // Wrap with a success
-                                        .map(leafResource -> AuditableResourceResponse.Builder.create()
-                                                .withResourceResponse(ResourceResponse.Builder.create(request)
-                                                        .withResource(leafResource)))
-                                        // An error occurred when requesting resource from delegate, create an AuditErrorMessage
-                                        .exceptionally(ex -> AuditableResourceResponse.Builder.create()
-                                                .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
-                                                        Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.REQUEST.toString()))
-                                                        .withError(new NoSuchResourceException(ex.getMessage(), ex))));
-                            } catch (RuntimeException ex) {
-                                LOGGER.error("Exception encountered connecting to the service: {}", ex.getMessage());
-                                // If the initial request to the service fails, audit as a service error rather than a request error
-                                return Collections.singleton(AuditableResourceResponse.Builder.create()
-                                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
-                                                Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.SERVICE.toString()))
-                                                .withError(new NoSuchResourceException(ex.getMessage(), ex))))
-                                        .iterator();
-                            }
-                        })
+                .orElseGet(() -> Source.fromIterator(() -> this.delegateGetResourcesById(request))
                         .alsoTo(Flow.<AuditableResourceResponse>create()
                                 // Add the returned result to the persistence
                                 // If it wasn't an error, get the leaf resource
@@ -130,6 +108,36 @@ public class ResourceServicePersistenceProxy {
                                 // We don't care about the result as we will return the AuditableResourceResponse
                                 .to(Sink.ignore()))
                 );
+    }
+
+    /**
+     * Delegate call out to the 'real' resource-service as there was a cache miss
+     *
+     * @param request the the {@link ResourceRequest} that contains the resourceId used to retrieve resources
+     * @return an {@link Iterator} of auditable responses, containing {@link LeafResource}s associated with the resourceId
+     */
+    private Iterator<AuditableResourceResponse> delegateGetResourcesById(final ResourceRequest request) {
+        try {
+            // Try to call out to implemented delegate service
+            return FunctionalIterator.fromIterator(delegate.getResourcesById(request.resourceId))
+                    // Wrap with a success
+                    .map(leafResource -> AuditableResourceResponse.Builder.create()
+                            .withResourceResponse(ResourceResponse.Builder.create(request)
+                                    .withResource(leafResource)))
+                    // An error occurred when requesting resource from delegate, create an AuditErrorMessage
+                    .exceptionally(ex -> AuditableResourceResponse.Builder.create()
+                            .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
+                                    Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.REQUEST.toString()))
+                                    .withError(new NoSuchResourceException(ex.getMessage(), ex))));
+        } catch (RuntimeException ex) {
+            LOGGER.error("Exception encountered connecting to the service: {}", ex.getMessage());
+            // If the initial request to the service fails, audit as a service error rather than a request error
+            return Collections.singleton(AuditableResourceResponse.Builder.create()
+                    .withAuditErrorMessage(AuditErrorMessage.Builder.create(request,
+                            Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.SERVICE.toString()))
+                            .withError(new NoSuchResourceException(ex.getMessage(), ex))))
+                    .iterator();
+        }
     }
 
     /**

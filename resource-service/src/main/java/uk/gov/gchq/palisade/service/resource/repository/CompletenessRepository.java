@@ -46,7 +46,7 @@ public interface CompletenessRepository extends ReactiveCrudRepository<Completen
      * Converts the {@code findOneByEntityTypeAndEntityId} result to an akka {@link Source}
      *
      * @param entityType Information about the resource Object
-     * @param entityId The Id of the entity
+     * @param entityId   The Id of the entity
      * @return an akka {@link Source} of the {@link CompletenessEntity} from the backing store
      */
     default Source<CompletenessEntity, NotUsed> streamFindOneByEntityTypeAndEntityId(EntityType entityType, String entityId) {
@@ -57,7 +57,7 @@ public interface CompletenessRepository extends ReactiveCrudRepository<Completen
      * Checks if there is a {@link CompletenessEntity} using the passed parameters
      *
      * @param entityType Information about the resource Object
-     * @param entityId The Id of the entity
+     * @param entityId   The Id of the entity
      * @return a {@link CompletableFuture} of a {@link Boolean} if a CompletenessEntity is returned from the backing store
      */
     default CompletableFuture<Boolean> futureExistsByEntityTypeAndEntityId(EntityType entityType, String entityId) {
@@ -79,7 +79,7 @@ public interface CompletenessRepository extends ReactiveCrudRepository<Completen
      * Converts the saved entity to a {@link CompletableFuture}
      *
      * @param entityType Information about the resource Object
-     * @param entityId The Id of the entity
+     * @param entityId   The Id of the entity
      * @return a {@link CompletableFuture} of the {@link CompletenessEntity} that has been saved
      */
     default CompletableFuture<CompletenessEntity> futureSave(EntityType entityType, String entityId) {
@@ -90,7 +90,7 @@ public interface CompletenessRepository extends ReactiveCrudRepository<Completen
      * Converts the saved entity to an akka {@link Source}
      *
      * @param entityType Information about the resource Object
-     * @param entityId The Id of the entity
+     * @param entityId   The Id of the entity
      * @return an akka {@link Source} of the {@link CompletenessEntity} that has been saved
      */
     default Source<CompletenessEntity, NotUsed> streamSave(EntityType entityType, String entityId) {
