@@ -33,7 +33,6 @@ import akka.stream.Supervision.Directive;
 import akka.stream.javadsl.RunnableGraph;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +59,23 @@ import java.util.concurrent.CompletionStage;
 @Configuration
 public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
+
+    // "Optional" should not be used for parameters, but this is a private interface for what is just
+    // a nice name for a BiFunction, and it is implemented by our single messageBuilder object.
+    @SuppressWarnings("java:S3553")
+    private interface ProducerMessageBuilder {
+        /**
+         * Build a {@link ProducerMessage} output from {@link CommittableMessage} input and {@link AuditableResourceResponse} service output.
+         * If the service produced a response, prefer to build a message from the {@link AuditableResourceResponse#getAuditErrorMessage()} first.
+         * If the service did not produce a response and instead returned {@link Optional#empty()} then produce a {@link akka.kafka.ProducerMessage.PassThroughMessage}
+         * to commit the input.
+         *
+         * @param committableMessage        the upstream input
+         * @param auditableResourceResponse the service's output (or empty if the upstream input carried no request)
+         * @return a downstream message using upstream's committable offset
+         */
+        ProducerMessage.Envelope<String, byte[], Committable> build(CommittableMessage<String, ResourceRequest> committableMessage, Optional<AuditableResourceResponse> auditableResourceResponse);
+    }
 
     @Bean
     KafkaProducerService kafkaProducerService(final Sink<ProducerRecord<String, ResourceRequest>, CompletionStage<Done>> sink,
@@ -88,6 +104,23 @@ public class AkkaRunnableGraph {
         // Get error topic from config
         Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
+        // Builder for producer messages capturing all bits of context required
+        ProducerMessageBuilder messageBuilder = (message, optionalResponse) -> optionalResponse
+                .map(response -> Optional.ofNullable(response.getAuditErrorMessage())
+                        // If there was an error thrown in the service
+                        .map(audit -> ProducerMessage.single(
+                                new ProducerRecord<>(errorTopic.getName(), message.record().partition(), message.record().key(),
+                                        SerDesConfig.errorValueSerializer().serialize(null, audit), message.record().headers()),
+                                (Committable) message.committableOffset()))
+                        // If a resource was returned successfully
+                        .orElseGet(() -> ProducerMessage.single(
+                                new ProducerRecord<>(outputTopic.getName(), message.record().partition(), message.record().key(),
+                                        SerDesConfig.resourceValueSerializer().serialize(null, response.getResourceResponse()),
+                                        message.record().headers()),
+                                message.committableOffset())))
+                // If this was the Optional.empty() marking the end of the stream
+                .orElseGet(() -> ProducerMessage.passThrough(message.committableOffset()));
+
         // Read messages from the stream source
         return source
                 .map(message -> new Pair<>(message, Optional.ofNullable(message.record().value())))
@@ -104,36 +137,15 @@ public class AkkaRunnableGraph {
                                 // This will allow us to then acknowledge the original upstream message
                                 .concat(Source.single(Optional.empty()))
                                 // Build the producer message
-                                .map((Optional<AuditableResourceResponse> auditableResourceResponse) -> {
-                                    ConsumerRecord<String, ResourceRequest> requestRecord = messageAndRequest.first().record();
-                                    return auditableResourceResponse.map(response -> Optional.ofNullable(response.getAuditErrorMessage())
-
-                                            // If there was an error thrown in the service (caught by AsyncProxy)
-                                            .map(audit -> ProducerMessage.single(
-                                                    new ProducerRecord<>(errorTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                                            SerDesConfig.errorValueSerializer().serialize(null, audit), requestRecord.headers()),
-                                                    (Committable) messageAndRequest.first().committableOffset()))
-
-                                            // If a resource was returned successfully
-                                            .orElseGet(() -> ProducerMessage.single(
-                                                    new ProducerRecord<>(outputTopic.getName(), requestRecord.partition(), requestRecord.key(),
-                                                            SerDesConfig.resourceValueSerializer().serialize(null, auditableResourceResponse
-                                                                    .map(AuditableResourceResponse::getResourceResponse).orElse(null)), requestRecord.headers()),
-                                                    messageAndRequest.first().committableOffset())))
-
-                                            // If this was the Optional.empty() marking the end of the stream
-                                            .orElseGet(() -> ProducerMessage.passThrough(messageAndRequest.first().committableOffset()));
-                                })
+                                .map(auditableResourceResponse -> messageBuilder.build(messageAndRequest.first(), auditableResourceResponse))
                                 // Ignore the materialization value
                                 .mapMaterializedValue(ignored -> NotUsed.notUsed())
                         )
                         // If the request optional is empty then this is a StreamMarker (Start or End) message
                         // Pass the StreamMarker message downstream without processing
                         .orElseGet(() -> {
-                            ConsumerRecord<String, ResourceRequest> record = messageAndRequest.first().record();
-                            return Source.single(ProducerMessage.single(new ProducerRecord<>(outputTopic.getName(), record.partition(),
-                                            record.key(), null, record.headers()),
-                                    messageAndRequest.first().committableOffset()));
+                            Optional<AuditableResourceResponse> emptyResponse = Optional.of(AuditableResourceResponse.Builder.create().withResponseAndError(null, null));
+                            return Source.single(messageBuilder.build(messageAndRequest.first(), emptyResponse));
                         }))
 
                 // Supervise if an exception is thrown we haven't caught
