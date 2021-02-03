@@ -172,6 +172,7 @@ class KafkaContractTest {
         results.removeLast();
 
         assertThat(results)
+                .as("Check that there is only 1 result after removing START and END messages")
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
