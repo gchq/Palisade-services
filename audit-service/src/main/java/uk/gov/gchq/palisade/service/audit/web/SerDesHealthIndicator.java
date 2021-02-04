@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class SerDesHealthIndicator implements HealthIndicator {
 
-    protected static final Queue<Exception> SERDES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
+    protected static final Queue<Exception> SER_DES_EXCEPTIONS = new ConcurrentLinkedQueue<>();
 
     /**
      * Adds any encountered serialization exceptions to the {@link Queue} of exceptions
@@ -36,19 +36,19 @@ public class SerDesHealthIndicator implements HealthIndicator {
      * @param exception the encountered exception
      */
     public static void addSerDesExceptions(final Exception exception) {
-        SERDES_EXCEPTIONS.add(exception);
+        SER_DES_EXCEPTIONS.add(exception);
     }
 
     @Override
     public Health health() {
 
-        if (SERDES_EXCEPTIONS.isEmpty()) {
+        if (SER_DES_EXCEPTIONS.isEmpty()) {
             return Health.up()
                     .build();
         }
 
         return Health.down()
-                .withDetail("errors", SERDES_EXCEPTIONS)
+                .withDetail("errors", SER_DES_EXCEPTIONS)
                 .build();
     }
 }

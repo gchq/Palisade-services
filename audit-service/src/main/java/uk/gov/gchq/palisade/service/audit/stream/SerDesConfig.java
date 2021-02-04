@@ -165,6 +165,8 @@ public final class SerDesConfig {
     }
 
     private static void createFile(final String prefix, final String failedAuditString, final AuditServiceConfigProperties configProperties) {
+        // Create a fileName using the prefix value and a timestamp.
+        // A replace needs to be done on the timestamp value to allow saving a file on Windows machines
         String fileName = prefix + ZonedDateTime.now(ZoneOffset.UTC)
                 .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
         File directory = new File(configProperties.getErrorDirectory());

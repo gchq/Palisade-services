@@ -86,15 +86,21 @@ public class KafkaHealthIndicator implements HealthIndicator {
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
-                return consumerGroupDescription.members().stream()
+                boolean assignedPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
+
+                if (!assignedPartition) {
+                    LOGGER.error("Failed to find kafka topic-partition assignments");
+                }
+                return assignedPartition;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Timeout during Kafka health check for group {}", this.groupId, e);
+        } catch (InterruptedException ex) {
+            LOGGER.warn("Await on future interrupted", ex);
             Thread.currentThread().interrupt();
-            return false;
+        } catch (ExecutionException | TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
         }
 
-        return true;
+        return false;
     }
 }

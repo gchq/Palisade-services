@@ -30,7 +30,7 @@ class SerDesHealthIndicatorTest {
 
     @AfterEach
     void tearDown() {
-        SerDesHealthIndicator.SERDES_EXCEPTIONS.clear();
+        SerDesHealthIndicator.SER_DES_EXCEPTIONS.clear();
     }
 
     @Test
