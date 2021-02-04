@@ -60,6 +60,9 @@ import java.util.concurrent.CompletionStage;
 public class AkkaRunnableGraph {
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaRunnableGraph.class);
 
+    // "Optional" should not be used for parameters, but this is a private interface for what is just
+    // a nice name for a BiFunction, and it is implemented by our single messageBuilder object.
+    @SuppressWarnings("java:S3553")
     private interface ProducerMessageBuilder {
         /**
          * Build a {@link ProducerMessage} output from {@link CommittableMessage} input and {@link AuditableResourceResponse} service output.

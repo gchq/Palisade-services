@@ -97,9 +97,10 @@ public abstract class PalisadeService {
      * @param token      the token associated with the request
      * @param attributes a {@link Map} of attributes associated with the request
      * @param error      the error encountered
+     * @return a future completing once the error has been sent to the sink
      */
-    public void errorMessage(final PalisadeClientRequest request, final String token,
-                             final Map<String, Object> attributes, final Throwable error) {
+    public CompletableFuture<Void> errorMessage(final PalisadeClientRequest request, final String token,
+                                                final Map<String, Object> attributes, final Throwable error) {
         // Sends the information to the "error" topic
         // We need to include the token, the PalisadeClientRequest information and the Error that occurred.
         AuditErrorMessage errorMessage = AuditErrorMessage.Builder.create(request, attributes)
@@ -108,7 +109,7 @@ public abstract class PalisadeService {
                 .withAuditErrorMessage(errorMessage);
         TokenRequestPair requestPair = new TokenRequestPair(token, auditableRequest);
 
-        futureSink.thenApply(sink -> Source.single(requestPair).runWith(sink, materializer));
+        return futureSink.thenAccept(sink -> Source.single(requestPair).runWith(sink, materializer));
     }
 
     /**
