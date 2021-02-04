@@ -121,7 +121,9 @@ class RestControllerWebMvcTest extends CommonTestData {
 
         RuntimeException somethingWentWrong = new RuntimeException("Something went wrong");
         Mockito.when(palisadeService.registerDataRequest(any()))
-                .thenThrow(somethingWentWrong);
+                .thenReturn(CompletableFuture.failedFuture(somethingWentWrong));
+        Mockito.when(palisadeService.errorMessage(any(), any(), any(), any()))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
         MvcResult result = this.mockMvc.perform(post("/api/registerDataRequest")
                 .contentType(MediaType.APPLICATION_JSON)
