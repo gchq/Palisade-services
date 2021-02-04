@@ -28,7 +28,6 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PalisadeClientResponseTest.class)
@@ -54,13 +53,8 @@ class PalisadeClientResponseTest {
         ObjectContent<PalisadeClientResponse> responseObjectContent = jsonTester.parse(responseJsonContent.getJson());
         PalisadeClientResponse palisadeClientResponseObject = responseObjectContent.getObject();
 
-        assertAll("PalisadeClientResponse serializing and deserializing comparison",
-                () -> assertAll("Object comparison",
-                        //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeClientResponseObject).usingRecursiveComparison()
-                                .as("Recursively compare the PalisadeClientResponse object")
-                                .isEqualTo(palisadeClientResponse)
-                )
-        );
+        assertThat(palisadeClientResponseObject).usingRecursiveComparison()
+                .as("Recursively compare the PalisadeClientResponse object")
+                .isEqualTo(palisadeClientResponse);
     }
 }

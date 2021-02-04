@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -83,10 +82,9 @@ class PalisadeServiceComponentTest extends CommonTestData {
         }
         AuditablePalisadeSystemResponse auditableResponse = AuditablePalisadeSystemResponse.Builder.create().withPalisadeResponse(SYSTEM_RESPONSE);
         assertThat(sinkCollection)
-                .as("Check the sinkCollection has 1 entry")
-                .hasSize(1)
                 .usingRecursiveComparison()
-                .as("Check the value of the sinkCollection item")
-                .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), auditableResponse)));
+                .asList()
+                .as("Check the list contains 1 TokenRequestPair containing the token and AuditablePalisadeSystemResponse")
+                .containsOnly(new TokenRequestPair(uuid.toString(), auditableResponse));
     }
 }

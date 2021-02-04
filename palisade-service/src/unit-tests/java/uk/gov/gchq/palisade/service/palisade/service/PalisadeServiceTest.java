@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -57,29 +56,36 @@ class PalisadeServiceTest extends CommonTestData {
     void testRegisterDataRequest() {
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
 
-        assertThat(token.join())
-                .as("Check the value of the returned Token")
-                .isEqualTo(COMMON_UUID.toString());
-        assertThat(sinkCollection).as("Recursively check the returned TokenRequestPair")
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_REQUEST)));
+        assertAll(
+                () -> assertThat(token.join())
+                        .as("Check the value of the returned Token")
+                        .isEqualTo(COMMON_UUID.toString()),
+                () -> assertThat(sinkCollection)
+                        .as("Check that the sinkCollection has only 1 TokenRequestPair, containing the token and an AuditablePalisadeSystemResponse")
+                        .usingRecursiveComparison()
+                        .asList()
+                        .containsOnly(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_REQUEST))
+        );
     }
 
     @Test
     void testErrorMessage() {
         CompletableFuture<String> token = service.registerDataRequest(PALISADE_REQUEST);
         service.errorMessage(PALISADE_REQUEST, token.join(), attributes, ERROR);
-        assertThat(token.join())
-                .as("Check the value of the returned Token")
-                .isEqualTo(COMMON_UUID.toString());
         assertAll(
+                () -> assertThat(token.join())
+                        .as("Check the value of the returned Token")
+                        .isEqualTo(COMMON_UUID.toString()),
                 () -> assertThat(sinkCollection.getLast().first())
                         .as("Check the Token value from the error-topic")
                         .isEqualTo(token.join()),
                 () -> assertThat(sinkCollection.getLast().second().getAuditErrorMessage())
                         .as("Recursively check the value of the AuditErrorMessage")
                         .usingRecursiveComparison().ignoringFields("timestamp")
-                        .isEqualTo(List.of(new TokenRequestPair(token.join(), AUDITABLE_PALISADE_ERROR)).get(0).second().getAuditErrorMessage())
+                        .isEqualTo(AUDITABLE_PALISADE_ERROR.getAuditErrorMessage()),
+                () -> assertThat(sinkCollection.getLast().second().getAuditErrorMessage().getError())
+                        .as("Check the class of the thrown exception")
+                        .isExactlyInstanceOf(Throwable.class)
         );
     }
 

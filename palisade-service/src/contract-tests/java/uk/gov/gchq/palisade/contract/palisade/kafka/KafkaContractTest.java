@@ -228,6 +228,9 @@ class KafkaContractTest {
                             .ignoringFieldsOfTypes(Throwable.class).ignoringFields("timestamp")
                             .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable and TimeStamp values")
                             .isEqualTo(ContractTestData.ERROR_OBJ);
+                    assertThat(result.value().getError())
+                            .as("Check the error class within the AuditErrorMessage")
+                            .isInstanceOf(Throwable.class);
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .as("Check the byte value of the request-token header")
                             .isEqualTo(ContractTestData.ERROR_TOKEN.getBytes());
