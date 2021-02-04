@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib@PAL-929-dockerfile-lightweight-images')_
+@Library('jenkinsfile-lib')_
 
 timestamps {
     services()
