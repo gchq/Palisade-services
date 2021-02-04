@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # Copyright 2018-2021 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Uses Busybox shell commands
-# busybox sh is based on ash that implements a subset of the
-# POSIX specification of sh (in the POSIX locale, it is compliant for the most
-# part) with very few extensions, and in particular, not this one.
-# This is for compatability reasons, N.B some of the kafka client commands
-# make use of bash.
 
 #write_to_kafka(NAME PARTITION REPLICATIONFACTOR)
 #NAME: The name of the topic to create
@@ -51,6 +46,7 @@ if [ $# -eq 1 ]; then
 else
   printenv
 
+  printf 'Starting create-topics at %s \n' "$(date)"
   if [ -z ${ZOOKEEPER+palisade-zookeeper:2181} ]; then
     ZOOKEEPER="palisade-zookeeper:2181"
   fi
@@ -60,6 +56,7 @@ else
     sleep 20
   done
 
+  printf 'Zookeeper available at %s, creating topics\n' "$(date)"
   #Search for all environmental variables starting with the word: KAFKATOPIC
   for topic in "${!KAFKATOPIC@}"; do
     # Check if topic already exists and store the returned value
@@ -68,13 +65,13 @@ else
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
       # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
-      echo "Creating topic ${!topic}"
+      printf 'Creating topic %s at %s\n' "${!topic}" "$(date)"
       # shellcheck disable=SC2086
       write_to_kafka ${!topic}
     else
       echo "Topic ${!topic} already exists"
     fi
   done
-  echo "Topics now in zookeeper - "
+  printf 'Topics now in zookeeper -  at %s\n' "$(date)"
   ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi
