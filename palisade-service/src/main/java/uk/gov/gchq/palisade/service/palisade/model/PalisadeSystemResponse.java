@@ -119,6 +119,13 @@ public final class PalisadeSystemResponse {
                     new PalisadeSystemResponse(userId, resourceId, context);
         }
 
+        /**
+         * Convert a {@link PalisadeClientRequest} into an otherwise identical {@link PalisadeSystemResponse}.
+         * This affects the json serialisation.
+         *
+         * @param request the client's request
+         * @return a completed {@link PalisadeSystemResponse} object
+         */
         public static PalisadeSystemResponse create(final PalisadeClientRequest request) {
             return new PalisadeSystemResponse(
                     request.getUserId(),
