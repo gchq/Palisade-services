@@ -23,3 +23,15 @@ spring:
 
 spring:
   profiles: static-config
+  redis:
+    host: localhost
+    port: 6379
+
+akka:
+  kafka:
+    producer.topics:
+      output-topic.partitions: 1
+      error-topic.partitions: 1
+  discovery.config.services.kafka.endpoints:
+  - host: localhost
+    port: 9092
