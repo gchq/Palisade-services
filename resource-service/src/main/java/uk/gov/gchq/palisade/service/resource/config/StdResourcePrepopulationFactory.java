@@ -22,7 +22,6 @@ import uk.gov.gchq.palisade.resource.Resource;
 import uk.gov.gchq.palisade.service.ConnectionDetail;
 import uk.gov.gchq.palisade.service.ResourcePrepopulationFactory;
 import uk.gov.gchq.palisade.util.ResourceBuilder;
-import uk.gov.gchq.palisade.util.UriBuilder;
 
 import java.io.File;
 import java.net.URI;
