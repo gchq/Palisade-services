@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Crown Copyright
+ * Copyright 2018-2021 Crown Copyright
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,11 +120,11 @@ public final class PalisadeSystemResponse {
         }
 
         /**
-         * Convert a {@link PalisadeClientRequest} into an otherwise identical {@link PalisadeSystemResponse}.
-         * This affects the json serialisation.
+         * Taking a request, returns a {@link PalisadeSystemResponse} containing the same userId,
+         * resourceId and a newly created Context object for use downstream
          *
-         * @param request the client's request
-         * @return a completed {@link PalisadeSystemResponse} object
+         * @param request the request that has been sent from the client, containing a userId, resourceId and context
+         * @return a PalisadeSystemResponse used downstream containing the new Context object
          */
         public static PalisadeSystemResponse create(final PalisadeClientRequest request) {
             return new PalisadeSystemResponse(

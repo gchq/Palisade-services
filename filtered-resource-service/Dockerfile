@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11@sha256:736dd07fc5cb53060a49d38c86b9e673974510c5a18afc40b1c936475f59aee7
+ARG BASE_IMG
+FROM $BASE_IMG
+
 VOLUME /tmp
 
 ARG JAR_FILE
-
 COPY $JAR_FILE /usr/share/filtered-resource-service/filtered-resource-service.jar
 
 LABEL service="filtered-resource" project="palisade"
