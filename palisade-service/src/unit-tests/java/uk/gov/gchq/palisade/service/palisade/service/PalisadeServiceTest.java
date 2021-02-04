@@ -86,6 +86,7 @@ class PalisadeServiceTest extends CommonTestData {
                 () -> assertThat(sinkCollection.getLast().second().getAuditErrorMessage().getError())
                         .as("Check the class of the thrown exception")
                         .isExactlyInstanceOf(Throwable.class)
+                        .hasMessageContaining("An error was thrown in the Palisade-Service")
         );
     }
 
