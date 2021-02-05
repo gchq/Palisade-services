@@ -181,8 +181,8 @@ public class AuditMessage {
         AuditMessage that = (AuditMessage) o;
         return leafResourceId.equals(that.leafResourceId) &&
                 token.equals(that.token) &&
-                Objects.equals(userId, that.userId) &&
-                Objects.equals(resourceId, that.resourceId) &&
+                userId.equals(that.userId) &&
+                resourceId.equals( that.resourceId) &&
                 Objects.equals(context, that.context) &&
                 serviceName.equals(that.serviceName) &&
                 timestamp.equals(that.timestamp) &&

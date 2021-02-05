@@ -67,7 +67,7 @@ public final class AuditErrorMessage extends AuditMessage {
          * Starter method for the Builder class.  This method is called to start the process of creating the
          * AuditErrorMessage class.
          *
-         * @return interface {@link IToken} for the next step in the build.
+         * @return interface {@link ILeafResourceId} for the next step in the build.
          */
         public static ILeafResourceId create() {
             return leafResourceId -> token -> userId -> resourceId -> context -> attributes -> error ->
@@ -176,7 +176,7 @@ public final class AuditErrorMessage extends AuditMessage {
              * @param context user context for the request.
              * @return interface {@link IAttributes} for the next step in the build.
              */
-             IAttributes withContext(Context context);
+            IAttributes withContext(Context context);
         }
 
         /**
