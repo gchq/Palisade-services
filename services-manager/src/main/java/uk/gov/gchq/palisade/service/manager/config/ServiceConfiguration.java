@@ -114,7 +114,6 @@ public class ServiceConfiguration {
         ArrayList<String> command = new ArrayList<>();
         // java (JVM)
         command.add("java");
-        command.add(String.format("-Ddefault.rootId=%s", System.getProperty("user.dir")));
         // -Dloader.path (include extra jars)
         if (!paths.isEmpty()) {
             command.add(String.format("-Dloader.path=%s", String.join(SPRING_LIST_SEP, paths)));
