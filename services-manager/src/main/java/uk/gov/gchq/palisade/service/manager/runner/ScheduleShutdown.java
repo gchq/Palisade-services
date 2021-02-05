@@ -54,7 +54,7 @@ public class ScheduleShutdown implements Runnable {
     }
 
     public void run() {
-        serviceNames.forEach(serviceName -> {
+        serviceNames.forEach((String serviceName) -> {
             LOGGER.info("Shutting down {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
             service.shutdown();

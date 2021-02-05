@@ -93,7 +93,7 @@ public class ManagedService implements Service {
             Response response = failures.get();
             LOGGER.error("An error occurred while setting logging levels: {}", response);
             String responseBody = Arrays.toString(response.body().asInputStream().readAllBytes());
-            throw new IOException(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", packageName, configuredLevel, responseBody));
+            throw new UnsupportedOperationException(String.format("Expected /actuator/loggers/%s %s -> 200 OK but instead was %s", packageName, configuredLevel, responseBody));
         }
     }
 

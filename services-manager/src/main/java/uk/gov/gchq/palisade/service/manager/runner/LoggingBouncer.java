@@ -43,7 +43,7 @@ public class LoggingBouncer implements Runnable {
     }
 
     public void run() {
-        loggingConfiguration.forEach((serviceName, config) -> {
+        loggingConfiguration.forEach((String serviceName, ServiceConfiguration config) -> {
             LOGGER.info("Configuring logging for {}", serviceName);
             ManagedService service = serviceProducer.apply(serviceName);
             config.getLevel().forEach((String packageName, String level) -> {

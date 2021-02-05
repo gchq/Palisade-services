@@ -26,6 +26,8 @@ import uk.gov.gchq.palisade.service.manager.service.ManagedService;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -39,6 +41,7 @@ import java.util.function.Supplier;
 public class ScheduleRunner implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleRunner.class);
     private static final String BAR = "========================";
+    private static final int POLL_SECONDS = 5;
 
     // Autowired through constructor
     private final File rootDir;
@@ -51,12 +54,14 @@ public class ScheduleRunner implements Runnable {
         this.serviceProducer = serviceProducer;
     }
 
+    // Suppress System.exit warning
+    @SuppressWarnings("java:S1147")
     public void waitUntilComplete(final Map<String, List<Supplier<Boolean>>> taskCompleteIndicators) {
         try {
             boolean complete = false;
             while (!complete) {
-                Thread.sleep(5000);
-                complete = taskCompleteIndicators.entrySet().stream().allMatch(indicators -> {
+                TimeUnit.SECONDS.sleep(POLL_SECONDS);
+                complete = taskCompleteIndicators.entrySet().stream().allMatch((Entry<String, List<Supplier<Boolean>>> indicators) -> {
                     String serviceName = indicators.getKey();
                     boolean serviceComplete = indicators.getValue().stream().anyMatch(Supplier::get);
                     if (!serviceComplete) {
@@ -65,14 +70,15 @@ public class ScheduleRunner implements Runnable {
                     return serviceComplete;
                 });
             }
-        } catch (Exception ex) {
+        } catch (InterruptedException ex) {
             LOGGER.error("Error while waiting for services: ", ex);
+            Thread.currentThread().interrupt();
             System.exit(1);
         }
     }
 
     public void run() {
-        schedule.forEach(taskEntry -> {
+        schedule.forEach((Entry<String, TaskConfiguration> taskEntry) -> {
             LOGGER.info("");
             LOGGER.info(BAR);
             LOGGER.info("STARTING TASK :: {}", taskEntry.getKey());

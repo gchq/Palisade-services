@@ -35,6 +35,6 @@ public class ConfigPrinter implements Runnable {
     }
 
     public void run() {
-        LOGGER.info("Loaded config...\n{}", config.toString());
+        LOGGER.info("Loaded config...\n{}", config);
     }
 }

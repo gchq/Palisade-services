@@ -27,6 +27,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,8 +41,8 @@ import java.util.stream.Collectors;
 public class TaskRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskRunner.class);
 
-    private Map<String, ProcessBuilder> processBuilders;
-    private Function<String, ManagedService> serviceProducer;
+    private final Map<String, ProcessBuilder> processBuilders;
+    private final Function<String, ManagedService> serviceProducer;
 
     public TaskRunner(final Map<String, ProcessBuilder> processBuilders, final Function<String, ManagedService> serviceProducer) {
         this.processBuilders = processBuilders;
@@ -50,7 +51,7 @@ public class TaskRunner {
 
     Map<String, Process> runServices() {
         return processBuilders.entrySet().stream()
-                .map(entry -> {
+                .map((Entry<String, ProcessBuilder> entry) -> {
                     try {
                         LOGGER.info("Starting {}", entry.getKey());
                         return new SimpleEntry<>(entry.getKey(), entry.getValue().start());
@@ -68,7 +69,7 @@ public class TaskRunner {
         Map<String, Process> processes = runServices();
 
         return processes.entrySet().stream()
-                .map(entry -> {
+                .map((Entry<String, Process> entry) -> {
                     LinkedList<Supplier<Boolean>> indicators = new LinkedList<>();
                     indicators.addLast(() -> {
                         boolean alive = entry.getValue().isAlive();
