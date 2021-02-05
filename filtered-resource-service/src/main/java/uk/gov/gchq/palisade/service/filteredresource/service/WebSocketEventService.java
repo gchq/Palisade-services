@@ -31,8 +31,9 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMes
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.util.ConditionalGraph;
@@ -53,27 +54,32 @@ import java.util.Optional;
  */
 public class WebSocketEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventService.class);
+    private static final Integer PARALLELISM = 1;
 
     private final ActorRef<TokenOffsetCommand> tokenOffsetController;
     private final AuditServiceSinkFactory auditSinkFactory;
     private final FilteredResourceSourceFactory resourceSourceFactory;
+    private final TokenAuditErrorMessagePersistenceLayer tokenAuditErrorMessagePersistenceLayer;
 
     /**
      * Default constructor for a new WebSocketEventService, supplying the persistence layer for retrieving token offsets.
-     * This will continually listen to a client's websocket for RTS/CTS handshakes, sending either errors or resources
+     * This will continually listen to a client's websocket for RTS/CTSR/CTSE handshakes, sending either errors or resources
      * back to the client as required.
      *
-     * @param tokenOffsetController the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
-     * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
-     * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
+     * @param tokenOffsetController                  the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
+     * @param auditSinkFactory                       a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
+     * @param resourceSourceFactory                  a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
+     * @param tokenAuditErrorMessagePersistenceLayer access to the persistence layer containing exceptions for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
             final AuditServiceSinkFactory auditSinkFactory,
-            final FilteredResourceSourceFactory resourceSourceFactory) {
+            final FilteredResourceSourceFactory resourceSourceFactory,
+            final TokenAuditErrorMessagePersistenceLayer tokenAuditErrorMessagePersistenceLayer) {
         this.tokenOffsetController = tokenOffsetController;
         this.auditSinkFactory = auditSinkFactory;
         this.resourceSourceFactory = resourceSourceFactory;
+        this.tokenAuditErrorMessagePersistenceLayer = tokenAuditErrorMessagePersistenceLayer;
     }
 
     /**
@@ -83,7 +89,8 @@ public class WebSocketEventService {
      * This flow will accept the client {@link MessageType}s and return server types as follows:
      * <ul>
      *     <li> {@link MessageType#PING} replies with {@link MessageType#PONG}
-     *     <li> {@link MessageType#CTS} replies with one of {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
+     *     <li> {@link MessageType#CTSR} replies with one of {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
+     *     <li> {@link MessageType#CTSE} replies with one of {@link MessageType#ERROR} or {@link MessageType#NO_ERROR}
      * </ul>
      * <p>
      * All other incoming types of message will be discarded. No other outgoing types of message will be produced.
@@ -104,9 +111,38 @@ public class WebSocketEventService {
                 .via(ConditionalGraph.map(x -> x.getType().ordinal(), Map.of(
                         // On PING message, do a PONG
                         MessageType.PING.ordinal(), onPing(token),
-                        // On CTS message, get the offset for the token from persistence, then return results
-                        MessageType.CTS.ordinal(), onCts(token)
+                        // On CTSR message, get the offset for the token from persistence, then return results
+                        MessageType.CTSR.ordinal(), onCtsResource(token),
+                        // On CTSE messages, get the exceptions for the token from the persistence, and return the results
+                        MessageType.CTSE.ordinal(), onCtsError(token)
                 )));
+    }
+
+    /**
+     * Handle error messages, will send a {@link MessageType#ERROR} for each error associated with the token,
+     * and then a {@link MessageType#NO_ERROR} message to signify that all errors have been processed and returned
+     *
+     * @param token the unique request token
+     * @return An Exception for the token followed by a {@link MessageType#NO_ERROR} when all exceptions have been processed
+     */
+    private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCtsError(final String token) {
+        return Flow.<WebSocketMessage>create()
+                .mapAsync(PARALLELISM, (WebSocketMessage message) -> tokenAuditErrorMessagePersistenceLayer.popAuditErrorMessage(token))
+
+                .map(message -> message.map(auditErrorMessage -> WebSocketMessage.Builder.create()
+                        .withType(MessageType.ERROR)
+                        .withHeader(Token.HEADER, token).noHeaders()
+                        .withBody(auditErrorMessage)))
+
+                .takeWhile(Optional::isPresent)
+                .map(Optional::get)
+
+                // Then send a NO_ERROR to signify that all errors for this token have been sent
+                .concat(Source.single(WebSocketMessage.Builder.create()
+                        .withType(MessageType.NO_ERROR)
+                        .withHeader(Token.HEADER, token).noHeaders()
+                        .noBody()));
+
     }
 
     /**
@@ -127,19 +163,19 @@ public class WebSocketEventService {
     }
 
     /**
-     * Handle {@link MessageType#CTS} messages, expected to return a {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
+     * Handle {@link MessageType#CTSR} messages, expected to return a {@link MessageType#RESOURCE} or {@link MessageType#COMPLETE}
      * message in response.
-     * This zips the flow of filtered resources from kafka to the flow of {@link MessageType#CTS} messages from the client.
+     * This zips the flow of filtered resources from kafka to the flow of {@link MessageType#CTSR} messages from the client.
      * This ensures <i>every</i> resource is paired up with <i>every</i> client CTS in a strict one-to-one manner, while still
      * making best use of asynchronous akka streams.
      * If an error occurs getting the offset for a token from persistence (eg redis is down), a {@link MessageType#ERROR} will be
      * returned, followed by a {@link MessageType#COMPLETE}.
      *
      * @param token the token for this client
-     * @return a flow from {@link MessageType#CTS} client requests to {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or
+     * @return a flow from {@link MessageType#CTSR} client requests to {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or
      * {@link MessageType#COMPLETE} server responses
      */
-    private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCts(final String token) {
+    private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCtsResource(final String token) {
         return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
                 .zip(this.createResourceSource(token))
@@ -195,7 +231,15 @@ public class WebSocketEventService {
                                         .withType(MessageType.ERROR)
                                         .withHeader(Token.HEADER, token).noHeaders()
                                         .withBody(offsetResponse.getException()))
-                                .withoutAuditable())))
+                                .withoutAuditable())
+
+                                // Then send a NO_ERROR to signify that all errors for this token have been sent
+                                .concat(Source.single(AuditableWebSocketMessage.Builder.create()
+                                        .withWebSocketMessage(WebSocketMessage.Builder.create()
+                                                .withType(MessageType.NO_ERROR)
+                                                .withHeader(Token.HEADER, token).noHeaders()
+                                                .noBody())
+                                        .withoutAuditable()))))
 
                 // Append COMPLETE message
                 .concat(Source.single(AuditableWebSocketMessage.Builder.create()

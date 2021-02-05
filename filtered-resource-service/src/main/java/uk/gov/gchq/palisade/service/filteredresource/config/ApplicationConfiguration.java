@@ -26,11 +26,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
-import uk.gov.gchq.palisade.service.filteredresource.repository.JpaTokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessageRepository;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
+import uk.gov.gchq.palisade.service.filteredresource.service.AuditErrorMessageEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.AuditEventService;
 import uk.gov.gchq.palisade.service.filteredresource.service.OffsetEventService;
 
@@ -52,6 +56,13 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    TokenAuditErrorMessagePersistenceLayer jpaTokenAuditErrorMessagePersistenceLayer(
+            final TokenAuditErrorMessageRepository repository,
+            final @Qualifier("applicationTaskExecutor") Executor executor) {
+        return new JpaTokenAuditErrorMessagePersistenceLayer(repository, executor);
+    }
+
+    @Bean
     AuditEventService auditEventService() {
         return new AuditEventService(Collections.emptyMap());
     }
@@ -59,6 +70,11 @@ public class ApplicationConfiguration {
     @Bean
     OffsetEventService topicOffsetService(final TokenOffsetPersistenceLayer persistenceLayer) {
         return new OffsetEventService(persistenceLayer);
+    }
+
+    @Bean
+    AuditErrorMessageEventService auditErrorMessageEventService(final TokenAuditErrorMessagePersistenceLayer persistenceLayer) {
+        return new AuditErrorMessageEventService(persistenceLayer);
     }
 
     /**

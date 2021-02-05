@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
+import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -50,9 +51,10 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetController.TokenOffsetCommand;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
@@ -100,6 +102,7 @@ class AkkaWebSocketTest {
 
     // WebSocket test objects
     final TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
+    final TokenAuditErrorMessagePersistenceLayer tokenAuditErrorMessagePersistenceLayer = new MapTokenAuditErrorMessagePersistenceLayer();
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
             .take(N_MESSAGES - 1)
@@ -111,7 +114,7 @@ class AkkaWebSocketTest {
                     .flatMap(List::stream)
                     .collect(Collectors.toList())));
     // Finally, create the websocketEventService from its parts
-    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory);
+    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory, tokenAuditErrorMessagePersistenceLayer);
 
     // WebSocket endpoint to be tested
     final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
@@ -194,7 +197,7 @@ class AkkaWebSocketTest {
         // Add a dummy offset to persistence (it is ignored by the mock ResourceSourceFactory function)
         persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test message
-        WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+        WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
@@ -264,7 +267,7 @@ class AkkaWebSocketTest {
         persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test messages
         WebSocketMessage pingMsg = WebSocketMessage.Builder.create().withType(MessageType.PING).noHeaders().noBody();
-        WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+        WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
         Source<Message, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         // Interleave PINGs and CTSes

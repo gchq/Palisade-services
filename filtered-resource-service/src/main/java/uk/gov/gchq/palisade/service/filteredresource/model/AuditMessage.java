@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
@@ -107,8 +108,12 @@ public class AuditMessage {
     }
 
     @Generated
-    public Context getContext() throws JsonProcessingException {
-        return MAPPER.treeToValue(context, Context.class);
+    public Context getContext() {
+        try {
+            return MAPPER.treeToValue(this.context, Context.class);
+        } catch (JsonProcessingException e) {
+            throw new SerializationFailedException("Failed to get Context", e);
+        }
     }
 
     @Generated

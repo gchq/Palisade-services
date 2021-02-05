@@ -73,7 +73,7 @@ import uk.gov.gchq.palisade.service.filteredresource.model.StreamMarker;
 import uk.gov.gchq.palisade.service.filteredresource.model.Token;
 import uk.gov.gchq.palisade.service.filteredresource.model.TopicOffsetMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.TokenOffsetPersistenceLayer;
+import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.stream.ConsumerTopicConfiguration;
 
 import java.util.Collections;
@@ -143,7 +143,8 @@ class KafkaRestWebSocketContractTest {
             // Special instances
             HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
             HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
-            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
+            WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
+            WebSocketMessage noErrorMsg = WebSocketMessage.Builder.create().withType(MessageType.NO_ERROR).noHeaders().noBody();
             Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.COMPLETE)
                     .withHeader(Token.HEADER, token)
