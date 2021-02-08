@@ -52,9 +52,15 @@ class HealthActuatorContractTest {
     @Test
     void testHealthActuatorServiceIsRunning() {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String body = responseEntity.getBody();
-        assertThat(body).contains("\"status\":\"UP\"");
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
+
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
 
 }
