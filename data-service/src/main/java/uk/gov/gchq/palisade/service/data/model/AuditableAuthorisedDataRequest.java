@@ -70,8 +70,7 @@ public final class AuditableAuthorisedDataRequest {
          * @return the composed immutable object
          */
         public static IDataRequest create() {
-            return dataRequest -> dataResponse -> error ->
-                    new AuditableAuthorisedDataRequest(dataRequest, dataResponse, error);
+            return dataRequest -> (authorisedData, error) -> new AuditableAuthorisedDataRequest(dataRequest, authorisedData, error);
         }
 
         /**
@@ -89,32 +88,34 @@ public final class AuditableAuthorisedDataRequest {
         }
 
         /**
-         * Compose with {@link AuthorisedData}
+         * Compose wityh either {@link AuthorisedData} or {@link AuditErrorMessage} to create the
+         * AuditableAuthorisedDataRequest
          */
         public interface IDataResponse {
             /**
              * Adds the data from the
              *
-             * @param authorisedData or null
-             * @return interface {@link IError} for the next step of the build.
+             * @param authorisedData for the resources
+             * @return interface {@link AuditableAuthorisedDataRequest} for the final step in the build.
              */
-            IError withDataResponse(AuthorisedData authorisedData);
+            default AuditableAuthorisedDataRequest withAuthorisedData(AuthorisedData authorisedData) {
+                return withAuthorisedDataAndError(authorisedData, null);
+            }
 
-        }
-
-        /**
-         * Adds the {@code AuditErrorMessage}
-         */
-        public interface IError {
             /**
-             * Adds the error message.
+             * Adds the data from the
              *
-             * @param auditErrorMessage or null
-             * @return interface {@link IError} for the completed class from the builder.
+             * @param auditErrorMessage for the error that occurred
+             * @return interface {@link AuditableAuthorisedDataRequest} for the final step in the build.
              */
-            AuditableAuthorisedDataRequest withErrorMessage(AuditErrorMessage auditErrorMessage);
+            default AuditableAuthorisedDataRequest withAuditErrorMessage(AuditErrorMessage auditErrorMessage) {
+                return withAuthorisedDataAndError(null, auditErrorMessage);
+            }
+
+            AuditableAuthorisedDataRequest withAuthorisedDataAndError(AuthorisedData authorisedData, AuditErrorMessage auditErrorMessage);
 
         }
+
     }
 
     @Override

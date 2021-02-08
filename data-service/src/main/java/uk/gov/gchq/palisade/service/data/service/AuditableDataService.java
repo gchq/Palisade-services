@@ -53,14 +53,12 @@ public class AuditableDataService {
      */
     public CompletableFuture<AuditableAuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         return dataService.authoriseRequest(dataRequest)
-                .thenApply(dataResponse -> AuditableAuthorisedDataRequest.Builder.create()
+                .thenApply(authorisedData -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
-                        .withDataResponse(dataResponse)
-                        .withErrorMessage(null))
+                        .withAuthorisedData(authorisedData))
                 .exceptionally(e -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
-                        .withDataResponse(null)
-                        .withErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
+                        .withAuditErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
                                 .withAttributes(Collections.singletonMap("method", "authoriseRequest"))
                                 .withError(e)));
     }
@@ -80,7 +78,7 @@ public class AuditableDataService {
         AtomicLong recordsReturned = new AtomicLong(0);
 
         return dataService.read(authorisedData, outputStream, recordsProcessed, recordsReturned)
-                .thenApply(pair -> AuditableDataResponse.Builder.create()
+                .thenApply(Boolean -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))

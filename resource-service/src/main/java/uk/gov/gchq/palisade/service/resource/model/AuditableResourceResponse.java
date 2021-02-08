@@ -90,7 +90,7 @@ public final class AuditableResourceResponse {
          * @return the composed immutable object
          */
         public static IResourceResponse create() {
-            return AuditableResourceResponse::new;
+            return (resourceResponse1, auditErrorMessage1) -> new AuditableResourceResponse(resourceResponse1, auditErrorMessage1);
         }
 
         /**

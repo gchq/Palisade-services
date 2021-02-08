@@ -111,15 +111,11 @@ public class ContractTestData {
 
     public static final AuditableAuthorisedDataRequest AUDITABLE_DATA_REQUEST = AuditableAuthorisedDataRequest.Builder.create()
             .withDataRequest(DATA_REQUEST)
-            .withDataResponse(AUTHORISED_DATA)
-            .withErrorMessage(null);
-
+            .withAuthorisedData(AUTHORISED_DATA);
 
     public static final AuditableAuthorisedDataRequest AUDITABLE_DATA_REQUEST_WITH_ERROR = AuditableAuthorisedDataRequest.Builder.create()
             .withDataRequest(DATA_REQUEST)
-            .withDataResponse(null)
-            .withErrorMessage(AUDIT_ERROR_MESSAGE);
-
+            .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
 
     public static final AuditableDataResponse AUDITABLE_DATA_RESPONSE = AuditableDataResponse.Builder.create()
             .withToken(REQUEST_TOKEN)

@@ -81,14 +81,11 @@ class AuditErrorMessageTest {
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
         assertAll("ObjectComparison",
-                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using the AuditErrorMessage's equals")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
-                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively")
+                   () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively")
                         .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class)
                         .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
                 () -> assertThat(auditErrorMessageObject.getError().getMessage()).as("Assertion check of the error message")
                         .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION.getError().getMessage())
-
         );
     }
 }
