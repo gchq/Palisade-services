@@ -29,6 +29,8 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ import org.testcontainers.containers.KafkaContainer;
 
 import uk.gov.gchq.palisade.contract.audit.ContractTestData;
 import uk.gov.gchq.palisade.service.audit.AuditApplication;
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.audit.model.Token;
@@ -67,12 +70,16 @@ import uk.gov.gchq.palisade.service.audit.service.AuditService;
 import uk.gov.gchq.palisade.service.audit.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.audit.stream.PropertiesConfigurer;
 
+import java.io.File;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -122,12 +129,35 @@ class KafkaContractTest {
     private Materializer akkaMaterializer;
     @Autowired
     private ConsumerTopicConfiguration consumerTopicConfiguration;
+    @Autowired
+    private AuditServiceConfigProperties auditServiceConfigProperties;
     @SpyBean
     private AuditService auditService;
+    private int errorBefore;
+    private int successBefore;
+    private int after;
+
+    @BeforeEach
+    void setup() {
+        errorBefore = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Error"))
+                .collect(Collectors.toSet()).size();
+        successBefore = Arrays.stream(new File(".").listFiles())
+                .filter(file -> file.getName().startsWith("Success"))
+                .collect(Collectors.toSet()).size();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        Arrays.stream(new File(".").listFiles())
+                .filter(file -> (file.getName().startsWith("Success") || file.getName().startsWith("Error")))
+                .peek(file -> LOGGER.info("Deleting file {}", file.getName()))
+                .forEach(File::deleteOnExit);
+    }
 
     @Test
     @DirtiesContext
-    void testErrorRequestSet() {
+    void testErrorRequestSet() throws InterruptedException {
         // Add some messages on the error topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akkatest yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.ERROR_RECORD_NODE_FACTORY.get().limit(3L);
@@ -141,13 +171,15 @@ class KafkaContractTest {
                 .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
                 .toCompletableFuture().join();
 
+        waitForService();
+
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
     }
 
     @Test
     @DirtiesContext
-    void testGoodSuccessRequestSet() {
+    void testGoodSuccessRequestSet() throws InterruptedException {
         // Add some messages on the success topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.GOOD_SUCCESS_RECORD_NODE_FACTORY.get().limit(3L);
@@ -158,7 +190,10 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
+
+        waitForService();
 
         // Then - check the audit service has invoked the audit method 3 times
         Mockito.verify(auditService, Mockito.timeout(3000).times(3)).audit(anyString(), any());
@@ -166,7 +201,7 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testGoodAndBadSuccessRequestSet() {
+    void testGoodAndBadSuccessRequestSet() throws InterruptedException {
         // Add 2 `Good` and 2 `Bad` success messages to the success topic
         // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
         final Stream<ProducerRecord<String, JsonNode>> requests = Stream.of(
@@ -181,7 +216,10 @@ class KafkaContractTest {
                 .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
 
         Source.fromJavaStream(() -> requests)
-                .runWith(Producer.plainSink(producerSettings), akkaMaterializer);
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
+
+        waitForService();
 
         // Then - check the audit service has invoked the audit method for the 2 `Good` requests
         Mockito.verify(auditService, Mockito.timeout(3000).times(2)).audit(anyString(), any());
@@ -189,13 +227,15 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testRestEndpointForErrorMessage() {
+    void testRestEndpointForErrorMessage() throws InterruptedException {
         // Pass an error message to 'error' rest endpoint
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AuditErrorMessage> entity = new HttpEntity<>(ContractTestData.ERROR_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/error", entity, Void.class);
 
+        waitForService();
+
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
@@ -205,13 +245,15 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testRestEndpointForGoodSuccessMessage() {
+    void testRestEndpointForGoodSuccessMessage() throws InterruptedException {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.GOOD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
+        waitForService();
+
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
@@ -221,18 +263,76 @@ class KafkaContractTest {
 
     @Test
     @DirtiesContext
-    void testRestEndpointForBadSuccessMessage() {
+    void testRestEndpointForBadSuccessMessage() throws InterruptedException {
         // Pass a success message to 'success' rest endpoint
         // When - we POST to the rest endpoint
         Map<String, List<String>> headers = Collections.singletonMap(Token.HEADER, Collections.singletonList(ContractTestData.REQUEST_TOKEN));
         HttpEntity<AuditSuccessMessage> entity = new HttpEntity<>(ContractTestData.BAD_SUCCESS_REQUEST_OBJ, new LinkedMultiValueMap<>(headers));
         ResponseEntity<Void> response = restTemplate.postForEntity("/api/success", entity, Void.class);
 
+        waitForService();
+
         // Then - check the REST request was accepted
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
         // Then - check the audit service has invoked the audit method
         Mockito.verify(auditService, Mockito.timeout(3000).times(0)).audit(anyString(), any());
+    }
+
+    @Test
+    @DirtiesContext
+    void testFailedErrorDeserialization() throws InterruptedException {
+        // Add a message to the 'error' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_ERROR_MESSAGE_NODE_FACTORY.get().limit(1L);
+
+        // When - we write to the input
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+
+        Source.fromJavaStream(() -> requests)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
+
+        waitForService();
+
+        // Then check an "Error-..." file has been created
+        after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith("Error"))
+                .collect(Collectors.toSet()).size();
+
+        assertThat(after).as("Check at least 1 'Error' file has been created").isEqualTo(errorBefore + 1);
+    }
+
+    @Test
+    @DirtiesContext
+    void testFailedSuccessDeserialization() throws InterruptedException {
+        // Add a message to the 'success' topic
+        // The ContractTestData.REQUEST_TOKEN maps to partition 0 of [0, 1, 2], so the akka-test yaml connects the consumer to only partition 0
+        final Stream<ProducerRecord<String, JsonNode>> requests = ContractTestData.BAD_SUCCESS_MESSAGE_NODE_FACTORY.get().limit(1L);
+
+        // When - we write to the input
+        ProducerSettings<String, JsonNode> producerSettings = ProducerSettings
+                .create(akkaActorSystem, new StringSerializer(), new RequestSerializer())
+                .withBootstrapServers(KafkaInitializer.kafka.getBootstrapServers());
+
+        Source.fromJavaStream(() -> requests)
+                .runWith(Producer.plainSink(producerSettings), akkaMaterializer)
+                .toCompletableFuture().join();
+
+        waitForService();
+
+        // Then check a "Success-..." file has been created
+        after = Arrays.stream(new File(auditServiceConfigProperties.getErrorDirectory()).listFiles())
+                .filter(file -> file.getName().startsWith("Success"))
+                .collect(Collectors.toSet()).size();
+
+        assertThat(after).as("Check at least 1 'Success' file has been created").isEqualTo(successBefore + 1);
+    }
+
+    private void waitForService() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(2);
     }
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
