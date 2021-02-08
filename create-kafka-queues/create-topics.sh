@@ -46,6 +46,7 @@ if [ $# -eq 1 ]; then
 else
   printenv
 
+  printf 'Starting create-topics at %s \n' "$(date)"
   if [ -z ${ZOOKEEPER+palisade-zookeeper:2181} ]; then
     ZOOKEEPER="palisade-zookeeper:2181"
   fi
@@ -55,6 +56,7 @@ else
     sleep 20
   done
 
+  printf 'Zookeeper available at %s, creating topics\n' "$(date)"
   #Search for all environmental variables starting with the word: KAFKATOPIC
   for topic in "${!KAFKATOPIC@}"; do
     # Check if topic already exists and store the returned value
@@ -63,13 +65,13 @@ else
     returnVal=$(./bin/kafka-topics.sh --list --zookeeper $ZOOKEEPER --topic ${!topic})
     if [ -z "${returnVal}" ]; then
       # Use variable indirection to get the contents of KAFKATOPIC e.g palisade 1 1
-      echo "Creating topic ${!topic}"
+      printf 'Creating topic %s at %s\n' "${!topic}" "$(date)"
       # shellcheck disable=SC2086
       write_to_kafka ${!topic}
     else
       echo "Topic ${!topic} already exists"
     fi
   done
-  echo "Topics now in zookeeper - "
+  printf 'Topics now in zookeeper -  at %s\n' "$(date)"
   ./bin/kafka-topics.sh --zookeeper $ZOOKEEPER --list
 fi
