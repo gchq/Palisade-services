@@ -181,14 +181,14 @@ public class AuditMessage {
         AuditMessage that = (AuditMessage) o;
         return leafResourceId.equals(that.leafResourceId) &&
                 token.equals(that.token) &&
-                Optional.ofNullable(userId).equals(that.userId) &&
-                Optional.ofNullable(resourceId).equals(that.resourceId) &&
-                Optional.ofNullable(context).equals(that.context) &&
-                Optional.ofNullable(serviceName).equals(that.serviceName) &&
-                Optional.ofNullable(timestamp).equals(that.timestamp) &&
-                Optional.ofNullable(serverIP).equals(that.serverIP) &&
-                Optional.ofNullable(serverHostname).equals(that.serverHostname) &&
-                Optional.ofNullable(attributes).equals(that.attributes);
+                Objects.equals(userId, that.userId) &&
+                Objects.equals(resourceId, that.resourceId) &&
+                Objects.equals(context, that.context) &&
+                serviceName.equals(that.serviceName) &&
+                timestamp.equals(that.timestamp) &&
+                serverIP.equals(that.serverIP) &&
+                serverHostname.equals(that.serverHostname) &&
+                attributes.equals(that.attributes);
     }
 
     @Override
