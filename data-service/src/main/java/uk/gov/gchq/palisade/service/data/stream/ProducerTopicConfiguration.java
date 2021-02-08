@@ -24,6 +24,8 @@ import uk.gov.gchq.palisade.Generated;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Configuration for Akka Kafka producer
@@ -34,6 +36,19 @@ public class ProducerTopicConfiguration {
     private String serviceName;
     private Integer parallelism;
     private Map<String, Topic> topics = new HashMap<>();
+
+    /**
+     * Provides the set of topic names for the Kafka producers.
+     *
+     * @return set of topic names
+     */
+    public Set<String> getTopicNames() {
+        return getTopics()
+                .values()
+                .stream()
+                .map(Topic::getName)
+                .collect(Collectors.toSet());
+    }
 
     @Generated
     public String getDiscoveryMethod() {

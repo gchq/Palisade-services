@@ -26,7 +26,6 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
-import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration.Topic;
 
 import java.util.Collections;
 import java.util.Set;
@@ -59,7 +58,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-        Set<String> configTopics = topicsFromConfig(topicConfiguration);
+        Set<String> configTopics = topicConfiguration.getTopicNames();
         Set<String> kafkaTopics = topicsFromKafka(adminClient.describeTopics(configTopics));
 
         if (kafkaTopics.equals(configTopics)) {
@@ -72,15 +71,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .withDetail("kafkaTopics", kafkaTopics)
                     .build();
         }
-    }
-
-    private static Set<String> topicsFromConfig(final ProducerTopicConfiguration topicConfiguration) {
-        // Get topic names defined in config
-        return topicConfiguration.getTopics()
-                .values()
-                .stream()
-                .map(Topic::getName)
-                .collect(Collectors.toSet());
     }
 
     private static Set<String> topicsFromKafka(final DescribeTopicsResult topicsResult) {

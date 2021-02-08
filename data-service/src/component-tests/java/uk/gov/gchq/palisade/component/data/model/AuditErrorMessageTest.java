@@ -59,7 +59,9 @@ class AuditErrorMessageTest {
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
                 () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively")
                         .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class)
-                        .isEqualTo(AUDIT_ERROR_MESSAGE)
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+                () -> assertThat(auditErrorMessageObject.getError().getMessage()).as("Comparison assertion using the Throwable's exception")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE.getError().getMessage())
         );
     }
 
@@ -81,6 +83,8 @@ class AuditErrorMessageTest {
         AuditErrorMessage auditErrorMessageObject = auditErrorMessageObjectContent.getObject();
 
         assertAll("ObjectComparison",
+                () -> assertThat(auditErrorMessageObject).as("Comparison assertion using the AuditErrorMessage's equals")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
                    () -> assertThat(auditErrorMessageObject).as("Comparison assertion using all of the AuditErrorMessage's components recursively")
                         .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class)
                         .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),

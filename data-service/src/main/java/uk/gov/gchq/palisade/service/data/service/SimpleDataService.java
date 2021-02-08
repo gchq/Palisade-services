@@ -85,7 +85,7 @@ public class SimpleDataService implements DataService {
      * @param out                an {@link OutputStream} to write the stream of resources to (after applying rules)
      * @param recordsProcessed   number of records that have been processed
      * @param recordsReturned    number of records that have been returned
-     * @return boolean indicating that the process has been successful
+     * @return true if indicating that the process has been successful
      */
     public CompletableFuture<Boolean> read(final AuthorisedData authorisedData, final OutputStream out,
                                            final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
