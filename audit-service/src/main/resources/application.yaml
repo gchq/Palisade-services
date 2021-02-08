@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 spring:
   profiles:
     include:
@@ -29,17 +29,9 @@ spring:
       enabled: always
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
 
 server:
   port: 8089
-
-eureka:
-  client:
-    enabled: false
 
 management:
   endpoints:
@@ -49,9 +41,15 @@ management:
   endpoint:
     shutdown:
       enabled: true
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
 
 audit:
   implementations:
     stroom:
     logger:
     simple:
+  errorDirectory: "."

@@ -127,6 +127,20 @@ Some more important arguments are as follows:
 | global.redis-cluster.install            | Install Redis-cluster, **default=false**
 | global.redisClusterEnabled              | Set to true to use Redis-cluster or false to use Redis. Useful if redis is already installed. **default=false**
 
+#### Base Image Variants
+The base image used can be customised using the maven property `dockerfile.base.image` and labelled with `dockerfile.base.tag`.
+By default, this base image is `openjdk:11.0-jre-slim` but debugging may require a more-featured image such as `openjdk:11.0-jdk-slim`
+Either of these two images can be selected using the profiles `-P jrei` and `-P jdki` for JRE and JDK respectively.
+Alternatively, a custom base image can be specified as follows:
+```
+mvn clean install -pl <module name> -Ddockerfile.base.image=openjdk:<image tag> -Ddockerfile.base.tag=<my label>
+```
+This label can then be used at the time of `helm install` to deploy this variant image.
+By default, the labels `jre` and `jdk` can be used for JRE and JDK respectively.
+```
+helm upgrade --install palisade . --set <service name>.image.base=<my label>
+```
+
 #### Redis vs Redis-Cluster
 The key difference is scalability, write-points, sharding and partitioning.
 * Redis will support a single (master) write-point with many replicated (slave) read-points.
