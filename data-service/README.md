@@ -48,7 +48,7 @@ The client request will contain the token and resource id that is used to unique
 The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
 been requested and prepared in the initial request to Palisade services. 
 * `POST api/read/chunked`
-    - returns a `202 ACCEPTED` and an OutputStream which will provides the resource.
+    - returns a `202 ACCEPTED` and a streamed HTTP response body which will provides the resource.
 
 ## Example JSON Request
 ```
