@@ -96,7 +96,7 @@ public final class AuditableAuthorisedDataRequest {
              * Adds the data from the
              *
              * @param authorisedData for the resources
-             * @return interface {@link AuditableAuthorisedDataRequest} for the final step in the build.
+             * @return class {@link AuditableAuthorisedDataRequest} for the final step in the build.
              */
             default AuditableAuthorisedDataRequest withAuthorisedData(AuthorisedData authorisedData) {
                 return withAuthorisedDataAndError(authorisedData, null);
@@ -106,12 +106,18 @@ public final class AuditableAuthorisedDataRequest {
              * Adds the data from the
              *
              * @param auditErrorMessage for the error that occurred
-             * @return interface {@link AuditableAuthorisedDataRequest} for the final step in the build.
+             * @return class {@link AuditableAuthorisedDataRequest} for the final step in the build.
              */
             default AuditableAuthorisedDataRequest withAuditErrorMessage(AuditErrorMessage auditErrorMessage) {
                 return withAuthorisedDataAndError(null, auditErrorMessage);
             }
 
+            /**
+             * Adds both the {@link AuthorisedData } and the {@link AuditErrorMessage} for the creation of the object
+             * @param authorisedData  value or null
+             * @param auditErrorMessage value or null
+             * @return value object
+             */
             AuditableAuthorisedDataRequest withAuthorisedDataAndError(AuthorisedData authorisedData, AuditErrorMessage auditErrorMessage);
 
         }

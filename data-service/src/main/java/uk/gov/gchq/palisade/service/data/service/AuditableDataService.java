@@ -78,7 +78,7 @@ public class AuditableDataService {
         AtomicLong recordsReturned = new AtomicLong(0);
 
         return dataService.read(authorisedData, outputStream, recordsProcessed, recordsReturned)
-                .thenApply(Boolean -> AuditableDataResponse.Builder.create()
+                .thenApply(success -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
