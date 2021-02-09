@@ -111,17 +111,6 @@ public class ApplicationConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * A bean for the Kafka Health Indicator
-     *
-     * @param adminClient the Kafka admin client
-     * @param topicConfiguration the details of the consumer topic(s)
-     * @return an instance of the {@link KafkaHealthIndicator}
-     */
-    public KafkaHealthIndicator kafkaHealthIndicator(final AdminClient adminClient, final ConsumerTopicConfiguration topicConfiguration) {
-        return new KafkaHealthIndicator(adminClient, topicConfiguration);
-    }
-
-    /**
      * ObjectMapper used in serializing and deserializing
      *
      * @return an instance of the ObjectMapper
