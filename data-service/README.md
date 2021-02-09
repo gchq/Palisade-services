@@ -28,7 +28,7 @@ The client request will contain the token and resource id that is used to unique
 
 | DataRequest     | (response to client)   | AuditSuccessMessage  | AuditErrorMessage |
 |:----------------|:-----------------------|:---------------------|:------------------|
-| token           | OutputStream           | *token               | *token            | 
+| *token          | OutputStream           | *token               | *token            | 
 | leafResourceId  |                        | leafResourceId       | leafResourceId    |  
 |                 |                        | userId               | ***userId         |
 |                 |                        | resourceId           | ***resourceId     |
