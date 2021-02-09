@@ -228,32 +228,33 @@ class KafkaRestWebSocketContractTest {
                                             .withError(new Throwable("No Start Marker was observed for token: " + "test-token-3"))
                             )
                     )
-//                    ,
-//                    // Test no resources
-//                    Arguments.of(
-//                            "test-token-4",
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
-//                                    //No Resources
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
-//                            ),
-//                            List.of(
-//                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
-//                            ),
-//                            List.of(
-//                                    ctsMsg
-//                            ),
-//                            List.of(
-//                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
-//                            ),
-//                            List.of(
-//                                    AuditErrorMessage.Builder.create().withUserId("unknown")
-//                                            .withResourceId("unknown")
-//                                            .withContext(new Context().purpose("unknown"))
-//                                            .withAttributes(Collections.emptyMap())
-//                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
-//                            )
-//                    )
+                    ,
+                    // Test no resources
+                    Arguments.of(
+                            "test-token-4",
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
+                                    //No Resources
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), endHeader), null)
+                            ),
+                            List.of(
+                                    Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4")), offsetBuilder.apply(0L))
+                            ),
+                            Map.of(),
+                            List.of(
+                                    ctsMsg
+                            ),
+                            List.of(
+                                    WebSocketMessage.Builder.create().withType(MessageType.COMPLETE).withHeader(Token.HEADER, "test-token-4").noHeaders().noBody()
+                            ),
+                            List.of(
+                                    AuditErrorMessage.Builder.create().withUserId("unknown")
+                                            .withResourceId("unknown")
+                                            .withContext(new Context().purpose("unknown"))
+                                            .withAttributes(Collections.emptyMap())
+                                            .withError(new Throwable("No Resources were observed for token: " + "test-token-4"))
+                            )
+                    )
             );
         }
     }
