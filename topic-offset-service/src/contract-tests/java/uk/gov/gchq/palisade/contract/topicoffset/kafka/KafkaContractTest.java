@@ -85,8 +85,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * An external requirement of the service is to connect to a pair of kafka topics.
- * The upstream "attribute-masking-service" topic is and read by this service.
- * The downstream "filtered-resource-offset" topic is written to by this service.
+ * The upstream "masked-resource" topic is written to by the attribute-masking-service and read by this service.
+ * The downstream "masked-resource-offset" topic is written to by this service and read by the filtered-resource-service.
  * Upon writing to the upstream topic, appropriate messages should be written to the downstream topic.
  */
 @SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT, properties = "akka.discovery.config.services.kafka.from-config=false")

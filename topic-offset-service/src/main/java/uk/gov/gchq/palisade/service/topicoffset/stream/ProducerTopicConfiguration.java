@@ -64,6 +64,7 @@ public class ProducerTopicConfiguration {
     @Generated
     public void setParallelism(final Integer parallelism) {
         this.parallelism = Optional.ofNullable(parallelism)
+                .filter(x -> x > 0)
                 .orElseThrow(() -> new IllegalArgumentException("parallelism cannot be null"));
     }
 
