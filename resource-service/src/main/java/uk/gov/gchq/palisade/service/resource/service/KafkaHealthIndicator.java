@@ -43,38 +43,43 @@ import java.util.concurrent.TimeoutException;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
+
+    private final String groupId;
     private final AdminClient adminClient;
-    @Value("${akka.kafka.consumer.kafka-clients.group.id}")
-    private String groupId;
 
     /**
      * Requires the AdminClient to interact with Kafka
+     * *
      *
+     * @param groupId     of the cluster
      * @param adminClient of the cluster
      */
-    public KafkaHealthIndicator(final AdminClient adminClient) {
+    public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId, final AdminClient adminClient) {
+        this.groupId = groupId;
         this.adminClient = adminClient;
+
     }
 
     @Override
     public Health getHealth(final boolean includeDetails) {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().withDetail("group", this.groupId).build())
-                .orElseGet(() -> Health.down().withDetail("group", this.groupId).build());
+        if (performCheck()) {
+            return Health.up().withDetail("group", this.groupId).build();
+        } else {
+            return Health.down().withDetail("group", this.groupId).build();
+        }
     }
 
     /**
      * Health endpoint
-     *
      * @return the {@code Health} object
      */
     @Override
     public Health health() {
-        return Optional.of(performCheck())
-                .filter(healthy -> healthy)
-                .map(up -> Health.up().build())
-                .orElseGet(() -> Health.down().build());
+        if (performCheck()) {
+            return Health.up().build();
+        } else {
+            return Health.down().build();
+        }
     }
 
     private boolean performCheck() {
@@ -84,9 +89,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
                     .get(1, TimeUnit.SECONDS);
 
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
-
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
                 boolean assignedGroupPartition = consumerGroupDescription.members().stream()
@@ -96,11 +99,13 @@ public class KafkaHealthIndicator implements HealthIndicator {
                 }
                 return assignedGroupPartition;
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.warn("Exception during Kafka health check for group {}", this.groupId, e);
+
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
             Thread.currentThread().interrupt();
-            return false;
+        } catch (ExecutionException | TimeoutException e) {
+            LOGGER.warn("Timeout connecting to kafka", e);
         }
-        return true;
+        return false;
     }
 }
