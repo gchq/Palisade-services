@@ -231,7 +231,7 @@ class KafkaRestWebSocketContractTest {
                     ,
                     // Test no resources
                     Arguments.of(
-                            "test-token-41",
+                            "test-token-4",
                             List.of(
                                     Pair.create(List.of(RawHeader.create(Token.HEADER, "test-token-4"), startHeader), null),
                                     //No Resources
