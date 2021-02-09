@@ -28,14 +28,22 @@ import org.springframework.context.ApplicationContext;
  * static method, to imitate the equivalent spring actuator
  */
 public class SpringShutdownRouter implements ActuatorSupplier {
+    private static final StatusCode HTTP_OK = StatusCode.int2StatusCode(200);
+
     private final ApplicationContext ctx;
 
+    /**
+     * POSTable endpoint to call the {@link SpringApplication#exit(ApplicationContext, ExitCodeGenerator...)}
+     *
+     * @param applicationContext the spring application context
+     */
     public SpringShutdownRouter(final ApplicationContext applicationContext) {
         this.ctx = applicationContext;
     }
 
     private Route postShutdown() {
-        return Directives.complete(StatusCode.int2StatusCode(SpringApplication.exit(ctx, () -> 0)));
+        SpringApplication.exit(ctx, () -> 0);
+        return Directives.complete(HTTP_OK);
     }
 
     /**

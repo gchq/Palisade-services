@@ -22,16 +22,22 @@ import akka.http.javadsl.server.Route;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.actuator.ActuatorSupplier;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 /**
  * Collect all {@link ActuatorSupplier}s and return them under the /actuator REST path.
  */
 public class SpringActuatorRouter implements RouteSupplier {
-    Collection<ActuatorSupplier> actuatorSuppliers;
+    private final Collection<ActuatorSupplier> actuatorSuppliers;
 
+    /**
+     * Serve all ActuatorSuppliers under the /actuator endpoint
+     *
+     * @param actuatorSuppliers a collection of actuators to serve
+     */
     public SpringActuatorRouter(final Collection<ActuatorSupplier> actuatorSuppliers) {
-        this.actuatorSuppliers = actuatorSuppliers;
+        this.actuatorSuppliers = Collections.unmodifiableCollection(actuatorSuppliers);
     }
 
     private Route concatActuators() {
