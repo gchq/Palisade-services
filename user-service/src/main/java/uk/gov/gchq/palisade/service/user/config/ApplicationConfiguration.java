@@ -16,7 +16,6 @@
 package uk.gov.gchq.palisade.service.user.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -31,12 +30,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import uk.gov.gchq.palisade.jsonserialisation.JSONSerialiser;
 import uk.gov.gchq.palisade.service.user.exception.ApplicationAsyncExceptionHandler;
-import uk.gov.gchq.palisade.service.user.service.KafkaHealthIndicator;
 import uk.gov.gchq.palisade.service.user.service.NullUserService;
 import uk.gov.gchq.palisade.service.user.service.UserService;
 import uk.gov.gchq.palisade.service.user.service.UserServiceAsyncProxy;
 import uk.gov.gchq.palisade.service.user.service.UserServiceCachingProxy;
-import uk.gov.gchq.palisade.service.user.stream.ConsumerTopicConfiguration;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
