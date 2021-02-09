@@ -82,7 +82,7 @@ public class AuditableDataService {
                         .withToken(dataRequest.getToken())
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
-                        .withAuditErrorMessage(null))
+                        .withoutAuditErrorMessage())
                 .exceptionally(e -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
