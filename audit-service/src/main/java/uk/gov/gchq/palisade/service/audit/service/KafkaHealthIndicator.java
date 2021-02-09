@@ -55,7 +55,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
     public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId, final AdminClient adminClient) {
         this.groupId = groupId;
         this.adminClient = adminClient;
-
     }
 
     @Override
