@@ -48,7 +48,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     /**
      * Requires the AdminClient to interact with Kafka
-     * *
      *
      * @param groupId     of the cluster
      * @param adminClient of the cluster
@@ -70,6 +69,7 @@ public class KafkaHealthIndicator implements HealthIndicator {
 
     /**
      * Health endpoint
+     *
      * @return the {@code Health} object
      */
     @Override
