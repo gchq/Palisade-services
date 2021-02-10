@@ -39,7 +39,8 @@ public interface DataService extends Service {
      * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc)
      *
      * @param request the client's request for a leaf resource and their unique request token
-     * @return asynchronous what rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the data-reader
+     * @return rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the
+     * data-reader and null if there is no data
      */
     CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
 
