@@ -85,6 +85,13 @@ Calculate a storage path based on the code release artifact id or the supplied v
 {{- end }}
 
 {{/*
+Calculate the service config location
+*/}}
+{{- define "audit-service.config.path" }}
+{{- printf "/usr/share/%s/config/" .Chart.Name }}
+{{- end }}
+
+{{/*
 Calculate a storage name based on the code release artifact id or the supplied value of codeRelease
 */}}
 {{- define "audit-service.deployment.name" }}
