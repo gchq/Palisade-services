@@ -42,6 +42,7 @@ import java.util.concurrent.TimeoutException;
 public class KafkaHealthIndicator implements HealthIndicator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
+
     private final String groupId;
     private final AdminClient adminClient;
 
@@ -52,12 +53,17 @@ public class KafkaHealthIndicator implements HealthIndicator {
      * @param adminClient of the cluster
      */
     public KafkaHealthIndicator(@Value("${akka.kafka.consumer.kafka-clients.group.id}") final String groupId, final AdminClient adminClient) {
-        this.adminClient = adminClient;
         this.groupId = groupId;
+        this.adminClient = adminClient;
     }
 
+    /**
+     * Health endpoint
+     *
+     * @return the {@code Health} object
+     */
     @Override
-    public Health getHealth(final boolean includeDetails) {
+    public Health health() {
         if (performCheck()) {
             return Health.up().withDetail("group", this.groupId).build();
         } else {
@@ -65,42 +71,30 @@ public class KafkaHealthIndicator implements HealthIndicator {
         }
     }
 
-    @Override
-    public Health health() {
-        if (performCheck()) {
-            return Health.up().build();
-        } else {
-            return Health.down().build();
-        }
-    }
-
     private boolean performCheck() {
-
         try {
             Map<String, ConsumerGroupDescription> groupDescriptionMap = this.adminClient.describeConsumerGroups(Collections.singletonList(this.groupId))
                     .all()
                     .get(1, TimeUnit.SECONDS);
 
             ConsumerGroupDescription consumerGroupDescription = groupDescriptionMap.get(this.groupId);
-
             LOGGER.debug("Kafka consumer group ({}) state: {}", groupId, consumerGroupDescription.state());
 
             if (consumerGroupDescription.state() == ConsumerGroupState.STABLE) {
-                boolean assignedPartition = consumerGroupDescription.members().stream()
+                boolean assignedGroupPartition = consumerGroupDescription.members().stream()
                         .noneMatch(member -> (member.assignment() == null || member.assignment().topicPartitions().isEmpty()));
-
-                if (!assignedPartition) {
+                if (!assignedGroupPartition) {
                     LOGGER.error("Failed to find kafka topic-partition assignments");
                 }
-                return assignedPartition;
+                return assignedGroupPartition;
             }
-        } catch (InterruptedException ex) {
-            LOGGER.warn("Await on future interrupted", ex);
+
+        } catch (InterruptedException e) {
+            LOGGER.warn("Await on future interrupted", e);
             Thread.currentThread().interrupt();
         } catch (ExecutionException | TimeoutException e) {
             LOGGER.warn("Timeout connecting to kafka", e);
         }
-
         return false;
     }
 }
