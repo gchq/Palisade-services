@@ -94,7 +94,7 @@ class DataControllerTest {
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
-        ResultActions resultActions = mockMvc.perform(asyncDispatch(result))
+        mockMvc.perform(asyncDispatch(result))
                 .andDo(print())
                 .andExpect(status().isAccepted());
 
