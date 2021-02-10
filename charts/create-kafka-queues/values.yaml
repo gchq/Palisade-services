@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Crown Copyright
+# Copyright 2020 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ kafkaCreateTopics:
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-d5003ef
+  tag: SNAPSHOT-09dfaba
   pullPolicy: IfNotPresent
 
 resources:

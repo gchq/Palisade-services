@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.gchq.palisade.service.policy.service;
+package uk.gov.gchq.palisade.service.audit.service;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;

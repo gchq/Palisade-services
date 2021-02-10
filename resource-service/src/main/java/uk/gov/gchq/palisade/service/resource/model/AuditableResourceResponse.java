@@ -94,7 +94,7 @@ public final class AuditableResourceResponse {
         }
 
         /**
-         * Compose with {@code UserResponse}
+         * Compose a {@code ResourceResponse}
          */
         public interface IResourceResponse {
             /**

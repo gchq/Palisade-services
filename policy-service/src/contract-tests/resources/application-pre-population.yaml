@@ -16,15 +16,15 @@
 population:
   policyProvider: std
   policies:
-  - resourceId: file:/test/noRulesResource
+  - resourceId: /test/noRulesResource
 
-  - resourceId: file:/test/resourceId
+  - resourceId: /test/resourceId
     resourceRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
     recordRules:
       "1-Pass Through Rule": uk.gov.gchq.palisade.contract.policy.common.PassThroughRule
 
-  - resourceId: file:/test/resourceRulesResource
+  - resourceId: /test/resourceRulesResource
     resourceRules:
       "1-Serialised-Format-Rule": uk.gov.gchq.palisade.contract.policy.common.SerialisedFormatRule
     recordRules:

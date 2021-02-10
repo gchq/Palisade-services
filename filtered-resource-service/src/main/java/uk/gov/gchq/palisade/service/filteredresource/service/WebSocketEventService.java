@@ -102,7 +102,7 @@ public class WebSocketEventService {
         return Flow.<WebSocketMessage>create()
                 // Log some details of each client request
                 .map((WebSocketMessage wsMsg) -> {
-                    LOGGER.trace("Received message {} from client", wsMsg);
+                    LOGGER.debug("Received message {} from client", wsMsg);
                     return wsMsg;
                 })
 
@@ -119,7 +119,12 @@ public class WebSocketEventService {
                         // On CTSE messages, get the exceptions for the token from the persistence, and return the results
                         // returns ERROR, ....*n, ERROR and then NO_ERROR
                         MessageType.CTSE.ordinal(), onCtsError(token)
-                )));
+                )))
+
+                .map((WebSocketMessage wsMsg) -> {
+                    LOGGER.debug("Returning message {} to client", wsMsg);
+                    return wsMsg;
+                });
     }
 
     /**

@@ -1,4 +1,4 @@
-# Copyright 2018-2021 Crown Copyright
+# Copyright 2019 Crown Copyright
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 replicaCount: 1
 
 service:
@@ -21,7 +21,8 @@ service:
 
 image:
   name: resource-service
-  tag: SNAPSHOT-be180ee
+  base: jre
+  tag: SNAPSHOT-09dfaba
   pullPolicy: IfNotPresent
   codeRelease: 0.5.0-SNAPSHOT
 

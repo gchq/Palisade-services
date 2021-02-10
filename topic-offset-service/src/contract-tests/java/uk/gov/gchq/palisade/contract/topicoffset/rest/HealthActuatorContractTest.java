@@ -28,33 +28,37 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.service.topicoffset.TopicOffsetApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
- * An external requirement of the service is to keep-alive in k8s.
- * This is done by checking the service is still alive and healthy by REST GET /actuator/health.
- * This should return 200 OK if the service is healthy.
+ * Test checks the services health endpoint for the Topic-Offset-Service
  */
-@SpringBootTest(classes = TopicOffsetApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("akkatest")
+@SpringBootTest(
+        classes = {TopicOffsetApplication.class},
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {"management.health.kafka.enabled=false"}
+)
+@ActiveProfiles("akka-test")
 class HealthActuatorContractTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
+    /**
+     * RESTful test to confirm the Spring Health Actuator service is up and running.
+     */
     @Test
-    void testContextLoads() {
-        assertThat(restTemplate).isNotNull();
-    }
+    void testHealthActuatorServiceIsRunning() {
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
 
-    @Test
-    void testServiceIsHealthy() {
-        // Given that the service is running (and presumably healthy)
-
-        // When we GET the /actuator/health REST endpoint (used by k8s)
-        final ResponseEntity<String> health = restTemplate.getForEntity("/actuator/health", String.class);
-
-        // Then the service reports itself to be healthy
-        assertThat(health.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
 
 }

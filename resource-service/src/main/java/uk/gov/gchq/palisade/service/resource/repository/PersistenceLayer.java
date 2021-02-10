@@ -70,8 +70,8 @@ public interface PersistenceLayer {
      * Add a {@link LeafResource} to persistence for a given type
      * Used for updating the persistence store from a given source of 'truth' - ie. a real resource-service
      *
-     * @param <T>       the type for the {@link Flow}
-     * @param type      the file type that was queried to return this {@link Flow} of resources
+     * @param <T>  the type for the {@link Flow}
+     * @param type the file type that was queried to return this {@link Flow} of resources
      * @return an {@link Flow} of {@link LeafResource}s added to the persistence
      */
     <T extends LeafResource> Flow<T, T, NotUsed> withPersistenceByType(String type);

@@ -21,13 +21,22 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
+import uk.gov.gchq.palisade.service.audit.config.AuditServiceConfigProperties;
 import uk.gov.gchq.palisade.service.audit.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage;
+import uk.gov.gchq.palisade.service.audit.web.SerDesHealthIndicator;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Static configuration for kafka key/value serialisers/deserialisers
@@ -36,6 +45,7 @@ import java.nio.charset.Charset;
  * In general, the keys are not used so the choice of serialiser is not important
  */
 public final class SerDesConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerDesConfig.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SERIALIZATION_FAILED_MESSAGE = "Failed to serialize ";
     private static final String DESERIALIZATION_FAILED_MESSAGE = "Failed to deserialize ";
@@ -65,6 +75,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -82,14 +93,18 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
+     * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditErrorMessage)
      */
-    public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
+    public static Deserializer<AuditErrorMessage> errorValueDeserializer(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditErrorMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
+                String failedAuditString = new String(auditRequest, Charset.defaultCharset());
+                createFile("Error-", failedAuditString, configProperties);
+                SerDesHealthIndicator.addSerDesExceptions(e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
     }
@@ -115,6 +130,7 @@ public final class SerDesConfig {
             try {
                 return MAPPER.writeValueAsBytes(auditRequest);
             } catch (IOException e) {
+                SerDesHealthIndicator.addSerDesExceptions(e);
                 throw new SerializationFailedException(SERIALIZATION_FAILED_MESSAGE + auditRequest.toString(), e);
             }
         };
@@ -132,15 +148,36 @@ public final class SerDesConfig {
     /**
      * Kafka value deserialiser for upstream messages coming in as input
      *
+     * @param configProperties contains the directory for error files
      * @return an appropriate value deserialiser for the topic's message content (AuditSuccessMessage)
      */
-    public static Deserializer<AuditSuccessMessage> successValueDeserializer() {
+    public static Deserializer<AuditSuccessMessage> successValueDeserializer(final AuditServiceConfigProperties configProperties) {
         return (String ignored, byte[] auditRequest) -> {
             try {
                 return MAPPER.readValue(auditRequest, AuditSuccessMessage.class);
             } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(auditRequest, Charset.defaultCharset()), e);
+                String failedAuditString = new String(auditRequest, Charset.defaultCharset());
+                createFile("Success-", failedAuditString, configProperties);
+                SerDesHealthIndicator.addSerDesExceptions(e);
+                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + failedAuditString, e);
             }
         };
+    }
+
+    private static void createFile(final String prefix, final String failedAuditString, final AuditServiceConfigProperties configProperties) {
+        // Create a fileName using the prefix value and a timestamp.
+        // A replace needs to be done on the timestamp value to allow saving a file on Windows machines
+        String fileName = prefix + ZonedDateTime.now(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_INSTANT).replace(":", "-");
+        File directory = new File(configProperties.getErrorDirectory());
+        File parent = directory.getAbsoluteFile().getParentFile();
+        File timestampedFile = new File(parent, fileName);
+        try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
+            fileWriter.write(failedAuditString);
+            LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", prefix, timestampedFile);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to write file to directory: {}", directory.getAbsoluteFile());
+            LOGGER.error("Failed to process audit request '{}'", failedAuditString, ex);
+        }
     }
 }

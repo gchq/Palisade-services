@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 @Component
 @ConditionalOnEnabledHealthIndicator("kafka")
 public class KafkaHealthIndicator implements HealthIndicator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaHealthIndicator.class);
     private final AdminClient adminClient;
     private final ProducerTopicConfiguration topicConfiguration;
@@ -58,6 +59,11 @@ public class KafkaHealthIndicator implements HealthIndicator {
         this.topicConfiguration = topicConfiguration;
     }
 
+    /**
+     * Health endpoint
+     *
+     * @return the {@code Health} object
+     */
     @Override
     public Health health() {
         Set<String> configTopics = topicsFromConfig(topicConfiguration);
