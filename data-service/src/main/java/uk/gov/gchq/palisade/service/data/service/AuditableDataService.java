@@ -21,6 +21,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
+import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 
 import java.io.OutputStream;
 import java.util.Collections;
@@ -59,7 +60,7 @@ public class AuditableDataService {
                 .exceptionally(e -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
-                                .withAttributes(Collections.singletonMap("method", "authoriseRequest"))
+                                .withAttributes(Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.AUTHORISED_REQUEST))
                                 .withError(e)));
     }
 
@@ -88,7 +89,7 @@ public class AuditableDataService {
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)
                                 .withRecordsProcessedAndReturned(recordsProcessed.get(), recordsReturned.get()))
                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(auditableAuthorisedDataRequest)
-                                .withAttributes(Collections.singletonMap("method", "read"))
+                                .withAttributes(Collections.singletonMap(ExceptionSource.ATTRIBUTE_KEY, ExceptionSource.READ))
                                 .withError(e)));
     }
 }

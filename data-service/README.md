@@ -37,7 +37,7 @@ The client request will contain the token and resource id that is used to unique
 |                 |                        | serverMetadata       | error             |
 |                 |                        |                      | serverMetadata    |
   
-*token is stored in the header metadata  
+*token comes in the body of the data request and is stored in the header metadata for the audit messages
 
 **attributes will include the numbers for records processed and records returned
 

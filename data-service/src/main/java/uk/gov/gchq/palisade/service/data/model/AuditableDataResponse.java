@@ -116,6 +116,14 @@ public final class AuditableDataResponse {
              * @return class {@link AuditableDataResponse} for the final step in the build.
              */
             AuditableDataResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage);
+
+
+            /**
+             * @return class {@link AuditableDataResponse} that does not have an {@link AuditErrorMessage}
+             */
+            default AuditableDataResponse withoutAuditErrorMessage() {
+                return withAuditErrorMessage(null);
+            }
         }
 
     }
