@@ -46,6 +46,12 @@ management:
     shutdown:
       enabled: true
 
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: true
+
 logging:
   level:
     org.apache.kafka: WARN
