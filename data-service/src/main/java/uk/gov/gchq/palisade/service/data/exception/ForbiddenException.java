@@ -17,7 +17,7 @@ package uk.gov.gchq.palisade.service.data.exception;
 
 
 /**
- * Exception for when there the request is not allowed or there no content for the request.
+ * Exception for when the request is not allowed or there is no content for the request.
  */
 public class ForbiddenException extends RuntimeException {
 

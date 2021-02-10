@@ -53,6 +53,7 @@ public class CommonTestData {
     public static final String USER_ID = "testUserId";
     public static final User USER = new User().userId(USER_ID);
     public static final String RESOURCE_ID = "test resource id";
+
     public static final LeafResource RESOURCE = new FileResource().id(LEAF_RESOURCE_ID)
             .type("java.lang.String")
             .serialisedFormat("format")
@@ -89,8 +90,6 @@ public class CommonTestData {
             .withAttributes(null)
             .withError(new ForbiddenException("Something went wrong!"));
 
-
-
     public static final AuthorisedData AUTHORISED_DATA = AuthorisedData.Builder.create()
             .withResource(RESOURCE)
             .withUser(USER)
@@ -104,7 +103,6 @@ public class CommonTestData {
     public static final AuditableAuthorisedDataRequest AUDITABLE_DATA_REQUEST_WITH_ERROR = AuditableAuthorisedDataRequest.Builder.create()
             .withDataRequest(DATA_REQUEST)
             .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
-
 
     public static final AuditableDataResponse AUDITABLE_DATA_RESPONSE = AuditableDataResponse.Builder.create()
             .withToken(TOKEN)
