@@ -101,7 +101,7 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
 @ActiveProfiles({"akka-test", "debug"})
 public class KafkaContractTest {
-    public static final String READ_CHUNKED = "/api/read/chunked";
+    public static final String READ_CHUNKED = "/data/read/chunked";
 
     @Autowired
     private TestRestTemplate restTemplate;
