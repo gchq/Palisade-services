@@ -7,9 +7,9 @@ package uk.gov.gchq.palisade.service.data.model;
 public enum ExceptionSource {
 
     /**
-     * If an exception is thrown when requesting the authorisation.
+     * If an exception is thrown when requesting the authorised resources.
      */
-    AUTHORISED_REQUEST,fetch
+    AUTHORISED_REQUEST,
 
     /**
      * If an exception is thrown in reading the resource.
