@@ -21,7 +21,7 @@ akka:
       poll-interval: 50ms
       poll-timeout: 50ms
       stop-timeout: 30s
-      close-timeout: 20s
+      close-timeout: 300s
       commit-timeout: 15s
       commit-time-warning: 1s
       commit-refresh-interval: infinite
