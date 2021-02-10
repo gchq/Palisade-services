@@ -150,10 +150,6 @@
             <version>1.14.3</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-        </dependency>
     </dependencies>
 
     <profiles>
