@@ -9,7 +9,7 @@ public enum ExceptionSource {
     /**
      * If an exception is thrown when requesting the authorisation.
      */
-    AUTHORISED_REQUEST,
+    AUTHORISED_REQUEST,fetch
 
     /**
      * If an exception is thrown in reading the resource.
