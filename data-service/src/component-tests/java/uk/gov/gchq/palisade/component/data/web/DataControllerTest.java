@@ -118,7 +118,7 @@ class DataControllerTest {
         when(auditMessageServiceMock.auditMessage(any()))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
-        MvcResult result = mockMvc.perform(post("/data/read/chunked")
+        mockMvc.perform(post("/data/read/chunked")
                 .contentType("application/json")
                 .characterEncoding(StandardCharsets.UTF_8.name())
                 .content(MAPPER.writeValueAsBytes(DATA_REQUEST)))

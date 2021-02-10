@@ -31,8 +31,8 @@ import java.util.StringJoiner;
  * Represents information for a successful processing of a request which is forwarded to the audit-service.
  * Note there are three classes that effectively represent the same data but represent a different stage of the process.
  * uk.gov.gchq.palisade.service.audit.model.AuditSuccessMessage is the message received by the Audit Service.
- * uk.gov.gchq.palisade.service.results.model.AuditSuccessMessage is the message sent by the results-service.
- * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the data-service.
+ * uk.gov.gchq.palisade.service.filteredresource.model.AuditSuccessMessage is the message sent by the Filtered Resource Service.
+ * uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage is the message sent by the Data Service.
  * The one version produced by the data-service is unique in that it includes the leafResourceId, token and the
  * two counters for the number of records process and records returned as part of the message.
  */
@@ -91,7 +91,7 @@ public final class AuditSuccessMessage extends AuditMessage {
          */
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
             DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedData readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedData();
+            AuthorisedDataRequest readerRequestModel  = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())

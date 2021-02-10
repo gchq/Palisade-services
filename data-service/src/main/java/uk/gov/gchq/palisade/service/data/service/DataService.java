@@ -18,7 +18,7 @@ package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.Service;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.OutputStream;
@@ -39,9 +39,9 @@ public interface DataService extends Service {
      * Request the trusted details about a client's request from persistence (what policies to apply, user details, etc)
      *
      * @param request the client's request for a leaf resource and their unique request token
-     * @return asynchronous what rules apply when accessing the data, returned as a {@link AuthorisedData} to pass to the data-reader
+     * @return asynchronous what rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the data-reader
      */
-    CompletableFuture<AuthorisedData> authoriseRequest(final DataRequest request);
+    CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
 
     /**
      * Read a resource and write each record to the given {@link OutputStream}.
@@ -52,5 +52,5 @@ public interface DataService extends Service {
      * @param recordsReturned  number of records that have been returned
      * @return boolean of true for a successful completion
      */
-    CompletableFuture<Boolean> read(final AuthorisedData request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
+    CompletableFuture<Boolean> read(final AuthorisedDataRequest request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
 }

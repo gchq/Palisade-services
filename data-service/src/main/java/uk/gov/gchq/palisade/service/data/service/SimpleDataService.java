@@ -25,7 +25,7 @@ import uk.gov.gchq.palisade.reader.request.DataReaderResponse;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
 import uk.gov.gchq.palisade.service.data.exception.ReadException;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
@@ -65,11 +65,11 @@ public class SimpleDataService implements DataService {
      * @param dataRequest data provided by the client for requesting the resource
      * @return reference to the resources that are to be returned to client
      */
-    public CompletableFuture<AuthorisedData> authoriseRequest(final DataRequest dataRequest) {
+    public CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
         CompletableFuture<Optional<AuthorisedRequestEntity>> futureRequestEntity = persistenceLayer.getAsync(dataRequest.getToken(), dataRequest.getLeafResourceId());
         return futureRequestEntity.thenApply(maybeEntity -> maybeEntity.map(
-                entity -> AuthorisedData.Builder.create()
+                entity -> AuthorisedDataRequest.Builder.create()
                         .withResource(entity.getLeafResource())
                         .withUser(entity.getUser())
                         .withContext(entity.getContext())
@@ -81,22 +81,22 @@ public class SimpleDataService implements DataService {
     /**
      * Includes the resources into the OutputStream that is to be provided to the client
      *
-     * @param authorisedData the information for the resources in the context of the request
+     * @param authorisedDataRequest the information for the resources in the context of the request
      * @param out                an {@link OutputStream} to write the stream of resources to (after applying rules)
      * @param recordsProcessed   number of records that have been processed
      * @param recordsReturned    number of records that have been returned
      * @return true if indicating that the process has been successful
      */
-    public CompletableFuture<Boolean> read(final AuthorisedData authorisedData, final OutputStream out,
+    public CompletableFuture<Boolean> read(final AuthorisedDataRequest authorisedDataRequest, final OutputStream out,
                                            final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
 
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.debug("Reading from reader with request {}", authorisedData);
+            LOGGER.debug("Reading from reader with request {}", authorisedDataRequest);
             DataReaderRequest readerRequest = new DataReaderRequest()
-                    .context(authorisedData.getContext())
-                    .user(authorisedData.getUser())
-                    .resource(authorisedData.getResource())
-                    .rules(authorisedData.getRules());
+                    .context(authorisedDataRequest.getContext())
+                    .user(authorisedDataRequest.getUser())
+                    .resource(authorisedDataRequest.getResource())
+                    .rules(authorisedDataRequest.getRules());
             DataReaderResponse readerResponse = dataReader.read(readerRequest, recordsProcessed, recordsReturned);
 
             LOGGER.debug("Writing reader response {} to output stream", readerResponse);

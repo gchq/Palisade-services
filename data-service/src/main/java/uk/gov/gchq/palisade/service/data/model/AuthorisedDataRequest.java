@@ -26,17 +26,17 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The AuthorisedData represents reference for the filtered resource that the user is authorised to retrieve.
+ * The AuthorisedDataRequest represents reference for the filtered resource that the user is authorised to retrieve.
  * This will be used to provide the link to the resource that will be forwarded to the user to be streamed.
  */
-public final class AuthorisedData {
+public final class AuthorisedDataRequest {
 
     private final LeafResource resource; //resource that is to be viewed
     private final User user; //user that is requesting the information
     private final Context context;  //context of the request
     private final Rules<?> rules;  //rules that apply to the resource
 
-    private AuthorisedData(
+    private AuthorisedDataRequest(
             final LeafResource resource,
             final User user,
             final Context context,
@@ -73,20 +73,20 @@ public final class AuthorisedData {
     }
 
     /**
-     * Builder class for the creation of instances of the AuthorisedData.
+     * Builder class for the creation of instances of the AuthorisedDataRequest.
      * This is a variant of the Fluent Builder which will use Java Objects for the components
      * in the build.
      */
     public static class Builder {
         /**
          * Starter method for the Builder class.
-         * This method is called to start the process of creating the AuthorisedData class.
+         * This method is called to start the process of creating the AuthorisedDataRequest class.
          *
          * @return interface {@link IResource} for the next step in the build.
          */
         public static IResource create() {
             return resource -> user -> context -> rules ->
-                    new AuthorisedData(resource, user, context, rules);
+                    new AuthorisedDataRequest(resource, user, context, rules);
         }
 
         /**
@@ -136,9 +136,9 @@ public final class AuthorisedData {
              * Adds the rules to apply to the resource
              *
              * @param rules that are to apply to the resource
-             * @return interface {@link AuthorisedData} for the completed class from the builder
+             * @return interface {@link AuthorisedDataRequest} for the completed class from the builder
              */
-            AuthorisedData withRules(Rules<?> rules);
+            AuthorisedDataRequest withRules(Rules<?> rules);
 
         }
     }
@@ -150,10 +150,10 @@ public final class AuthorisedData {
             return true;
         }
 
-        if (!(o instanceof AuthorisedData)) {
+        if (!(o instanceof AuthorisedDataRequest)) {
             return false;
         }
-        AuthorisedData that = (AuthorisedData) o;
+        AuthorisedDataRequest that = (AuthorisedDataRequest) o;
         return resource.equals(that.resource) &&
                 user.equals(that.user) &&
                 context.equals(that.context) &&
@@ -169,7 +169,7 @@ public final class AuthorisedData {
     @Override
     @Generated
     public String toString() {
-        return new StringJoiner(", ", AuthorisedData.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", AuthorisedDataRequest.class.getSimpleName() + "[", "]")
                 .add("resource" + resource)
                 .add("user=" + user)
                 .add("context=" + context)

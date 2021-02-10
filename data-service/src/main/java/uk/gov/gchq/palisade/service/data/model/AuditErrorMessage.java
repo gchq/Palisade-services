@@ -85,14 +85,14 @@ public final class AuditErrorMessage extends AuditMessage {
 
         public static IAttributes create(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest) {
             DataRequest dataRequest =  auditableAuthorisedDataRequest.getDataRequest();
-            AuthorisedData authorisedData =  auditableAuthorisedDataRequest.getAuthorisedData();
+            AuthorisedDataRequest authorisedDataRequest =  auditableAuthorisedDataRequest.getAuthorisedDataRequest();
 
             return create()
                     .withLeafResourceId(dataRequest.getLeafResourceId())
                     .withToken(dataRequest.getToken())
-                    .withUserId(authorisedData.getUser().getUserId().getId())
-                    .withResourceId(authorisedData.getResource().getId())
-                    .withContext(authorisedData.getContext());
+                    .withUserId(authorisedDataRequest.getUser().getUserId().getId())
+                    .withResourceId(authorisedDataRequest.getResource().getId())
+                    .withContext(authorisedDataRequest.getContext());
         }
 
         /**

@@ -34,7 +34,7 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.data.domain.AuthorisedRequestEntity;
 import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 
@@ -114,7 +114,7 @@ class SimpleDataServiceTest {
             .context(CONTEXT)
             .rules(RULES);
 
-    final AuthorisedData authorisedData = AuthorisedData.Builder.create()
+    final AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
@@ -175,10 +175,10 @@ class SimpleDataServiceTest {
                 .thenReturn(CompletableFuture.completedFuture(Optional.of(authorisedEntity)));
 
         // When
-        CompletableFuture<AuthorisedData> dataReaderRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
+        CompletableFuture<AuthorisedDataRequest> authorisedDataRequestCompletableFuture = simpleDataService.authoriseRequest(dataRequest);
 
         // Then
-        assertThat(dataReaderRequestCompletableFuture.join())
+        assertThat(authorisedDataRequestCompletableFuture.join())
                 .usingRecursiveComparison()
                 .isEqualTo(readerRequest);
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
@@ -214,7 +214,7 @@ class SimpleDataServiceTest {
 
         // When
         CompletableFuture<Boolean> completed = simpleDataService
-                .read(authorisedData, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
+                .read(authorisedDataRequest, outputStream, RECORDS_PROCESSED, RECORDS_RETURNED);
         completed.join();
         String outputString = outputStream.toString();
         assertThat(outputString).isEqualTo(testResponseMessage);

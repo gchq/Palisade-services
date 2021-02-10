@@ -19,7 +19,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.ExceptionSource;
 
@@ -54,9 +54,9 @@ public class AuditableDataService {
      */
     public CompletableFuture<AuditableAuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         return dataService.authoriseRequest(dataRequest)
-                .thenApply(authorisedData -> AuditableAuthorisedDataRequest.Builder.create()
+                .thenApply(authorisedDataRequest -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
-                        .withAuthorisedData(authorisedData))
+                        .withAuthorisedData(authorisedDataRequest))
                 .exceptionally(e -> AuditableAuthorisedDataRequest.Builder.create()
                         .withDataRequest(dataRequest)
                         .withAuditErrorMessage(AuditErrorMessage.Builder.create(dataRequest)
@@ -74,11 +74,11 @@ public class AuditableDataService {
      */
     public CompletableFuture<AuditableDataResponse> read(final AuditableAuthorisedDataRequest auditableAuthorisedDataRequest, final OutputStream outputStream) {
         DataRequest dataRequest = auditableAuthorisedDataRequest.getDataRequest();
-        AuthorisedData authorisedData = auditableAuthorisedDataRequest.getAuthorisedData();
+        AuthorisedDataRequest authorisedDataRequest = auditableAuthorisedDataRequest.getAuthorisedDataRequest();
         AtomicLong recordsProcessed = new AtomicLong(0);
         AtomicLong recordsReturned = new AtomicLong(0);
 
-        return dataService.read(authorisedData, outputStream, recordsProcessed, recordsReturned)
+        return dataService.read(authorisedDataRequest, outputStream, recordsProcessed, recordsReturned)
                 .thenApply(success -> AuditableDataResponse.Builder.create()
                         .withToken(dataRequest.getToken())
                         .withSuccessMessage(AuditSuccessMessage.Builder.create(auditableAuthorisedDataRequest)

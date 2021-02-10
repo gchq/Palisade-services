@@ -23,7 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 
 import java.io.IOException;
 
@@ -36,20 +36,20 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUTHORI
 class AuthorisedDataTest {
 
     @Autowired
-    private JacksonTester<AuthorisedData> jacksonTester;
+    private JacksonTester<AuthorisedDataRequest> jacksonTester;
 
     /**
      * Create the object with the builder and then convert to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
-     * @throws IOException throws if the {@link AuthorisedData} object cannot be converted to a JsonContent.
+     * @throws IOException throws if the {@link AuthorisedDataRequest} object cannot be converted to a JsonContent.
      *                     This equates to a failure to serialise or deserialise the string.
      */
     @Test
     void testDataRequestReaderSerialisingAndDeserialising() throws IOException {
-        JsonContent<AuthorisedData> dataResponseJsonContent = jacksonTester.write(AUTHORISED_DATA);
-        ObjectContent<AuthorisedData> dataResponseObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
-        AuthorisedData authorisedDataObjectContentObject = dataResponseObjectContent.getObject();
+        JsonContent<AuthorisedDataRequest> dataResponseJsonContent = jacksonTester.write(AUTHORISED_DATA);
+        ObjectContent<AuthorisedDataRequest> dataResponseObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
+        AuthorisedDataRequest authorisedDataObjectContentObject = dataResponseObjectContent.getObject();
 
         assertAll("ObjectComparison",
                 () -> assertThat(authorisedDataObjectContentObject).as("Comparison assertion using the AuthorisedData's equals")

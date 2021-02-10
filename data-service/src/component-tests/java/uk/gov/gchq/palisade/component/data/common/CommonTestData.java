@@ -28,7 +28,7 @@ import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
-import uk.gov.gchq.palisade.service.data.model.AuthorisedData;
+import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 
@@ -90,7 +90,7 @@ public class CommonTestData {
             .withAttributes(null)
             .withError(new ForbiddenException("Something went wrong!"));
 
-    public static final AuthorisedData AUTHORISED_DATA = AuthorisedData.Builder.create()
+    public static final AuthorisedDataRequest AUTHORISED_DATA = AuthorisedDataRequest.Builder.create()
             .withResource(RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
