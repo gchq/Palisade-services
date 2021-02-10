@@ -195,7 +195,7 @@ class SimpleDataServiceTest {
                 .thenThrow(new ForbiddenException("test exception")); // temp dataRequest
 
         // When & Then
-        Exception unauthorisedAccessException = assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequest), "should throw UnauthorisedAccessException");
+        assertThrows(ForbiddenException.class, () -> simpleDataService.authoriseRequest(dataRequest), "should throw UnauthorisedAccessException");
         verify(persistenceLayer, times(1)).getAsync(anyString(), anyString());
     }
 
