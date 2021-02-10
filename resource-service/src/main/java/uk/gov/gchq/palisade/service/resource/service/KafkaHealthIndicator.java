@@ -57,15 +57,6 @@ public class KafkaHealthIndicator implements HealthIndicator {
         this.adminClient = adminClient;
     }
 
-    @Override
-    public Health getHealth(final boolean includeDetails) {
-        if (performCheck()) {
-            return Health.up().withDetail("group", this.groupId).build();
-        } else {
-            return Health.down().withDetail("group", this.groupId).build();
-        }
-    }
-
     /**
      * Health endpoint
      *
