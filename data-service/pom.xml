@@ -47,9 +47,6 @@
         <dockerfile.base.image>openjdk@sha256:d9a6b51ec836e6278521678640211544b93272a3df675c915ca01a78c8c18ecd</dockerfile.base.image>
         <!-- Prefix image tag with image type being used -->
         <dockerfile.base.tag>jre</dockerfile.base.tag>
-        <unit-test.skip>false</unit-test.skip>
-        <component-test.skip>false</component-test.skip>
-        <contract-test.skip>false</contract-test.skip>
     </properties>
 
     <dependencies>
