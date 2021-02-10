@@ -37,7 +37,7 @@ The client request will contain the token and resource id that is used to unique
 |                 |                        | serverMetadata       | error             |
 |                 |                        |                      | serverMetadata    |
   
-*token comes in the body of the data request and is stored in the header metadata for the audit messages
+*token comes in the body of the request from the client (DataRequest) and is stored in the header metadata for the audit messages
 
 **attributes will include the numbers for records processed and records returned
 
@@ -47,12 +47,12 @@ The client request will contain the token and resource id that is used to unique
 
 The application exposes one endpoint to the client for retrieving the resources. This will be the data that has previously 
 been requested and prepared in the initial request to Palisade services. 
-* `POST api/read/chunked`
+* `POST data/read/chunked`
     - returns a `202 ACCEPTED` and a streamed HTTP response body which will provides the resource.
 
 ## Example JSON Request
 ```
-curl -X POST data-dervcie/api/user  -H "content-type: application/json" --data \
+curl -X POST data-dervcie/data/user  -H "content-type: application/json" --data \
 '{
    "token": "test-token",
    "leafResourceId": "test-leafResourceId"
