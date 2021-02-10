@@ -74,7 +74,7 @@ public class SimpleDataService implements DataService {
                         .withUser(entity.getUser())
                         .withContext(entity.getContext())
                         .withRules(entity.getRules())
-                ).orElseThrow(() -> new ForbiddenException("There is no data for this request."))
+                ).orElseThrow(() -> new ForbiddenException( String.format("There is no data for the request for token %s and resource %s" ,dataRequest.getToken(), dataRequest.getLeafResourceId())))
         );
     }
 
