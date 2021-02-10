@@ -144,7 +144,11 @@ class KafkaRestWebSocketContractTest {
             HttpHeader startHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.START));
             HttpHeader endHeader = RawHeader.create(StreamMarker.HEADER, String.valueOf(StreamMarker.END));
             WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
-            WebSocketMessage noErrorMsg = WebSocketMessage.Builder.create().withType(MessageType.NO_ERROR).noHeaders().noBody();
+            Function<String, WebSocketMessage> noErrMsgBuilder = (token) -> WebSocketMessage.Builder.create()
+                    .withType(MessageType.NO_ERROR)
+                    .withHeader(Token.HEADER, token)
+                    .noHeaders()
+                    .noBody();
             Function<String, WebSocketMessage> completeMsgBuilder = (token) -> WebSocketMessage.Builder.create()
                     .withType(MessageType.COMPLETE)
                     .withHeader(Token.HEADER, token)
@@ -172,6 +176,7 @@ class KafkaRestWebSocketContractTest {
                                     responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.2").getResource()),
                                     responseBuilder.apply("test-token-1", resourceBuilder.apply("resource.3").getResource()),
+                                    noErrMsgBuilder.apply("test-token-1"),
                                     completeMsgBuilder.apply("test-token-1")
                             ),
                             List.of()
@@ -197,6 +202,7 @@ class KafkaRestWebSocketContractTest {
                                     responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.1").getResource()),
                                     responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.2").getResource()),
                                     responseBuilder.apply("test-token-2", resourceBuilder.apply("resource.3").getResource()),
+                                    noErrMsgBuilder.apply("test-token-2"),
                                     completeMsgBuilder.apply("test-token-2")
                             ),
                             List.of()
@@ -219,7 +225,8 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg
                             ),
                             List.of(
-                                    // No Resources or WebSocketMessages are expected to be returned
+                                    // No Resources or WebSocketMessages are expected to be returned1
+                                    noErrMsgBuilder.apply("test-token-3")
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")

@@ -43,7 +43,7 @@ import java.util.StringJoiner;
 @Table(
         name = "token_exception",
         indexes = {
-                @Index(name = "message_token", columnList = "message_token")
+                @Index(name = "token", columnList = "token")
         }
 )
 @RedisHash(value = "TokenAuditErrorMessageEntity", timeToLive = 6000L)
@@ -54,11 +54,11 @@ public class TokenAuditErrorMessageEntity implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "message_token", columnDefinition = "varchar(255)")
+    @Column(name = "token", columnDefinition = "varchar(255)")
     @Indexed
     protected String token;
 
-    @Column(name = "auditErrorMessage", columnDefinition = "clob")
+    @Column(name = "message", columnDefinition = "clob")
     @Convert(converter = AuditErrorMessageConverter.class)
     private AuditErrorMessage auditErrorMessage;
 

@@ -109,11 +109,15 @@ public class WebSocketEventService {
                 // Register handlers for each MessageType
                 // Any messages with MessageTypes other than those listed here are dropped
                 .via(ConditionalGraph.map(x -> x.getType().ordinal(), Map.of(
-                        // On PING message, do a PONG
+                        // On PING message, return PONG
                         MessageType.PING.ordinal(), onPing(token),
+
                         // On CTSR message, get the offset for the token from persistence, then return results
+                        // Usually returns RESOURCE ....*n, RESOURCE, COMPLETE, if redis is dead then return ERROR, and then NO_ERROR
                         MessageType.CTSR.ordinal(), onCtsResource(token),
+
                         // On CTSE messages, get the exceptions for the token from the persistence, and return the results
+                        // returns ERROR, ....*n, ERROR and then NO_ERROR
                         MessageType.CTSE.ordinal(), onCtsError(token)
                 )));
     }
@@ -127,8 +131,10 @@ public class WebSocketEventService {
      */
     private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCtsError(final String token) {
         return Flow.<WebSocketMessage>create()
+                // Get the errors for the token from the repository
                 .mapAsync(PARALLELISM, (WebSocketMessage message) -> tokenAuditErrorMessagePersistenceLayer.popAuditErrorMessage(token))
 
+                // Build the WebSocketMessage with the {@link MessageType#ERROR} and AuditErrorMessage in the body
                 .map(message -> message.map(auditErrorMessage -> WebSocketMessage.Builder.create()
                         .withType(MessageType.ERROR)
                         .withHeader(Token.HEADER, token).noHeaders()
@@ -142,7 +148,6 @@ public class WebSocketEventService {
                         .withType(MessageType.NO_ERROR)
                         .withHeader(Token.HEADER, token).noHeaders()
                         .noBody()));
-
     }
 
     /**
@@ -177,14 +182,14 @@ public class WebSocketEventService {
      */
     private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCtsResource(final String token) {
         return Flow.<WebSocketMessage>create()
-                // Connect each CTS message with a processed leafResource or error
+                // Connect each CTSR message with a processed leafResource or error
                 .zip(this.createResourceSource(token))
 
-                // Drop the CTS message, we don't care about it's contents beyond the MessageType
+                // Drop the CTSR message, we don't care about it's contents beyond the MessageType
                 .map(Pair::second)
 
                 // Connect to the audit topic kafka stream for resources returned to the client
-                // Each filtered resource request is audited as soon as we receive a CTS message
+                // Each filtered resource request is audited as soon as we receive a CTSR message
                 // for it from the client (before the resource is returned to the client)
                 .alsoTo(Flow.<AuditableWebSocketMessage>create()
                         .map(AuditableWebSocketMessage::getAuditSuccessPair)

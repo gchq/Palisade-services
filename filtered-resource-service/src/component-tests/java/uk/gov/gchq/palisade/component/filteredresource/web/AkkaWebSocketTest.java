@@ -62,6 +62,7 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,12 +179,11 @@ class AkkaWebSocketTest {
                 .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
 
         assertThat(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS))
-                .hasSize(N_MESSAGES)
+                .hasSize(N_MESSAGES + 1)
                 // Assert PING -> PONG
-                .allSatisfy(message -> assertThat(message)
+                .allSatisfy((WebSocketMessage message) -> assertThat(message)
                         .extracting(WebSocketMessage::getType)
-                        .isIn(MessageType.PONG, MessageType.COMPLETE));
-
+                        .isIn(MessageType.PONG, MessageType.NO_ERROR, MessageType.COMPLETE));
         // Nothing should have been audited
         assertThat(auditedResources.get()).isEmpty();
     }
@@ -229,13 +229,21 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
         assertThat(results)
-                .hasSize(N_MESSAGES);
+                .hasSize(N_MESSAGES + 1);
+
+        assertThat(results.getLast())
+                .as("Assert that the last message is NO_ERROR")
+                .extracting(WebSocketMessage::getType)
+                .isEqualTo(MessageType.NO_ERROR);
+        results.removeLast();
 
         // Assert CTS -> COMPLETE for last messages
         assertThat(results.getLast())
+                .as("Assert that the last message is COMPLETE")
                 .extracting(WebSocketMessage::getType)
                 .isEqualTo(MessageType.COMPLETE);
         results.removeLast();
+
         assertThat(results)
                 .allSatisfy(message -> {
                     // Assert CTS -> RESOURCE for not-last messages
@@ -302,7 +310,7 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         List<WebSocketMessage> results = sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS);
         assertThat(results)
-                .hasSize(N_MESSAGES * 2);
+                .hasSize((N_MESSAGES * 2) + 1);
 
         // De-interleave the two lists
         // There is no guarantee that messages of different types are strictly ordered compared to one another, but messages of the same type are
