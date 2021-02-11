@@ -27,10 +27,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
- * Static configuration for kafka key/value serialisers/deserialisers
- * - Each input has a pair of key/value deserialisers
- * - Each output has a pair of key/value serialisers
- * In general, the keys are not used, so the choice of serialiser is not important
+ * Static configuration for kafka key/value serializers/deserializers
+ * - Each input has a pair of key/value deserializers
+ * - Each output has a pair of key/value serializers
+ * In general, the keys are not used, so the choice of serializer is not important
  */
 public final class TestSerDesConfig {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -41,18 +41,18 @@ public final class TestSerDesConfig {
     }
 
     /**
-     * Kafka key deserialiser for upstream messages coming in as input
+     * Kafka key deserializer for upstream messages coming in as input
      *
-     * @return an appropriate key deserialiser for the topic's message content
+     * @return an appropriate key deserializer for the topic's message content
      */
     public static Deserializer<String> requestKeyDeserializer() {
         return new StringDeserializer();
     }
 
     /**
-     * Kafka value deserialiser for upstream messages coming in as input
+     * Kafka value deserializer for upstream messages coming in as input
      *
-     * @return an appropriate value deserialiser for the topic's message content
+     * @return an appropriate value deserializer for the topic's message content
      */
     public static Deserializer<PalisadeSystemResponse> requestValueDeserializer() {
         return (String ignored, byte[] palisadeResponse) -> {
@@ -65,18 +65,18 @@ public final class TestSerDesConfig {
     }
 
     /**
-     * Kafka key deserialiser for upstream messages coming in as input
+     * Kafka key deserializer for upstream messages coming in as input
      *
-     * @return an appropriate key deserialiser for the topic's message content
+     * @return an appropriate key deserializer for the topic's message content
      */
     public static Deserializer<String> errorKeyDeserializer() {
         return new StringDeserializer();
     }
 
     /**
-     * Kafka value deserialiser for upstream messages coming in as input
+     * Kafka value deserializer for upstream messages coming in as input
      *
-     * @return an appropriate value deserialiser for the topic's message content
+     * @return an appropriate value deserializer for the topic's message content
      */
     public static Deserializer<AuditErrorMessage> errorValueDeserializer() {
         return (String ignored, byte[] auditErrorMessage) -> {
