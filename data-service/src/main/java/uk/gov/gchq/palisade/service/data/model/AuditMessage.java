@@ -19,12 +19,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Context;
 import uk.gov.gchq.palisade.Generated;
 import uk.gov.gchq.palisade.exception.PalisadeRuntimeException;
-
-import javax.annotation.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

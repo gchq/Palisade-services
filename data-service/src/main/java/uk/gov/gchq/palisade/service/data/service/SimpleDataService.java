@@ -74,7 +74,7 @@ public class SimpleDataService implements DataService {
                         .withUser(entity.getUser())
                         .withContext(entity.getContext())
                         .withRules(entity.getRules())
-                ).orElseThrow(() -> new ForbiddenException( String.format("There is no data for the request for token %s and resource %s" ,dataRequest.getToken(), dataRequest.getLeafResourceId())))
+                ).orElseThrow(() -> new ForbiddenException(String.format("There is no data for the request, with token %s and resource %s", dataRequest.getToken(), dataRequest.getLeafResourceId())))
         );
     }
 
@@ -82,9 +82,9 @@ public class SimpleDataService implements DataService {
      * Includes the resources into the OutputStream that is to be provided to the client
      *
      * @param authorisedDataRequest the information for the resources in the context of the request
-     * @param out                an {@link OutputStream} to write the stream of resources to (after applying rules)
-     * @param recordsProcessed   number of records that have been processed
-     * @param recordsReturned    number of records that have been returned
+     * @param out                   an {@link OutputStream} to write the stream of resources to (after applying rules)
+     * @param recordsProcessed      number of records that have been processed
+     * @param recordsReturned       number of records that have been returned
      * @return true if indicating that the process has been successful
      */
     public CompletableFuture<Boolean> read(final AuthorisedDataRequest authorisedDataRequest, final OutputStream out,

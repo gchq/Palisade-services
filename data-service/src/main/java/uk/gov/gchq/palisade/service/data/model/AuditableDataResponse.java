@@ -15,9 +15,9 @@
  */
 package uk.gov.gchq.palisade.service.data.model;
 
-import uk.gov.gchq.palisade.Generated;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
+import uk.gov.gchq.palisade.Generated;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -26,12 +26,14 @@ import java.util.StringJoiner;
 /**
  * The class contains the audit message from the processing of the request.  This will be a {@link AuditSuccessMessage}
  * or possibly an {@link AuditErrorMessage} message generated in the processing of the request.
- * */
+ */
 public final class AuditableDataResponse {
 
     private final String token;
-    private final @Nullable AuditSuccessMessage auditSuccessMessage;
-    private final @Nullable AuditErrorMessage auditErrorMessage;
+    private final @Nullable
+    AuditSuccessMessage auditSuccessMessage;
+    private final @Nullable
+    AuditErrorMessage auditErrorMessage;
 
 
     private AuditableDataResponse(
@@ -43,8 +45,6 @@ public final class AuditableDataResponse {
                 .orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
         this.auditSuccessMessage = auditSuccessMessage;
         this.auditErrorMessage = auditErrorMessage;
-
-
     }
 
     @Generated
@@ -71,17 +71,18 @@ public final class AuditableDataResponse {
 
         /**
          * The starter method for the Builder class.
-         * *
+         *
          * @return the composed immutable object
          */
         public static IToken create() {
-            return  token ->  success -> error ->  new AuditableDataResponse(token, success, error);
+            return token -> success -> error -> new AuditableDataResponse(token, success, error);
         }
 
         /**
          * Adds the token to the response
          */
         public interface IToken {
+
             /**
              * Adds the token to the response
              *
@@ -95,6 +96,7 @@ public final class AuditableDataResponse {
          * Adds the auditSuccessMessage for the response.
          */
         public interface ISuccess {
+
             /**
              * Adds the AuditSuccessMessage for the response.
              *
@@ -102,21 +104,20 @@ public final class AuditableDataResponse {
              * @return interface {@link IError} for the next step in the build.
              */
             IError withSuccessMessage(AuditSuccessMessage auditSuccessMessage);
-
         }
 
         /**
          * Adds the attributes for the response.
          */
         public interface IError {
+
             /**
-             * Adds the AuditErrorMessage for the response.
+             * Adds the AuditErrorMessage to the response.
              *
              * @param auditErrorMessage error message for the request.
              * @return class {@link AuditableDataResponse} for the final step in the build.
              */
             AuditableDataResponse withAuditErrorMessage(AuditErrorMessage auditErrorMessage);
-
 
             /**
              * @return class {@link AuditableDataResponse} that does not have an {@link AuditErrorMessage}
