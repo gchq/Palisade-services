@@ -38,7 +38,10 @@ class UUIDPalisadeServiceTest extends CommonTestData {
 
         //Then the token is a valid uuid
         //UUID.fromString has its own error handling, such as throw new IllegalArgumentException so no extra validation checking is required here
-        assertThat(UUID.fromString(token)).isInstanceOf(UUID.class)
+        assertThat(UUID.fromString(token))
+                .as("Check the class of the token")
+                .isInstanceOf(UUID.class)
+                .as("Check the value of the token")
                 .isEqualTo(COMMON_UUID);
     }
 }

@@ -33,7 +33,6 @@ import uk.gov.gchq.palisade.service.palisade.model.TokenRequestPair;
 import uk.gov.gchq.palisade.service.palisade.service.PalisadeService;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -72,7 +71,9 @@ class PalisadeServiceComponentTest extends CommonTestData {
         //UUID.fromString contains its own uuid validation and will throw an error if an incorrect UUID is returned
         UUID uuid = UUID.fromString(token.join());
         assertThat(uuid)
+                .as("Check the uuid value is not null")
                 .isNotNull()
+                .as("Check the uuid is of type UUID class")
                 .isInstanceOf(UUID.class);
 
         // Short grace period if the message hasn't been sent to the sink yet
@@ -81,8 +82,9 @@ class PalisadeServiceComponentTest extends CommonTestData {
         }
         AuditablePalisadeSystemResponse auditableResponse = AuditablePalisadeSystemResponse.Builder.create().withPalisadeResponse(SYSTEM_RESPONSE);
         assertThat(sinkCollection)
-                .hasSize(1)
                 .usingRecursiveComparison()
-                .isEqualTo(List.of(new TokenRequestPair(uuid.toString(), auditableResponse)));
+                .asList()
+                .as("Check the list contains 1 TokenRequestPair containing the token and AuditablePalisadeSystemResponse")
+                .containsOnly(new TokenRequestPair(uuid.toString(), auditableResponse));
     }
 }

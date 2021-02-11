@@ -29,7 +29,6 @@ import uk.gov.gchq.palisade.service.palisade.model.PalisadeClientRequest;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PalisadeClientRequestTest.class)
@@ -47,28 +46,15 @@ class PalisadeClientRequestTest extends CommonTestData {
      *                     This equates to a failure to serialize or deserialize the string.
      */
     @Test
-    void testPalisadeRequestSerialisingAndDeserialising() throws IOException {
+    void testPalisadeRequestSerializingAndDeserializing() throws IOException {
 
         JsonContent<PalisadeClientRequest> requestJsonContent = jsonTester.write(PALISADE_REQUEST);
 
         ObjectContent<PalisadeClientRequest> requestObjectContent = jsonTester.parse(requestJsonContent.getJson());
         PalisadeClientRequest palisadeClientRequestObject = requestObjectContent.getObject();
 
-        assertAll("PalisadeClientRequest Serialising and Deseralising Comparison",
-                () -> assertAll("PalisadeClientRequest Serialising Compared To String",
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.userId").isEqualTo("testUserId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.resourceId").isEqualTo("/test/resourceId"),
-                        () -> assertThat(requestJsonContent).extractingJsonPathStringValue("$.context.purpose").isEqualTo("testContext")
-                ),
-                () -> assertAll("PalisadeClientRequest Deserialising Compared To Object",
-                        () -> assertThat(palisadeClientRequestObject.getUserId()).isEqualTo(PALISADE_REQUEST.getUserId()),
-                        () -> assertThat(palisadeClientRequestObject.getResourceId()).isEqualTo(PALISADE_REQUEST.getResourceId()),
-                        () -> assertThat(palisadeClientRequestObject.getContext()).isEqualTo(PALISADE_REQUEST.getContext())
-                ),
-                () -> assertAll("Object Comparison",
-                        //compares the two objects using the objects equal method
-                        () -> assertThat(palisadeClientRequestObject).usingRecursiveComparison().isEqualTo(PALISADE_REQUEST)
-                )
-        );
+        assertThat(palisadeClientRequestObject).usingRecursiveComparison()
+                .as("Recursively compare the PalisadeClientRequest object")
+                .isEqualTo(PALISADE_REQUEST);
     }
 }
