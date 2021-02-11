@@ -52,7 +52,7 @@ been requested and prepared in the initial request to Palisade services.
 
 ## Example JSON Request
 ```
-curl -X POST data-dervcie/data/user  -H "content-type: application/json" --data \
+curl -X POST data-service/read/chunked  -H "content-type: application/json" --data \
 '{
    "token": "test-token",
    "leafResourceId": "test-leafResourceId"

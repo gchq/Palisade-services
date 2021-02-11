@@ -41,7 +41,7 @@ import java.io.OutputStream;
  * resource request and will return a data stream of the response data.
  */
 @RestController
-@RequestMapping(path = "/data")
+@RequestMapping(path = "/")
 public class DataController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
