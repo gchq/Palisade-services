@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -172,7 +173,7 @@ public final class SerDesConfig {
         File directory = new File(configProperties.getErrorDirectory());
         File parent = directory.getAbsoluteFile().getParentFile();
         File timestampedFile = new File(parent, fileName);
-        try (FileWriter fileWriter = new FileWriter(timestampedFile, Charset.defaultCharset(), !timestampedFile.createNewFile())) {
+        try (FileWriter fileWriter = new FileWriter(timestampedFile, StandardCharsets.UTF_8, !timestampedFile.createNewFile())) {
             fileWriter.write(failedAuditString);
             LOGGER.warn("Failed to deserialize the '{}' audit message. Created file {}", prefix, timestampedFile);
         } catch (IOException ex) {

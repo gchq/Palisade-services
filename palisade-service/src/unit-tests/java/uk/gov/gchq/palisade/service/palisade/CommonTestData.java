@@ -30,7 +30,7 @@ public class CommonTestData {
     public static final String RESOURCE_ID = "/test/resourceId";
     public static final Map<String, String> CONTEXT = Collections.singletonMap("purpose", "testContext");
     public static final Map<String, Object> ATTRIBUTES = new HashMap<>();
-    public static final Throwable ERROR = new Throwable("An error");
+    public static final Throwable ERROR = new Throwable("An error was thrown in the Palisade-Service");
     public static final PalisadeClientRequest PALISADE_REQUEST;
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE;
     public static final AuditablePalisadeSystemResponse AUDITABLE_PALISADE_REQUEST;
