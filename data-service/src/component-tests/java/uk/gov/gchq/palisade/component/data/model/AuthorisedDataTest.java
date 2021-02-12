@@ -16,47 +16,34 @@
 package uk.gov.gchq.palisade.component.data.model;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import org.springframework.boot.test.json.ObjectContent;
-import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
-
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUTHORISED_DATA;
 
-@JsonTest
-@ContextConfiguration(classes = {DataRequestTest.class})
 class AuthorisedDataTest {
 
-    @Autowired
-    private JacksonTester<AuthorisedDataRequest> jacksonTester;
-
     /**
-     * Create the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
-     *
-     * @throws IOException throws if the {@link AuthorisedDataRequest} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     * Creates an {@code AuthorisedDataRequest} for a successful request using the class's Builder and then
+     * compares it to the original object.
      */
     @Test
-    void testDataRequestReaderSerialisingAndDeserialising() throws IOException {
-        JsonContent<AuthorisedDataRequest> dataResponseJsonContent = jacksonTester.write(AUTHORISED_DATA);
-        ObjectContent<AuthorisedDataRequest> dataResponseObjectContent = jacksonTester.parse(dataResponseJsonContent.getJson());
-        AuthorisedDataRequest authorisedDataObjectContentObject = dataResponseObjectContent.getObject();
+    void testDataRequestReaderBuilder()  {
+        AuthorisedDataRequest authorisedDataObjectContentObject = AuthorisedDataRequest.Builder.create()
+                .withResource(AUTHORISED_DATA.getResource())
+                .withUser(AUTHORISED_DATA.getUser())
+                .withContext(AUTHORISED_DATA.getContext())
+                .withRules(AUTHORISED_DATA.getRules());
 
         assertAll("ObjectComparison",
-                () -> assertThat(authorisedDataObjectContentObject).as("Comparison assertion using the AuthorisedData's equals")
+                () -> assertThat(authorisedDataObjectContentObject)
+                        .as("Comparison assertion using the AuthorisedData's equals")
                         .isEqualTo(AUTHORISED_DATA),
-                () -> assertThat(authorisedDataObjectContentObject).as("Comparison assertion using all of the AuthorisedData's components recursively")
-                        .usingRecursiveComparison()
-                        .isEqualTo(AUTHORISED_DATA)
+                () -> assertThat(authorisedDataObjectContentObject)
+                        .as("Comparison assertion using all of the AuthorisedData's components recursively")
+                        .usingRecursiveComparison().isEqualTo(AUTHORISED_DATA)
         );
     }
 
