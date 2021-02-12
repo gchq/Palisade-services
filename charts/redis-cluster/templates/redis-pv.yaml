@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-{{- if .Values.global.persistence.statefulSet.pv.enabled }}
+{{- if .Values.global.persistence.statefulset.pv.enabled }}
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis-cluster.fullname" . }}
-{{- $config := .Values.global.persistence.redisCluster }}
+{{- $config := (index $.Values.global.persistence "redis-cluster") }}
 {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
 {{- if eq $provisioning "static" }}
 {{- $sc := pluck .Values.global.hosting $config.storageClassName | first | default $config.storageClassName._default }}

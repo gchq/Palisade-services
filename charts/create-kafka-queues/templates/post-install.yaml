@@ -43,7 +43,7 @@ spec:
         command: ["/bin/bash", "/bin/create-topics.sh" ]
         env:
         - name: ZOOKEEPER
-          value: {{ .Values.global.zookeeperConnectString | quote }}
+          value: {{ .Values.exports.zookeeper | quote }}
         {{- range $key, $val := .Values.kafkaCreateTopics }}
         - name: {{ printf "KAFKATOPIC%d" $key }}
           value: {{ printf "%s %s %s" $val.name ($val.partitions | toString) ($val.replicationFactor | toString)  }}

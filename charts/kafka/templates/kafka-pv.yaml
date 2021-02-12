@@ -14,7 +14,7 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- $kafkaname := include "kafka.fullname" . }}
-{{- if .Values.global.persistence.statefulSet.pv.enabled }}
+{{- if .Values.global.persistence.statefulset.pv.enabled }}
 {{- $config := .Values.global.persistence.kafka }}
 {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
 {{- if eq $provisioning "static" }}
