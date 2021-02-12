@@ -100,7 +100,6 @@ public class AuditMessage {
         this.resourceId = resourceId;
         this.context = context;
 
-        //
         this.attributes = Optional.ofNullable(attributes).orElseGet(HashMap::new);
         this.timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 

@@ -18,6 +18,8 @@ package uk.gov.gchq.palisade.service.data.service;
 
 import uk.gov.gchq.palisade.reader.common.DataReader;
 import uk.gov.gchq.palisade.service.Service;
+import uk.gov.gchq.palisade.service.data.exception.ForbiddenException;
+import uk.gov.gchq.palisade.service.data.exception.ReadException;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
@@ -41,6 +43,7 @@ public interface DataService extends Service {
      * @param request the client's request for a leaf resource and their unique request token
      * @return rules apply when accessing the data, returned as a {@link AuthorisedDataRequest} to pass to the
      * data-reader and null if there is no data
+     * @throws ForbiddenException if there is no authorised data for the request
      */
     CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest request);
 
@@ -52,6 +55,7 @@ public interface DataService extends Service {
      * @param recordsProcessed number of records that have been processed
      * @param recordsReturned  number of records that have been returned
      * @return boolean of true for a successful completion
+     * @throws ReadException if there is a failure in the reading of the stream
      */
     CompletableFuture<Boolean> read(final AuthorisedDataRequest request, final OutputStream out, final AtomicLong recordsProcessed, final AtomicLong recordsReturned);
 }

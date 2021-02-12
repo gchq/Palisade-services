@@ -64,6 +64,7 @@ public class SimpleDataService implements DataService {
      *
      * @param dataRequest data provided by the client for requesting the resource
      * @return reference to the resources that are to be returned to client
+     * @throws ForbiddenException if there is no authorised data for the request
      */
     public CompletableFuture<AuthorisedDataRequest> authoriseRequest(final DataRequest dataRequest) {
         LOGGER.debug("Querying persistence for token {} and resource {}", dataRequest.getToken(), dataRequest.getLeafResourceId());
@@ -86,6 +87,7 @@ public class SimpleDataService implements DataService {
      * @param recordsProcessed      number of records that have been processed
      * @param recordsReturned       number of records that have been returned
      * @return true if indicating that the process has been successful
+     * @throws ReadException if there is a failure during reading of the stream
      */
     public CompletableFuture<Boolean> read(final AuthorisedDataRequest authorisedDataRequest, final OutputStream out,
                                            final AtomicLong recordsProcessed, final AtomicLong recordsReturned) {
