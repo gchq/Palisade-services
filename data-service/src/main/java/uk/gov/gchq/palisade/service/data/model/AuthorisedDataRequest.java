@@ -136,7 +136,7 @@ public final class AuthorisedDataRequest {
              * Adds the rules to apply to the resource
              *
              * @param rules that are to apply to the resource
-             * @return interface {@link AuthorisedDataRequest} for the completed class from the builder
+             * @return the completed class from the builder
              */
             AuthorisedDataRequest withRules(Rules<?> rules);
 

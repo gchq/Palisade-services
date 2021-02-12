@@ -80,7 +80,7 @@ public final class DataRequest {
          */
         public interface IToken {
             /**
-             * Adds the token to the request
+             * Adds the token to the message
              *
              * @param token the client's unique token
              * @return interface {@link ILeafResourceId} for the next step in the build.
@@ -96,7 +96,7 @@ public final class DataRequest {
              * Adds the leaf resource id to the request
              *
              * @param leafResourceId resource ID for the request.
-             * @return the completed DataRequest object
+             * @return the completed {@code DataRequest} object
              */
             DataRequest withLeafResourceId(String leafResourceId);
         }
