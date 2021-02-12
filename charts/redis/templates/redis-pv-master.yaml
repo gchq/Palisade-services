@@ -14,7 +14,7 @@
 
 {{- $namespace := include "palisade.namespace" . }}
 {{- $redisname := include "redis.fullname" . }}
-{{- if .Values.global.persistence.statefulset.pv.enabled }}
+{{- if (index .Values.global.persistence "stateful-set").pv.enabled }}
 {{- $config := (index $.Values.global.persistence "redis-master") }}
 {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
 {{- if eq $provisioning "static" }}
