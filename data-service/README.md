@@ -19,7 +19,7 @@ limitations under the License.
 
 ## Overview
 
-The core API for the data service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.
+The core API for the Data Service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.
 
 The client request will contain the token and resource id that is used to uniquely identify this resource request.
 
