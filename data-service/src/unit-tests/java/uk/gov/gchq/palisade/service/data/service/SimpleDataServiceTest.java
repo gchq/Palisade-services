@@ -90,7 +90,7 @@ class SimpleDataServiceTest {
         }
     }
 
-    public static final Rules<Serializable> RULES = new Rules<Serializable>().addRule(RULE_MESSAGE, new PassThroughRule<Serializable>());
+    public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
 
     // Mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
