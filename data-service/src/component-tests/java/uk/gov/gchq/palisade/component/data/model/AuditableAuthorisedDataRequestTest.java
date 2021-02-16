@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
-import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUTHORISED_DATA;
 
 class AuditableAuthorisedDataRequestTest {
 
@@ -36,7 +35,7 @@ class AuditableAuthorisedDataRequestTest {
 
         AuditableAuthorisedDataRequest auditableAuthorisedDataRequestObject = AuditableAuthorisedDataRequest.Builder.create()
                 .withDataRequest(AUDITABLE_DATA_REQUEST.getDataRequest())
-                .withAuthorisedData(AUTHORISED_DATA);
+                .withAuthorisedData(AUDITABLE_DATA_REQUEST.getAuthorisedDataRequest());
 
         assertAll("ObjectComparison",
                 () -> assertThat(auditableAuthorisedDataRequestObject)
@@ -65,11 +64,24 @@ class AuditableAuthorisedDataRequestTest {
                         .as("Comparison using the AuditableDataRequest's equals method")
                         .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
 
-                () -> assertThat(auditableAuthorisedDataRequestObject)
-                        .as("Comparison of content using all of the AuditableDataRequest's components recursively")
+                () -> assertThat(auditableAuthorisedDataRequestObject
+                        .getAuditErrorMessage()
+                        .getError())
+                        .as("Comparison of content using all of the AuditableDataRequest's components recursively excluding the error")
                         .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(Throwable.class)
-                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
+                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
+
+                () -> assertThat(auditableAuthorisedDataRequestObject
+                        .getAuditErrorMessage()
+                        .getError()
+                        .getMessage())
+                        .as("Assertion check of the error message")
+                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR
+                                .getAuditErrorMessage()
+                                .getError()
+                                .getMessage())
+
 
         );
     }
