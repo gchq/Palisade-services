@@ -21,7 +21,7 @@ package uk.gov.gchq.palisade.service.filteredresource.model;
  * The client is expected to only send:
  * <ul>
  * <li> {@link MessageType#PING} - is the server alive? reply with a {@link MessageType#PONG}
- * <li> {@link MessageType#CTS} - clear to send next {@link MessageType#RESOURCE}, or {@link MessageType#COMPLETE}
+ * <li> {@link MessageType#CTS} - clear to send next {@link MessageType#RESOURCE}, {@link MessageType#ERROR} or {@link MessageType#COMPLETE}
  * </ul>
  * The server is expected to only send:
  * <ul>
@@ -35,11 +35,12 @@ public enum MessageType {
 
     // Client
     PING, // -> PONG
-    CTS, // -> RESOURCE|COMPLETE
+    CTS, // -> RESOURCE|ERROR|COMPLETE
 
     // Server
     PONG,
     RESOURCE,
     ERROR,
     COMPLETE
+
 }
