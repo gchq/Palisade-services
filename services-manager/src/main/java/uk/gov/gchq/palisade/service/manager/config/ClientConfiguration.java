@@ -25,8 +25,8 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Client Configuration is used to resolve services from eureka or via the relevant application-yaml
- * for classes such as {@link uk.gov.gchq.palisade.service.manager.service.ManagedService} so that metrics such as health can be observed.
+ * Client Configuration is used to resolve service URIs from service names for classes such as
+ * {@link uk.gov.gchq.palisade.service.manager.service.ManagedService} to monitor application health.
  */
 public class ClientConfiguration {
     private Map<String, List<URI>> client;

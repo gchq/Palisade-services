@@ -70,8 +70,7 @@ public class ApplicationConfiguration {
     }
 
     /**
-     * Used for resolving *all* service URIs with eureka or through yaml
-     * This behaviour seems to be a little beyond feign's capabilities
+     * Used for resolving *all* service URIs for a given service name
      *
      * @return A WebConfiguration capable of resolving a service name to a *collection* of URIs
      */
@@ -121,7 +120,7 @@ public class ApplicationConfiguration {
      * A mapping from service names to ManagedServices, providing a REST client abstraction
      *
      * @param client       a feign client with all available RESTful interfaces (health, logging changes, etc)
-     * @param clientConfig a mapping from service names to URIs through either eureka or static yaml config
+     * @param clientConfig a mapping from service names to URIs
      * @return a ManagedService factory requiring a service name and producing a REST client for a number of service instances
      */
     @Bean("managedServiceProducer")

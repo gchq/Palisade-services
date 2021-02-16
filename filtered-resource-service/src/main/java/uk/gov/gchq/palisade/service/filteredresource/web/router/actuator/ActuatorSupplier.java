@@ -21,7 +21,9 @@ import akka.http.javadsl.server.Route;
 import java.util.function.Supplier;
 
 /**
- * Interface for supplying akka routes
+ * Interface for supplying akka routes.
+ * Functionally equivalent to {@link uk.gov.gchq.palisade.service.filteredresource.web.router.RouteSupplier}
+ * but allows Spring to differentiate between routes under localhost/... and actuators under localhost/actuator/...
  */
 public interface ActuatorSupplier extends Supplier<Route> {
     // Marker interface for Spring autowiring
