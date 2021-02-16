@@ -126,7 +126,7 @@ class SimpleDataServiceTest {
         final String testData = testResponseMessage;
 
         @Override
-        public void close() throws IOException {
+        public void close() {
 
         }
 

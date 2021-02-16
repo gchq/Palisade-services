@@ -41,9 +41,11 @@ class AuditableAuthorisedDataRequestTest {
                 () -> assertThat(auditableAuthorisedDataRequestObject)
                         .as("Comparison assertion using the AuditableDataRequest's equals")
                         .isEqualTo(AUDITABLE_DATA_REQUEST),
+
                 () -> assertThat(auditableAuthorisedDataRequestObject)
                         .as("Comparison assertion using all of the AuditableDataRequest's components recursively")
-                        .usingRecursiveComparison().isEqualTo(AUDITABLE_DATA_REQUEST)
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUDITABLE_DATA_REQUEST)
         );
     }
 
@@ -61,9 +63,13 @@ class AuditableAuthorisedDataRequestTest {
                 () -> assertThat(auditableAuthorisedDataRequestObject)
                         .as("Comparison using the AuditableDataRequest's equals method")
                         .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
+
                 () -> assertThat(auditableAuthorisedDataRequestObject)
                         .as("Comparison of content using all of the AuditableDataRequest's components recursively")
-                        .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class).isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(Throwable.class)
+                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
+
         );
     }
 }
