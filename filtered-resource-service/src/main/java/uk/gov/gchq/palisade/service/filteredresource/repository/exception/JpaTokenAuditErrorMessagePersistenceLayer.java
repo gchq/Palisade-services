@@ -15,6 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
+import akka.japi.Pair;
+
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
@@ -27,7 +29,6 @@ import java.util.concurrent.Executor;
  * Persist and retrieve {@link AuditErrorMessage#getError()} for a given request token.
  */
 public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {
-
     private final TokenAuditErrorMessageRepository repository;
     private final Executor executor;
 
@@ -49,14 +50,10 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     }
 
     @Override
-    public CompletableFuture<Optional<AuditErrorMessage>> popAuditErrorMessage(final String token) {
+    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
         // Get the exception from the repository
         return CompletableFuture.supplyAsync(() -> repository.findFirstByToken(token), executor)
                 // Then delete the exception from the repositry
-                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> {
-                    entityOptional.ifPresent(entity -> repository.deleteByTokenAndAuditErrorMessage(entity.getToken(), entity.getAuditErrorMessage()));
-                    // Return the exception from the entity
-                    return entityOptional.map((TokenAuditErrorMessageEntity::getAuditErrorMessage));
-                });
+                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(repository, entity, executor))));
     }
 }

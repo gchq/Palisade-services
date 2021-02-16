@@ -16,8 +16,11 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.repository;
 
+import akka.japi.Pair;
+
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.filteredresource.repository.exception.CrudRepositoryPop;
 import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 
 import java.util.HashMap;
@@ -37,9 +40,14 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
     }
 
     @Override
-    public CompletableFuture<Optional<AuditErrorMessage>> popAuditErrorMessage(final String token) {
-        var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
-        this.tokenAuditErrorMessage.remove(token);
-        return CompletableFuture.completedFuture(Optional.ofNullable(auditErrorMessage));
+    public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
+        return null;
     }
+
+//    @Override
+//    public CompletableFuture<Optional<AuditErrorMessage>> popAuditErrorMessage(final String token) {
+//        var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
+//        this.tokenAuditErrorMessage.remove(token);
+//        return CompletableFuture.completedFuture(Optional.ofNullable(auditErrorMessage));
+//    }
 }

@@ -25,7 +25,7 @@ import akka.http.javadsl.model.ws.WebSocketRequest;
 import akka.http.javadsl.model.ws.WebSocketUpgradeResponse;
 import akka.http.scaladsl.model.ws.TextMessage.Strict;
 import akka.japi.Pair;
-import akka.kafka.ConsumerMessage.CommittableOffset;
+import akka.kafka.ConsumerMessage.Committable;
 import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.Context;
-import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
@@ -51,18 +50,17 @@ import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.TokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetController.TokenOffsetCommand;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.service.WebSocketEventService;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.AuditServiceSinkFactory;
+import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.ErrorSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.stream.config.AkkaRunnableGraph.FilteredResourceSourceFactory;
 import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,23 +97,25 @@ class AkkaWebSocketTest {
             .withResourceId("/test")
             .withContext(new Context())
             .withResource(testResource);
-    final CommittableOffset mockCommittable = Mockito.mock(CommittableOffset.class);
+    final Committable mockCommittable = Mockito.mock(Committable.class);
 
     // WebSocket test objects
     final TokenOffsetPersistenceLayer persistenceLayer = new MapTokenOffsetPersistenceLayer();
-    final TokenAuditErrorMessagePersistenceLayer tokenAuditErrorMessagePersistenceLayer = new MapTokenAuditErrorMessagePersistenceLayer();
     final ActorRef<TokenOffsetCommand> offsetController = TokenOffsetController.create(persistenceLayer);
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
             .take(N_MESSAGES - 1)
             .mapMaterializedValue(notUsed -> Consumer.createNoopControl());
+    final ErrorSourceFactory errorSourceFactory = (token) -> Source.empty();
+
+
     // This reference is updated by our audit service and wiped clean in the setUp() method before each test
     final AtomicReference<List<FilteredResourceRequest>> auditedResources = new AtomicReference<>(Collections.emptyList());
     final AuditServiceSinkFactory sinkFactory = token -> Sink.foreach(pair -> auditedResources
-            .updateAndGet(list -> Stream.of(list, Collections.singletonList(pair.first()))
+            .updateAndGet(list -> Stream.of(list, Collections.singletonList(pair.getFilteredResourceRequest()))
                     .flatMap(List::stream)
                     .collect(Collectors.toList())));
     // Finally, create the websocketEventService from its parts
-    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory, tokenAuditErrorMessagePersistenceLayer);
+    final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory, errorSourceFactory);
 
     // WebSocket endpoint to be tested
     final WebSocketRouter wsRouter = new WebSocketRouter(websocketEventService, MAPPER);
@@ -183,7 +183,7 @@ class AkkaWebSocketTest {
                 // Assert PING -> PONG
                 .allSatisfy((WebSocketMessage message) -> assertThat(message)
                         .extracting(WebSocketMessage::getType)
-                        .isIn(MessageType.PONG, MessageType.NO_ERROR, MessageType.COMPLETE));
+                        .isIn(MessageType.PONG, MessageType.COMPLETE));
         // Nothing should have been audited
         assertThat(auditedResources.get()).isEmpty();
     }
@@ -197,7 +197,7 @@ class AkkaWebSocketTest {
         // Add a dummy offset to persistence (it is ignored by the mock ResourceSourceFactory function)
         persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test message
-        WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
+        WebSocketMessage wsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
         Source<Message, NotUsed> wsMsgSource = Source.repeat(wsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Sink<Message, CompletionStage<List<WebSocketMessage>>> listSink = Flow.<Message>create().map(this::readTextMessage).toMat(Sink.seq(), Keep.right());
         // Create client Sink/Source Flow (send the payload, collect the responses)
@@ -230,12 +230,6 @@ class AkkaWebSocketTest {
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
         assertThat(results)
                 .hasSize(N_MESSAGES + 1);
-
-        assertThat(results.getLast())
-                .as("Assert that the last message is NO_ERROR")
-                .extracting(WebSocketMessage::getType)
-                .isEqualTo(MessageType.NO_ERROR);
-        results.removeLast();
 
         // Assert CTS -> COMPLETE for last messages
         assertThat(results.getLast())
@@ -275,7 +269,7 @@ class AkkaWebSocketTest {
         persistenceLayer.overwriteOffset(token, 1L);
         // Create payload test messages
         WebSocketMessage pingMsg = WebSocketMessage.Builder.create().withType(MessageType.PING).noHeaders().noBody();
-        WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTSR).noHeaders().noBody();
+        WebSocketMessage ctsMsg = WebSocketMessage.Builder.create().withType(MessageType.CTS).noHeaders().noBody();
         Source<Message, NotUsed> pingMsgSrc = Source.repeat(pingMsg).take(N_MESSAGES).map(this::writeTextMessage);
         Source<Message, NotUsed> ctsMsgSrc = Source.repeat(ctsMsg).take(N_MESSAGES).map(this::writeTextMessage);
         // Interleave PINGs and CTSes

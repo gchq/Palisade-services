@@ -17,13 +17,11 @@
 package uk.gov.gchq.palisade.service.filteredresource.model;
 
 import akka.japi.Pair;
-import akka.kafka.ConsumerMessage.CommittableOffset;
+import akka.kafka.ConsumerMessage.Committable;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import uk.gov.gchq.palisade.Generated;
-
-import java.util.Optional;
 
 /**
  * Collect a {@link WebSocketMessage} prepared to be returned to the client with any other context
@@ -32,14 +30,20 @@ import java.util.Optional;
  */
 public class AuditableWebSocketMessage {
     private final WebSocketMessage websocketMessage;
-    private final Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair;
+    private final Committable committable;
+    private final FilteredResourceRequest filteredResourceRequest;
+    private final AuditErrorMessage auditErrorMessage;
 
     protected AuditableWebSocketMessage(
             final @NonNull WebSocketMessage websocketMessage,
-            final @Nullable Pair<FilteredResourceRequest, CommittableOffset> auditSuccessPair
+            final @NonNull Committable committable,
+            final @Nullable FilteredResourceRequest filteredResourceRequest,
+            final @Nullable AuditErrorMessage auditErrorMessage
     ) {
         this.websocketMessage = websocketMessage;
-        this.auditSuccessPair = auditSuccessPair;
+        this.committable = committable;
+        this.filteredResourceRequest = filteredResourceRequest;
+        this.auditErrorMessage = auditErrorMessage;
     }
 
     @Generated
@@ -48,8 +52,23 @@ public class AuditableWebSocketMessage {
     }
 
     @Generated
-    public Optional<Pair<FilteredResourceRequest, CommittableOffset>> getAuditSuccessPair() {
-        return Optional.ofNullable(auditSuccessPair);
+    public WebSocketMessage getWebsocketMessage() {
+        return websocketMessage;
+    }
+
+    @Generated
+    public Committable getCommittable() {
+        return committable;
+    }
+
+    @Generated
+    public FilteredResourceRequest getFilteredResourceRequest() {
+        return filteredResourceRequest;
+    }
+
+    @Generated
+    public AuditErrorMessage getAuditErrorMessage() {
+        return auditErrorMessage;
     }
 
     /**
@@ -63,7 +82,8 @@ public class AuditableWebSocketMessage {
          * @return the next step in the builder chain
          */
         public static IWebSocketMessage create() {
-            return websocketMessage -> auditableRequest -> new AuditableWebSocketMessage(websocketMessage, auditableRequest);
+            return websocketMessage -> committable -> auditablePair ->
+                    new AuditableWebSocketMessage(websocketMessage, committable, auditablePair.first(), auditablePair.second());
         }
 
         /**
@@ -76,40 +96,31 @@ public class AuditableWebSocketMessage {
              * @param websocketMessage the outbound websocket message
              * @return the next step in the builder
              */
-            IAuditable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
+            ICommittable withWebSocketMessage(@NonNull WebSocketMessage websocketMessage);
+        }
+
+        public interface ICommittable {
+            IAuditable withCommittable(Committable committable);
+
+            default AuditableWebSocketMessage withoutCommittable() {
+                return withCommittable(null).withAuditablePair(Pair.create(null, null));
+            }
         }
 
         /**
          * Compose inbound request data
          */
         public interface IAuditable {
-            /**
-             * Compose inbound request data
-             *
-             * @param auditableRequest a pair of the inbound request and its offset
-             * @return a completed AuditableWebSocketMessage
-             */
-            AuditableWebSocketMessage withAuditablePair(@Nullable Pair<FilteredResourceRequest, CommittableOffset> auditableRequest);
+            AuditableWebSocketMessage withAuditablePair(@NonNull Pair<FilteredResourceRequest, AuditErrorMessage> auditablePair);
 
-            /**
-             * Compose inbound request data
-             *
-             * @param request           the inbound request
-             * @param committableOffset the inbound request's kafka offset to be committed back to kafka once done
-             * @return a completed AuditableWebSocketMessage
-             */
-            default AuditableWebSocketMessage withAuditable(final @NonNull FilteredResourceRequest request, final @NonNull CommittableOffset committableOffset) {
-                return withAuditablePair(Pair.create(request, committableOffset));
+            default AuditableWebSocketMessage withFilteredResourceRequest(final @NonNull FilteredResourceRequest request) {
+                return withAuditablePair(Pair.create(request, null));
             }
 
-            /**
-             * Don't add any audit information (e.g. an {@link AuditableWebSocketMessage} for a {@link MessageType#PING})
-             *
-             * @return a completed AuditableWebSocketMessage
-             */
-            default AuditableWebSocketMessage withoutAuditable() {
-                return withAuditablePair(null);
+            default AuditableWebSocketMessage withAuditErrorMessage(final @NonNull AuditErrorMessage auditErrorMessage) {
+                return withAuditablePair(Pair.create(null, auditErrorMessage));
             }
+
         }
     }
 }

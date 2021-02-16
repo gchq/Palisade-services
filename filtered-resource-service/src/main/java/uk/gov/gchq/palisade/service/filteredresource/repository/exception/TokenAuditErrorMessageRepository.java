@@ -15,12 +15,16 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
+import akka.Done;
 import org.springframework.data.repository.CrudRepository;
+import reactor.core.publisher.Mono;
+import scala.concurrent.Future;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Persist and retrieve {@link AuditErrorMessage}(s) for a given request token.
@@ -48,10 +52,10 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
     Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
 
     /**
-     * Deletes the token and AuditErrorMessage from the backing store
      *
-     * @param token             the unique request token
-     * @param auditErrorMessage the {@link AuditErrorMessage} associated with this token
+     * @param entity
+     * @param executor
+     * @return
      */
-    void deleteByTokenAndAuditErrorMessage(final String token, final AuditErrorMessage auditErrorMessage);
+    Future<Done> asyncDelete(TokenAuditErrorMessageEntity entity, Executor executor);
 }

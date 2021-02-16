@@ -15,6 +15,8 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
+import akka.japi.Pair;
+
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
@@ -41,5 +43,5 @@ public interface TokenAuditErrorMessagePersistenceLayer {
      * @param token the unique request token
      * @return an optional.empty if there are no AuditErrorMessages left, or the throwable exception from the repository
      */
-    CompletableFuture<Optional<AuditErrorMessage>> popAuditErrorMessage(final String token);
+    CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token);
 }
