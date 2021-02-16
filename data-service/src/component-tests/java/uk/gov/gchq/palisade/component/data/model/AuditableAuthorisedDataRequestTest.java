@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST;
 import static uk.gov.gchq.palisade.component.data.common.CommonTestData.AUDITABLE_DATA_REQUEST_WITH_ERROR;
+import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUTHORISED_DATA;
 
 class AuditableAuthorisedDataRequestTest {
 
@@ -35,7 +36,7 @@ class AuditableAuthorisedDataRequestTest {
 
         AuditableAuthorisedDataRequest auditableAuthorisedDataRequestObject = AuditableAuthorisedDataRequest.Builder.create()
                 .withDataRequest(AUDITABLE_DATA_REQUEST.getDataRequest())
-                .withAuthorisedData(AUDITABLE_DATA_REQUEST.getAuthorisedDataRequest());
+                .withAuthorisedData(AUTHORISED_DATA);
 
         assertAll("ObjectComparison",
                 () -> assertThat(auditableAuthorisedDataRequestObject)
