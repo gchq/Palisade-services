@@ -140,28 +140,9 @@ class SimpleDataServiceTest {
         }
     };
 
-    final ResponseWriter errorProneResponseWriter = new ResponseWriter() {
-        final String testData = testResponseMessage;
-
-        @Override
-        public void close() {
-
-        }
-
-        @Override
-        public ResponseWriter write(final OutputStream outputStream) throws IOException {
-            throw new IOException("Something went wrong");
-
-        }
-    };
-
     final DataReaderResponse dataReaderResponse = new DataReaderResponse()
             .message("test message")
             .writer(responseWriter);
-
-    final DataReaderResponse errorDataReaderResponse = new DataReaderResponse()
-            .message("test message")
-            .writer(errorProneResponseWriter);
 
     /**
      * Test for {@link SimpleDataService#authoriseRequest(DataRequest)}.  If the request is found to be

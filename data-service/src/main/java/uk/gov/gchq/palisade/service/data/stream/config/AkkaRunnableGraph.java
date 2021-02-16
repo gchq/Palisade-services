@@ -77,8 +77,7 @@ public class AkkaRunnableGraph {
                             return new ProducerRecord<>(successTopic.getName(), partition, (String) null, (AuditSuccessMessage) tokenMessagePair.second(), headers);
                         })
                         .to(successSink))
-                .to(Flow
-                        .<TokenMessagePair>create()
+                .to(Flow.<TokenMessagePair>create()
                         //for AuditErrorMessage send to the audit-service error topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditErrorMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {

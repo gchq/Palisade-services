@@ -36,7 +36,7 @@ import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 import java.io.OutputStream;
 
 /**
- * Controller for data-service.  Provides the front end RESTFul web service for resources that have already been
+ * Controller for Data Service.  Provides the front end RESTFul web service for resources that have already been
  * registered with the Palisade Service.  The request is in the form of information that will uniquely identify the
  * resource request and will return a data stream of the response data.
  */
