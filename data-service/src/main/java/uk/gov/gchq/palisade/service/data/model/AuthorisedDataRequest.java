@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The AuthorisedDataRequest represents reference for the filtered resource that the user is authorised to retrieve.
- * This will be used to provide the link to the resource that will be forwarded to the user to be streamed.
+ * The AuthorisedDataRequest is the reference for the data that has been requested and prepared for the client.
+ * This will then be used to provide the filtered data based on the rules in place and the context of the request.
  */
 public final class AuthorisedDataRequest {
 

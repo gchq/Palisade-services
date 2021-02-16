@@ -39,7 +39,7 @@ public class AuditableDataService {
     /**
      * AuditableDataService constructor
      *
-     * @param dataService the current Data Service implemetation
+     * @param dataService the current Data Service implementation
      */
     public AuditableDataService(final DataService dataService) {
         this.dataService = dataService;

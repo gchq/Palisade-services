@@ -41,9 +41,11 @@ class AuthorisedDataTest {
                 () -> assertThat(authorisedDataObjectContentObject)
                         .as("Comparison assertion using the AuthorisedData's equals")
                         .isEqualTo(AUTHORISED_DATA),
+
                 () -> assertThat(authorisedDataObjectContentObject)
                         .as("Comparison assertion using all of the AuthorisedData's components recursively")
-                        .usingRecursiveComparison().isEqualTo(AUTHORISED_DATA)
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUTHORISED_DATA)
         );
     }
 

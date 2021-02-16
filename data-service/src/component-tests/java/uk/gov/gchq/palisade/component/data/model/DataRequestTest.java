@@ -52,9 +52,12 @@ class DataRequestTest {
         DataRequest dataRequestMessageObject = dataRequestObjectContent.getObject();
 
         assertAll("ObjectComparison",
-                () -> assertThat(dataRequestMessageObject).as("Comparison assertion using the DataRequest's equals")
+                () -> assertThat(dataRequestMessageObject)
+                        .as("Comparison assertion using the DataRequest's equals")
                         .isEqualTo(DATA_REQUEST),
-                () -> assertThat(dataRequestMessageObject).as("Comparison assertion using all of the DataRequest's components recursively")
+
+                () -> assertThat(dataRequestMessageObject)
+                        .as("Comparison assertion using all of the DataRequest's components recursively")
                         .usingRecursiveComparison()
                         .isEqualTo(DATA_REQUEST)
         );

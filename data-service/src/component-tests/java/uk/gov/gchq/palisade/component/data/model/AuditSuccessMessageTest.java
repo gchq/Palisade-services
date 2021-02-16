@@ -39,7 +39,7 @@ class AuditSuccessMessageTest {
     private JacksonTester<AuditSuccessMessage> jacksonTester;
 
     /**
-     * Creates the object with the builder and then convert to the Json equivalent.
+     * Creates the object with the builder and then converts it to the Json equivalent.
      * Takes the JSON Object, deserialises and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditSuccessMessage} object cannot be converted to a JsonContent.
@@ -55,9 +55,11 @@ class AuditSuccessMessageTest {
                 () -> assertThat(auditSuccessMessageObjectContentObject)
                         .as("Comparison assertion using the AuditSuccessMessage's equals")
                         .isEqualTo(AUDIT_SUCCESS_MESSAGE),
+
                 () -> assertThat(auditSuccessMessageObjectContentObject)
                         .as("Comparison assertion using all of the AuditSuccessMessage's components recursively")
-                        .usingRecursiveComparison().isEqualTo(AUDIT_SUCCESS_MESSAGE)
+                        .usingRecursiveComparison()
+                        .isEqualTo(AUDIT_SUCCESS_MESSAGE)
         );
     }
 }

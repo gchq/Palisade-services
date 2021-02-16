@@ -68,8 +68,7 @@ public class AkkaRunnableGraph {
         Topic errorTopic = topicConfiguration.getTopics().get("error-topic");
 
         return source
-                .alsoTo(Flow
-                        .<TokenMessagePair>create()
+                .alsoTo(Flow.<TokenMessagePair>create()
                         //for AuditSuccessMessage send to the audit-service success topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditSuccessMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
