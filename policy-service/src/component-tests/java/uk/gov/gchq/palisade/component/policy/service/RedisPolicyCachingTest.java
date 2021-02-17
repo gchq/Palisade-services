@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(
         classes = {ApplicationConfiguration.class, CacheAutoConfiguration.class},
@@ -102,8 +103,12 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Test
     void testContextLoads() {
-        assertThat(cacheProxy).isNotNull();
-        assertThat(redisTemplate).isNotNull();
+        assertThat(cacheProxy)
+                .as("Check the caching proxy is not null")
+                .isNotNull();
+        assertThat(redisTemplate)
+                .as("Check the redis template is not null")
+                .isNotNull();
     }
 
     @Test
@@ -117,8 +122,10 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
             // Then
             assertThat(resourceRules)
+                    .as("Check the returned resource rules is not empty")
                     .isPresent()
-                    .get().isNotNull();
+                    .get().as("Check the resource rule is not null")
+                    .isNotNull();
         }
     }
 
@@ -130,7 +137,9 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<Serializable>> recordRules = cacheProxy.getRecordRules("does not exist");
 
         // Then
-        assertThat(recordRules).isEmpty();
+        assertThat(recordRules)
+                .as("Check the returned record rules are empty")
+                .isEmpty();
     }
 
     @Test
@@ -150,8 +159,15 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(systemResource.getId());
 
         // Then the returned policy should have the updated resource rules
-        assertThat(recordRules).isPresent();
-        assertThat(recordRules.get().getRules()).usingRecursiveComparison().isEqualTo(newPolicy.getRules());
+        assertAll(
+                () -> assertThat(recordRules)
+                        .as("Check the returned record rules is not empty")
+                        .isPresent(),
+                () -> assertThat(recordRules).isPresent().get()
+                        .extracting("rules").usingRecursiveComparison()
+                        .as("Recursively check the returned rules")
+                        .isEqualTo(newPolicy.getRules())
+        );
     }
 
     @Test
@@ -166,7 +182,9 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<LeafResource>> recordRules = cacheProxy.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
-        assertThat(recordRules).isEmpty();
+        assertThat(recordRules)
+                .as("Check the returned record rules are empty")
+                .isEmpty();
     }
 
 

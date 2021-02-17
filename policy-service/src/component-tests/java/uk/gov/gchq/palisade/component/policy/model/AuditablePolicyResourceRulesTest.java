@@ -23,6 +23,7 @@ import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
+import uk.gov.gchq.palisade.component.policy.CommonTestData;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_R
  */
 @JsonTest
 @ContextConfiguration(classes = AuditablePolicyResourceRulesTest.class)
-class AuditablePolicyResourceRulesTest {
+class AuditablePolicyResourceRulesTest extends CommonTestData {
 
     @Autowired
     private JacksonTester<AuditablePolicyResourceRules> jsonTester;
@@ -49,78 +50,56 @@ class AuditablePolicyResourceRulesTest {
      * no exception and before the {@code Resource} has been modified.  This is the expected state of the object
      * after a query for the rules applicable to the resource, but before these rules have been applied to the resource.
      * Test involve creating the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserializes and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyResourceRules} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testAuditablePolicyResourceRulesSerialisingAndDeserialising() throws IOException {
-        AuditablePolicyResourceRules auditablePolicyResourceRules = AuditablePolicyResourceRules.Builder.create()
-                .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors();
+    void testAuditablePolicyResourceRulesSerializingAndDeserializing() throws IOException {
 
-        JsonContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesJsonContent = jsonTester.write(auditablePolicyResourceRules);
+        JsonContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesJsonContent = jsonTester.write(POLICY_RESOURCE_RULES);
         ObjectContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesObjectContent = jsonTester.parse(auditablePolicyResourceRulesJsonContent.getJson());
         AuditablePolicyResourceRules auditablePolicyResourceRulesObjectContentObject = auditablePolicyResourceRulesObjectContent.getObject();
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.auditErrorMessage").isNull()
-                ),
 
-
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getPolicyRequest()).isEqualTo(auditablePolicyResourceRules.getPolicyRequest()),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getRules()).isEqualTo(auditablePolicyResourceRules.getRules()),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getAuditErrorMessage()).isNull(),
-                        () -> assertThat(auditablePolicyResourceRules.getAuditErrorMessage()).isNull()
-
-                ),
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceRules),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceRules)
-                )
+        assertAll("AuditablePolicyResourceRules serializing and deserializing comparison",
+                //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
+                        .as("Compare the AuditablePolicyResourceRules objects")
+                        .isEqualTo(POLICY_RESOURCE_RULES),
+                () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
+                        .as("Recursively compare the AuditablePolicyResourceRules object")
+                        .usingRecursiveComparison()
+                        .isEqualTo(POLICY_RESOURCE_RULES)
         );
     }
-
 
     /**
      * Grouped assertion test for a {@link AuditablePolicyResourceRules} which holds a {@code PolicyRequest},
      * has and exception and before the {@code Resource} has been modified.  This is the expected state of the object
      * after a query for the rules applicable to the resource then an error occurs when rules have been applied to the resource.
      * Test involve creating the object with the builder and then convert to the Json equivalent.
-     * Takes the JSON Object, deserialises and tests against the original Object
+     * Takes the JSON Object, deserializes and tests against the original Object
      *
      * @throws IOException throws if the {@link AuditablePolicyResourceRules} object cannot be converted to a JsonContent.
-     *                     This equates to a failure to serialise or deserialise the string.
+     *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testErrorAuditablePolicyResourceRulesSerialisingAndDeserialising() throws IOException {
-        AuditablePolicyResourceRules auditablePolicyResourceRules = AuditablePolicyResourceRules.Builder.create()
-                .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
-        JsonContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesJsonContent = jsonTester.write(auditablePolicyResourceRules);
+    void testErrorAuditablePolicyResourceRulesSerializingAndDeserializing() throws IOException {
+
+        JsonContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesJsonContent = jsonTester.write(POLICY_RESOURCE_RULES_ERROR);
         ObjectContent<AuditablePolicyResourceRules> auditablePolicyResourceRulesObjectContent = jsonTester.parse(auditablePolicyResourceRulesJsonContent.getJson());
         AuditablePolicyResourceRules auditablePolicyResourceRulesObjectContentObject = auditablePolicyResourceRulesObjectContent.getObject();
-        assertAll("AuditSerialisingDeseralisingAndComparison",
-                () -> assertAll("AuditSerialisingComparedToString",
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.policyRequest.userId").isEqualTo("test-user-id"),
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.rules.message").isEqualTo("no rules set"),
-                        () -> assertThat(auditablePolicyResourceRulesJsonContent).extractingJsonPathStringValue("$.auditErrorMessage.userId").isEqualTo("test-user-id")
-                ),
 
-                () -> assertAll("AuditDeserialisingComparedToObject",
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getPolicyRequest()).isEqualTo(auditablePolicyResourceRules.getPolicyRequest()),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getRules()).isEqualTo(auditablePolicyResourceRules.getRules()),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject.getAuditErrorMessage()).isEqualTo(auditablePolicyResourceRules.getAuditErrorMessage())
-                ),
-
-                () -> assertAll("ObjectComparison",
-                        //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject).as("Check using EqualTo").isEqualTo(auditablePolicyResourceRules),
-                        () -> assertThat(auditablePolicyResourceRulesObjectContentObject).as("Check using recursion").usingRecursiveComparison().isEqualTo(auditablePolicyResourceRules)
-                )
+        assertAll("AuditablePolicyResourceRules with error serializing and deserializing comparison",
+                //The reconstructed stack trace wont be exactly the same due to different object hashes so equals is used here
+                () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
+                        .as("Compare the AuditablePolicyResourceRules objects")
+                        .isEqualTo(POLICY_RESOURCE_RULES_ERROR),
+                () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
+                        .as("Recursively compare the AuditablePolicyResourceRules object, ignoring the Throwable value")
+                        .usingRecursiveComparison()
+                        .isEqualTo(POLICY_RESOURCE_RULES_ERROR)
         );
     }
 }

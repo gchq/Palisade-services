@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,14 +69,21 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithAPolicyRequest() throws Exception {
         // When
         when(hierarchyProxy.getResourceRules(any())).thenReturn(RESOURCE_RULES);
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
-        AuditablePolicyResourceRules response = completableFuture.get();
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(REQUEST).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNotNull();
-        assertThat(response.getRules()).isNotNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
         verify(hierarchyProxy, times(1)).getResourceRules(any());
+        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
+                () -> assertThat(response.getPolicyRequest())
+                        .as("Check the PolicyRequest value is not null")
+                        .isNotNull(),
+                () -> assertThat(response.getRules())
+                        .as("Check the Rules value is not null")
+                        .isNotNull(),
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage value is null")
+                        .isNull()
+        );
     }
 
     /**
@@ -91,15 +99,21 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithANullPolicyRequest() throws Exception {
 
         // When
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(null);
-        //getResourceRules is an asynchronous call so we need to force it get the response
-        AuditablePolicyResourceRules response = completableFuture.get();
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(null).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNull();
-        assertThat(response.getRules()).isNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
         verify(hierarchyProxy, times(0)).getResourceRules(any());
+        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
+                () -> assertThat(response.getPolicyRequest())
+                        .as("Check the PolicyRequest value is null")
+                        .isNull(),
+                () -> assertThat(response.getRules())
+                        .as("Check the Rules value is null")
+                        .isNull(),
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage value is null")
+                        .isNull()
+        );
     }
 
 
@@ -113,17 +127,23 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWhenItThrowsAnException() throws Exception {
         // When
         when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("Test"));
-
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
-        // asynchronous call so we need to force it get the response
-        AuditablePolicyResourceRules response = completableFuture.get();
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(REQUEST).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNotNull();
-        assertThat(response.getRules()).isNull();
-        assertThat(response.getAuditErrorMessage()).isNotNull();
-        // Note the exception is a CompletionException with the cause being a NoSuchPolicyException
-        assertThat(response.getAuditErrorMessage().getError().getCause()).isInstanceOf(NoSuchPolicyException.class);
+        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
+                () -> assertThat(response.getPolicyRequest())
+                        .as("Check the PolicyRequest value is not null")
+                        .isNotNull(),
+                () -> assertThat(response.getRules())
+                        .as("Check the Rules value is null")
+                        .isNull(),
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage value is not null")
+                        .isNotNull(),
+                () -> assertThat(response.getAuditErrorMessage().getError().getCause())
+                        .as("Check the cause of the thrown error")
+                        .isInstanceOf(NoSuchPolicyException.class)
+        );
     }
 
 
@@ -135,30 +155,48 @@ class PolicyServiceAsyncProxyTest {
      */
     @Test
     void testGetRecordRulesWhichFindsRules() throws Exception {
+        // When
         when(hierarchyProxy.getRecordRules(any())).thenReturn(RULES);
+        AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE).get();
 
-        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE);
-        AuditablePolicyRecordResponse response = completableFuture.get();
-        assertThat(response.getPolicyResponse()).isNotNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
+        // Then
+        assertAll("Check the values of the returned AuditablePolicyRecordResponse object",
+                () -> assertThat(response.getPolicyResponse())
+                        .as("Check the PolicyRequest value is not null")
+                        .isNotNull(),
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage value is null")
+                        .isNull()
+        );
     }
 
     /**
-     * Test for when Rules are not found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
+     * Test for when Rules are not found for the record. This should produce an {@link AuditablePolicyRecordResponse}
      * with a {@code PolicyResponse} that has an empty {@code Rules} set and with {@code AuditErrorMessage}.
      *
      * @throws Exception if the test fails
      */
     @Test
     void testGetRecordRulesWithNoPolicyRecord() throws Exception {
+        // When
         when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("Test"));
-
-        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES);
-        AuditablePolicyRecordResponse response = completableFuture.get();
+        AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES).get();
         PolicyResponse policyResponse = response.getPolicyResponse();
-        assertThat(policyResponse).isNotNull();
-        assertThat(policyResponse.getRules()).isNotNull();
-        assertThat(policyResponse.getRules().containsRules());
-        assertThat(response.getAuditErrorMessage()).isNotNull();
+
+        // Then
+        assertAll(
+                () -> assertThat(policyResponse)
+                        .as("Check the PolicyRequest value is not null")
+                        .isNotNull(),
+                () -> assertThat(policyResponse.getRules())
+                        .as("Check the PolicyRequest contains a Rules object")
+                        .isNotNull(),
+                () -> assertThat(policyResponse.getRules().containsRules())
+                        .as("Check the Rules object does not contain any rules")
+                        .isEqualTo(Boolean.FALSE),
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage value is null")
+                        .isNotNull()
+        );
     }
 }

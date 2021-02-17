@@ -92,7 +92,9 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
      */
     @Test
     void testContextLoads() {
-        assertThat(policyService).isNotNull();
+        assertThat(policyService)
+                .as("Check the PolicyService is not null")
+                .isNotNull();
     }
 
     /**
@@ -108,7 +110,9 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
             Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(resource.getId());
 
             // Then
-            assertThat(recordRules).isPresent();
+            assertThat(recordRules)
+                    .as("Check the returned record rules is not empty")
+                    .isPresent();
         }
     }
 
@@ -123,7 +127,9 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules("does not exist");
 
         // Then
-        assertThat(recordRules).isEmpty();
+        assertThat(recordRules)
+                .as("Check the returned record rules object is empty")
+                .isEmpty();
     }
 
     /**
@@ -146,7 +152,9 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(makeResource.apply(0).getId());
 
         // Then - it has been evicted
-        assertThat(recordRules).isEmpty();
+        assertThat(recordRules)
+                .as("Check the returned record rules object is empty")
+                .isEmpty();
     }
 
     /**
@@ -167,6 +175,8 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
         Optional<Rules<LeafResource>> recordRules = policyService.getResourceRules(ACCESSIBLE_JSON_TXT_FILE.getId());
 
         // Then - it has been evicted
-        assertThat(recordRules).isEmpty();
+        assertThat(recordRules)
+                .as("Check the returned record rules object is empty")
+                .isEmpty();
     }
 }

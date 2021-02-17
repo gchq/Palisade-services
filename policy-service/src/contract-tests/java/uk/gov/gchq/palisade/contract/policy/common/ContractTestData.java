@@ -71,16 +71,11 @@ public class ContractTestData {
         }
     }
 
-    public static final UserId USER_ID = new UserId().id("test-user-id");
-    public static final String RESOURCE_ID = "/test/resourceId";
-    public static final String PURPOSE = "test-purpose";
-    public static final Context CONTEXT = new Context().purpose(PURPOSE);
     public static final NoSuchPolicyException NO_SUCH_POLICY_EXCEPTION = new NoSuchPolicyException("Test no such policy exception");
 
 
     static {
         try {
-
             REQUEST_NODE = MAPPER.readTree(REQUEST_JSON);
             NO_RESOURCE_RULES_REQUEST_NODE = MAPPER.readTree(NO_RESOURCE_RULES_REQUEST_JSON);
             REDACTED_RESOURCE_RULES_REQUEST_NODE = MAPPER.readTree(REDACTED_RESOURCE_RULES_REQUEST_JSON);
@@ -99,10 +94,10 @@ public class ContractTestData {
         }
     }
 
-    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> String.format(REQUEST_JSON, i, i);
-    public static final Function<Integer, String> NO_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(NO_RESOURCE_RULES_REQUEST_JSON, i, i);
-    public static final Function<Integer, String> REDACTED_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> String.format(REDACTED_RESOURCE_RULES_REQUEST_JSON, i, i);
-    public static final Function<Integer, String> NO_SUCH_POLICY_FACTORY_JSON = i -> String.format(NO_SUCH_POLICY_EXCEPTION_JSON, i, i);
+    public static final Function<Integer, String> REQUEST_FACTORY_JSON = i -> REQUEST_JSON;
+    public static final Function<Integer, String> NO_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> NO_RESOURCE_RULES_REQUEST_JSON;
+    public static final Function<Integer, String> REDACTED_RESOURCE_RULES_REQUEST_FACTORY_JSON = i -> REDACTED_RESOURCE_RULES_REQUEST_JSON;
+    public static final Function<Integer, String> NO_SUCH_POLICY_FACTORY_JSON = i -> String.format(NO_SUCH_POLICY_EXCEPTION_JSON, i);
 
 
 

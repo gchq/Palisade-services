@@ -74,7 +74,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned
         assertThat(secretDirRules)
+                .as("Check the rules are not null")
                 .isNotNull()
+                .as("Recursively check the returned rules")
                 .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
 
         // When - a record-level policy is requested on a resource
@@ -83,7 +85,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned (and include all those of the parent directory)
         assertThat(secretFileRules)
+                .as("Check the rules are not null")
                 .isNotNull()
+                .as("Recursively check the returned rules")
                 .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
     }
 
@@ -96,7 +100,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
         Exception noSuchPolicy = assertThrows(NoSuchPolicyException.class, () -> HIERARCHY_POLICY.getRecordRules(NEW_FILE), "should throw NoSuchPolicyException");
 
         //Then an error is thrown
-        assertThat("No Record Rules found for the resource").isEqualTo(noSuchPolicy.getMessage());
+        assertThat(noSuchPolicy.getMessage())
+                .as("Check the exception message")
+                .isEqualTo("No Record Rules found for the resource");
     }
 
     @Test
@@ -112,7 +118,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(ACCESSIBLE_JSON_TXT_FILE);
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, ACCESSIBLE_JSON_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotNull();
+            assertThat(resource)
+                    .as("Check the returned resource is not null")
+                    .isNotNull();
         }
 
 
@@ -123,7 +131,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(SENSITIVE_TXT_FILE);
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SENSITIVE_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotNull();
+            assertThat(resource)
+                    .as("Check the returned resource is not null")
+                    .isNotNull();
         }
 
         for (User accessingUser : Collections.singletonList(SECRET_USER)) {
@@ -133,7 +143,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(SECRET_TXT_FILE);
             LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(accessingUser, SECRET_TXT_FILE, CONTEXT, rules);
             // Then - the resource is accessible
-            assertThat(resource).isNotNull();
+            assertThat(resource)
+                    .as("Check the returned resource is not null")
+                    .isNotNull();
 
         }
     }
@@ -148,9 +160,14 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             // When - access to the resource is queried
             Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource.getId());
 
-            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(USER, fileResource, CONTEXT, HIERARCHY_POLICY.getResourceRules(fileResource));
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(USER, fileResource, CONTEXT, HIERARCHY_POLICY.getResourceRules(fileResource));
             // Then - the resource is not accessible
-            assertThat(resource).isNotNull().usingRecursiveComparison().isEqualTo(fileResource);
+            assertThat(resource)
+                    .as("Check the returned resource is not null")
+                    .isNotNull()
+                    .as("Recursively check the returned resource")
+                    .usingRecursiveComparison()
+                    .isEqualTo(fileResource);
         }
 
         // Given - there are inaccessible resources
@@ -162,9 +179,11 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             Mockito.doReturn(Optional.of(SECRET_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource.getId());
 
             Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(fileResource);
-            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
-            assertThat(resource).isNull();
+            assertThat(resource)
+                    .as("Check the returned resource is null")
+                    .isNull();
         }
 
         // Given - there are inaccessible resources
@@ -175,9 +194,11 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
             Mockito.doReturn(Optional.of(SECRET_POLICY)).when(MOCK_SERVICE).getResourceRules(fileResource.getId());
 
             Rules<LeafResource> rules = HIERARCHY_POLICY.getResourceRules(fileResource);
-            LeafResource resource = HIERARCHY_POLICY.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
+            LeafResource resource = PolicyServiceHierarchyProxy.applyRulesToResource(SENSITIVE_USER, fileResource, CONTEXT, rules);
             // Then - the resource is not accessible
-            assertThat(resource).isNull();
+            assertThat(resource)
+                    .as("Check the returned resource is null")
+                    .isNull();
         }
     }
 }

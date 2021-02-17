@@ -24,12 +24,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import uk.gov.gchq.palisade.service.policy.ApplicationTestData;
+import uk.gov.gchq.palisade.component.policy.CommonTestData;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.service.KafkaProducerService;
 import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
@@ -37,10 +40,12 @@ import uk.gov.gchq.palisade.service.policy.web.PolicyRestController;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @WebMvcTest(controllers = {PolicyRestController.class})
 @ContextConfiguration(classes = {RestControllerWebMvcTest.class, PolicyRestController.class})
-class RestControllerWebMvcTest {
+class RestControllerWebMvcTest extends CommonTestData {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @MockBean
@@ -71,10 +76,9 @@ class RestControllerWebMvcTest {
     void testControllerReturnsAccepted() throws Exception {
         // When a request comes in to the controller
         mockMvc.perform(MockMvcRequestBuilders.post("/api/policy")
-                .header(Token.HEADER, ApplicationTestData.REQUEST_TOKEN)
-                .content(MAPPER.writeValueAsBytes(ApplicationTestData.REQUEST))
+                .header(Token.HEADER, REQUEST_TOKEN)
+                .content(MAPPER.writeValueAsBytes(POLICY_REQUEST))
                 .contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.status().isAccepted());
     }
-
 }

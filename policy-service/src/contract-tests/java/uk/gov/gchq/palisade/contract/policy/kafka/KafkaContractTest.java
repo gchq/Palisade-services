@@ -71,6 +71,7 @@ import uk.gov.gchq.palisade.service.policy.PolicyApplication;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
+import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import uk.gov.gchq.palisade.service.policy.model.Token;
 import uk.gov.gchq.palisade.service.policy.stream.ConsumerTopicConfiguration;
 import uk.gov.gchq.palisade.service.policy.stream.ProducerTopicConfiguration;
@@ -171,20 +172,24 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check the size of the returned results")
                         .hasSize((int) recordCount),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the bytes of the 'x-request-token' value")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the START stream marker bytes")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the END stream marker bytes")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
@@ -193,31 +198,42 @@ class KafkaContractTest {
         results.removeLast();
         assertAll("Results are correct and ordered",
                 () -> assertThat(results)
+                        .as("Check the size of the returned results")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the bytes of the 'x-request-token' value")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 () -> assertThat(results.stream()
                         .map(ConsumerRecord::value)
                         .map(response -> response.get("resource").get("type").asInt())
                         .collect(Collectors.toList()))
+                        .as("Check the results are sorted correctly")
                         .isSorted(),
 
-                () -> assertAll("Policy Assertion",
-                        () -> assertThat(results.get(0).value().get("user").get("userId").get("id").asText())
-                                .isEqualTo("test-user-id"),
-                        () -> assertThat(results.get(0).value().get("resourceId").asText())
-                                .isEqualTo("file:/test/resourceId"),
-                        () -> assertThat(results.get(0).value().get("context").get("contents").get("purpose").asText())
-                                .isEqualTo("test-purpose"),
-                        () -> assertThat(results.get(0).value().get("rules").get("message").asText())
-                                .isEqualTo("no rules set"),
-                        () -> assertThat(results.get(0).value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
-                                .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule")
-                ));
+                () -> assertThat(results)
+                        .as("Check the values within the results")
+                        .allSatisfy(result -> {
+                            assertThat(result.value().get("user").get("userId").get("id").asText())
+                                    .as("Check the userId value")
+                                    .isEqualTo("test-user-id");
+                            assertThat(result.value().get("resourceId").asText())
+                                    .as("Check the resourceId value")
+                                    .isEqualTo("file:/test/resourceId");
+                            assertThat(result.value().get("context").get("contents").get("purpose").asText())
+                                    .as("Check the purpose value within the context")
+                                    .isEqualTo("test-purpose");
+                            assertThat(result.value().get("rules").get("message").asText())
+                                    .as("Check the message within the returned rules")
+                                    .isEqualTo("no rules set");
+                            assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
+                                    .as("Check the class name of the returned rules")
+                                    .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule");
+                        })
+        );
     }
 
     /**
@@ -277,41 +293,50 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check the size of the returned results")
                         .hasSize(2),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the bytes of the 'x-request-token' value")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the START stream marker bytes")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the END stream marker bytes")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
         // All but the first and last have the expected message
         results.removeFirst();
         results.removeLast();
-        assertThat(results).isEmpty();
+        assertThat(results)
+                .as("Check the results are empty after removing the START and END markers")
+                .isEmpty();
 
         assertAll("Asserting on the error topic",
                 // One error is produced
                 () -> assertThat(errorResults)
+                        .as("Check the size of the returned results")
                         .hasSize(1),
 
                 // The error has the relevant headers, including the token
                 () -> assertThat(errorResults)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the bytes of the 'x-request-token' value")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes())),
 
                 // The error has a message that contains the throwable exception, and the message
                 () -> assertThat(errorResults.get(0).value().get("error").get("message").asText())
+                        .as("Check the message of the error within the AuditErrorMessage object")
                         .isEqualTo(NoSuchPolicyException.class.getName() + ": No Resource Rules found for the resource")
         );
     }
@@ -352,14 +377,17 @@ class KafkaContractTest {
         // The request was written with the correct header
         assertAll("Records returned are correct",
                 () -> assertThat(results)
+                        .as("Check the size of the returned results")
                         .hasSize(1),
 
                 () -> assertThat(results)
                         .allSatisfy(result -> {
                             assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                    .as("Check the bytes of the 'x-request-token' value")
                                     .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
-
                             assertThat(result.value())
+                                    .usingRecursiveComparison()
+                                    .as("Recursively check the request from the 'input-topic'")
                                     .isEqualTo(ContractTestData.REQUEST_OBJ);
                         })
         );
@@ -414,27 +442,33 @@ class KafkaContractTest {
         // All messages have a correct Token in the header
         assertAll("Headers have correct token",
                 () -> assertThat(results)
+                        .as("Check the size of the returned results")
                         .hasSize(2),
 
                 () -> assertThat(results)
                         .allSatisfy(result ->
                                 assertThat(result.headers().lastHeader(Token.HEADER).value())
+                                        .as("Check the bytes of the 'x-request-token' value")
                                         .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes()))
         );
 
         // The first and last have a correct StreamMarker header
         assertAll("StreamMarkers are correct START and END",
                 () -> assertThat(results.getFirst().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the START stream marker bytes")
                         .isEqualTo(StreamMarker.START.toString().getBytes()),
 
                 () -> assertThat(results.getLast().headers().lastHeader(StreamMarker.HEADER).value())
+                        .as("Check the END stream marker bytes")
                         .isEqualTo(StreamMarker.END.toString().getBytes())
         );
 
-        // All but the first and last have the expected message
+        // Remove the START and END messages from the results list
         results.removeFirst();
         results.removeLast();
-        assertThat(results).isEmpty();
+        assertThat(results)
+                .as("Check the results list is empty after removing the START and END messages")
+                .isEmpty();
     }
 
     // Serialiser for upstream test input
