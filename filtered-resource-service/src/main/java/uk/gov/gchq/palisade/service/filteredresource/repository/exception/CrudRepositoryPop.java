@@ -25,7 +25,6 @@ import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 /**
@@ -38,9 +37,8 @@ public class CrudRepositoryPop implements Committable {
     /**
      * The default constructor of the CrudRepositoryPop, used for asynchronously deleting entities from the backing store
      *
-     * @param repository the {@link TokenAuditErrorMessageRepository} used to access the backing store
-     * @param entity     the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
-     * @param executor   the async executor
+     * @param entity      the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
+     * @param asyncDelete the asyncDelete function used in the tokenAuditErrorPersistenceLayer to delete entities from the backing store
      */
     public CrudRepositoryPop(final Function<TokenAuditErrorMessageEntity, CompletableFuture<Void>> asyncDelete, final TokenAuditErrorMessageEntity entity) {
         this.asyncDelete = asyncDelete;
