@@ -26,7 +26,6 @@ import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
