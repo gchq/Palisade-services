@@ -154,7 +154,7 @@ public final class AuditableDataResponse {
     public String toString() {
         return new StringJoiner(", ", AuditableDataResponse.class.getSimpleName() + "[", "]")
                 .add("auditSuccessMessage=" + auditSuccessMessage)
-                .add("auditErrorMessage==" + auditErrorMessage)
+                .add("auditErrorMessage=" + auditErrorMessage)
                 .toString();
     }
 }
