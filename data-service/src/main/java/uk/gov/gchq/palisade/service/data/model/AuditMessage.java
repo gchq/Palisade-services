@@ -61,11 +61,13 @@ public class AuditMessage {
     protected final String userId; // Unique identifier for the user.
 
     @JsonProperty("resourceId")
-    protected final @Nullable
+    @Nullable
+    protected final
     String resourceId;  //Resource that that is being asked to access.
 
     @JsonProperty("context")
-    protected final @Nullable
+    @Nullable
+    protected final
     Context context;   //Relevant context information about the request.
 
     @JsonProperty("serviceName")
@@ -87,9 +89,9 @@ public class AuditMessage {
     protected AuditMessage(
             final @JsonProperty("leafResourceId") String leafResourceId,
             final @JsonProperty("token") String token,
-            final @JsonProperty("userId") @Nullable String userId,
-            final @JsonProperty("resourceId") @Nullable String resourceId,
-            final @JsonProperty("context") @Nullable Context context,
+            @Nullable final @JsonProperty("userId") String userId,
+            @Nullable final @JsonProperty("resourceId") String resourceId,
+            @Nullable final @JsonProperty("context") Context context,
             final @JsonProperty("attributes") Map<String, Object> attributes) {
 
         this.leafResourceId = Optional.ofNullable(leafResourceId).orElseThrow(() -> new IllegalArgumentException("leafResourceId" + " cannot be null"));

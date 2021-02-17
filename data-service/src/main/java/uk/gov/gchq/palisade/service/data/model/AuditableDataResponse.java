@@ -30,16 +30,16 @@ import java.util.StringJoiner;
 public final class AuditableDataResponse {
 
     private final String token;
-    private final @Nullable
-    AuditSuccessMessage auditSuccessMessage;
-    private final @Nullable
-    AuditErrorMessage auditErrorMessage;
+    @Nullable
+    private final AuditSuccessMessage auditSuccessMessage;
+    @Nullable
+    private final AuditErrorMessage auditErrorMessage;
 
 
     private AuditableDataResponse(
             final String token,
-            final @Nullable AuditSuccessMessage auditSuccessMessage,
-            final @Nullable AuditErrorMessage auditErrorMessage) {
+            @Nullable final AuditSuccessMessage auditSuccessMessage,
+            @Nullable final AuditErrorMessage auditErrorMessage) {
 
         this.token = Optional.ofNullable(token)
                 .orElseThrow(() -> new IllegalArgumentException("token cannot be null"));
