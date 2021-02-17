@@ -66,8 +66,7 @@ public class AuditMessage {
 
     @JsonProperty("context")
     @Nullable
-    protected final
-    Context context;   //Relevant context information about the request.
+    protected final Context context;   //Relevant context information about the request.
 
     @JsonProperty("serviceName")
     protected String serviceName = SERVICE_NAME;  //service that sent the message
