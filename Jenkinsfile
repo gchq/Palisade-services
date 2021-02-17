@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@Library('jenkinsfile-lib')_
+@Library('jenkinsfile-lib/PAL-824-k8s-example-smoketest')_
 
 timestamps {
     services()
