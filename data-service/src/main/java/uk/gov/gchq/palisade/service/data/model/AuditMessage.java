@@ -62,8 +62,7 @@ public class AuditMessage {
 
     @JsonProperty("resourceId")
     @Nullable
-    protected final
-    String resourceId;  //Resource that that is being asked to access.
+    protected final String resourceId;  //Resource that that is being asked to access.
 
     @JsonProperty("context")
     @Nullable
