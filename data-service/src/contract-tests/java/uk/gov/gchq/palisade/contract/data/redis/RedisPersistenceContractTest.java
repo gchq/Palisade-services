@@ -126,8 +126,14 @@ class RedisPersistenceContractTest {
         AuthorisedDataRequest authorisedDataFromResource = futureDataResponse.join();
         // Then
         assertAll("ObjectComparison",
-                () -> assertThat(authorisedDataFromResource).as("Comparison using the DataResponse's equals method").isEqualTo(authorisedDataRequest),
-                () -> assertThat(authorisedDataFromResource).as("Comparison of content using all of the DataResponse's components recursively").usingRecursiveComparison().isEqualTo(authorisedDataRequest)
+                () -> assertThat(authorisedDataFromResource)
+                        .as("Comparison using the DataResponse's equals method")
+                        .isEqualTo(authorisedDataRequest),
+                
+                () -> assertThat(authorisedDataFromResource)
+                        .as("Comparison of content using all of the DataResponse's components recursively")
+                        .usingRecursiveComparison()
+                        .isEqualTo(authorisedDataRequest)
         );
     }
 }
