@@ -45,7 +45,7 @@ kafkaCreateTopics:
 
 image:
   name: create-kafka-queues
-  tag: SNAPSHOT-114395f
+  tag: SNAPSHOT-8f6e6e4
   pullPolicy: IfNotPresent
 
 resources:
