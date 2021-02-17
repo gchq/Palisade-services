@@ -23,16 +23,17 @@ import scala.concurrent.Future;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 /**
  * The CrudRepositoryPop is used to call the repository and asynchronously delete tokenAuditErrorMessageEntities
  */
 public class CrudRepositoryPop implements Committable {
-    private final TokenAuditErrorMessageRepository repository;
+    private final Function<TokenAuditErrorMessageEntity, CompletableFuture<Void>> asyncDelete;
     private final TokenAuditErrorMessageEntity entity;
-    private final Executor executor;
 
     /**
      * The default constructor of the CrudRepositoryPop, used for asynchronously deleting entities from the backing store
@@ -41,10 +42,9 @@ public class CrudRepositoryPop implements Committable {
      * @param entity     the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
      * @param executor   the async executor
      */
-    public CrudRepositoryPop(final TokenAuditErrorMessageRepository repository, final TokenAuditErrorMessageEntity entity, final Executor executor) {
-        this.repository = repository;
+    public CrudRepositoryPop(final Function<TokenAuditErrorMessageEntity, CompletableFuture<Void>> asyncDelete, final TokenAuditErrorMessageEntity entity) {
+        this.asyncDelete = asyncDelete;
         this.entity = entity;
-        this.executor = executor;
     }
 
     @Override
@@ -54,12 +54,12 @@ public class CrudRepositoryPop implements Committable {
 
     @Override
     public CompletionStage<Done> commitJavadsl() {
-        return FutureConverters.toJava(commitInternal());
+        return this.asyncDelete.apply(entity).thenApply(ignored -> Done.done());
     }
 
     @Override
     public Future<Done> commitInternal() {
-        return repository.asyncDelete(entity, executor);
+        return FutureConverters.toScala(commitJavadsl());
     }
 
     @Override

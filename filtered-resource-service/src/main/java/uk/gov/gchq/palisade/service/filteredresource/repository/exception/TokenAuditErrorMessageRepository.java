@@ -49,13 +49,4 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
      * @return an Optional of the {@link TokenAuditErrorMessageEntity} containing the exception and token
      */
     Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
-
-    /**
-     * An Async call to delete the entity from the repository.
-     *
-     * @param entity   the TokenAuditErrorMessageEntity to be deleted
-     * @param executor the async exexcutor
-     * @return A Completed Future after the async has completed
-     */
-    Future<Done> asyncDelete(TokenAuditErrorMessageEntity entity, Executor executor);
 }

@@ -54,6 +54,10 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
         // Get the exception from the repository
         return CompletableFuture.supplyAsync(() -> repository.findFirstByToken(token), executor)
                 // Then delete the exception from the repositry
-                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(repository, entity, executor))));
+                .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(this::asyncDelete, entity))));
+    }
+
+    public CompletableFuture<Void> asyncDelete(final TokenAuditErrorMessageEntity entity) {
+        return CompletableFuture.runAsync(() -> repository.delete(entity), executor);
     }
 }
