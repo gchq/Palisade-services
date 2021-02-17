@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PolicyRequestTest.class)
@@ -52,9 +53,15 @@ class PolicyRequestTest extends CommonTestData {
         ObjectContent<PolicyRequest> policyRequestObjectContent = jacksonTester.parse(policyRequestJsonContent.getJson());
         PolicyRequest policyRequestMessageObject = policyRequestObjectContent.getObject();
 
-        assertThat(policyRequestMessageObject)
-                .usingRecursiveComparison()
-                .as("Recursively compare the PolicyRequest object")
-                .isEqualTo(POLICY_REQUEST);
+        assertAll(
+                () -> assertThat(policyRequestMessageObject)
+                        .as("Check deserialized object")
+                        .isEqualTo(POLICY_REQUEST),
+
+                () -> assertThat(policyRequestMessageObject)
+                        .usingRecursiveComparison()
+                        .as("Recursively compare the PolicyRequest object")
+                        .isEqualTo(POLICY_REQUEST)
+        );
     }
 }

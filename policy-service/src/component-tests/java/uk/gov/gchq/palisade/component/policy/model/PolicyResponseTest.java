@@ -29,6 +29,7 @@ import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JsonTest
 @ContextConfiguration(classes = PolicyResponseTest.class)
@@ -46,15 +47,21 @@ class PolicyResponseTest extends CommonTestData {
      *                     This equates to a failure to serialise or deserialize the string.
      */
     @Test
-    void testGroupedDependantPolicyResponseSerialisingAndDeserialising() throws IOException {
+    void testGroupedDependantPolicyResponseSerializingAndDeserializing() throws IOException {
 
         JsonContent<PolicyResponse> policyResponseJsonContent = jacksonTester.write(POLICY_RESPONSE);
         ObjectContent<PolicyResponse> policyResponseObjectContent = jacksonTester.parse(policyResponseJsonContent.getJson());
         PolicyResponse policyResponseMessageObject = policyResponseObjectContent.getObject();
 
-        assertThat(policyResponseMessageObject)
-                .usingRecursiveComparison()
-                .as("Recursively compare the PolicyResponse object")
-                .isEqualTo(POLICY_RESPONSE);
+        assertAll(
+                () -> assertThat(policyResponseMessageObject)
+                        .as("Check deserialized object")
+                        .isEqualTo(POLICY_RESPONSE),
+
+                () -> assertThat(policyResponseMessageObject)
+                        .usingRecursiveComparison()
+                        .as("Recursively compare the PolicyResponse object")
+                        .isEqualTo(POLICY_RESPONSE)
+        );
     }
 }

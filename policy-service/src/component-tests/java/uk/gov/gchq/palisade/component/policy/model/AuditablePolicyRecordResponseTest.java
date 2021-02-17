@@ -61,6 +61,7 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
                         .as("Compare the AuditablePolicyRecordResponse objects")
                         .isEqualTo(POLICY_RECORD_RESPONSE),
+
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
                         .as("Recursively compare the AuditablePolicyRecordResponse object")
                         .usingRecursiveComparison()
@@ -89,8 +90,10 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
                         .as("Compare the AuditablePolicyRecordResponse objects")
                         .isEqualTo(POLICY_RECORD_RESPONSE_ERROR),
+
                 () -> assertThat(auditablePolicyRecordResponseMessageObject)
-                        .usingRecursiveComparison().ignoringFieldsOfTypes(Throwable.class)
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(Throwable.class)
                         .as("Recursively compare the AuditablePolicyRecordResponse object, ignoring the Throwable value")
                         .isEqualTo(POLICY_RECORD_RESPONSE_ERROR)
         );
@@ -111,6 +114,7 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
                         .usingRecursiveComparison()
                         .as("Recursively check the chained response has not changed")
                         .isEqualTo(auditablePolicyRecordResponse),
+
                 () -> assertThat(chainedResponse)
                         .as("Check the chained response is the same as the original response")
                         .isEqualTo(auditablePolicyRecordResponse)
@@ -132,10 +136,12 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
                         .usingRecursiveComparison()
                         .as("Recursively check the original response is not equal to the chained response")
                         .isNotEqualTo(auditablePolicyRecordResponse),
+
                 () -> assertThat(chainedResponse.getAuditErrorMessage())
                         .usingRecursiveComparison()
                         .as("Recursively check the AuditErrorMessage within the response")
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
+
                 () -> assertThat(chainedResponse.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage objects")
                         .isEqualTo(AUDIT_ERROR_MESSAGE)

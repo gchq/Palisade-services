@@ -103,12 +103,15 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
     @Test
     void testContextLoads() {
-        assertThat(cacheProxy)
-                .as("Check the caching proxy is not null")
-                .isNotNull();
-        assertThat(redisTemplate)
-                .as("Check the redis template is not null")
-                .isNotNull();
+        assertAll(
+                () -> assertThat(cacheProxy)
+                        .as("Check the caching proxy is not null")
+                        .isNotNull(),
+
+                () -> assertThat(redisTemplate)
+                        .as("Check the redis template is not null")
+                        .isNotNull()
+        );
     }
 
     @Test
@@ -163,6 +166,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
                 () -> assertThat(recordRules)
                         .as("Check the returned record rules is not empty")
                         .isPresent(),
+
                 () -> assertThat(recordRules).isPresent().get()
                         .extracting("rules").usingRecursiveComparison()
                         .as("Recursively check the returned rules")

@@ -219,15 +219,19 @@ class KafkaContractTest {
                             assertThat(result.value().get("user").get("userId").get("id").asText())
                                     .as("Check the userId value")
                                     .isEqualTo("test-user-id");
+
                             assertThat(result.value().get("resourceId").asText())
                                     .as("Check the resourceId value")
                                     .isEqualTo("file:/test/resourceId");
+
                             assertThat(result.value().get("context").get("contents").get("purpose").asText())
                                     .as("Check the purpose value within the context")
                                     .isEqualTo("test-purpose");
+
                             assertThat(result.value().get("rules").get("message").asText())
                                     .as("Check the message within the returned rules")
                                     .isEqualTo("no rules set");
+
                             assertThat(result.value().get("rules").get("rules").get("1-PassThroughRule").get("class").asText())
                                     .as("Check the class name of the returned rules")
                                     .isEqualTo("uk.gov.gchq.palisade.contract.policy.common.PassThroughRule");

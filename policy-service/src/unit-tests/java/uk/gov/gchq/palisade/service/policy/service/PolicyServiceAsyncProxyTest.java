@@ -76,9 +76,11 @@ class PolicyServiceAsyncProxyTest {
                 () -> assertThat(response.getPolicyRequest())
                         .as("Check the PolicyRequest value is not null")
                         .isNotNull(),
+
                 () -> assertThat(response.getRules())
                         .as("Check the Rules value is not null")
                         .isNotNull(),
+
                 () -> assertThat(response.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage value is null")
                         .isNull()
@@ -106,9 +108,11 @@ class PolicyServiceAsyncProxyTest {
                 () -> assertThat(response.getPolicyRequest())
                         .as("Check the PolicyRequest value is null")
                         .isNull(),
+
                 () -> assertThat(response.getRules())
                         .as("Check the Rules value is null")
                         .isNull(),
+
                 () -> assertThat(response.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage value is null")
                         .isNull()
@@ -133,12 +137,15 @@ class PolicyServiceAsyncProxyTest {
                 () -> assertThat(response.getPolicyRequest())
                         .as("Check the PolicyRequest value is not null")
                         .isNotNull(),
+
                 () -> assertThat(response.getRules())
                         .as("Check the Rules value is null")
                         .isNull(),
+
                 () -> assertThat(response.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage value is not null")
                         .isNotNull(),
+
                 () -> assertThat(response.getAuditErrorMessage().getError().getCause())
                         .as("Check the cause of the thrown error")
                         .isInstanceOf(NoSuchPolicyException.class)
@@ -163,6 +170,7 @@ class PolicyServiceAsyncProxyTest {
                 () -> assertThat(response.getPolicyResponse())
                         .as("Check the PolicyRequest value is not null")
                         .isNotNull(),
+
                 () -> assertThat(response.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage value is null")
                         .isNull()
@@ -187,12 +195,15 @@ class PolicyServiceAsyncProxyTest {
                 () -> assertThat(policyResponse)
                         .as("Check the PolicyRequest value is not null")
                         .isNotNull(),
+
                 () -> assertThat(policyResponse.getRules())
                         .as("Check the PolicyRequest contains a Rules object")
                         .isNotNull(),
+
                 () -> assertThat(policyResponse.getRules().containsRules())
                         .as("Check the Rules object does not contain any rules")
                         .isEqualTo(Boolean.FALSE),
+
                 () -> assertThat(response.getAuditErrorMessage())
                         .as("Check the AuditErrorMessage value is null")
                         .isNotNull()

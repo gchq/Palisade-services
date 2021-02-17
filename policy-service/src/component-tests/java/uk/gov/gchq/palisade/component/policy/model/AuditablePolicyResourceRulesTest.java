@@ -64,6 +64,7 @@ class AuditablePolicyResourceRulesTest extends CommonTestData {
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
                         .as("Compare the AuditablePolicyResourceRules objects")
                         .isEqualTo(POLICY_RESOURCE_RULES),
+
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
                         .as("Recursively compare the AuditablePolicyResourceRules object")
                         .usingRecursiveComparison()
@@ -93,6 +94,7 @@ class AuditablePolicyResourceRulesTest extends CommonTestData {
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
                         .as("Compare the AuditablePolicyResourceRules objects")
                         .isEqualTo(POLICY_RESOURCE_RULES_ERROR),
+
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
                         .as("Recursively compare the AuditablePolicyResourceRules object, ignoring the Throwable value")
                         .usingRecursiveComparison()

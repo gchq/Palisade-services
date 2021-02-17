@@ -79,6 +79,7 @@ public class CommonTestData {
     public static final AuditablePolicyRecordResponse POLICY_RECORD_RESPONSE = AuditablePolicyRecordResponse.Builder.create()
             .withPolicyResponse(POLICY_RESPONSE)
             .withNoErrors();
+
     public static final AuditablePolicyRecordResponse POLICY_RECORD_RESPONSE_ERROR = AuditablePolicyRecordResponse.Builder.create()
             .withPolicyResponse(null)
             .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
@@ -88,6 +89,7 @@ public class CommonTestData {
             .withRules(RESOURCE_RULES)
             .withNoErrors()
             .withModifiedResource(LEAF_RESOURCE);
+
     public static final AuditablePolicyResourceResponse POLICY_RESOURCE_RESPONSE_ERROR = AuditablePolicyResourceResponse.Builder.create()
             .withPolicyRequest(POLICY_REQUEST)
             .withRules(RESOURCE_RULES)
@@ -98,6 +100,7 @@ public class CommonTestData {
             .withPolicyRequest(POLICY_REQUEST)
             .withRules(RESOURCE_RULES)
             .withNoErrors();
+
     public static final AuditablePolicyResourceRules POLICY_RESOURCE_RULES_ERROR = AuditablePolicyResourceRules.Builder.create()
             .withPolicyRequest(POLICY_REQUEST)
             .withRules(RESOURCE_RULES)

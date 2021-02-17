@@ -55,7 +55,8 @@ class AuditErrorMessageTest extends CommonTestData {
 
 
         assertAll("AuditErrorMessage serializing and deserializing comparison",
-                () -> assertThat(auditErrorMessageObject).usingRecursiveComparison()
+                () -> assertThat(auditErrorMessageObject)
+                        .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(Throwable.class)
                         .as("Recursively compare the AuditErrorMessage object, ignoring the Throwable value")
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
