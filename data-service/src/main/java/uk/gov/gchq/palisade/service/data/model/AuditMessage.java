@@ -38,7 +38,7 @@ import java.util.StringJoiner;
 
 /**
  * This is the parent class for Audit information.  It represents the common component of the data that is to be
- * sent to audit service.  Note this version of {@code AuditMessage} is unique in comparison to the {@code AuditMessage}
+ * sent to Audit Service.  Note this version of {@code AuditMessage} is unique in comparison to the {@code AuditMessage}
  * from the other service in that it will include the {@code leafResourceId} and {@code token} plus the {@code userID},
  * {@code resourceID} and {@code context} can be null.  This can occur when this message represents an error for a
  * request that is not authorised to access the data.
@@ -212,4 +212,3 @@ public class AuditMessage {
                 .toString();
     }
 }
-
