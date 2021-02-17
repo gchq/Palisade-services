@@ -10,6 +10,10 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 |  \- com.typesafe:ssl-config-core_2.13:jar:0.4.1:compile
 |     \- org.scala-lang.modules:scala-parser-combinators_2.13:jar:1.1.2:compile
 +- com.typesafe.akka:akka-stream-kafka_2.13:jar:2.0.4:compile
+|  +- org.apache.kafka:kafka-clients:jar:2.5.0:compile
+|  |  +- com.github.luben:zstd-jni:jar:1.4.4-7:compile
+|  |  +- org.lz4:lz4-java:jar:1.7.1:compile
+|  |  \- org.xerial.snappy:snappy-java:jar:1.1.7.3:compile
 |  \- org.scala-lang.modules:scala-collection-compat_2.13:jar:2.1.6:compile
 +- com.typesafe.akka:akka-slf4j_2.13:jar:2.6.8:compile
 |  \- org.slf4j:slf4j-api:jar:1.7.30:compile
@@ -219,8 +223,4 @@ uk.gov.gchq.palisade:data-service:jar:0.5.0-SNAPSHOT
 +- com.typesafe.akka:akka-stream-testkit_2.13:jar:2.6.8:test
 |  \- com.typesafe.akka:akka-testkit_2.13:jar:2.6.8:test
 +- com.typesafe.akka:akka-stream-kafka-testkit_2.13:jar:2.0.4:test
-+- org.testcontainers:kafka:jar:1.14.3:test
-\- org.apache.kafka:kafka-clients:jar:2.5.0:compile
-   +- com.github.luben:zstd-jni:jar:1.4.4-7:compile
-   +- org.lz4:lz4-java:jar:1.7.1:compile
-   \- org.xerial.snappy:snappy-java:jar:1.1.7.3:compile
+\- org.testcontainers:kafka:jar:1.14.3:test

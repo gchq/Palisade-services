@@ -41,7 +41,6 @@ import uk.gov.gchq.palisade.service.data.repository.PersistenceLayer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Optional;
@@ -81,23 +80,11 @@ class SimpleDataServiceTest {
 
     public static final AtomicLong RECORDS_RETURNED = new AtomicLong(0);
     public static final AtomicLong RECORDS_PROCESSED = new AtomicLong(0);
-
-
-    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
-        @Override
-        public T apply(final T record, final User user, final Context context) {
-            return record;
-        }
-    }
-
     public static final Rules<Serializable> RULES = new Rules<>().addRule(RULE_MESSAGE, new PassThroughRule<>());
-
     // Mocks
     final PersistenceLayer persistenceLayer = Mockito.mock(PersistenceLayer.class);
     final DataReader dataReader = Mockito.mock(DataReader.class);
     final SimpleDataService simpleDataService = new SimpleDataService(persistenceLayer, dataReader);
-
-
     // Test data
     final DataRequest dataRequest = DataRequest.Builder.create().withToken(REQUEST_TOKEN).withLeafResourceId(RESOURCE_ID);
     final AuthorisedRequestEntity authorisedEntity = new AuthorisedRequestEntity(
@@ -107,21 +94,17 @@ class SimpleDataServiceTest {
             CONTEXT,
             RULES
     );
-
     final DataReaderRequest readerRequest = new DataReaderRequest()
             .user(USER)
             .resource(LEAF_RESOURCE)
             .context(CONTEXT)
             .rules(RULES);
-
     final AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create()
             .withResource(LEAF_RESOURCE)
             .withUser(USER)
             .withContext(CONTEXT)
             .withRules(RULES);
-
     final String testResponseMessage = "test response for data request";
-
     final ResponseWriter responseWriter = new ResponseWriter() {
         final String testData = testResponseMessage;
 
@@ -139,7 +122,6 @@ class SimpleDataServiceTest {
             return this;
         }
     };
-
     final DataReaderResponse dataReaderResponse = new DataReaderResponse()
             .message("test message")
             .writer(responseWriter);
@@ -201,5 +183,12 @@ class SimpleDataServiceTest {
         assertThat(outputString).isEqualTo(testResponseMessage);
         verify(dataReader, times(1)).read(any(), any(), any());
 
+    }
+
+    public static class PassThroughRule<T extends Serializable> implements Rule<T> {
+        @Override
+        public T apply(final T record, final User user, final Context context) {
+            return record;
+        }
     }
 }
