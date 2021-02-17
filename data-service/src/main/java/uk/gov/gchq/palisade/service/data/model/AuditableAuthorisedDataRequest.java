@@ -88,12 +88,12 @@ public final class AuditableAuthorisedDataRequest {
         }
 
         /**
-         * Compose wityh either {@link AuthorisedDataRequest} or {@link AuditErrorMessage} to create the
+         * Compose with either {@link AuthorisedDataRequest} or {@link AuditErrorMessage} to create the
          * AuditableAuthorisedDataRequest
          */
         public interface IDataResponse {
             /**
-             * Adds the data from the
+             * Adds the authorised request and assigns the error message to null
              *
              * @param authorisedDataRequest for the resources
              * @return class {@link AuditableAuthorisedDataRequest} for the final step in the build.
@@ -103,7 +103,7 @@ public final class AuditableAuthorisedDataRequest {
             }
 
             /**
-             * Adds the data from the
+             * Adds the only the error message anbd assigns the authorised data to null
              *
              * @param auditErrorMessage for the error that occurred
              * @return class {@link AuditableAuthorisedDataRequest} for the final step in the build.
@@ -119,9 +119,7 @@ public final class AuditableAuthorisedDataRequest {
              * @return value object
              */
             AuditableAuthorisedDataRequest withAuthorisedDataAndError(AuthorisedDataRequest authorisedDataRequest, AuditErrorMessage auditErrorMessage);
-
         }
-
     }
 
     @Override
