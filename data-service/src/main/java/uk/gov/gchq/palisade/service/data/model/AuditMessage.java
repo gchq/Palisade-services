@@ -199,16 +199,16 @@ public class AuditMessage {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditMessage.class.getSimpleName() + "[", "]")
-                .add("leafResourceId= " + leafResourceId + "'")
-                .add("token= " + token + "'")
-                .add("userId= " + userId + "'")
-                .add("resourceId= " + resourceId + "'")
-                .add("context= " + context)
-                .add("serviceName= " + serviceName + "'")
-                .add("timestamp= " + timestamp + "'")
-                .add("serverIP= " + serverIP + "'")
-                .add("serverHostname= " + serverHostname + "'")
-                .add("attributes= " + attributes)
+                .add("leafResourceId='" + leafResourceId + "'")
+                .add("token='" + token + "'")
+                .add("userId='" + userId + "'")
+                .add("resourceId='" + resourceId + "'")
+                .add("context=" + context)
+                .add("serviceName='" + serviceName + "'")
+                .add("timestamp='" + timestamp + "'")
+                .add("serverIP='" + serverIP + "'")
+                .add("serverHostname='" + serverHostname + "'")
+                .add("attributes=" + attributes)
                 .toString();
     }
 }

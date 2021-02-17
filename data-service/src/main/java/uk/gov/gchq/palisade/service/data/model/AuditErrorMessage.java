@@ -233,15 +233,8 @@ public final class AuditErrorMessage extends AuditMessage {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
-                .add("error= " + error)
-                .add("userId= " + userId + "'")
-                .add("resourceId= " + resourceId + "'")
-                .add("context= " + context)
-                .add("serviceName= " + serviceName + "'")
-                .add("timestamp= " + timestamp + "'")
-                .add("serverIP= " + serverIP + "'")
-                .add("serverHostname= " + serverHostname + "'")
-                .add("attributes= " + attributes)
+                .add("error=" + error)
+                .add(super.toString())
                 .toString();
     }
 }

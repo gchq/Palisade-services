@@ -69,7 +69,7 @@ public class AkkaRunnableGraph {
 
         return source
                 .alsoTo(Flow.<TokenMessagePair>create()
-                        //for AuditSuccessMessage send to the audit-service success topic
+                        //Send AuditSuccessMessage to the Audit Service via the success Kafka topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditSuccessMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), successTopic.getPartitions());
@@ -78,7 +78,7 @@ public class AkkaRunnableGraph {
                         })
                         .to(successSink))
                 .to(Flow.<TokenMessagePair>create()
-                        //for AuditErrorMessage send to the audit-service error topic
+                        //Send AuditErrorMessage to the Audit Service via the  error Kafka topic
                         .filter(tokenMessagePair -> tokenMessagePair.second() instanceof AuditErrorMessage)
                         .map((TokenMessagePair tokenMessagePair) -> {
                             Integer partition = Token.toPartition(tokenMessagePair.first(), errorTopic.getPartitions());

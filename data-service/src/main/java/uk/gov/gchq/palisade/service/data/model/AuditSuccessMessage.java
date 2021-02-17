@@ -226,14 +226,14 @@ public final class AuditSuccessMessage extends AuditMessage {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditErrorMessage.class.getSimpleName() + "[", "]")
-                .add("userId= " + userId + "'")
-                .add("resourceId= " + resourceId + "'")
-                .add("context= " + context)
-                .add("serviceName= " + serviceName + "'")
-                .add("timestamp= " + timestamp + "'")
-                .add("serverIP= " + serverIP + "'")
-                .add("serverHostname= " + serverHostname + "'")
-                .add("attributes= " + attributes)
+                .add("userId='" + userId + "'")
+                .add("resourceId= '" + resourceId + "'")
+                .add("context=" + context)
+                .add("serviceName= '" + serviceName + "'")
+                .add("timestamp= '" + timestamp + "'")
+                .add("serverIP= '" + serverIP + "'")
+                .add("serverHostname= '" + serverHostname + "'")
+                .add("attributes=" + attributes)
                 .toString();
     }
 }

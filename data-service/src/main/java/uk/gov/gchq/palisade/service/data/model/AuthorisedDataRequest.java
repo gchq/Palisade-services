@@ -170,7 +170,7 @@ public final class AuthorisedDataRequest {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuthorisedDataRequest.class.getSimpleName() + "[", "]")
-                .add("resource" + resource)
+                .add("resource=" + resource)
                 .add("user=" + user)
                 .add("context=" + context)
                 .add("rules=" + rules)

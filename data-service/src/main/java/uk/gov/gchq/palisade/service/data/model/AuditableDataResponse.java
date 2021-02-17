@@ -153,8 +153,8 @@ public final class AuditableDataResponse {
     @Generated
     public String toString() {
         return new StringJoiner(", ", AuditableDataResponse.class.getSimpleName() + "[", "]")
-                .add("auditSuccessMessage= " + auditSuccessMessage)
-                .add("auditErrorMessage= " + auditErrorMessage)
+                .add("auditSuccessMessage=" + auditSuccessMessage)
+                .add("auditErrorMessage==" + auditErrorMessage)
                 .toString();
     }
 }
