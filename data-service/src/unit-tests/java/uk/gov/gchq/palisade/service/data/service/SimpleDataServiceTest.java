@@ -133,9 +133,9 @@ class SimpleDataServiceTest {
         @Override
         public ResponseWriter write(final OutputStream outputStream) throws IOException {
 
-            InputStream testInputStream = new ByteArrayInputStream(testData.getBytes());
-            testInputStream.transferTo(outputStream);
-            testInputStream.close();
+            try (var testInputStream = new ByteArrayInputStream(testData.getBytes())) {
+                testInputStream.transferTo(outputStream);
+            }
             return this;
         }
     };
