@@ -102,15 +102,14 @@ class RedisPersistenceContractTest {
                 .context(new Context().purpose("test-purpose"))
                 .rules(new Rules<>());
 
-        AuthorisedDataRequest authorisedDataRequest =   AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
+        AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
                         .serialisedFormat("avro")
                         .type(Employee.class.getTypeName())
                         .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                        .parent(new SystemResource().id("/")))                .withUser(new User().userId("test-user"))
+                        .parent(new SystemResource().id("/")))                
+                .withUser(new User().userId("test-user"))
                 .withContext(new Context().purpose("test-purpose"))
                 .withRules(new Rules<>());
-
-
         repository.save(new AuthorisedRequestEntity(
                 token,
                 readerRequest.getUser(),
