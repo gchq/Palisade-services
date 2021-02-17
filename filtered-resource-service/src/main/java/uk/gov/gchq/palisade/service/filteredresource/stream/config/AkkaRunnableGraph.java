@@ -99,7 +99,7 @@ public class AkkaRunnableGraph {
                             observedResource.set(true);
                             return false;
                         })
-                        // If we haven't seen any resources, but recieve the end of stream message, then audit it
+                        // If we haven't seen any resources, but receive the end of stream message, then audit it
                         .orElse(tokenMarkerRequestMessage.t2()
                                 .filter(StreamMarker.END::equals)
                                 .filter(endMarker -> !observedResource.get())
@@ -295,10 +295,10 @@ public class AkkaRunnableGraph {
             return Flow.<AuditableWebSocketMessage>create()
 
                     //Filter out anything that doesn't have a committable
-                    .filter(committable -> committable.getCommittable() != null)
+                    .filter(message -> message.getCommittable() != null)
 
                     // Convert incoming FilteredResourceRequest to outgoing AuditSuccessMessage using the service instance
-                    .map(auditableWebSocketMessage -> new Pair<>(auditEventService.createSuccessMessage(auditableWebSocketMessage.getFilteredResourceRequest()), auditableWebSocketMessage.getCommittable()))
+                    .map(message -> new Pair<>(auditEventService.createSuccessMessage(message.getFilteredResourceRequest()), message.getCommittable()))
 
                     // Convert the audit message to a producer record, supplying the kafka topic, partition and headers
                     .map(requestAndOffset -> new Pair<>(

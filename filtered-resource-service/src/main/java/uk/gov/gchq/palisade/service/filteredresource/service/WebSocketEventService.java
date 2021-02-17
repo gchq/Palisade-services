@@ -157,7 +157,8 @@ public class WebSocketEventService {
         Source<AuditableWebSocketMessage, NotUsed> ctsSource = Source.<AuditableWebSocketMessage>empty()
                 .concat(this.createErrorSource(token)) // Handle early error messages
                 .concat(this.createResourceSource(token)) // Handle the resources
-                .concat(this.createErrorSource(token)); // Handle late error messages
+                .concat(this.createErrorSource(token)) // Handle late error messages
+                .concat(this.createCompleteSource(token)); // Finally add the complete message to the Flow
 
         return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
@@ -171,10 +172,8 @@ public class WebSocketEventService {
                 // for it from the client (before the resource is returned to the client)
                 .alsoTo(this.auditSinkFactory.create(token))
 
-                .map(AuditableWebSocketMessage::getWebSocketMessage)
+                .map(AuditableWebSocketMessage::getWebSocketMessage);
 
-                // Finally add the complete message to the Flow
-                .concat(this.createCompleteSource(token));
     }
 
     /**
@@ -245,10 +244,13 @@ public class WebSocketEventService {
      * @param token the token for this client
      * @return a source of {@link WebSocketMessage}s with a {@link MessageType#COMPLETE}
      */
-    private Source<WebSocketMessage, NotUsed> createCompleteSource(final String token) {
-        return Source.single(WebSocketMessage.Builder.create()
-                .withType(MessageType.COMPLETE)
-                .withHeader(Token.HEADER, token).noHeaders()
-                .noBody());
+    @SuppressWarnings("java:S2325") // don't make static
+    private Source<AuditableWebSocketMessage, NotUsed> createCompleteSource(final String token) {
+        return Source.single(AuditableWebSocketMessage.Builder.create()
+                .withWebSocketMessage(WebSocketMessage.Builder.create()
+                        .withType(MessageType.COMPLETE)
+                        .withHeader(Token.HEADER, token).noHeaders()
+                        .noBody())
+                .withoutCommittable());
     }
 }

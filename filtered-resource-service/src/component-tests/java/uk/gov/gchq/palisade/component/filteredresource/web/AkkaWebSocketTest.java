@@ -16,6 +16,7 @@
 
 package uk.gov.gchq.palisade.component.filteredresource.web;
 
+import akka.Done;
 import akka.NotUsed;
 import akka.actor.ActorSystem;
 import akka.actor.typed.ActorRef;
@@ -47,6 +48,7 @@ import uk.gov.gchq.palisade.component.filteredresource.repository.MapTokenOffset
 import uk.gov.gchq.palisade.resource.impl.FileResource;
 import uk.gov.gchq.palisade.resource.impl.SystemResource;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditableWebSocketMessage;
 import uk.gov.gchq.palisade.service.filteredresource.model.FilteredResourceRequest;
 import uk.gov.gchq.palisade.service.filteredresource.model.MessageType;
 import uk.gov.gchq.palisade.service.filteredresource.model.WebSocketMessage;
@@ -71,7 +73,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -109,11 +110,15 @@ class AkkaWebSocketTest {
     final ErrorSourceFactory errorSourceFactory = (token) -> Source.empty();
 
     // This reference is updated by our audit service and wiped clean in the setUp() method before each test
-    final AtomicReference<List<FilteredResourceRequest>> auditedResources = new AtomicReference<>(Collections.emptyList());
-    final AuditServiceSinkFactory sinkFactory = token -> Sink.foreach(pair -> auditedResources
-            .updateAndGet(list -> Stream.of(list, Collections.singletonList(pair.getFilteredResourceRequest()))
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList())));
+    final AtomicReference<LinkedList<FilteredResourceRequest>> auditedResources = new AtomicReference<>(new LinkedList<>());
+    final Sink<AuditableWebSocketMessage, CompletionStage<Done>> listSink = Sink.foreach(pair -> auditedResources
+            .updateAndGet(list -> {
+                list.addLast(pair.getFilteredResourceRequest());
+                return list;
+            }));
+    final AuditServiceSinkFactory sinkFactory = token -> Flow.<AuditableWebSocketMessage>create()
+            .filter(message -> message.getCommittable() != null) // Similar to the service implementation, only 'audit' things that are committable
+            .toMat(listSink, Keep.right());
     // Finally, create the websocketEventService from its parts
     final WebSocketEventService websocketEventService = new WebSocketEventService(offsetController, sinkFactory, sourceFactory, errorSourceFactory);
 
@@ -132,7 +137,7 @@ class AkkaWebSocketTest {
         server = new AkkaHttpServer(HOST, PORT, List.of(wsRouter));
         server.serveForever(system);
         // Reset the audited resources so far
-        auditedResources.set(Collections.emptyList());
+        auditedResources.set(new LinkedList<>());
     }
 
     @AfterEach
@@ -179,11 +184,11 @@ class AkkaWebSocketTest {
                 .exceptionally(throwable -> fail("CompletableFuture failed while collecting list of websocket responses", throwable));
 
         assertThat(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS))
-                .hasSize(N_MESSAGES + 1)
+                .hasSize(N_MESSAGES)
                 // Assert PING -> PONG
                 .allSatisfy((WebSocketMessage message) -> assertThat(message)
                         .extracting(WebSocketMessage::getType)
-                        .isIn(MessageType.PONG, MessageType.COMPLETE));
+                        .isEqualTo(MessageType.PONG));
         // Nothing should have been audited
         assertThat(auditedResources.get()).isEmpty();
     }
@@ -229,7 +234,7 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         LinkedList<WebSocketMessage> results = new LinkedList<>(sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS));
         assertThat(results)
-                .hasSize(N_MESSAGES + 1);
+                .hasSize(N_MESSAGES);
 
         // Assert CTS -> COMPLETE for last messages
         assertThat(results.getLast())
@@ -304,7 +309,7 @@ class AkkaWebSocketTest {
         // Get the result of the client sink, a list of (WebSocket) responses
         List<WebSocketMessage> results = sinkFuture.get(N_MESSAGES, TimeUnit.SECONDS);
         assertThat(results)
-                .hasSize((N_MESSAGES * 2) + 1);
+                .hasSize(N_MESSAGES * 2);
 
         // De-interleave the two lists
         // There is no guarantee that messages of different types are strictly ordered compared to one another, but messages of the same type are
