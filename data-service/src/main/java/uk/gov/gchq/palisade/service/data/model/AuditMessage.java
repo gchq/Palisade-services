@@ -57,8 +57,8 @@ public class AuditMessage {
     private final String token;  //token for this request
 
     @JsonProperty("userId")
-    protected final @Nullable
-    String userId; //Unique identifier for the user.
+    @Nullable
+    protected final String userId; // Unique identifier for the user.
 
     @JsonProperty("resourceId")
     protected final @Nullable
