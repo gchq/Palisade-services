@@ -41,13 +41,8 @@ public class MapTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
 
     @Override
     public CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token) {
-        return null;
+        var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
+        this.tokenAuditErrorMessage.remove(token);
+        return CompletableFuture.completedFuture(Optional.of(new Pair<>(new TokenAuditErrorMessageEntity(token, auditErrorMessage), null)));
     }
-
-//    @Override
-//    public CompletableFuture<Optional<AuditErrorMessage>> popAuditErrorMessage(final String token) {
-//        var auditErrorMessage = this.tokenAuditErrorMessage.get(token);
-//        this.tokenAuditErrorMessage.remove(token);
-//        return CompletableFuture.completedFuture(Optional.ofNullable(auditErrorMessage));
-//    }
 }

@@ -17,7 +17,6 @@ package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
 import akka.Done;
 import org.springframework.data.repository.CrudRepository;
-import reactor.core.publisher.Mono;
 import scala.concurrent.Future;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
@@ -32,7 +31,7 @@ import java.util.concurrent.Executor;
 public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAuditErrorMessageEntity, String> {
 
     /**
-     * Put a token and its {@link AuditErrorMessage} into persistence .
+     * Put a token and its {@link AuditErrorMessage} into persistence.
      * This is a ease-of-use wrapper around {@link CrudRepository#save}.
      *
      * @param token             the unique request token
@@ -44,7 +43,7 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
     }
 
     /**
-     * Find the first AuditErrorMessages from the repository for the unique token
+     * Find the first TokenAuditErrorMessageEntity from the repository by the unique token.
      *
      * @param token the unique request token
      * @return an Optional of the {@link TokenAuditErrorMessageEntity} containing the exception and token
@@ -52,10 +51,11 @@ public interface TokenAuditErrorMessageRepository extends CrudRepository<TokenAu
     Optional<TokenAuditErrorMessageEntity> findFirstByToken(final String token);
 
     /**
+     * An Async call to delete the entity from the repository.
      *
-     * @param entity
-     * @param executor
-     * @return
+     * @param entity   the TokenAuditErrorMessageEntity to be deleted
+     * @param executor the async exexcutor
+     * @return A Completed Future after the async has completed
      */
     Future<Done> asyncDelete(TokenAuditErrorMessageEntity entity, Executor executor);
 }

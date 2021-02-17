@@ -105,8 +105,8 @@ class AkkaWebSocketTest {
     final FilteredResourceSourceFactory sourceFactory = (token, offset) -> Source.repeat(new Pair<>(testRequest, mockCommittable))
             .take(N_MESSAGES - 1)
             .mapMaterializedValue(notUsed -> Consumer.createNoopControl());
+    // Create en errorSourceFactory that returns 0 errors
     final ErrorSourceFactory errorSourceFactory = (token) -> Source.empty();
-
 
     // This reference is updated by our audit service and wiped clean in the setUp() method before each test
     final AtomicReference<List<FilteredResourceRequest>> auditedResources = new AtomicReference<>(Collections.emptyList());

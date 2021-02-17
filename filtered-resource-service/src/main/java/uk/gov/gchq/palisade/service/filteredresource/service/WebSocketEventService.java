@@ -69,7 +69,7 @@ public class WebSocketEventService {
      * @param tokenOffsetController the instance of the {@link TokenOffsetController}, which will handle reporting early and late offsets for a given token
      * @param auditSinkFactory      a factory for creating an akka-streams {@link Sink} to the audit "success" queue for a given token
      * @param resourceSourceFactory a factory for creating an akka-streams {@link Source} from the upstream "masked-resource" queue for a given token
-     * @param errorSourceFactory a factory for creating an akka-streams{@link Source} from the upstream "error" topic queue for a given token
+     * @param errorSourceFactory    a factory for creating an akka-streams{@link Source} from the upstream "error" topic queue for a given token
      */
     public WebSocketEventService(
             final ActorRef<TokenOffsetCommand> tokenOffsetController,
@@ -129,7 +129,7 @@ public class WebSocketEventService {
                         MessageType.PING.ordinal(), onPing(token),
 
                         // On CTS message, get the offset for the token from persistence, then return results
-                        // Usually returns RESOURCE ....*n, RESOURCE, COMPLETE, if redis is dead then return ERROR, and then NO_ERROR
+                        // Usually returns RESOURCE ....*n, RESOURCE, COMPLETE, if redis is dead then return ERROR
                         MessageType.CTS.ordinal(), onCts(token)
 
                 )))
@@ -155,9 +155,9 @@ public class WebSocketEventService {
      */
     private Flow<WebSocketMessage, WebSocketMessage, NotUsed> onCts(final String token) {
         Source<AuditableWebSocketMessage, NotUsed> ctsSource = Source.<AuditableWebSocketMessage>empty()
-                .concat(this.createErrorSource(token))
-                .concat(this.createResourceSource(token))
-                .concat(this.createErrorSource(token));
+                .concat(this.createErrorSource(token)) // Handle early error messages
+                .concat(this.createResourceSource(token)) // Handle the resources
+                .concat(this.createErrorSource(token)); // Handle late error messages
 
         return Flow.<WebSocketMessage>create()
                 // Connect each CTS message with a processed leafResource or error
@@ -173,7 +173,7 @@ public class WebSocketEventService {
 
                 .map(AuditableWebSocketMessage::getWebSocketMessage)
 
-                //Then add the complete message
+                // Finally add the complete message to the Flow
                 .concat(this.createCompleteSource(token));
     }
 
@@ -197,18 +197,18 @@ public class WebSocketEventService {
                         // If an offset was successfully found for this token, emit many RESOURCE messages
                         .map(offset -> this.resourceSourceFactory.create(token, offset)
                                 // Convert to an internal datatype capturing all necessary information
-                                .map(pair -> AuditableWebSocketMessage.Builder.create()
+                                .map(committablePair -> AuditableWebSocketMessage.Builder.create()
                                         .withWebSocketMessage(WebSocketMessage.Builder.create()
                                                 .withType(MessageType.RESOURCE)
                                                 .withHeader(Token.HEADER, token).noHeaders()
-                                                .withBody(pair.first().getResourceNode()))
-                                        .withCommittable(pair.second())
-                                        .withFilteredResourceRequest(pair.first()))
+                                                .withBody(committablePair.first().getResourceNode()))
+                                        .withCommittable(committablePair.second())
+                                        .withFilteredResourceRequest(committablePair.first()))
 
                                 // Ignore this stream's materialization
                                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed()))
 
-                        // If an error occurred finding the offset, emit a single ERROR message
+                        // If an error occurred finding the offset, emit a single ERROR message without a committable
                         .orElse(Source.single(AuditableWebSocketMessage.Builder.create()
                                 .withWebSocketMessage(WebSocketMessage.Builder.create()
                                         .withType(MessageType.ERROR)
@@ -225,14 +225,14 @@ public class WebSocketEventService {
      */
     private Source<AuditableWebSocketMessage, NotUsed> createErrorSource(final String token) {
         return this.errorSourceFactory.create(token)
-                // Take an error and convert it into an auditableWebSocketMessage
-                .map(pair -> AuditableWebSocketMessage.Builder.create()
+                // Take an error and convert it into an auditableWebSocketMessage so that it can be committed
+                .map(committablePair -> AuditableWebSocketMessage.Builder.create()
                         .withWebSocketMessage(WebSocketMessage.Builder.create()
                                 .withType(MessageType.ERROR)
                                 .withHeader(Token.HEADER, token).noHeaders()
-                                .withBody(pair.first().getError().getMessage()))
-                        .withCommittable(pair.second())
-                        .withAuditErrorMessage(pair.first()))
+                                .withBody(committablePair.first().getError().getMessage()))
+                        .withCommittable(committablePair.second())
+                        .withAuditErrorMessage(committablePair.first()))
 
                 // Ignore this stream's materialization
                 .mapMaterializedValue(ignoredMat -> NotUsed.notUsed());
@@ -240,7 +240,7 @@ public class WebSocketEventService {
 
     /**
      * The end message in the stream of {@link WebSocketMessage}s.
-     * Attaching a {@link MessageType#COMPLETE} to indicate that all resources or errors have been processed for this token
+     * Attaching a {@link MessageType#COMPLETE} to indicate that all resources and/or errors have been processed for this token
      *
      * @param token the token for this client
      * @return a source of {@link WebSocketMessage}s with a {@link MessageType#COMPLETE}
@@ -251,5 +251,4 @@ public class WebSocketEventService {
                 .withHeader(Token.HEADER, token).noHeaders()
                 .noBody());
     }
-
 }

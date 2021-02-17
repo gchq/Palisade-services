@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Persist and retrieve {@link AuditErrorMessage} for a given request token.
+ * Persist and retrieve {@link TokenAuditErrorMessageEntity} for a given request token.
  */
 public interface TokenAuditErrorMessagePersistenceLayer {
 
@@ -41,7 +41,7 @@ public interface TokenAuditErrorMessagePersistenceLayer {
      * Get it, delete from repository and return to client
      *
      * @param token the unique request token
-     * @return an optional.empty if there are no AuditErrorMessages left, or the throwable exception from the repository
+     * @return an optional.empty if there are no TokenAuditErrorMessageEntity left in the repository
      */
     CompletableFuture<Optional<Pair<TokenAuditErrorMessageEntity, CrudRepositoryPop>>> popAuditErrorMessage(final String token);
 }

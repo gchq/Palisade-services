@@ -302,13 +302,11 @@ public class AkkaRunnableGraph {
 
                     // Convert the audit message to a producer record, supplying the kafka topic, partition and headers
                     .map(requestAndOffset -> new Pair<>(
-                            new ProducerRecord<>(
-                                    outputTopic.getName(), partition,
-                                    (String) null, requestAndOffset.first(), headers),
+                            new ProducerRecord<>(outputTopic.getName(), partition, (String) null, requestAndOffset.first(), headers),
                             requestAndOffset.second()))
 
                     // Consume and apply the upstream committable to the kafka message
-                    .map(recordAndOffset -> ProducerMessage.single(recordAndOffset.first(), (Committable) recordAndOffset.second()))
+                    .map(recordAndOffset -> ProducerMessage.single(recordAndOffset.first(), recordAndOffset.second()))
 
                     // Send to kafka to be consumed by the actual audit service
                     .toMat(auditSink, Keep.right());
@@ -329,7 +327,7 @@ public class AkkaRunnableGraph {
                         .map(element -> Pair.create(persistenceLayer, element))))
 
                 // Extract the AuditErrorMessage from the entity
-                .map(pair -> Pair.create(pair.first().getAuditErrorMessage(), pair.second()));
+                .map(entityCrudPair -> Pair.create(entityCrudPair.first().getAuditErrorMessage(), entityCrudPair.second()));
     }
 
     @Bean
@@ -337,8 +335,7 @@ public class AkkaRunnableGraph {
             final Source<CommittableMessage<String, TopicOffsetMessage>, Control> tokenOffsetSource,
             final Sink<Committable, CompletionStage<Done>> committerSink,
             final OffsetEventService offsetEventService,
-            final ActorRef<TokenOffsetCommand> tokenOffsetCtrl
-    ) {
+            final ActorRef<TokenOffsetCommand> tokenOffsetCtrl) {
         return tokenOffsetSource
                 // Extract committable, token and message
                 .map(committableMessage -> Tuple3.create(
@@ -363,14 +360,6 @@ public class AkkaRunnableGraph {
                         .to(committerSink));
     }
 
-    /**
-     * The RunnableGraph for processing tokens and the linked AuditErrorMessage exceptions.
-     *
-     * @param tokenAuditErrorMessageSource  the source, containing the CommittableMessage, token and AuditErrorMessage
-     * @param committerSink                 the runnable sink
-     * @param auditErrorMessageEventService the event service, with the methods to interact with the persistence layer
-     * @return
-     */
     @Bean
     RunnableGraph<Control> tokenAuditErrorMessageRunnableGraph(final Source<CommittableMessage<String, AuditErrorMessage>, Control> tokenAuditErrorMessageSource,
                                                                final Sink<Committable, CompletionStage<Done>> committerSink,
@@ -412,8 +401,20 @@ public class AkkaRunnableGraph {
         Source<Pair<FilteredResourceRequest, Committable>, Control> create(String token, Long offset);
     }
 
+    /**
+     * Factory for Akka {@link Source} of {@link AuditErrorMessage}.
+     * This automatically connects to kafka to retrieve AuditErrorMessages and committables for the token.
+     * The result is a stream of {@link AuditErrorMessage}s to be returned to the client
+     */
     public interface ErrorSourceFactory {
 
+        /**
+         * Factory for Akka {@link Source} of {@link AuditErrorMessage}.
+         * Connect to kafka for a unique token and retrieve AuditErrorMessages
+         *
+         * @param token the client's unique token for their request
+         * @return {@link Source} of {@link AuditErrorMessage} for the client's request
+         */
         Source<Pair<AuditErrorMessage, Committable>, NotUsed> create(String token);
     }
 

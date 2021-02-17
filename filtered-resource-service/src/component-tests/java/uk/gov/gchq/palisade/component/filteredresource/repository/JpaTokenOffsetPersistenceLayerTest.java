@@ -51,7 +51,7 @@ class JpaTokenOffsetPersistenceLayerTest {
     private TokenOffsetRepository offsetsRepository;
 
     @Test
-    void contextLoads() {
+    void testContextLoads() {
         assertThat(persistenceLayer).isNotNull();
         assertThat(offsetsRepository).isNotNull();
     }

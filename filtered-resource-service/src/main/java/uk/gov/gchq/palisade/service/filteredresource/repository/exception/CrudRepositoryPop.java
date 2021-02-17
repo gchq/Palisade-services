@@ -21,15 +21,26 @@ import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
+import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
+/**
+ * The CrudRepositoryPop is used to call the repository and asynchronously delete tokenAuditErrorMessageEntities
+ */
 public class CrudRepositoryPop implements Committable {
     private final TokenAuditErrorMessageRepository repository;
     private final TokenAuditErrorMessageEntity entity;
     private final Executor executor;
 
+    /**
+     * The default constructor of the CrudRepositoryPop, used for asynchronously deleting entities from the backing store
+     *
+     * @param repository the {@link TokenAuditErrorMessageRepository} used to access the backing store
+     * @param entity     the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
+     * @param executor   the async executor
+     */
     public CrudRepositoryPop(final TokenAuditErrorMessageRepository repository, final TokenAuditErrorMessageEntity entity, final Executor executor) {
         this.repository = repository;
         this.entity = entity;

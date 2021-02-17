@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Java JPA implementation of a {@link TokenAuditErrorMessagePersistenceLayer} for the filtered-resource-service.
+ * Java JPA implementation of a {@link TokenAuditErrorMessagePersistenceLayer} for the Filtered-Resource-Service.
  * Persist and retrieve {@link AuditErrorMessage#getError()} for a given request token.
  */
 public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErrorMessagePersistenceLayer {

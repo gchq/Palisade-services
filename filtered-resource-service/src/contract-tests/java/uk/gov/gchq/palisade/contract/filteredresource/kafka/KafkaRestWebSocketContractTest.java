@@ -218,7 +218,7 @@ class KafkaRestWebSocketContractTest {
                                     ctsMsg
                             ),
                             List.of(
-                                    // No Resources or WebSocketMessages are expected to be returned1
+                                    // No Resources or WebSocketMessages are expected to be returned
                             ),
                             List.of(
                                     AuditErrorMessage.Builder.create().withUserId("userId")
