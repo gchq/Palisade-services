@@ -103,10 +103,10 @@ class RedisPersistenceContractTest {
                 .rules(new Rules<>());
 
         AuthorisedDataRequest authorisedDataRequest = AuthorisedDataRequest.Builder.create().withResource(new FileResource().id("/resource/id")
-                        .serialisedFormat("avro")
-                        .type(Employee.class.getTypeName())
-                        .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
-                        .parent(new SystemResource().id("/")))                
+                .serialisedFormat("avro")
+                .type(Employee.class.getTypeName())
+                .connectionDetail(new SimpleConnectionDetail().serviceName("data-service"))
+                .parent(new SystemResource().id("/")))
                 .withUser(new User().userId("test-user"))
                 .withContext(new Context().purpose("test-purpose"))
                 .withRules(new Rules<>());
@@ -129,7 +129,7 @@ class RedisPersistenceContractTest {
                 () -> assertThat(authorisedDataFromResource)
                         .as("Comparison using the DataResponse's equals method")
                         .isEqualTo(authorisedDataRequest),
-                
+
                 () -> assertThat(authorisedDataFromResource)
                         .as("Comparison of content using all of the DataResponse's components recursively")
                         .usingRecursiveComparison()
