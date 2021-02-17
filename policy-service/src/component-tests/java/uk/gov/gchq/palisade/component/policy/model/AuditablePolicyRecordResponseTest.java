@@ -106,12 +106,19 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
         AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(null);
         // Then
-        assertThat(chainedResponse).usingRecursiveComparison().isEqualTo(auditablePolicyRecordResponse);
-        assertThat(chainedResponse).isEqualTo(auditablePolicyRecordResponse);
+        assertAll(
+                () -> assertThat(chainedResponse)
+                        .usingRecursiveComparison()
+                        .as("Recursively check the chained response has not changed")
+                        .isEqualTo(auditablePolicyRecordResponse),
+                () -> assertThat(chainedResponse)
+                        .as("Check the chained response is the same as the original response")
+                        .isEqualTo(auditablePolicyRecordResponse)
+        );
     }
 
     /**
-     * When there is no {@link AuditErrorMessage} the  {@link AuditablePolicyRecordResponse#chain(AuditErrorMessage)}
+     * When there is no {@link AuditErrorMessage} the {@link AuditablePolicyRecordResponse#chain(AuditErrorMessage)}
      * is expected to return a new and different object with the error message {@link AuditErrorMessage} added.
      */
     @Test
@@ -120,8 +127,18 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
         AuditablePolicyRecordResponse auditablePolicyRecordResponse = AuditablePolicyRecordResponse.Builder.create().withPolicyResponse(RESPONSE).withNoErrors();
         AuditablePolicyRecordResponse chainedResponse = auditablePolicyRecordResponse.chain(AUDIT_ERROR_MESSAGE);
         // Then
-        assertThat(chainedResponse).usingRecursiveComparison().isNotEqualTo(auditablePolicyRecordResponse);
-        assertThat(chainedResponse.getAuditErrorMessage()).usingRecursiveComparison().isEqualTo(AUDIT_ERROR_MESSAGE);
-        assertThat(chainedResponse.getAuditErrorMessage()).isEqualTo(AUDIT_ERROR_MESSAGE);
+        assertAll(
+                () -> assertThat(chainedResponse)
+                        .usingRecursiveComparison()
+                        .as("Recursively check the original response is not equal to the chained response")
+                        .isNotEqualTo(auditablePolicyRecordResponse),
+                () -> assertThat(chainedResponse.getAuditErrorMessage())
+                        .usingRecursiveComparison()
+                        .as("Recursively check the AuditErrorMessage within the response")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+                () -> assertThat(chainedResponse.getAuditErrorMessage())
+                        .as("Check the AuditErrorMessage objects")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE)
+        );
     }
 }
