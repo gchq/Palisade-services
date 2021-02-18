@@ -57,6 +57,13 @@ public class JpaTokenAuditErrorMessagePersistenceLayer implements TokenAuditErro
                 .thenApply((Optional<TokenAuditErrorMessageEntity> entityOptional) -> entityOptional.map(entity -> Pair.create(entity, new CrudRepositoryPop(this::asyncDelete, entity))));
     }
 
+    /**
+     * Calls the {@link TokenAuditErrorMessageRepository#delete(Object)} method and deletes the entity from the backing store,
+     * then returns a CompletableFuture when completed
+     *
+     * @param entity the {@link TokenAuditErrorMessageEntity} containing the {@link AuditErrorMessage} and token
+     * @return a CompletableFuture#void after the async call has completed
+     */
     public CompletableFuture<Void> asyncDelete(final TokenAuditErrorMessageEntity entity) {
         return CompletableFuture.runAsync(() -> repository.delete(entity), executor);
     }

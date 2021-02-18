@@ -47,7 +47,7 @@ public class AuditErrorMessageConverter implements AttributeConverter<AuditError
         try {
             return this.objectMapper.writeValueAsString(auditErrorMessage);
         } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Could not convert rules to json string", e);
+            throw new SerializationFailedException("Could not convert AuditErrorMessage to json string", e);
         }
     }
 
@@ -56,7 +56,7 @@ public class AuditErrorMessageConverter implements AttributeConverter<AuditError
         try {
             return this.objectMapper.readValue(auditErrorMessage, AuditErrorMessage.class);
         } catch (JsonProcessingException e) {
-            throw new SerializationFailedException("Could not convert json string to rules", e);
+            throw new SerializationFailedException("Could not convert json string to AuditErrorMessage", e);
         }
     }
 }

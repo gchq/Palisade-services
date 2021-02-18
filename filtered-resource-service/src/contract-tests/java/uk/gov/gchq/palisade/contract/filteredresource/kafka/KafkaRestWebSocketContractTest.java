@@ -191,7 +191,7 @@ class KafkaRestWebSocketContractTest {
                             List.of()
                     ),
                     // Test for 'late' client - persistence has offset
-                    // Expect tot receive the three resources and no errors
+                    // Expect to receive the three resources and no errors
                     Arguments.of(
                             "test-token-2",
                             List.of(
