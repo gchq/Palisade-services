@@ -96,7 +96,7 @@ class AuditablePolicyResourceRulesTest extends CommonTestData {
                         .isEqualTo(POLICY_RESOURCE_RULES_ERROR),
 
                 () -> assertThat(auditablePolicyResourceRulesObjectContentObject)
-                        .as("Recursively compare the AuditablePolicyResourceRules object, ignoring the Throwable value")
+                        .as("Recursively compare the AuditablePolicyResourceRules object")
                         .usingRecursiveComparison()
                         .isEqualTo(POLICY_RESOURCE_RULES_ERROR)
         );

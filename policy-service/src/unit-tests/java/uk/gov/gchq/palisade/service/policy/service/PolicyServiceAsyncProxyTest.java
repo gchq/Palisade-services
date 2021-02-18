@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
@@ -129,7 +130,7 @@ class PolicyServiceAsyncProxyTest {
     @Test
     void testGetResourceRulesWhenItThrowsAnException() throws Exception {
         // When
-        when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("Test"));
+        when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("No rules found for the resource"));
         AuditablePolicyResourceRules response = asyncProxy.getResourceRules(REQUEST).get();
 
         // Then
@@ -146,9 +147,13 @@ class PolicyServiceAsyncProxyTest {
                         .as("Check the AuditErrorMessage value is not null")
                         .isNotNull(),
 
-                () -> assertThat(response.getAuditErrorMessage().getError().getCause())
+                () -> assertThat(response.getAuditErrorMessage().getError())
+                        .extracting(Throwable::getCause)
                         .as("Check the cause of the thrown error")
                         .isInstanceOf(NoSuchPolicyException.class)
+                        .as("Check the message in the exception")
+                        .extracting(Throwable::getMessage)
+                        .isEqualTo("No rules found for the resource")
         );
     }
 
@@ -168,7 +173,7 @@ class PolicyServiceAsyncProxyTest {
         // Then
         assertAll("Check the values of the returned AuditablePolicyRecordResponse object",
                 () -> assertThat(response.getPolicyResponse())
-                        .as("Check the PolicyRequest value is not null")
+                        .as("Check the PolicyResponse value is not null")
                         .isNotNull(),
 
                 () -> assertThat(response.getAuditErrorMessage())
@@ -186,26 +191,31 @@ class PolicyServiceAsyncProxyTest {
     @Test
     void testGetRecordRulesWithNoPolicyRecord() throws Exception {
         // When
-        when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("Test"));
+        when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("No rules found for the resource"));
         AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES).get();
         PolicyResponse policyResponse = response.getPolicyResponse();
 
         // Then
         assertAll(
                 () -> assertThat(policyResponse)
-                        .as("Check the PolicyRequest value is not null")
+                        .as("Check the PolicyResponse value is not null")
                         .isNotNull(),
 
                 () -> assertThat(policyResponse.getRules())
-                        .as("Check the PolicyRequest contains a Rules object")
+                        .as("Check the PolicyResponse contains a Rules object")
                         .isNotNull(),
 
                 () -> assertThat(policyResponse.getRules().containsRules())
                         .as("Check the Rules object does not contain any rules")
                         .isEqualTo(Boolean.FALSE),
 
-                () -> assertThat(response.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage value is null")
+                () -> assertThat(response.getAuditErrorMessage().getError())
+                        .extracting(Throwable::getCause)
+                        .as("Check the cause of the thrown exception")
+                        .isInstanceOf(NoSuchPolicyException.class)
+                        .extracting(Throwable::getMessage)
+                        .as("Check the message of the thrown exception")
+                        .isEqualTo("No rules found for the resource")
                         .isNotNull()
         );
     }

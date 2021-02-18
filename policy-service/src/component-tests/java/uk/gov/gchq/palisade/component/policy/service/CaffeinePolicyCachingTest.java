@@ -93,7 +93,7 @@ class CaffeinePolicyCachingTest extends PolicyTestCommon {
     @Test
     void testContextLoads() {
         assertThat(policyService)
-                .as("Check the PolicyService is not null")
+                .as("Check the Policy Service is not null")
                 .isNotNull();
     }
 

@@ -74,10 +74,9 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
 
         // Then - the record-level rules are returned
         assertThat(secretDirRules)
-                .as("Check the rules are not null")
-                .isNotNull()
                 .as("Recursively check the returned rules")
-                .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
+                .usingRecursiveComparison()
+                .isEqualTo(PASS_THROUGH_POLICY);
 
         // When - a record-level policy is requested on a resource
         Mockito.doReturn(Optional.of(PASS_THROUGH_POLICY)).when(MOCK_SERVICE).getRecordRules(SECRET_TXT_FILE.getId());
@@ -88,7 +87,8 @@ class PolicyServiceHierarchyProxyTest extends PolicyTestCommon {
                 .as("Check the rules are not null")
                 .isNotNull()
                 .as("Recursively check the returned rules")
-                .usingRecursiveComparison().isEqualTo(PASS_THROUGH_POLICY);
+                .usingRecursiveComparison()
+                .isEqualTo(PASS_THROUGH_POLICY);
     }
 
     @Test

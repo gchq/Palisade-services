@@ -127,7 +127,8 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
             assertThat(resourceRules)
                     .as("Check the returned resource rules is not empty")
                     .isPresent()
-                    .get().as("Check the resource rule is not null")
+                    .map(Rules::getRules)
+                    .as("Check the resource rule is not null")
                     .isNotNull();
         }
     }
@@ -168,7 +169,8 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
                         .isPresent(),
 
                 () -> assertThat(recordRules).isPresent().get()
-                        .extracting("rules").usingRecursiveComparison()
+                        .extracting("rules")
+                        .usingRecursiveComparison()
                         .as("Recursively check the returned rules")
                         .isEqualTo(newPolicy.getRules())
         );
