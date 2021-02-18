@@ -34,7 +34,6 @@ import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.concurrent.CompletionException;
 
 public class ApplicationTestData {
     public static final String REQUEST_TOKEN = "test-request-token";
