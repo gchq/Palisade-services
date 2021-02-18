@@ -99,7 +99,7 @@ import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUDITAB
 )
 @Import({KafkaContractTest.KafkaInitializer.Config.class})
 @ContextConfiguration(initializers = {KafkaContractTest.KafkaInitializer.class})
-@ActiveProfiles({"akka-test", "debug"})
+@ActiveProfiles({"akka-test"})
 public class KafkaContractTest {
     public static final String READ_CHUNKED = "/read/chunked";
 
@@ -121,7 +121,6 @@ public class KafkaContractTest {
     @Test
     @DirtiesContext
     void testRestEndpointError() {
-
         when(serviceMock.authoriseRequest(any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST_WITH_ERROR));
 
@@ -146,7 +145,6 @@ public class KafkaContractTest {
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditErrorMessage>> resultSeq = errorProbe.request(1);
 
-
         LinkedList<ConsumerRecord<String, AuditErrorMessage>> results = LongStream.range(0, 1)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(21, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -156,8 +154,17 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
-                            .as("Check the result is an AuditErrorMessage")
+                            .as("Recursivley check the result against the AuditErrorMessage, ignoring the error")
+                            .usingRecursiveComparison()
+                            .ignoringFieldsOfTypes(Throwable.class)
                             .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE);
+
+                    assertThat(result.value())
+                            .as("Check the Error Message in the AuditErrorMessage object")
+                            .extracting(AuditErrorMessage::getError)
+                            .extracting(Throwable::getMessage)
+                            .isEqualTo(ContractTestData.AUDIT_ERROR_MESSAGE.getError().getMessage());
+
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .as("Check the bytes of the request token")
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
@@ -165,14 +172,12 @@ public class KafkaContractTest {
     }
 
     /**
-     * Tests the handling of the successful messages on the kafka stream for data-service.  The expected results will be an
+     * Tests the handling of the successful messages on the kafka stream for data-service. The expected results will be an
      * AuditSuccessMessage on a Kafka stream to the "success-topic" and return HTTP Accepted.
      */
     @Test
     @DirtiesContext
     void testRestEndpointSuccess() {
-
-        //   TokenMessagePair tokenMessagePair = new TokenMessagePair(ContractTestData.REQUEST_TOKEN, ContractTestData.AUDIT_SUCCESS_MESSAGE);
         when(serviceMock.authoriseRequest(any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST));
 
@@ -199,7 +204,6 @@ public class KafkaContractTest {
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
 
-
         LinkedList<ConsumerRecord<String, AuditSuccessMessage>> results = LongStream.range(0, 1)
                 .mapToObj(i -> resultSeq.expectNext(new FiniteDuration(21, TimeUnit.SECONDS)))
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -209,14 +213,15 @@ public class KafkaContractTest {
                 .hasSize(1)
                 .allSatisfy(result -> {
                     assertThat(result.value())
-                            .as("Check the result is an AuditSuccessMessage")
+                            .as("Recursivley check the result against the AuditSuccessMessage")
+                            .usingRecursiveComparison()
                             .isEqualTo(ContractTestData.AUDIT_SUCCESS_MESSAGE);
+
                     assertThat(result.headers().lastHeader(Token.HEADER).value())
                             .as("Check the bytes of the request token")
                             .isEqualTo(ContractTestData.REQUEST_TOKEN.getBytes());
                 });
     }
-
 
     public static class KafkaInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         private static final Logger LOGGER = LoggerFactory.getLogger(KafkaInitializer.class);
