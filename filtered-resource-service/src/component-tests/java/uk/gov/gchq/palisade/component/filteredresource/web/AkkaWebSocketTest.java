@@ -63,7 +63,6 @@ import uk.gov.gchq.palisade.service.filteredresource.web.AkkaHttpServer;
 import uk.gov.gchq.palisade.service.filteredresource.web.router.WebSocketRouter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

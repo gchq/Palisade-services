@@ -31,7 +31,6 @@ import uk.gov.gchq.palisade.service.filteredresource.ApplicationTestData;
 import uk.gov.gchq.palisade.service.filteredresource.config.ApplicationConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.config.AsyncConfiguration;
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenOffsetEntity;
-import uk.gov.gchq.palisade.service.filteredresource.repository.exception.JpaTokenAuditErrorMessagePersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.JpaTokenOffsetPersistenceLayer;
 import uk.gov.gchq.palisade.service.filteredresource.repository.offset.TokenOffsetRepository;
 

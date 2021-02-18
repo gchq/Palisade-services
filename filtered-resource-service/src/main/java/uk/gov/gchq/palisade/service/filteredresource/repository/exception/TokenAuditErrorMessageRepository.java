@@ -15,15 +15,12 @@
  */
 package uk.gov.gchq.palisade.service.filteredresource.repository.exception;
 
-import akka.Done;
 import org.springframework.data.repository.CrudRepository;
-import scala.concurrent.Future;
 
 import uk.gov.gchq.palisade.service.filteredresource.domain.TokenAuditErrorMessageEntity;
 import uk.gov.gchq.palisade.service.filteredresource.model.AuditErrorMessage;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /**
  * Persist and retrieve {@link AuditErrorMessage}(s) for a given request token.
