@@ -58,19 +58,19 @@ class RedisPersistenceContractTest {
     private static final int REDIS_PORT = 6379;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
+        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
                 .withReuse(true);
 
         @Override
         public void initialize(@NonNull final ConfigurableApplicationContext context) {
             // Start container
-            redis.start();
+            REDIS.start();
 
             // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
+            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
             // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
+            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
         }

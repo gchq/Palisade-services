@@ -110,12 +110,10 @@ class SimpleDataServiceTest {
 
         @Override
         public void close() {
-
         }
 
         @Override
         public ResponseWriter write(final OutputStream outputStream) throws IOException {
-
             try (var testInputStream = new ByteArrayInputStream(testData.getBytes())) {
                 testInputStream.transferTo(outputStream);
             }

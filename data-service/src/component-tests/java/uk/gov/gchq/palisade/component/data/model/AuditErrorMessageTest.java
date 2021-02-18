@@ -65,13 +65,9 @@ class AuditErrorMessageTest {
                         .ignoringFieldsOfTypes(Throwable.class)
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
 
-                () -> assertThat(auditErrorMessageObject
-                                .getError()
-                                .getMessage())
+                () -> assertThat(auditErrorMessageObject.getError().getMessage())
                         .as("Comparison assertion using the Throwable's exception")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE
-                                .getError()
-                                .getMessage())
+                        .isEqualTo(AUDIT_ERROR_MESSAGE.getError().getMessage())
         );
     }
 
@@ -103,13 +99,9 @@ class AuditErrorMessageTest {
                         .ignoringFieldsOfTypes(Throwable.class)
                         .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION),
 
-                () -> assertThat(auditErrorMessageObject
-                                .getError()
-                                .getMessage())
+                () -> assertThat(auditErrorMessageObject.getError().getMessage())
                         .as("Assertion check of the error message")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION
-                                .getError()
-                                .getMessage())
+                        .isEqualTo(AUDIT_ERROR_MESSAGE_FAILED_AUTHENTICATION.getError().getMessage())
         );
     }
 }

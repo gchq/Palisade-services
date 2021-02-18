@@ -185,7 +185,6 @@ public class KafkaContractTest {
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        final long recordCount = 1;
 
         TestSubscriber.Probe<ConsumerRecord<String, AuditSuccessMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("success-topic").getName()))

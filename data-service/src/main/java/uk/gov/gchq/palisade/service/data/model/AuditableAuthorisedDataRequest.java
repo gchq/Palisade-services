@@ -78,7 +78,7 @@ public final class AuditableAuthorisedDataRequest {
          */
         public interface IDataRequest {
             /**
-             * Adds the dataRequest.
+             * Adds the dataRequest to the message
              *
              * @param dataRequest initial request data
              * @return interface {@link IDataResponse} for the next step of the build
@@ -103,7 +103,7 @@ public final class AuditableAuthorisedDataRequest {
             }
 
             /**
-             * Adds the only the error message anbd assigns the authorised data to null
+             * Adds the only the error message and assigns the authorised data to null
              *
              * @param auditErrorMessage for the error that occurred
              * @return class {@link AuditableAuthorisedDataRequest} for the final step in the build.
@@ -114,9 +114,10 @@ public final class AuditableAuthorisedDataRequest {
 
             /**
              * Adds both the {@link AuthorisedDataRequest } and the {@link AuditErrorMessage} for the creation of the object
-             * @param authorisedDataRequest  value or null
-             * @param auditErrorMessage value or null
-             * @return value object
+             *
+             * @param authorisedDataRequest adds either the {@link AuthorisedDataRequest} or null to the builder
+             * @param auditErrorMessage     adds either the {@link AuditErrorMessage} or null to the builder
+             * @return class {@link AuditableAuthorisedDataRequest} for the completed class from the builder.
              */
             AuditableAuthorisedDataRequest withAuthorisedDataAndError(AuthorisedDataRequest authorisedDataRequest, AuditErrorMessage auditErrorMessage);
         }

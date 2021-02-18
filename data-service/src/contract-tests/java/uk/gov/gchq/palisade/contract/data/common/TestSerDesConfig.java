@@ -22,7 +22,6 @@ import org.springframework.core.serializer.support.SerializationFailedException;
 
 import uk.gov.gchq.palisade.service.data.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.data.model.AuditSuccessMessage;
-import uk.gov.gchq.palisade.service.data.model.DataRequest;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -39,30 +38,6 @@ public final class TestSerDesConfig {
 
     private TestSerDesConfig() {
         // Static collection of objects, class should never be instantiated
-    }
-
-    /**
-     * Kafka key deserialiser for upstream messages coming in as input
-     *
-     * @return an appropriate key deserialiser for the topic's message content
-     */
-    public static Deserializer<String> requestKeyDeserializer() {
-        return new StringDeserializer();
-    }
-
-    /**
-     * Kafka value deserialiser for upstream messages coming in as input
-     *
-     * @return an appropriate value deserialiser for the topic's message content
-     */
-    public static Deserializer<DataRequest> requestValueDeserializer() {
-        return (String ignored, byte[] palisadeResponse) -> {
-            try {
-                return MAPPER.readValue(palisadeResponse, DataRequest.class);
-            } catch (IOException e) {
-                throw new SerializationFailedException(DESERIALIZATION_FAILED_MESSAGE + new String(palisadeResponse, Charset.defaultCharset()), e);
-            }
-        };
     }
 
     /**

@@ -30,7 +30,6 @@ import uk.gov.gchq.palisade.service.data.model.AuditableAuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.AuditableDataResponse;
 import uk.gov.gchq.palisade.service.data.model.AuthorisedDataRequest;
 import uk.gov.gchq.palisade.service.data.model.DataRequest;
-import uk.gov.gchq.palisade.service.data.model.TokenMessagePair;
 
 import java.util.Collections;
 import java.util.Map;
@@ -108,11 +107,4 @@ public class CommonTestData {
             .withToken(TOKEN)
             .withSuccessMessage(AUDIT_SUCCESS_MESSAGE)
             .withAuditErrorMessage(null);
-
-    public static final AuditableDataResponse AUDITABLE_DATA_RESPONSE_WITH_ERROR = AuditableDataResponse.Builder.create()
-            .withToken(TOKEN)
-            .withSuccessMessage(null)
-            .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
-
-    public static final TokenMessagePair TOKEN_MESSAGE_PAIR = new TokenMessagePair(TOKEN, AUDIT_SUCCESS_MESSAGE);
 }

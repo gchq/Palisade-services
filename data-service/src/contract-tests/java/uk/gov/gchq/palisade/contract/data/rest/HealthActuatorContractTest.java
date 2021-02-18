@@ -27,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.gchq.palisade.service.data.DataApplication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * SpringBoot Starter Actuator is a service loaded-up by adding the spring-boot-starter-actuator as a dependency to the
@@ -53,9 +54,13 @@ class HealthActuatorContractTest {
     @Test
     void testServiceIsHealthy() {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity("/actuator/health", String.class);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String body = responseEntity.getBody();
-        assertThat(body).contains("\"status\":\"UP\"");
+        assertAll("Assert the Health Actuator",
+                () -> assertThat(responseEntity.getStatusCode())
+                        .as("Check the status code of the response")
+                        .isEqualTo(HttpStatus.OK),
+                () -> assertThat(responseEntity.getBody())
+                        .as("Check the body of the response")
+                        .contains("\"status\":\"UP\"")
+        );
     }
-
 }

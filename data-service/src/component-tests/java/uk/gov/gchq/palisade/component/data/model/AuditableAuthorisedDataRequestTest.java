@@ -32,7 +32,6 @@ class AuditableAuthorisedDataRequestTest {
      */
     @Test
     void testAuditableDataRequestBuilder() {
-
         AuditableAuthorisedDataRequest auditableAuthorisedDataRequestObject = AuditableAuthorisedDataRequest.Builder.create()
                 .withDataRequest(AUDITABLE_DATA_REQUEST.getDataRequest())
                 .withAuthorisedData(AUDITABLE_DATA_REQUEST.getAuthorisedDataRequest());
@@ -64,25 +63,10 @@ class AuditableAuthorisedDataRequestTest {
                         .as("Comparison using the AuditableDataRequest's equals method")
                         .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
 
-                () -> assertThat(auditableAuthorisedDataRequestObject
-                        .getAuditErrorMessage()
-                        .getError())
-                        .as("Comparison of content using all of the AuditableDataRequest's components recursively excluding the error")
+                () -> assertThat(auditableAuthorisedDataRequestObject)
+                        .as("Comparison of content using all of the AuditableDataRequest's components recursively")
                         .usingRecursiveComparison()
-                        .ignoringFieldsOfTypes(Throwable.class)
-                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR),
-
-                () -> assertThat(auditableAuthorisedDataRequestObject
-                        .getAuditErrorMessage()
-                        .getError()
-                        .getMessage())
-                        .as("Assertion check of the error message")
-                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR
-                                .getAuditErrorMessage()
-                                .getError()
-                                .getMessage())
-
-
+                        .isEqualTo(AUDITABLE_DATA_REQUEST_WITH_ERROR)
         );
     }
 }
