@@ -198,7 +198,7 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
 
         private static final int REDIS_PORT = 6379;
 
-        static GenericContainer<?> redis = new GenericContainer<>("redis:6-alpine")
+        static final GenericContainer<?> REDIS = new GenericContainer<>("redis:6-alpine")
                 .withExposedPorts(REDIS_PORT)
                 .withNetwork(Network.SHARED)
                 .withReuse(true);
@@ -207,12 +207,12 @@ class RedisPolicyCachingTest extends PolicyTestCommon {
         public void initialize(@NotNull final ConfigurableApplicationContext context) {
             context.getEnvironment().setActiveProfiles("redis", "akkatest");
             // Start container
-            redis.start();
+            REDIS.start();
 
             // Override Redis configuration
-            String redisContainerIP = "spring.redis.host=" + redis.getContainerIpAddress();
+            String redisContainerIP = "spring.redis.host=" + REDIS.getContainerIpAddress();
             // Configure the testcontainer random port
-            String redisContainerPort = "spring.redis.port=" + redis.getMappedPort(REDIS_PORT);
+            String redisContainerPort = "spring.redis.port=" + REDIS.getMappedPort(REDIS_PORT);
             RedisPolicyCachingTest.LOGGER.info("Starting Redis with {}", redisContainerPort);
             // Override the configuration at runtime
             TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, redisContainerIP, redisContainerPort);
