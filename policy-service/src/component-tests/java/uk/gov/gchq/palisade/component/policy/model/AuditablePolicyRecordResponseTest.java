@@ -24,6 +24,7 @@ import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.ContextConfiguration;
 
 import uk.gov.gchq.palisade.component.policy.CommonTestData;
+import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 
@@ -141,8 +142,12 @@ class AuditablePolicyRecordResponseTest extends CommonTestData {
                         .isEqualTo(AUDIT_ERROR_MESSAGE),
 
                 () -> assertThat(chainedResponse.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage objects")
-                        .isEqualTo(AUDIT_ERROR_MESSAGE)
+                        .extracting(AuditErrorMessage::getError)
+                        .as("Check the cause of the thrown error")
+                        .isInstanceOf(NoSuchPolicyException.class)
+                        .as("Check the message in the exception")
+                        .extracting(Throwable::getMessage)
+                        .isEqualTo("No rules found for the resource")
         );
     }
 }

@@ -59,7 +59,7 @@ public class CommonTestData {
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
             .withAttributes((new HashMap<>()))
-            .withError(new NoSuchPolicyException("Something went wrong!"));
+            .withError(new NoSuchPolicyException("No rules found for the resource"));
 
     public static final PolicyRequest POLICY_REQUEST = PolicyRequest.Builder.create()
             .withUserId(USER_ID)
