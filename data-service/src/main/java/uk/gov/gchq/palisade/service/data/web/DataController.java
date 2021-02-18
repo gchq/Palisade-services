@@ -34,6 +34,7 @@ import uk.gov.gchq.palisade.service.data.service.AuditMessageService;
 import uk.gov.gchq.palisade.service.data.service.AuditableDataService;
 
 import java.io.OutputStream;
+import java.util.Optional;
 
 /**
  * Controller for Data Service.  Provides the front end RESTFul web service for resources that have already been
@@ -78,21 +79,18 @@ public class DataController {
         AuditableAuthorisedDataRequest auditableAuthorisedDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
         AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
-        if (firstErrorMessage != null) {
-            LOGGER.error("Error occurred processing the authoriseRequest for  {}", firstErrorMessage);
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), firstErrorMessage)).join();
+        if (authorisationErrorMessage != null) {
+            LOGGER.error("Error occurred processing the authoriseRequest for  {}", authorisationErrorMessage);
+            httpStatus = (HttpStatus.INTERNAL_SERVER_ERROR);
+            auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), authorisationErrorMessage)).join();
         } else {
             // Create a consumer of the REST response's OutputStream, writing resource data to it
             stream = (OutputStream outputStream) -> {
                 AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
                 auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), auditableDataResponse.getAuditSuccessMessage())).join();
 
-                AuditErrorMessage readerErrorMessage = auditableDataResponse.getAuditErrorMessage();
-                if (secondErrorMessage != null) {
-                    LOGGER.error("Error occurred processing the authoriseRequest for  {}", secondErrorMessage);
-                    auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), secondErrorMessage)).join();
-                }
+                Optional.ofNullable(auditableDataResponse.getAuditErrorMessage())
+                        .ifPresent(errorMessage -> auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), errorMessage)).join());
             };
         }
         return new ResponseEntity<>(stream, httpStatus);

@@ -15,14 +15,9 @@ limitations under the License.
 --->
 # Data Service
 
-<span style="color:red">**Note:** As noted in the [documentation root](../README.md) Palisade is in an early stage of development, therefore the precise APIs contained in these service modules are likely to adapt as the project matures.</span>
-
-## Overview
-
-The core API for the Data Service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.
+The core API for the Data Service accepts a request from the client and returns the resources that have been processed from the initial request for resources.  These resources will be filtered and redacted based on the processing of the request in the inital resource request.  
 
 The client request will contain the token and resource id that is used to uniquely identify this resource request.
-
 
 ## Message Model and Database Domain
 
@@ -58,5 +53,12 @@ curl -X POST data-service/read/chunked  -H "content-type: application/json" --da
    "leafResourceId": "test-leafResourceId"
  }'
 ```
-
-  
+## Octet-Stream Response
+The response body will be an octet-stream of data from the requested resource with policy rules applied, no matter the file type, for example, a user.json resource might be:
+```
+{
+  usernamne: "alice",
+  password: null,
+  postcode: "SW1 XXX"
+}
+```

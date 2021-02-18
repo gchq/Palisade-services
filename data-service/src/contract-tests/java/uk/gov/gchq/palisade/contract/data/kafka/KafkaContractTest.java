@@ -21,13 +21,13 @@ import akka.kafka.ConsumerSettings;
 import akka.kafka.Subscriptions;
 import akka.kafka.javadsl.Consumer;
 import akka.stream.Materializer;
-import akka.stream.testkit.TestSubscriber;
 import akka.stream.testkit.TestSubscriber.Probe;
 import akka.stream.testkit.javadsl.TestSink;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -68,6 +71,7 @@ import uk.gov.gchq.palisade.service.data.stream.ProducerTopicConfiguration;
 import uk.gov.gchq.palisade.service.data.stream.PropertiesConfigurer;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,6 +117,14 @@ public class KafkaContractTest {
     private Materializer akkaMaterializer;
     @Autowired
     private ProducerTopicConfiguration producerTopicConfiguration;
+
+    @BeforeEach
+    void setUp() {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(
+                Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM));
+        restTemplate.getRestTemplate().setMessageConverters(Arrays.asList(converter, new FormHttpMessageConverter()));
+    }
 
     /**
      * Tests the handling of the error messages on the kafka stream for data-service.  The expected results will be an
@@ -200,7 +212,8 @@ public class KafkaContractTest {
         ResponseEntity<Void> response = restTemplate.postForEntity(READ_CHUNKED, entity, Void.class);
 
         // Then - the REST request was accepted
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode())
+                .isEqualTo(HttpStatus.ACCEPTED);
         // When - results are pulled from the output stream
         Probe<ConsumerRecord<String, AuditSuccessMessage>> resultSeq = probe.request(1);
 
@@ -270,7 +283,7 @@ public class KafkaContractTest {
 
             @Bean
             @Primary
-            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka, final ConfigurableApplicationContext context) {
+            ActorSystem actorSystem(final PropertiesConfigurer props, final KafkaContainer kafka) {
                 LOGGER.info("Starting Kafka with port {}", kafka.getFirstMappedPort());
                 return ActorSystem.create("actor-with-overrides", props.toHoconConfig(Stream.concat(
                         props.getAllActiveProperties().entrySet().stream()
