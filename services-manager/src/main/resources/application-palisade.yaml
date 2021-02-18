@@ -26,7 +26,7 @@ manager:
 
   tasks:
     palisade-task:
-    - attribute-masking-service
+      - attribute-masking-service
       - audit-service
       - data-service
       - filtered-resource-service
