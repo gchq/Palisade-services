@@ -77,7 +77,7 @@ public class ApplicationTestData {
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
             .withAttributes((new HashMap<>()))
-            .withError(new CompletionException(new NoSuchPolicyException("No rules found for the resource")));
+            .withError(new NoSuchPolicyException("No rules found for the resource"));
 
     public static final AuditablePolicyResourceRules AUDITABLE_POLICY_RESOURCE_RULES_NULL = AuditablePolicyResourceRules.Builder.create()
             .withPolicyRequest(null)
