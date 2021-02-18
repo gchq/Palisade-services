@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static uk.gov.gchq.palisade.contract.data.common.ContractTestData.AUTHORISED_DATA;
 
-class AuthorisedDataTest {
+class AuthorisedDataRequestTest {
 
     /**
      * Creates an {@code AuthorisedDataRequest} for a successful request using the class's Builder and then

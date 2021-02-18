@@ -66,7 +66,7 @@ public class DataController {
      * @param dataRequest the request to read the data from a leafResource
      * @return a stream of bytes representing the contents of the resource
      */
-    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/read/chunked", consumes = "application/json", produces = "application/octet-stream")
     public ResponseEntity<StreamingResponseBody> readChunked(
             @RequestBody final DataRequest dataRequest) {
         LOGGER.info("Invoking read (chunked): {}", dataRequest);
@@ -76,19 +76,19 @@ public class DataController {
 
         //first with the client information about the request, retrieve the authorised resource information
         AuditableAuthorisedDataRequest auditableAuthorisedDataRequest = auditableDataService.authoriseRequest(dataRequest).join();
-        AuditErrorMessage firstErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
+        AuditErrorMessage authorisationErrorMessage = auditableAuthorisedDataRequest.getAuditErrorMessage();
 
         if (firstErrorMessage != null) {
             LOGGER.error("Error occurred processing the authoriseRequest for  {}", firstErrorMessage);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), firstErrorMessage)).join();
         } else {
-            //retrieve the outputstream that links to the resources
+            // Create a consumer of the REST response's OutputStream, writing resource data to it
             stream = (OutputStream outputStream) -> {
                 AuditableDataResponse auditableDataResponse = auditableDataService.read(auditableAuthorisedDataRequest, outputStream).join();
                 auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), auditableDataResponse.getAuditSuccessMessage())).join();
 
-                AuditErrorMessage secondErrorMessage = auditableDataResponse.getAuditErrorMessage();
+                AuditErrorMessage readerErrorMessage = auditableDataResponse.getAuditErrorMessage();
                 if (secondErrorMessage != null) {
                     LOGGER.error("Error occurred processing the authoriseRequest for  {}", secondErrorMessage);
                     auditMessageService.auditMessage(new TokenMessagePair(dataRequest.getToken(), secondErrorMessage)).join();

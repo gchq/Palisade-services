@@ -124,7 +124,7 @@ public class KafkaContractTest {
         when(serviceMock.authoriseRequest(any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_REQUEST_WITH_ERROR));
 
-        // Given - we are already listening to the service input
+        // Given - we are already listening to the service error output
         ConsumerSettings<String, AuditErrorMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.errorKeyDeserializer(), TestSerDesConfig.errorValueDeserializer())
                 .withGroupId("test-group")
@@ -184,14 +184,14 @@ public class KafkaContractTest {
         when(serviceMock.read(any(), any()))
                 .thenReturn(CompletableFuture.completedFuture(AUDITABLE_DATA_RESPONSE));
 
-        // Given - we are already listening to the service input
+        // Given - we are already listening to the service error output
         ConsumerSettings<String, AuditSuccessMessage> consumerSettings = ConsumerSettings
                 .create(akkaActorSystem, TestSerDesConfig.keyDeserializer(), TestSerDesConfig.valueDeserializer())
                 .withGroupId("test-group")
                 .withBootstrapServers(KafkaInitializer.KAFKA.getBootstrapServers())
                 .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        TestSubscriber.Probe<ConsumerRecord<String, AuditSuccessMessage>> probe = Consumer
+        Probe<ConsumerRecord<String, AuditSuccessMessage>> probe = Consumer
                 .atMostOnceSource(consumerSettings, Subscriptions.topics(producerTopicConfiguration.getTopics().get("success-topic").getName()))
                 .runWith(TestSink.probe(akkaActorSystem), akkaMaterializer);
 
