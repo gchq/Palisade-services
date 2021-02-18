@@ -44,6 +44,12 @@ manager:
   mode: run
 
   services:
+    attribute-masking-service:
+      paths: *libraries
+      profiles: *profiles
+      log: attribute-masking-service-example.log
+      err: attribute-masking-service-example.err
+
     audit-service:
       paths: *libraries
       profiles: *profiles
@@ -55,6 +61,12 @@ manager:
       profiles: *profiles
       log: data-service-example.log
       err: data-service-example.err
+
+    filtered-resource-service:
+      paths: *libraries
+      profiles: *profiles
+      log: filtered-resource-service-example.log
+      err: filtered-resource-service-example.err
 
     palisade-service:
       paths: *libraries
@@ -74,26 +86,14 @@ manager:
       log: resource-service-example.log
       err: resource-service-example.err
 
-    user-service:
-      paths: *libraries
-      profiles: *profiles
-      log: user-service-example.log
-      err: user-service-example.err
-
-    attribute-masking-service:
-      paths: *libraries
-      profiles: *profiles
-      log: attribute-masking-service-example.log
-      err: attribute-masking-service-example.err
-
-    filtered-resource-service:
-      paths: *libraries
-      profiles: *profiles
-      log: filtered-resource-service-example.log
-      err: filtered-resource-service-example.err
-
     topic-offset-service:
       paths: *libraries
       profiles: *profiles
       log: topic-offset-service-example.log
       err: topic-offset-service-example.err
+
+    user-service:
+      paths: *libraries
+      profiles: *profiles
+      log: user-service-example.log
+      err: user-service-example.err

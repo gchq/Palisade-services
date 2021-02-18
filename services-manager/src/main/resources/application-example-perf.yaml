@@ -60,10 +60,16 @@ manager:
         - static
       log: performance-test.log
 
+    attribute-masking-service:
+      profiles: *profiles
+
     audit-service:
       profiles: *profiles
 
     data-service:
+      profiles: *profiles
+
+    filtered-resource-service:
       profiles: *profiles
 
     palisade-service:
@@ -75,14 +81,8 @@ manager:
     resource-service:
       profiles: *profiles
 
-    user-service:
-      profiles: *profiles
-
-    attribute-masking-service:
-      profiles: *profiles
-
-    filtered-resource-service:
-      profiles: *profiles
-
     topic-offset-service:
+      profiles: *profiles
+
+    user-service:
       profiles: *profiles

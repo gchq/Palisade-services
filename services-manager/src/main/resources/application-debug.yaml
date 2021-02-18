@@ -22,10 +22,16 @@ logging:
 
 manager:
   services:
+    attribute-masking-service:
+      level: *debug
+
     audit-service:
       level: *debug
 
     data-service:
+      level: *debug
+
+    filtered-resource-service:
       level: *debug
 
     palisade-service:
@@ -37,14 +43,8 @@ manager:
     resource-service:
       level: *debug
 
-    user-service:
-      level: *debug
-
-    attribute-masking-service:
-      level: *debug
-
-    filtered-resource-service:
-      level: *debug
-
     topic-offset-service:
+      level: *debug
+
+    user-service:
       level: *debug
