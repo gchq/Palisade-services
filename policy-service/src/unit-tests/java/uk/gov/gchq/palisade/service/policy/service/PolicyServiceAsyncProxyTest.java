@@ -42,6 +42,7 @@ import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NULL;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDIT_ERROR_MESSAGE;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE_NO_RULES;
@@ -128,6 +129,12 @@ class PolicyServiceAsyncProxyTest {
                         .ignoringFieldsOfTypes(AuditErrorMessage.class)
                         .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES),
 
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Recursively check the AuditErrorMessage object")
+                        .usingRecursiveComparison()
+                        .ignoringFields("timestamp")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
                         .as("Check the cause of the thrown error")
@@ -178,6 +185,12 @@ class PolicyServiceAsyncProxyTest {
                         .usingRecursiveComparison()
                         .ignoringFieldsOfTypes(AuditErrorMessage.class)
                         .isEqualTo(RESPONSE_NO_RULES),
+
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Recursively check the AuditErrorMessage object")
+                        .usingRecursiveComparison()
+                        .ignoringFields("timestamp")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
 
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
