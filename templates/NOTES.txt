@@ -25,7 +25,7 @@ You have installed {{ .Chart.Name }} as release {{ .Release.Name }} into namespa
 {{- end }}
 {{- end }}
 
-{{- if $.Values.global.redisClusterEnabled }}
+{{- if (index $.Values.global "redis-cluster-enabled") }}
     {{- $clusterNodes := include "palisade.redis-cluster.headlessNodes" . | trimAll "," }}
     {{- println }}Redis is clustered using nodes: {{ $clusterNodes }}
 {{- else }}
