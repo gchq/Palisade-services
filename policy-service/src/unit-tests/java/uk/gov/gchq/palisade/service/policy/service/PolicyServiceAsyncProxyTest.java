@@ -36,10 +36,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RECORD_RESPONSE_NO_ERROR;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NULL;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE_NO_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RULES;
 
 /**
@@ -73,19 +78,10 @@ class PolicyServiceAsyncProxyTest {
 
         // Then
         verify(hierarchyProxy, times(1)).getResourceRules(any());
-        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
-                () -> assertThat(response.getPolicyRequest())
-                        .as("Check the PolicyRequest value is not null")
-                        .isNotNull(),
-
-                () -> assertThat(response.getRules())
-                        .as("Check the Rules value is not null")
-                        .isNotNull(),
-
-                () -> assertThat(response.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage value is null")
-                        .isNull()
-        );
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyResourceRules object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR);
     }
 
     /**
@@ -105,19 +101,10 @@ class PolicyServiceAsyncProxyTest {
 
         // Then
         verify(hierarchyProxy, times(0)).getResourceRules(any());
-        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
-                () -> assertThat(response.getPolicyRequest())
-                        .as("Check the PolicyRequest value is null")
-                        .isNull(),
-
-                () -> assertThat(response.getRules())
-                        .as("Check the Rules value is null")
-                        .isNull(),
-
-                () -> assertThat(response.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage value is null")
-                        .isNull()
-        );
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyResourceRules object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NULL);
     }
 
 
@@ -135,17 +122,11 @@ class PolicyServiceAsyncProxyTest {
 
         // Then
         assertAll("Check the values of the returned AuditablePolicyResourceRules object",
-                () -> assertThat(response.getPolicyRequest())
-                        .as("Check the PolicyRequest value is not null")
-                        .isNotNull(),
-
-                () -> assertThat(response.getRules())
-                        .as("Check the Rules value is null")
-                        .isNull(),
-
-                () -> assertThat(response.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage value is not null")
-                        .isNotNull(),
+                () -> assertThat(response)
+                        .as("Recursively check the returned AuditablePolicyResourceRules object")
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(AuditErrorMessage.class)
+                        .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES),
 
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
@@ -159,7 +140,7 @@ class PolicyServiceAsyncProxyTest {
 
 
     /**
-     * Test for when Rules are found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
+     * Test for when Rules are found for the record. This should produce an {@link AuditablePolicyRecordResponse}
      * with an {@code PolicyResponse} and no {@code AuditErrorMessage}
      *
      * @throws Exception if the test fails
@@ -171,15 +152,10 @@ class PolicyServiceAsyncProxyTest {
         AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE).get();
 
         // Then
-        assertAll("Check the values of the returned AuditablePolicyRecordResponse object",
-                () -> assertThat(response.getPolicyResponse())
-                        .as("Check the PolicyResponse value is not null")
-                        .isNotNull(),
-
-                () -> assertThat(response.getAuditErrorMessage())
-                        .as("Check the AuditErrorMessage value is null")
-                        .isNull()
-        );
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyRecordResponse object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RECORD_RESPONSE_NO_ERROR);
     }
 
     /**
@@ -198,23 +174,17 @@ class PolicyServiceAsyncProxyTest {
         // Then
         assertAll(
                 () -> assertThat(policyResponse)
-                        .as("Check the PolicyResponse value is not null")
-                        .isNotNull(),
-
-                () -> assertThat(policyResponse.getRules())
-                        .as("Check the PolicyResponse contains a Rules object")
-                        .isNotNull(),
-
-                () -> assertThat(policyResponse.getRules().containsRules())
-                        .as("Check the Rules object does not contain any rules")
-                        .isEqualTo(Boolean.FALSE),
+                        .as("Recursively check the PolicyResponse objet")
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(AuditErrorMessage.class)
+                        .isEqualTo(RESPONSE_NO_RULES),
 
                 () -> assertThat(response.getAuditErrorMessage().getError())
                         .extracting(Throwable::getCause)
                         .as("Check the cause of the thrown exception")
                         .isInstanceOf(NoSuchPolicyException.class)
-                        .extracting(Throwable::getMessage)
                         .as("Check the message of the thrown exception")
+                        .extracting(Throwable::getMessage)
                         .isEqualTo("No rules found for the resource")
                         .isNotNull()
         );

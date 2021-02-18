@@ -26,12 +26,15 @@ import uk.gov.gchq.palisade.rule.Rules;
 import uk.gov.gchq.palisade.service.SimpleConnectionDetail;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
 import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
+import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
 import uk.gov.gchq.palisade.service.policy.model.PolicyRequest;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.CompletionException;
 
 public class ApplicationTestData {
     public static final String REQUEST_TOKEN = "test-request-token";
@@ -63,18 +66,40 @@ public class ApplicationTestData {
             .withContext(CONTEXT)
             .withUser(USER)
             .withResource(LEAF_RESOURCE);
+
     public static final PolicyResponse RESPONSE = PolicyResponse.Builder.create(REQUEST)
             .withRules(RULES);
+    public static final PolicyResponse RESPONSE_NO_RULES = PolicyResponse.Builder.create(REQUEST)
+            .withRules(new Rules<>());
 
     public static final AuditErrorMessage AUDIT_ERROR_MESSAGE = AuditErrorMessage.Builder.create()
             .withUserId(USER_ID.getId())
             .withResourceId(RESOURCE_ID)
             .withContext(CONTEXT)
             .withAttributes((new HashMap<>()))
-            .withError(new NoSuchPolicyException("Something went wrong!"));
+            .withError(new CompletionException(new NoSuchPolicyException("No rules found for the resource")));
 
-    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors().withNoModifiedResource();
-    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create().withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoModifiedResource();
+    public static final AuditablePolicyResourceRules AUDITABLE_POLICY_RESOURCE_RULES_NULL = AuditablePolicyResourceRules.Builder.create()
+            .withPolicyRequest(null)
+            .withRules(null)
+            .withNoErrors();
+    public static final AuditablePolicyResourceRules AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR = AuditablePolicyResourceRules.Builder.create()
+            .withPolicyRequest(REQUEST)
+            .withRules(RESOURCE_RULES)
+            .withNoErrors();
+    public static final AuditablePolicyResourceRules AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES = AuditablePolicyResourceRules.Builder.create()
+            .withPolicyRequest(REQUEST)
+            .withRules(null)
+            .withAuditErrorMessage(AUDIT_ERROR_MESSAGE);
+
+    public static final AuditablePolicyRecordResponse AUDITABLE_POLICY_RECORD_RESPONSE_NO_ERROR = AuditablePolicyRecordResponse.Builder.create()
+            .withPolicyResponse(RESPONSE)
+            .withAuditErrorMessage(null);
+
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE = AuditablePolicyResourceResponse.Builder.create()
+            .withPolicyRequest(REQUEST).withRules(RESOURCE_RULES).withNoErrors().withNoModifiedResource();
+    public static final AuditablePolicyResourceResponse AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES = AuditablePolicyResourceResponse.Builder.create()
+            .withPolicyRequest(REQUEST).withRules(null).withNoErrors().withNoModifiedResource();
 
 
     /**
