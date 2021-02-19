@@ -21,24 +21,31 @@ import org.mockito.Mockito;
 
 import uk.gov.gchq.palisade.resource.LeafResource;
 import uk.gov.gchq.palisade.service.policy.exception.NoSuchPolicyException;
+import uk.gov.gchq.palisade.service.policy.model.AuditErrorMessage;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyRecordResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceResponse;
 import uk.gov.gchq.palisade.service.policy.model.AuditablePolicyResourceRules;
 import uk.gov.gchq.palisade.service.policy.model.PolicyResponse;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RECORD_RESPONSE_NO_ERROR;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDITABLE_POLICY_RESOURCE_RULES_NULL;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.AUDIT_ERROR_MESSAGE;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.REQUEST;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESOURCE_RULES;
+import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RESPONSE_NO_RULES;
 import static uk.gov.gchq.palisade.service.policy.ApplicationTestData.RULES;
 
 /**
@@ -68,14 +75,14 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithAPolicyRequest() throws Exception {
         // When
         when(hierarchyProxy.getResourceRules(any())).thenReturn(RESOURCE_RULES);
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
-        AuditablePolicyResourceRules response = completableFuture.get();
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(REQUEST).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNotNull();
-        assertThat(response.getRules()).isNotNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
         verify(hierarchyProxy, times(1)).getResourceRules(any());
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyResourceRules object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_ERROR);
     }
 
     /**
@@ -91,15 +98,14 @@ class PolicyServiceAsyncProxyTest {
     void testGetResourceRulesWithANullPolicyRequest() throws Exception {
 
         // When
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(null);
-        //getResourceRules is an asynchronous call so we need to force it get the response
-        AuditablePolicyResourceRules response = completableFuture.get();
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(null).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNull();
-        assertThat(response.getRules()).isNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
         verify(hierarchyProxy, times(0)).getResourceRules(any());
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyResourceRules object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NULL);
     }
 
 
@@ -112,53 +118,88 @@ class PolicyServiceAsyncProxyTest {
     @Test
     void testGetResourceRulesWhenItThrowsAnException() throws Exception {
         // When
-        when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("Test"));
-
-        CompletableFuture<AuditablePolicyResourceRules> completableFuture = asyncProxy.getResourceRules(REQUEST);
-        // asynchronous call so we need to force it get the response
-        AuditablePolicyResourceRules response = completableFuture.get();
+        when(hierarchyProxy.getResourceRules(any())).thenThrow(new NoSuchPolicyException("No rules found for the resource"));
+        AuditablePolicyResourceRules response = asyncProxy.getResourceRules(REQUEST).get();
 
         // Then
-        assertThat(response.getPolicyRequest()).isNotNull();
-        assertThat(response.getRules()).isNull();
-        assertThat(response.getAuditErrorMessage()).isNotNull();
-        // Note the exception is a CompletionException with the cause being a NoSuchPolicyException
-        assertThat(response.getAuditErrorMessage().getError().getCause()).isInstanceOf(NoSuchPolicyException.class);
+        assertAll("Check the values of the returned AuditablePolicyResourceRules object",
+                () -> assertThat(response)
+                        .as("Recursively check the returned AuditablePolicyResourceRules object")
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(AuditErrorMessage.class)
+                        .isEqualTo(AUDITABLE_POLICY_RESOURCE_RULES_NO_RULES),
+
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Recursively check the AuditErrorMessage object, ignoring the timestamp field")
+                        .usingRecursiveComparison()
+                        .ignoringFields("timestamp")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+
+                () -> assertThat(response.getAuditErrorMessage().getError())
+                        .extracting(Throwable::getCause)
+                        .as("The exception cause should be 'NoSuchPolicyException'")
+                        .isInstanceOf(NoSuchPolicyException.class)
+                        .as("The exception should contain the message 'No rules found for the resource'")
+                        .extracting(Throwable::getMessage)
+                        .isEqualTo("No rules found for the resource")
+        );
     }
 
 
     /**
-     * Test for when Rules are found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
+     * Test for when Rules are found for the record. This should produce an {@link AuditablePolicyRecordResponse}
      * with an {@code PolicyResponse} and no {@code AuditErrorMessage}
      *
      * @throws Exception if the test fails
      */
     @Test
     void testGetRecordRulesWhichFindsRules() throws Exception {
+        // When
         when(hierarchyProxy.getRecordRules(any())).thenReturn(RULES);
+        AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE).get();
 
-        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE);
-        AuditablePolicyRecordResponse response = completableFuture.get();
-        assertThat(response.getPolicyResponse()).isNotNull();
-        assertThat(response.getAuditErrorMessage()).isNull();
+        // Then
+        assertThat(response)
+                .as("Recursively check the returned AuditablePolicyRecordResponse object")
+                .usingRecursiveComparison()
+                .isEqualTo(AUDITABLE_POLICY_RECORD_RESPONSE_NO_ERROR);
     }
 
     /**
-     * Test for when Rules are not found for the record.  This should produce an {@link AuditablePolicyRecordResponse}
+     * Test for when Rules are not found for the record. This should produce an {@link AuditablePolicyRecordResponse}
      * with a {@code PolicyResponse} that has an empty {@code Rules} set and with {@code AuditErrorMessage}.
      *
      * @throws Exception if the test fails
      */
     @Test
     void testGetRecordRulesWithNoPolicyRecord() throws Exception {
-        when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("Test"));
-
-        CompletableFuture<AuditablePolicyRecordResponse> completableFuture = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES);
-        AuditablePolicyRecordResponse response = completableFuture.get();
+        // When
+        when(hierarchyProxy.getRecordRules(any())).thenThrow(new NoSuchPolicyException("No rules found for the resource"));
+        AuditablePolicyRecordResponse response = asyncProxy.getRecordRules(AUDITABLE_POLICY_RESOURCE_RESPONSE_WITH_NO_RULES).get();
         PolicyResponse policyResponse = response.getPolicyResponse();
-        assertThat(policyResponse).isNotNull();
-        assertThat(policyResponse.getRules()).isNotNull();
-        assertThat(policyResponse.getRules().containsRules());
-        assertThat(response.getAuditErrorMessage()).isNotNull();
+
+        // Then
+        assertAll(
+                () -> assertThat(policyResponse)
+                        .as("Recursively check the PolicyResponse objet")
+                        .usingRecursiveComparison()
+                        .ignoringFieldsOfTypes(AuditErrorMessage.class)
+                        .isEqualTo(RESPONSE_NO_RULES),
+
+                () -> assertThat(response.getAuditErrorMessage())
+                        .as("Recursively check the AuditErrorMessage object")
+                        .usingRecursiveComparison()
+                        .ignoringFields("timestamp")
+                        .isEqualTo(AUDIT_ERROR_MESSAGE),
+
+                () -> assertThat(response.getAuditErrorMessage().getError())
+                        .extracting(Throwable::getCause)
+                        .as("The exception cause should be 'NoSuchPolicyException'")
+                        .isInstanceOf(NoSuchPolicyException.class)
+                        .as("The exception should contain the message 'No rules found for the resource'")
+                        .extracting(Throwable::getMessage)
+                        .isEqualTo("No rules found for the resource")
+                        .isNotNull()
+        );
     }
 }
