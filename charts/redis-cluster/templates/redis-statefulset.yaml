@@ -198,7 +198,7 @@ spec:
             - name: redis-password
               mountPath: /opt/bitnami/redis/secrets/
             {{- end }}
-            - name: {{ .Values.global.persistence.redisCluster.name }}
+            - name: {{ (index .Values.global.persistence "redis-cluster").name }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
             - name: default-config
@@ -259,7 +259,7 @@ spec:
           resources:
           {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           volumeMounts:
-            - name: {{ .Values.global.persistence.redisCluster.name }}
+            - name: {{ (index .Values.global.persistence "redis-cluster").name }}
               mountPath: {{ .Values.persistence.path }}
               subPath: {{ .Values.persistence.subPath }}
         {{- end }}
@@ -323,15 +323,15 @@ spec:
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ .Values.global.persistence.redisCluster.name }}
+        name: {{ (index .Values.global.persistence "redis-cluster").name }}
       spec:
         accessModes:
-        - {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.mode | first | default .Values.global.persistence.redisCluster.mode._default | indent 1 }}
-        storageClassName: {{- pluck .Values.global.hosting .Values.global.persistence.redisCluster.storageClassName | first | default .Values.global.persistence.redisCluster.storageClassName._default | indent 1 }}
+        - {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-cluster").mode | first | default (index .Values.global.persistence "redis-cluster").mode._default | indent 1 }}
+        storageClassName: {{- pluck .Values.global.hosting (index .Values.global.persistence "redis-cluster").storageClassName | first | default (index .Values.global.persistence "redis-cluster").storageClassName._default | indent 1 }}
         resources:
           requests:
-            storage: {{ .Values.global.persistence.redisCluster.storage | quote }}
-        {{- $config := .Values.global.persistence.redisCluster }}
+            storage: {{ (index .Values.global.persistence "redis-cluster").storage | quote }}
+        {{- $config := (index .Values.global.persistence "redis-cluster") }}
         {{- $provisioning := pluck .Values.global.hosting $config.provisioning | first | default $config.provisioning._default }}
         {{- if eq $provisioning "static" }}
         selector:
