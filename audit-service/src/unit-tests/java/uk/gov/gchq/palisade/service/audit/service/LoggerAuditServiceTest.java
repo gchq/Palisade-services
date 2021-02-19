@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
@@ -75,7 +74,7 @@ class LoggerAuditServiceTest {
     @Test
     void testFilteredResourceServiceAuditSuccessMessage() {
         // Given
-        Mockito.doNothing().when(logger).info(anyString(), infoCaptor.capture());
+        doNothing().when(logger).info(anyString(), infoCaptor.capture());
 
         // When
         auditService.audit(TEST_TOKEN, auditSuccessMessage(FILTERED_RESOURCE_SERVICE));
